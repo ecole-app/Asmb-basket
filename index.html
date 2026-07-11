@@ -28,9 +28,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .theme-btn{width:34px;height:34px;border-radius:var(--rx);background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .scr{display:none;min-height:100%}.scr.on{display:block}
+#scr-chat.on{display:flex}
 .bnav{display:flex;background:var(--sf);border-top:1px solid var(--bdr);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));flex-shrink:0;box-shadow:0 -4px 20px var(--shadow)}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;border:none;background:none;color:var(--mut);font-size:9px;font-weight:600;text-transform:uppercase;transition:color .15s}
-.bni.on{color:var(--ltg)}.bni-ic{font-size:21px;line-height:1}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;border:none;background:none;color:var(--mut);font-size:8.5px;font-weight:600;text-transform:uppercase;transition:color .15s;white-space:nowrap}
+.bni.on{color:var(--ltg)}.bni-ic{font-size:19px;line-height:1}
 .sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:16px 16px 8px}
 .hero{background:linear-gradient(160deg,#0d2b14,#1B5C28,#0d2b14);padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
 [data-theme="dark"] .hero{background:linear-gradient(160deg,#040a05,#0a1f0c,#040a05)}
@@ -572,7 +573,7 @@ initChannels();
   </div>
 
   <!-- ═══ CHAT ROOM ═══ -->
-  <div class="scr" id="scr-chat" style="display:flex;flex-direction:column;height:100%">
+  <div class="scr" id="scr-chat" style="flex-direction:column;height:100%">
     <div id="chat-hdr" style="padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0">
       <div id="chat-icon" style="font-size:22px"></div>
       <div style="flex:1"><div id="chat-name" style="font-size:14px;font-weight:800;color:var(--txt)"></div><div id="chat-desc" style="font-size:10px;color:var(--mut)"></div></div>
@@ -623,7 +624,7 @@ initChannels();
 
 <nav class="bnav">
   <button class="bni on" id="bni-portal" onclick="navTo('portal')"><span class="bni-ic">&#127968;</span>Accueil</button>
-  <button class="bni" id="bni-communaute" onclick="navTo('communaute')"><span class="bni-ic">💬</span>Communauté</button>
+  <button class="bni" id="bni-communaute" onclick="navTo('communaute')"><span class="bni-ic">&#128172;</span>Communaute</button>
   <button class="bni" id="bni-inscription" onclick="navTo('inscription')"><span class="bni-ic">&#128203;</span>Inscription</button>
   <button class="bni" id="bni-admin" onclick="navTo('admin')"><span class="bni-ic">&#128274;</span>Admin</button>
 </nav>
@@ -2620,6 +2621,7 @@ function buildAdminComm(){
 function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
 
 function createChannel(){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
   var name=document.getElementById("ch-name").value.trim();
   var icon=document.getElementById("ch-icon").value.trim()||"🏀";
   var desc=document.getElementById("ch-desc").value.trim();
@@ -2633,6 +2635,7 @@ function createChannel(){
 }
 
 async function deleteChannel(id,name){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
   if(!confirm('Supprimer le canal "'+name+'" et tous ses messages ?'))return;
   // Delete messages subcollection
   var msgsSnap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels",id,"messages"));
@@ -2663,6 +2666,7 @@ function renderMembers(ch){
 }
 
 async function addMemberToChannel(){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
   var input=document.getElementById("member-phone");
   var phone=input.value.trim().replace(/\s+/g,"");
   if(!phone){alert("Entrez un numero de telephone");return;}
@@ -2680,6 +2684,7 @@ async function addMemberToChannel(){
 }
 
 async function removeMemberFromChannel(phone){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
   if(!confirm("Revoquer l'acces de "+phone+" ?"))return;
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
@@ -2789,6 +2794,7 @@ function listenMessages(channelId){
 }
 
 function sendMsg(){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
   var msgEl=document.getElementById("chat-msg");
   var pseudoEl=document.getElementById("chat-pseudo");
   if(!msgEl||!pseudoEl)return;
