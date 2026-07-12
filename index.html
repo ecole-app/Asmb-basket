@@ -616,8 +616,128 @@ initChannels();
       <input id="member-phone" placeholder="06 12 34 56 78" style="flex:1;padding:11px 13px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" type="tel">
       <button onclick="addMemberToChannel()" style="padding:11px 18px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ajouter</button>
     </div>
+    <div style="padding:0 16px 8px">
+      <button onclick="showLicenceContactPicker()" style="width:100%;padding:10px;border-radius:var(--rx);background:var(--card);border:1.5px dashed var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer">📇 Choisir depuis les inscriptions</button>
+    </div>
     <div class="sec">Membres autorisés</div>
     <div id="member-list" style="padding-bottom:80px"></div>
+  </div>
+
+  <!-- ═══ MODAL PICKER CONTACTS LICENCES ═══ -->
+  <div id="modal-lic-picker" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:75vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Choisir un contact</div>
+        <button onclick="closeModal('modal-lic-picker')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div id="lic-picker-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL EVENEMENT COMPLET ═══ -->
+  <div id="modal-event-full" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvel evenement</div>
+        <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noel"></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type"><option value="match">Match</option><option value="entrainement">Entrainement</option><option value="tournoi">Tournoi</option><option value="autre" selected>Autre</option></select></div>
+      <div style="display:flex;gap:12px">
+        <div class="form-group" style="flex:1"><label class="form-label">Date *</label><input class="form-input" id="ev-date" type="date"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder="Gymnase..."></div>
+      <div class="form-group"><label class="form-label">Equipe concernee</label><input class="form-input" id="ev-equipe" placeholder="U13F, U15M..."></div>
+
+      <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Participants du club</div>
+      <div id="ev-players-list" style="max-height:160px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;margin-bottom:14px"></div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Invites externes</div>
+      <div id="ev-externes-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input id="ev-ext-nom" placeholder="Nom" style="flex:1;padding:9px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
+        <input id="ev-ext-contact" placeholder="Contact" style="flex:1;padding:9px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
+        <button onclick="addEvExterne()" style="padding:9px 14px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">+</button>
+      </div>
+
+      <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
+      <div class="form-group"><label class="form-label">Envoyer une annonce dans un canal (optionnel)</label>
+        <select class="form-select" id="ev-canal">
+          <option value="">Ne pas envoyer</option>
+          <option value="general">Général</option>
+          <option value="u13f">U13 Féminin</option>
+          <option value="u15">U15</option>
+          <option value="seniors">Seniors</option>
+          <option value="coaches">Coachs</option>
+          <option value="evenements">Événements</option>
+        </select>
+      </div>
+      <button onclick="saveEventFull()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer l'événement</button>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL PRESENCES ═══ -->
+  <div id="modal-presence" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="presence-title">Presences</div><div style="font-size:11px;color:var(--mut)" id="presence-sub"></div></div>
+        <button onclick="closeModal('modal-presence')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div id="presence-list"></div>
+      <button onclick="savePresences()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Enregistrer les presences</button>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL BROADCAST EMAIL ═══ -->
+  <div id="modal-broadcast" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Envoyer une info aux familles</div>
+        <button onclick="closeModal('modal-broadcast')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div id="broadcast-count" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
+      <div class="form-group"><label class="form-label">Objet</label><input class="form-input" id="bc-sujet" placeholder="Ex: Reprise des entrainements"></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="bc-message" rows="6" placeholder="Votre message aux familles..."></textarea></div>
+      <button onclick="sendBroadcast()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">📧 Ouvrir le mail avec tous les destinataires</button>
+    </div>
+  </div>
+
+  <!-- ═══ PARAMETRES ═══ -->
+  <div class="scr" id="scr-parametres">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
+      <div style="font-size:16px;font-weight:800;color:var(--txt)">Parametres</div>
+      <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Donnees</div>
+    </div>
+    <div class="sec">Notifications</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+      <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Notifications push</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Recevoir des alertes pour les nouveaux messages</div></div>
+        <input type="checkbox" id="notif-toggle" onchange="toggleNotif(this.checked)" style="width:44px;height:24px;accent-color:var(--dkg)">
+      </label>
+    </div>
+    <div class="sec">Apparence</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">Theme sombre</div>
+        <button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer">Basculer</button>
+      </div>
+    </div>
+    <div class="sec">Communication</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="showBroadcast()">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">📧 Envoyer une info aux familles</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Email groupe a tous les contacts valides</div>
+    </div>
+    <div class="sec">Donnees</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="exportData()">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">💾 Exporter les donnees</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Telecharger un fichier de sauvegarde</div>
+    </div>
+    <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
+      <div style="font-size:13px;font-weight:700;color:var(--red)">🗑️ Reinitialiser l'application</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime toutes les donnees locales (irreversible)</div>
+    </div>
   </div>
 
 </div>
@@ -774,7 +894,7 @@ function showScr(id){
   var el=document.getElementById("scr-"+id);
   if(el)el.classList.add("on");
   document.querySelectorAll(".bni").forEach(function(b){b.classList.remove("on");});
-  var map={portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
+  var map={portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
   var nb=document.getElementById("bni-"+(map[id]||"portal"));
   if(nb)nb.classList.add("on");
   document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
@@ -783,7 +903,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Elite Academy","Pole Formation ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Elite Academy","Pole Formation ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -791,6 +911,7 @@ function goBack(){
   if(prev==="cycle"){showScr("cycle");buildCycle(curCy);}
   else if(prev==="admin"){buildAdminHome();showScr("admin");}
   else if(prev==="admin-comm"){buildAdminComm();showScr("admin-comm");}
+  else if(prev==="parametres"){buildParametres();showScr("parametres");}
   else if(prev&&prev.startsWith("pole-")){showScr(prev);}
   else if(prev==="communaute"){buildCommunaute();showScr("communaute");if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}}
   else showScr(prev);
@@ -1899,7 +2020,8 @@ function renderLicenceDetail(lic){
     var rows=[
       ["Genre",f.genre==="F"?"Feminin":"Masculin"],
       ["Prenom",f.prenom],["Nom",f.nom],
-      ["Date de naissance",f.naissance],["Adresse",f.adresse],
+      ["Date de naissance",f.naissance],
+      ["Ne(e) a l etranger",f.neEtranger?"Oui - "+(f.villeNaiss||"?")+", "+(f.paysNaiss||"?"):"Non"],["Adresse",f.adresse],
       ["Telephone",f.telephone],["Email",f.emailLic],
       ["Responsable legal 1",f.respNom+(f.respLien?" ("+f.respLien+")":"")],
       ["Tel resp. 1",f.respTel],
@@ -2133,6 +2255,16 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Prenom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prenom"></div>'+
       '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(f.nom||'')+'" placeholder="Nom de famille"></div>'+
       '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'"></div>'+
+      '<div class="form-group"><label class="form-label">Ne(e) a l\'etranger ?</label>'+
+        '<div style="display:flex;gap:10px">'+
+          '<button type="button" id="btn-etr-non" onclick="selectEtranger(false)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--bdr)":"var(--dkg)")+';background:'+(f.neEtranger?"var(--bg)":"var(--dkg)")+';color:'+(f.neEtranger?"var(--mut)":"#fff")+';cursor:pointer">Non</button>'+
+          '<button type="button" id="btn-etr-oui" onclick="selectEtranger(true)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--dkg)":"var(--bdr)")+';background:'+(f.neEtranger?"var(--dkg)":"var(--bg)")+';color:'+(f.neEtranger?"#fff":"var(--mut)")+';cursor:pointer">Oui</button>'+
+        '</div>'+
+      '</div>'+
+      '<div id="etranger-fields" style="'+(f.neEtranger?"":"display:none")+'">'+
+        '<div class="form-group"><label class="form-label">Ville de naissance</label><input class="form-input" id="f-villeNaiss" value="'+(f.villeNaiss||'')+'" placeholder="Ville"></div>'+
+        '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(f.paysNaiss||'')+'" placeholder="Pays"></div>'+
+      '</div>'+
       '<div class="form-group"><label class="form-label">Adresse complete</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville">'+(f.adresse||'')+'</textarea></div>'+
       '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="email@..."></div>'+
@@ -2192,6 +2324,7 @@ function renderFicheForm(lic){
 }
 
 var ficheGenre="";
+var ficheNeEtranger=false;
 var fichePhoto="";
 var ficheCertificat="";
 
@@ -2213,6 +2346,16 @@ function removeResp2(){
   wrap.innerHTML='<button type="button" onclick="addResp2()" style="padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:1.5px dashed var(--bdr);cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-size:16px">+</span> Ajouter un 2ème responsable légal</button>';
 }
 
+function selectEtranger(val){
+  ficheNeEtranger=val;
+  var nonBtn=document.getElementById("btn-etr-non"),ouiBtn=document.getElementById("btn-etr-oui");
+  var fields=document.getElementById("etranger-fields");
+  if(nonBtn&&ouiBtn){
+    nonBtn.style.background=val?"var(--bg)":"var(--dkg)";nonBtn.style.color=val?"var(--mut)":"#fff";nonBtn.style.borderColor=val?"var(--bdr)":"var(--dkg)";
+    ouiBtn.style.background=val?"var(--dkg)":"var(--bg)";ouiBtn.style.color=val?"#fff":"var(--mut)";ouiBtn.style.borderColor=val?"var(--dkg)":"var(--bdr)";
+  }
+  if(fields)fields.style.display=val?"block":"none";
+}
 function selectGenre(g){
   ficheGenre=g;
   var m=document.getElementById("btn-M"),f=document.getElementById("btn-F");
@@ -2266,6 +2409,9 @@ function soumettreFiche(){
   var fiche={
     genre:ficheGenre,prenom:prenom.trim(),nom:nom.trim(),
     naissance:naissance,
+    neEtranger:ficheNeEtranger,
+    villeNaiss:ficheNeEtranger?((document.getElementById("f-villeNaiss")||{}).value||""):"",
+    paysNaiss:ficheNeEtranger?((document.getElementById("f-paysNaiss")||{}).value||""):"",
     adresse:(document.getElementById("f-adresse")||{}).value||"",
     telephone:(document.getElementById("f-telephone")||{}).value||"",
     emailLic:(document.getElementById("f-emailLic")||{}).value||"",
@@ -2295,8 +2441,147 @@ function soumettreFiche(){
   if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyee !</div><div style="font-size:13px;color:var(--mut);margin-bottom:24px">Votre fiche a bien ete transmise au club. Vous serez contacte prochainement.</div><button onclick="buildInscriptionPublic()" style="padding:12px 24px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Nouvelle inscription</button></div>';
 }
 
+
+// ═══ PRESENCES ═══════════════════════════════════════════════════
+var currentPresenceEventId=null;
+
+function openPresences(eventId){
+  var events=getEvents();
+  var ev=events.find(function(e){return e.id===eventId;});
+  if(!ev)return;
+  currentPresenceEventId=eventId;
+  document.getElementById("presence-title").textContent="Presences · "+ev.titre;
+  document.getElementById("presence-sub").textContent=ev.date+(ev.heure?" · "+ev.heure:"")+(ev.equipe?" · "+ev.equipe:"");
+  var players=getPlayers();
+  var relevantPlayers=ev.equipe?players.filter(function(p){return p.cat&&ev.equipe.toUpperCase().indexOf(p.cat.toUpperCase())>=0;}):players;
+  if(!relevantPlayers.length)relevantPlayers=players;
+  var el=document.getElementById("presence-list");
+  el.innerHTML="";
+  var presences=ev.presences||{};
+  relevantPlayers.forEach(function(p){
+    var state=presences[p.id]||"present";
+    var div=document.createElement("div");
+    div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr)";
+    div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Present</button>'+
+        '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
+      '</div>';
+    el.appendChild(div);
+  });
+  document.getElementById("modal-presence").style.display="flex";
+}
+
+function setPresenceState(btn){
+  var pid=btn.dataset.pid,state=btn.dataset.state;
+  var parent=btn.parentElement;
+  parent.querySelectorAll("button").forEach(function(b){
+    var isThis=b===btn;
+    var s=b.dataset.state;
+    var col=s==="present"?"#27AE60":"#C0392B";
+    b.style.background=isThis?col:"var(--bg)";
+    b.style.color=isThis?"#fff":"var(--mut)";
+    b.style.borderColor=isThis?col:"var(--bdr)";
+  });
+  btn.dataset.selected="1";
+}
+
+function savePresences(){
+  var events=getEvents();
+  var idx=events.findIndex(function(e){return e.id===currentPresenceEventId;});
+  if(idx<0)return;
+  var presences={};
+  document.querySelectorAll("#presence-list > div").forEach(function(row){
+    var btns=row.querySelectorAll("button");
+    btns.forEach(function(b){
+      if(b.style.color==="rgb(255, 255, 255)"){presences[b.dataset.pid]=b.dataset.state;}
+    });
+  });
+  events[idx].presences=presences;
+  saveEvents(events);
+  closeModal("modal-presence");
+  buildPlanning();
+  alert("Presences enregistrees !");
+}
+
+// ═══ BROADCAST EMAIL ═════════════════════════════════════════════
+function getAllContactEmails(){
+  var lics=getLicences();
+  var emails=[];
+  lics.forEach(function(lic){
+    if(!lic.fiche)return;
+    var f=lic.fiche;
+    [f.emailLic,f.respEmail,f.resp2Email].forEach(function(e){
+      if(e&&e.trim()&&emails.indexOf(e.trim())<0)emails.push(e.trim());
+    });
+  });
+  return emails;
+}
+
+function showBroadcast(){
+  var emails=getAllContactEmails();
+  document.getElementById("broadcast-count").textContent=emails.length+" destinataire"+(emails.length>1?"s":"")+" trouve"+(emails.length>1?"s":"")+" dans les inscriptions";
+  document.getElementById("bc-sujet").value="";
+  document.getElementById("bc-message").value="";
+  document.getElementById("modal-broadcast").style.display="flex";
+}
+
+function sendBroadcast(){
+  var sujet=document.getElementById("bc-sujet").value.trim();
+  var message=document.getElementById("bc-message").value.trim();
+  if(!sujet||!message){alert("Objet et message obligatoires");return;}
+  var emails=getAllContactEmails();
+  if(!emails.length){alert("Aucun contact email trouve");return;}
+  var body="Bonjour,\n\n"+message+"\n\nL'equipe ASMB\nSaint-Etienne Metropole Basket";
+  var mailto="mailto:?bcc="+emails.join(",")+"&subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
+  window.location.href=mailto;
+  closeModal("modal-broadcast");
+}
+
+// ═══ PARAMETRES ══════════════════════════════════════════════════
+function buildParametres(){
+  var toggle=document.getElementById("notif-toggle");
+  if(toggle)toggle.checked=localStorage.getItem("asmb_notif")==="on";
+}
+
+function toggleNotif(checked){
+  if(checked&&"Notification" in window){
+    Notification.requestPermission().then(function(perm){
+      if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activees !"});}
+      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;alert("Permission refusee");}
+    });
+  } else {
+    localStorage.setItem("asmb_notif","off");
+  }
+}
+
+function exportData(){
+  var data={
+    players:getPlayers(),teams:getTeams(),events:getEvents(),docs:getDocs(),
+    licences:getLicences(),
+    pole_elite:getPoleData("elite"),pole_competition:getPoleData("competition"),
+    pole_3x3:getPoleData("3x3"),pole_evenement:getPoleData("evenement"),pole_basketpourtous:getPoleData("basketpourtous")
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="asmb-export-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function resetAllData(){
+  if(!confirm("ATTENTION : Ceci va supprimer TOUTES les donnees locales (joueurs, equipes, evenements, documents, licences). Cette action est irreversible. Continuer ?"))return;
+  if(!confirm("Etes-vous vraiment sur ? Cette action ne peut pas etre annulee."))return;
+  ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
+  Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
+  alert("Donnees supprimees. L'application va se recharger.");
+  location.reload();
+}
+
 // ═══ ADMIN ════════════════════════════════════════════════════════
 var ADMIN_MODULES=[
+  {id:"parametres",name:"Parametres",sub:"Notifications - Compte - Donnees",icon:"⚙️",color:"#5a76aa",scr:"parametres"},
   {id:"communaute",name:"Communaute",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
   {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#27AE60",scr:"licences"},
   {id:"inscriptions",name:"Inscriptions",sub:"Fiches joueurs · Licences",icon:"📝",color:"#1B5C28",scr:"inscriptions"},
@@ -2329,6 +2614,7 @@ function buildAdminHome(){
   });
 }
 function getAdminCount(id){
+  if(id==="parametres")return "Configuration";
   if(id==="communaute")return "Gestion des canaux";
   if(id==="licences"){var l=getLicences();return l.length+" fiche"+(l.length>1?"s":"");}
   if(id==="inscriptions"){var p=getPlayers();return p.length+" joueur"+(p.length>1?"s":"");}
@@ -2341,7 +2627,8 @@ function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   stack.push(m.scr);
-  if(id==="communaute"){buildAdminComm();}
+  if(id==="parametres"){buildParametres();}
+  else if(id==="communaute"){buildAdminComm();}
   else if(id==="licences"){buildLicences();}
   else if(id==="inscriptions")buildPlayers();
   else if(id==="equipes")buildTeams();
@@ -2477,7 +2764,9 @@ function buildPlanning(){
     var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">👥 "+e.equipe+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+"</div>"+delBtn+"</div>";
+    var presenceCount=e.presences?Object.keys(e.presences).length:0;
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les presences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+presBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
 }
@@ -2536,16 +2825,86 @@ function saveCreneau(){
   buildPlanning();buildAdminHome();
 }
 
+var evExternes=[];
 function showAddEvent(){
-  var titre=prompt("Titre de l'evenement :");if(!titre)return;
-  var type=prompt("Type (match/entrainement/tournoi/autre) :")|| "autre";
-  var date=prompt("Date (AAAA-MM-JJ) :");if(!date)return;
-  var heure=prompt("Heure (ex: 14h00) :");
-  var lieu=prompt("Lieu / Salle :");
-  var equipe=prompt("Equipe concernee :");
+  evExternes=[];
+  document.getElementById("ev-titre").value="";
+  document.getElementById("ev-date").value="";
+  document.getElementById("ev-heure").value="";
+  document.getElementById("ev-lieu").value="";
+  document.getElementById("ev-equipe").value="";
+  document.getElementById("ev-type").value="autre";
+  document.getElementById("ev-canal").value="";
+  renderEvExternes();
+  renderEvPlayers();
+  document.getElementById("modal-event-full").style.display="flex";
+}
+function renderEvPlayers(){
+  var el=document.getElementById("ev-players-list");if(!el)return;
+  var players=getPlayers();
+  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur inscrit</div>';return;}
+  el.innerHTML="";
+  players.forEach(function(p){
+    var lbl=document.createElement("label");
+    lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
+    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
+    el.appendChild(lbl);
+  });
+}
+function renderEvExternes(){
+  var el=document.getElementById("ev-externes-list");if(!el)return;
+  if(!evExternes.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:4px 0">Aucun invite externe</div>';return;}
+  el.innerHTML="";
+  evExternes.forEach(function(ex,i){
+    var div=document.createElement("div");
+    div.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--txt)";
+    div.innerHTML='<span style="flex:1">'+ex.nom+(ex.contact?" · "+ex.contact:"")+'</span><button onclick="removeEvExterne('+i+')" style="padding:3px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button>';
+    el.appendChild(div);
+  });
+}
+function addEvExterne(){
+  var nom=document.getElementById("ev-ext-nom").value.trim();
+  var contact=document.getElementById("ev-ext-contact").value.trim();
+  if(!nom){alert("Nom obligatoire");return;}
+  evExternes.push({nom:nom,contact:contact});
+  document.getElementById("ev-ext-nom").value="";
+  document.getElementById("ev-ext-contact").value="";
+  renderEvExternes();
+}
+function removeEvExterne(i){evExternes.splice(i,1);renderEvExternes();}
+
+function saveEventFull(){
+  var titre=document.getElementById("ev-titre").value.trim();
+  var type=document.getElementById("ev-type").value;
+  var date=document.getElementById("ev-date").value;
+  var heure=document.getElementById("ev-heure").value;
+  var lieu=document.getElementById("ev-lieu").value.trim();
+  var equipe=document.getElementById("ev-equipe").value.trim();
+  var canal=document.getElementById("ev-canal").value;
+  if(!titre||!date){alert("Titre et date obligatoires");return;}
+  var participantsClub=Array.from(document.querySelectorAll(".ev-player-cb:checked")).map(function(cb){return cb.value;});
+  var players=getPlayers();
+  var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
+  var eventObj={
+    id:Date.now().toString(),titre:titre,type:type,date:date,heure:heure||"",lieu:lieu||"",equipe:equipe||"",
+    participantsClub:participantsClub,participantsExternes:evExternes.slice(),
+    presences:{}
+  };
   var events=getEvents();
-  events.push({id:Date.now().toString(),titre:titre,type:type.toLowerCase(),date:date,heure:heure||"",lieu:lieu||"",equipe:equipe||""});
-  saveEvents(events);buildPlanning();buildAdminHome();
+  events.push(eventObj);
+  saveEvents(events);
+  buildPlanning();buildAdminHome();
+  closeModal("modal-event-full");
+  // Envoi au canal si selectionne
+  if(canal&&window.fbReady){
+    var msg="🎉 <b>"+titre+"</b><br>📅 "+date+(heure?" · "+heure:"")+"<br>"+(lieu?"📍 "+lieu+"<br>":"")+(equipe?"👥 "+equipe+"<br>":"")+(participantsNoms.length?"Participants : "+participantsNoms.join(", "):"");
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
+      text:msg,pseudo:"📢 Admin ASMB",ts:window.fbServerTimestamp()
+    });
+    alert("Evenement cree et annonce envoyee dans le canal !");
+  } else {
+    alert("Evenement cree !");
+  }
 }
 function deleteEvent(id){if(!confirm("Supprimer cet evenement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
 
@@ -2658,11 +3017,31 @@ function renderMembers(ch){
   var members=ch.members||[];
   if(!members.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucun membre autorise</div><div style="font-size:11px;margin-top:4px">Tout le monde peut voir ce canal</div></div>';return;}
   el.innerHTML="";
-  members.forEach(function(phone){
+  members.forEach(function(m){
+    var phone=typeof m==="string"?m:m.phone;
+    var label=typeof m==="string"?null:m.label;
     var div=document.createElement("div");div.className="member-card";
-    div.innerHTML='<div class="member-avatar">📱</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">'+phone+'</div><button onclick="removeMemberFromChannel(\''+phone+'\')" style="padding:6px 12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button>';
+    div.innerHTML='<div class="member-avatar">📱</div><div style="flex:1;min-width:0">'+(label?'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+label+'</div><div style="font-size:11px;color:var(--mut)">'+phone+'</div>':'<div style="font-size:13px;font-weight:600;color:var(--txt)">'+phone+'</div>')+'</div><div style="display:flex;flex-direction:column;gap:5px"><button onclick="editMemberLabel(\''+phone+'\',\''+(label||"").replace(/'/g,"")+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button><button onclick="removeMemberFromChannel(\''+phone+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button></div>';
     el.appendChild(div);
   });
+}
+
+async function editMemberLabel(phone,currentLabel){
+  var newLabel=prompt("Nom d'identification (ex: Lucas-U13) :",currentLabel||"");
+  if(newLabel===null)return;
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
+  var chData=null;
+  chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
+  var members=(chData&&chData.members)||[];
+  var updated=members.map(function(m){
+    var p=typeof m==="string"?m:m.phone;
+    if(p===phone)return {phone:p,label:newLabel.trim()||null};
+    return m;
+  });
+  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:updated},{merge:true});
+  chData.members=updated;
+  renderMembers(chData);
 }
 
 async function addMemberToChannel(){
@@ -2674,8 +3053,9 @@ async function addMemberToChannel(){
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=(chData&&chData.members)||[];
-  if(members.includes(phone)){alert("Ce numero est deja membre");return;}
-  members.push(phone);
+  var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
+  if(exists){alert("Ce numero est deja membre");return;}
+  members.push({phone:phone,label:null});
   await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
   input.value="";
   chData.members=members;
@@ -2689,11 +3069,75 @@ async function removeMemberFromChannel(phone){
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
-  var members=((chData&&chData.members)||[]).filter(function(p){return p!==phone;});
+  var members=((chData&&chData.members)||[]).filter(function(m){return (typeof m==="string"?m:m.phone)!==phone;});
   await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
   chData.members=members;
   renderMembers(chData);
   buildAdminComm();
+}
+
+
+function showLicenceContactPicker(){
+  var contacts=getLicencedContacts();
+  var el=document.getElementById("lic-picker-list");
+  if(!contacts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📇</div><div style="font-size:13px;font-weight:600">Aucun contact disponible</div><div style="font-size:11px;margin-top:4px">Les licences validees avec telephone apparaitront ici</div></div>';}
+  else{
+    el.innerHTML="";
+    contacts.forEach(function(c){
+      var div=document.createElement("div");div.className="member-card";div.style.cursor="pointer";
+      div.onclick=function(){addMemberFromLicence(c.phone,c.label);};
+      div.innerHTML='<div class="member-avatar">📱</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+c.label+'</div><div style="font-size:11px;color:var(--mut)">'+c.phone+'</div></div><span style="color:var(--ltg);font-size:18px">+</span>';
+      el.appendChild(div);
+    });
+  }
+  document.getElementById("modal-lic-picker").style.display="flex";
+}
+
+async function addMemberFromLicence(phone,label){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
+  var chData=null;
+  chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
+  var members=(chData&&chData.members)||[];
+  var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
+  if(exists){alert("Ce contact est deja membre");return;}
+  members.push({phone:phone,label:label});
+  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  chData.members=members;
+  renderMembers(chData);
+  buildAdminComm();
+  closeModal("modal-lic-picker");
+}
+
+// ═══ CONTACTS DEPUIS LES LICENCES ════════════════════════════════
+function calcAge(dateNaissance){
+  if(!dateNaissance)return null;
+  var today=new Date();
+  var birth=new Date(dateNaissance);
+  var age=today.getFullYear()-birth.getFullYear();
+  var m=today.getMonth()-birth.getMonth();
+  if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;
+  return age;
+}
+
+function getLicencedContacts(){
+  var lics=getLicences();
+  var contacts=[];
+  lics.forEach(function(lic){
+    if(!lic.fiche)return;
+    var f=lic.fiche;
+    var age=calcAge(f.naissance);
+    var isMajeur=age!==null&&age>=18;
+    var cat=lic.categorie||"";
+    var label=f.prenom+(cat?"-"+cat:"");
+    if(isMajeur){
+      if(f.telephone)contacts.push({phone:f.telephone.trim(),label:label});
+    } else {
+      if(f.respTel)contacts.push({phone:f.respTel.trim(),label:label+(f.respNom?" (parent: "+f.respNom+")":"")});
+      if(f.resp2Tel)contacts.push({phone:f.resp2Tel.trim(),label:label+(f.resp2Nom?" (2e parent: "+f.resp2Nom+")":"")});
+    }
+  });
+  return contacts.filter(function(c){return c.phone;});
 }
 
 // ═══ COTE MEMBRE - VERIFICATION TELEPHONE ═══════════════════════
@@ -2729,7 +3173,7 @@ function buildCommunaute(){
       if(ch.deleted)return;
       var members=ch.members||[];
       var isRestricted=members.length>0;
-      var isMember=!isRestricted||members.includes(myPhone);
+      var isMember=!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
       var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
       if(isMember){
         div.onclick=function(){openChannel(ch);};
@@ -2748,7 +3192,8 @@ function openChannel(ch){
   var members=ch.members||[];
   if(members.length>0){
     if(!myPhone){if(!checkMyPhone()){return;}}
-    if(!members.includes(myPhone)){alert("Ce canal est reserve aux membres autorises. Contactez un responsable ASMB.");return;}
+    var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    if(!isAuth){alert("Ce canal est reserve aux membres autorises. Contactez un responsable ASMB.");return;}
   }
   currentChannelId=ch.id;currentChannelData=ch;
   document.getElementById("chat-icon").textContent=ch.icon;
