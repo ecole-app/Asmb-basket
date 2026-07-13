@@ -3485,11 +3485,11 @@ function initProfile(){
     showScr("portal");
     buildPortal();
   } else {
+    buildBottomNav("parent");
     var teams=getParentTeams();
     if(!teams.length){
       openTeamPicker(false);
     } else {
-      buildBottomNav("parent");
       stack=["portal"];
       showScr("portal");
       buildParentHome();
@@ -3520,6 +3520,7 @@ function chooseRole(role){
     buildPortal();
   } else {
     localStorage.setItem("asmb_profile","parent");
+    buildBottomNav("parent");
     openTeamPicker(false);
   }
 }
