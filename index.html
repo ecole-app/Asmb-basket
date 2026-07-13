@@ -1064,7 +1064,7 @@ function goBack(){
 }
 function navTo(id){
   stack=["portal"];
-  if(id==="admin"){stack.push("admin-login");showScr("admin-login");}
+  if(id==="admin"){stack.push("admin");buildAdminHome();showScr("admin");}
   else if(id==="inscription"){stack.push("inscription");showScr("inscription");buildInscriptionPublic();}
   else if(id==="communaute"){stack.push("communaute");showScr("communaute");buildCommunaute();}
   else{stack.push(id);showScr(id);}
