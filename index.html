@@ -831,6 +831,15 @@ initChannels();
     <div id="parent-events-list" style="padding:8px 0 80px"></div>
   </div>
 
+  <!-- ══════════════ STATS (parent) ══════════════ -->
+  <div class="scr" id="scr-parent-stats">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
+      <div style="font-size:16px;font-weight:800;color:var(--txt)">Stats</div>
+      <div style="font-size:11px;color:var(--mut)" id="parent-stats-sub"></div>
+    </div>
+    <div id="parent-stats-content" style="padding:16px 12px 80px"></div>
+  </div>
+
 </div>
 
 <nav class="bnav" id="bnav-main">
@@ -978,14 +987,14 @@ function cycleProgress(cyId){
 
 // ═══ NAV ═════════════════════════════════════════════════════════
 var stack=["portal"],curCy=null,curSea=null;
-var ROOTS=["portal","plan","admin-login","inscription","communaute","role-select","team-picker","parent-equipe","parent-events"];
+var ROOTS=["portal","plan","admin-login","inscription","communaute","role-select","team-picker","parent-equipe","parent-events","parent-stats"];
 
 function showScr(id){
   document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
   var el=document.getElementById("scr-"+id);
   if(el)el.classList.add("on");
   document.querySelectorAll(".bni").forEach(function(b){b.classList.remove("on");});
-  var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
+  var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
   var nb=document.getElementById("bni-"+(map[id]||"portal"));
   if(nb)nb.classList.add("on");
   document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
@@ -994,7 +1003,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Elite Academy","Pole Formation ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Elite Academy","Pole Formation ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -3714,6 +3723,42 @@ function buildParentEvents(){
   });
 }
 
+// ── PARENT STATS TAB ──────────────────────────────────────────────
+function buildParentStats(){
+  var activeId=getActiveTeamId();
+  var teams=getTeams();
+  var team=teams.find(function(t){return t.id===activeId;});
+  document.getElementById("parent-stats-sub").textContent=team?team.name:"";
+  var el=document.getElementById("parent-stats-content");
+  if(!team){el.innerHTML="";return;}
+
+  var stats=getTeamPresenceStats(team);
+  var html="";
+
+  if(stats.total===0){
+    html+='<div class="empty-state"><div class="empty-state-icon">'+String.fromCodePoint(128202)+'</div><div style="font-size:13px;font-weight:600">Pas d\'historique de donnees</div><div style="font-size:11px;margin-top:4px">pour les criteres selectionnes</div></div>';
+  } else {
+    html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Bilan des presences</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center">';
+    html+='<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite</div></div>';
+    html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';
+    html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Presences</div></div>';
+    html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';
+    html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+(stats.total-stats.present)+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Absences</div></div>';
+    html+='</div></div>';
+
+    // Progress bar
+    html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow)">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Taux d\'assiduite</div>';
+    html+='<div class="prog-bar" style="height:10px"><div class="prog-fill" style="width:'+stats.pct+'%"></div></div>';
+    html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">'+stats.present+' presences sur '+stats.total+' seances enregistrees</div>';
+    html+='</div>';
+  }
+
+  el.innerHTML=html;
+}
+
 // ── DYNAMIC BOTTOM NAV ────────────────────────────────────────────
 function buildBottomNav(profile){
   var nav=document.getElementById("bnav-main");
@@ -3726,10 +3771,10 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">&#128274;</span>Admin</button>';
   } else {
     nav.innerHTML=
-      '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">&#127968;</span>Accueil</button>'+
+      '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">&#127936;</span>Match</button>'+
       '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">&#128737;</span>Equipe</button>'+
-      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">&#128197;</span>Evenements</button>'+
-      '<button class="bni" id="bni-communaute" onclick="navTo(\'communaute\')"><span class="bni-ic">&#128172;</span>Communaute</button>';
+      '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">&#128202;</span>Stats</button>'+
+      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">&#128197;</span>Evenement</button>';
   }
 }
 
@@ -3737,6 +3782,7 @@ function navToParent(which){
   document.querySelectorAll("#bnav-main .bni").forEach(function(b){b.classList.remove("on");});
   if(which==="home"){document.getElementById("bni-portal").classList.add("on");stack=["portal"];showScr("portal");buildParentHome();}
   else if(which==="equipe"){document.getElementById("bni-eq").classList.add("on");stack=["parent-equipe"];showScr("parent-equipe");buildParentEquipe();}
+  else if(which==="stats"){document.getElementById("bni-stats").classList.add("on");stack=["parent-stats"];showScr("parent-stats");buildParentStats();}
   else if(which==="events"){document.getElementById("bni-ev").classList.add("on");stack=["parent-events"];showScr("parent-events");buildParentEvents();}
 }
 
