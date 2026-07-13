@@ -209,6 +209,7 @@ async function initChannels(){
 }
 initChannels();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -312,7 +313,10 @@ initChannels();
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Inscriptions</div>
         <div style="font-size:11px;color:var(--mut)" id="insc-count">0 joueur(s)</div>
       </div>
-      <button onclick="showAddPlayer()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ajouter</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportPlayersPDF()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">📄 PDF</button>
+        <button onclick="showAddPlayer()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ajouter</button>
+      </div>
     </div>
     <!-- Filtres catégorie -->
     <div style="padding:10px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
@@ -367,7 +371,9 @@ initChannels();
     <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
       <button onclick="showAddCreneau()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--dkg);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">🕐 + Créneau</button>
       <button onclick="showAddEvent()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">📅 + Evénement</button>
+      <button id="plan-view-toggle" onclick="togglePlanningView()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🗓️ Vue calendrier</button>
     </div>
+    <div id="planning-calendar" style="display:none;padding:12px"></div>
     <div id="planningList" style="padding:8px 0 80px"></div>
     <!-- Modal créneau -->
     <div id="modal-creneau" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
@@ -721,6 +727,8 @@ initChannels();
       <div style="font-size:16px;font-weight:800;color:var(--txt)">Parametres</div>
       <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Donnees</div>
     </div>
+    <div class="sec">Statistiques du club</div>
+    <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
     <div class="sec">Notifications</div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
       <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
@@ -792,6 +800,8 @@ initChannels();
       <div id="parent-date" style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px"></div>
       <div class="sec" style="padding:0 0 8px">Prochain evenement</div>
       <div id="parent-next-event"></div>
+      <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
+      <div id="parent-last-matches"></div>
       <div class="sec" style="padding:16px 0 8px">Bilan de presence</div>
       <div id="parent-stats"></div>
       <div style="text-align:center;margin-top:20px">
@@ -2633,6 +2643,44 @@ function sendBroadcast(){
 function buildParametres(){
   var toggle=document.getElementById("notif-toggle");
   if(toggle)toggle.checked=localStorage.getItem("asmb_notif")==="on";
+  buildClubStats();
+}
+
+function buildClubStats(){
+  var el=document.getElementById("club-stats-box");
+  if(!el)return;
+  var players=getPlayers();
+  var CATS_ALL=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
+  var byCat={};
+  CATS_ALL.forEach(function(c){byCat[c]=0;});
+  players.forEach(function(p){if(byCat.hasOwnProperty(p.cat))byCat[p.cat]++;});
+  var licencies=players.filter(function(p){return p.licence==="ok";}).length;
+
+  var allEvents=getEvents().filter(function(e){return e.presences&&Object.keys(e.presences).length;});
+  var totalPres=0,totalSlots=0;
+  allEvents.forEach(function(e){
+    Object.keys(e.presences).forEach(function(k){totalSlots++;if(e.presences[k]==="present")totalPres++;});
+  });
+  var avgPresence=totalSlots?Math.round(totalPres/totalSlots*100):0;
+
+  var html='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center;margin-bottom:16px">'+
+    '<div><div style="font-size:24px;font-weight:900;color:var(--dkg)">'+players.length+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licencies total</div></div>'+
+    '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
+    '<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+licencies+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licences validees</div></div>'+
+    '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
+    '<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+avgPresence+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite moyenne</div></div>'+
+  '</div>';
+
+  html+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Repartition par categorie</div>';
+  CATS_ALL.forEach(function(c){
+    var count=byCat[c];
+    if(count===0)return;
+    var pct=Math.round(count/players.length*100)||0;
+    html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--txt);font-weight:600">'+c+'</span><span style="color:var(--mut)">'+count+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+  });
+  if(!players.length){html+='<div style="font-size:11px;color:var(--mut);text-align:center;padding:10px 0">Aucune donnee pour le moment</div>';}
+
+  el.innerHTML=html;
 }
 
 function toggleNotif(checked){
@@ -2787,6 +2835,8 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Categorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
+    '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Competition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Numero de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
     '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+(p?p.contact:'')+'" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+(p?p.notes:'')+'</textarea></div>';
 }
@@ -2795,7 +2845,7 @@ function savePlayer(){
   var nom=document.getElementById("fp-nom").value.trim();
   if(!prenom||!nom){alert("Prenom et nom obligatoires");return;}
   var players=getPlayers();
-  var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,poste:document.getElementById("fp-poste").value,licence:document.getElementById("fp-licence").value,contact:document.getElementById("fp-contact").value,notes:document.getElementById("fp-notes").value};
+  var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,poste:document.getElementById("fp-poste").value,licence:document.getElementById("fp-licence").value,typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,contact:document.getElementById("fp-contact").value,notes:document.getElementById("fp-notes").value};
   if(editingPlayerId){var idx=players.findIndex(function(p){return p.id===editingPlayerId;});if(idx>=0)players[idx]=data;}
   else players.push(data);
   savePlayers(players);
@@ -2807,6 +2857,51 @@ function deletePlayer(id){
   if(!confirm("Supprimer ce joueur ?"))return;
   var players=getPlayers().filter(function(p){return p.id!==id;});
   savePlayers(players);renderPlayers();buildAdminHome();
+}
+
+function exportPlayersPDF(){
+  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, reessayez dans quelques secondes");return;}
+  var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
+  if(!players.length){alert("Aucun joueur a exporter");return;}
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF();
+  doc.setFontSize(16);
+  doc.setTextColor(27,92,40);
+  doc.text("ASMB - Liste des licencies",14,16);
+  doc.setFontSize(9);
+  doc.setTextColor(100,100,100);
+  doc.text("Saint-Etienne Metropole Basket - Genere le "+new Date().toLocaleDateString("fr-FR"),14,22);
+  if(currentCatFilter!=="all"){doc.text("Categorie : "+currentCatFilter,14,27);}
+
+  var headers=["Nom","Prenom","Categorie","Type licence","N° licence","Statut"];
+  var colX=[14,50,86,112,150,178];
+  var y=currentCatFilter!=="all"?35:32;
+  doc.setFontSize(9);
+  doc.setTextColor(255,255,255);
+  doc.setFillColor(27,92,40);
+  doc.rect(12,y-5,186,7,"F");
+  headers.forEach(function(h,i){doc.text(h,colX[i],y);});
+  y+=8;
+  doc.setTextColor(30,30,30);
+  players.forEach(function(p,idx){
+    if(y>280){doc.addPage();y=20;}
+    if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    var typeLic=p.typeLicence==="competition"?"Competition":"Loisir";
+    var numLic=p.numLicence||"0C";
+    var statut=p.licence==="ok"?"Licencie":(p.licence==="attente"?"En attente":"Sans licence");
+    doc.text((p.nom||"").substring(0,18),colX[0],y);
+    doc.text((p.prenom||"").substring(0,18),colX[1],y);
+    doc.text(p.cat||"",colX[2],y);
+    doc.text(typeLic,colX[3],y);
+    doc.text(numLic,colX[4],y);
+    doc.text(statut,colX[5],y);
+    y+=7;
+  });
+  doc.setFontSize(8);
+  doc.setTextColor(150,150,150);
+  doc.text("Total : "+players.length+" licencie(s)",14,y+6);
+
+  doc.save("ASMB_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
 }
 
 // ── TEAMS ────────────────────────────────────────────────────────
@@ -2840,6 +2935,77 @@ function deleteTeam(id){if(!confirm("Supprimer cette equipe ?"))return;var teams
 // ── PLANNING ─────────────────────────────────────────────────────
 function getEvents(){try{return JSON.parse(localStorage.getItem("asmb_events")||"[]");}catch(e){return [];}}
 function saveEvents(e){localStorage.setItem("asmb_events",JSON.stringify(e));}
+var planViewMode="list";
+var planCalMonth=new Date().getMonth();
+var planCalYear=new Date().getFullYear();
+
+function togglePlanningView(){
+  planViewMode=(planViewMode==="list")?"calendar":"list";
+  var btn=document.getElementById("plan-view-toggle");
+  var calEl=document.getElementById("planning-calendar");
+  var listEl=document.getElementById("planningList");
+  if(planViewMode==="calendar"){
+    btn.textContent="📋 Vue liste";
+    calEl.style.display="block";
+    listEl.style.display="none";
+    renderPlanningCalendar();
+  } else {
+    btn.textContent="🗓️ Vue calendrier";
+    calEl.style.display="none";
+    listEl.style.display="block";
+  }
+}
+
+function renderPlanningCalendar(){
+  var el=document.getElementById("planning-calendar");if(!el)return;
+  var events=getEvents();
+  var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
+  var monthNames=["Janvier","Fevrier","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Decembre"];
+  var firstDay=new Date(planCalYear,planCalMonth,1);
+  var startOffset=(firstDay.getDay()+6)%7; // lundi=0
+  var daysInMonth=new Date(planCalYear,planCalMonth+1,0).getDate();
+  var todayStr=new Date().toISOString().slice(0,10);
+
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+    '<button onclick="shiftPlanCal(-1)" style="width:32px;height:32px;border-radius:8px;background:var(--bdr);border:none;color:var(--mut);cursor:pointer">‹</button>'+
+    '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+monthNames[planCalMonth]+' '+planCalYear+'</div>'+
+    '<button onclick="shiftPlanCal(1)" style="width:32px;height:32px;border-radius:8px;background:var(--bdr);border:none;color:var(--mut);cursor:pointer">›</button>'+
+  '</div>';
+
+  html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">';
+  ["L","M","M","J","V","S","D"].forEach(function(d){html+='<div style="text-align:center;font-size:9px;font-weight:700;color:var(--mut)">'+d+'</div>';});
+  html+='</div>';
+
+  html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
+  for(var i=0;i<startOffset;i++){html+='<div></div>';}
+  for(var day=1;day<=daysInMonth;day++){
+    var dateStr=planCalYear+"-"+String(planCalMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    var dayEvents=events.filter(function(e){return e.date===dateStr;});
+    var isToday=dateStr===todayStr;
+    var dots=dayEvents.slice(0,3).map(function(e){return '<span style="width:5px;height:5px;border-radius:50%;background:'+(typeColors[e.type]||"#1B5C28")+';display:inline-block;margin:0 1px"></span>';}).join("");
+    html+='<div onclick="showDayEvents(\''+dateStr+'\')" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;background:'+(isToday?"var(--dkg)":"var(--card)")+';border:1px solid var(--bdr)">'+
+      '<span style="font-size:11px;font-weight:'+(isToday?"800":"600")+';color:'+(isToday?"#fff":"var(--txt)")+'">'+day+'</span>'+
+      '<div style="height:6px;margin-top:2px">'+dots+'</div>'+
+    '</div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function shiftPlanCal(delta){
+  planCalMonth+=delta;
+  if(planCalMonth<0){planCalMonth=11;planCalYear--;}
+  if(planCalMonth>11){planCalMonth=0;planCalYear++;}
+  renderPlanningCalendar();
+}
+
+function showDayEvents(dateStr){
+  var events=getEvents().filter(function(e){return e.date===dateStr;});
+  if(!events.length){alert("Aucun evenement ce jour-la");return;}
+  var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" a "+e.heure:"");}).join("\n");
+  alert("Evenements du "+dateStr+" :\n\n"+txt);
+}
+
 function buildPlanning(){
   var events=getEvents();
   var el=document.getElementById("planningList");if(!el)return;
@@ -2857,7 +3023,9 @@ function buildPlanning(){
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
     var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les presences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
-    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+presBtn+"</div>"+delBtn+"</div>";
+    var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">ASMB "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
+    var scoreBtn=(e.type==="match")?("<button onclick=\"editScore('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">🏆 "+(e.score?"Modifier score":"Ajouter score")+"</button>"):"";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+scoreDisplay+presBtn+scoreBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
 }
@@ -2998,6 +3166,20 @@ function saveEventFull(){
   }
 }
 function deleteEvent(id){if(!confirm("Supprimer cet evenement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
+function editScore(eventId){
+  var events=getEvents();
+  var ev=events.find(function(e){return e.id===eventId;});
+  if(!ev)return;
+  var adversaire=prompt("Nom de l adversaire :",(ev.score&&ev.score.adversaire)||"");
+  if(adversaire===null)return;
+  var scoreAsmb=prompt("Score ASMB :",(ev.score&&ev.score.asmb)||"0");
+  if(scoreAsmb===null)return;
+  var scoreAdv=prompt("Score adversaire :",(ev.score&&ev.score.adv)||"0");
+  if(scoreAdv===null)return;
+  ev.score={adversaire:adversaire.trim()||"Adversaire",asmb:parseInt(scoreAsmb,10)||0,adv:parseInt(scoreAdv,10)||0};
+  saveEvents(events);
+  buildPlanning();
+}
 
 // ── DOCUMENTS ────────────────────────────────────────────────────
 function getDocs(){try{return JSON.parse(localStorage.getItem("asmb_docs")||"[]");}catch(e){return [];}}
@@ -3311,8 +3493,24 @@ function listenMessages(channelId){
   var msgsEl=document.getElementById("chat-messages");
   if(!msgsEl)return;
   msgsEl.innerHTML="";
+  var isFirstLoad=true;
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels",channelId,"messages"),window.fbOrderBy("ts"));
   chatUnsubscribe=window.fbOnSnapshot(q,function(snap){
+    // Notification locale sur nouveaux messages (app ouverte uniquement)
+    if(!isFirstLoad&&localStorage.getItem("asmb_notif")==="on"&&"Notification" in window&&Notification.permission==="granted"){
+      snap.docChanges().forEach(function(change){
+        if(change.type==="added"){
+          var m=change.doc.data();
+          if(m.pseudo!==(savedPseudo||"moi")){
+            try{
+              var ch=currentChannelData;
+              new Notification((ch?ch.icon+" "+ch.name:"ASMB")+" - "+m.pseudo,{body:m.text.replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
+            }catch(e){}
+          }
+        }
+      });
+    }
+    isFirstLoad=false;
     msgsEl.innerHTML="";
     var lastDay="";
     var pinnedId=currentChannelData?currentChannelData.pinnedMessageId:null;
@@ -3718,6 +3916,23 @@ function buildParentHome(){
     '</div>';
   }
 
+  // Derniers matchs joues
+  var lastMatches=getLastMatchesForTeam(activeTeam);
+  var lmEl=document.getElementById("parent-last-matches");
+  if(!lastMatches.length){
+    lmEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucun match joue pour le moment</div></div>';
+  } else {
+    lmEl.innerHTML="";
+    lastMatches.forEach(function(m){
+      var res=m.score.asmb>m.score.adv?"V":(m.score.asmb<m.score.adv?"D":"N");
+      var resCol=res==="V"?"#27AE60":(res==="D"?"#C0392B":"#E8670A");
+      var div=document.createElement("div");
+      div.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow)";
+      div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">ASMB '+m.score.asmb+' - '+m.score.adv+' '+m.score.adversaire+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+m.date+'</div></div>';
+      lmEl.appendChild(div);
+    });
+  }
+
   // Stats presence
   var stats=getTeamPresenceStats(activeTeam);
   var statsEl=document.getElementById("parent-stats");
@@ -3734,6 +3949,18 @@ function buildParentHome(){
   }
 }
 
+function getLastMatchesForTeam(team){
+  if(!team)return[];
+  var events=getEvents();
+  var todayStr=new Date().toISOString().slice(0,10);
+  var matched=events.filter(function(e){
+    if(e.type!=="match"||!e.score||!e.equipe)return false;
+    var eq=e.equipe.toUpperCase();
+    return (eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0)&&e.date<=todayStr;
+  });
+  matched.sort(function(a,b){return b.date>a.date?1:-1;});
+  return matched.slice(0,5);
+}
 function getNextEventForTeam(team){
   if(!team)return null;
   var events=getEvents();
