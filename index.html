@@ -4480,7 +4480,7 @@ var POLE_FORMS={
   "session":    {title:"Nouvelle session",fields:[{id:"nom",label:"Nom de la session",ph:"Ex: Seance technique U13"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"Ex: 14h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."},{id:"notes",label:"Notes",ph:"Informations..."}]},
   "participant":{title:"Nouveau participant",fields:[{id:"nom",label:"Nom complet",ph:"Prenom Nom"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"contact",label:"Contact",ph:"06..."}]},
   "equipe":     {title:"Nouvelle equipe",fields:[{id:"nom",label:"Nom de l'equipe",ph:"Ex: U13F ASMB"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"coach",label:"Coach",ph:"Prenom Nom"},{id:"notes",label:"Notes",ph:""}]},
-  "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",ph:"Domicile / Exterieur"},{id:"equipe",label:"Notre equipe",ph:"U13F ASMB"},{id:"cat",label:"Categorie",type:"select-cat"}]},
+  "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",type:"select-lieu"},{id:"equipe",label:"Notre equipe",type:"select-team"},{id:"cat",label:"Categorie",type:"select-cat"}]},
   "joueur":     {title:"Nouveau joueur",fields:[{id:"nom",label:"Nom complet",ph:"Prenom Nom"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numero de maillot",ph:"#7"},{id:"equipe",label:"Equipe",ph:"U13F"}]},
   "tournoi":    {title:"Nouveau tournoi",fields:[{id:"nom",label:"Nom du tournoi",ph:"Ex: Tournoi de Noel"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"format",label:"Format",ph:"3x3, 5x5, mixte..."},{id:"notes",label:"Notes",ph:""}]},
   "evenement":  {title:"Nouvel evenement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
@@ -4551,6 +4551,15 @@ function showAddPoleItem(poleId,type){
     } else if(f.type==="select-cat"){
       var opts=CATS_OPT.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
       html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez une categorie...</option>'+opts+'</select>';
+    } else if(f.type==="select-team"){
+      var teamOpts=getTeams().map(function(t){return '<option value="'+t.name+'">'+t.name+' ('+t.cat+')</option>';}).join("");
+      if(!getTeams().length){
+        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Aucune equipe creee - Admin > Equipes</option></select>';
+      } else {
+        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez une equipe...</option>'+teamOpts+'</select>';
+      }
+    } else if(f.type==="select-lieu"){
+      html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez...</option><option value="Domicile">Domicile</option><option value="Exterieur">Exterieur</option></select>';
     } else {
       html+='<input class="form-input" id="pf-'+f.id+'" placeholder="'+(f.ph||'')+'">';
     }
