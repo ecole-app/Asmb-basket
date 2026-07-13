@@ -981,6 +981,8 @@ function showScr(id){
   var nb=document.getElementById("bni-"+(map[id]||"portal"));
   if(nb)nb.classList.add("on");
   document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
+  var navEl=document.getElementById("bnav-main");
+  if(navEl)navEl.style.display=(id==="role-select")?"none":"flex";
   document.querySelector(".main").scrollTop=0;
   updateHdr(id);
 }
