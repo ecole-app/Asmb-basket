@@ -772,9 +772,14 @@ initChannels();
         <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Parent</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Voir l'equipe et les evenements de mon enfant</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
-      <div onclick="chooseRole('coach')" style="cursor:pointer;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
+      <div onclick="chooseRole('coach')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
+        <div style="width:52px;height:52px;border-radius:50%;background:#16A085;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🏀</div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Equipe, Formation, Competition, Evenements</div></div>
+        <span style="color:var(--mut);font-size:18px">›</span>
+      </div>
+      <div onclick="chooseRole('dirigeant')" style="cursor:pointer;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#1A2E5A;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🎓</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach / Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Acces complet a la gestion du club</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Acces complet a la gestion du club</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
     </div>
@@ -3433,7 +3438,7 @@ var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
 
 function buildCommunaute(){
   var el=document.getElementById("channel-list");if(!el)return;
-  window.asmbCoachMode=(localStorage.getItem("asmb_profile")==="coach");
+  window.asmbCoachMode=(["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0);
   if(!window.fbReady){
     window.addEventListener("fb-ready",function(){buildCommunaute();},{once:true});
     return;
@@ -3768,11 +3773,14 @@ function initProfile(){
     showScr("role-select");
     return;
   }
-  if(profile==="coach"){
-    buildBottomNav("coach");
+  if(profile==="dirigeant"){
+    buildBottomNav("dirigeant");
     stack=["portal"];
     showScr("portal");
     buildPortal();
+  } else if(profile==="coach"){
+    buildBottomNav("coach");
+    navToCoach("equipe");
   } else {
     buildBottomNav("parent");
     var teams=getParentTeams();
@@ -3794,24 +3802,49 @@ function injectRoleLogo(){
 }
 
 function chooseRole(role){
-  if(role==="coach"){
-    var code=prompt("Code coach / dirigeant :");
+  if(role==="dirigeant"){
+    var code=prompt("Code dirigeant :");
     if(code===null)return;
     var validCode=localStorage.getItem("asmb_coach_code")||"ASMB2025";
     if(code.trim().toUpperCase()!==validCode.toUpperCase()){
       alert("Code incorrect");
       return;
     }
-    localStorage.setItem("asmb_profile","coach");
-    buildBottomNav("coach");
+    localStorage.setItem("asmb_profile","dirigeant");
+    buildBottomNav("dirigeant");
     stack=["portal"];
     showScr("portal");
     buildPortal();
+  } else if(role==="coach"){
+    localStorage.setItem("asmb_profile","coach");
+    buildBottomNav("coach");
+    navToCoach("equipe");
   } else {
     localStorage.setItem("asmb_profile","parent");
     buildBottomNav("parent");
     openTeamPicker(false);
   }
+}
+
+function navToCoach(which){
+  document.querySelectorAll("#bnav-main .bni").forEach(function(b){b.classList.remove("on");});
+  var hbk=document.getElementById("hbk");
+  if(which==="equipe"){
+    var b=document.getElementById("bni-c-equipe");if(b)b.classList.add("on");
+    stack=["equipes"];showScr("equipes");buildTeams();
+  } else if(which==="formation"){
+    var b2=document.getElementById("bni-c-formation");if(b2)b2.classList.add("on");
+    stack=["elite"];showScr("elite");buildElite();
+  } else if(which==="competition"){
+    var b3=document.getElementById("bni-c-competition");if(b3)b3.classList.add("on");
+    currentPoleId="competition";
+    stack=["pole-competition"];showScr("pole-competition");buildPoleScreen("competition");
+  } else if(which==="evenements"){
+    var b4=document.getElementById("bni-c-evenements");if(b4)b4.classList.add("on");
+    currentPoleId="evenement";
+    stack=["pole-evenement"];showScr("pole-evenement");buildPoleScreen("evenement");
+  }
+  if(hbk)hbk.classList.remove("show");
 }
 
 function switchProfile(){
@@ -4102,12 +4135,18 @@ var NAV_ICONS={
 function buildBottomNav(profile){
   var nav=document.getElementById("bnav-main");
   if(!nav)return;
-  if(profile==="coach"){
+  if(profile==="dirigeant"){
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navTo(\'portal\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
       '<button class="bni" id="bni-communaute" onclick="navTo(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>'+
       '<button class="bni" id="bni-inscription" onclick="navTo(\'inscription\')"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>'+
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
+  } else if(profile==="coach"){
+    nav.innerHTML=
+      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
+      '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Formation</button>'+
+      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
+      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Evenements</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
