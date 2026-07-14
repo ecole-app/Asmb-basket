@@ -410,6 +410,7 @@ initChannels();
       <button onclick="showAddCreneau()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--dkg);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">🕐 + Créneau</button>
       <button onclick="showAddEvent()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">📅 + Evénement</button>
       <button id="plan-view-toggle" onclick="togglePlanningView()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🗓️ Vue calendrier</button>
+      <button onclick="exportPlanningPDF()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">📄 PDF</button>
     </div>
     <div id="planning-calendar" style="display:none;padding:12px"></div>
     <div id="planningList" style="padding:8px 0 80px"></div>
@@ -467,6 +468,16 @@ initChannels();
           <label class="form-label">Notes (optionnel)</label>
           <input class="form-input" id="cr-notes" placeholder="Informations supplementaires...">
         </div>
+        <!-- Repetition -->
+        <div class="form-group">
+          <label class="form-label">Repeter ce creneau</label>
+          <select class="form-select" id="cr-repeat">
+            <option value="0">Une seule fois</option>
+            <option value="4">4 semaines</option>
+            <option value="8">8 semaines</option>
+            <option value="12">12 semaines</option>
+          </select>
+        </div>
         <div style="display:flex;gap:8px;margin-top:4px">
           <button onclick="closeModal('modal-creneau')" style="flex:1;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:600;border:none;cursor:pointer">Annuler</button>
           <button onclick="saveCreneau()" style="flex:2;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
@@ -497,6 +508,7 @@ initChannels();
       </div>
       <button onclick="showNewLicence()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Nouvelle fiche</button>
     </div>
+    <div id="lic-counter-box" style="margin:12px 12px 4px"></div>
     <div id="licenceList" style="padding:8px 0 80px"></div>
     <!-- Modal nouvelle fiche -->
     <div id="modal-new-lic" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
@@ -630,14 +642,12 @@ initChannels();
       <div id="chat-icon" style="font-size:22px"></div>
       <div style="flex:1"><div id="chat-name" style="font-size:14px;font-weight:800;color:var(--txt)"></div><div id="chat-desc" style="font-size:10px;color:var(--mut)"></div></div>
     </div>
-    <div id="chat-pinned" style="display:none;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);flex-shrink:0">
-      <span style="font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-    </div>
+    <div id="chat-pinned" style="display:none;flex-direction:column;gap:4px;padding:8px 14px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);flex-shrink:0"></div>
     <div id="chat-messages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;padding-bottom:80px"></div>
     <div id="chat-input-bar" style="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:8px;z-index:10">
       <button id="poll-btn" onclick="showPollCreator()" style="width:38px;height:38px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</button>
       <input id="chat-pseudo" placeholder="Pseudo..." style="width:80px;padding:9px 10px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none;flex-shrink:0">
-      <input id="chat-msg" placeholder="Message..." style="flex:1;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()">
+      <input id="chat-msg" placeholder="Message..." style="flex:1;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
       <button onclick="sendMsg()" style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
     </div>
   </div>
@@ -1209,7 +1219,7 @@ function goBack(){
   else if(prev==="admin-comm"){buildAdminComm();showScr("admin-comm");}
   else if(prev==="parametres"){buildParametres();showScr("parametres");}
   else if(prev&&prev.startsWith("pole-")){showScr(prev);}
-  else if(prev==="communaute"){buildCommunaute();showScr("communaute");if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}}
+  else if(prev==="communaute"){buildCommunaute();showScr("communaute");if(chatUnsubscribe){chatUnsubscribe();chatUnsubscribe=null;}if(typingUnsubscribe){typingUnsubscribe();typingUnsubscribe=null;}}
   else showScr(prev);
 }
 function navTo(id){
@@ -2282,6 +2292,30 @@ function buildLicences(){
   var lics=getLicences();
   var el=document.getElementById("licenceList");if(!el)return;
   document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"");
+
+  var counterEl=document.getElementById("lic-counter-box");
+  if(counterEl){
+    var byCat={};
+    lics.forEach(function(l){
+      var cat=l.categorie||"Non classee";
+      if(!byCat[cat])byCat[cat]={valid:0,pending:0};
+      if(l.statut==="validee")byCat[cat].valid++;
+      else byCat[cat].pending++;
+    });
+    var catKeys=Object.keys(byCat);
+    if(!catKeys.length){counterEl.innerHTML="";}
+    else{
+      var chtml='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;box-shadow:0 2px 8px var(--shadow)">';
+      chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validees vs en attente</div>';
+      catKeys.forEach(function(cat){
+        var c=byCat[cat];
+        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:#27AE60;font-weight:700">'+c.valid+' validee'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
+      });
+      chtml+='</div>';
+      counterEl.innerHTML=chtml;
+    }
+  }
+
   el.innerHTML="";
   if(!lics.length){
     el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><div style="font-size:13px;font-weight:600">Aucune fiche envoyee</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Nouvelle fiche</div></div>';
@@ -2297,7 +2331,10 @@ function buildLicences(){
     var catBadge=lic.categorie?'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(CAT_COLS_LIC[lic.categorie]||"#1B5C28")+'">'+lic.categorie+'</span>':'';
     var photoHtml=lic.fiche&&lic.fiche.photo?'<img src="'+lic.fiche.photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👤</div>';
     var nom=lic.fiche?(lic.fiche.prenom+" "+lic.fiche.nom):"Fiche en attente";
-    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+lic.code+'</b>'+(lic.email?' · '+lic.email:'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+st.label+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+lic.ouvertLe+'</span>':'')+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
+    var daysSince=(Date.now()-lic.createdAt)/86400000;
+    var needsRelance=lic.statut==="envoyee"&&daysSince>=5;
+    var relanceBadge=needsRelance?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">⏰ Relance recommandee</span>':"";
+    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+lic.code+'</b>'+(lic.email?' · '+lic.email:'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+st.label+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+lic.ouvertLe+'</span>':'')+relanceBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
 }
@@ -3293,6 +3330,7 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Categorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
+    '<div class="form-group"><label class="form-label">Numero de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder="Ex: 7"></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
     '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Competition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
     '<div class="form-group"><label class="form-label">Numero de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
@@ -3304,7 +3342,7 @@ function savePlayer(){
   var nom=document.getElementById("fp-nom").value.trim();
   if(!prenom||!nom){alert("Prenom et nom obligatoires");return;}
   var players=getPlayers();
-  var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,poste:document.getElementById("fp-poste").value,licence:document.getElementById("fp-licence").value,typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,contact:document.getElementById("fp-contact").value,notes:document.getElementById("fp-notes").value};
+  var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,poste:document.getElementById("fp-poste").value,maillot:document.getElementById("fp-maillot").value,licence:document.getElementById("fp-licence").value,typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,contact:document.getElementById("fp-contact").value,notes:document.getElementById("fp-notes").value};
   if(editingPlayerId){var idx=players.findIndex(function(p){return p.id===editingPlayerId;});if(idx>=0)players[idx]=data;}
   else players.push(data);
   savePlayers(players);
@@ -3377,6 +3415,41 @@ function renderPresenceHistory(){
     div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"#27AE60":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+(typeColors[e.type]?e.type:"autre")+'</div></div>';
     listEl.appendChild(div);
   });
+}
+
+function exportPlanningPDF(){
+  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, reessayez dans quelques secondes");return;}
+  var events=getEvents().slice().sort(function(a,b){return a.date>b.date?1:-1;});
+  if(!events.length){alert("Aucun evenement a exporter");return;}
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF();
+  doc.setFontSize(16);doc.setTextColor(27,92,40);
+  doc.text("ASMB - Planning",14,16);
+  doc.setFontSize(9);doc.setTextColor(100,100,100);
+  doc.text("Genere le "+new Date().toLocaleDateString("fr-FR"),14,22);
+
+  var headers=["Date","Type","Titre","Heure","Lieu","Equipe"];
+  var colX=[14,42,66,120,145,175];
+  var y=32;
+  doc.setFontSize(8);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
+  doc.rect(12,y-5,186,7,"F");
+  headers.forEach(function(h,i){doc.text(h,colX[i],y);});
+  y+=8;
+  doc.setTextColor(30,30,30);
+  events.forEach(function(e,idx){
+    if(y>280){doc.addPage();y=20;}
+    if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    doc.text(e.date||"",colX[0],y);
+    doc.text((e.type||"").substring(0,12),colX[1],y);
+    doc.text((e.titre||"").substring(0,24),colX[2],y);
+    doc.text(e.heure||"",colX[3],y);
+    doc.text((e.lieu||"").substring(0,10),colX[4],y);
+    doc.text((e.equipe||"").substring(0,10),colX[5],y);
+    y+=7;
+  });
+  doc.setFontSize(8);doc.setTextColor(150,150,150);
+  doc.text("Total : "+events.length+" evenement(s)",14,y+6);
+  doc.save("ASMB_planning_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
 function exportPlayersPDF(){
@@ -3585,26 +3658,45 @@ function selectJour(btn,jour){
   btn.style.background="var(--dkg)";btn.style.color="#fff";btn.style.borderColor="var(--dkg)";
 }
 
+function getNextDateForDayName(dayName){
+  var days=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+  var targetIdx=days.indexOf(dayName);
+  if(targetIdx<0)return new Date().toISOString().slice(0,10);
+  var d=new Date();
+  var todayIdx=d.getDay();
+  var diff=(targetIdx-todayIdx+7)%7;
+  d.setDate(d.getDate()+diff);
+  return d.toISOString().slice(0,10);
+}
+
 function saveCreneau(){
   var debut=(document.getElementById("cr-debut")||{}).value||"";
   var fin=(document.getElementById("cr-fin")||{}).value||"";
   var salle=(document.getElementById("cr-salle")||{}).value||"";
   var equipe=(document.getElementById("cr-equipe")||{}).value||"";
   var notes=(document.getElementById("cr-notes")||{}).value||"";
+  var repeatWeeks=parseInt((document.getElementById("cr-repeat")||{}).value||"0",10);
   if(!debut||!fin){alert("Horaires obligatoires");return;}
   var events=getEvents();
-  events.push({
-    id:Date.now().toString(),
-    titre:(creneauType==="match"?"Match":"Entrainement")+(equipe?" · "+equipe:""),
-    type:creneauType,
-    date:creneauJour,
-    heure:debut+" - "+fin,
-    lieu:salle,equipe:equipe,notes:notes,
-    recurrent:true
-  });
+  var firstDate=getNextDateForDayName(creneauJour);
+  var occurrences=repeatWeeks>0?repeatWeeks:1;
+  for(var i=0;i<occurrences;i++){
+    var d=new Date(firstDate);
+    d.setDate(d.getDate()+i*7);
+    events.push({
+      id:Date.now().toString()+"-"+i,
+      titre:(creneauType==="match"?"Match":"Entrainement")+(equipe?" · "+equipe:""),
+      type:creneauType,
+      date:d.toISOString().slice(0,10),
+      heure:debut+" - "+fin,
+      lieu:salle,equipe:equipe,notes:notes,
+      recurrent:repeatWeeks>0
+    });
+  }
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();
+  if(occurrences>1)alert(occurrences+" creneaux crees (repetition hebdomadaire)");
 }
 
 var evExternes=[];
@@ -4118,6 +4210,8 @@ function checkMyPhone(){
 var currentChannelId=null;
 var currentChannelData=null;
 var chatUnsubscribe=null;
+var typingUnsubscribe=null;
+var typingDebounce=null;
 var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
 
 function buildCommunaute(){
@@ -4172,9 +4266,44 @@ function openChannel(ch){
   stack.push("chat");
   showScr("chat");
   listenMessages(ch.id);
+  listenTyping(ch.id);
   setTimeout(function(){var msgs=document.getElementById("chat-messages");if(msgs)msgs.scrollTop=msgs.scrollHeight;},300);
   // Marquer comme lu
   localStorage.setItem("asmb_lastread_"+ch.id, Date.now().toString());
+}
+
+// ── INDICATEUR "EN TRAIN D'ECRIRE" ──────────────────────────────
+function notifyTyping(){
+  if(!window.fbReady||!currentChannelId)return;
+  var pseudo=savedPseudo||"moi";
+  window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentChannelId,"typing",pseudo),{ts:window.fbServerTimestamp()},{merge:true});
+}
+
+function listenTyping(channelId){
+  if(typingUnsubscribe)typingUnsubscribe();
+  var descEl=document.getElementById("chat-desc");
+  var baseDesc=currentChannelData?currentChannelData.desc:"";
+  typingUnsubscribe=window.fbOnSnapshot(window.fbCollection(window.fbDb,"channels",channelId,"typing"),function(snap){
+    var myPseudo=savedPseudo||"moi";
+    var typers=[];
+    var now=Date.now();
+    snap.forEach(function(d){
+      if(d.id===myPseudo)return;
+      var data=d.data();
+      var ts=data.ts&&data.ts.toDate?data.ts.toDate().getTime():0;
+      if(now-ts<3000)typers.push(d.id);
+    });
+    if(!descEl)return;
+    if(typers.length){
+      descEl.textContent=(typers.length===1?typers[0]+" ecrit...":typers.join(", ")+" ecrivent...");
+      descEl.style.color="#27AE60";
+      descEl.style.fontStyle="italic";
+    } else {
+      descEl.textContent=baseDesc;
+      descEl.style.color="";
+      descEl.style.fontStyle="";
+    }
+  });
 }
 
 var REACTION_EMOJIS=["👍","❤️"];
@@ -4204,11 +4333,11 @@ function listenMessages(channelId){
     isFirstLoad=false;
     msgsEl.innerHTML="";
     var lastDay="";
-    var pinnedId=currentChannelData?currentChannelData.pinnedMessageId:null;
-    var pinnedMsg=null;
+    var pinnedIds=(currentChannelData&&currentChannelData.pinnedMessageIds)||[];
+    var pinnedMsgs=[];
     snap.forEach(function(d){
       var msg=d.data();
-      if(pinnedId&&d.id===pinnedId)pinnedMsg=msg;
+      if(pinnedIds.indexOf(d.id)>=0)pinnedMsgs.push({id:d.id,text:msg.text||msg.question||"Message"});
       var isOut=msg.pseudo===(savedPseudo||"moi");
       var ts=msg.ts?msg.ts.toDate():new Date();
       var day=ts.toLocaleDateString("fr-FR");
@@ -4279,7 +4408,7 @@ function listenMessages(channelId){
         '<span onclick="toggleReaction(\''+channelId+'\',\''+d.id+'\',\'like\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:'+(likedByMe?"rgba(39,174,96,.25)":"rgba(0,0,0,.08)")+'">👍 '+(likeUsers.length||"")+'</span>'+
         '<span onclick="toggleReaction(\''+channelId+'\',\''+d.id+'\',\'heart\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:'+(heartedByMe?"rgba(192,57,43,.2)":"rgba(0,0,0,.08)")+'">❤️ '+(heartUsers.length||"")+'</span>';
       if(window.asmbCoachMode){
-        reactHtml+='<span onclick="togglePin(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">'+(pinnedId===d.id?"📌 Retirer":"📌 Epingler")+'</span>';
+        reactHtml+='<span onclick="togglePin(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">'+(pinnedIds.indexOf(d.id)>=0?"📌 Retirer":"📌 Epingler")+'</span>';
       }
       if(canDelete){
         reactHtml+='<span onclick="deleteMessage(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(192,57,43,.12);color:var(--red)">🗑️</span>';
@@ -4291,8 +4420,12 @@ function listenMessages(channelId){
     });
     var pinEl=document.getElementById("chat-pinned");
     if(pinEl){
-      if(pinnedMsg){pinEl.style.display="flex";pinEl.querySelector("span").textContent="📌 "+pinnedMsg.text;}
-      else{pinEl.style.display="none";}
+      if(pinnedMsgs.length){
+        pinEl.style.display="flex";
+        pinEl.innerHTML=pinnedMsgs.map(function(pm){
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 '+pm.text+'</span>'+(window.asmbCoachMode?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
+        }).join("");
+      } else{pinEl.style.display="none";pinEl.innerHTML="";}
     }
     setTimeout(function(){msgsEl.scrollTop=msgsEl.scrollHeight;},50);
   });
@@ -4317,10 +4450,17 @@ function toggleReaction(channelId,msgId,type){
 
 function togglePin(channelId,msgId){
   if(!window.fbReady)return;
-  var current=currentChannelData?currentChannelData.pinnedMessageId:null;
-  var newVal=(current===msgId)?null:msgId;
-  window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{pinnedMessageId:newVal},{merge:true});
-  if(currentChannelData)currentChannelData.pinnedMessageId=newVal;
+  var current=(currentChannelData&&currentChannelData.pinnedMessageIds)||[];
+  var idx=current.indexOf(msgId);
+  var updated;
+  if(idx>=0){
+    updated=current.slice();updated.splice(idx,1);
+  } else {
+    if(current.length>=3){alert("Maximum 3 messages epingles. Retirez-en un d'abord.");return;}
+    updated=current.concat([msgId]);
+  }
+  window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{pinnedMessageIds:updated},{merge:true});
+  if(currentChannelData)currentChannelData.pinnedMessageIds=updated;
 }
 
 function deleteMessage(channelId,msgId){
@@ -4582,6 +4722,20 @@ function savePoleItem(){
   var data=getPoleData(currentPoleId);
   data.push(item);
   savePoleData(currentPoleId,data);
+
+  // Lien automatique : un match cree dans un pole cree aussi l'evenement dans le Planning
+  if(currentPoleType==="match"&&item.date){
+    var events=getEvents();
+    events.push({
+      id:"planning-"+item.id,
+      titre:(item.equipe?item.equipe+" ":"")+"vs "+(item.adversaire||"Adversaire"),
+      type:"match",date:item.date,heure:item.heure||"",lieu:item.lieu||"",
+      equipe:item.equipe||item.cat||"",
+      presences:{}
+    });
+    saveEvents(events);
+  }
+
   closeModal("modal-pole-item");
   buildPoleScreen(currentPoleId);
 }
@@ -4590,6 +4744,8 @@ function deletePoleItem(poleId,id){
   if(!confirm("Supprimer cet élément ?"))return;
   var data=getPoleData(poleId).filter(function(d){return d.id!==id;});
   savePoleData(poleId,data);
+  var events=getEvents().filter(function(e){return e.id!=="planning-"+id;});
+  saveEvents(events);
   buildPoleScreen(poleId);
 }
 
@@ -4932,10 +5088,11 @@ function buildParentEquipe(){
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div><div class="player-meta">'+metaTxt+'</div></div>';
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
-      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+"\nCategorie : "+team.cat);};
+      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
     }
     el.appendChild(div);
   });
@@ -4961,7 +5118,8 @@ function buildCoachEquipe(){
     var div=document.createElement("div");
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non defini";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div><div class="player-meta">'+posteTxt+'</div></div>';
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+posteTxt+'</div></div>';
     el.appendChild(div);
   });
 }
