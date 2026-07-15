@@ -3296,58 +3296,50 @@ function resetAllData(){
 
 // ── DONNEES DE DEMO ───────────────────────────────────────────────
 function loadDemoData(){
-  if(!confirm("Charger des equipes et joueurs de demonstration pour tester l'app ?"))return;
-  var demoTeamId1="demo-team-1";
-  var demoTeamId2="demo-team-2";
-  var teams=getTeams();
-  if(!teams.find(function(t){return t.id===demoTeamId1;})){
-    teams.push({id:demoTeamId1,name:"U13F ASMB (Demo)",cat:"U13",coach:"Demo Coach",notes:"",demo:true});
-  }
-  if(!teams.find(function(t){return t.id===demoTeamId2;})){
-    teams.push({id:demoTeamId2,name:"Seniors ASMB (Demo)",cat:"Senior",coach:"Demo Coach",notes:"",demo:true});
-  }
-  saveTeams(teams);
+  if(!confirm("Charger 4 equipes et 40 joueurs de demonstration pour tester l'app ?"))return;
+
+  var teamDefs=[
+    {id:"demo-team-u13f",name:"U13 Filles ASMB (Demo)",cat:"U13"},
+    {id:"demo-team-u13g",name:"U13 Garcons ASMB (Demo)",cat:"U13"},
+    {id:"demo-team-seniorf",name:"Seniors Filles ASMB (Demo)",cat:"Senior"},
+    {id:"demo-team-seniorm",name:"Seniors Garcons ASMB (Demo)",cat:"Senior"}
+  ];
+
+  var prenomsF=["Lea","Chloe","Emma","Sarah","Manon","Julie","Camille","Ines","Anais","Clara"];
+  var prenomsM=["Nathan","Enzo","Rayan","Mathis","Lucas","Adam","Karim","Thomas","Yanis","Hugo"];
+  var noms=["Martin","Bernard","Dubois","Petit","Girard","Fontaine","Lefevre","Robin","Faure","Blanc"];
+  var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot"];
 
   var players=getPlayers();
-  var demoPlayers=[
-    // U13 - filles
-    {prenom:"Lea",nom:"Martin",cat:"U13",genre:"F",poste:"Meneur",maillot:"4"},
-    {prenom:"Chloe",nom:"Bernard",cat:"U13",genre:"F",poste:"Ailier",maillot:"7"},
-    {prenom:"Emma",nom:"Dubois",cat:"U13",genre:"F",poste:"Pivot",maillot:"11"},
-    {prenom:"Sarah",nom:"Petit",cat:"U13",genre:"F",poste:"Arriere",maillot:"9"},
-    // U13 - garcons
-    {prenom:"Nathan",nom:"Girard",cat:"U13",genre:"M",poste:"Meneur",maillot:"3"},
-    {prenom:"Enzo",nom:"Fontaine",cat:"U13",genre:"M",poste:"Ailier",maillot:"6"},
-    {prenom:"Rayan",nom:"Lefevre",cat:"U13",genre:"M",poste:"Ailier Fort",maillot:"10"},
-    {prenom:"Mathis",nom:"Robin",cat:"U13",genre:"M",poste:"Pivot",maillot:"13"},
-    {prenom:"Lucas",nom:"Faure",cat:"U13",genre:"M",poste:"Arriere",maillot:"14"},
-    {prenom:"Adam",nom:"Blanc",cat:"U13",genre:"M",poste:"Meneur",maillot:"2"},
-    // Senior - garcons
-    {prenom:"Karim",nom:"Benali",cat:"Senior",genre:"M",poste:"Meneur",maillot:"5"},
-    {prenom:"Thomas",nom:"Roux",cat:"Senior",genre:"M",poste:"Ailier Fort",maillot:"12"},
-    {prenom:"Yanis",nom:"Moreau",cat:"Senior",genre:"M",poste:"Pivot",maillot:"15"},
-    {prenom:"Hugo",nom:"Simon",cat:"Senior",genre:"M",poste:"Arriere",maillot:"8"},
-    // Senior - filles
-    {prenom:"Manon",nom:"Girard",cat:"Senior",genre:"F",poste:"Meneur",maillot:"6"},
-    {prenom:"Julie",nom:"Andre",cat:"Senior",genre:"F",poste:"Ailier",maillot:"10"},
-    {prenom:"Camille",nom:"Lambert",cat:"Senior",genre:"F",poste:"Pivot",maillot:"14"},
-    {prenom:"Ines",nom:"Bonnet",cat:"Senior",genre:"F",poste:"Arriere",maillot:"3"},
-    {prenom:"Anais",nom:"Francois",cat:"Senior",genre:"F",poste:"Ailier Fort",maillot:"7"},
-    {prenom:"Clara",nom:"Mercier",cat:"Senior",genre:"F",poste:"Meneur",maillot:"9"}
-  ];
-  demoPlayers.forEach(function(dp,i){
-    var id="demo-player-"+i;
-    if(!players.find(function(p){return p.id===id;})){
-      players.push({
-        id:id,prenom:dp.prenom,nom:dp.nom,naissance:"2013-01-01",cat:dp.cat,genre:dp.genre,
-        poste:dp.poste,maillot:dp.maillot,licence:"ok",typeLicence:"competition",
-        numLicence:"0C",contact:"06 00 00 00 00",notes:"",demo:true
-      });
+  var teams=getTeams();
+
+  teamDefs.forEach(function(td,ti){
+    if(!teams.find(function(t){return t.id===td.id;})){
+      teams.push({id:td.id,name:td.name,cat:td.cat,coach:"Demo Coach",notes:"",demo:true,members:[]});
     }
+    var team=teams.find(function(t){return t.id===td.id;});
+    var genre=(ti%2===0)?"F":"M";
+    var prenoms=(genre==="F")?prenomsF:prenomsM;
+    var memberIds=[];
+    for(var i=0;i<10;i++){
+      var pid="demo-player-t"+ti+"-"+i;
+      memberIds.push(pid);
+      if(!players.find(function(p){return p.id===pid;})){
+        players.push({
+          id:pid,prenom:prenoms[i],nom:noms[i],naissance:(td.cat==="U13"?"2013-01-01":"1998-01-01"),
+          cat:td.cat,genre:genre,poste:postes[i%postes.length],maillot:String(i+1),
+          licence:"ok",typeLicence:"competition",numLicence:"0C",
+          contact:"06 00 00 00 00",notes:"",demo:true
+        });
+      }
+    }
+    team.members=memberIds;
   });
+
+  saveTeams(teams);
   savePlayers(players);
 
-  alert("Donnees de demo chargees ! 2 equipes et 20 joueurs ajoutes (10 par equipe, mixte).");
+  alert("Donnees de demo chargees ! 4 equipes (U13F, U13G, SeniorF, SeniorM) de 10 joueurs chacune.");
   buildAdminHome();
 }
 
@@ -5333,7 +5325,7 @@ function buildParentEquipe(){
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
   document.getElementById("parent-eq-name").textContent=team.name;
   document.getElementById("parent-eq-cat").textContent="Basket-ball · "+team.cat;
-  var players=getPlayers().filter(function(p){return p.cat===team.cat;});
+  var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("parent-eq-members");
   if(!players.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucun membre pour le moment</div></div>';return;}
   el.innerHTML="";
@@ -5367,7 +5359,7 @@ function buildCoachEquipe(){
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
   document.getElementById("coach-eq-name").textContent=team.name;
   document.getElementById("coach-eq-cat").textContent="Basket-ball · "+team.cat;
-  var players=getPlayers().filter(function(p){return p.cat===team.cat;});
+  var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("coach-eq-members");
   if(!players.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucun membre pour le moment</div></div>';return;}
   var CATS_ORD_COACH=["U7","U9","U11","U13","U15","U17","Senior"];
