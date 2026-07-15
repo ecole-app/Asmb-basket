@@ -1237,7 +1237,7 @@ function cycleProgress(cyId){
 
 // ═══ NAV ═════════════════════════════════════════════════════════
 var stack=["portal"],curCy=null,curSea=null;
-var ROOTS=["portal","plan","admin-login","inscription","communaute","role-select","team-picker","parent-equipe","parent-events","parent-stats","coach-equipe","elite","pole-competition","pole-evenement","tutoriel"];
+var ROOTS=["portal","plan","admin-login","inscription","communaute","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","pole-competition","pole-evenement","tutoriel"];
 
 function showScr(id){
   document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
@@ -1255,7 +1255,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon equipe",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon equipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -4977,8 +4977,8 @@ function initProfile(){
     if(!teams.length){
       openTeamPicker(false);
     } else {
-      stack=["portal"];
-      showScr("portal");
+      stack=["parent-home"];
+      showScr("parent-home");
       buildParentHome();
     }
   }
@@ -5101,8 +5101,8 @@ function saveParentTeams(){
   if(!localStorage.getItem("asmb_tuto_done")){
     showTutoriel();
   } else {
-    stack=["portal"];
-    showScr("portal");
+    stack=["parent-home"];
+    showScr("parent-home");
     buildParentHome();
   }
 }
@@ -5151,8 +5151,8 @@ function tutoPrev(){if(tutoStep>0){tutoStep--;renderTutoStep();}}
 function skipTutoriel(){finishTutoriel();}
 function finishTutoriel(){
   localStorage.setItem("asmb_tuto_done","1");
-  stack=["portal"];
-  showScr("portal");
+  stack=["parent-home"];
+  showScr("parent-home");
   buildParentHome();
 }
 
@@ -5496,7 +5496,7 @@ function buildBottomNav(profile){
 
 function navToParent(which){
   document.querySelectorAll("#bnav-main .bni").forEach(function(b){b.classList.remove("on");});
-  if(which==="home"){document.getElementById("bni-portal").classList.add("on");stack=["portal"];showScr("portal");buildParentHome();}
+  if(which==="home"){document.getElementById("bni-portal").classList.add("on");stack=["parent-home"];showScr("parent-home");buildParentHome();}
   else if(which==="equipe"){document.getElementById("bni-eq").classList.add("on");stack=["parent-equipe"];showScr("parent-equipe");buildParentEquipe();}
   else if(which==="stats"){document.getElementById("bni-stats").classList.add("on");stack=["parent-stats"];showScr("parent-stats");buildParentStats();}
   else if(which==="events"){document.getElementById("bni-ev").classList.add("on");stack=["parent-events"];showScr("parent-events");buildParentEvents();}
