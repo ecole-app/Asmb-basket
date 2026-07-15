@@ -4779,7 +4779,7 @@ var POLE_FORMS={
   "participant":{title:"Nouveau participant",fields:[{id:"nom",label:"Nom complet",ph:"Prenom Nom"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"contact",label:"Contact",ph:"06..."}]},
   "equipe":     {title:"Nouvelle equipe",fields:[{id:"nom",label:"Nom de l'equipe",ph:"Ex: U13F ASMB"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"coach",label:"Coach",ph:"Prenom Nom"},{id:"notes",label:"Notes",ph:""}]},
   "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",type:"select-lieu"},{id:"equipe",label:"Notre equipe",type:"select-team"},{id:"cat",label:"Categorie",type:"select-cat"}]},
-  "joueur":     {title:"Nouveau joueur",fields:[{id:"nom",label:"Joueur (liste des inscrits)",type:"select-player"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numero de maillot",ph:"#7"},{id:"equipe",label:"Equipe",type:"select-team"}]},
+  "joueur":     {title:"Nouveau joueur",fields:[{id:"cat",label:"Categorie",type:"select-cat"},{id:"nom",label:"Joueur (liste des inscrits)",type:"select-player"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numero de maillot",ph:"#7"},{id:"equipe",label:"Equipe",type:"select-team"}]},
   "tournoi":    {title:"Nouveau tournoi",fields:[{id:"nom",label:"Nom du tournoi",ph:"Ex: Tournoi de Noel"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"format",label:"Format",ph:"3x3, 5x5, mixte..."},{id:"notes",label:"Notes",ph:""}]},
   "evenement":  {title:"Nouvel evenement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
   "groupe":     {title:"Nouveau groupe",fields:[{id:"nom",label:"Nom du groupe",ph:"Ex: Loisir Adultes Mardi"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"niveau",label:"Niveau",ph:"Debutant, Intermediaire..."},{id:"jour",label:"Jour",ph:"Lundi, Mardi..."},{id:"heure",label:"Heure",ph:"18h00 - 20h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."}]},
@@ -4848,7 +4848,8 @@ function showAddPoleItem(poleId,type){
       html+='<input class="form-input" id="pf-'+f.id+'" type="date">';
     } else if(f.type==="select-cat"){
       var opts=CATS_OPT.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
-      html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez une categorie...</option>'+opts+'</select>';
+      var catOnchange=(currentPoleType==="joueur")?' onchange="refreshPlayerSelect(this.value)"':"";
+      html+='<select class="form-select" id="pf-'+f.id+'"'+catOnchange+'><option value="">Selectionnez une categorie...</option>'+opts+'</select>';
     } else if(f.type==="select-team"){
       var teamOpts=getTeams().map(function(t){return '<option value="'+t.name+'">'+t.name+' ('+t.cat+')</option>';}).join("");
       if(!getTeams().length){
@@ -4859,16 +4860,7 @@ function showAddPoleItem(poleId,type){
     } else if(f.type==="select-lieu"){
       html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez...</option><option value="Domicile">Domicile</option><option value="Exterieur">Exterieur</option></select>';
     } else if(f.type==="select-player"){
-      var allPlayers=getPlayers();
-      if(!allPlayers.length){
-        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Aucun joueur inscrit - Admin > Inscriptions</option></select>';
-      } else {
-        var playerOpts=allPlayers.map(function(pl){
-          var dot=pl.genre==="M"?"🔵":(pl.genre==="F"?"🌸":"⚪");
-          return '<option value="'+pl.prenom+' '+pl.nom+'">'+dot+' '+pl.prenom+' '+pl.nom+' ('+pl.cat+')</option>';
-        }).join("");
-        html+='<select class="form-select" id="pf-'+f.id+'" onchange="prefillFromPlayer(this.value)"><option value="">Selectionnez un joueur...</option>'+playerOpts+'</select>';
-      }
+      html+='<select class="form-select" id="pf-'+f.id+'" onchange="prefillFromPlayer(this.value)"><option value="">D\'abord choisir une categorie...</option></select>';
     } else {
       html+='<input class="form-input" id="pf-'+f.id+'" placeholder="'+(f.ph||'')+'">';
     }
@@ -4876,6 +4868,22 @@ function showAddPoleItem(poleId,type){
   });
   document.getElementById("modal-pole-form").innerHTML=html;
   document.getElementById("modal-pole-item").style.display="flex";
+}
+
+function refreshPlayerSelect(cat){
+  var sel=document.getElementById("pf-nom");
+  if(!sel)return;
+  if(!cat){sel.innerHTML='<option value="">D\'abord choisir une categorie...</option>';return;}
+  var players=getPlayers().filter(function(p){return p.cat===cat;});
+  if(!players.length){
+    sel.innerHTML='<option value="">Aucun joueur inscrit dans cette categorie</option>';
+    return;
+  }
+  var opts=players.map(function(pl){
+    var dot=pl.genre==="M"?"🔵":(pl.genre==="F"?"🌸":"⚪");
+    return '<option value="'+pl.prenom+' '+pl.nom+'">'+dot+' '+pl.prenom+' '+pl.nom+'</option>';
+  }).join("");
+  sel.innerHTML='<option value="">Selectionnez un joueur...</option>'+opts;
 }
 
 function prefillFromPlayer(fullName){
