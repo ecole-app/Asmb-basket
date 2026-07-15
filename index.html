@@ -923,6 +923,16 @@ initChannels();
       <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos donnees sont sauvegardees automatiquement dans le cloud</div>
       <button onclick="restoreFromCloud()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Restaurer depuis le cloud</button>
     </div>
+    <div class="sec">Demonstration</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🎭 Charger des donnees de demo</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">2 equipes + 8 joueurs fictifs pour tester l'app</div>
+    </div>
+    <div style="margin:0 12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="clearDemoData()">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🧹 Vider les donnees de demo</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime uniquement les equipes/joueurs de test</div>
+    </div>
+    <div class="sec">Zone dangereuse</div>
     <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
       <div style="font-size:13px;font-weight:700;color:var(--red)">🗑️ Reinitialiser l'application</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime toutes les donnees locales (irreversible)</div>
@@ -3282,6 +3292,57 @@ function resetAllData(){
   Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
   alert("Donnees supprimees. L'application va se recharger.");
   location.reload();
+}
+
+// ── DONNEES DE DEMO ───────────────────────────────────────────────
+function loadDemoData(){
+  if(!confirm("Charger des equipes et joueurs de demonstration pour tester l'app ?"))return;
+  var demoTeamId1="demo-team-1";
+  var demoTeamId2="demo-team-2";
+  var teams=getTeams();
+  if(!teams.find(function(t){return t.id===demoTeamId1;})){
+    teams.push({id:demoTeamId1,name:"U13F ASMB (Demo)",cat:"U13",coach:"Demo Coach",notes:"",demo:true});
+  }
+  if(!teams.find(function(t){return t.id===demoTeamId2;})){
+    teams.push({id:demoTeamId2,name:"Seniors ASMB (Demo)",cat:"Senior",coach:"Demo Coach",notes:"",demo:true});
+  }
+  saveTeams(teams);
+
+  var players=getPlayers();
+  var demoPlayers=[
+    {prenom:"Lea",nom:"Martin",cat:"U13",poste:"Meneur",maillot:"4"},
+    {prenom:"Chloe",nom:"Bernard",cat:"U13",poste:"Ailier",maillot:"7"},
+    {prenom:"Emma",nom:"Dubois",cat:"U13",poste:"Pivot",maillot:"11"},
+    {prenom:"Sarah",nom:"Petit",cat:"U13",poste:"Arriere",maillot:"9"},
+    {prenom:"Karim",nom:"Benali",cat:"Senior",poste:"Meneur",maillot:"5"},
+    {prenom:"Thomas",nom:"Roux",cat:"Senior",poste:"Ailier Fort",maillot:"12"},
+    {prenom:"Yanis",nom:"Moreau",cat:"Senior",poste:"Pivot",maillot:"15"},
+    {prenom:"Hugo",nom:"Simon",cat:"Senior",poste:"Arriere",maillot:"8"}
+  ];
+  demoPlayers.forEach(function(dp,i){
+    var id="demo-player-"+i;
+    if(!players.find(function(p){return p.id===id;})){
+      players.push({
+        id:id,prenom:dp.prenom,nom:dp.nom,naissance:"2013-01-01",cat:dp.cat,
+        poste:dp.poste,maillot:dp.maillot,licence:"ok",typeLicence:"competition",
+        numLicence:"0C",contact:"06 00 00 00 00",notes:"",demo:true
+      });
+    }
+  });
+  savePlayers(players);
+
+  alert("Donnees de demo chargees ! 2 equipes et 8 joueurs ajoutes.");
+  buildAdminHome();
+}
+
+function clearDemoData(){
+  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs marques Demo) ?"))return;
+  var teams=getTeams().filter(function(t){return !t.demo;});
+  saveTeams(teams);
+  var players=getPlayers().filter(function(p){return !p.demo;});
+  savePlayers(players);
+  alert("Donnees de demo supprimees.");
+  buildAdminHome();
 }
 
 // ═══ ADMIN ════════════════════════════════════════════════════════
