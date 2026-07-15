@@ -989,6 +989,7 @@ initChannels();
     <div style="padding:14px 12px 8px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr);background:var(--sf)" id="parent-team-chips"></div>
     <div style="padding:16px">
       <div id="parent-date" style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px"></div>
+      <div id="parent-summary-row" style="display:flex;gap:10px;margin-bottom:16px"></div>
       <div class="sec" style="padding:0 0 8px">Prochain evenement</div>
       <div id="parent-next-event"></div>
       <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
@@ -3762,7 +3763,10 @@ function buildPlanning(){
     var convocCount=e.convocations?e.convocations.length:0;
     var convocBtn=(e.type==="match")?("<button onclick=\"showConvocation('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer\">📋 Convocation"+(convocCount?" ("+convocCount+")":"")+"</button>"):"";
     var weatherBtn=(e.type==="match"&&e.lieu)?("<button onclick=\"showWeather('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer\">☀️ Meteo</button>"):"";
-    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+scoreDisplay+presBtn+scoreBtn+convocBtn+weatherBtn+"</div>"+delBtn+"</div>";
+    var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">✏️ Modifier horaire</button>";
+    var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">🚫 Annuler</button>";
+    var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\">🚫 EVENEMENT ANNULE</div>":"";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+convocBtn+weatherBtn+editTimeBtn+cancelBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
 }
@@ -3922,6 +3926,48 @@ function saveEventFull(){
   }
 }
 function deleteEvent(id){if(!confirm("Supprimer cet evenement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
+
+function cancelEvent(eventId){
+  var events=getEvents();
+  var ev=events.find(function(e){return e.id===eventId;});
+  if(!ev)return;
+  if(!confirm('Annuler "'+ev.titre+'" du '+ev.date+' ? Une alerte sera envoyee dans le canal.'))return;
+  ev.cancelled=true;
+  saveEvents(events);
+  buildPlanning();
+  if(window.fbReady){
+    var channelId=findChannelForTeamText(ev.equipe);
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+      text:"🚫 <b>Evenement annule</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annule.",
+      pseudo:"🚫 ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    });
+  }
+}
+
+function editEventDateTime(eventId){
+  var events=getEvents();
+  var idx=events.findIndex(function(e){return e.id===eventId;});
+  if(idx<0)return;
+  var ev=events[idx];
+  var oldDate=ev.date,oldHeure=ev.heure;
+  var newDate=prompt("Nouvelle date (AAAA-MM-JJ) :",ev.date);
+  if(newDate===null)return;
+  var newHeure=prompt("Nouvelle heure :",ev.heure||"");
+  if(newHeure===null)return;
+  var changed=(newDate!==oldDate)||(newHeure!==oldHeure);
+  ev.date=newDate.trim()||oldDate;
+  ev.heure=newHeure.trim();
+  saveEvents(events);
+  buildPlanning();
+  if(changed&&window.fbReady){
+    var channelId=findChannelForTeamText(ev.equipe);
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+      text:"⚠️ <b>Changement d'horaire</b><br>\""+ev.titre+"\" a change : nouveau rendez-vous le "+ev.date+(ev.heure?" a "+ev.heure:"")+" (au lieu du "+oldDate+(oldHeure?" a "+oldHeure:"")+")",
+      pseudo:"⚠️ ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    });
+    alert("Horaire modifie, alerte envoyee dans le canal.");
+  }
+}
 function editScore(eventId){
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
@@ -5214,6 +5260,29 @@ function buildParentHome(){
   dateStr=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
   document.getElementById("parent-date").textContent=dateStr;
 
+  // Resume : matchs joues + statut licence
+  var summaryEl=document.getElementById("parent-summary-row");
+  var matchesPlayed=getEvents().filter(function(e){
+    if(e.type!=="match"||!e.equipe)return false;
+    var eq=e.equipe.toUpperCase();
+    var matchTeam=(eq.indexOf(activeTeam.cat.toUpperCase())>=0||eq.indexOf(activeTeam.name.toUpperCase())>=0);
+    return matchTeam&&e.date<=new Date().toISOString().slice(0,10);
+  }).length;
+  var myLic=getMyLicenceForTeam(activeTeam);
+  var licBadge="";
+  if(myLic){
+    var licColors={"validee":"#27AE60","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#6a9e72"};
+    var licLabels={"validee":"Licence validee","recue":"Fiche recue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche a completer"};
+    licBadge='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
+      '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
+      '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(licLabels[myLic.statut]||"Licence")+'</div>'+
+    '</div>';
+  }
+  summaryEl.innerHTML='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
+    '<div style="font-size:18px;font-weight:900;color:var(--dkg)">'+matchesPlayed+'</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joue'+(matchesPlayed>1?"s":"")+'</div>'+
+  '</div>'+licBadge;
+
   // Chips equipes
   var chipsEl=document.getElementById("parent-team-chips");
   chipsEl.innerHTML="";
@@ -5235,11 +5304,14 @@ function buildParentHome(){
     var col=typeColors[nextEv.type]||"#1B5C28";
     var dateObj=new Date(nextEv.date);
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+    var mapsBtn=nextEv.lieu?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none">🗺️ Itineraire</a>'):"";
+    var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-left:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button>';
     evEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow)">'+
       '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;color:#fff;background:'+col+'">'+nextEv.type.toUpperCase()+'</span>'+
       '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-top:10px">'+nextEv.titre+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:6px">📅 '+dStr+(nextEv.heure?" · "+nextEv.heure:"")+'</div>'+
       (nextEv.lieu?'<div style="font-size:12px;color:var(--mut);margin-top:2px">📍 '+nextEv.lieu+'</div>':'')+
+      mapsBtn+absenceBtn+
     '</div>';
   }
 
@@ -5276,6 +5348,36 @@ function buildParentHome(){
   }
 }
 
+function getMyLicenceForTeam(team){
+  if(!myPhone)return null;
+  var lics=getLicences();
+  return lics.find(function(l){
+    if(!l.fiche)return false;
+    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+    var myP=myPhone.replace(/\s+/g,"");
+    var phoneMatch=phones.indexOf(myP)>=0;
+    if(!phoneMatch)return false;
+    if(l.categorie&&team.cat&&l.categorie!==team.cat)return false;
+    return true;
+  })||null;
+}
+
+function signalerAbsence(eventId){
+  var events=getEvents();
+  var ev=events.find(function(e){return e.id===eventId;});
+  if(!ev)return;
+  var nom=prompt("Prenom du joueur absent :");
+  if(!nom)return;
+  var motif=prompt("Motif (optionnel) :","")||"";
+  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  var channelId=findChannelForTeamText(ev.equipe);
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+    text:"🙋 <b>Absence signalee</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
+    pseudo:"🙋 "+(nom||"Parent"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+  });
+  alert("Absence signalee dans le canal de l'equipe.");
+}
+
 function getLastMatchesForTeam(team){
   if(!team)return[];
   var events=getEvents();
@@ -5293,7 +5395,7 @@ function getNextEventForTeam(team){
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var matched=events.filter(function(e){
-    if(!e.equipe)return false;
+    if(!e.equipe||e.cancelled)return false;
     var eq=e.equipe.toUpperCase();
     return eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0;
   }).filter(function(e){return e.date>=todayStr;});
@@ -5416,7 +5518,14 @@ function buildParentEvents(){
       var tot=Object.keys(e.presences).length;
       presInfo='<div style="font-size:11px;color:#27AE60;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
     }
-    div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+col+'">'+e.type.toUpperCase()+'</span><span style="font-size:11px;color:var(--mut)">'+e.date+(e.heure?" · "+e.heure:"")+'</span></div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+(e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+e.lieu+'</div>':"")+presInfo;
+    var convocInfo="";
+    if(e.convocations&&e.convocations.length){
+      var convPlayers=getPlayers();
+      var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prenom:null;}).filter(Boolean);
+      convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">📋 Convoques : '+noms.join(", ")+'</div>';
+    }
+    var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">🚫 ANNULE</div>':"";
+    div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+col+'">'+e.type.toUpperCase()+'</span><span style="font-size:11px;color:var(--mut)">'+e.date+(e.heure?" · "+e.heure:"")+'</span></div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+(e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+e.lieu+'</div>':"")+cancelledInfo+convocInfo+presInfo;
     el.appendChild(div);
   });
 }
