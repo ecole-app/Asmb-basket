@@ -3310,14 +3310,30 @@ function loadDemoData(){
 
   var players=getPlayers();
   var demoPlayers=[
+    // U13 - filles
     {prenom:"Lea",nom:"Martin",cat:"U13",genre:"F",poste:"Meneur",maillot:"4"},
     {prenom:"Chloe",nom:"Bernard",cat:"U13",genre:"F",poste:"Ailier",maillot:"7"},
     {prenom:"Emma",nom:"Dubois",cat:"U13",genre:"F",poste:"Pivot",maillot:"11"},
     {prenom:"Sarah",nom:"Petit",cat:"U13",genre:"F",poste:"Arriere",maillot:"9"},
+    // U13 - garcons
+    {prenom:"Nathan",nom:"Girard",cat:"U13",genre:"M",poste:"Meneur",maillot:"3"},
+    {prenom:"Enzo",nom:"Fontaine",cat:"U13",genre:"M",poste:"Ailier",maillot:"6"},
+    {prenom:"Rayan",nom:"Lefevre",cat:"U13",genre:"M",poste:"Ailier Fort",maillot:"10"},
+    {prenom:"Mathis",nom:"Robin",cat:"U13",genre:"M",poste:"Pivot",maillot:"13"},
+    {prenom:"Lucas",nom:"Faure",cat:"U13",genre:"M",poste:"Arriere",maillot:"14"},
+    {prenom:"Adam",nom:"Blanc",cat:"U13",genre:"M",poste:"Meneur",maillot:"2"},
+    // Senior - garcons
     {prenom:"Karim",nom:"Benali",cat:"Senior",genre:"M",poste:"Meneur",maillot:"5"},
     {prenom:"Thomas",nom:"Roux",cat:"Senior",genre:"M",poste:"Ailier Fort",maillot:"12"},
     {prenom:"Yanis",nom:"Moreau",cat:"Senior",genre:"M",poste:"Pivot",maillot:"15"},
-    {prenom:"Hugo",nom:"Simon",cat:"Senior",genre:"M",poste:"Arriere",maillot:"8"}
+    {prenom:"Hugo",nom:"Simon",cat:"Senior",genre:"M",poste:"Arriere",maillot:"8"},
+    // Senior - filles
+    {prenom:"Manon",nom:"Girard",cat:"Senior",genre:"F",poste:"Meneur",maillot:"6"},
+    {prenom:"Julie",nom:"Andre",cat:"Senior",genre:"F",poste:"Ailier",maillot:"10"},
+    {prenom:"Camille",nom:"Lambert",cat:"Senior",genre:"F",poste:"Pivot",maillot:"14"},
+    {prenom:"Ines",nom:"Bonnet",cat:"Senior",genre:"F",poste:"Arriere",maillot:"3"},
+    {prenom:"Anais",nom:"Francois",cat:"Senior",genre:"F",poste:"Ailier Fort",maillot:"7"},
+    {prenom:"Clara",nom:"Mercier",cat:"Senior",genre:"F",poste:"Meneur",maillot:"9"}
   ];
   demoPlayers.forEach(function(dp,i){
     var id="demo-player-"+i;
@@ -3331,7 +3347,7 @@ function loadDemoData(){
   });
   savePlayers(players);
 
-  alert("Donnees de demo chargees ! 2 equipes et 8 joueurs ajoutes.");
+  alert("Donnees de demo chargees ! 2 equipes et 20 joueurs ajoutes (10 par equipe, mixte).");
   buildAdminHome();
 }
 
