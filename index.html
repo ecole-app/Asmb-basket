@@ -5322,15 +5322,19 @@ function buildCoachEquipe(){
   var players=getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("coach-eq-members");
   if(!players.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucun membre pour le moment</div></div>';return;}
+  var CATS_ORD_COACH=["U7","U9","U11","U13","U15","U17","Senior"];
+  var teamCatIdxCoach=CATS_ORD_COACH.indexOf(team.cat);
+  var posteEligibleCoach=teamCatIdxCoach>=CATS_ORD_COACH.indexOf("U15");
   el.innerHTML="";
   players.forEach(function(p){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non defini";
+    var metaTxt=posteEligibleCoach?posteTxt:"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">👕 Maillot</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+posteTxt+'</div></div>'+maillotBtn;
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>'+maillotBtn;
     el.appendChild(div);
   });
 }
