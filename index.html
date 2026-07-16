@@ -4769,6 +4769,7 @@ function listenMessages(channelId){
 
 function toggleReaction(channelId,msgId,type){
   if(!window.fbReady)return;
+  if(!checkMyPhone())return;
   var pseudo=savedPseudo||"moi";
   var field=type==="like"?"likeUsers":"heartUsers";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
@@ -4811,6 +4812,7 @@ function deleteMessage(channelId,msgId){
 
 function sendMsg(){
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!checkMyPhone())return;
   var msgEl=document.getElementById("chat-msg");
   var pseudoEl=document.getElementById("chat-pseudo");
   if(!msgEl||!pseudoEl)return;
@@ -4856,6 +4858,7 @@ function createPoll(){
 
 function votePoll(channelId,msgId,optionIndex){
   if(!window.fbReady)return;
+  if(!checkMyPhone())return;
   var pseudo=savedPseudo||"moi";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
@@ -4887,6 +4890,7 @@ function votePoll(channelId,msgId,optionIndex){
 
 function respondConvocation(channelId,msgId,playerId,status){
   if(!window.fbReady)return;
+  if(!checkMyPhone())return;
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
     var msgData=null;
@@ -5123,6 +5127,13 @@ var ASMB_LOGO_B64_REF = null; // will reuse existing home-logo html via cloning
 function initProfile(){
   var profile = localStorage.getItem("asmb_profile");
   injectRoleLogo();
+  if(profile==="parent"&&!myPhone){
+    // Sans numero enregistre, on considere que c'est une nouvelle arrivee a chaque fois
+    localStorage.removeItem("asmb_profile");
+    localStorage.removeItem("asmb_parent_teams");
+    localStorage.removeItem("asmb_parent_active_team");
+    profile=null;
+  }
   if(!profile){
     ROOTS.push("role-select");
     stack=["role-select"];
@@ -5193,11 +5204,23 @@ function chooseRole(role){
 function registerParentPhone(){
   if(myPhone){openTeamPicker(false);return;}
   var phone=prompt("Entrez votre numero de telephone (le meme que celui fournit au club) pour rejoindre le groupe de votre enfant :");
-  if(!phone){openTeamPicker(false);return;}
+  if(!phone){
+    notifyPhoneSkipped();
+    openTeamPicker(false);
+    return;
+  }
   phone=phone.trim().replace(/\s+/g,"");
   myPhone=phone;
   localStorage.setItem("asmb_phone",phone);
   autoLinkParentToChannel(phone);
+}
+
+function notifyPhoneSkipped(){
+  if(!window.fbReady)return;
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels","general","messages"),{
+    text:"⚠️ Un parent a rejoint l'application sans renseigner son numero de telephone. Il n'a pas encore acces a la communaute.",
+    pseudo:"⚠️ Systeme ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+  });
 }
 
 function autoLinkParentToChannel(phone){
@@ -5560,6 +5583,7 @@ function getMyLicenceForTeam(team){
 }
 
 function signalerAbsence(eventId){
+  if(!checkMyPhone())return;
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
@@ -5831,7 +5855,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784212310";
+var APP_VERSION="1784213026";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
