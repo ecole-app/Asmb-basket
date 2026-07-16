@@ -283,6 +283,55 @@ initChannels();
   </div>
 </div>
 
+<!-- ═══ MODAL LISTE LICENCIES ═══ -->
+<div id="modal-licencies-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les licencies</div>
+      <button onclick="closeModal('modal-licencies-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="cat-filter on" onclick="sortLicenciesList('nom')" id="sortby-nom">Nom</button>
+      <button class="cat-filter" onclick="sortLicenciesList('naissance')" id="sortby-naissance">Naissance</button>
+      <button class="cat-filter" onclick="sortLicenciesList('cat')" id="sortby-cat">Equipe</button>
+    </div>
+    <div id="licencies-list-content"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL LICENCES EN ATTENTE ═══ -->
+<div id="modal-pending-licences" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Licences en attente</div>
+      <button onclick="closeModal('modal-pending-licences')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+    </div>
+    <div id="pending-licences-content"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL LISTE EQUIPES ═══ -->
+<div id="modal-teams-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:800;color:var(--txt)" id="teams-list-title">Equipes du club</div>
+      <button onclick="closeModal('modal-teams-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+    </div>
+    <div id="teams-list-content"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL GRAPHIQUE ASSIDUITE ═══ -->
+<div id="modal-assiduite" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:75vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Assiduite mensuelle</div>
+      <button onclick="closeModal('modal-assiduite')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+    </div>
+    <div id="assiduite-content"></div>
+  </div>
+</div>
+
 <div id="ptr-indicator" style="position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;pointer-events:none;z-index:50;opacity:0;transition:opacity .15s">
   <div id="ptr-spinner" style="width:24px;height:24px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);transition:transform .1s"></div>
 </div>
@@ -383,9 +432,11 @@ initChannels();
         <div style="font-size:11px;color:var(--mut)" id="insc-count">0 joueur(s)</div>
       </div>
       <div style="display:flex;gap:6px">
+        <button onclick="document.getElementById('csv-import-input').click()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">📥 CSV</button>
         <button onclick="exportPlayersPDF()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">📄 PDF</button>
         <button onclick="showAddPlayer()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ajouter</button>
       </div>
+      <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="importPlayersCSV(this)">
     </div>
     <!-- Filtres catégorie -->
     <div style="padding:10px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
@@ -1367,19 +1418,19 @@ function buildDashboard(){
 
   var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
 
-  html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
+  html+='<div onclick="showLicenciesList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--dkg)">'+players.length+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licencies'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
 
-  html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
+  html+='<div onclick="showPendingLicences()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"#27AE60")+'">'+licencesEnAttente+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licences en attente</div></div>';
 
-  html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
+  html+='<div onclick="showTeamsList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+teams.length+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Equipes actives</div></div>';
 
-  html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
+  html+='<div onclick="showAssiduiteChart()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+(avgPresence!==null?avgPresence+"%":"—")+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite 30 derniers jours</div></div>';
 
@@ -1394,6 +1445,132 @@ function buildDashboard(){
 
   el.innerHTML=html;
 }
+
+// ── DRILL-DOWN CHIFFRES CLES ──────────────────────────────────────
+var licenciesSortMode="nom";
+
+function showLicenciesList(){
+  document.getElementById("modal-licencies-list").style.display="flex";
+  sortLicenciesList("nom");
+}
+
+function sortLicenciesList(mode){
+  licenciesSortMode=mode;
+  document.querySelectorAll("#modal-licencies-list .cat-filter").forEach(function(b){b.classList.remove("on");});
+  document.getElementById("sortby-"+mode).classList.add("on");
+  var players=getPlayers().slice();
+  players.sort(function(a,b){
+    if(mode==="nom")return (a.nom||"").localeCompare(b.nom||"");
+    if(mode==="naissance")return (a.naissance||"").localeCompare(b.naissance||"");
+    if(mode==="cat")return (a.cat||"").localeCompare(b.cat||"");
+    return 0;
+  });
+  var el=document.getElementById("licencies-list-content");
+  if(!players.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div>Aucun licencie</div></div>';return;}
+  el.innerHTML="";
+  players.forEach(function(p){
+    var div=document.createElement("div");
+    div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr)";
+    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+'</div></div>'+
+      '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"#27AE60":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
+    el.appendChild(div);
+  });
+}
+
+function showPendingLicences(){
+  var lics=getLicences().filter(function(l){return l.statut&&l.statut!=="validee";});
+  var el=document.getElementById("pending-licences-content");
+  if(!lics.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">✅</div><div>Aucune licence en attente</div></div>';}
+  else{
+    el.innerHTML="";
+    lics.forEach(function(l){
+      var nom=l.fiche?(l.fiche.prenom+" "+l.fiche.nom):"Fiche non remplie";
+      var div=document.createElement("div");
+      div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr);cursor:pointer";
+      div.onclick=function(){closeModal("modal-pending-licences");openLicenceDetail(l.code);};
+      div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Code : '+l.code+(l.categorie?" · "+l.categorie:"")+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
+      el.appendChild(div);
+    });
+  }
+  document.getElementById("modal-pending-licences").style.display="flex";
+}
+
+function showTeamsList(){
+  var teams=getTeams();
+  var el=document.getElementById("teams-list-content");
+  document.getElementById("teams-list-title").textContent="Equipes du club";
+  if(!teams.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛡️</div><div>Aucune equipe</div></div>';}
+  else{
+    el.innerHTML="";
+    teams.forEach(function(t){
+      var count=(t.members&&t.members.length)?t.members.length:getPlayers().filter(function(p){return p.cat===t.cat;}).length;
+      var div=document.createElement("div");
+      div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--bdr);cursor:pointer";
+      div.onclick=function(){showTeamRoster(t.id);};
+      div.innerHTML='<div><div style="font-size:14px;font-weight:700;color:var(--txt)">'+t.name+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+t.cat+' · '+count+' joueur'+(count>1?"s":"")+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
+      el.appendChild(div);
+    });
+  }
+  document.getElementById("modal-teams-list").style.display="flex";
+}
+
+function showTeamRoster(teamId){
+  var team=getTeams().find(function(t){return t.id===teamId;});
+  if(!team)return;
+  document.getElementById("teams-list-title").textContent=team.name;
+  var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
+  var el=document.getElementById("teams-list-content");
+  var backBtn='<button onclick="showTeamsList()" style="margin-bottom:10px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">← Toutes les equipes</button>';
+  if(!players.length){el.innerHTML=backBtn+'<div class="empty-state"><div class="empty-state-icon">👥</div><div>Aucun joueur</div></div>';return;}
+  var html=backBtn;
+  players.forEach(function(p){
+    html+='<div style="padding:10px 4px;border-bottom:1px solid var(--bdr)">'+
+      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Ne(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Competition":"Loisir")+')</div>'+
+    '</div>';
+  });
+  el.innerHTML=html;
+}
+
+function showAssiduiteChart(){
+  var events=getEvents().filter(function(e){return e.presences&&Object.keys(e.presences).length;});
+  var now=new Date();
+  var months=[];
+  for(var i=5;i>=0;i--){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({key:d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"),label:d.toLocaleDateString("fr-FR",{month:"short"})});
+  }
+  var byMonth={};
+  months.forEach(function(m){byMonth[m.key]={present:0,total:0};});
+  events.forEach(function(e){
+    var key=e.date.slice(0,7);
+    if(!byMonth[key])return;
+    Object.keys(e.presences).forEach(function(k){
+      byMonth[key].total++;
+      if(e.presences[k]==="present")byMonth[key].present++;
+    });
+  });
+  var totalP=0,totalT=0;
+  months.forEach(function(m){totalP+=byMonth[m.key].present;totalT+=byMonth[m.key].total;});
+  var overallPct=totalT?Math.round(totalP/totalT*100):0;
+
+  var html='<div style="text-align:center;margin-bottom:20px"><div style="font-size:32px;font-weight:900;color:#27AE60">'+overallPct+'%</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Assiduite globale (6 derniers mois)</div></div>';
+  html+='<div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 8px">';
+  months.forEach(function(m){
+    var d=byMonth[m.key];
+    var pct=d.total?Math.round(d.present/d.total*100):0;
+    var barH=d.total?Math.max(pct*1.3,4):4;
+    html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">'+
+      '<div style="font-size:10px;font-weight:700;color:var(--txt)">'+(d.total?pct+"%":"—")+'</div>'+
+      '<div style="width:100%;height:'+barH+'px;background:'+(d.total?"#27AE60":"var(--bdr)")+';border-radius:4px 4px 0 0"></div>'+
+      '<div style="font-size:9px;color:var(--mut);text-transform:capitalize">'+m.label+'</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  document.getElementById("assiduite-content").innerHTML=html;
+  document.getElementById("modal-assiduite").style.display="flex";
+}
+
 function openPole(id){
   if(id==="formation"){stack.push("elite");buildElite();showScr("elite");}
   else if(id==="elite"||id==="competition"||id==="3x3"||id==="evenement"||id==="basketpourtous"){
@@ -3626,6 +3803,53 @@ function exportPlanningPDF(){
   doc.save("ASMB_planning_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
+function importPlayersCSV(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;
+    var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
+    if(lines.length<2){alert("Fichier CSV vide ou invalide");return;}
+    var headers=lines[0].split(",").map(function(h){return h.trim().toLowerCase();});
+    var idxNom=headers.indexOf("nom");
+    var idxPrenom=headers.indexOf("prenom");
+    var idxNaissance=headers.indexOf("naissance");
+    var idxCat=headers.indexOf("categorie");
+    var idxNumLic=headers.indexOf("numlicence");
+    var idxTypeLic=headers.indexOf("typelicence");
+    if(idxNom<0||idxPrenom<0){
+      alert("Le fichier doit contenir au minimum les colonnes: nom,prenom (optionnel: naissance,categorie,numlicence,typelicence)");
+      return;
+    }
+    var players=getPlayers();
+    var added=0;
+    lines.slice(1).forEach(function(line){
+      var cols=line.split(",").map(function(c){return c.trim();});
+      var nom=cols[idxNom],prenom=cols[idxPrenom];
+      if(!nom||!prenom)return;
+      players.push({
+        id:Date.now().toString()+Math.random().toString(36).slice(2),
+        prenom:prenom,nom:nom,
+        naissance:idxNaissance>=0?(cols[idxNaissance]||""):"",
+        cat:idxCat>=0?(cols[idxCat]||""):"",
+        poste:"---",maillot:"",
+        licence:"attente",
+        typeLicence:idxTypeLic>=0&&cols[idxTypeLic]?cols[idxTypeLic]:"competition",
+        numLicence:idxNumLic>=0&&cols[idxNumLic]?cols[idxNumLic]:"0C",
+        contact:"",notes:""
+      });
+      added++;
+    });
+    savePlayers(players);
+    renderPlayers();
+    buildAdminHome();
+    input.value="";
+    alert(added+" joueur(s) importe(s) depuis le CSV !");
+  };
+  reader.readAsText(file);
+}
+
 function exportPlayersPDF(){
   if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, reessayez dans quelques secondes");return;}
   var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
@@ -5002,16 +5226,43 @@ function buildPoleScreen(poleId){
     return;
   }
   listEl.innerHTML="";
-  data.forEach(function(item){
+
+  function renderItemCard(item,indent){
     var div=document.createElement("div");
-    div.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:13px 14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:flex-start;justify-content:space-between";
+    div.style.cssText="margin:0 12px 8px 0 12px;margin-left:"+(12+indent)+"px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:13px 14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:flex-start;justify-content:space-between"+(indent?";border-left:3px solid var(--dkg)":"");
     var mainInfo=item.nom||item.adversaire||item.titre||"Sans nom";
     var subInfo=[item.cat,item.date,item.heure,item.lieu,item.groupe].filter(Boolean).join(" · ");
     var subHtml=subInfo?"<div style=\"font-size:11px;color:var(--mut)\">"+subInfo+"</div>":"";
     var delBtn="<button onclick=\"deletePoleItem('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+mainInfo+"</div>"+subHtml+"</div>"+delBtn;
+    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?"👤 ":"")+mainInfo+"</div>"+subHtml+"</div>"+delBtn;
     listEl.appendChild(div);
-  });
+  }
+
+  var equipes=data.filter(function(d){return d.type==="equipe";});
+  var joueurs=data.filter(function(d){return d.type==="joueur";});
+  var matchs=data.filter(function(d){return d.type==="match";});
+  var others=data.filter(function(d){return d.type!=="equipe"&&d.type!=="joueur"&&d.type!=="match";});
+
+  if(equipes.length||joueurs.length){
+    if(equipes.length)listEl.innerHTML+='<div class="sec" style="padding-left:0">Equipes</div>';
+    equipes.forEach(function(eq){
+      renderItemCard(eq,0);
+      var assigned=joueurs.filter(function(j){return j.equipe===eq.nom;});
+      assigned.forEach(function(j){renderItemCard(j,0);});
+    });
+    var unassigned=joueurs.filter(function(j){return !equipes.some(function(eq){return eq.nom===j.equipe;});});
+    if(unassigned.length){
+      listEl.innerHTML+='<div class="sec" style="padding-left:0">Joueurs sans equipe assignee</div>';
+      unassigned.forEach(function(j){renderItemCard(j,0);});
+    }
+  }
+
+  if(matchs.length){
+    listEl.innerHTML+='<div class="sec" style="padding-left:0">Matchs</div>';
+    matchs.forEach(function(m){renderItemCard(m,0);});
+  }
+
+  others.forEach(function(o){renderItemCard(o,0);});
 }
 
 function getPoleIcon(id){
@@ -5700,7 +5951,8 @@ function buildCoachEquipe(){
     var metaTxt=posteEligibleCoach?posteTxt:"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">👕 Maillot</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>'+maillotBtn;
+    var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">🆔 Licence</button>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
     el.appendChild(div);
   });
 }
@@ -5714,6 +5966,21 @@ function editPlayerMaillot(playerId){
   p.maillot=num.trim();
   savePlayers(players);
   buildCoachEquipe();
+}
+
+function editPlayerLicence(playerId){
+  var players=getPlayers();
+  var p=players.find(function(x){return x.id===playerId;});
+  if(!p)return;
+  var num=prompt("Numero de licence pour "+p.prenom+" "+p.nom+" :",p.numLicence||"0C");
+  if(num===null)return;
+  var type=prompt("Type de licence (competition / loisir) :",p.typeLicence||"competition");
+  if(type===null)return;
+  p.numLicence=num.trim();
+  p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
+  savePlayers(players);
+  buildCoachEquipe();
+  alert("Licence mise a jour.");
 }
 
 // ── PARENT EVENEMENTS TAB ─────────────────────────────────────────
@@ -5859,7 +6126,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784214001";
+var APP_VERSION="1784215703";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
