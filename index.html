@@ -135,6 +135,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .poll-opt-content{position:relative;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt)}
 .poll-opt.voted{border-color:#27AE60}
 @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ptrSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.ptr-spinning{animation:ptrSpin .6s linear infinite}
 @keyframes cloudFloat{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
 @keyframes rainFall{0%{transform:translateY(-10px);opacity:0}50%{opacity:1}100%{transform:translateY(30px);opacity:0}}
 .weather-icon-wrap{position:relative;width:110px;height:110px;margin:0 auto 16px}
@@ -261,8 +263,30 @@ initChannels();
   <span>🔄 Nouvelle version disponible</span>
   <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1B5C28;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre a jour</button>
 </div>
+<div id="join-req-banner" style="display:none;background:#1A2E5A;color:#fff;padding:12px 16px;flex-direction:column;gap:8px">
+  <div style="font-size:12px;font-weight:700" id="join-req-text"></div>
+  <div style="display:flex;gap:8px">
+    <button onclick="showJoinReqFiche()" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">📋 Fiche</button>
+    <button onclick="acceptJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Accepter</button>
+    <button onclick="rejectJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✕ Refuser</button>
+  </div>
+</div>
 
-<div class="main">
+<!-- ═══ MODAL FICHE (lecture seule, coach/dirigeant) ═══ -->
+<div id="modal-fiche-view" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Fiche du licencie</div>
+      <button onclick="closeModal('modal-fiche-view')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+    </div>
+    <div id="fiche-view-content"></div>
+  </div>
+</div>
+
+<div id="ptr-indicator" style="position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;pointer-events:none;z-index:50;opacity:0;transition:opacity .15s">
+  <div id="ptr-spinner" style="width:24px;height:24px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);transition:transform .1s"></div>
+</div>
+<div class="main" id="main-scroll">
   <div class="scr on" id="scr-portal">
     <div id="portal-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
     <div class="hero">
@@ -712,6 +736,7 @@ initChannels();
       <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Communauté</div><div style="font-size:11px;color:var(--mut)" id="admcomm-count">0 canal</div></div>
       <button onclick="showAddChannel()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Canal</button>
     </div>
+    <div class="sec">Canaux</div>
     <div id="admcomm-list" style="padding:8px 0 80px"></div>
   </div>
 
@@ -4250,7 +4275,99 @@ function buildAdminComm(){
   });
 }
 
-function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
+// ── DEMANDES D'ADHESION ──────────────────────────────────────────
+var currentJoinReqId=null;
+var currentJoinReqData=null;
+var pendingJoinReqsList=[];
+
+function listenJoinRequestsGlobal(){
+  if(!window.fbReady)return;
+  if(!window.asmbCoachMode)return;
+  window.fbOnSnapshot(window.fbQuery(window.fbCollection(window.fbDb,"joinRequests"),window.fbOrderBy("ts")),function(snap){
+    var pending=[];
+    snap.forEach(function(d){var r=d.data();if(r.status==="pending"){r.id=d.id;pending.push(r);}});
+    pendingJoinReqsList=pending;
+    renderJoinReqBanner();
+  });
+}
+
+function renderJoinReqBanner(){
+  var banner=document.getElementById("join-req-banner");
+  if(!banner)return;
+  if(!pendingJoinReqsList.length){banner.style.display="none";currentJoinReqId=null;return;}
+  var r=pendingJoinReqsList[0];
+  currentJoinReqId=r.id;
+  currentJoinReqData=r;
+  var extra=pendingJoinReqsList.length>1?" (+"+(pendingJoinReqsList.length-1)+" autre"+(pendingJoinReqsList.length>2?"s":"")+")":"";
+  document.getElementById("join-req-text").textContent=(r.childName||"Un parent")+" souhaite rejoindre le groupe "+(r.teamNames||"?")+extra;
+  banner.style.display="flex";
+}
+
+function acceptJoinRequest(reqId){
+  var req=pendingJoinReqsList.find(function(r){return r.id===reqId;})||currentJoinReqData;
+  if(!req)return;
+  var teams=getTeams().filter(function(t){return (req.teamIds||[]).indexOf(t.id)>=0;});
+  var catSet=[];
+  teams.forEach(function(t){if(catSet.indexOf(t.cat)<0)catSet.push(t.cat);});
+  var promises=catSet.map(function(cat){
+    var channelId=findChannelForTeamText(cat);
+    return window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(chSnap){
+      var chData=null;
+      chSnap.forEach(function(d){if(d.id===channelId)chData=d.data();});
+      var members=(chData&&chData.members)||[];
+      var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===req.phone;});
+      if(!exists){
+        members.push({phone:req.phone,label:(req.childName||"Parent")+"-"+cat});
+        return window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{members:members},{merge:true});
+      }
+    });
+  });
+  Promise.all(promises).then(function(){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"joinRequests",reqId),{status:"accepted"},{merge:true});
+  });
+}
+
+function rejectJoinRequest(reqId){
+  if(!confirm("Refuser cette demande d'adhesion ?"))return;
+  window.fbSetDoc(window.fbDoc(window.fbDb,"joinRequests",reqId),{status:"rejected"},{merge:true});
+}
+
+function showJoinReqFiche(){
+  if(!currentJoinReqData)return;
+  viewFicheModal(currentJoinReqData.phone);
+}
+
+function viewFicheModal(phone){
+  var lics=getLicences();
+  var normPhone=phone.replace(/\s+/g,"");
+  var matches=lics.filter(function(l){
+    if(!l.fiche)return false;
+    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+    return phones.indexOf(normPhone)>=0;
+  });
+  if(!matches.length){
+    alert("Aucune fiche trouvee pour ce numero.");
+    return;
+  }
+  var lic=matches[0];
+  var f=lic.fiche;
+  var rows=[
+    ["Prenom",f.prenom],["Nom",f.nom],["Date de naissance",f.naissance],
+    ["Categorie",lic.categorie||""],["Adresse",f.adresse],["Telephone",f.telephone],["Email",f.emailLic],
+    ["Responsable 1",f.respNom],["Tel responsable 1",f.respTel],
+    ["Contact urgence",f.urgenceNom],["Tel urgence",f.urgenceTel],
+    ["Notes / medical",f.notes]
+  ];
+  var html="";
+  rows.forEach(function(r){
+    if(!r[1])return;
+    html+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">'+r[0]+'</div><div style="font-size:13px;color:var(--txt);margin-top:2px">'+r[1]+'</div></div>';
+  });
+  document.getElementById("fiche-view-content").innerHTML=html||'<div style="font-size:12px;color:var(--mut)">Fiche incomplete</div>';
+  document.getElementById("modal-fiche-view").style.display="flex";
+}
+
+function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
 
 function createChannel(){
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
@@ -5069,6 +5186,59 @@ function chooseRole(role){
   } else {
     localStorage.setItem("asmb_profile","parent");
     buildBottomNav("parent");
+    registerParentPhone();
+  }
+}
+
+function registerParentPhone(){
+  if(myPhone){openTeamPicker(false);return;}
+  var phone=prompt("Entrez votre numero de telephone (le meme que celui fournit au club) pour rejoindre le groupe de votre enfant :");
+  if(!phone){openTeamPicker(false);return;}
+  phone=phone.trim().replace(/\s+/g,"");
+  myPhone=phone;
+  localStorage.setItem("asmb_phone",phone);
+  autoLinkParentToChannel(phone);
+}
+
+function autoLinkParentToChannel(phone){
+  var lics=getLicences();
+  var lic=lics.find(function(l){
+    if(!l.fiche)return false;
+    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+    return phones.indexOf(phone)>=0;
+  });
+  if(!lic||!lic.categorie){
+    pendingJoinRequestPhone=phone;
+    openTeamPicker(false);
+    return;
+  }
+  // Auto-selectionner l'equipe correspondant a la categorie de l'enfant
+  var matchingTeams=getTeams().filter(function(t){return t.cat===lic.categorie;});
+  var parentTeams=getParentTeams();
+  matchingTeams.forEach(function(t){if(parentTeams.indexOf(t.id)<0)parentTeams.push(t.id);});
+  saveParentTeamsList(parentTeams);
+
+  // Auto-ajout au canal correspondant
+  var childName=lic.fiche.prenom||"";
+  var label=childName+(lic.categorie?"-"+lic.categorie:"");
+  var channelId=findChannelForTeamText(lic.categorie);
+  if(window.fbReady){
+    window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+      var chData=null;
+      snap.forEach(function(d){if(d.id===channelId)chData=d.data();});
+      var members=(chData&&chData.members)||[];
+      var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
+      if(!exists){
+        members.push({phone:phone,label:label});
+        window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{members:members},{merge:true});
+      }
+    });
+  }
+
+  if(matchingTeams.length){
+    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'equipe "+matchingTeams[0].name+" et au canal correspondant.");
+    saveParentTeams();
+  } else {
     openTeamPicker(false);
   }
 }
@@ -5146,11 +5316,19 @@ function toggleTeamPick(div,teamId){
   openTeamPicker(true);
 }
 
+var pendingJoinRequestPhone=null;
+
 function saveParentTeams(){
   var selected=getParentTeams();
   if(!selected.length){alert("Selectionnez au moins une equipe");return;}
   if(!getActiveTeamId()||selected.indexOf(getActiveTeamId())<0)setActiveTeamId(selected[0]);
   buildBottomNav("parent");
+
+  if(pendingJoinRequestPhone){
+    submitJoinRequest(pendingJoinRequestPhone,selected);
+    pendingJoinRequestPhone=null;
+  }
+
   if(!localStorage.getItem("asmb_tuto_done")){
     showTutoriel();
   } else {
@@ -5158,6 +5336,18 @@ function saveParentTeams(){
     showScr("parent-home");
     buildParentHome();
   }
+}
+
+function submitJoinRequest(phone,teamIds){
+  if(!window.fbReady)return;
+  var teams=getTeams().filter(function(t){return teamIds.indexOf(t.id)>=0;});
+  var teamNames=teams.map(function(t){return t.name;}).join(", ");
+  var childName=prompt("Prenom de votre enfant (pour la demande envoyee au coach) :")||"Parent";
+  window.fbAddDoc(window.fbCollection(window.fbDb,"joinRequests"),{
+    phone:phone,childName:childName,teamIds:teamIds,teamNames:teamNames,
+    status:"pending",ts:window.fbServerTimestamp()
+  });
+  alert("Votre demande a ete envoyee au coach. Vous aurez acces au canal de l'equipe une fois validee.");
 }
 
 // ── TUTORIEL PARENT (premiere connexion) ────────────────────────────
@@ -5641,7 +5831,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784153747";
+var APP_VERSION="1784212310";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -5661,6 +5851,79 @@ setInterval(checkForUpdate,120000);
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="visible")checkForUpdate();
 });
+
+// ═══ PULL-TO-REFRESH ═══════════════════════════════════════════════
+function refreshCurrentScreen(){
+  var id=stack[stack.length-1];
+  try{
+    if(id==="portal")buildPortal();
+    else if(id==="parent-home")buildParentHome();
+    else if(id==="parent-equipe")buildParentEquipe();
+    else if(id==="parent-events")buildParentEvents();
+    else if(id==="parent-stats")buildParentStats();
+    else if(id==="coach-equipe")buildCoachEquipe();
+    else if(id==="communaute")buildCommunaute();
+    else if(id==="admin")buildAdminHome();
+    else if(id==="inscriptions")renderPlayers();
+    else if(id==="equipes")buildTeams();
+    else if(id==="planning")buildPlanning();
+    else if(id==="documents")buildDocs();
+    else if(id==="licences")buildLicences();
+    else if(id==="annuaire")buildAnnuaire();
+    else if(id==="galerie")buildGalerie();
+    else if(id==="parametres")buildParametres();
+    else if(id==="elite")buildElite();
+    else if(id&&id.startsWith("pole-")&&typeof currentPoleId!=="undefined")buildPoleScreen(currentPoleId);
+  }catch(e){}
+}
+
+(function(){
+  var mainEl=document.getElementById("main-scroll");
+  var indicator=document.getElementById("ptr-indicator");
+  var spinner=document.getElementById("ptr-spinner");
+  if(!mainEl||!indicator||!spinner)return;
+  var startY=0,pulling=false,triggered=false;
+  var THRESHOLD=70;
+
+  mainEl.addEventListener("touchstart",function(e){
+    if(mainEl.scrollTop<=0){
+      startY=e.touches[0].clientY;
+      pulling=true;triggered=false;
+    }
+  },{passive:true});
+
+  mainEl.addEventListener("touchmove",function(e){
+    if(!pulling)return;
+    var dy=e.touches[0].clientY-startY;
+    if(dy>0&&mainEl.scrollTop<=0){
+      var pull=Math.min(dy*0.5,90);
+      indicator.style.opacity=Math.min(pull/THRESHOLD,1);
+      spinner.style.transform="translateY("+pull+"px) rotate("+(pull*3)+"deg)";
+      if(pull>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor="#27AE60";}
+      else if(pull<THRESHOLD&&triggered){triggered=false;spinner.style.borderTopColor="var(--dkg)";}
+    }
+  },{passive:true});
+
+  mainEl.addEventListener("touchend",function(){
+    if(!pulling)return;
+    pulling=false;
+    if(triggered){
+      spinner.classList.add("ptr-spinning");
+      spinner.style.transform="translateY(50px)";
+      indicator.style.opacity="1";
+      checkForUpdate();
+      refreshCurrentScreen();
+      setTimeout(function(){
+        indicator.style.opacity="0";
+        spinner.classList.remove("ptr-spinning");
+        spinner.style.transform="translateY(0)";
+      },700);
+    } else {
+      indicator.style.opacity="0";
+      spinner.style.transform="translateY(0)";
+    }
+  },{passive:true});
+})();
 
 // ═══ DETECTION MODE HORS-LIGNE ═══════════════════════════════════
 function updateOfflineBanner(){
@@ -5699,6 +5962,7 @@ function checkEventReminders(){
 setTimeout(checkEventReminders,2000);
 setTimeout(checkWeatherAlerts,3000);
 setTimeout(backupToCloud,5000);
+setTimeout(listenJoinRequestsGlobal,3500);
 setInterval(backupToCloud,300000);
 document.addEventListener("DOMContentLoaded",function(){
   var home=document.getElementById("home-logo");
