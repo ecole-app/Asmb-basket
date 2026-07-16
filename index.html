@@ -5283,6 +5283,9 @@ function navToCoach(which){
     var b4=document.getElementById("bni-c-evenements");if(b4)b4.classList.add("on");
     currentPoleId="evenement";
     stack=["pole-evenement"];showScr("pole-evenement");buildPoleScreen("evenement");
+  } else if(which==="communaute"){
+    var b5=document.getElementById("bni-c-communaute");if(b5)b5.classList.add("on");
+    stack=["communaute"];showScr("communaute");buildCommunaute();
   }
   if(hbk)hbk.classList.remove("show");
 }
@@ -5814,7 +5817,8 @@ function buildBottomNav(profile){
       '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
       '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
-      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Evenements</button>';
+      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Evenements</button>'+
+      '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
@@ -5855,7 +5859,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784213026";
+var APP_VERSION="1784214001";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
