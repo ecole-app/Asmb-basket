@@ -755,7 +755,7 @@ initChannels();
     <div id="chat-input-bar" style="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:6px;z-index:10">
       <button id="poll-btn" onclick="showPollCreator()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</button>
       <button onclick="document.getElementById('chat-media-input').click()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📎</button>
-      <input type="file" id="chat-media-input" accept="image/*,video/*" style="display:none" onchange="sendMediaMessage(this)">
+      <input type="file" id="chat-media-input" accept="image/*" style="display:none" onchange="sendMediaMessage(this)">
       <input id="chat-pseudo" placeholder="Pseudo..." style="width:70px;padding:9px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none;flex-shrink:0">
       <input id="chat-msg" placeholder="Message..." style="flex:1;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
       <button onclick="sendMsg()" style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
@@ -3411,26 +3411,51 @@ function buildGalerie(){
   });
 }
 
+function compressImageFile(file,maxWidth,quality){
+  return new Promise(function(resolve,reject){
+    var img=new Image();
+    var reader=new FileReader();
+    reader.onload=function(e){
+      img.onload=function(){
+        var w=img.width,h=img.height;
+        if(w>maxWidth){h=Math.round(h*(maxWidth/w));w=maxWidth;}
+        var canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        var ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        var dataUrl=canvas.toDataURL("image/jpeg",quality);
+        resolve(dataUrl);
+      };
+      img.onerror=function(){reject(new Error("Image invalide"));};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){reject(new Error("Lecture fichier echouee"));};
+    reader.readAsDataURL(file);
+  });
+}
+
 function uploadGalleryPhoto(input){
   if(!input.files||!input.files[0])return;
   if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
   var file=input.files[0];
-  var filename="gallery/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"");
-  var ref=window.fbStorageRef(window.fbStorage,filename);
   var addBtn=document.getElementById("galerie-add-btn");
-  if(addBtn){addBtn.textContent="Envoi...";addBtn.disabled=true;}
-  window.fbUploadBytes(ref,file).then(function(){
-    return window.fbGetDownloadURL(ref);
-  }).then(function(url){
+  if(addBtn){addBtn.textContent="Compression...";addBtn.disabled=true;}
+  compressImageFile(file,1000,0.6).then(function(dataUrl){
+    if(dataUrl.length>900000){
+      return compressImageFile(file,700,0.45);
+    }
+    return dataUrl;
+  }).then(function(dataUrl){
+    if(addBtn)addBtn.textContent="Envoi...";
     return window.fbAddDoc(window.fbCollection(window.fbDb,"gallery"),{
-      url:url,caption:"",uploadedBy:savedPseudo||"ASMB",ts:window.fbServerTimestamp()
+      url:dataUrl,caption:"",uploadedBy:savedPseudo||"ASMB",ts:window.fbServerTimestamp()
     });
   }).then(function(){
     input.value="";
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
   }).catch(function(err){
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
-    alert("Erreur lors de l'upload. Verifiez que Firebase Storage est active dans la console Firebase.");
+    alert("Erreur lors de l'envoi de la photo. Reessayez avec une image plus petite.");
     console.error(err);
   });
 }
@@ -5117,24 +5142,22 @@ function sendMediaMessage(input){
   if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
   if(!checkMyPhone())return;
   var file=input.files[0];
-  var isVideo=file.type.indexOf("video")===0;
-  if(file.size>25*1024*1024){alert("Fichier trop volumineux (max 25 Mo)");input.value="";return;}
+  if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptees (pas de video)");input.value="";return;}
   var pseudoEl=document.getElementById("chat-pseudo");
   var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
   savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
-  var filename="chat-media/"+currentChannelId+"/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"");
-  var ref=window.fbStorageRef(window.fbStorage,filename);
   input.value="";
-  window.fbUploadBytes(ref,file).then(function(){
-    return window.fbGetDownloadURL(ref);
-  }).then(function(url){
+  compressImageFile(file,900,0.55).then(function(dataUrl){
+    if(dataUrl.length>900000)return compressImageFile(file,600,0.4);
+    return dataUrl;
+  }).then(function(dataUrl){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
-      type:"media",mediaUrl:url,mediaType:isVideo?"video":"image",
+      type:"media",mediaUrl:dataUrl,mediaType:"image",
       pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
     localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
   }).catch(function(err){
-    alert("Erreur lors de l'envoi. Verifiez que Firebase Storage est active.");
+    alert("Erreur lors de l'envoi de la photo. Reessayez avec une image plus petite.");
     console.error(err);
   });
 }
@@ -6222,7 +6245,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784218654";
+var APP_VERSION="1784223256";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
