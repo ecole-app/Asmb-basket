@@ -752,9 +752,11 @@ initChannels();
     </div>
     <div id="chat-pinned" style="display:none;flex-direction:column;gap:4px;padding:8px 14px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);flex-shrink:0"></div>
     <div id="chat-messages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;padding-bottom:80px"></div>
-    <div id="chat-input-bar" style="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:8px;z-index:10">
-      <button id="poll-btn" onclick="showPollCreator()" style="width:38px;height:38px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</button>
-      <input id="chat-pseudo" placeholder="Pseudo..." style="width:80px;padding:9px 10px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none;flex-shrink:0">
+    <div id="chat-input-bar" style="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:6px;z-index:10">
+      <button id="poll-btn" onclick="showPollCreator()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</button>
+      <button onclick="document.getElementById('chat-media-input').click()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📎</button>
+      <input type="file" id="chat-media-input" accept="image/*,video/*" style="display:none" onchange="sendMediaMessage(this)">
+      <input id="chat-pseudo" placeholder="Pseudo..." style="width:70px;padding:9px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none;flex-shrink:0">
       <input id="chat-msg" placeholder="Message..." style="flex:1;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
       <button onclick="sendMsg()" style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
     </div>
@@ -3413,18 +3415,22 @@ function uploadGalleryPhoto(input){
   if(!input.files||!input.files[0])return;
   if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
   var file=input.files[0];
-  var caption=prompt("Legende (optionnel) :","")||"";
   var filename="gallery/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"");
   var ref=window.fbStorageRef(window.fbStorage,filename);
+  var addBtn=document.getElementById("galerie-add-btn");
+  if(addBtn){addBtn.textContent="Envoi...";addBtn.disabled=true;}
   window.fbUploadBytes(ref,file).then(function(){
     return window.fbGetDownloadURL(ref);
   }).then(function(url){
-    window.fbAddDoc(window.fbCollection(window.fbDb,"gallery"),{
-      url:url,caption:caption,uploadedBy:savedPseudo||"ASMB",ts:window.fbServerTimestamp()
+    return window.fbAddDoc(window.fbCollection(window.fbDb,"gallery"),{
+      url:url,caption:"",uploadedBy:savedPseudo||"ASMB",ts:window.fbServerTimestamp()
     });
+  }).then(function(){
     input.value="";
+    if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
   }).catch(function(err){
-    alert("Erreur lors de l'upload. Vérifiez que Firebase Storage est active.");
+    if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
+    alert("Erreur lors de l'upload. Verifiez que Firebase Storage est active dans la console Firebase.");
     console.error(err);
   });
 }
@@ -3435,6 +3441,14 @@ function viewPhoto(p){
   document.getElementById("photo-view-caption").textContent=p.caption||"";
   var delBtn=document.getElementById("photo-delete-btn");
   delBtn.style.display=window.asmbCoachMode?"block":"none";
+  document.getElementById("modal-photo-view").style.display="flex";
+}
+
+function viewChatMedia(url){
+  currentPhotoId=null;
+  document.getElementById("photo-view-img").src=url;
+  document.getElementById("photo-view-caption").textContent="";
+  document.getElementById("photo-delete-btn").style.display="none";
   document.getElementById("modal-photo-view").style.display="flex";
 }
 
@@ -4944,6 +4958,18 @@ function listenMessages(channelId){
       var wrap=document.createElement("div");wrap.className="msg-wrap "+(isOut?"out":"in");
       var time=ts.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
       if(!isOut){var psd=document.createElement("div");psd.className="msg-pseudo";psd.textContent=msg.pseudo;wrap.appendChild(psd);}
+      if(msg.type==="media"){
+        var mediaWrap=document.createElement("div");
+        mediaWrap.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow)";
+        if(msg.mediaType==="video"){
+          mediaWrap.innerHTML='<video src="'+msg.mediaUrl+'" controls style="width:100%;display:block;max-height:300px;background:#000"></video><div style="padding:4px 10px;font-size:9px;color:var(--mut);background:var(--card)">'+time+'</div>';
+        } else {
+          mediaWrap.innerHTML='<img src="'+msg.mediaUrl+'" onclick="viewChatMedia(\''+msg.mediaUrl+'\')" style="width:100%;display:block;max-height:320px;object-fit:cover;cursor:pointer"><div style="padding:4px 10px;font-size:9px;color:var(--mut);background:var(--card)">'+time+'</div>';
+        }
+        wrap.appendChild(mediaWrap);
+        msgsEl.appendChild(wrap);
+        return;
+      }
       if(msg.type==="convocation"){
         var cvDiv=document.createElement("div");cvDiv.className="poll-bubble";
         var responses=msg.responses||{};
@@ -5084,6 +5110,33 @@ function sendMsg(){
     text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
   });
   localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
+}
+
+function sendMediaMessage(input){
+  if(!input.files||!input.files[0])return;
+  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  if(!checkMyPhone())return;
+  var file=input.files[0];
+  var isVideo=file.type.indexOf("video")===0;
+  if(file.size>25*1024*1024){alert("Fichier trop volumineux (max 25 Mo)");input.value="";return;}
+  var pseudoEl=document.getElementById("chat-pseudo");
+  var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
+  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
+  var filename="chat-media/"+currentChannelId+"/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"");
+  var ref=window.fbStorageRef(window.fbStorage,filename);
+  input.value="";
+  window.fbUploadBytes(ref,file).then(function(){
+    return window.fbGetDownloadURL(ref);
+  }).then(function(url){
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+      type:"media",mediaUrl:url,mediaType:isVideo?"video":"image",
+      pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    });
+    localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
+  }).catch(function(err){
+    alert("Erreur lors de l'envoi. Verifiez que Firebase Storage est active.");
+    console.error(err);
+  });
 }
 
 // ── SONDAGES (style WhatsApp) ────────────────────────────────────
@@ -6169,7 +6222,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784216796";
+var APP_VERSION="1784218654";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
