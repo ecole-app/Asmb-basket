@@ -3544,12 +3544,13 @@ function loadDemoData(){
       }
     }
     team.members=memberIds;
+    ensureTeamChannel(team);
   });
 
   saveTeams(teams);
   savePlayers(players);
 
-  alert("Donnees de demo chargees ! 4 equipes (U13F, U13G, SeniorF, SeniorM) de 10 joueurs chacune.");
+  alert("Donnees de demo chargees ! 4 equipes (U13F, U13G, SeniorF, SeniorM) de 10 joueurs chacune, chacune avec son canal de discussion.");
   buildAdminHome();
 }
 
@@ -3918,8 +3919,11 @@ function showAddTeam(){
   var name=prompt("Nom de l'equipe (ex: U13F) :");if(!name)return;
   var cat=prompt("Categorie (U7/U9/U11/U13/U15/U17/Senior) :");if(!cat)return;
   var teams=getTeams();
-  teams.push({id:Date.now().toString(),name:name,cat:cat,members:[]});
-  saveTeams(teams);buildTeams();buildAdminHome();
+  var newTeam={id:Date.now().toString(),name:name,cat:cat,members:[]};
+  teams.push(newTeam);
+  saveTeams(teams);
+  ensureTeamChannel(newTeam);
+  buildTeams();buildAdminHome();
 }
 function deleteTeam(id){if(!confirm("Supprimer cette equipe ?"))return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();}
 
@@ -4267,11 +4271,28 @@ function showConvocation(eventId){
 
 function findChannelForTeamText(teamText){
   var text=(teamText||"").toUpperCase();
+  // 1. Chercher une equipe reelle correspondante (par nom ou categorie) et utiliser son propre canal
+  var teams=getTeams();
+  var matchedTeam=teams.find(function(t){
+    return text.indexOf(t.name.toUpperCase())>=0||t.name.toUpperCase().indexOf(text)>=0||text===t.cat.toUpperCase();
+  });
+  if(matchedTeam){
+    ensureTeamChannel(matchedTeam);
+    return matchedTeam.id;
+  }
+  // 2. Repli sur les canaux generiques par categorie
   var known={"U13":"u13f","U15":"u15","SENIOR":"seniors"};
   for(var key in known){
     if(text.indexOf(key)>=0)return known[key];
   }
   return "general";
+}
+
+function ensureTeamChannel(team){
+  if(!window.fbReady)return;
+  window.fbSetDoc(window.fbDoc(window.fbDb,"channels",team.id),{
+    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'equipe "+team.name
+  },{merge:true});
 }
 
 function saveConvocation(){
@@ -4784,28 +4805,42 @@ function buildCommunaute(){
   el.innerHTML="";
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
-    el.innerHTML="";
+    var channels=[];
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
-      if(ch.deleted)return;
-      var members=ch.members||[];
-      var isRestricted=members.length>0;
-      var isMember=!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
-      var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
-      div.style.position="relative";
-      if(isMember){
-        div.onclick=function(){openChannel(ch);};
-      } else {
-        div.style.opacity=".5";
-      }
-      var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)">🔓 Membre</span>':'<span style="font-size:10px;color:var(--red)">🔒 Prive</span>'):'';
-      var unreadDot='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--red)"></span>';
-      div.innerHTML=unreadDot+'<div class="ch-icon">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+ch.name+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+ch.desc+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"🔒")+'</div>';
-      el.appendChild(div);
+      if(!ch.deleted)channels.push(ch);
     });
-    if(!snap.size)el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💬</div><div>Aucun canal</div></div>';
-    checkUnreadBadges();
+    renderChannelList(channels);
   });
+}
+
+function renderChannelList(channels){
+  var el=document.getElementById("channel-list");if(!el)return;
+  if(!channels.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💬</div><div>Aucun canal</div></div>';return;}
+
+  // Trier par derniere activite (utilisation recente en premier)
+  var lastUsed={};
+  channels.forEach(function(ch){lastUsed[ch.id]=parseInt(localStorage.getItem("asmb_lastread_"+ch.id)||"0",10);});
+  channels.sort(function(a,b){return (lastUsedActivity[b.id]||lastUsed[b.id]||0)-(lastUsedActivity[a.id]||lastUsed[a.id]||0);});
+
+  el.innerHTML="";
+  channels.forEach(function(ch){
+    var members=ch.members||[];
+    var isRestricted=members.length>0;
+    var isMember=!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
+    div.style.position="relative";
+    if(isMember){
+      div.onclick=function(){openChannel(ch);};
+    } else {
+      div.style.opacity=".5";
+    }
+    var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)">🔓 Membre</span>':'<span style="font-size:10px;color:var(--red)">🔒 Prive</span>'):'';
+    var unreadBadge='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
+    div.innerHTML=unreadBadge+'<div class="ch-icon">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+ch.name+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+ch.desc+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"🔒")+'</div>';
+    el.appendChild(div);
+  });
+  checkUnreadBadges();
 }
 
 function openChannel(ch){
@@ -5130,49 +5165,57 @@ function respondConvocation(channelId,msgId,playerId,status){
 }
 
 // ── BADGE NON-LU ──────────────────────────────────────────────────
+var lastUsedActivity={};
+
 function checkUnreadBadges(){
   if(!window.fbReady)return;
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbGetDocs(q).then(function(snap){
-    var promises=[];
-    var anyUnread=false;
+    var totalUnread=0;
     var checks=[];
-    snap.forEach(function(d){
-      checks.push(d.id);
-    });
+    snap.forEach(function(d){checks.push(d.id);});
     var pending=checks.length;
-    if(!pending){updateNavBadge(false);return;}
+    if(!pending){updateNavBadge(0);return;}
     checks.forEach(function(chId){
       var lastRead=parseInt(localStorage.getItem("asmb_lastread_"+chId)||"0",10);
       window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels",chId,"messages"),window.fbOrderBy("ts"))).then(function(msnap){
         var msgs=[];msnap.forEach(function(m){msgs.push(m.data());});
         var last=msgs[msgs.length-1];
-        var badgeEl=document.getElementById("badge-"+chId);
-        var hasUnread=false;
         if(last&&last.ts){
-          var lastTs=last.ts.toDate?last.ts.toDate().getTime():0;
-          hasUnread=lastTs>lastRead;
+          lastUsedActivity[chId]=last.ts.toDate?last.ts.toDate().getTime():0;
         }
-        if(badgeEl)badgeEl.style.display=hasUnread?"block":"none";
-        if(hasUnread)anyUnread=true;
+        var unreadCount=0;
+        msgs.forEach(function(m){
+          var ts=m.ts&&m.ts.toDate?m.ts.toDate().getTime():0;
+          if(ts>lastRead)unreadCount++;
+        });
+        var badgeEl=document.getElementById("badge-"+chId);
+        if(badgeEl){
+          if(unreadCount>0){badgeEl.style.display="flex";badgeEl.textContent=unreadCount>99?"99+":unreadCount;}
+          else{badgeEl.style.display="none";}
+        }
+        totalUnread+=unreadCount;
         pending--;
-        if(pending<=0)updateNavBadge(anyUnread);
-      }).catch(function(){pending--;if(pending<=0)updateNavBadge(anyUnread);});
+        if(pending<=0)updateNavBadge(totalUnread);
+      }).catch(function(){pending--;if(pending<=0)updateNavBadge(totalUnread);});
     });
   }).catch(function(){});
 }
-function updateNavBadge(show){
-  var btn=document.getElementById("bni-communaute");
-  if(!btn)return;
-  var dot=btn.querySelector(".nav-dot");
-  if(!dot){
-    dot=document.createElement("span");
-    dot.className="nav-dot";
-    dot.style.cssText="position:absolute;top:2px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:var(--red)";
-    btn.style.position="relative";
-    btn.appendChild(dot);
-  }
-  dot.style.display=show?"block":"none";
+function updateNavBadge(count){
+  ["bni-communaute","bni-c-communaute"].forEach(function(btnId){
+    var btn=document.getElementById(btnId);
+    if(!btn)return;
+    var dot=btn.querySelector(".nav-dot");
+    if(!dot){
+      dot=document.createElement("span");
+      dot.className="nav-dot";
+      dot.style.cssText="position:absolute;top:2px;right:calc(50% - 18px);min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:800;align-items:center;justify-content:center";
+      btn.style.position="relative";
+      btn.appendChild(dot);
+    }
+    if(count>0){dot.style.display="flex";dot.textContent=count>99?"99+":count;}
+    else{dot.style.display="none";}
+  });
 }
 
 // ═══ POLES GENERIQUES ════════════════════════════════════════════
@@ -6126,7 +6169,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784215703";
+var APP_VERSION="1784216796";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
