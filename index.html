@@ -1016,11 +1016,15 @@ initChannels();
     <div class="sec">Demonstration</div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
       <div style="font-size:13px;font-weight:700;color:var(--txt)">🎭 Charger des donnees de demo</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">2 equipes + 8 joueurs fictifs pour tester l'app</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 equipes + 40 joueurs fictifs pour tester l'app</div>
+    </div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoEvents()">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🗓️ Entrainements fictifs (semaine prochaine)</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 entrainements + 1 match samedi, pour tester le calendrier</div>
     </div>
     <div style="margin:0 12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="clearDemoData()">
       <div style="font-size:13px;font-weight:700;color:var(--txt)">🧹 Vider les donnees de demo</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime uniquement les equipes/joueurs de test</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime equipes/joueurs/evenements de test</div>
     </div>
     <div class="sec">Zone dangereuse</div>
     <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
@@ -3815,12 +3819,66 @@ function loadDemoData(){
   buildAdminHome();
 }
 
+function loadDemoEvents(){
+  if(!confirm("Ajouter des entrainements fictifs pour la semaine prochaine (+ un match samedi) ?"))return;
+  var teams=getTeams();
+  var demoTeams=teams.filter(function(t){return t.demo;});
+  if(!demoTeams.length){
+    alert("Chargez d'abord les equipes de demo (bouton juste au-dessus).");
+    return;
+  }
+
+  var today=new Date();
+  var nextMonday=getMonday(today);
+  nextMonday.setDate(nextMonday.getDate()+7);
+
+  var events=getEvents();
+  var scheduleByDay=[0,1,2,3]; // lundi, mardi, mercredi, jeudi -> entrainements
+  var heures=["18h00 - 19h30","18h30 - 20h00","17h30 - 19h00","19h00 - 20h30"];
+
+  demoTeams.forEach(function(team,ti){
+    var dayIdx=scheduleByDay[ti%scheduleByDay.length];
+    var d=new Date(nextMonday);
+    d.setDate(nextMonday.getDate()+dayIdx);
+    events.push({
+      id:"demo-evt-train-"+ti+"-"+Date.now(),
+      titre:"Entrainement "+team.name,
+      type:"entrainement",
+      date:d.toISOString().slice(0,10),
+      heure:heures[ti%heures.length],
+      lieu:"Gymnase Giraudet",
+      equipe:team.name,
+      demo:true
+    });
+  });
+
+  // Match le samedi pour la 1ere equipe demo
+  var saturday=new Date(nextMonday);
+  saturday.setDate(nextMonday.getDate()+5);
+  events.push({
+    id:"demo-evt-match-"+Date.now(),
+    titre:demoTeams[0].name+" vs ASVEL Villeurbanne (Demo)",
+    type:"match",
+    date:saturday.toISOString().slice(0,10),
+    heure:"15h00",
+    lieu:"Domicile",
+    equipe:demoTeams[0].name,
+    demo:true
+  });
+
+  saveEvents(events);
+  alert("Entrainements fictifs ajoutes pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
+  buildAdminHome();
+}
+
 function clearDemoData(){
-  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs marques Demo) ?"))return;
+  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs/evenements marques Demo) ?"))return;
   var teams=getTeams().filter(function(t){return !t.demo;});
   saveTeams(teams);
   var players=getPlayers().filter(function(p){return !p.demo;});
   savePlayers(players);
+  var events=getEvents().filter(function(e){return !e.demo;});
+  saveEvents(events);
   alert("Donnees de demo supprimees.");
   buildAdminHome();
 }
@@ -6709,7 +6767,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784305346";
+var APP_VERSION="1784305966";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
