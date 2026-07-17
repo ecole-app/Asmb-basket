@@ -338,20 +338,19 @@ initChannels();
 <div class="main" id="main-scroll">
   <div class="scr on" id="scr-portal">
     <div id="portal-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
-    <div class="hero" style="padding:16px 16px 0">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+      <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="home-logo" style="flex-shrink:0"></div>
-        <div>
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6)">Saint-Etienne Metropole Basket</div>
-          <div style="font-size:12px;font-style:italic;color:rgba(255,255,255,.5);margin-top:2px">Un club. Une famille. Un territoire.</div>
-        </div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase">ASMB</div>
       </div>
-      <div id="portal-next-event" style="background:rgba(255,255,255,.08);border-radius:var(--rs) var(--rs) 0 0;margin:0 -16px;padding:12px 16px;display:none;align-items:center;gap:10px">
-        <span style="font-size:18px">📅</span>
-        <div>
-          <div id="portal-next-event-title" style="font-size:12px;font-weight:700;color:#fff"></div>
-          <div id="portal-next-event-sub" style="font-size:10px;color:rgba(255,255,255,.6)"></div>
-        </div>
+      <div id="portal-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
+        <div id="portal-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
+        <div id="portal-next-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
+      </div>
+      <div id="portal-no-event" style="display:none;position:relative;z-index:1">
+        <div style="font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase">Bienvenue</div>
+        <div style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Etienne Metropole Basket</div>
       </div>
     </div>
     <div class="sec">Chiffres cles</div>
@@ -1030,10 +1029,16 @@ initChannels();
 
   <!-- ══════════════ ROLE SELECT ══════════════ -->
   <div class="scr" id="scr-role-select">
-    <div class="hero" style="padding:32px 16px 28px">
-      <div id="role-logo" style="display:flex;justify-content:center;margin-bottom:14px"></div>
-      <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px">Bienvenue sur ASMB</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.6)">Qui etes-vous ?</div>
+    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+      <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
+      <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1">
+        <div id="role-logo" style="flex-shrink:0"></div>
+        <div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase;margin-bottom:6px">ASMB</div>
+          <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px">Bienvenue</div>
+          <div style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px">QUI ETES-VOUS ?</div>
+        </div>
+      </div>
     </div>
     <div style="padding:20px 16px">
       <div onclick="chooseRole('parent')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
@@ -1074,21 +1079,17 @@ initChannels();
 
   <!-- ══════════════ ACCUEIL PARENT ══════════════ -->
   <div class="scr" id="scr-parent-home">
-    <div class="hero" style="padding:16px 16px 0">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+      <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="parent-hero-logo" style="flex-shrink:0"></div>
-        <div>
-          <div id="parent-hero-team" style="font-size:16px;font-weight:900;color:#fff"></div>
-          <div id="parent-date" style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px"></div>
-        </div>
+        <div id="parent-hero-team" style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
       </div>
-      <div id="parent-hero-event" style="background:rgba(255,255,255,.08);border-radius:var(--rs) var(--rs) 0 0;margin:0 -16px;padding:12px 16px;display:none;align-items:center;gap:10px">
-        <span style="font-size:18px">📅</span>
-        <div>
-          <div id="parent-hero-event-title" style="font-size:12px;font-weight:700;color:#fff"></div>
-          <div id="parent-hero-event-sub" style="font-size:10px;color:rgba(255,255,255,.6)"></div>
-        </div>
+      <div id="parent-hero-event" style="display:none;flex-direction:column;position:relative;z-index:1">
+        <div id="parent-hero-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
+        <div id="parent-hero-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
       </div>
+      <div id="parent-date" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
     <div id="parent-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
     <div style="padding:14px 12px 8px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr);background:var(--sf)" id="parent-team-chips"></div>
@@ -1163,21 +1164,17 @@ initChannels();
 
   <!-- ══════════════ EQUIPE (coach) ══════════════ -->
   <div class="scr" id="scr-coach-equipe">
-    <div class="hero" style="padding:16px 16px 0">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+      <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="coach-eq-logo" style="flex-shrink:0"></div>
-        <div>
-          <div id="coach-eq-name" style="font-size:16px;font-weight:900;color:#fff"></div>
-          <div id="coach-eq-cat" style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px"></div>
-        </div>
+        <div id="coach-eq-cat" style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
       </div>
-      <div id="coach-next-event" style="background:rgba(255,255,255,.08);border-radius:var(--rs) var(--rs) 0 0;margin:0 -16px;padding:12px 16px;display:none;align-items:center;gap:10px">
-        <span style="font-size:18px">📅</span>
-        <div>
-          <div id="coach-next-event-title" style="font-size:12px;font-weight:700;color:#fff"></div>
-          <div id="coach-next-event-sub" style="font-size:10px;color:rgba(255,255,255,.6)"></div>
-        </div>
+      <div id="coach-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
+        <div id="coach-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
+        <div id="coach-next-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
       </div>
+      <div id="coach-eq-name" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
     <div class="sec">Membres de l'equipe</div>
     <div id="coach-eq-members" style="padding-bottom:20px"></div>
@@ -1477,17 +1474,19 @@ function buildDashboard(){
 
   el.innerHTML=html;
 
-  // Remplir le bandeau compact en haut avec le prochain evenement
   var heroEvent=document.getElementById("portal-next-event");
-  if(heroEvent){
+  var heroNoEvent=document.getElementById("portal-no-event");
+  if(heroEvent&&heroNoEvent){
     if(upcoming){
       var dToday=new Date().toISOString().slice(0,10);
       var dLabel=upcoming.date===dToday?"Aujourd'hui":upcoming.date;
       document.getElementById("portal-next-event-title").textContent=upcoming.titre;
       document.getElementById("portal-next-event-sub").textContent=dLabel+(upcoming.heure?" · "+upcoming.heure:"");
       heroEvent.style.display="flex";
+      heroNoEvent.style.display="none";
     } else {
       heroEvent.style.display="none";
+      heroNoEvent.style.display="block";
     }
   }
 }
@@ -5891,19 +5890,13 @@ function buildParentHome(){
   setActiveTeamId(activeId);
   var activeTeam=myTeams.find(function(t){return t.id===activeId;});
 
-  // Date du jour
-  var today=new Date();
-  var dateStr=today.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
-  dateStr=dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
-  document.getElementById("parent-date").textContent=dateStr;
-
-  // Bandeau vert compact : logo + equipe + prochain evenement
   var pLogoEl=document.getElementById("parent-hero-logo");
   var pHomeLogo=document.getElementById("home-logo");
   if(pLogoEl&&pHomeLogo&&pHomeLogo.innerHTML)pLogoEl.innerHTML=pHomeLogo.innerHTML;
-  document.getElementById("parent-hero-team").textContent=activeTeam.name;
+  document.getElementById("parent-hero-team").textContent="ASMB · "+activeTeam.name;
   var pNextEv=getNextEventForTeam(activeTeam);
   var pHeroEv=document.getElementById("parent-hero-event");
+  var pDateEl=document.getElementById("parent-date");
   if(pHeroEv){
     if(pNextEv){
       var pdToday=new Date().toISOString().slice(0,10);
@@ -5911,8 +5904,15 @@ function buildParentHome(){
       document.getElementById("parent-hero-event-title").textContent=pNextEv.titre;
       document.getElementById("parent-hero-event-sub").textContent=pdLabel+(pNextEv.heure?" · "+pNextEv.heure:"");
       pHeroEv.style.display="flex";
+      if(pDateEl)pDateEl.style.display="none";
     } else {
       pHeroEv.style.display="none";
+      if(pDateEl){
+        var todayD=new Date();
+        var dStr2=todayD.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+        pDateEl.textContent=dStr2.charAt(0).toUpperCase()+dStr2.slice(1);
+        pDateEl.style.display="block";
+      }
     }
   }
 
@@ -6116,11 +6116,11 @@ function buildCoachEquipe(){
   var logoEl=document.getElementById("coach-eq-logo");
   var homeLogo=document.getElementById("home-logo");
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
-  document.getElementById("coach-eq-name").textContent=team.name;
-  document.getElementById("coach-eq-cat").textContent="Basket-ball · "+team.cat;
+  document.getElementById("coach-eq-cat").textContent="ASMB · "+team.cat;
 
   var nextEv=getNextEventForTeam(team);
   var heroEv=document.getElementById("coach-next-event");
+  var noEv=document.getElementById("coach-eq-name");
   if(heroEv){
     if(nextEv){
       var dToday=new Date().toISOString().slice(0,10);
@@ -6128,8 +6128,10 @@ function buildCoachEquipe(){
       document.getElementById("coach-next-event-title").textContent=nextEv.titre;
       document.getElementById("coach-next-event-sub").textContent=dLabel+(nextEv.heure?" · "+nextEv.heure:"");
       heroEv.style.display="flex";
+      if(noEv)noEv.style.display="none";
     } else {
       heroEv.style.display="none";
+      if(noEv){noEv.textContent=team.name;noEv.style.display="block";}
     }
   }
 
@@ -6323,7 +6325,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784235890";
+var APP_VERSION="1784300868";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
