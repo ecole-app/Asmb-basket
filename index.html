@@ -3447,6 +3447,15 @@ function getMonday(d){
 
 var calFilterMode="mine";
 
+function toggleCalEventExpand(eventId){
+  var slot=document.getElementById("cal-checkin-"+eventId);
+  var chevron=document.getElementById("cal-chevron-"+eventId);
+  if(!slot)return;
+  var isOpen=slot.style.display==="block";
+  slot.style.display=isOpen?"none":"block";
+  if(chevron)chevron.textContent=isOpen?"›":"⌄";
+}
+
 function setCalFilter(mode){
   calFilterMode=mode;
   document.getElementById("cal-filter-mine").classList.toggle("on",mode==="mine");
@@ -3507,9 +3516,10 @@ function buildCalendrier(){
         eventsHtml='<div style="font-size:11px;color:var(--mut);padding:6px 0 6px 4px">Aucun evenement</div>';
       } else {
         dayEvents.forEach(function(e){
-          eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
-            '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div></div>'+
-            '<div id="cal-checkin-'+e.id+'"></div>'+
+          var isMatch=e.type==="match";
+          eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px'+(isMatch?";cursor:pointer":"")+'"'+(isMatch?' onclick="toggleCalEventExpand(\''+e.id+'\')"':"")+'>'+
+            '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<span style="color:var(--mut);font-size:14px" id="cal-chevron-'+e.id+'">›</span>':"")+'</div>'+
+            (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="display:none" onclick="event.stopPropagation()"></div>':"")+
           '</div>';
         });
       }
@@ -3518,7 +3528,28 @@ function buildCalendrier(){
       content.appendChild(dayBlock);
     });
 
-    // Boutons de pointage pour le joueur/parent lie
+    // Ligne "absences/retards declares", visible par tous, sur chaque evenement
+    events.forEach(function(e){
+      var absEl=document.getElementById("cal-absences-"+e.id);
+      if(!absEl)return;
+      window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+        var notable=[];
+        snap.forEach(function(d){
+          var c=d.data();
+          if(c.eventId===e.id&&(c.status==="absent"||c.status==="retard"))notable.push(c);
+        });
+        if(!notable.length)return;
+        var icons={absent:"🔴",retard:"🟠"};
+        var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
+        notable.forEach(function(c){
+          html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+(icons[c.status]||"")+' '+c.playerName+' '+(c.status==="absent"?"absent(e)":"en retard")+'</div>';
+        });
+        html+='</div>';
+        absEl.innerHTML=html;
+      }).catch(function(){});
+    });
+
+    // Action de pointage pour le joueur/parent lie (affichee au clic sur la carte)
     var linkedPlayer=getLinkedPlayerForCheckin();
     if(linkedPlayer){
       events.forEach(function(e){
@@ -3527,19 +3558,23 @@ function buildCalendrier(){
         var eq=(e.equipe||"").toUpperCase();
         var matches=eq.indexOf(linkedPlayer.cat.toUpperCase())>=0;
         if(!matches)return;
-        checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
-          var statusLabels={present:"✓ Present",retard:"⏰ Retard",absent:"✕ Absent"};
-          var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
-          if(existing){
-            slot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[existing.status]+' · enregistre</div>';
-          } else {
-            slot.innerHTML='<div style="display:flex;gap:6px;margin-top:8px">'+
-              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
-              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'retard\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">⏰ Retard</button>'+
-              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
-            '</div>';
-          }
-        });
+
+        if(e.type==="match"){
+          checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
+            var statusLabels={present:"✓ Present",absent:"✕ Absent"};
+            var statusColors={present:"#27AE60",absent:"#C0392B"};
+            if(existing&&(existing.status==="present"||existing.status==="absent")){
+              slot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[existing.status]+' · enregistre</div>';
+            } else {
+              slot.innerHTML='<div style="display:flex;gap:6px;margin-top:8px">'+
+                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
+                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
+              '</div>';
+            }
+          });
+        } else {
+          slot.innerHTML='<div style="margin-top:8px"><button onclick="signalerAbsence(\''+e.id+'\')" style="width:100%;padding:9px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button></div>';
+        }
       });
     }
   });
@@ -5993,13 +6028,19 @@ function buildJoueurScreen(player){
         var statusLabels={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
         var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
         var lockedBadge=locked?('<div style="text-align:center;padding:10px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:13px;font-weight:800;margin-top:10px">'+statusLabels[existing.status]+' · deja enregistre</div>'):"";
-        card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+ev.titre+'</div>'+
-          '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+(ev.heure||"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+
-          (locked?lockedBadge:'<div style="display:flex;gap:8px;margin-top:12px" id="joueur-btns-'+ev.id+'">'+
+        var actionHtml;
+        if(locked){
+          actionHtml=lockedBadge;
+        } else if(ev.type==="match"){
+          actionHtml='<div style="display:flex;gap:8px;margin-top:12px" id="joueur-btns-'+ev.id+'">'+
             '<button onclick="joueurSelfCheckin(\''+player.id+'\',\''+ev.id+'\',\'present\')" style="flex:1;padding:11px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
-            '<button onclick="joueurSelfCheckin(\''+player.id+'\',\''+ev.id+'\',\'retard\')" style="flex:1;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">⏰ Retard</button>'+
             '<button onclick="joueurSelfCheckin(\''+player.id+'\',\''+ev.id+'\',\'absent\')" style="flex:1;padding:11px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
-          '</div>');
+          '</div>';
+        } else {
+          actionHtml='<div style="margin-top:12px"><button onclick="signalerAbsence(\''+ev.id+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:12px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button></div>';
+        }
+        card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+ev.titre+'</div>'+
+          '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+(ev.heure||"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+actionHtml;
         el.appendChild(card);
       });
     });
@@ -6767,7 +6808,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784305966";
+var APP_VERSION="1784306769";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
