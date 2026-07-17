@@ -3267,13 +3267,20 @@ function openPresences(eventId){
   relevantPlayers.forEach(function(p){
     var state=presences[p.id]||"present";
     var div=document.createElement("div");
-    div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
+    div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
+    div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
         '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Present</button>'+
         '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
       '</div>';
     el.appendChild(div);
+    checkExistingCheckin(eventId,p.id).then(function(existing){
+      var badgeEl=document.getElementById("selfdecl-"+p.id);
+      if(!badgeEl||!existing)return;
+      var labels={present:"✓ auto",retard:"⏰ retard (auto)",absent:"✕ auto"};
+      var colors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+      badgeEl.innerHTML='<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;color:#fff;background:'+colors[existing.status]+'">'+labels[existing.status]+'</span>';
+    });
   });
   document.getElementById("modal-presence").style.display="flex";
 }
@@ -3455,7 +3462,7 @@ function buildCalendrier(){
   }
   var sunday=days[6];
   var labelFmt=function(d){return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});};
-  document.getElementById("cal-week-label").textContent=labelFmt(monday)+" - "+labelFmt(sunday);
+  document.getElementById("cal-week-label").textContent=labelFmt(monday)+" - "+labelFmt(sunday)+" "+sunday.getFullYear();
 
   var filterRow=document.getElementById("cal-filter-row");
   var isCoach=localStorage.getItem("asmb_profile")==="coach";
@@ -3496,8 +3503,9 @@ function buildCalendrier(){
         eventsHtml='<div style="font-size:11px;color:var(--mut);padding:6px 0 6px 4px">Aucun evenement</div>';
       } else {
         dayEvents.forEach(function(e){
-          eventsHtml+='<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
-            '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+
+          eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
+            '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div></div>'+
+            '<div id="cal-checkin-'+e.id+'"></div>'+
           '</div>';
         });
       }
@@ -3505,6 +3513,31 @@ function buildCalendrier(){
       dayBlock.innerHTML=dayHeader+eventsHtml;
       content.appendChild(dayBlock);
     });
+
+    // Boutons de pointage pour le joueur/parent lie
+    var linkedPlayer=getLinkedPlayerForCheckin();
+    if(linkedPlayer){
+      events.forEach(function(e){
+        var slot=document.getElementById("cal-checkin-"+e.id);
+        if(!slot)return;
+        var eq=(e.equipe||"").toUpperCase();
+        var matches=eq.indexOf(linkedPlayer.cat.toUpperCase())>=0;
+        if(!matches)return;
+        checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
+          var statusLabels={present:"✓ Present",retard:"⏰ Retard",absent:"✕ Absent"};
+          var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+          if(existing){
+            slot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[existing.status]+' · enregistre</div>';
+          } else {
+            slot.innerHTML='<div style="display:flex;gap:6px;margin-top:8px">'+
+              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
+              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'retard\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">⏰ Retard</button>'+
+              '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
+            '</div>';
+          }
+        });
+      });
+    }
   });
 }
 
@@ -5831,6 +5864,8 @@ function chooseRole(role){
 }
 
 // ── ESPACE JOUEUR (auto-pointage) ──────────────────────────────────
+var joueurIdentifiedPlayer=null;
+
 function openJoueurCheckin(){
   var phone=prompt("Ton numero de telephone (celui donne au club) :");
   if(!phone)return;
@@ -5840,9 +5875,23 @@ function openJoueurCheckin(){
     alert("Numero non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
   }
+  joueurIdentifiedPlayer=player;
   stack=["joueur"];
   showScr("joueur");
   buildJoueurScreen(player);
+}
+
+function getLinkedPlayerForCheckin(){
+  if(joueurIdentifiedPlayer)return joueurIdentifiedPlayer;
+  if(localStorage.getItem("asmb_profile")==="parent"&&myPhone){
+    var activeTeamId=getActiveTeamId();
+    var myTeam=getTeams().find(function(t){return t.id===activeTeamId;});
+    var lic=myTeam?getMyLicenceForTeam(myTeam):null;
+    if(lic&&lic.fiche){
+      return getPlayers().find(function(p){return p.prenom===lic.fiche.prenom&&p.nom===lic.fiche.nom;})||null;
+    }
+  }
+  return null;
 }
 
 function buildJoueurScreen(player){
@@ -5930,11 +5979,15 @@ function joueurSelfCheckin(playerId,eventId,status){
     eventTitre:ev?ev.titre:"",eventDate:ev?ev.date:"",
     status:status,ts:window.fbServerTimestamp(),source:"self"
   }).then(function(){
+    var statusLabels={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
+    var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
     var btnsEl=document.getElementById("joueur-btns-"+eventId);
     if(btnsEl){
-      var statusLabels={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
-      var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
       btnsEl.outerHTML='<div style="text-align:center;padding:10px;border-radius:var(--rx);background:'+statusColors[status]+';color:#fff;font-size:13px;font-weight:800;margin-top:10px">'+statusLabels[status]+' · enregistre</div>';
+    }
+    var calSlot=document.getElementById("cal-checkin-"+eventId);
+    if(calSlot){
+      calSlot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[status]+' · enregistre</div>';
     }
     if((status==="absent"||status==="retard")&&ev){
       var channelId=findChannelForTeamText(ev.equipe||player.cat);
@@ -6656,7 +6709,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784304455";
+var APP_VERSION="1784305346";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
