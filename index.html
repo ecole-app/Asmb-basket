@@ -360,6 +360,7 @@ initChannels();
     <div style="text-align:center;padding-bottom:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
       <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📇 Annuaire du club</button>
       <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📷 Galerie photos</button>
+        <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📅 Calendrier</button>
     </div>
   </div>
 
@@ -1116,6 +1117,7 @@ initChannels();
         <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Gerer mes equipes</button>
         <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📇 Annuaire du club</button>
         <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📷 Galerie photos</button>
+        <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📅 Calendrier</button>
       </div>
     </div>
   </div>
@@ -1137,6 +1139,20 @@ initChannels();
     <img id="photo-view-img" style="max-width:92%;max-height:75vh;border-radius:8px">
     <div id="photo-view-caption" style="color:rgba(255,255,255,.7);font-size:12px;margin-top:14px;text-align:center;padding:0 20px"></div>
     <button id="photo-delete-btn" onclick="deleteGalleryPhoto()" style="display:none;margin-top:16px;padding:9px 18px;border-radius:20px;background:rgba(192,57,43,.8);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer">🗑️ Supprimer</button>
+  </div>
+
+  <!-- ══════════════ CALENDRIER PARTAGE (semaine) ══════════════ -->
+  <div class="scr" id="scr-calendrier">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+      <button onclick="shiftCalWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">‹</button>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entrainements et matchs</div></div>
+      <button onclick="shiftCalWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">›</button>
+    </div>
+    <div id="cal-filter-row" style="display:none;padding:10px 16px;gap:8px">
+      <button class="cat-filter on" onclick="setCalFilter(\'mine\')" id="cal-filter-mine">Mon equipe</button>
+      <button class="cat-filter" onclick="setCalFilter(\'all\')" id="cal-filter-all">Toutes les equipes</button>
+    </div>
+    <div id="cal-week-content" style="padding:12px 0 80px"></div>
   </div>
 
   <div class="scr" id="scr-annuaire">
@@ -1193,6 +1209,7 @@ initChannels();
       <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Modifier mon equipe</button>
       <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📇 Annuaire du club</button>
       <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📷 Galerie photos</button>
+        <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📅 Calendrier</button>
     </div>
   </div>
 
@@ -1379,7 +1396,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon equipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon equipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entrainements et matchs"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -3394,6 +3411,103 @@ function toggleNotif(checked){
 function getAnnuaire(){try{return JSON.parse(localStorage.getItem("asmb_annuaire")||"[]");}catch(e){return [];}}
 function saveAnnuaireList(list){localStorage.setItem("asmb_annuaire",JSON.stringify(list));}
 
+var calWeekOffset=0;
+
+function openCalendrier(){
+  calWeekOffset=0;
+  stack.push("calendrier");
+  showScr("calendrier");
+  buildCalendrier();
+}
+
+function shiftCalWeek(dir){
+  calWeekOffset+=dir;
+  buildCalendrier();
+}
+
+function getMonday(d){
+  var day=d.getDay();
+  var diff=day===0?-6:1-day;
+  var monday=new Date(d);
+  monday.setDate(d.getDate()+diff);
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+
+var calFilterMode="mine";
+
+function setCalFilter(mode){
+  calFilterMode=mode;
+  document.getElementById("cal-filter-mine").classList.toggle("on",mode==="mine");
+  document.getElementById("cal-filter-all").classList.toggle("on",mode==="all");
+  buildCalendrier();
+}
+
+function buildCalendrier(){
+  var base=new Date();
+  base.setDate(base.getDate()+calWeekOffset*7);
+  var monday=getMonday(base);
+  var days=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    days.push(d);
+  }
+  var sunday=days[6];
+  var labelFmt=function(d){return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});};
+  document.getElementById("cal-week-label").textContent=labelFmt(monday)+" - "+labelFmt(sunday);
+
+  var filterRow=document.getElementById("cal-filter-row");
+  var isCoach=localStorage.getItem("asmb_profile")==="coach";
+  var coachTeam=isCoach?getCoachTeam():null;
+  if(filterRow)filterRow.style.display=(isCoach&&coachTeam)?"flex":"none";
+
+  fetchEventsFromCloud().then(function(events){
+    if(isCoach&&coachTeam&&calFilterMode==="mine"){
+      events=events.filter(function(e){
+        var eq=(e.equipe||"").toUpperCase();
+        return eq.indexOf(coachTeam.cat.toUpperCase())>=0||eq.indexOf(coachTeam.name.toUpperCase())>=0;
+      });
+    }
+    var content=document.getElementById("cal-week-content");
+    content.innerHTML="";
+    var dayNames=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+    var todayStr=new Date().toISOString().slice(0,10);
+    var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
+
+    days.forEach(function(d,idx){
+      var dStr=d.toISOString().slice(0,10);
+      var isSaturday=idx===5;
+      var isToday=dStr===todayStr;
+      var dayEvents=events.filter(function(e){return e.date===dStr&&!e.cancelled;});
+      if(isSaturday){
+        dayEvents=dayEvents.slice().sort(function(a,b){return a.type==="match"?-1:(b.type==="match"?1:0);});
+      }
+
+      var dayBlock=document.createElement("div");
+      dayBlock.style.cssText="padding:10px 16px";
+      var dayHeader='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<span style="font-size:11px;font-weight:800;color:'+(isToday?"var(--dkg)":"var(--mut)")+';text-transform:uppercase;letter-spacing:.5px">'+dayNames[idx]+' '+d.getDate()+(isSaturday?" 🏀":"")+'</span>'+
+        (isToday?'<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--dkg);color:#fff">AUJOURD\'HUI</span>':"")+
+      '</div>';
+
+      var eventsHtml="";
+      if(!dayEvents.length){
+        eventsHtml='<div style="font-size:11px;color:var(--mut);padding:6px 0 6px 4px">Aucun evenement</div>';
+      } else {
+        dayEvents.forEach(function(e){
+          eventsHtml+='<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
+            '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+
+          '</div>';
+        });
+      }
+
+      dayBlock.innerHTML=dayHeader+eventsHtml;
+      content.appendChild(dayBlock);
+    });
+  });
+}
+
 function openAnnuaire(){
   var addBtn=document.getElementById("annuaire-add-btn");
   if(addBtn)addBtn.style.display=window.asmbCoachMode?"block":"none";
@@ -4190,7 +4304,7 @@ function buildPlanning(){
     var convocCount=e.convocations?e.convocations.length:0;
     var convocBtn=(e.type==="match")?("<button onclick=\"showConvocation('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer\">📋 Convocation"+(convocCount?" ("+convocCount+")":"")+"</button>"):"";
     var weatherBtn=(e.type==="match"&&e.lieu)?("<button onclick=\"showWeather('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer\">☀️ Meteo</button>"):"";
-    var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">✏️ Modifier horaire</button>";
+    var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">✏️ Modifier</button>";
     var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">🚫 Annuler</button>";
     var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\">🚫 EVENEMENT ANNULE</div>":"";
     d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+convocBtn+weatherBtn+editTimeBtn+cancelBtn+"</div>"+delBtn+"</div>";
@@ -4376,23 +4490,38 @@ function editEventDateTime(eventId){
   var idx=events.findIndex(function(e){return e.id===eventId;});
   if(idx<0)return;
   var ev=events[idx];
-  var oldDate=ev.date,oldHeure=ev.heure;
-  var newDate=prompt("Nouvelle date (AAAA-MM-JJ) :",ev.date);
+  var oldDate=ev.date,oldHeure=ev.heure,oldEquipe=ev.equipe,oldLieu=ev.lieu;
+
+  var newDate=prompt("Date (AAAA-MM-JJ) :",ev.date);
   if(newDate===null)return;
-  var newHeure=prompt("Nouvelle heure :",ev.heure||"");
+  var newHeure=prompt("Heure :",ev.heure||"");
   if(newHeure===null)return;
-  var changed=(newDate!==oldDate)||(newHeure!==oldHeure);
+
+  var teams=getTeams();
+  var teamNames=teams.map(function(t){return t.name;}).join(", ");
+  var newEquipe=prompt("Equipe concernee (options : "+teamNames+") :",ev.equipe||"");
+  if(newEquipe===null)return;
+  var newLieu=prompt("Lieu :",ev.lieu||"");
+  if(newLieu===null)return;
+
+  var changed=(newDate!==oldDate)||(newHeure!==oldHeure)||(newEquipe!==oldEquipe)||(newLieu!==oldLieu);
   ev.date=newDate.trim()||oldDate;
   ev.heure=newHeure.trim();
+  ev.equipe=newEquipe.trim();
+  ev.lieu=newLieu.trim();
   saveEvents(events);
   buildPlanning();
   if(changed&&window.fbReady){
     var channelId=findChannelForTeamText(ev.equipe);
+    var changesTxt=[];
+    if(newDate!==oldDate||newHeure!==oldHeure)changesTxt.push("nouveau rendez-vous le "+ev.date+(ev.heure?" a "+ev.heure:""));
+    if(newEquipe!==oldEquipe)changesTxt.push("equipe : "+ev.equipe);
+    if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"⚠️ <b>Changement d'horaire</b><br>\""+ev.titre+"\" a change : nouveau rendez-vous le "+ev.date+(ev.heure?" a "+ev.heure:"")+" (au lieu du "+oldDate+(oldHeure?" a "+oldHeure:"")+")",
+      text:"⚠️ <b>Creneau modifie</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:"⚠️ ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    alert("Horaire modifie, alerte envoyee dans le canal.");
+    alert("Creneau modifie, alerte envoyee dans le canal.");
   }
 }
 function editScore(eventId){
@@ -6527,7 +6656,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784302506";
+var APP_VERSION="1784304455";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
