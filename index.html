@@ -230,12 +230,12 @@ window.fbReady = true;
 // Init default channels if needed
 async function initChannels(){
   const channels = [
-    {id:"général", name:"Général", icon:"🏀", desc:"Canal principal ASMB"},
+    {id:"general", name:"Général", icon:"🏀", desc:"Canal principal ASMB"},
     {id:"u13f", name:"U13 Féminin", icon:"👧", desc:"Équipe U13F"},
     {id:"u15", name:"U15", icon:"⛹️", desc:"Équipe U15"},
     {id:"seniors", name:"Seniors", icon:"🏆", desc:"Équipe Seniors"},
     {id:"coaches", name:"Coachs", icon:"📋", desc:"Staff et encadrants"},
-    {id:"événements", name:"Evénements", icon:"🎉", desc:"Annonces et événements"},
+    {id:"evenements", name:"Evénements", icon:"🎉", desc:"Annonces et événements"},
   ];
   for(const ch of channels){
     await setDoc(doc(db,"channels",ch.id), ch, {merge:true});
@@ -253,7 +253,7 @@ initChannels();
 
 <header class="hdr">
   <button class="hbk" id="hbk" onclick="goBack()">&#8592;</button>
-  <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Etienne Metropole Basket</div></div>
+  <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Étienne Métropole Basket</div></div>
   <button class="theme-btn" onclick="switchProfile()" title="Changer de profil">&#128100;</button>
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
   <div id="hlogo" style="flex-shrink:0"></div>
@@ -350,7 +350,7 @@ initChannels();
       </div>
       <div id="portal-no-event" style="display:none;position:relative;z-index:1">
         <div data-line1 style="font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase">Bienvenue</div>
-        <div data-line2 style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Etienne Metropole Basket</div>
+        <div data-line2 style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Étienne Métropole Basket</div>
       </div>
     </div>
     <div class="sec">Chiffres clés</div>
@@ -367,14 +367,14 @@ initChannels();
   <div class="scr" id="scr-elite">
     <div class="hero" style="padding:16px">
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:4px">Planification</div>
-      <div style="font-size:18px;font-weight:900;color:#fff">Pole Formation</div>
+      <div style="font-size:18px;font-weight:900;color:#fff">Pôle Formation</div>
     </div>
     <div class="sec">Catégories</div>
     <div id="eliteCards" style="padding-bottom:16px"></div>
   </div>
   <div class="scr" id="scr-u13home">
     <div class="hero" style="padding:16px 16px 14px">
-      <div style="font-size:18px;font-weight:900;color:#fff">U13 <span style="color:var(--ltg)">Feminin</span></div>
+      <div style="font-size:18px;font-weight:900;color:#fff">U13 <span style="color:var(--ltg)">Féminin</span></div>
       <div id="u13chips" style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
     </div>
     <div class="sec">Vacances Zone A</div>
@@ -487,7 +487,7 @@ initChannels();
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Planning</div>
-        <div style="font-size:11px;color:var(--mut)">Salles · Creneaux · Matchs</div>
+        <div style="font-size:11px;color:var(--mut)">Salles · Créneaux · Matchs</div>
       </div>
 
     </div>
@@ -556,7 +556,7 @@ initChannels();
         </div>
         <!-- Repetition -->
         <div class="form-group">
-          <label class="form-label">Répéter ce creneau</label>
+          <label class="form-label">Répéter ce créneau</label>
           <select class="form-select" id="cr-repeat">
             <option value="0">Une seule fois</option>
             <option value="4">4 semaines</option>
@@ -639,7 +639,7 @@ initChannels();
   <!-- ═══ DETAIL LICENCE (admin) ═══ -->
   <div class="scr" id="scr-licence-detail">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
-      <div style="font-size:16px;font-weight:800;color:var(--txt)">Detail de la fiche</div>
+      <div style="font-size:16px;font-weight:800;color:var(--txt)">Détail de la fiche</div>
     </div>
     <div id="lic-detail-content" style="padding:16px;padding-bottom:80px"></div>
   </div>
@@ -659,7 +659,7 @@ initChannels();
   <!-- ═══ ELITE ACADEMY ═══ -->
   <div class="scr" id="scr-pole-elite">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Elite Academy</div><div style="font-size:11px;color:var(--mut)" id="elite-count">0 session</div></div>
+      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Élite Academy</div><div style="font-size:11px;color:var(--mut)" id="elite-count">0 session</div></div>
     </div>
     <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
       <button onclick="showAddPoleItem('elite','session')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid #1a6b30;color:#1a6b30;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">⭐ + Session</button>
@@ -849,7 +849,7 @@ initChannels();
         <button class="cat-filter" id="ph-period-all" onclick="setPresencePeriod('all')">Tout</button>
       </div>
       <div id="ph-summary"></div>
-      <div class="sec" style="padding:12px 0 8px">Detail par événement</div>
+      <div class="sec" style="padding:12px 0 8px">Détail par événement</div>
       <div id="ph-detail-list"></div>
       <div id="ph-self-declared"></div>
     </div>
@@ -1255,17 +1255,17 @@ initChannels();
 
 <nav class="bnav" id="bnav-main">
   <button class="bni on" id="bni-portal" onclick="navTo('portal')"><span class="bni-ic">&#127968;</span>Accueil</button>
-  <button class="bni" id="bni-communaute" onclick="navTo('communaute')"><span class="bni-ic">&#128172;</span>Communaute</button>
+  <button class="bni" id="bni-communaute" onclick="navTo('communaute')"><span class="bni-ic">&#128172;</span>Communauté</button>
   <button class="bni" id="bni-inscription" onclick="navTo('inscription')"><span class="bni-ic">&#128203;</span>Inscription</button>
   <button class="bni" id="bni-admin" onclick="navTo('admin')"><span class="bni-ic">&#128274;</span>Admin</button>
 </nav>
 
 <script>
 const POLES=[
-  {id:"formation",name:"Pole Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1B5C28",ready:true,
+  {id:"formation",name:"Pôle Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1B5C28",ready:true,
    about:"Structurer et developper la pratique du basket a tous les niveaux. Entraîneurs diplomes, suivi individualise, methodologie structuree.",
    items:["École de basket · Catégories jeunes","Accès au niveau compétition","Suivi individualise · Progression continue","Formation des educateurs en continu"]},
-  {id:"elite",name:"Elite Academy",sub:"Accompagner les jeunes talents",desc:"Formation · Scolaire · Personnel",icon:"⭐",color:"#1a6b30",ready:true,
+  {id:"elite",name:"Élite Academy",sub:"Accompagner les jeunes talents",desc:"Formation · Scolaire · Personnel",icon:"⭐",color:"#1a6b30",ready:true,
    about:"Accompagner les jeunes joueurs dans leur progression sportive, scolaire et personnelle. Plus qu'une formation sportive, une école de la vie.",
    items:["Entraînements adaptes aux academiciens","Développement technique tactique et physique","Aide aux devoirs et suivi scolaire","Apprentissage de l'autonomie et responsabilité"]},
   {id:"competition",name:"Compétition 5x5",sub:"Le coeur du projet sportif ASMB",desc:"Compétitions · Entraînements · Équipes",icon:"🏆",color:"#C0392B",ready:true,
@@ -1282,7 +1282,7 @@ const POLES=[
    items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Séances adaptees et bienveillantes"]}
 ];
 const ELITE_CATS=[
-  {id:"u13f",name:"U13 Feminin",desc:"5 cycles · 47 séances · 2025-2026",icon:"👧",color:"#27AE60",ready:true},
+  {id:"u13f",name:"U13 Féminin",desc:"5 cycles · 47 séances · 2025-2026",icon:"👧",color:"#27AE60",ready:true},
   {id:"u13m",name:"U13 Masculin",desc:"Bientot disponible",icon:"👦",color:"#27AE60",ready:false}
 ];
 const VACS=[
@@ -1416,7 +1416,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -1570,7 +1570,7 @@ function showLicenciesList(){
 
 function sortLicenciesList(mode){
   licenciesSortMode=mode;
-  document.querySelectorAll("#modal-licenciés-list .cat-filter").forEach(function(b){b.classList.remove("on");});
+  document.querySelectorAll("#modal-licencies-list .cat-filter").forEach(function(b){b.classList.remove("on");});
   document.getElementById("sortby-"+mode).classList.add("on");
   var players=getPlayers().slice();
   players.sort(function(a,b){
@@ -2738,7 +2738,7 @@ function sendLicenceMail(lic){
   var appUrl=window.location.href.split("?")[0];
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
-    "L'ASMB (Saint-Etienne Metropole Basket) vous invite a completer votre fiche d'inscription en ligne.\n\n"+
+    "L'ASMB (Saint-Étienne Métropole Basket) vous invite a completer votre fiche d'inscription en ligne.\n\n"+
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"+
     "  VOTRE CODE D'INSCRIPTION\n\n"+
     "        "+lic.code+"\n\n"+
@@ -2751,7 +2751,7 @@ function sendLicenceMail(lic){
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de probleme, contactez le club directement.\n\n"+
     "L'équipe ASMB\n"+
-    "Saint-Etienne Metropole Basket\n"+
+    "Saint-Étienne Métropole Basket\n"+
     "—\n"+
     "🏀 ASMB · EST. 2022";
   var mailto="mailto:"+lic.email+"?subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
@@ -2792,7 +2792,7 @@ function renderLicenceDetail(lic){
   if(lic.fiche){
     var f=lic.fiche;
     var rows=[
-      ["Genre",f.genre==="F"?"Feminin":"Masculin"],
+      ["Genre",f.genre==="F"?"Féminin":"Masculin"],
       ["Prénom",f.prenom],["Nom",f.nom],
       ["Date de naissance",f.naissance],
       ["Ne(e) a l etranger",f.neEtranger?"Oui - "+(f.villeNaiss||"?")+", "+(f.paysNaiss||"?"):"Non"],["Adresse",f.adresse],
@@ -3075,7 +3075,7 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Genre *</label>'+
         '<div style="display:flex;gap:10px">'+
           '<button id="btn-M" onclick="selectGenre(\'M\')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.genre==="M"?"var(--dkg)":"var(--bdr)")+';background:'+(f.genre==="M"?"var(--dkg)":"var(--bg)")+';color:'+(f.genre==="M"?"#fff":"var(--mut)")+';cursor:pointer">Masculin</button>'+
-          '<button id="btn-F" onclick="selectGenre(\'F\')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.genre==="F"?"var(--dkg)":"var(--bdr)")+';background:'+(f.genre==="F"?"var(--dkg)":"var(--bg)")+';color:'+(f.genre==="F"?"#fff":"var(--mut)")+';cursor:pointer">Feminin</button>'+
+          '<button id="btn-F" onclick="selectGenre(\'F\')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.genre==="F"?"var(--dkg)":"var(--bdr)")+';background:'+(f.genre==="F"?"var(--dkg)":"var(--bg)")+';color:'+(f.genre==="F"?"#fff":"var(--mut)")+';cursor:pointer">Féminin</button>'+
         '</div>'+
       '</div>'+
       '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prénom"></div>'+
@@ -3290,7 +3290,7 @@ function openPresences(eventId){
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
     div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
-        '<button data-pid="'+p.id+'" data-state="présent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
+        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
         '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
       '</div>';
     el.appendChild(div);
@@ -3365,7 +3365,7 @@ function sendBroadcast(){
   if(!sujet||!message){alert("Objet et message obligatoires");return;}
   var emails=getAllContactEmails();
   if(!emails.length){alert("Aucun contact email trouve");return;}
-  var body="Bonjour,\n\n"+message+"\n\nL'équipe ASMB\nSaint-Etienne Metropole Basket";
+  var body="Bonjour,\n\n"+message+"\n\nL'équipe ASMB\nSaint-Étienne Métropole Basket";
   var mailto="mailto:?bcc="+emails.join(",")+"&subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
   window.location.href=mailto;
   closeModal("modal-broadcast");
@@ -3978,11 +3978,11 @@ function loadDemoData(){
   var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
   lics.push({
     code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
-    statut:"validée",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
-    catégorie:"U13",
+    statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
+    categorie:"U13",
     fiche:{
-      prénom:"Lea",nom:"Martin",naissance:"2013-01-01",
-      téléphone:"",respTel:"0700000000",resp2Tel:"",
+      prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
+      telephone:"",respTel:"0700000000",resp2Tel:"",
       adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
       urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
     }
@@ -4016,12 +4016,12 @@ function loadDemoEvents(){
     d.setDate(nextMonday.getDate()+dayIdx);
     events.push({
       id:"demo-evt-train-"+ti+"-"+Date.now(),
-      titre:"Entrainement "+team.name,
+      titre:"Entraînement "+team.name,
       type:"entrainement",
       date:d.toISOString().slice(0,10),
       heure:heures[ti%heures.length],
       lieu:"Gymnase Giraudet",
-      équipe:team.name,
+      equipe:team.name,
       demo:true
     });
   });
@@ -4036,17 +4036,17 @@ function loadDemoEvents(){
     date:saturday.toISOString().slice(0,10),
     heure:"15h00",
     lieu:"Domicile",
-    équipe:demoTeams[0].name,
+    equipe:demoTeams[0].name,
     demo:true
   });
 
   saveEvents(events);
-  alert("Entrainements fictifs ajoutes pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
+  alert("Entraînements fictifs ajoutes pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
   buildAdminHome();
 }
 
 function clearDemoData(){
-  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs/evenements/licences marques Demo) ?"))return;
+  if(!confirm("Supprimer uniquement les données de demonstration (équipes/joueurs/événements/licences marques Demo) ?"))return;
   var teams=getTeams().filter(function(t){return !t.demo;});
   saveTeams(teams);
   var players=getPlayers().filter(function(p){return !p.demo;});
@@ -4055,18 +4055,18 @@ function clearDemoData(){
   saveEvents(events);
   var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
   saveLicences(lics);
-  alert("Donnees de demo supprimees.");
+  alert("Données de demo supprimees.");
   buildAdminHome();
 }
 
 // ═══ ADMIN ════════════════════════════════════════════════════════
 var ADMIN_MODULES=[
-  {id:"parametres",name:"Parametres",sub:"Notifications - Compte - Donnees",icon:"⚙️",color:"#5a76aa",scr:"parametres"},
-  {id:"communaute",name:"Communaute",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
+  {id:"parametres",name:"Paramètres",sub:"Notifications - Compte - Données",icon:"⚙️",color:"#5a76aa",scr:"parametres"},
+  {id:"communaute",name:"Communauté",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
   {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#27AE60",scr:"licences"},
   {id:"inscriptions",name:"Inscriptions",sub:"Fiches joueurs · Licences",icon:"📝",color:"#1B5C28",scr:"inscriptions"},
-  {id:"equipes",name:"Equipes",sub:"Composition · Staff · Maillots",icon:"👥",color:"#16A085",scr:"equipes"},
-  {id:"planning",name:"Planning",sub:"Salles · Creneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
+  {id:"equipes",name:"Équipes",sub:"Composition · Staff · Maillots",icon:"👥",color:"#16A085",scr:"equipes"},
+  {id:"planning",name:"Planning",sub:"Salles · Créneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
   {id:"documents",name:"Documents",sub:"Fichiers · Formulaires",icon:"📁",color:"#8E44AD",scr:"documents"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
@@ -4136,7 +4136,7 @@ function renderPlayers(){
   if(!filtered.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👤</div><div style="font-size:13px;font-weight:600">Aucun joueur</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Ajouter</div></div>';return;}
   el.innerHTML="";
   filtered.forEach(function(p){
-    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var col=CAT_COLORS[p.cat]||"#1B5C28";
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     var d=document.createElement("div");d.className="player-card";
@@ -4146,7 +4146,7 @@ function renderPlayers(){
     btns+='<button onclick="editPlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
     btns+='<button onclick="deletePlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
-      +'<div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+'</div>'
+      +'<div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
       +'<div style="margin-top:4px">'+status+'</div></div>'+btns;
     el.appendChild(d);
@@ -4171,16 +4171,16 @@ function renderPlayerForm(p){
   var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
   var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencie</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
   document.getElementById("player-form").innerHTML=
-    '<div class="form-group"><label class="form-label">Prenom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prénom"></div>'+
+    '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prénom"></div>'+
     '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="fp-nom" value="'+(p?p.nom:'')+'" placeholder="Nom de famille"></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
-    '<div class="form-group"><label class="form-label">Categorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigne</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Feminin</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Telephone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entraînements)"></div>'+
+    '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
+    '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigne</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entraînements)"></div>'+
     '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder="Ex: 7"></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="compétition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
     '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+(p?p.contact:'')+'" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+(p?p.notes:'')+'</textarea></div>';
@@ -4393,7 +4393,7 @@ function exportPlayersPDF(){
   doc.text("ASMB - Liste des licenciés",14,16);
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
-  doc.text("Saint-Etienne Metropole Basket - Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
+  doc.text("Saint-Étienne Métropole Basket - Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
   if(currentCatFilter!=="all"){doc.text("Catégorie : "+currentCatFilter,14,27);}
 
   var headers=["Nom","Prénom","Catégorie","Type licence","N° licence","Statut"];
@@ -4649,7 +4649,7 @@ function saveCreneau(){
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();
-  if(occurrences>1)alert(occurrences+" creneaux crees (repetition hebdomadaire)");
+  if(occurrences>1)alert(occurrences+" créneaux crees (repetition hebdomadaire)");
 }
 
 var evExternes=[];
@@ -4785,10 +4785,10 @@ function editEventDateTime(eventId){
     if(newEquipe!==oldEquipe)changesTxt.push("équipe : "+ev.equipe);
     if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"⚠️ <b>Creneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
+      text:"⚠️ <b>Créneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:"⚠️ ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    alert("Creneau modifié, alerte envoyée dans le canal.");
+    alert("Créneau modifié, alerte envoyée dans le canal.");
   }
 }
 function editScore(eventId){
@@ -5150,18 +5150,18 @@ function viewFicheModal(phone){
   var normPhone=phone.replace(/\s+/g,"");
   var matches=lics.filter(function(l){
     if(!l.fiche)return false;
-    var phones=[l.fiche.téléphone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
     return phones.indexOf(normPhone)>=0;
   });
   if(!matches.length){
-    alert("Aucune fiche trouvee pour ce numero.");
+    alert("Aucune fiche trouvee pour ce numéro.");
     return;
   }
   var lic=matches[0];
   var f=lic.fiche;
   var rows=[
-    ["Prenom",f.prenom],["Nom",f.nom],["Date de naissance",f.naissance],
-    ["Categorie",lic.categorie||""],["Adresse",f.adresse],["Telephone",f.telephone],["Email",f.emailLic],
+    ["Prénom",f.prenom],["Nom",f.nom],["Date de naissance",f.naissance],
+    ["Catégorie",lic.categorie||""],["Adresse",f.adresse],["Téléphone",f.telephone],["Email",f.emailLic],
     ["Responsable 1",f.respNom],["Tel responsable 1",f.respTel],
     ["Contact urgence",f.urgenceNom],["Tel urgence",f.urgenceTel],
     ["Notes / medical",f.notes]
@@ -5175,7 +5175,7 @@ function viewFicheModal(phone){
   document.getElementById("modal-fiche-view").style.display="flex";
 }
 
-function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
+function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
 
 function createChannel(){
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
@@ -5993,10 +5993,10 @@ function savePoleItem(){
     var events=getEvents();
     events.push({
       id:"planning-"+item.id,
-      titre:(item.équipe?item.équipe+" ":"")+"vs "+(item.adversaire||"Adversaire"),
+      titre:(item.equipe?item.equipe+" ":"")+"vs "+(item.adversaire||"Adversaire"),
       type:"match",date:item.date,heure:item.heure||"",lieu:item.lieu||"",
-      équipe:item.équipe||item.cat||"",
-      présences:{}
+      equipe:item.equipe||item.cat||"",
+      presences:{}
     });
     saveEvents(events);
   }
@@ -6435,7 +6435,7 @@ var TUTO_STEPS=[
   {icon:"🛡️",titre:"Onglet Équipe",texte:"Consultez la composition de l'équipe, les postes et numéros de maillot de chaque joueur."},
   {icon:"📊",titre:"Onglet Stats",texte:"Suivez le bilan de présence et l'assiduité de l'équipe au fil de la saison."},
   {icon:"📅",titre:"Onglet Événement",texte:"Retrouvez tous les matchs et entraînements a venir, avec les convocations du coach."},
-  {icon:"💬",titre:"Communaute",texte:"Echangez avec les autres familles et le club dans les canaux de discussion dedies."}
+  {icon:"💬",titre:"Communauté",texte:"Echangez avec les autres familles et le club dans les canaux de discussion dedies."}
 ];
 
 function showTutoriel(){
@@ -6477,7 +6477,7 @@ function finishTutoriel(){
   buildParentHome();
 }
 
-// ── COACH TEAM (equipe unique) ────────────────────────────────────
+// ── COACH TEAM (équipe unique) ────────────────────────────────────
 function getCoachTeam(){return localStorage.getItem("asmb_coach_team")||"";}
 function setCoachTeam(id){localStorage.setItem("asmb_coach_team",id);}
 
@@ -6558,7 +6558,7 @@ function buildParentHome(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joue'+(matchesPlayed>1?"s":"")+'</div>'+
   '</div>'+licBadge;
 
-  // Chips equipes
+  // Chips équipes
   var chipsEl=document.getElementById("parent-team-chips");
   chipsEl.innerHTML="";
   myTeams.forEach(function(t){
@@ -6569,7 +6569,7 @@ function buildParentHome(){
     chipsEl.appendChild(b);
   });
 
-  // Prochain evenement
+  // Prochain événement
   var nextEv=getNextEventForTeam(activeTeam);
   var evEl=document.getElementById("parent-next-event");
   if(!nextEv){
@@ -6607,7 +6607,7 @@ function buildParentHome(){
     });
   }
 
-  // Stats presence
+  // Stats présence
   var stats=getTeamPresenceStats(activeTeam);
   var statsEl=document.getElementById("parent-stats");
   if(stats.total===0){
@@ -6649,7 +6649,7 @@ function signalerAbsence(eventId){
 
   var proceed=function(nom,playerId){
     var motif=prompt("Motif (optionnel) :","")||"";
-    var channelId=findChannelForTeamText(ev.équipe);
+    var channelId=findChannelForTeamText(ev.equipe);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       text:"🙋 <b>Absence signalée</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
       pseudo:"🙋 "+(nom||"Parent"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
@@ -6668,11 +6668,11 @@ function signalerAbsence(eventId){
     // Verifier si un pointage existe déjà pour cet enfant sur cet événement
     checkExistingCheckin(eventId,linkedPlayer.id).then(function(existing){
       if(existing){
-        var labels={présent:"present(e)",retard:"en retard",absent:"absent(e)"};
-        alert(linkedPlayer.prénom+" s'est déjà declare(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
+        var labels={present:"present(e)",retard:"en retard",absent:"absent(e)"};
+        alert(linkedPlayer.prenom+" s'est déjà declare(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
         return;
       }
-      proceed(linkedPlayer.prénom+" "+linkedPlayer.nom,linkedPlayer.id);
+      proceed(linkedPlayer.prenom+" "+linkedPlayer.nom,linkedPlayer.id);
     });
   } else {
     var nom=prompt("Prénom du joueur absent :");
@@ -6686,8 +6686,8 @@ function getLastMatchesForTeam(team){
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var matched=events.filter(function(e){
-    if(e.type!=="match"||!e.score||!e.équipe)return false;
-    var eq=e.équipe.toUpperCase();
+    if(e.type!=="match"||!e.score||!e.equipe)return false;
+    var eq=e.equipe.toUpperCase();
     return (eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0)&&e.date<=todayStr;
   });
   matched.sort(function(a,b){return b.date>a.date?1:-1;});
@@ -6698,8 +6698,8 @@ function getNextEventForTeam(team){
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var matched=events.filter(function(e){
-    if(!e.équipe||e.cancelled)return false;
-    var eq=e.équipe.toUpperCase();
+    if(!e.equipe||e.cancelled)return false;
+    var eq=e.equipe.toUpperCase();
     return eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0;
   }).filter(function(e){return e.date>=todayStr;});
   matched.sort(function(a,b){return a.date>b.date?1:-1;});
@@ -6707,16 +6707,16 @@ function getNextEventForTeam(team){
 }
 
 function getTeamPresenceStats(team){
-  if(!team)return{total:0,présent:0,pct:0};
+  if(!team)return{total:0,present:0,pct:0};
   var events=getEvents().filter(function(e){
-    if(!e.présences||!Object.keys(e.présences).length||!e.équipe)return false;
-    return e.équipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
+    if(!e.presences||!Object.keys(e.presences).length||!e.equipe)return false;
+    return e.equipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
   });
-  var total=0,présent=0;
+  var total=0,present=0;
   events.forEach(function(e){
-    Object.keys(e.présences).forEach(function(k){total++;if(e.présences[k]==="présent")présent++;});
+    Object.keys(e.presences).forEach(function(k){total++;if(e.presences[k]==="present")present++;});
   });
-  return{total:total,présent:présent,pct:total?Math.round(présent/total*100):0};
+  return{total:total,present:present,pct:total?Math.round(present/total*100):0};
 }
 
 // ── PARENT EQUIPE TAB ─────────────────────────────────────────────
@@ -6738,16 +6738,16 @@ function buildParentEquipe(){
   var teamCatIdx=CATS_ORD.indexOf(team.cat);
   var posteEligible=teamCatIdx>=CATS_ORD.indexOf("U15");
   players.forEach(function(p){
-    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
-      div.onclick=function(){alert(p.prénom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
+      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
     }
     el.appendChild(div);
   });
@@ -6773,7 +6773,7 @@ function buildCoachEquipe(){
   var posteEligibleCoach=teamCatIdxCoach>=CATS_ORD_COACH.indexOf("U15");
   el.innerHTML="";
   players.forEach(function(p){
-    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non défini";
@@ -6781,7 +6781,7 @@ function buildCoachEquipe(){
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">👕 Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">🆔 Licence</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
     el.appendChild(div);
   });
 }
@@ -6790,7 +6790,7 @@ function editPlayerMaillot(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numéro de maillot pour "+p.prénom+" "+p.nom+" :",p.maillot||"");
+  var num=prompt("Numéro de maillot pour "+p.prenom+" "+p.nom+" :",p.maillot||"");
   if(num===null)return;
   p.maillot=num.trim();
   savePlayers(players);
@@ -6801,12 +6801,12 @@ function editPlayerLicence(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numéro de licence pour "+p.prénom+" "+p.nom+" :",p.numLicence||"0C");
+  var num=prompt("Numéro de licence pour "+p.prenom+" "+p.nom+" :",p.numLicence||"0C");
   if(num===null)return;
-  var type=prompt("Type de licence (compétition / loisir) :",p.typeLicence||"compétition");
+  var type=prompt("Type de licence (compétition / loisir) :",p.typeLicence||"competition");
   if(type===null)return;
   p.numLicence=num.trim();
-  p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"compétition";
+  p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
   savePlayers(players);
   buildCoachEquipe();
   alert("Licence mise a jour.");
@@ -6821,27 +6821,27 @@ function buildParentEvents(){
   var el=document.getElementById("parent-events-list");
   if(!team){el.innerHTML="";return;}
   var events=getEvents().filter(function(e){
-    if(!e.équipe)return false;
-    return e.équipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
+    if(!e.equipe)return false;
+    return e.equipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
   });
   events.sort(function(a,b){return a.date>b.date?1:-1;});
-  if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun evenement</div></div>';return;}
+  if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun événement</div></div>';return;}
   el.innerHTML="";
-  var typeColors={"match":"#C0392B","entraînement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
+  var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
   events.forEach(function(e){
     var col=typeColors[e.type]||"#1B5C28";
     var div=document.createElement("div");
     div.className="event-card";
     var presInfo="";
-    if(e.présences&&Object.keys(e.présences).length){
-      var pres=Object.values(e.présences).filter(function(v){return v==="présent";}).length;
-      var tot=Object.keys(e.présences).length;
+    if(e.presences&&Object.keys(e.presences).length){
+      var pres=Object.values(e.presences).filter(function(v){return v==="present";}).length;
+      var tot=Object.keys(e.presences).length;
       presInfo='<div style="font-size:11px;color:#27AE60;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
     }
     var convocInfo="";
     if(e.convocations&&e.convocations.length){
       var convPlayers=getPlayers();
-      var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prénom:null;}).filter(Boolean);
+      var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prenom:null;}).filter(Boolean);
       convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">📋 Convoques : '+noms.join(", ")+'</div>';
     }
     var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">🚫 ANNULE</div>':"";
@@ -6905,20 +6905,20 @@ function buildBottomNav(profile){
   if(profile==="dirigeant"){
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navTo(\'portal\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
-      '<button class="bni" id="bni-communaute" onclick="navTo(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>'+
+      '<button class="bni" id="bni-communaute" onclick="navTo(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
       '<button class="bni" id="bni-inscription" onclick="navTo(\'inscription\')"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>'+
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
   } else if(profile==="coach"){
     nav.innerHTML=
-      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
+      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
       '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'compétition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
       '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'événements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
-      '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>';
+      '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
-      '<button class="bni" id="bni-eq" onclick="navToParent(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
+      '<button class="bni" id="bni-eq" onclick="navToParent(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
       '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>';
   }
@@ -6946,7 +6946,7 @@ function toggleTheme(){
 (function(){
   var lics = getLicences();
   if(!lics.find(function(l){return l.code==="ASMB-TEST-0001";})){
-    lics.push({code:"ASMB-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyée",createdAt:Date.now(),ouvertLe:null,fiche:null,catégorie:null});
+    lics.push({code:"ASMB-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyee",createdAt:Date.now(),ouvertLe:null,fiche:null,categorie:null});
     saveLicences(lics);
   }
 }());
@@ -6955,7 +6955,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784367155";
+var APP_VERSION="1784367725";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -6982,20 +6982,20 @@ function refreshCurrentScreen(){
   try{
     if(id==="portal")buildPortal();
     else if(id==="parent-home")buildParentHome();
-    else if(id==="parent-équipe")buildParentEquipe();
+    else if(id==="parent-equipe")buildParentEquipe();
     else if(id==="parent-events")buildParentEvents();
     else if(id==="parent-stats")buildParentStats();
-    else if(id==="coach-équipe")buildCoachEquipe();
+    else if(id==="coach-equipe")buildCoachEquipe();
     else if(id==="communaute")buildCommunaute();
     else if(id==="admin")buildAdminHome();
     else if(id==="inscriptions")renderPlayers();
-    else if(id==="équipes")buildTeams();
+    else if(id==="equipes")buildTeams();
     else if(id==="planning")buildPlanning();
     else if(id==="documents")buildDocs();
     else if(id==="licences")buildLicences();
     else if(id==="annuaire")buildAnnuaire();
     else if(id==="galerie")buildGalerie();
-    else if(id==="paramètres")buildParametres();
+    else if(id==="parametres")buildParametres();
     else if(id==="elite")buildElite();
     else if(id&&id.startsWith("pole-")&&typeof currentPoleId!=="undefined")buildPoleScreen(currentPoleId);
   }catch(e){}
@@ -7068,7 +7068,7 @@ function checkEventReminders(){
   var notified=JSON.parse(localStorage.getItem("asmb_reminded")||"{}");
   events.forEach(function(e){
     if(!localStorage.getItem("asmb_notif")==="on")return;
-    var typeKey=e.type==="match"?"match":(e.type==="entraînement"?"entraînement":"événement");
+    var typeKey=e.type==="match"?"match":(e.type==="entrainement"?"entrainement":"evenement");
     if(localStorage.getItem("asmb_notif_"+typeKey)==="off")return;
     var evDate=new Date(e.date+(e.heure?" "+e.heure.replace("h",":"):" 00:00"));
     var diffH=(evDate-now)/3600000;
