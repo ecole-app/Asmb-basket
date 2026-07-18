@@ -3519,7 +3519,9 @@ function buildMatchList(){
           '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+
           '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(e.heure||"?")+(e.lieu?" · "+e.lieu:"")+'</div>'+
           '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
-          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'')+
+          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'')+
+          (e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none">🧭 Itineraire</a>':'')+
+          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer">📋 Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'')+
           '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
         '</div>';
       content.appendChild(card);
@@ -3638,8 +3640,16 @@ function buildCalendrier(){
       } else {
         dayEvents.forEach(function(e){
           var isMatch=e.type==="match";
+          var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
+          var itinBtn=e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none">🧭 Itineraire</a>':'';
+          var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'';
+          var coachBtns=(isCoachOrDir&&isMatch)?
+            ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer">📋 Convocation</button>'+
+            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>')
+            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'');
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
+            '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+coachBtns+'</div>'+
             (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
           '</div>';
         });
@@ -7006,7 +7016,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784389267";
+var APP_VERSION="1784389694";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
