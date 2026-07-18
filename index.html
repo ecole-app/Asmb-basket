@@ -913,10 +913,10 @@ initChannels();
 
       <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Invites externes</div>
       <div id="ev-externes-list" style="margin-bottom:8px"></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input id="ev-ext-nom" placeholder="Nom" style="flex:1;padding:9px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
-        <input id="ev-ext-contact" placeholder="Contact" style="flex:1;padding:9px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
-        <button onclick="addEvExterne()" style="padding:9px 14px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">+</button>
+      <div style="display:flex;gap:6px;margin-bottom:14px;width:100%">
+        <input id="ev-ext-nom" placeholder="Nom" style="flex:1;min-width:0;padding:9px 8px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
+        <input id="ev-ext-contact" placeholder="Contact" style="flex:1;min-width:0;padding:9px 8px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none">
+        <button onclick="addEvExterne()" style="flex-shrink:0;padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">+</button>
       </div>
 
       <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
@@ -7005,7 +7005,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784368861";
+var APP_VERSION="1784369066";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
