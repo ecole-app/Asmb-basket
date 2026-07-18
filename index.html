@@ -230,12 +230,12 @@ window.fbReady = true;
 // Init default channels if needed
 async function initChannels(){
   const channels = [
-    {id:"general", name:"Général", icon:"🏀", desc:"Canal principal ASMB"},
-    {id:"u13f", name:"U13 Féminin", icon:"👧", desc:"Equipe U13F"},
-    {id:"u15", name:"U15", icon:"⛹️", desc:"Equipe U15"},
-    {id:"seniors", name:"Seniors", icon:"🏆", desc:"Equipe Seniors"},
+    {id:"général", name:"Général", icon:"🏀", desc:"Canal principal ASMB"},
+    {id:"u13f", name:"U13 Féminin", icon:"👧", desc:"Équipe U13F"},
+    {id:"u15", name:"U15", icon:"⛹️", desc:"Équipe U15"},
+    {id:"seniors", name:"Seniors", icon:"🏆", desc:"Équipe Seniors"},
     {id:"coaches", name:"Coachs", icon:"📋", desc:"Staff et encadrants"},
-    {id:"evenements", name:"Evénements", icon:"🎉", desc:"Annonces et événements"},
+    {id:"événements", name:"Evénements", icon:"🎉", desc:"Annonces et événements"},
   ];
   for(const ch of channels){
     await setDoc(doc(db,"channels",ch.id), ch, {merge:true});
@@ -258,7 +258,7 @@ initChannels();
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
-<div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">📡 Mode hors-ligne · Vous consultez les dernieres donnees chargees</div>
+<div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">📡 Mode hors-ligne · Vous consultez les dernieres données chargées</div>
 <div id="update-banner" style="display:none;background:#27AE60;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;align-items:center;justify-content:center;gap:10px">
   <span>🔄 Nouvelle version disponible</span>
   <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1B5C28;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre a jour</button>
@@ -287,13 +287,13 @@ initChannels();
 <div id="modal-licencies-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
   <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les licencies</div>
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les licenciés</div>
       <button onclick="closeModal('modal-licencies-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px">
       <button class="cat-filter on" onclick="sortLicenciesList('nom')" id="sortby-nom">Nom</button>
       <button class="cat-filter" onclick="sortLicenciesList('naissance')" id="sortby-naissance">Naissance</button>
-      <button class="cat-filter" onclick="sortLicenciesList('cat')" id="sortby-cat">Equipe</button>
+      <button class="cat-filter" onclick="sortLicenciesList('cat')" id="sortby-cat">Équipe</button>
     </div>
     <div id="licencies-list-content"></div>
   </div>
@@ -314,7 +314,7 @@ initChannels();
 <div id="modal-teams-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
   <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:800;color:var(--txt)" id="teams-list-title">Equipes du club</div>
+      <div style="font-size:15px;font-weight:800;color:var(--txt)" id="teams-list-title">Équipes du club</div>
       <button onclick="closeModal('modal-teams-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
     </div>
     <div id="teams-list-content"></div>
@@ -325,7 +325,7 @@ initChannels();
 <div id="modal-assiduite" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
   <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:75vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:15px;font-weight:800;color:var(--txt)">Assiduite mensuelle</div>
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Assiduité mensuelle</div>
       <button onclick="closeModal('modal-assiduite')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
     </div>
     <div id="assiduite-content"></div>
@@ -353,7 +353,7 @@ initChannels();
         <div data-line2 style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Etienne Metropole Basket</div>
       </div>
     </div>
-    <div class="sec">Chiffres cles</div>
+    <div class="sec">Chiffres clés</div>
     <div id="dashboard-dirigeant" style="padding:0 12px 8px"></div>
     <div class="sec">Poles du club</div>
     <div id="poleCards" style="padding-bottom:8px"></div>
@@ -369,7 +369,7 @@ initChannels();
       <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:4px">Planification</div>
       <div style="font-size:18px;font-weight:900;color:#fff">Pole Formation</div>
     </div>
-    <div class="sec">Categories</div>
+    <div class="sec">Catégories</div>
     <div id="eliteCards" style="padding-bottom:16px"></div>
   </div>
   <div class="scr" id="scr-u13home">
@@ -474,10 +474,10 @@ initChannels();
   <div class="scr" id="scr-equipes">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
       <div>
-        <div style="font-size:16px;font-weight:800;color:var(--txt)">Equipes</div>
-        <div style="font-size:11px;color:var(--mut)">Composition par categorie</div>
+        <div style="font-size:16px;font-weight:800;color:var(--txt)">Équipes</div>
+        <div style="font-size:11px;color:var(--mut)">Composition par catégorie</div>
       </div>
-      <button onclick="showAddTeam()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Equipe</button>
+      <button onclick="showAddTeam()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Équipe</button>
     </div>
     <div id="teamList" style="padding:8px 0 80px"></div>
   </div>
@@ -546,7 +546,7 @@ initChannels();
         </div>
         <!-- Equipe -->
         <div class="form-group">
-          <label class="form-label">Equipe</label>
+          <label class="form-label">Équipe</label>
           <input class="form-input" id="cr-equipe" placeholder="Ex: U13F, U15M, Seniors...">
         </div>
         <!-- Notes -->
@@ -556,7 +556,7 @@ initChannels();
         </div>
         <!-- Repetition -->
         <div class="form-group">
-          <label class="form-label">Repeter ce creneau</label>
+          <label class="form-label">Répéter ce creneau</label>
           <select class="form-select" id="cr-repeat">
             <option value="0">Une seule fois</option>
             <option value="4">4 semaines</option>
@@ -583,7 +583,7 @@ initChannels();
     </div>
     <div style="padding:10px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
       <button class="cat-filter on" onclick="filterDocCat('all')" id="doccat-all">Tous</button>
-      <button class="cat-filter" onclick="filterDocCat('reglement')" id="doccat-reglement">Reglement</button>
+      <button class="cat-filter" onclick="filterDocCat('reglement')" id="doccat-reglement">Règlement</button>
       <button class="cat-filter" onclick="filterDocCat('autorisation')" id="doccat-autorisation">Autorisation</button>
       <button class="cat-filter" onclick="filterDocCat('formulaire')" id="doccat-formulaire">Formulaire</button>
       <button class="cat-filter" onclick="filterDocCat('autre')" id="doccat-autre">Autre</button>
@@ -596,12 +596,12 @@ initChannels();
   <div id="modal-doc-cat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:var(--txt)">Categorie du document</div>
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Catégorie du document</div>
         <button onclick="closeModal('modal-doc-cat')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Type de document</label>
         <select class="form-select" id="doc-cat-select">
-          <option value="reglement">Reglement</option>
+          <option value="reglement">Règlement</option>
           <option value="autorisation">Autorisation</option>
           <option value="formulaire">Formulaire</option>
           <option value="autre" selected>Autre</option>
@@ -780,7 +780,7 @@ initChannels();
       <div class="form-group"><label class="form-label">Option 4 (optionnel)</label><input class="form-input" id="poll-opt-3" placeholder=""></div>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:14px">
         <input type="checkbox" id="poll-multiple" style="width:18px;height:18px;accent-color:var(--dkg)">
-        <span style="font-size:12px;color:var(--txt)">Autoriser plusieurs reponses par personne</span>
+        <span style="font-size:12px;color:var(--txt)">Autoriser plusieurs réponses par personne</span>
       </label>
       <div class="form-group"><label class="form-label">Date limite (optionnel)</label><input class="form-input" id="poll-deadline" type="date"></div>
       <button onclick="createPoll()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Publier le sondage</button>
@@ -840,16 +840,16 @@ initChannels();
   <div id="modal-presence-history" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="ph-name">Historique</div><div style="font-size:11px;color:var(--mut)">Presences · Absences</div></div>
+        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="ph-name">Historique</div><div style="font-size:11px;color:var(--mut)">Présences · Absences</div></div>
         <button onclick="closeModal('modal-presence-history')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div style="display:flex;gap:6px;margin-bottom:14px">
         <button class="cat-filter on" id="ph-period-month" onclick="setPresencePeriod('month')">Ce mois</button>
-        <button class="cat-filter" id="ph-period-year" onclick="setPresencePeriod('year')">Cette annee</button>
+        <button class="cat-filter" id="ph-period-year" onclick="setPresencePeriod('year')">Cette année</button>
         <button class="cat-filter" id="ph-period-all" onclick="setPresencePeriod('all')">Tout</button>
       </div>
       <div id="ph-summary"></div>
-      <div class="sec" style="padding:12px 0 8px">Detail par evenement</div>
+      <div class="sec" style="padding:12px 0 8px">Detail par événement</div>
       <div id="ph-detail-list"></div>
       <div id="ph-self-declared"></div>
     </div>
@@ -894,17 +894,17 @@ initChannels();
   <div id="modal-event-full" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvel evenement</div>
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvel événement</div>
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noel"></div>
-      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type"><option value="match">Match</option><option value="entrainement">Entrainement</option><option value="tournoi">Tournoi</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="autre" selected>Autre</option></select></div>
       <div style="display:flex;gap:12px">
         <div class="form-group" style="flex:1"><label class="form-label">Date *</label><input class="form-input" id="ev-date" type="date"></div>
         <div class="form-group" style="flex:1"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
       </div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder="Gymnase..."></div>
-      <div class="form-group"><label class="form-label">Equipe concernee</label><input class="form-input" id="ev-equipe" placeholder="U13F, U15M..."></div>
+      <div class="form-group"><label class="form-label">Équipe concernee</label><input class="form-input" id="ev-equipe" placeholder="U13F, U15M..."></div>
 
       <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
       <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Participants du club</div>
@@ -938,11 +938,11 @@ initChannels();
   <div id="modal-presence" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="presence-title">Presences</div><div style="font-size:11px;color:var(--mut)" id="presence-sub"></div></div>
+        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="presence-title">Présences</div><div style="font-size:11px;color:var(--mut)" id="presence-sub"></div></div>
         <button onclick="closeModal('modal-presence')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div id="presence-list"></div>
-      <button onclick="savePresences()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Enregistrer les presences</button>
+      <button onclick="savePresences()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Enregistrer les présences</button>
     </div>
   </div>
 
@@ -963,8 +963,8 @@ initChannels();
   <!-- ═══ PARAMETRES ═══ -->
   <div class="scr" id="scr-parametres">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
-      <div style="font-size:16px;font-weight:800;color:var(--txt)">Parametres</div>
-      <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Donnees</div>
+      <div style="font-size:16px;font-weight:800;color:var(--txt)">Paramètres</div>
+      <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Données</div>
     </div>
     <div class="sec">Statistiques du club</div>
     <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
@@ -983,11 +983,11 @@ initChannels();
         <input type="checkbox" id="notif-match-toggle" onchange="toggleNotifType('match',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
       </label>
       <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0">
-        <div style="font-size:12px;font-weight:600;color:var(--txt)">🏀 Rappel avant entrainement</div>
+        <div style="font-size:12px;font-weight:600;color:var(--txt)">🏀 Rappel avant entraînement</div>
         <input type="checkbox" id="notif-entrainement-toggle" onchange="toggleNotifType('entrainement',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
       </label>
       <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0">
-        <div style="font-size:12px;font-weight:600;color:var(--txt)">🎉 Rappel evenements</div>
+        <div style="font-size:12px;font-weight:600;color:var(--txt)">🎉 Rappel événements</div>
         <input type="checkbox" id="notif-evenement-toggle" onchange="toggleNotifType('evenement',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
       </label>
     </div>
@@ -1003,33 +1003,33 @@ initChannels();
       <div style="font-size:13px;font-weight:700;color:var(--txt)">📧 Envoyer une info aux familles</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Email groupe a tous les contacts valides</div>
     </div>
-    <div class="sec">Donnees</div>
+    <div class="sec">Données</div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="exportData()">
-      <div style="font-size:13px;font-weight:700;color:var(--txt)">💾 Exporter les donnees</div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">💾 Exporter les données</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Telecharger un fichier de sauvegarde</div>
     </div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
       <div style="font-size:13px;font-weight:700;color:var(--txt)">☁️ Sauvegarde automatique</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos donnees sont sauvegardees automatiquement dans le cloud</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos données sont sauvegardees automatiquement dans le cloud</div>
       <button onclick="restoreFromCloud()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Restaurer depuis le cloud</button>
     </div>
     <div class="sec">Demonstration</div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
-      <div style="font-size:13px;font-weight:700;color:var(--txt)">🎭 Charger des donnees de demo</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 equipes + 40 joueurs fictifs pour tester l'app</div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🎭 Charger des données de demo</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 équipes + 40 joueurs fictifs pour tester l'app</div>
     </div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoEvents()">
-      <div style="font-size:13px;font-weight:700;color:var(--txt)">🗓️ Entrainements fictifs (semaine prochaine)</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 entrainements + 1 match samedi, pour tester le calendrier</div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🗓️ Entraînements fictifs (semaine prochaine)</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">4 entraînements + 1 match samedi, pour tester le calendrier</div>
     </div>
     <div style="margin:0 12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="clearDemoData()">
-      <div style="font-size:13px;font-weight:700;color:var(--txt)">🧹 Vider les donnees de demo</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime equipes/joueurs/evenements de test</div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">🧹 Vider les données de demo</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé équipes/joueurs/événements de test</div>
     </div>
     <div class="sec">Zone dangereuse</div>
     <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
       <div style="font-size:13px;font-weight:700;color:var(--red)">🗑️ Reinitialiser l'application</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime toutes les donnees locales (irreversible)</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé toutes les données locales (irreversible)</div>
     </div>
   </div>
 
@@ -1049,17 +1049,17 @@ initChannels();
     <div style="padding:20px 16px">
       <div onclick="chooseRole('parent')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">👨‍👩‍👧</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Parent</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Voir l'equipe et les evenements de mon enfant</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Parent</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Voir l'équipe et les événements de mon enfant</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
       <div onclick="chooseRole('joueur')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#E8670A;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🏃</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Joueur/Joueuse</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Me pointer present a l'entrainement</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Joueur/Joueuse</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Me pointer présent a l'entraînement</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
       <div onclick="chooseRole('coach')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#16A085;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🏀</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Equipe, Formation, Competition, Evenements</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Équipe, Formation, Competition, Événements</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
       <div onclick="chooseRole('dirigeant')" style="cursor:pointer;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
@@ -1084,8 +1084,8 @@ initChannels();
   <div class="scr" id="scr-team-picker">
     <div class="hero" style="padding:24px 16px 20px">
       <div style="font-size:32px;margin-bottom:10px" id="tp-icon">👨‍👩‍👧</div>
-      <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px" id="tp-title">Quelle equipe suivez-vous ?</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.6)" id="tp-sub">Vous pourrez ajouter d'autres equipes plus tard</div>
+      <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px" id="tp-title">Quelle équipe suivez-vous ?</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)" id="tp-sub">Vous pourrez ajouter d'autres équipes plus tard</div>
     </div>
     <div id="team-picker-list" style="padding:16px 12px 8px"></div>
     <div style="padding:8px 16px 20px">
@@ -1111,14 +1111,14 @@ initChannels();
     <div style="padding:14px 12px 8px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr);background:var(--sf)" id="parent-team-chips"></div>
     <div style="padding:16px">
       <div id="parent-summary-row" style="display:flex;gap:10px;margin-bottom:16px"></div>
-      <div class="sec" style="padding:0 0 8px">Prochain evenement</div>
+      <div class="sec" style="padding:0 0 8px">Prochain événement</div>
       <div id="parent-next-event"></div>
       <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
       <div id="parent-last-matches"></div>
-      <div class="sec" style="padding:16px 0 8px">Bilan de presence</div>
+      <div class="sec" style="padding:16px 0 8px">Bilan de présence</div>
       <div id="parent-stats"></div>
       <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Gerer mes equipes</button>
+        <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Gerer mes équipes</button>
         <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📇 Annuaire du club</button>
         <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📷 Galerie photos</button>
         <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📅 Calendrier</button>
@@ -1130,7 +1130,7 @@ initChannels();
   <!-- ══════════════ GALERIE PHOTOS ══════════════ -->
   <div class="scr" id="scr-galerie">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Galerie photos</div><div style="font-size:11px;color:var(--mut)">Evenements et matchs ASMB</div></div>
+      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Galerie photos</div><div style="font-size:11px;color:var(--mut)">Événements et matchs ASMB</div></div>
       <button id="galerie-add-btn" onclick="document.getElementById('galerie-file-input').click()" style="display:none;padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Photo</button>
       <input type="file" id="galerie-file-input" accept="image/*" style="display:none" onchange="uploadGalleryPhoto(this)">
     </div>
@@ -1155,12 +1155,12 @@ initChannels();
     <div id="cal-tab-semaine">
       <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
         <button onclick="shiftCalWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">‹</button>
-        <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entrainements et matchs</div></div>
+        <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entraînements et matchs</div></div>
         <button onclick="shiftCalWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">›</button>
       </div>
       <div id="cal-filter-row" style="display:none;padding:10px 16px;gap:8px">
-        <button class="cat-filter on" onclick="setCalFilter('mine')" id="cal-filter-mine">Mon equipe</button>
-        <button class="cat-filter" onclick="setCalFilter('all')" id="cal-filter-all">Toutes les equipes</button>
+        <button class="cat-filter on" onclick="setCalFilter('mine')" id="cal-filter-mine">Mon équipe</button>
+        <button class="cat-filter" onclick="setCalFilter('all')" id="cal-filter-all">Toutes les équipes</button>
       </div>
       <div id="cal-week-content" style="padding:12px 0 80px"></div>
     </div>
@@ -1192,7 +1192,7 @@ initChannels();
       </div>
       <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ct-nom" placeholder="Prenom Nom"></div>
       <div class="form-group"><label class="form-label">Role / Fonction</label><input class="form-input" id="ct-role" placeholder="Ex: President, Tresoriere, Responsable U13..."></div>
-      <div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="ct-tel" type="tel" placeholder="06..."></div>
+      <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ct-tel" type="tel" placeholder="06..."></div>
       <div class="form-group"><label class="form-label">Email (optionnel)</label><input class="form-input" id="ct-email" type="email" placeholder="email@..."></div>
       <button onclick="saveContact()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
     </div>
@@ -1205,7 +1205,7 @@ initChannels();
       <div id="parent-eq-name" style="font-size:18px;font-weight:900;color:#fff"></div>
       <div id="parent-eq-cat" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px"></div>
     </div>
-    <div class="sec">Membres de l'equipe</div>
+    <div class="sec">Membres de l'équipe</div>
     <div id="parent-eq-members" style="padding-bottom:80px"></div>
   </div>
 
@@ -1223,10 +1223,10 @@ initChannels();
       </div>
       <div id="coach-eq-name" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
-    <div class="sec">Membres de l'equipe</div>
+    <div class="sec">Membres de l'équipe</div>
     <div id="coach-eq-members" style="padding-bottom:20px"></div>
     <div style="text-align:center;padding-bottom:80px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Modifier mon equipe</button>
+      <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Modifier mon équipe</button>
       <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📇 Annuaire du club</button>
       <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📷 Galerie photos</button>
         <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📅 Calendrier</button>
@@ -1236,7 +1236,7 @@ initChannels();
   <!-- ══════════════ EVENEMENTS (parent) ══════════════ -->
   <div class="scr" id="scr-parent-events">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
-      <div style="font-size:16px;font-weight:800;color:var(--txt)">Evenements</div>
+      <div style="font-size:16px;font-weight:800;color:var(--txt)">Événements</div>
       <div style="font-size:11px;color:var(--mut)" id="parent-events-sub"></div>
     </div>
     <div id="parent-events-list" style="padding:8px 0 80px"></div>
@@ -3539,14 +3539,9 @@ function buildMatchList(){
         if(eq.indexOf(linkedPlayer.cat.toUpperCase())>=0){
           checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
             if(existing&&(existing.status==="present"||existing.status==="absent")){
-              var lbl={present:"✓ Present",absent:"✕ Absent"};
-              var col={present:"#27AE60",absent:"#C0392B"};
-              actionsEl.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+col[existing.status]+';color:#fff;font-size:11px;font-weight:800">'+lbl[existing.status]+' · enregistre</div>';
+              actionsEl.innerHTML=checkinBadgeHtml(linkedPlayer.id,e.id,existing.status);
             } else {
-              actionsEl.innerHTML='<div style="display:flex;gap:6px">'+
-                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Present</button>'+
-                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Absent</button>'+
-              '</div>';
+              actionsEl.innerHTML=checkinButtonsHtml(linkedPlayer.id,e.id);
             }
           });
         }
@@ -3693,15 +3688,10 @@ function buildCalendrier(){
 
         if(e.type==="match"){
           checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
-            var statusLabels={present:"✓ Present",absent:"✕ Absent"};
-            var statusColors={present:"#27AE60",absent:"#C0392B"};
             if(existing&&(existing.status==="present"||existing.status==="absent")){
-              slot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[existing.status]+' · enregistre</div>';
+              slot.innerHTML=checkinBadgeHtml(linkedPlayer.id,e.id,existing.status);
             } else {
-              slot.innerHTML='<div style="display:flex;gap:6px;margin-top:8px">'+
-                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
-                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
-              '</div>';
+              slot.innerHTML=checkinButtonsHtml(linkedPlayer.id,e.id);
             }
           });
         } else {
@@ -3984,21 +3974,20 @@ function loadDemoData(){
   savePlayers(players);
 
   // Fiche licence demo pour tester le lien Parent (via son propre numero, different de l'enfant)
-  var lics=getLicences();
-  if(!lics.find(function(l){return l.code==="DEMO01";})){
-    lics.push({
-      code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
-      statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
-      categorie:"U13",
-      fiche:{
-        prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
-        telephone:"",respTel:"0700000000",resp2Tel:"",
-        adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
-        urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
-      }
-    });
-    saveLicences(lics);
-  }
+  // Upsert : toujours remise a jour (ne pas se fier a une ancienne version incomplete)
+  var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
+  lics.push({
+    code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
+    statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
+    categorie:"U13",
+    fiche:{
+      prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
+      telephone:"",respTel:"0700000000",resp2Tel:"",
+      adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
+      urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
+    }
+  });
+  saveLicences(lics);
 
   alert("Donnees de demo chargees ! 4 equipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Lea Martin) : 0600000000\n- \"Je suis Parent\" (parent de Lea) : 0700000000");
   buildAdminHome();
@@ -4057,13 +4046,15 @@ function loadDemoEvents(){
 }
 
 function clearDemoData(){
-  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs/evenements marques Demo) ?"))return;
+  if(!confirm("Supprimer uniquement les donnees de demonstration (equipes/joueurs/evenements/licences marques Demo) ?"))return;
   var teams=getTeams().filter(function(t){return !t.demo;});
   saveTeams(teams);
   var players=getPlayers().filter(function(p){return !p.demo;});
   savePlayers(players);
   var events=getEvents().filter(function(e){return !e.demo;});
   saveEvents(events);
+  var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
+  saveLicences(lics);
   alert("Donnees de demo supprimees.");
   buildAdminHome();
 }
@@ -6127,9 +6118,13 @@ function openJoueurCheckin(){
 function getLinkedPlayerForCheckin(){
   if(joueurIdentifiedPlayer)return joueurIdentifiedPlayer;
   if(localStorage.getItem("asmb_profile")==="parent"&&myPhone){
-    var activeTeamId=getActiveTeamId();
-    var myTeam=getTeams().find(function(t){return t.id===activeTeamId;});
-    var lic=myTeam?getMyLicenceForTeam(myTeam):null;
+    var myP=myPhone.replace(/\s+/g,"");
+    var lics=getLicences();
+    var lic=lics.find(function(l){
+      if(!l.fiche)return false;
+      var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+      return phones.indexOf(myP)>=0;
+    });
     if(lic&&lic.fiche){
       return getPlayers().find(function(p){return p.prenom===lic.fiche.prenom&&p.nom===lic.fiche.nom;})||null;
     }
@@ -6174,18 +6169,12 @@ function buildJoueurScreen(player){
       checkExistingCheckin(ev.id,player.id).then(function(existing){
         var card=document.createElement("div");
         card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:0 2px 8px var(--shadow)";
-        var locked=!!existing;
-        var statusLabels={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
-        var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
-        var lockedBadge=locked?('<div style="text-align:center;padding:10px;border-radius:var(--rx);background:'+statusColors[existing.status]+';color:#fff;font-size:13px;font-weight:800;margin-top:10px">'+statusLabels[existing.status]+' · deja enregistre</div>'):"";
+        var locked=existing&&(existing.status==="present"||existing.status==="absent");
         var actionHtml;
         if(locked){
-          actionHtml=lockedBadge;
+          actionHtml='<div style="margin-top:12px">'+checkinBadgeHtml(player.id,ev.id,existing.status)+'</div>';
         } else if(ev.type==="match"){
-          actionHtml='<div style="display:flex;gap:8px;margin-top:12px" id="joueur-btns-'+ev.id+'">'+
-            '<button onclick="joueurSelfCheckin(\''+player.id+'\',\''+ev.id+'\',\'present\')" style="flex:1;padding:11px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
-            '<button onclick="joueurSelfCheckin(\''+player.id+'\',\''+ev.id+'\',\'absent\')" style="flex:1;padding:11px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
-          '</div>';
+          actionHtml='<div style="margin-top:12px">'+checkinButtonsHtml(player.id,ev.id)+'</div>';
         } else {
           actionHtml='<div style="margin-top:12px"><button onclick="signalerAbsence(\''+ev.id+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:12px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button></div>';
         }
@@ -6215,6 +6204,23 @@ function checkExistingCheckin(eventId,playerId){
   }).catch(function(){return null;});
 }
 
+function checkinButtonsHtml(playerId,eventId){
+  return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
+    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
+    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
+  '</div>';
+}
+
+function checkinBadgeHtml(playerId,eventId,status){
+  var lbl={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
+  var col={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+  return '<div onclick="reopenCheckin(this,\''+playerId+'\',\''+eventId+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistre (toucher pour modifier)</div>';
+}
+
+function reopenCheckin(el,playerId,eventId){
+  el.outerHTML=checkinButtonsHtml(playerId,eventId);
+}
+
 function joueurSelfCheckin(playerId,eventId,status){
   if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
   var player=getPlayers().find(function(p){return p.id===playerId;});
@@ -6228,16 +6234,13 @@ function joueurSelfCheckin(playerId,eventId,status){
     eventTitre:ev?ev.titre:"",eventDate:ev?ev.date:"",
     status:status,ts:window.fbServerTimestamp(),source:"self"
   }).then(function(){
-    var statusLabels={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
-    var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
-    var btnsEl=document.getElementById("joueur-btns-"+eventId);
-    if(btnsEl){
-      btnsEl.outerHTML='<div style="text-align:center;padding:10px;border-radius:var(--rx);background:'+statusColors[status]+';color:#fff;font-size:13px;font-weight:800;margin-top:10px">'+statusLabels[status]+' · enregistre</div>';
-    }
+    var badgeHtml=checkinBadgeHtml(playerId,eventId,status);
+    var btnsEl=document.getElementById("joueur-btns-"+eventId)||document.getElementById("checkin-btns-"+eventId);
+    if(btnsEl)btnsEl.outerHTML=badgeHtml;
     var calSlot=document.getElementById("cal-checkin-"+eventId);
-    if(calSlot){
-      calSlot.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+statusColors[status]+';color:#fff;font-size:11px;font-weight:800;margin-top:8px">'+statusLabels[status]+' · enregistre</div>';
-    }
+    if(calSlot)calSlot.innerHTML=badgeHtml;
+    var matchActionsEl=document.getElementById("match-actions-"+eventId);
+    if(matchActionsEl)matchActionsEl.innerHTML=badgeHtml;
     if((status==="absent"||status==="retard")&&ev){
       var channelId=findChannelForTeamText(ev.equipe||player.cat);
       var msgTxt=status==="absent"?
@@ -6642,13 +6645,7 @@ function signalerAbsence(eventId){
   if(!ev)return;
 
   // Retrouver l'enfant lie a ce parent (via son telephone) pour verifier les doublons
-  var activeTeamId=getActiveTeamId();
-  var myTeam=getTeams().find(function(t){return t.id===activeTeamId;});
-  var lic=myTeam?getMyLicenceForTeam(myTeam):null;
-  var linkedPlayer=null;
-  if(lic&&lic.fiche){
-    linkedPlayer=getPlayers().find(function(p){return p.prenom===lic.fiche.prenom&&p.nom===lic.fiche.nom;});
-  }
+  var linkedPlayer=getLinkedPlayerForCheckin();
 
   var proceed=function(nom,playerId){
     var motif=prompt("Motif (optionnel) :","")||"";
@@ -6916,14 +6913,14 @@ function buildBottomNav(profile){
       '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
       '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
-      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Evenements</button>'+
+      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
       '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
-      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Evenement</button>';
+      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>';
   }
 }
 
@@ -6958,7 +6955,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784349467";
+var APP_VERSION="1784351556";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
