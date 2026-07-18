@@ -562,6 +562,7 @@ initChannels();
             <option value="4">4 semaines</option>
             <option value="8">8 semaines</option>
             <option value="12">12 semaines</option>
+            <option value="season">Toute la saison (mi-aout a fin juin)</option>
           </select>
         </div>
         <div style="display:flex;gap:8px;margin-top:4px">
@@ -4628,11 +4629,18 @@ function saveCreneau(){
   var salle=(document.getElementById("cr-salle")||{}).value||"";
   var equipe=(document.getElementById("cr-equipe")||{}).value||"";
   var notes=(document.getElementById("cr-notes")||{}).value||"";
-  var repeatWeeks=parseInt((document.getElementById("cr-repeat")||{}).value||"0",10);
+  var repeatVal=(document.getElementById("cr-repeat")||{}).value||"0";
   if(!debut||!fin){alert("Horaires obligatoires");return;}
   var events=getEvents();
   var firstDate=getNextDateForDayName(creneauJour);
-  var occurrences=repeatWeeks>0?repeatWeeks:1;
+  var occurrences;
+  if(repeatVal==="season"){
+    var endOfSeason=new Date(firstDate.getFullYear()+(firstDate.getMonth()<7?0:1),5,30);
+    occurrences=Math.max(1,Math.ceil((endOfSeason-firstDate)/(7*24*60*60*1000))+1);
+  } else {
+    var repeatWeeks=parseInt(repeatVal||"0",10);
+    occurrences=repeatWeeks>0?repeatWeeks:1;
+  }
   for(var i=0;i<occurrences;i++){
     var d=new Date(firstDate);
     d.setDate(d.getDate()+i*7);
@@ -4643,7 +4651,7 @@ function saveCreneau(){
       date:d.toISOString().slice(0,10),
       heure:debut+" - "+fin,
       lieu:salle,equipe:equipe,notes:notes,
-      recurrent:repeatWeeks>0
+      recurrent:(repeatVal!=="0")
     });
   }
   saveEvents(events);
@@ -6955,7 +6963,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784367725";
+var APP_VERSION="1784368170";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
