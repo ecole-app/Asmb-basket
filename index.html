@@ -6594,7 +6594,7 @@ function buildParentHome(){
   var lastMatches=getLastMatchesForTeam(activeTeam);
   var lmEl=document.getElementById("parent-last-matches");
   if(!lastMatches.length){
-    lmEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucun match joue pour le moment</div></div>';
+    lmEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucun match joué pour le moment</div></div>';
   } else {
     lmEl.innerHTML="";
     lastMatches.forEach(function(m){
@@ -6611,7 +6611,7 @@ function buildParentHome(){
   var stats=getTeamPresenceStats(activeTeam);
   var statsEl=document.getElementById("parent-stats");
   if(stats.total===0){
-    statsEl.innerHTML='<div class="empty-state" style="padding:24px 20px"><div style="font-size:12px;color:var(--mut)">Pas d\'historique de donnees pour le moment</div></div>';
+    statsEl.innerHTML='<div class="empty-state" style="padding:24px 20px"><div style="font-size:12px;color:var(--mut)">Pas d\'historique de données pour le moment</div></div>';
   } else {
     statsEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow);display:flex;align-items:center;justify-content:space-around;text-align:center">'+
       '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite</div></div>'+
@@ -6863,7 +6863,7 @@ function buildParentStats(){
   var html="";
 
   if(stats.total===0){
-    html+='<div class="empty-state"><div class="empty-state-icon">'+String.fromCodePoint(128202)+'</div><div style="font-size:13px;font-weight:600">Pas d\'historique de donnees</div><div style="font-size:11px;margin-top:4px">pour les criteres selectionnes</div></div>';
+    html+='<div class="empty-state"><div class="empty-state-icon">'+String.fromCodePoint(128202)+'</div><div style="font-size:13px;font-weight:600">Pas d\'historique de données</div><div style="font-size:11px;margin-top:4px">pour les critères sélectionnés</div></div>';
   } else {
     html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px">';
     html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Bilan des presences</div>';
@@ -6955,7 +6955,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784351556";
+var APP_VERSION="1784351904";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
