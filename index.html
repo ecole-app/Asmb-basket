@@ -3519,6 +3519,7 @@ function buildMatchList(){
           '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+
           '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(e.heure||"?")+(e.lieu?" · "+e.lieu:"")+'</div>'+
           '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
+          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'')+
           '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
         '</div>';
       content.appendChild(card);
@@ -7005,7 +7006,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784369066";
+var APP_VERSION="1784389267";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
