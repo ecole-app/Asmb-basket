@@ -170,7 +170,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 </style>
 
 <script>
-// Desinstalle tout service worker existant + vide les caches (evite le cache bloque)
+// Desinstalle tout service worker existant + vide les caches (évite le cache bloqué)
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){
     regs.forEach(function(reg){ reg.unregister(); });
@@ -399,7 +399,7 @@ initChannels();
     <div class="hero" style="padding:32px 16px 28px">
       <div style="font-size:40px;margin-bottom:12px">🔒</div>
       <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">Espace Responsables</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.6)">Acces reserve aux responsables ASMB</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Accès réservé aux responsables ASMB</div>
     </div>
     <div style="padding:24px 20px">
       <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;box-shadow:0 4px 20px var(--shadow)">
@@ -806,7 +806,7 @@ initChannels();
       </div>
       <div class="form-group"><label class="form-label">Nom du canal</label><input class="form-input" id="ch-name" placeholder="Ex: U17 Masculin"></div>
       <div class="form-group"><label class="form-label">Icône (emoji)</label><input class="form-input" id="ch-icon" placeholder="🏀" value="🏀"></div>
-      <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Equipe U17M"></div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Équipe U17M"></div>
       <button onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
     </div>
   </div>
@@ -954,7 +954,7 @@ initChannels();
         <button onclick="closeModal('modal-broadcast')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div id="broadcast-count" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
-      <div class="form-group"><label class="form-label">Objet</label><input class="form-input" id="bc-sujet" placeholder="Ex: Reprise des entrainements"></div>
+      <div class="form-group"><label class="form-label">Objet</label><input class="form-input" id="bc-sujet" placeholder="Ex: Reprise des entraînements"></div>
       <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="bc-message" rows="6" placeholder="Votre message aux familles..."></textarea></div>
       <button onclick="sendBroadcast()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">📧 Ouvrir le mail avec tous les destinataires</button>
     </div>
@@ -1059,12 +1059,12 @@ initChannels();
       </div>
       <div onclick="chooseRole('coach')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#16A085;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🏀</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Équipe, Formation, Competition, Événements</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Coach</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Équipe, Formation, Compétition, Événements</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
       <div onclick="chooseRole('dirigeant')" style="cursor:pointer;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#1A2E5A;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🎓</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Acces complet a la gestion du club</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Accès complet a la gestion du club</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
     </div>
@@ -1190,7 +1190,7 @@ initChannels();
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau contact</div>
         <button onclick="closeModal('modal-contact')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
-      <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ct-nom" placeholder="Prenom Nom"></div>
+      <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ct-nom" placeholder="Prénom Nom"></div>
       <div class="form-group"><label class="form-label">Role / Fonction</label><input class="form-input" id="ct-role" placeholder="Ex: President, Tresoriere, Responsable U13..."></div>
       <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ct-tel" type="tel" placeholder="06..."></div>
       <div class="form-group"><label class="form-label">Email (optionnel)</label><input class="form-input" id="ct-email" type="email" placeholder="email@..."></div>
@@ -1262,120 +1262,120 @@ initChannels();
 
 <script>
 const POLES=[
-  {id:"formation",name:"Pole Formation",sub:"Planification des entrainements",desc:"Cycles · Seances · Animations",icon:"📋",color:"#1B5C28",ready:true,
+  {id:"formation",name:"Pole Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1B5C28",ready:true,
    about:"Structurer et developper la pratique du basket a tous les niveaux. Entraîneurs diplomes, suivi individualise, methodologie structuree.",
-   items:["Ecole de basket · Categories jeunes","Acces au niveau competition","Suivi individualise · Progression continue","Formation des educateurs en continu"]},
+   items:["École de basket · Catégories jeunes","Accès au niveau compétition","Suivi individualise · Progression continue","Formation des educateurs en continu"]},
   {id:"elite",name:"Elite Academy",sub:"Accompagner les jeunes talents",desc:"Formation · Scolaire · Personnel",icon:"⭐",color:"#1a6b30",ready:true,
-   about:"Accompagner les jeunes joueurs dans leur progression sportive, scolaire et personnelle. Plus qu'une formation sportive, une ecole de la vie.",
-   items:["Entraînements adaptes aux academiciens","Developpement technique tactique et physique","Aide aux devoirs et suivi scolaire","Apprentissage de l'autonomie et responsabilite"]},
-  {id:"competition",name:"Competition 5x5",sub:"Le coeur du projet sportif ASMB",desc:"Competitions · Entrainements · Equipes",icon:"🏆",color:"#C0392B",ready:true,
+   about:"Accompagner les jeunes joueurs dans leur progression sportive, scolaire et personnelle. Plus qu'une formation sportive, une école de la vie.",
+   items:["Entraînements adaptes aux academiciens","Développement technique tactique et physique","Aide aux devoirs et suivi scolaire","Apprentissage de l'autonomie et responsabilité"]},
+  {id:"competition",name:"Compétition 5x5",sub:"Le coeur du projet sportif ASMB",desc:"Compétitions · Entraînements · Équipes",icon:"🏆",color:"#C0392B",ready:true,
    about:"Le basket 5x5 structure notre projet sportif. De l'initiation aux seniors, chaque joueur progresse dans un cadre exigeant et bienveillant.",
-   items:["Championnats locaux et regionaux","Developpement des equipes par categorie","Encadrement de qualite · Educateurs formes","Esprit d'equipe · Respect · Engagement"]},
-  {id:"3x3",name:"3x3",sub:"Rapide · Urbain · Accessible",desc:"Competitions · Evenements · Detection",icon:"🏀",color:"#E8670A",ready:true,
-   about:"Le 3x3 est une pratique dynamique qui complete notre projet. Plus rapide, plus libre, il permet a chacun de s'exprimer dans un format moderne.",
-   items:["Competitions 3x3 · Tournois locaux","Detection et formation des talents","Evenements et animations urbaines","Mixite et inclusion favorisees"]},
-  {id:"evenement",name:"Evenements",sub:"Des rendez-vous qui nous rassemblent",desc:"Tournois · Soirees · Journees club",icon:"🎉",color:"#8E44AD",ready:true,
-   about:"L'ASMB organise des evenements tout au long de la saison pour faire vivre notre passion, creer du lien et faire rayonner notre territoire.",
+   items:["Championnats locaux et regionaux","Développement des équipes par catégorie","Encadrement de qualité · Educateurs formes","Esprit d'équipe · Respect · Engagement"]},
+  {id:"3x3",name:"3x3",sub:"Rapide · Urbain · Accessible",desc:"Compétitions · Événements · Détection",icon:"🏀",color:"#E8670A",ready:true,
+   about:"Le 3x3 est une pratique dynamique qui complète notre projet. Plus rapide, plus libre, il permet a chacun de s'exprimer dans un format moderne.",
+   items:["Compétitions 3x3 · Tournois locaux","Détection et formation des talents","Événements et animations urbaines","Mixite et inclusion favorisees"]},
+  {id:"evenement",name:"Événements",sub:"Des rendez-vous qui nous rassemblent",desc:"Tournois · Soirees · Journees club",icon:"🎉",color:"#8E44AD",ready:true,
+   about:"L'ASMB organise des événements tout au long de la saison pour faire vivre notre passion, creer du lien et faire rayonner notre territoire.",
    items:["Creation de tournois 3x3 et 5x5","Soirees et journees club","Echanges inter-clubs · Tournoi international","Journees formation et arbitrage"]},
-  {id:"basketpourtous",name:"Basket Pour Tous",sub:"Un club ou chacun trouve sa place",desc:"Basket sante · Loisir · Inclusif · Adapte",icon:"🤝",color:"#16A085",ready:true,
-   about:"Le basket accessible a toutes et tous, sans distinction. Des seances adaptees, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
-   items:["Basket Sante · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Seances adaptees et bienveillantes"]}
+  {id:"basketpourtous",name:"Basket Pour Tous",sub:"Un club où chacun trouve sa place",desc:"Basket santé · Loisir · Inclusif · Adapte",icon:"🤝",color:"#16A085",ready:true,
+   about:"Le basket accessible a toutes et tous, sans distinction. Des séances adaptees, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
+   items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Séances adaptees et bienveillantes"]}
 ];
 const ELITE_CATS=[
-  {id:"u13f",name:"U13 Feminin",desc:"5 cycles · 47 seances · 2025-2026",icon:"👧",color:"#27AE60",ready:true},
+  {id:"u13f",name:"U13 Feminin",desc:"5 cycles · 47 séances · 2025-2026",icon:"👧",color:"#27AE60",ready:true},
   {id:"u13m",name:"U13 Masculin",desc:"Bientot disponible",icon:"👦",color:"#27AE60",ready:false}
 ];
 const VACS=[
-  {n:"Toussaint",d:"18 oct. - 3 nov. 2025",imp:"4 seances",c:"#E8670A"},
-  {n:"Noel",d:"20 dec. 2025 - 5 janv. 2026",imp:"5 seances",c:"#8E44AD"},
-  {n:"Hiver",d:"21 fev. - 9 mars 2026",imp:"4 seances",c:"#1A2E5A"},
-  {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 seances",c:"#27AE60"}
+  {n:"Toussaint",d:"18 oct. - 3 nov. 2025",imp:"4 séances",c:"#E8670A"},
+  {n:"Noel",d:"20 dec. 2025 - 5 janv. 2026",imp:"5 séances",c:"#8E44AD"},
+  {n:"Hiver",d:"21 fev. - 9 mars 2026",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 séances",c:"#27AE60"}
 ];
 const KC=["#16A085","#8E44AD","#27AE60","#1A2E5A","#E8670A"];
 
 const CYCLES=[
   {id:1,n:"Fondamentaux Individuels",sh:"Fondamentaux",p:"Sept. - mi-oct. 2025",s:10,c:"#27AE60",e:"⚙️",
-   objs:["Maitriser le dribble en deplacement","Passes precises : poitrine rebond une main","Acquerir le tir BEEF et le lay-up","Position defensive individuelle de base","Automatiser le pied-pivot"],
+   objs:["Maitriser le dribble en deplacement","Passes precises : poitrine rebond une main","Acquerir le tir BEEF et le lay-up","Position défensive individuelle de base","Automatiser le pied-pivot"],
    seas:[
     {num:"1.1",t:"Prise en main et dribble",dur:"1h30",obj:"Evaluer le niveau et decouvrir le dribble",sits:[
-      {ti:"Circuit de dribble slalom",dur:"20 min",desc:"En file, chaque joueuse dribble en slalom autour de plots. Depart toutes les 5 secondes.",org:"4 colonnes. 4 plots par couloir. 1 ballon par joueuse.",axes:["Simplifier : ligne droite","Complexifier : changer de main a chaque plot","Relais equipe"],kws:["Regard haut","Main souple","Genou flechi","Rythme","Controle"],ch:null},
+      {ti:"Circuit de dribble slalom",dur:"20 min",desc:"En file, chaque joueuse dribble en slalom autour de plots. Depart toutes les 5 secondes.",org:"4 colonnes. 4 plots par couloir. 1 ballon par joueuse.",axes:["Simplifier : ligne droite","Complexifier : changer de main a chaque plot","Relais équipe"],kws:["Regard haut","Main souple","Genou flechi","Rythme","Controle"],ch:null},
       {ti:"Jeu du requin",dur:"15 min",desc:"2 requins cherchent a intercepter les ballons des dribbleuses libres dans la zone.",org:"Zone delimitee. 1 ballon par joueuse sauf requins.",axes:["Reduire la zone","Ajouter un 3e requin"],kws:["Proteger le ballon","Vision peripherique","Changement direction","Feinte"],ch:null},
-      {ti:"Tir libre - Bombe",dur:"15 min",desc:"Groupes de 3 par panier. Tir depuis la LF. Si rate : tir depuis le rebond. Si marque : avancer.",org:"Groupes de 3. 1 ballon.",axes:["Raquette uniquement","Mi-distance","Tournoi equipe"],kws:["BEEF","Armer le bras","Regard panier","Geste fluide"],ch:null}]},
+      {ti:"Tir libre - Bombe",dur:"15 min",desc:"Groupes de 3 par panier. Tir depuis la LF. Si raté : tir depuis le rebond. Si marqué : avancer.",org:"Groupes de 3. 1 ballon.",axes:["Raquette uniquement","Mi-distance","Tournoi équipe"],kws:["BEEF","Armer le bras","Regard panier","Geste fluide"],ch:null}]},
     {num:"1.2",t:"Dribble vitesse et changement de main",dur:"1h30",obj:"Progresser dans la maitrise du dribble",sits:[
-      {ti:"Dribble miroir",dur:"15 min",desc:"Par binomes face a face. A dribble en imitant les deplacements de B. Changement de role toutes les 2 min.",org:"Binomes. 1 ballon. Zone 3m x 3m.",axes:["B se deplace lateral","Chrono : max changements en 30 sec"],kws:["Regard adverse","Anticipation","Reactivite","Main non-directrice"],ch:null},
-      {ti:"Navettes dribble",dur:"20 min",desc:"Aller main droite retour main gauche. Relais par equipe de 4.",org:"4 equipes sur la largeur.",axes:["Dribble simple pour debutantes","Sprint avant passe finale"],kws:["Acceleration","Protection balle","Coordination","Regularite"],ch:null},
-      {ti:"1c1 attaque defense",dur:"20 min",desc:"A dribble depuis la ligne mediane. D part du poteau. Objectif A : atteindre la ligne de fond.",org:"Files attaquantes et defenseures. 3 possessions chacune.",axes:["D demarre 2m plus pres","A peut tirer si elle passe D"],kws:["Pivot pied fort","Changement rythme","Feinte","Position basse"],ch:"ok:Defense individuelle 1v1 - conforme charte"}]},
+      {ti:"Dribble miroir",dur:"15 min",desc:"Par binômes face a face. A dribble en imitant les deplacements de B. Changement de role toutes les 2 min.",org:"Binômes. 1 ballon. Zone 3m x 3m.",axes:["B se deplace lateral","Chrono : max changements en 30 sec"],kws:["Regard adverse","Anticipation","Reactivite","Main non-directrice"],ch:null},
+      {ti:"Navettes dribble",dur:"20 min",desc:"Aller main droite retour main gauche. Relais par équipe de 4.",org:"4 équipes sur la largeur.",axes:["Dribble simple pour debutantes","Sprint avant passe finale"],kws:["Acceleration","Protection balle","Coordination","Regularite"],ch:null},
+      {ti:"1c1 attaque défense",dur:"20 min",desc:"A dribble depuis la ligne mediane. D part du poteau. Objectif A : atteindre la ligne de fond.",org:"Files attaquantes et defenseures. 3 possessions chacune.",axes:["D demarre 2m plus pres","A peut tirer si elle passe D"],kws:["Pivot pied fort","Changement rythme","Feinte","Position basse"],ch:"ok:Défense individuelle 1v1 - conforme charte"}]},
     {num:"1.3",t:"La passe - precision et timing",dur:"1h30",obj:"Maitriser les 3 passes fondamentales",sits:[
-      {ti:"Mur de passes",dur:"15 min",desc:"Par binomes face au mur. Passe de poitrine 10x rebond 10x une main 10x.",org:"1 ballon par binome. Distance 3-4m.",axes:["Augmenter la distance","Alterner les types au signal"],kws:["Extension des bras","Rotation poignets","Cible","Precision"],ch:null},
-      {ti:"Triangles - passe et deplacement",dur:"20 min",desc:"Groupes de 3 en triangle. A passe a B et se deplace vers B. Le triangle tourne.",org:"Groupes de 3. Triangle 4m. 1 ballon.",axes:["Agrandir le triangle","Passe tendue et rebond alternance"],kws:["Appel de balle","Communication","Demarquage"],ch:null},
-      {ti:"2c0 - montee collective",dur:"20 min",desc:"Deux joueuses montent en se faisant des passes sans dribble depuis la ligne mediane.",org:"Binomes. File de depart.",axes:["Autoriser le dribble","Ajouter une defenseuse (2v1)"],kws:["Lecture partenaire","Timing","Course interieure","Decision"],ch:null}]},
+      {ti:"Mur de passes",dur:"15 min",desc:"Par binômes face au mur. Passe de poitrine 10x rebond 10x une main 10x.",org:"1 ballon par binome. Distance 3-4m.",axes:["Augmenter la distance","Alterner les types au signal"],kws:["Extension des bras","Rotation poignets","Cible","Precision"],ch:null},
+      {ti:"Triangles - passe et deplacement",dur:"20 min",desc:"Groupes de 3 en triangle. A passe a B et se deplace vers B. Le triangle tourne.",org:"Groupes de 3. Triangle 4m. 1 ballon.",axes:["Agrandir le triangle","Passe tendue et rebond alternance"],kws:["Appel de balle","Communication","Démarquage"],ch:null},
+      {ti:"2c0 - montée collective",dur:"20 min",desc:"Deux joueuses montent en se faisant des passes sans dribble depuis la ligne mediane.",org:"Binômes. File de depart.",axes:["Autoriser le dribble","Ajouter une defenseuse (2v1)"],kws:["Lecture partenaire","Timing","Course interieure","Decision"],ch:null}]},
     {num:"1.4",t:"Tir - BEEF et lay-up",dur:"1h30",obj:"Acquerir la mecanique BEEF et le lay-up",sits:[
       {ti:"BEEF sans ballon",dur:"10 min",desc:"En ligne face au coach. Travail en miroir du geste de tir sans ballon.",org:"En ligne face au coach.",axes:["Avec ballon leger ensuite","Tir depuis 2m puis 3m"],kws:["Balance","Eyes","Elbow","Follow-through"],ch:null},
-      {ti:"5 spots de tir",dur:"20 min",desc:"5 positions autour de la raquette. 2 tirs par spot. Partenaire fait le rebond.",org:"3 joueuses par panier. 1 ballon.",axes:["2 spots pour debutantes","Competition : max paniers en 3 min"],kws:["Arc de tir","Pieds largeur epaules","Regard cible"],ch:null},
+      {ti:"5 spots de tir",dur:"20 min",desc:"5 positions autour de la raquette. 2 tirs par spot. Partenaire fait le rebond.",org:"3 joueuses par panier. 1 ballon.",axes:["2 spots pour debutantes","Compétition : max paniers en 3 min"],kws:["Arc de tir","Pieds largeur epaules","Regard cible"],ch:null},
       {ti:"Lay-up droit puis gauche",dur:"25 min",desc:"Dribble depuis la ligne des 3 pts 2 derniers pas tir banque sur la planche.",org:"File unique. Rebondeur sous le panier.",axes:["Sans dribble : marcher","Dribble lent puis vitesse"],kws:["Pas appel","Genou leve","Banque planche","Tempo"],ch:null}]},
-    {num:"1.5",t:"Defense individuelle et pivot",dur:"1h30",obj:"Position defensive et pied-pivot",sits:[
-      {ti:"Glissades defensives",dur:"15 min",desc:"Sur signal : glissade gauche 3 pas droite 3 pas retraite sprint. Ne jamais croiser les pieds.",org:"Joueuses en ligne sur ligne de LF.",axes:["Signaux aleatoires","1v1 : A sans dribble"],kws:["Pas chasse","Position basse","Bras actif","Regard nombril"],ch:"ok:Defense individuelle - base charte CD42"},
+    {num:"1.5",t:"Défense individuelle et pivot",dur:"1h30",obj:"Position défensive et pied-pivot",sits:[
+      {ti:"Glissades defensives",dur:"15 min",desc:"Sur signal : glissade gauche 3 pas droite 3 pas retraite sprint. Ne jamais croiser les pieds.",org:"Joueuses en ligne sur ligne de LF.",axes:["Signaux aleatoires","1v1 : A sans dribble"],kws:["Pas chasse","Position basse","Bras actif","Regard nombril"],ch:"ok:Défense individuelle - base charte CD42"},
       {ti:"Pivot",dur:"15 min",desc:"Pied pivot choisi. Coach pointe une direction : la joueuse pivote sans lever le pied.",org:"Joueuses espacees avec ballon.",axes:["Ajouter un defenseur","Pivot pour tir passe ou dribble"],kws:["Pied ancre","Rotation hanche","Protection balle"],ch:null},
-      {ti:"3v3 defense individuelle",dur:"25 min",desc:"3v3 sur demi-terrain. Defense individuelle obligatoire. Conserver 10 secondes = 1 point.",org:"Equipes de 3. Terrain reduit.",axes:["2 dribbles max","Full court defense"],kws:["Pression sur balle","Individuelle tout terrain","Conservation"],ch:"ok:Defense individuelle - conforme charte"}]}
+      {ti:"3v3 défense individuelle",dur:"25 min",desc:"3v3 sur demi-terrain. Défense individuelle obligatoire. Conserver 10 secondes = 1 point.",org:"Équipes de 3. Terrain réduit.",axes:["2 dribbles max","Full court défense"],kws:["Pression sur balle","Individuelle tout terrain","Conservation"],ch:"ok:Défense individuelle - conforme charte"}]}
   ]},
   {id:2,n:"Jeu Collectif en Attaque",sh:"Jeu Collectif",p:"Nov. - mi-dec. 2025",s:8,c:"#16A085",e:"🤝",
-   objs:["Maitriser le jeu a 2 (passe-et-va 2v1)","Comprendre et appliquer le demarquage","Developper le 3v2","Organiser la remontee rapide","Creer des decalages sans ecran"],
+   objs:["Maitriser le jeu a 2 (passe-et-va 2v1)","Comprendre et appliquer le démarquage","Developper le 3v2","Organiser la remontee rapide","Creer des decalages sans ecran"],
    seas:[
     {num:"2.1",t:"Passe-et-va et surnombre 2v1",dur:"1h30",obj:"Creer le surnombre avec le passe-et-va",sits:[
-      {ti:"Passe-et-va",dur:"15 min",desc:"A passe a B et coupe vers le panier. B redonne dans la course. A termine en lay-up.",org:"Trinomes : A B rebondeur C.",axes:["B peut garder et couper","Ajouter un defenseur sur A"],kws:["Passe puis Deplacement","Timing","Course interieure"],ch:null},
+      {ti:"Passe-et-va",dur:"15 min",desc:"A passe a B et coupe vers le panier. B redonne dans la course. A terminé en lay-up.",org:"Trinomes : A B rebondeur C.",axes:["B peut garder et couper","Ajouter un defenseur sur A"],kws:["Passe puis Deplacement","Timing","Course interieure"],ch:null},
       {ti:"Surnombre 2v1",dur:"20 min",desc:"A et B face a 1 defenseur. Travailler la decision : qui tire qui passe.",org:"Files de 2 attaquantes et 1 file de defenseures.",axes:["D repart avec 2s de retard","2v1 full court"],kws:["Decision rapide","Attirer et passer","Penetration"],ch:null},
-      {ti:"3v2 demi-terrain",dur:"20 min",desc:"3 attaquantes contre 2 defenseures. 8 secondes pour tirer. Rotation continue.",org:"Groupes de 5. Chrono visible.",axes:["Reduire a 6 secondes","3v3 avec rebond offensif"],kws:["Surnombre","Largeur","Decalage","Circulation"],ch:null}]},
-    {num:"2.2",t:"Demarquage et appel de balle",dur:"1h30",obj:"Realiser un demarquage efficace",sits:[
-      {ti:"Tag et demarquage",dur:"15 min",desc:"1 requin cherche a toucher ses 2 attaquantes avec un foulard dans la zone.",org:"Zones de 5m x 5m. Chrono 20 sec.",axes:["Agrandir la zone","Introduire le ballon"],kws:["Changer de direction","Espace libre","Vitesse de depart"],ch:null},
-      {ti:"3v3 sans dribble",dur:"25 min",desc:"3v3 SANS dribble. Seulement pivoter et passer. 1 point = passe dans la raquette adverse.",org:"Equipes de 3. Demi-terrain.",axes:["Autoriser 1 dribble max","Passer a chaque joueuse avant de tirer"],kws:["Mobilite permanente","Communication","Vision du jeu"],ch:null},
-      {ti:"Match 4v4",dur:"20 min",desc:"Match 4v4 terrain reduit. Defense individuelle obligatoire.",org:"2 equipes de 4.",axes:["Bonus si tir vient d'un demarquage"],kws:["Lecture du jeu","Espaces","Application"],ch:"ok:Defense individuelle - conforme charte"}]},
-    {num:"2.3",t:"Remontee de balle rapide",dur:"1h30",obj:"Monter rapidement apres recuperation",sits:[
+      {ti:"3v2 demi-terrain",dur:"20 min",desc:"3 attaquantes contre 2 defenseures. 8 secondes pour tirer. Rotation continue.",org:"Groupes de 5. Chrono visible.",axes:["Reduire a 6 secondes","3v3 avec rebond offensif"],kws:["Surnombre","Largeur","Décalage","Circulation"],ch:null}]},
+    {num:"2.2",t:"Démarquage et appel de balle",dur:"1h30",obj:"Realiser un démarquage efficace",sits:[
+      {ti:"Tag et démarquage",dur:"15 min",desc:"1 requin cherche a toucher ses 2 attaquantes avec un foulard dans la zone.",org:"Zones de 5m x 5m. Chrono 20 sec.",axes:["Agrandir la zone","Introduire le ballon"],kws:["Changer de direction","Espace libre","Vitesse de depart"],ch:null},
+      {ti:"3v3 sans dribble",dur:"25 min",desc:"3v3 SANS dribble. Seulement pivoter et passer. 1 point = passe dans la raquette adverse.",org:"Équipes de 3. Demi-terrain.",axes:["Autoriser 1 dribble max","Passer a chaque joueuse avant de tirer"],kws:["Mobilite permanente","Communication","Vision du jeu"],ch:null},
+      {ti:"Match 4v4",dur:"20 min",desc:"Match 4v4 terrain réduit. Défense individuelle obligatoire.",org:"2 équipes de 4.",axes:["Bonus si tir vient d'un démarquage"],kws:["Lecture du jeu","Espaces","Application"],ch:"ok:Défense individuelle - conforme charte"}]},
+    {num:"2.3",t:"Remontee de balle rapide",dur:"1h30",obj:"Monter rapidement après récupération",sits:[
       {ti:"Remontee 3 couloirs",dur:"15 min",desc:"3 joueuses dans 3 couloirs. Meneuse dribble aileres courent. Passe exterieure pour lay-up.",org:"Groupes de 3. Depart ligne de fond.",axes:["Ajouter 1 defenseur en retard","3v2 full court"],kws:["Couloirs de jeu","Vitesse","Largeur","Premier tir rapide"],ch:null},
-      {ti:"Rebond defensif et contre-attaque",dur:"20 min",desc:"Coach tire. Les 3 D prennent le rebond (boxout) et lancent la contre-attaque immediatement.",org:"Groupes de 6.",axes:["Boxout obligatoire","5 secondes pour tirer"],kws:["Boxout","Outlet pass","Transition","Sprint"],ch:null},
-      {ti:"Match : contre-attaque valorisee",dur:"20 min",desc:"Match 4v4. Paniers en moins de 5 secondes apres recuperation = x2.",org:"2 equipes. Chrono 5s.",axes:["Retour defensif obligatoire"],kws:["Jeu rapide","Transition","Efficacite"],ch:null}]}
+      {ti:"Rebond défensif et contre-attaque",dur:"20 min",desc:"Coach tire. Les 3 D prennent le rebond (boxout) et lancent la contre-attaque immédiatement.",org:"Groupes de 6.",axes:["Boxout obligatoire","5 secondes pour tirer"],kws:["Boxout","Outlet pass","Transition","Sprint"],ch:null},
+      {ti:"Match : contre-attaque valorisee",dur:"20 min",desc:"Match 4v4. Paniers en moins de 5 secondes après récupération = x2.",org:"2 équipes. Chrono 5s.",axes:["Retour défensif obligatoire"],kws:["Jeu rapide","Transition","Efficacite"],ch:null}]}
   ]},
-  {id:3,n:"Defense Individuelle et Transition",sh:"Defense",p:"Janv. - mi-fev. 2026",s:9,c:"#C0392B",e:"🛡️",
-   objs:["Defense individuelle fille a fille sur TOUT le terrain","Pression sur le porteur de balle","Transition defense-attaque","Retour defensif systematique","Boxout et prise de rebond"],
+  {id:3,n:"Défense Individuelle et Transition",sh:"Défense",p:"Janv. - mi-fev. 2026",s:9,c:"#C0392B",e:"🛡️",
+   objs:["Défense individuelle fille a fille sur TOUT le terrain","Pression sur le porteur de balle","Transition défense-attaque","Retour défensif systematique","Boxout et prise de rebond"],
    seas:[
-    {num:"3.1",t:"1v1 Full Court",dur:"1h30",obj:"Pression defensive sur tout le terrain",sits:[
-      {ti:"1v1 full court",dur:"15 min",desc:"D suit A depuis la remise en jeu sur tout le terrain. A tente des changements de direction.",org:"Binomes. Rotation apres 2 possessions.",axes:["A max 3 changements","Sprint rattrapage si D perd A"],kws:["Pied avance sur balle","Distance bras tendu","Pas chasse","Position basse"],ch:"ok:Defense individuelle full court - charte obligatoire"},
-      {ti:"1v1 avec tir",dur:"20 min",desc:"1v1 demi-terrain. A part de la ligne mediane. D conteste le tir.",org:"3 possessions en attaque puis 3 en defense.",axes:["A a 5 secondes pour tirer","D doit toucher le ballon"],kws:["Contest de tir","Main haute","Ne pas sauter trop tot"],ch:"ok:Pression individuelle - conforme charte"},
-      {ti:"Boxout et rebond 2v2",dur:"15 min",desc:"Coach tire. D pivote et bloque son adversaire (boxout). A essaie de passer devant. D saisit.",org:"Groupes de 5.",axes:["1 dribble rebond offensif","D score si rebond defensif"],kws:["Fesses contre ventre","Bras en aile","Saisir a 2 mains"],ch:"ok:Boxout = action defensive individuelle legale"}]},
-    {num:"3.2",t:"Retour defensif et transition",dur:"1h30",obj:"Reflexe de retour defensif systematique",sits:[
-      {ti:"Sprint retour",dur:"10 min",desc:"Sur signal toutes les joueuses en zone offensive sprintent sous leur panier en 3 secondes.",org:"Joueuses sur ligne des 3/4.",axes:["Signal surprise","Derniere arrivee : 5 squats"],kws:["Reaction","Sprint","Priorite defensive"],ch:null},
+    {num:"3.1",t:"1v1 Full Court",dur:"1h30",obj:"Pression défensive sur tout le terrain",sits:[
+      {ti:"1v1 full court",dur:"15 min",desc:"D suit A depuis la remise en jeu sur tout le terrain. A tente des changements de direction.",org:"Binômes. Rotation après 2 possessions.",axes:["A max 3 changements","Sprint rattrapage si D perd A"],kws:["Pied avance sur balle","Distance bras tendu","Pas chasse","Position basse"],ch:"ok:Défense individuelle full court - charte obligatoire"},
+      {ti:"1v1 avec tir",dur:"20 min",desc:"1v1 demi-terrain. A part de la ligne mediane. D conteste le tir.",org:"3 possessions en attaque puis 3 en défense.",axes:["A a 5 secondes pour tirer","D doit toucher le ballon"],kws:["Contest de tir","Main haute","Ne pas sauter trop tot"],ch:"ok:Pression individuelle - conforme charte"},
+      {ti:"Boxout et rebond 2v2",dur:"15 min",desc:"Coach tire. D pivote et bloque son adversaire (boxout). A essaie de passer devant. D saisit.",org:"Groupes de 5.",axes:["1 dribble rebond offensif","D score si rebond défensif"],kws:["Fesses contre ventre","Bras en aile","Saisir a 2 mains"],ch:"ok:Boxout = action défensive individuelle legale"}]},
+    {num:"3.2",t:"Retour défensif et transition",dur:"1h30",obj:"Reflexe de retour défensif systematique",sits:[
+      {ti:"Sprint retour",dur:"10 min",desc:"Sur signal toutes les joueuses en zone offensive sprintent sous leur panier en 3 secondes.",org:"Joueuses sur ligne des 3/4.",axes:["Signal surprise","Dernière arrivée : 5 squats"],kws:["Reaction","Sprint","Priorité défensive"],ch:null},
       {ti:"Transition 3v3",dur:"25 min",desc:"3 A partent. 3 D reviennent avec 2 secondes de retard. Organisation en inferiorite temporaire.",org:"Demi-terrain. Coach declenche.",axes:["3v3 reel","2 defendent 1 remonte"],kws:["Priorites defensives","Communication","Organisation rapide"],ch:null},
-      {ti:"Match - retour obligatoire",dur:"20 min",desc:"Match 4v4. Apres chaque tir les 3 joueuses les plus avancees reviennent avant de defendre.",org:"Match complet. Arbitre.",axes:["Reduire a 2 joueuses"],kws:["Discipline collective","Effort defensif","Engagement"],ch:"ok:Retour pour retablir la defense individuelle"}]},
+      {ti:"Match - retour obligatoire",dur:"20 min",desc:"Match 4v4. Après chaque tir les 3 joueuses les plus avancées reviennent avant de defendre.",org:"Match complet. Arbitre.",axes:["Reduire a 2 joueuses"],kws:["Discipline collective","Effort défensif","Engagement"],ch:"ok:Retour pour retablir la défense individuelle"}]},
     {num:"3.3",t:"Situations defensives specifiques",dur:"1h30",obj:"Defendre en 1v1 dans des situations variees",sits:[
       {ti:"Contest de tir",dur:"15 min",desc:"A recoit a mi-distance. D ferme en glissade. D leve la main haute sans sauter trop tot.",org:"Trinomes. Rotation toutes les 3 tentatives.",axes:["A peut driver si D saute trop tot","Match 5 possessions"],kws:["Fermeture en glissade","Main haute","Ne pas sauter trop tot"],ch:"ok:Pression individuelle - conforme charte"},
-      {ti:"Defense sur poste bas",dur:"20 min",desc:"Attaquante poste bas. D se positionne entre elle et le panier. Coupe la ligne de passe.",org:"Trinomes.",axes:["D peut intercepter la passe","Pivot face au panier"],kws:["3/4 cote ballon","Bras coupe ligne de passe","Anticipation"],ch:"ok:Defense individuelle directe"},
-      {ti:"Match 5v5 evaluation",dur:"25 min",desc:"Match 5v5 complet. Defense individuelle full court obligatoire. 2 observatrices designees.",org:"Match 2 x 10 min.",axes:["Interception = 2 points","MVP defensif designee"],kws:["Defense individuelle","Full court","Application"],ch:"ok:Defense individuelle full court - conforme charte"}]}
+      {ti:"Défense sur poste bas",dur:"20 min",desc:"Attaquante poste bas. D se positionne entre elle et le panier. Coupe la ligne de passe.",org:"Trinomes.",axes:["D peut intercepter la passe","Pivot face au panier"],kws:["3/4 cote ballon","Bras coupe ligne de passe","Anticipation"],ch:"ok:Défense individuelle directe"},
+      {ti:"Match 5v5 évaluation",dur:"25 min",desc:"Match 5v5 complet. Défense individuelle full court obligatoire. 2 observatrices designees.",org:"Match 2 x 10 min.",axes:["Interception = 2 points","MVP défensif designee"],kws:["Défense individuelle","Full court","Application"],ch:"ok:Défense individuelle full court - conforme charte"}]}
   ]},
-  {id:4,n:"Jeu en Equipe",sh:"Systemes",p:"Mars - mi-avr. 2026",s:10,c:"#1A2E5A",e:"📋",
-   objs:["Jeu collectif offensif en mouvement","Fixation-passe sans ecran","Jeu interieur-exterieur","Defense individuelle 4v4 et 5v5","Roles definis : meneur ailiere pivot"],
+  {id:4,n:"Jeu en Équipe",sh:"Systemes",p:"Mars - mi-avr. 2026",s:10,c:"#1A2E5A",e:"📋",
+   objs:["Jeu collectif offensif en mouvement","Fixation-passe sans ecran","Jeu interieur-exterieur","Défense individuelle 4v4 et 5v5","Roles definis : meneur ailiere pivot"],
    seas:[
     {num:"4.1",t:"Fixation-passe et interieur-exterieur",dur:"1h30",obj:"Creer des decalages sans ecran",sits:[
-      {ti:"Fixation-passe",dur:"15 min",desc:"A dribble vers D pour le fixer. D reagit sur A puis A passe a B demarquee. B attaque.",org:"Trinomes. Demi-terrain.",axes:["Sans defenseur abord","2v2 avec fixation-passe"],kws:["Fixation","Attirer le defenseur","Timing passe","Demarquage"],ch:"ok:Pas d ecran - fixation-passe conforme charte"},
+      {ti:"Fixation-passe",dur:"15 min",desc:"A dribble vers D pour le fixer. D reagit sur A puis A passe a B demarquee. B attaque.",org:"Trinomes. Demi-terrain.",axes:["Sans defenseur abord","2v2 avec fixation-passe"],kws:["Fixation","Attirer le defenseur","Timing passe","Démarquage"],ch:"ok:Pas d ecran - fixation-passe conforme charte"},
       {ti:"Jeu interieur-exterieur",dur:"20 min",desc:"Poste bas recoit. Exterieure coupe. Poste peut tirer passer au coupeur ou ressortir.",org:"Par 3. Rotation des roles.",axes:["Defenseuse sur le poste","Passage obligatoire par le poste"],kws:["Ancrage poste","Demande de balle","Coupeur","Options"],ch:null},
-      {ti:"3v3 decalage par deplacement",dur:"20 min",desc:"3v3. Bonus si le tir vient d'un decalage cree par une coupe.",org:"Equipes de 3.",axes:["3 passes minimum avant le tir"],kws:["Mouvement sans ballon","Coupe","Decalage"],ch:"ok:Defense individuelle - conforme charte"}]},
+      {ti:"3v3 décalage par deplacement",dur:"20 min",desc:"3v3. Bonus si le tir vient d'un décalage créé par une coupe.",org:"Équipes de 3.",axes:["3 passes minimum avant le tir"],kws:["Mouvement sans ballon","Coupe","Décalage"],ch:"ok:Défense individuelle - conforme charte"}]},
     {num:"4.2",t:"Roles et systeme 5v5",dur:"1h30",obj:"Jouer avec des roles definis",sits:[
-      {ti:"Les 5 postes",dur:"15 min",desc:"Coach presente les 5 postes. Les joueuses marchent les deplacements sans adversaire.",org:"5 joueuses et coach.",axes:["Varier les initiations","Ajouter la defense progressivement"],kws:["Postes de jeu","Lecture","Automatisme","Replacement"],ch:null},
-      {ti:"4v4 avec roles",dur:"25 min",desc:"4v4 demi-terrain. Chaque joueuse a un role. Defense individuelle.",org:"Equipes de 4.",axes:["Pivot doit toucher la balle a chaque possession"],kws:["Roles definis","Lecture","Initiative","Collectif"],ch:"ok:Defense individuelle - conforme charte"},
-      {ti:"5v5 pression full court",dur:"25 min",desc:"Match 5v5. Equipe defensive presse toute la montee en defense individuelle.",org:"5v5 complet.",axes:["Pression remise en jeu uniquement abord"],kws:["Pression","Interception","Briser la pression","Tempo"],ch:"ok:Pression individuelle full court - conforme charte"}]},
-    {num:"4.3",t:"Transition attaque-defense",dur:"1h30",obj:"Maitriser le passage rapide A/D",sits:[
-      {ti:"3v3 transition alternance",dur:"20 min",desc:"3v3 terrain entier. Apres chaque panier l'equipe qui vient de defendre repart en attaque.",org:"Equipes de 3. Match continu.",axes:["5 sec pour traverser la ligne mediane"],kws:["Transition instantanee","Lecture","Vitesse de decision"],ch:null},
-      {ti:"Signal de transition",dur:"15 min",desc:"Coach siffle : equipe en attaque defend immediatement et inversement.",org:"4v4. Sifflet coach.",axes:["Signaux de plus en plus frequents"],kws:["Reaction","Adaptation","Vigilance"],ch:null},
-      {ti:"Match 5v5 evaluation",dur:"25 min",desc:"Match 5v5 regles officielles. Coach note les transitions et retours defensifs.",org:"2 x 10 min.",axes:["Bonus si transition en moins de 3 secondes"],kws:["Match reel","Application","Cohesion"],ch:"ok:Defense individuelle full court - conforme charte"}]}
+      {ti:"Les 5 postes",dur:"15 min",desc:"Coach présente les 5 postes. Les joueuses marchent les deplacements sans adversaire.",org:"5 joueuses et coach.",axes:["Varier les initiations","Ajouter la défense progressivement"],kws:["Postes de jeu","Lecture","Automatisme","Replacement"],ch:null},
+      {ti:"4v4 avec roles",dur:"25 min",desc:"4v4 demi-terrain. Chaque joueuse a un role. Défense individuelle.",org:"Équipes de 4.",axes:["Pivot doit toucher la balle a chaque possession"],kws:["Roles definis","Lecture","Initiative","Collectif"],ch:"ok:Défense individuelle - conforme charte"},
+      {ti:"5v5 pression full court",dur:"25 min",desc:"Match 5v5. Équipe défensive presse toute la montee en défense individuelle.",org:"5v5 complet.",axes:["Pression remise en jeu uniquement abord"],kws:["Pression","Interception","Briser la pression","Tempo"],ch:"ok:Pression individuelle full court - conforme charte"}]},
+    {num:"4.3",t:"Transition attaque-défense",dur:"1h30",obj:"Maitriser le passage rapide A/D",sits:[
+      {ti:"3v3 transition alternance",dur:"20 min",desc:"3v3 terrain entier. Après chaque panier l'équipe qui vient de defendre repart en attaque.",org:"Équipes de 3. Match continu.",axes:["5 sec pour traverser la ligne mediane"],kws:["Transition instantanee","Lecture","Vitesse de decision"],ch:null},
+      {ti:"Signal de transition",dur:"15 min",desc:"Coach siffle : équipe en attaque defend immédiatement et inversement.",org:"4v4. Sifflet coach.",axes:["Signaux de plus en plus frequents"],kws:["Reaction","Adaptation","Vigilance"],ch:null},
+      {ti:"Match 5v5 évaluation",dur:"25 min",desc:"Match 5v5 règles officielles. Coach note les transitions et retours défensifs.",org:"2 x 10 min.",axes:["Bonus si transition en moins de 3 secondes"],kws:["Match reel","Application","Cohésion"],ch:"ok:Défense individuelle full court - conforme charte"}]}
   ]},
-  {id:5,n:"Competition et Bilan",sh:"Competition",p:"Mai - juin 2026",s:10,c:"#E8670A",e:"🏆",
-   objs:["Integrer tous les acquis en match reel","Cohesion equipe et communication","Situations specifiques : remise en jeu fin de match","Evaluer les progres individuels","Terminer la saison positivement"],
+  {id:5,n:"Compétition et Bilan",sh:"Compétition",p:"Mai - juin 2026",s:10,c:"#E8670A",e:"🏆",
+   objs:["Integrer tous les acquis en match reel","Cohésion équipe et communication","Situations specifiques : remise en jeu fin de match","Evaluer les progres individuels","Terminer la saison positivement"],
    seas:[
     {num:"5.1",t:"Situations de fin de match",dur:"1h30",obj:"Gerer la pression en fin de match",sits:[
-      {ti:"Derniere action 10 secondes",dur:"20 min",desc:"Score serre 10 secondes. L'equipe prepare et execute la derniere action.",org:"Equipes de 5. Chrono 10 sec visible.",axes:["Qui decide ? Le capitaine","Faute volontaire pour stopper le chrono"],kws:["Pression","Clarte tactique","Confiance","Decision"],ch:"ok:Defense individuelle - conforme charte"},
-      {ti:"Remise en jeu rapide",dur:"15 min",desc:"Remise en jeu sous son panier. Decrochage du meneur passe immediate montee rapide.",org:"5 joueuses et coach.",axes:["Pression defensive sur la remise en jeu"],kws:["Remise en jeu rapide","Timing","Signal de depart"],ch:"ok:Defense individuelle - conforme charte"},
-      {ti:"Communication a voix haute",dur:"20 min",desc:"Match 5v5. Toute action annoncee a voix haute. Penalite si silence.",org:"Match complet.",axes:["Communication defensive uniquement abord"],kws:["Communication","Vocabulaire basket","Leader de jeu"],ch:"ok:Defense individuelle - conforme charte"}]},
+      {ti:"Dernière action 10 secondes",dur:"20 min",desc:"Score serré 10 secondes. L'équipe prépare et exécute la dernière action.",org:"Équipes de 5. Chrono 10 sec visible.",axes:["Qui decide ? Le capitaine","Faute volontaire pour stopper le chrono"],kws:["Pression","Clarte tactique","Confiance","Decision"],ch:"ok:Défense individuelle - conforme charte"},
+      {ti:"Remise en jeu rapide",dur:"15 min",desc:"Remise en jeu sous son panier. Decrochage du meneur passe immediate montee rapide.",org:"5 joueuses et coach.",axes:["Pression défensive sur la remise en jeu"],kws:["Remise en jeu rapide","Timing","Signal de depart"],ch:"ok:Défense individuelle - conforme charte"},
+      {ti:"Communication a voix haute",dur:"20 min",desc:"Match 5v5. Toute action annoncee a voix haute. Penalite si silence.",org:"Match complet.",axes:["Communication défensive uniquement abord"],kws:["Communication","Vocabulaire basket","Leader de jeu"],ch:"ok:Défense individuelle - conforme charte"}]},
     {num:"5.2",t:"Tournoi interne et bilan",dur:"1h30",obj:"Cloture festive et bilan de saison",sits:[
-      {ti:"Tournoi 3v3 FIBA",dur:"45 min",desc:"Tournoi 3v3 sur deux paniers. Format poule puis finale. FIBA 3x3.",org:"Equipes de 3 tirees au sort.",axes:["Equipes mixtes niveaux"],kws:["Competition positive","3x3","Esprit sportif","Plaisir"],ch:"ok:Defense individuelle - conforme charte"},
-      {ti:"Bilan individuel",dur:"20 min",desc:"Test : 10 lancers francs relais dribble auto-evaluation. Comparer avec septembre.",org:"Stations tournantes.",axes:["Valoriser tous les progres"],kws:["Progres","Auto-evaluation","Objectifs","Fierte"],ch:null}]}
+      {ti:"Tournoi 3v3 FIBA",dur:"45 min",desc:"Tournoi 3v3 sur deux paniers. Format poule puis finale. FIBA 3x3.",org:"Équipes de 3 tirées au sort.",axes:["Équipes mixtes niveaux"],kws:["Compétition positive","3x3","Esprit sportif","Plaisir"],ch:"ok:Défense individuelle - conforme charte"},
+      {ti:"Bilan individuel",dur:"20 min",desc:"Test : 10 lancers francs relais dribble auto-évaluation. Comparer avec septembre.",org:"Stations tournantes.",axes:["Valoriser tous les progres"],kws:["Progres","Auto-évaluation","Objectifs","Fierte"],ch:null}]}
   ]}
 ];
 
@@ -1387,7 +1387,7 @@ function toggleDone(cyId,sNum){
   localStorage.setItem("asmb_done",JSON.stringify(d));
   buildCycle(CYCLES.find(function(c){return c.id==cyId;}));
   var btn=document.getElementById("done-btn");
-  if(btn){var done=isDone(cyId,sNum);btn.textContent=done?"✓ Seance terminee":"○ Marquer comme terminee";btn.className="done-btn"+(done?" active":"");}
+  if(btn){var done=isDone(cyId,sNum);btn.textContent=done?"✓ Séance terminée":"○ Marquer comme terminée";btn.className="done-btn"+(done?" active":"");}
 }
 function cycleProgress(cyId){
   var cy=CYCLES.find(function(c){return c.id==cyId;});if(!cy)return null;
@@ -1416,7 +1416,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes equipes","Selection"],"parent-equipe":["Equipe",""],"parent-events":["Evenements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon equipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entrainements et matchs"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Seance "+curSea.num,curSea.t]:["Seance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Competition 5x5","Equipes · Matchs · Joueurs"],"pole-3x3":["3x3","Equipes · Tournois"],"pole-evenement":["Evenements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Seances"],"parametres":["Parametres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des acces"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Equipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Etienne Metropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],portal:["ASMB","Saint-Etienne Metropole Basket"],elite:["Pole Formation","Planification ASMB"],u13home:["U13 Feminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Elite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communaute","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communaute","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Detail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Creneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -1497,7 +1497,7 @@ function buildDashboard(){
 
   html+='<div onclick="showLicenciesList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--dkg)">'+players.length+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licencies'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
 
   html+='<div onclick="showPendingLicences()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"#27AE60")+'">'+licencesEnAttente+'</div>'+
@@ -1505,17 +1505,17 @@ function buildDashboard(){
 
   html+='<div onclick="showTeamsList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+teams.length+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Equipes actives</div></div>';
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Équipes actives</div></div>';
 
   html+='<div onclick="showAssiduiteChart()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+(avgPresence!==null?avgPresence+"%":"—")+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite 30 derniers jours</div></div>';
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité 30 derniers jours</div></div>';
 
   html+='</div>';
 
   if(upcoming){
     html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
-      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Prochain evenement</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Prochain événement</div>'+
       '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upcoming.date+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
   }
@@ -1555,7 +1555,7 @@ function fillTodayHero(eventElId,noEventElId,teamFilter,fallbackLine1,fallbackLi
     var line1El=heroNoEvent.querySelector("[data-line1]");
     var line2El=heroNoEvent.querySelector("[data-line2]");
     if(line1El)line1El.textContent=fallbackLine1||todayLabel;
-    if(line2El)line2El.textContent=fallbackLine2||"Aucun entrainement aujourd'hui";
+    if(line2El)line2El.textContent=fallbackLine2||"Aucun entraînement aujourd'hui";
     if(!line1El&&!line2El)heroNoEvent.textContent=(fallbackLine1||todayLabel)+(fallbackLine2?" · "+fallbackLine2:"");
   }
 }
@@ -1570,7 +1570,7 @@ function showLicenciesList(){
 
 function sortLicenciesList(mode){
   licenciesSortMode=mode;
-  document.querySelectorAll("#modal-licencies-list .cat-filter").forEach(function(b){b.classList.remove("on");});
+  document.querySelectorAll("#modal-licenciés-list .cat-filter").forEach(function(b){b.classList.remove("on");});
   document.getElementById("sortby-"+mode).classList.add("on");
   var players=getPlayers().slice();
   players.sort(function(a,b){
@@ -1612,8 +1612,8 @@ function showPendingLicences(){
 function showTeamsList(){
   var teams=getTeams();
   var el=document.getElementById("teams-list-content");
-  document.getElementById("teams-list-title").textContent="Equipes du club";
-  if(!teams.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛡️</div><div>Aucune equipe</div></div>';}
+  document.getElementById("teams-list-title").textContent="Équipes du club";
+  if(!teams.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🛡️</div><div>Aucune équipe</div></div>';}
   else{
     el.innerHTML="";
     teams.forEach(function(t){
@@ -1634,13 +1634,13 @@ function showTeamRoster(teamId){
   document.getElementById("teams-list-title").textContent=team.name;
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("teams-list-content");
-  var backBtn='<button onclick="showTeamsList()" style="margin-bottom:10px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">← Toutes les equipes</button>';
+  var backBtn='<button onclick="showTeamsList()" style="margin-bottom:10px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">← Toutes les équipes</button>';
   if(!players.length){el.innerHTML=backBtn+'<div class="empty-state"><div class="empty-state-icon">👥</div><div>Aucun joueur</div></div>';return;}
   var html=backBtn;
   players.forEach(function(p){
     html+='<div style="padding:10px 4px;border-bottom:1px solid var(--bdr)">'+
       '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Ne(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Competition":"Loisir")+')</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Ne(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Compétition":"Loisir")+')</div>'+
     '</div>';
   });
   el.innerHTML=html;
@@ -1668,7 +1668,7 @@ function showAssiduiteChart(){
   months.forEach(function(m){totalP+=byMonth[m.key].present;totalT+=byMonth[m.key].total;});
   var overallPct=totalT?Math.round(totalP/totalT*100):0;
 
-  var html='<div style="text-align:center;margin-bottom:20px"><div style="font-size:32px;font-weight:900;color:#27AE60">'+overallPct+'%</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Assiduite globale (6 derniers mois)</div></div>';
+  var html='<div style="text-align:center;margin-bottom:20px"><div style="font-size:32px;font-weight:900;color:#27AE60">'+overallPct+'%</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Assiduité globale (6 derniers mois)</div></div>';
   html+='<div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 8px">';
   months.forEach(function(m){
     var d=byMonth[m.key];
@@ -1700,7 +1700,7 @@ function openCat(id){
 }
 function buildU13Home(){
   var chips=document.getElementById("u13chips");
-  if(chips&&!chips.dataset.built){chips.dataset.built="1";["2 seances / semaine","1h30 par seance","Zone A Rhone-Alpes"].forEach(function(t){var s=document.createElement("span");s.className="chip";s.textContent=t;chips.appendChild(s);});}
+  if(chips&&!chips.dataset.built){chips.dataset.built="1";["2 séances / semaine","1h30 par séance","Zone A Rhone-Alpes"].forEach(function(t){var s=document.createElement("span");s.className="chip";s.textContent=t;chips.appendChild(s);});}
   var vl=document.getElementById("vacList");
   if(vl&&!vl.dataset.built){vl.dataset.built="1";VACS.forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+v.c+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+v.d+'</div></div><div class="vimp">'+v.imp+'</div></div>';});}
   var cl=document.getElementById("cyList");cl.innerHTML="";
@@ -1710,18 +1710,18 @@ function buildU13Home(){
     var progTxt=pr&&pr.total>0?" · "+pr.done+"/"+pr.total+" faites":"";
     var d=document.createElement("div");d.className="cy-card";
     d.onclick=function(){openCy(cy.id);};
-    d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"#27AE60":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"#27AE60":cy.c)+'">'+(allDone?"✓":cy.e)+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"#27AE60":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' seances'+progTxt+'</div></div><div style="color:'+(allDone?"#27AE60":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
+    d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"#27AE60":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"#27AE60":cy.c)+'">'+(allDone?"✓":cy.e)+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"#27AE60":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"#27AE60":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
     cl.appendChild(d);
   });
 }
 function openCy(id){curCy=CYCLES.find(function(c){return c.id===id;});stack.push("cycle");buildCycle(curCy);showScr("cycle");}
 function buildCycle(cy){
   if(!cy)return;
-  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+cy.c+';display:flex;align-items:center;justify-content:center;font-size:20px">'+cy.e+'</div><div><div style="font-size:17px;font-weight:900;color:#fff">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' seances</div></div></div></div>';
+  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+cy.c+';display:flex;align-items:center;justify-content:center;font-size:20px">'+cy.e+'</div><div><div style="font-size:17px;font-weight:900;color:#fff">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' séances</div></div></div></div>';
   document.getElementById("cyObjs").innerHTML='<div class="obj-bx">'+cy.objs.map(function(o){return '<div class="obj-it">'+o+'</div>';}).join("")+'</div>';
   var sl=document.getElementById("cySeances");sl.innerHTML="";
   var pr=cycleProgress(cy.id);
-  if(pr&&pr.total>0){var pct=Math.round(pr.done/pr.total*100);var _pw=document.createElement("div");_pw.className="prog-wrap";_pw.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut)">Progression</span><span style="font-size:11px;font-weight:700;color:var(--ltg)">'+pr.done+'/'+pr.total+' seances</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>';sl.appendChild(_pw);}
+  if(pr&&pr.total>0){var pct=Math.round(pr.done/pr.total*100);var _pw=document.createElement("div");_pw.className="prog-wrap";_pw.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut)">Progression</span><span style="font-size:11px;font-weight:700;color:var(--ltg)">'+pr.done+'/'+pr.total+' séances</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>';sl.appendChild(_pw);}
   cy.seas.forEach(function(s){
     var done=isDone(cy.id,s.num);
     var d=document.createElement("div");d.className="sea-card";
@@ -1741,12 +1741,12 @@ function buildSeance(cy,s){
   hdr.innerHTML="";
   var top=document.createElement("div");
   top.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:6px";
-  top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Seance '+s.num+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
+  top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+s.num+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
   var ttl=document.createElement("div");ttl.style.cssText="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px";ttl.textContent=s.t;
   var obj=document.createElement("div");obj.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.4;margin-bottom:8px";obj.textContent=s.obj;
   var btn=document.createElement("button");
   btn.id="done-btn";btn.className="done-btn"+(done?" active":"");
-  btn.textContent=done?"✓ Seance terminee":"○ Marquer comme terminee";
+  btn.textContent=done?"✓ Séance terminée":"○ Marquer comme terminée";
   btn.onclick=function(){toggleDone(cy.id,s.num);};
   hdr.appendChild(top);hdr.appendChild(ttl);hdr.appendChild(obj);hdr.appendChild(btn);
   var sl=document.getElementById("seaSits");sl.innerHTML="";
@@ -1948,7 +1948,7 @@ SIT_DUR["1.2-3"]=5500;SIT_ANIMS["1.2-3"]=function(ctx,t){if(!ctx)return;
   else if(t<0.6){var p=(t-.2)/.4;var pos=bz2(p,W/2,H/2+15,W/2-30,H/2,W/2+25,85,W/2+10,60);ax=pos.x;ay=pos.y;var pd=cl(p-.08,0,1);var dp2=bz2(pd,W/2,H/2+30,W/2-30,H/2+12,W/2+25,100,W/2+10,75);dx=dp2.x;dy=dp2.y;for(var k=1;k<=3;k++){var tp=cl(pd-k*.07,0,1);var f=bz2(tp,W/2,H/2+30,W/2-30,H/2+12,W/2+25,100,W/2+10,75);fp(ctx,f.x,f.y,Math.max(0,.12-k*.04));}ctx.strokeStyle="rgba(255,255,255,.15)";ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(dx,dy);ctx.stroke();ctx.setLineDash([]);}
   else{var p2=(t-.6)/.4;ax=lp(W/2+10,W/2+5,p2);ay=lp(60,38,eOut(p2));dx=lp(W/2+10,W/2+8,p2);dy=lp(75,52,eOut(p2));}
   if(t<0.9)bl(ctx,ax,ay-13,7);pl(ctx,dx,dy,"D","#C0392B");pl(ctx,ax,ay,"A","#1A2E5A");
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("1c1 · D suit A · Defense individuelle",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("1c1 · D suit A · Défense individuelle",W/2,H-8);
 };SIT_ANIMS["1.2-3"].height=260;
 
 SIT_DUR["1.3-1"]=4500;SIT_ANIMS["1.3-1"]=function(ctx,t){if(!ctx)return;
@@ -2083,7 +2083,7 @@ SIT_DUR["1.5-3"]=5500;SIT_ANIMS["1.5-3"]=function(ctx,t){if(!ctx)return;
   var bi=Math.floor(t*5)%3,bni=(bi+1)%3,bp=(t*5)%1;
   bl(ctx,lp(ap[bi].x,ap[bni].x,eOut(bp)),lp(ap[bi].y,ap[bni].y,eOut(bp))-Math.sin(bp*Math.PI)*7,7);
   dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Defense individuelle · Chaque D suit son A",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Défense individuelle · Chaque D suit son A",W/2,H-8);
 };SIT_ANIMS["1.5-3"].height=260;
 
 // ═══ ANIMATIONS C2 ═══════════════════════════════════════════════
@@ -2192,7 +2192,7 @@ SIT_DUR["2.2-2"]=5500;SIT_ANIMS["2.2-2"]=function(ctx,t){if(!ctx)return;
 // 2.2-3 : Match 4v4
 SIT_DUR["2.2-3"]=5000;SIT_ANIMS["2.2-3"]=function(ctx,t){if(!ctx)return;
   var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 4v4 · Defense individuelle",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 4v4 · Défense individuelle",W/2,H-8);
 };SIT_ANIMS["2.2-3"].height=260;
 
 // 2.3-1 : Remontee 3 couloirs
@@ -2248,7 +2248,7 @@ SIT_DUR["2.3-2"]=5500;SIT_ANIMS["2.3-2"]=function(ctx,t){if(!ctx)return;
     pl(ctx,d1x2,d1y2,"D1","#C0392B",11);pl(ctx,d2x2,d2y2,"D2","#C0392B",11);pl(ctx,d3x2,d3y2,"D3","#C0392B",11);
     if(p3>0.3){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("CONTRE-ATTAQUE !",W/2,H/2+10);}
   }
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Rebond defensif → Contre-attaque immediate",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Rebond défensif → Contre-attaque immediate",W/2,H-8);
 };SIT_ANIMS["2.3-2"].height=480;
 
 // 2.3-3 : Match contre-attaque valorisee
@@ -2312,7 +2312,7 @@ SIT_DUR["3.2-1"]=4500;SIT_ANIMS["3.2-1"]=function(ctx,t){if(!ctx)return;
     for(var k=1;k<=4;k++){var tpast=Math.max(0,(t-0.15-delay-k*0.05)/0.75);var pastY=lp(startY,targetY,eOut(tpast));ctx.globalAlpha=Math.max(0,.15-k*.04);ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(px,pastY,10,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
     pl(ctx,px,py,"D","#C0392B",12);
   });
-  if(t>0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Position defensive !",W/2,H/2+20);}
+  if(t>0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Position défensive !",W/2,H/2+20);}
   ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Signal → Sprint retour en 3 secondes",W/2,H-8);
 };SIT_ANIMS["3.2-1"].height=480;
 
@@ -2337,7 +2337,7 @@ SIT_DUR["3.2-2"]=5500;SIT_ANIMS["3.2-2"]=function(ctx,t){if(!ctx)return;
 // 3.2-3 : Match retour obligatoire
 SIT_DUR["3.2-3"]=5000;SIT_ANIMS["3.2-3"]=function(ctx,t){if(!ctx)return;
   var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Apres chaque tir : retour defensif obligatoire",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Après chaque tir : retour défensif obligatoire",W/2,H-8);
 };SIT_ANIMS["3.2-3"].height=260;
 
 // 3.3-1 : Contest de tir - fermeture en glissade
@@ -2383,7 +2383,7 @@ SIT_DUR["3.3-2"]=5000;SIT_ANIMS["3.3-2"]=function(ctx,t){if(!ctx)return;
 // 3.3-3 : Match 5v5 evaluation
 SIT_DUR["3.3-3"]=5000;SIT_ANIMS["3.3-3"]=function(ctx,t){if(!ctx)return;
   var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 5v5 · Defense individuelle full court",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 5v5 · Défense individuelle full court",W/2,H-8);
 };SIT_ANIMS["3.3-3"].height=260;
 
 // 4.1-1 : Fixation-passe
@@ -2455,8 +2455,8 @@ SIT_DUR["4.1-3"]=5500;SIT_ANIMS["4.1-3"]=function(ctx,t){if(!ctx)return;
   bl(ctx,lp(ap[bi].x,ap[bni].x,eOut(bp)),lp(ap[bi].y,ap[bni].y,eOut(bp))-Math.sin(bp*Math.PI)*7,7);
   dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});
   ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
-  if(t>0.5&&t<0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("BONUS si tir apres coupe !",W/2,H/2-12);}
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("3v3 · Decalage par coupe",W/2,H-8);
+  if(t>0.5&&t<0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("BONUS si tir après coupe !",W/2,H/2-12);}
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("3v3 · Décalage par coupe",W/2,H-8);
 };SIT_ANIMS["4.1-3"].height=260;
 
 // 4.2-1 : Les 5 postes
@@ -2513,14 +2513,14 @@ SIT_DUR["4.3-1"]=5500;SIT_ANIMS["4.3-1"]=function(ctx,t){if(!ctx)return;
   dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});
   ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
   ctx.fillStyle=phase?"rgba(192,57,43,.7)":"rgba(39,174,96,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(phase?"→ D devient A !":"Attaque →",W/2,H/2-(phase?-18:18));
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Transition instantanee apres chaque panier",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Transition instantanee après chaque panier",W/2,H-8);
 };SIT_ANIMS["4.3-1"].height=260;
 
 // 4.3-2 : Signal de transition
 SIT_DUR["4.3-2"]=5000;SIT_ANIMS["4.3-2"]=function(ctx,t){if(!ctx)return;
   var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
   if(Math.floor(t*3)%2===0&&t>0.2){ctx.fillStyle="rgba(255,165,0,.9)";ctx.font="bold 14px system-ui";ctx.textAlign="center";ctx.fillText("SIFFLET !",W/2,H/2-20);ctx.font="bold 22px system-ui";ctx.fillText("📢",W/2,H/2-40);}
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Sifflet → Inversion attaque/defense",W/2,H-8);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Sifflet → Inversion attaque/défense",W/2,H-8);
 };SIT_ANIMS["4.3-2"].height=260;
 
 // 4.3-3 : Match 5v5 evaluation
@@ -2547,7 +2547,7 @@ SIT_DUR["5.1-1"]=5500;SIT_ANIMS["5.1-1"]=function(ctx,t){if(!ctx)return;
   bl(ctx,lp(ap[bi].x,ap[bni].x,eOut(bp)),lp(ap[bi].y,ap[bni].y,eOut(bp))-Math.sin(bp*Math.PI)*6,7);
   dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",10);});
   ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",10);});
-  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Derniere action · Pression maximale",W/2,H/2-12);
+  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Dernière action · Pression maximale",W/2,H/2-12);
 };SIT_ANIMS["5.1-1"].height=270;
 
 // 5.1-2 : Remise en jeu rapide
@@ -2648,11 +2648,11 @@ function genCode(){
 }
 
 var STATUTS=[
-  {id:"envoyee",label:"Envoyee",icon:"📤",color:"#6a9e72"},
+  {id:"envoyee",label:"Envoyée",icon:"📤",color:"#6a9e72"},
   {id:"ouverte",label:"Ouverte",icon:"👁️",color:"#E8670A"},
   {id:"en_cours",label:"En cours",icon:"✏️",color:"#1A2E5A"},
-  {id:"recue",label:"Recue",icon:"📥",color:"#8E44AD"},
-  {id:"validee",label:"Validee",icon:"✅",color:"#27AE60"},
+  {id:"recue",label:"Reçue",icon:"📥",color:"#8E44AD"},
+  {id:"validee",label:"Validée",icon:"✅",color:"#27AE60"},
 ];
 var CATS_LIC=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","Senior":"#E8670A"};
@@ -2679,7 +2679,7 @@ function buildLicences(){
       chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validees vs en attente</div>';
       catKeys.forEach(function(cat){
         var c=byCat[cat];
-        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:#27AE60;font-weight:700">'+c.valid+' validee'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
+        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:#27AE60;font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
       });
       chtml+='</div>';
       counterEl.innerHTML=chtml;
@@ -2688,7 +2688,7 @@ function buildLicences(){
 
   el.innerHTML="";
   if(!lics.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><div style="font-size:13px;font-weight:600">Aucune fiche envoyee</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Nouvelle fiche</div></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><div style="font-size:13px;font-weight:600">Aucune fiche envoyée</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Nouvelle fiche</div></div>';
     return;
   }
   // Tri par date décroissante
@@ -2750,7 +2750,7 @@ function sendLicenceMail(lic){
     "4. Remplissez et validez votre fiche\n\n"+
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de probleme, contactez le club directement.\n\n"+
-    "L'equipe ASMB\n"+
+    "L'équipe ASMB\n"+
     "Saint-Etienne Metropole Basket\n"+
     "—\n"+
     "🏀 ASMB · EST. 2022";
@@ -2793,10 +2793,10 @@ function renderLicenceDetail(lic){
     var f=lic.fiche;
     var rows=[
       ["Genre",f.genre==="F"?"Feminin":"Masculin"],
-      ["Prenom",f.prenom],["Nom",f.nom],
+      ["Prénom",f.prenom],["Nom",f.nom],
       ["Date de naissance",f.naissance],
       ["Ne(e) a l etranger",f.neEtranger?"Oui - "+(f.villeNaiss||"?")+", "+(f.paysNaiss||"?"):"Non"],["Adresse",f.adresse],
-      ["Telephone",f.telephone],["Email",f.emailLic],
+      ["Téléphone",f.telephone],["Email",f.emailLic],
       ["Responsable legal 1",f.respNom+(f.respLien?" ("+f.respLien+")":"")],
       ["Tel resp. 1",f.respTel],
       ["Email resp. 1",f.respEmail],
@@ -2834,13 +2834,13 @@ function renderLicenceDetail(lic){
       '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Code</div>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
         '<div style="font-size:18px;font-weight:900;color:var(--txt);font-family:monospace;letter-spacing:2px">'+lic.code+'</div>'+
-        (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#27AE60")+'">'+( lic.typeLicence==="competition"?"🏆 Competition":"🎯 Loisir")+'</div>':'')+
+        (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#27AE60")+'">'+( lic.typeLicence==="competition"?"🏆 Compétition":"🎯 Loisir")+'</div>':'')+
         '<button onclick="copyCode(\''+lic.code+'\')" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:600;border:none;cursor:pointer">Copier</button>'+
       '</div>'+
       (lic.email?'<div style="font-size:11px;color:var(--mut);margin-top:4px">📧 '+lic.email+'</div>':'')+
       (lic.ouvertLe?'<div style="font-size:11px;color:#E8670A;margin-top:4px">👁️ Ouvert le '+lic.ouvertLe+'</div>':'')+
     '</div>'+
-    '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Categorie</div>'+
+    '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Catégorie</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">'+catSel+'</div>'+
     ficheHtml+actions;
 }
@@ -2859,7 +2859,7 @@ function validerLicence(){
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===currentLicCode;});
   if(idx<0)return;
-  if(!lics[idx].categorie){alert("Assignez une categorie avant de valider");return;}
+  if(!lics[idx].categorie){alert("Assignez une catégorie avant de valider");return;}
   lics[idx].statut="validee";
   saveLicences(lics);
   renderLicenceDetail(lics[idx]);
@@ -2874,7 +2874,7 @@ function validerLicence(){
       savePlayers(players);
     }
   }
-  alert("Licence validee ! Le joueur a ete ajoute aux inscriptions.");
+  alert("Licence validée ! Le joueur a ete ajouté aux inscriptions.");
 }
 
 function resendLicMail(){
@@ -2891,19 +2891,19 @@ function showEditFiche(){
   var f=lic.fiche;
   var el=document.getElementById("edit-fiche-form");
   el.innerHTML=
-    '<div class="form-group"><label class="form-label">Prenom</label><input class="form-input" id="ef-prenom" value="'+(f.prenom||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="ef-prenom" value="'+(f.prenom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ef-nom" value="'+(f.nom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="ef-naissance" type="date" value="'+(f.naissance||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2">'+(f.adresse||"")+'</textarea></div>'+
-    '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="ef-telephone" value="'+(f.telephone||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ef-telephone" value="'+(f.telephone||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ef-emailLic" value="'+(f.emailLic||"")+'"></div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
     '<div class="form-group"><label class="form-label">Responsable legal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(f.respNom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable legal 1 - Telephone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable legal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Responsable legal 1 - Email</label><input class="form-input" id="ef-respEmail" value="'+(f.respEmail||"")+'"></div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
     '<div class="form-group"><label class="form-label">Contact urgence - Nom</label><input class="form-input" id="ef-urgenceNom" value="'+(f.urgenceNom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Contact urgence - Telephone</label><input class="form-input" id="ef-urgenceTel" value="'+(f.urgenceTel||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Contact urgence - Téléphone</label><input class="form-input" id="ef-urgenceTel" value="'+(f.urgenceTel||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Notes / Informations medicales</label><textarea class="form-input" id="ef-notes" rows="3">'+(f.notes||"")+'</textarea></div>';
   document.getElementById("modal-edit-fiche").style.display="flex";
 }
@@ -2952,7 +2952,7 @@ function renderCodeEntry(){
     '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;box-shadow:0 4px 20px var(--shadow);text-align:center">'+
       '<div style="font-size:40px;margin-bottom:12px">🏀</div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Fiche d\'inscription</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code recu par mail</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code reçu par mail</div>'+
       '<input id="code-input" type="text" placeholder="ASMB-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
       '<button onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Acceder a ma fiche</button>'+
     '</div>'+
@@ -2972,7 +2972,7 @@ function validerCode(){
   if(!code){alert("Entrez votre code");return;}
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===code;});
-  if(idx<0){alert("Code invalide. Verifiez votre mail.");return;}
+  if(idx<0){alert("Code invalide. Vérifiez votre mail.");return;}
   var now=new Date();
   var dateStr=now.toLocaleDateString("fr-FR")+" a "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
   if(!lics[idx].ouvertLe){
@@ -3011,10 +3011,10 @@ function renderLicenceChoice(lic){
     '<div style="position:absolute;top:12px;right:14px;font-size:28px;opacity:.15">🏆</div>'+
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="background:#C0392B;color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">Compétition</div><div style="font-size:18px">🏆</div></div>'+
     '<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px">Pour se dépasser</div>'+
-    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Rejoindre l\'ASMB en competition : un engagement collectif ambitieux.</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Rejoindre l\'ASMB en compétition : un engagement collectif ambitieux.</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px">'+
-      '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Entrainements reguliers obligatoires</div>'+
-      '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Matchs officiels CD42 · Engagement saison complete</div>'+
+      '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Entraînements réguliers obligatoires</div>'+
+      '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Matchs officiels CD42 · Engagement saison complète</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Convocations obligatoires · Collectif avant tout</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)">⚡ Exigence · Respect · Depassement de soi</div>'+
     '</div>'+
@@ -3062,7 +3062,7 @@ function renderFicheForm(lic){
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
       '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;}))" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
       '<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--txt)">Ma fiche</div><div style="font-size:10px;color:var(--mut)">'+lic.code+'</div></div>'+
-      (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#27AE60")+'">'+( lic.typeLicence==="competition"?"🏆 Competition":"🎯 Loisir")+'</div>':'')+
+      (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#27AE60")+'">'+( lic.typeLicence==="competition"?"🏆 Compétition":"🎯 Loisir")+'</div>':'')+
     '</div>'+
     '<div style="padding:16px;padding-bottom:80px">'+
       // Photo
@@ -3078,7 +3078,7 @@ function renderFicheForm(lic){
           '<button id="btn-F" onclick="selectGenre(\'F\')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.genre==="F"?"var(--dkg)":"var(--bdr)")+';background:'+(f.genre==="F"?"var(--dkg)":"var(--bg)")+';color:'+(f.genre==="F"?"#fff":"var(--mut)")+';cursor:pointer">Feminin</button>'+
         '</div>'+
       '</div>'+
-      '<div class="form-group"><label class="form-label">Prenom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prenom"></div>'+
+      '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prénom"></div>'+
       '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(f.nom||'')+'" placeholder="Nom de famille"></div>'+
       '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'"></div>'+
       '<div class="form-group"><label class="form-label">Ne(e) a l\'etranger ?</label>'+
@@ -3091,21 +3091,21 @@ function renderFicheForm(lic){
         '<div class="form-group"><label class="form-label">Ville de naissance</label><input class="form-input" id="f-villeNaiss" value="'+(f.villeNaiss||'')+'" placeholder="Ville"></div>'+
         '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(f.paysNaiss||'')+'" placeholder="Pays"></div>'+
       '</div>'+
-      '<div class="form-group"><label class="form-label">Adresse complete</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville">'+(f.adresse||'')+'</textarea></div>'+
-      '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="06..."></div>'+
+      '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville">'+(f.adresse||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="email@..."></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Responsable legal</div>'+
-      '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(f.respNom||'')+'" placeholder="Prenom Nom"></div>'+
+      '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(f.respNom||'')+'" placeholder="Prénom Nom"></div>'+
       '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
-      '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="06..."></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(f.respEmail||'')+'" placeholder="email@..."></div>'+
       '<div style="margin:4px 0 16px" id="resp2-toggle-wrap">'+
         (f.resp2Nom ?
           '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable legal 2</div>'+
-          '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(f.resp2Nom||'')+'" placeholder="Prenom Nom"></div>'+
+          '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(f.resp2Nom||'')+'" placeholder="Prénom Nom"></div>'+
           '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
-          '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="06..."></div>'+
+          '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="06..."></div>'+
           '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(f.resp2Email||'')+'" placeholder="email@..."></div>'+
           '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>'
         :
@@ -3113,8 +3113,8 @@ function renderFicheForm(lic){
         )+'</div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Contact en cas d\'urgence</div>'+
-      '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prenom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Telephone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
+      '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prénom Nom"></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Notes / Informations medicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Certificat medical</div>'+
@@ -3132,7 +3132,7 @@ function renderFicheForm(lic){
         '<input class="form-input" id="f-certDate" type="date" value="'+(f.certDate||'')+'">'+
       '</div>'+
       '<div class="form-group">'+
-        '<label class="form-label">Medecin / Etablissement</label>'+
+        '<label class="form-label">Medecin / Établissement</label>'+
         '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="Dr ...">'+
       '</div>'+
       '<button onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px">✅ Valider ma fiche</button>'+
@@ -3160,9 +3160,9 @@ function addResp2(){
   if(!wrap)return;
   wrap.innerHTML=
     '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable legal 2</div>'+
-    '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" placeholder="Prenom Nom"></div>'+
+    '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" placeholder="Prénom Nom"></div>'+
     '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-resp2Lien" placeholder="Pere, Mere, Tuteur..."></div>'+
-    '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" id="f-resp2Tel" type="tel" placeholder="06..."></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" placeholder="email@..."></div>'+
     '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>';
 }
@@ -3230,8 +3230,8 @@ function soumettreFiche(){
   var prenom=(document.getElementById("f-prenom")||{}).value||"";
   var nom=(document.getElementById("f-nom")||{}).value||"";
   var naissance=(document.getElementById("f-naissance")||{}).value||"";
-  if(!prenom||!nom||!naissance){alert("Prenom, nom et date de naissance sont obligatoires");return;}
-  if(!ficheGenre){alert("Selectionnez votre genre");return;}
+  if(!prenom||!nom||!naissance){alert("Prénom, nom et date de naissance sont obligatoires");return;}
+  if(!ficheGenre){alert("Sélectionnez votre genre");return;}
   var fiche={
     genre:ficheGenre,prenom:prenom.trim(),nom:nom.trim(),
     naissance:naissance,
@@ -3264,7 +3264,7 @@ function soumettreFiche(){
   lics[idx].fiche=fiche;lics[idx].statut="recue";
   saveLicences(lics);buildLicences();
   var el=document.getElementById("insc-public-content");
-  if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyee !</div><div style="font-size:13px;color:var(--mut);margin-bottom:24px">Votre fiche a bien ete transmise au club. Vous serez contacte prochainement.</div><button onclick="buildInscriptionPublic()" style="padding:12px 24px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Nouvelle inscription</button></div>';
+  if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:24px">Votre fiche a bien ete transmise au club. Vous serez contacte prochainement.</div><button onclick="buildInscriptionPublic()" style="padding:12px 24px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Nouvelle inscription</button></div>';
 }
 
 
@@ -3276,7 +3276,7 @@ function openPresences(eventId){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
   currentPresenceEventId=eventId;
-  document.getElementById("presence-title").textContent="Presences · "+ev.titre;
+  document.getElementById("presence-title").textContent="Présences · "+ev.titre;
   document.getElementById("presence-sub").textContent=ev.date+(ev.heure?" · "+ev.heure:"")+(ev.equipe?" · "+ev.equipe:"");
   var players=getPlayers();
   var relevantPlayers=ev.equipe?players.filter(function(p){return p.cat&&ev.equipe.toUpperCase().indexOf(p.cat.toUpperCase())>=0;}):players;
@@ -3290,7 +3290,7 @@ function openPresences(eventId){
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
     div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
-        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Present</button>'+
+        '<button data-pid="'+p.id+'" data-state="présent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
         '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
       '</div>';
     el.appendChild(div);
@@ -3334,7 +3334,7 @@ function savePresences(){
   saveEvents(events);
   closeModal("modal-presence");
   buildPlanning();
-  alert("Presences enregistrees !");
+  alert("Présences enregistrees !");
 }
 
 // ═══ BROADCAST EMAIL ═════════════════════════════════════════════
@@ -3365,7 +3365,7 @@ function sendBroadcast(){
   if(!sujet||!message){alert("Objet et message obligatoires");return;}
   var emails=getAllContactEmails();
   if(!emails.length){alert("Aucun contact email trouve");return;}
-  var body="Bonjour,\n\n"+message+"\n\nL'equipe ASMB\nSaint-Etienne Metropole Basket";
+  var body="Bonjour,\n\n"+message+"\n\nL'équipe ASMB\nSaint-Etienne Metropole Basket";
   var mailto="mailto:?bcc="+emails.join(",")+"&subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
   window.location.href=mailto;
   closeModal("modal-broadcast");
@@ -3404,21 +3404,21 @@ function buildClubStats(){
   var avgPresence=totalSlots?Math.round(totalPres/totalSlots*100):0;
 
   var html='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center;margin-bottom:16px">'+
-    '<div><div style="font-size:24px;font-weight:900;color:var(--dkg)">'+players.length+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licencies total</div></div>'+
+    '<div><div style="font-size:24px;font-weight:900;color:var(--dkg)">'+players.length+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés total</div></div>'+
     '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
     '<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+licencies+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licences validees</div></div>'+
     '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
-    '<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+avgPresence+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite moyenne</div></div>'+
+    '<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+avgPresence+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité moyenne</div></div>'+
   '</div>';
 
-  html+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Repartition par categorie</div>';
+  html+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Répartition par catégorie</div>';
   CATS_ALL.forEach(function(c){
     var count=byCat[c];
     if(count===0)return;
     var pct=Math.round(count/players.length*100)||0;
     html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--txt);font-weight:600">'+c+'</span><span style="color:var(--mut)">'+count+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
   });
-  if(!players.length){html+='<div style="font-size:11px;color:var(--mut);text-align:center;padding:10px 0">Aucune donnee pour le moment</div>';}
+  if(!players.length){html+='<div style="font-size:11px;color:var(--mut);text-align:center;padding:10px 0">Aucune donnée pour le moment</div>';}
 
   el.innerHTML=html;
 }
@@ -3427,7 +3427,7 @@ function toggleNotif(checked){
   if(checked&&"Notification" in window){
     Notification.requestPermission().then(function(perm){
       if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activees !"});}
-      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;alert("Permission refusee");}
+      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;alert("Permission refusée");}
     });
   } else {
     localStorage.setItem("asmb_notif","off");
@@ -3632,7 +3632,7 @@ function buildCalendrier(){
 
       var eventsHtml="";
       if(!dayEvents.length){
-        eventsHtml='<div style="font-size:11px;color:var(--mut);padding:6px 0 6px 4px">Aucun evenement</div>';
+        eventsHtml='<div style="font-size:11px;color:var(--mut);padding:6px 0 6px 4px">Aucun événement</div>';
       } else {
         dayEvents.forEach(function(e){
           var isMatch=e.type==="match";
@@ -3819,7 +3819,7 @@ function compressImageFile(file,maxWidth,quality){
 
 function uploadGalleryPhoto(input){
   if(!input.files||!input.files[0])return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   var file=input.files[0];
   var addBtn=document.getElementById("galerie-add-btn");
   if(addBtn){addBtn.textContent="Compression...";addBtn.disabled=true;}
@@ -3838,7 +3838,7 @@ function uploadGalleryPhoto(input){
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
   }).catch(function(err){
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
-    alert("Erreur lors de l'envoi de la photo. Reessayez avec une image plus petite.");
+    alert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
   });
 }
@@ -3896,8 +3896,8 @@ function backupToCloud(){
 }
 
 function restoreFromCloud(){
-  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
-  if(!confirm("Ceci va REMPLACER toutes vos donnees locales par la derniere sauvegarde cloud. Continuer ?"))return;
+  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!confirm("Ceci va REMPLACER toutes vos données locales par la dernière sauvegarde cloud. Continuer ?"))return;
   window.fbGetDocs(window.fbCollection(window.fbDb,"backups")).then(function(snap){
     var found=null;
     snap.forEach(function(d){if(d.id==="latest")found=d.data();});
@@ -3912,23 +3912,23 @@ function restoreFromCloud(){
     ["elite","competition","3x3","evenement","basketpourtous"].forEach(function(id){
       localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
     });
-    alert("Donnees restaurees depuis le cloud ! L'application va se recharger.");
+    alert("Données restaurees depuis le cloud ! L'application va se recharger.");
     location.reload();
   }).catch(function(){alert("Erreur lors de la restauration");});
 }
 
 function resetAllData(){
-  if(!confirm("ATTENTION : Ceci va supprimer TOUTES les donnees locales (joueurs, equipes, evenements, documents, licences). Cette action est irreversible. Continuer ?"))return;
-  if(!confirm("Etes-vous vraiment sur ? Cette action ne peut pas etre annulee."))return;
+  if(!confirm("ATTENTION : Ceci va supprimer TOUTES les données locales (joueurs, équipes, événements, documents, licences). Cette action est irreversible. Continuer ?"))return;
+  if(!confirm("Etes-vous vraiment sur ? Cette action ne peut pas être annulée."))return;
   ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
   Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
-  alert("Donnees supprimees. L'application va se recharger.");
+  alert("Données supprimees. L'application va se recharger.");
   location.reload();
 }
 
 // ── DONNEES DE DEMO ───────────────────────────────────────────────
 function loadDemoData(){
-  if(!confirm("Charger 4 equipes et 40 joueurs de demonstration pour tester l'app ?"))return;
+  if(!confirm("Charger 4 équipes et 40 joueurs de demonstration pour tester l'app ?"))return;
 
   var teamDefs=[
     {id:"demo-team-u13f",name:"U13 Filles ASMB (Demo)",cat:"U13"},
@@ -3978,23 +3978,23 @@ function loadDemoData(){
   var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
   lics.push({
     code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
-    statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
-    categorie:"U13",
+    statut:"validée",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
+    catégorie:"U13",
     fiche:{
-      prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
-      telephone:"",respTel:"0700000000",resp2Tel:"",
+      prénom:"Lea",nom:"Martin",naissance:"2013-01-01",
+      téléphone:"",respTel:"0700000000",resp2Tel:"",
       adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
       urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
     }
   });
   saveLicences(lics);
 
-  alert("Donnees de demo chargees ! 4 equipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Lea Martin) : 0600000000\n- \"Je suis Parent\" (parent de Lea) : 0700000000");
+  alert("Données de demo chargées ! 4 équipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Lea Martin) : 0600000000\n- \"Je suis Parent\" (parent de Lea) : 0700000000");
   buildAdminHome();
 }
 
 function loadDemoEvents(){
-  if(!confirm("Ajouter des entrainements fictifs pour la semaine prochaine (+ un match samedi) ?"))return;
+  if(!confirm("Ajouter des entraînements fictifs pour la semaine prochaine (+ un match samedi) ?"))return;
   var teams=getTeams();
   var demoTeams=teams.filter(function(t){return t.demo;});
   if(!demoTeams.length){
@@ -4007,7 +4007,7 @@ function loadDemoEvents(){
   nextMonday.setDate(nextMonday.getDate()+7);
 
   var events=getEvents();
-  var scheduleByDay=[0,1,2,3]; // lundi, mardi, mercredi, jeudi -> entrainements
+  var scheduleByDay=[0,1,2,3]; // lundi, mardi, mercredi, jeudi -> entraînements
   var heures=["18h00 - 19h30","18h30 - 20h00","17h30 - 19h00","19h00 - 20h30"];
 
   demoTeams.forEach(function(team,ti){
@@ -4021,12 +4021,12 @@ function loadDemoEvents(){
       date:d.toISOString().slice(0,10),
       heure:heures[ti%heures.length],
       lieu:"Gymnase Giraudet",
-      equipe:team.name,
+      équipe:team.name,
       demo:true
     });
   });
 
-  // Match le samedi pour la 1ere equipe demo
+  // Match le samedi pour la 1ere équipe demo
   var saturday=new Date(nextMonday);
   saturday.setDate(nextMonday.getDate()+5);
   events.push({
@@ -4036,7 +4036,7 @@ function loadDemoEvents(){
     date:saturday.toISOString().slice(0,10),
     heure:"15h00",
     lieu:"Domicile",
-    equipe:demoTeams[0].name,
+    équipe:demoTeams[0].name,
     demo:true
   });
 
@@ -4136,7 +4136,7 @@ function renderPlayers(){
   if(!filtered.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👤</div><div style="font-size:13px;font-weight:600">Aucun joueur</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Ajouter</div></div>';return;}
   el.innerHTML="";
   filtered.forEach(function(p){
-    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var col=CAT_COLORS[p.cat]||"#1B5C28";
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     var d=document.createElement("div");d.className="player-card";
@@ -4146,7 +4146,7 @@ function renderPlayers(){
     btns+='<button onclick="editPlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
     btns+='<button onclick="deletePlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
-      +'<div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div>'
+      +'<div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
       +'<div style="margin-top:4px">'+status+'</div></div>'+btns;
     el.appendChild(d);
@@ -4171,24 +4171,24 @@ function renderPlayerForm(p){
   var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
   var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencie</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
   document.getElementById("player-form").innerHTML=
-    '<div class="form-group"><label class="form-label">Prenom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prenom"></div>'+
+    '<div class="form-group"><label class="form-label">Prenom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prénom"></div>'+
     '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="fp-nom" value="'+(p?p.nom:'')+'" placeholder="Nom de famille"></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Categorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigne</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Feminin</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Telephone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entrainements)"></div>'+
+    '<div class="form-group"><label class="form-label">Telephone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entraînements)"></div>'+
     '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Numero de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder="Ex: 7"></div>'+
+    '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder="Ex: 7"></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Competition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Numero de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
+    '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="compétition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
     '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+(p?p.contact:'')+'" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+(p?p.notes:'')+'</textarea></div>';
 }
 function savePlayer(){
   var prenom=document.getElementById("fp-prenom").value.trim();
   var nom=document.getElementById("fp-nom").value.trim();
-  if(!prenom||!nom){alert("Prenom et nom obligatoires");return;}
+  if(!prenom||!nom){alert("Prénom et nom obligatoires");return;}
   var players=getPlayers();
   var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,genre:document.getElementById("fp-genre").value,poste:document.getElementById("fp-poste").value,maillot:document.getElementById("fp-maillot").value,licence:document.getElementById("fp-licence").value,typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,contact:document.getElementById("fp-contact").value,telEnfant:document.getElementById("fp-telEnfant").value,notes:document.getElementById("fp-notes").value};
   if(editingPlayerId){var idx=players.findIndex(function(p){return p.id===editingPlayerId;});if(idx>=0)players[idx]=data;}
@@ -4245,15 +4245,15 @@ function renderPresenceHistory(){
 
   var sumEl=document.getElementById("ph-summary");
   sumEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;justify-content:space-around;text-align:center">'+
-    '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite</div></div>'+
+    '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
     '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
-    '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Presences</div></div>'+
+    '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>'+
     '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
     '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+(total-present)+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Absences</div></div>'+
   '</div>';
 
   var listEl=document.getElementById("ph-detail-list");
-  if(!total){listEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucune donnee pour cette periode</div></div>';return;}
+  if(!total){listEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucune donnée pour cette période</div></div>';return;}
   listEl.innerHTML="";
   var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
   events.forEach(function(e){
@@ -4281,7 +4281,7 @@ function renderPresenceHistory(){
           return tb-ta;
         });
         if(!mine.length){selfEl.innerHTML="";return;}
-        var statusLabels={present:"✓ Present",retard:"⏰ Retard",absent:"✕ Absent"};
+        var statusLabels={present:"✓ Présent",retard:"⏰ Retard",absent:"✕ Absent"};
         var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
         var html='<div class="sec" style="padding-left:0;margin-top:16px">Auto-declarations (horodatees)</div>';
         mine.forEach(function(c){
@@ -4301,17 +4301,17 @@ function renderPresenceHistory(){
 }
 
 function exportPlanningPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, reessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, réessayez dans quelques secondes");return;}
   var events=getEvents().slice().sort(function(a,b){return a.date>b.date?1:-1;});
-  if(!events.length){alert("Aucun evenement a exporter");return;}
+  if(!events.length){alert("Aucun événement a exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);doc.setTextColor(27,92,40);
   doc.text("ASMB - Planning",14,16);
   doc.setFontSize(9);doc.setTextColor(100,100,100);
-  doc.text("Genere le "+new Date().toLocaleDateString("fr-FR"),14,22);
+  doc.text("Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
 
-  var headers=["Date","Type","Titre","Heure","Lieu","Equipe"];
+  var headers=["Date","Type","Titre","Heure","Lieu","Équipe"];
   var colX=[14,42,66,120,145,175];
   var y=32;
   doc.setFontSize(8);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
@@ -4331,7 +4331,7 @@ function exportPlanningPDF(){
     y+=7;
   });
   doc.setFontSize(8);doc.setTextColor(150,150,150);
-  doc.text("Total : "+events.length+" evenement(s)",14,y+6);
+  doc.text("Total : "+events.length+" événement(s)",14,y+6);
   doc.save("ASMB_planning_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
@@ -4351,7 +4351,7 @@ function importPlayersCSV(input){
     var idxNumLic=headers.indexOf("numlicence");
     var idxTypeLic=headers.indexOf("typelicence");
     if(idxNom<0||idxPrenom<0){
-      alert("Le fichier doit contenir au minimum les colonnes: nom,prenom (optionnel: naissance,categorie,numlicence,typelicence)");
+      alert("Le fichier doit contenir au minimum les colonnes: nom,prénom (optionnel: naissance,catégorie,numlicence,typelicence)");
       return;
     }
     var players=getPlayers();
@@ -4383,20 +4383,20 @@ function importPlayersCSV(input){
 }
 
 function exportPlayersPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, reessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, réessayez dans quelques secondes");return;}
   var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
   if(!players.length){alert("Aucun joueur a exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);
   doc.setTextColor(27,92,40);
-  doc.text("ASMB - Liste des licencies",14,16);
+  doc.text("ASMB - Liste des licenciés",14,16);
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
-  doc.text("Saint-Etienne Metropole Basket - Genere le "+new Date().toLocaleDateString("fr-FR"),14,22);
-  if(currentCatFilter!=="all"){doc.text("Categorie : "+currentCatFilter,14,27);}
+  doc.text("Saint-Etienne Metropole Basket - Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
+  if(currentCatFilter!=="all"){doc.text("Catégorie : "+currentCatFilter,14,27);}
 
-  var headers=["Nom","Prenom","Categorie","Type licence","N° licence","Statut"];
+  var headers=["Nom","Prénom","Catégorie","Type licence","N° licence","Statut"];
   var colX=[14,50,86,112,150,178];
   var y=currentCatFilter!=="all"?35:32;
   doc.setFontSize(9);
@@ -4409,7 +4409,7 @@ function exportPlayersPDF(){
   players.forEach(function(p,idx){
     if(y>280){doc.addPage();y=20;}
     if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
-    var typeLic=p.typeLicence==="competition"?"Competition":"Loisir";
+    var typeLic=p.typeLicence==="competition"?"Compétition":"Loisir";
     var numLic=p.numLicence||"0C";
     var statut=p.licence==="ok"?"Licencie":(p.licence==="attente"?"En attente":"Sans licence");
     doc.text((p.nom||"").substring(0,18),colX[0],y);
@@ -4433,7 +4433,7 @@ function saveTeams(t){localStorage.setItem("asmb_teams",JSON.stringify(t));}
 function buildTeams(){
   var teams=getTeams(),players=getPlayers();
   var el=document.getElementById("teamList");if(!el)return;
-  if(!teams.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune equipe</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Equipe</div></div>';return;}
+  if(!teams.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune équipe</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Équipe</div></div>';return;}
   el.innerHTML="";
   teams.forEach(function(t){
     var col=CAT_COLORS[t.cat]||"#1B5C28";
@@ -4447,8 +4447,8 @@ function buildTeams(){
 }
 function toggleTeam(id){var b=document.getElementById("team-body-"+id);if(b)b.style.display=b.style.display==="block"?"none":"block";}
 function showAddTeam(){
-  var name=prompt("Nom de l'equipe (ex: U13F) :");if(!name)return;
-  var cat=prompt("Categorie (U7/U9/U11/U13/U15/U17/Senior) :");if(!cat)return;
+  var name=prompt("Nom de l'équipe (ex: U13F) :");if(!name)return;
+  var cat=prompt("Catégorie (U7/U9/U11/U13/U15/U17/Senior) :");if(!cat)return;
   var teams=getTeams();
   var newTeam={id:Date.now().toString(),name:name,cat:cat,members:[]};
   teams.push(newTeam);
@@ -4456,7 +4456,7 @@ function showAddTeam(){
   ensureTeamChannel(newTeam);
   buildTeams();buildAdminHome();
 }
-function deleteTeam(id){if(!confirm("Supprimer cette equipe ?"))return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();}
+function deleteTeam(id){if(!confirm("Supprimer cette équipe ?"))return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();}
 
 // ── PLANNING ─────────────────────────────────────────────────────
 function getEvents(){try{return JSON.parse(localStorage.getItem("asmb_events")||"[]");}catch(e){return [];}}
@@ -4503,7 +4503,7 @@ function renderPlanningCalendar(){
   var el=document.getElementById("planning-calendar");if(!el)return;
   var events=getEvents();
   var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
-  var monthNames=["Janvier","Fevrier","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Decembre"];
+  var monthNames=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Décembre"];
   var firstDay=new Date(planCalYear,planCalMonth,1);
   var startOffset=(firstDay.getDay()+6)%7; // lundi=0
   var daysInMonth=new Date(planCalYear,planCalMonth+1,0).getDate();
@@ -4544,15 +4544,15 @@ function shiftPlanCal(delta){
 
 function showDayEvents(dateStr){
   var events=getEvents().filter(function(e){return e.date===dateStr;});
-  if(!events.length){alert("Aucun evenement ce jour-la");return;}
+  if(!events.length){alert("Aucun événement ce jour-la");return;}
   var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" a "+e.heure:"");}).join("\n");
-  alert("Evenements du "+dateStr+" :\n\n"+txt);
+  alert("Événements du "+dateStr+" :\n\n"+txt);
 }
 
 function buildPlanning(){
   var events=getEvents();
   var el=document.getElementById("planningList");if(!el)return;
-  if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun evenement</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Evenement</div></div>';return;}
+  if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun événement</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Événement</div></div>';return;}
   el.innerHTML="";
   // Sort by date
   events.sort(function(a,b){return a.date>b.date?1:-1;});
@@ -4565,7 +4565,7 @@ function buildPlanning(){
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">👥 "+e.equipe+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
-    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les presences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
     var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">ASMB "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
     var scoreBtn=(e.type==="match")?("<button onclick=\"editScore('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">🏆 "+(e.score?"Modifier score":"Ajouter score")+"</button>"):"";
     var convocCount=e.convocations?e.convocations.length:0;
@@ -4573,7 +4573,7 @@ function buildPlanning(){
     var weatherBtn=(e.type==="match"&&e.lieu)?("<button onclick=\"showWeather('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer\">☀️ Meteo</button>"):"";
     var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">✏️ Modifier</button>";
     var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">🚫 Annuler</button>";
-    var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\">🚫 EVENEMENT ANNULE</div>":"";
+    var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\">🚫 EVENEMENT ANNULÉ</div>":"";
     d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+convocBtn+weatherBtn+editTimeBtn+cancelBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
@@ -4638,7 +4638,7 @@ function saveCreneau(){
     d.setDate(d.getDate()+i*7);
     events.push({
       id:Date.now().toString()+"-"+i,
-      titre:(creneauType==="match"?"Match":"Entrainement")+(equipe?" · "+equipe:""),
+      titre:(creneauType==="match"?"Match":"Entraînement")+(equipe?" · "+equipe:""),
       type:creneauType,
       date:d.toISOString().slice(0,10),
       heure:debut+" - "+fin,
@@ -4728,25 +4728,25 @@ function saveEventFull(){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
       text:msg,pseudo:"📢 Admin ASMB",ts:window.fbServerTimestamp()
     });
-    alert("Evenement cree et annonce envoyee dans le canal !");
+    alert("Événement cree et annonce envoyée dans le canal !");
   } else {
-    alert("Evenement cree !");
+    alert("Événement cree !");
   }
 }
-function deleteEvent(id){if(!confirm("Supprimer cet evenement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
+function deleteEvent(id){if(!confirm("Supprimer cet événement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
 
 function cancelEvent(eventId){
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
-  if(!confirm('Annuler "'+ev.titre+'" du '+ev.date+' ? Une alerte sera envoyee dans le canal.'))return;
+  if(!confirm('Annuler "'+ev.titre+'" du '+ev.date+' ? Une alerte sera envoyée dans le canal.'))return;
   ev.cancelled=true;
   saveEvents(events);
   buildPlanning();
   if(window.fbReady){
     var channelId=findChannelForTeamText(ev.equipe);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"🚫 <b>Evenement annule</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annule.",
+      text:"🚫 <b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annulé.",
       pseudo:"🚫 ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
   }
@@ -4766,7 +4766,7 @@ function editEventDateTime(eventId){
 
   var teams=getTeams();
   var teamNames=teams.map(function(t){return t.name;}).join(", ");
-  var newEquipe=prompt("Equipe concernee (options : "+teamNames+") :",ev.equipe||"");
+  var newEquipe=prompt("Équipe concernee (options : "+teamNames+") :",ev.equipe||"");
   if(newEquipe===null)return;
   var newLieu=prompt("Lieu :",ev.lieu||"");
   if(newLieu===null)return;
@@ -4782,13 +4782,13 @@ function editEventDateTime(eventId){
     var channelId=findChannelForTeamText(ev.equipe);
     var changesTxt=[];
     if(newDate!==oldDate||newHeure!==oldHeure)changesTxt.push("nouveau rendez-vous le "+ev.date+(ev.heure?" a "+ev.heure:""));
-    if(newEquipe!==oldEquipe)changesTxt.push("equipe : "+ev.equipe);
+    if(newEquipe!==oldEquipe)changesTxt.push("équipe : "+ev.equipe);
     if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"⚠️ <b>Creneau modifie</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
+      text:"⚠️ <b>Creneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:"⚠️ ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    alert("Creneau modifie, alerte envoyee dans le canal.");
+    alert("Creneau modifié, alerte envoyée dans le canal.");
   }
 }
 function editScore(eventId){
@@ -4818,7 +4818,7 @@ function showConvocation(eventId){
   var players=ev.equipe?getPlayers().filter(function(p){return ev.equipe.toUpperCase().indexOf(p.cat.toUpperCase())>=0;}):getPlayers();
   var convoked=ev.convocations||[];
   var el=document.getElementById("convoc-players-list");
-  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur disponible pour cette equipe</div>';}
+  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur disponible pour cette équipe</div>';}
   else{
     el.innerHTML="";
     players.forEach(function(p){
@@ -4854,7 +4854,7 @@ function findChannelForTeamText(teamText){
 function ensureTeamChannel(team){
   if(!window.fbReady)return;
   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",team.id),{
-    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'equipe "+team.name
+    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'équipe "+team.name
   },{merge:true});
 }
 
@@ -4864,7 +4864,7 @@ function saveConvocation(){
   if(idx<0)return;
   var ev=events[idx];
   var checked=Array.from(document.querySelectorAll(".convoc-cb:checked")).map(function(cb){return cb.value;});
-  if(!checked.length){alert("Selectionnez au moins un joueur");closeModal("modal-convocation");return;}
+  if(!checked.length){alert("Sélectionnez au moins un joueur");closeModal("modal-convocation");return;}
   ev.convocations=checked;
   saveEvents(events);
   buildPlanning();
@@ -4878,9 +4878,9 @@ function saveConvocation(){
       type:"convocation",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventHeure:ev.heure||"",eventLieu:ev.lieu||"",
       players:convocPlayers,responses:{},pseudo:"📋 Convocation ASMB",ts:window.fbServerTimestamp()
     });
-    alert("Convocation envoyee dans le canal !");
+    alert("Convocation envoyée dans le canal !");
   } else {
-    alert("Convocation enregistree (pas de connexion pour notifier)");
+    alert("Convocation enregistrée (pas de connexion pour notifier)");
   }
 }
 
@@ -4946,7 +4946,7 @@ function checkWeatherAlerts(){
             localStorage.setItem("asmb_weather_alerted",JSON.stringify(alerted));
             var channelId=findChannelForTeamText(ev.equipe);
             window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-              text:"⚠️ <b>Alerte meteo</b><br>"+weatherLabel(code)+" prevu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" a "+ev.heure:"")+" · "+ev.lieu,
+              text:"⚠️ <b>Alerte meteo</b><br>"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" a "+ev.heure:"")+" · "+ev.lieu,
               pseudo:"⚠️ Alerte Meteo ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
             });
           });
@@ -4966,13 +4966,13 @@ function showWeather(eventId){
   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(ev.lieu+", France"))
     .then(function(r){return r.json();})
     .then(function(geo){
-      if(!geo||!geo.length){el.innerHTML='<div style="font-size:12px;color:var(--mut)">Lieu introuvable pour la meteo. Verifiez l\'adresse renseignee.</div>';return;}
+      if(!geo||!geo.length){el.innerHTML='<div style="font-size:12px;color:var(--mut)">Lieu introuvable pour la meteo. Vérifiez l\'adresse renseignee.</div>';return;}
       var lat=geo[0].lat,lon=geo[0].lon;
       return fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date="+ev.date+"&end_date="+ev.date)
         .then(function(r2){return r2.json();})
         .then(function(w){
           if(!w.daily||!w.daily.weathercode||!w.daily.weathercode.length){
-            el.innerHTML='<div style="font-size:12px;color:var(--mut)">Previsions non disponibles pour cette date (trop lointaine ou passee).</div>';
+            el.innerHTML='<div style="font-size:12px;color:var(--mut)">Previsions non disponibles pour cette date (trop lointaine ou passée).</div>';
             return;
           }
           var code=w.daily.weathercode[0];
@@ -4985,7 +4985,7 @@ function showWeather(eventId){
         });
     })
     .catch(function(){
-      el.innerHTML='<div style="font-size:12px;color:var(--mut)">Impossible de recuperer la meteo (verifiez votre connexion).</div>';
+      el.innerHTML='<div style="font-size:12px;color:var(--mut)">Impossible de recuperer la meteo (vérifiez votre connexion).</div>';
     });
 }
 
@@ -4994,7 +4994,7 @@ function getDocs(){try{return JSON.parse(localStorage.getItem("asmb_docs")||"[]"
 function saveDocs(d){localStorage.setItem("asmb_docs",JSON.stringify(d));}
 var currentDocCatFilter="all";
 var pendingDocCategory="autre";
-var DOC_CAT_LABELS={"reglement":"Reglement","autorisation":"Autorisation","formulaire":"Formulaire","autre":"Autre"};
+var DOC_CAT_LABELS={"reglement":"Règlement","autorisation":"Autorisation","formulaire":"Formulaire","autre":"Autre"};
 var DOC_CAT_COLORS={"reglement":"#1A2E5A","autorisation":"#C0392B","formulaire":"#16A085","autre":"#8E44AD"};
 
 function filterDocCat(cat){
@@ -5051,7 +5051,7 @@ function handleFiles(files){
     docs.push({id:Date.now().toString()+Math.random(),name:file.name,type:type,size:size,date:new Date().toLocaleDateString("fr-FR"),desc:"",category:pendingDocCategory});
   });
   saveDocs(docs);buildDocs();buildAdminHome();
-  alert(files.length+" document"+(files.length>1?"s":"")+" ajoute"+(files.length>1?"s":"")+" !");
+  alert(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
 }
 function deleteDoc(id){if(!confirm("Supprimer ce document ?"))return;var docs=getDocs().filter(function(d){return d.id!==id;});saveDocs(docs);buildDocs();buildAdminHome();}
 
@@ -5150,7 +5150,7 @@ function viewFicheModal(phone){
   var normPhone=phone.replace(/\s+/g,"");
   var matches=lics.filter(function(l){
     if(!l.fiche)return false;
-    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
+    var phones=[l.fiche.téléphone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
     return phones.indexOf(normPhone)>=0;
   });
   if(!matches.length){
@@ -5227,7 +5227,7 @@ function renderMembers(ch){
 async function editMemberLabel(phone,currentLabel){
   var newLabel=prompt("Nom d'identification (ex: Lucas-U13) :",currentLabel||"");
   if(newLabel===null)return;
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
@@ -5243,16 +5243,16 @@ async function editMemberLabel(phone,currentLabel){
 }
 
 async function addMemberToChannel(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var input=document.getElementById("member-phone");
   var phone=input.value.trim().replace(/\s+/g,"");
-  if(!phone){alert("Entrez un numero de telephone");return;}
+  if(!phone){alert("Entrez un numéro de téléphone");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=(chData&&chData.members)||[];
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
-  if(exists){alert("Ce numero est deja membre");return;}
+  if(exists){alert("Ce numéro est déjà membre");return;}
   members.push({phone:phone,label:null});
   await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
   input.value="";
@@ -5262,8 +5262,8 @@ async function addMemberToChannel(){
 }
 
 async function removeMemberFromChannel(phone){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
-  if(!confirm("Revoquer l'acces de "+phone+" ?"))return;
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!confirm("Revoquer l'accès de "+phone+" ?"))return;
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
@@ -5278,7 +5278,7 @@ async function removeMemberFromChannel(phone){
 function showLicenceContactPicker(){
   var contacts=getLicencedContacts();
   var el=document.getElementById("lic-picker-list");
-  if(!contacts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📇</div><div style="font-size:13px;font-weight:600">Aucun contact disponible</div><div style="font-size:11px;margin-top:4px">Les licences validees avec telephone apparaitront ici</div></div>';}
+  if(!contacts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📇</div><div style="font-size:13px;font-weight:600">Aucun contact disponible</div><div style="font-size:11px;margin-top:4px">Les licences validees avec téléphone apparaitront ici</div></div>';}
   else{
     el.innerHTML="";
     contacts.forEach(function(c){
@@ -5292,13 +5292,13 @@ function showLicenceContactPicker(){
 }
 
 async function addMemberFromLicence(phone,label){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=(chData&&chData.members)||[];
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
-  if(exists){alert("Ce contact est deja membre");return;}
+  if(exists){alert("Ce contact est déjà membre");return;}
   members.push({phone:phone,label:label});
   await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
   chData.members=members;
@@ -5343,7 +5343,7 @@ var myPhone=localStorage.getItem("asmb_phone")||"";
 
 function checkMyPhone(){
   if(myPhone)return true;
-  var phone=prompt("Entrez votre numero de telephone pour acceder a la communaute (le meme que celui fourni au club) :");
+  var phone=prompt("Entrez votre numéro de téléphone pour acceder a la communaute (le meme que celui fourni au club) :");
   if(!phone)return false;
   myPhone=phone.trim().replace(/\s+/g,"");
   localStorage.setItem("asmb_phone",myPhone);
@@ -5530,7 +5530,7 @@ function listenMessages(channelId){
           cvHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bdr)">'+
             '<span style="font-size:12px;color:var(--txt)">'+p.nom+'</span>'+
             '<div style="display:flex;gap:5px">'+
-              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#27AE60":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Present</span>'+
+              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'présent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#27AE60":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
               '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'absent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="absent"?"#C0392B":"rgba(0,0,0,.08)")+';color:'+(resp==="absent"?"#fff":"var(--mut)")+'">✕ Absent</span>'+
             '</div></div>';
         });
@@ -5563,7 +5563,7 @@ function listenMessages(channelId){
       var bubble=document.createElement("div");bubble.className="msg-bubble "+(isOut?"msg-out":"msg-in");
       if(msg.deleted){
         bubble.style.opacity=".55";bubble.style.fontStyle="italic";
-        bubble.innerHTML="🚫 Message supprime"+(msg.deletedBy?" par "+msg.deletedBy:"")+'<div class="msg-time">'+time+'</div>';
+        bubble.innerHTML="🚫 Message supprimé"+(msg.deletedBy?" par "+msg.deletedBy:"")+'<div class="msg-time">'+time+'</div>';
         wrap.appendChild(bubble);
         msgsEl.appendChild(wrap);
         return;
@@ -5645,7 +5645,7 @@ function deleteMessage(channelId,msgId){
 }
 
 function sendMsg(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!checkMyPhone())return;
   var msgEl=document.getElementById("chat-msg");
   var pseudoEl=document.getElementById("chat-pseudo");
@@ -5663,7 +5663,7 @@ function sendMsg(){
 
 function sendMediaMessage(input){
   if(!input.files||!input.files[0])return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   if(!checkMyPhone())return;
   var file=input.files[0];
   if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptees (pas de video)");input.value="";return;}
@@ -5681,7 +5681,7 @@ function sendMediaMessage(input){
     });
     localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
   }).catch(function(err){
-    alert("Erreur lors de l'envoi de la photo. Reessayez avec une image plus petite.");
+    alert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
   });
 }
@@ -5695,7 +5695,7 @@ function showPollCreator(){
 }
 
 function createPoll(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var question=document.getElementById("poll-question").value.trim();
   if(!question){alert("Entrez une question");return;}
   var options=[];
@@ -5824,15 +5824,15 @@ var currentPoleType=null;
 
 var CATS_OPT=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
 var POLE_FORMS={
-  "session":    {title:"Nouvelle session",fields:[{id:"nom",label:"Nom de la session",ph:"Ex: Seance technique U13"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"Ex: 14h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."},{id:"notes",label:"Notes",ph:"Informations..."}]},
-  "participant":{title:"Nouveau participant",fields:[{id:"nom",label:"Nom complet",ph:"Prenom Nom"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"contact",label:"Contact",ph:"06..."}]},
-  "equipe":     {title:"Nouvelle equipe",fields:[{id:"nom",label:"Nom de l'equipe",ph:"Ex: U13F ASMB"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"coach",label:"Coach",ph:"Prenom Nom"},{id:"notes",label:"Notes",ph:""}]},
-  "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",type:"select-lieu"},{id:"equipe",label:"Notre equipe",type:"select-team"},{id:"cat",label:"Categorie",type:"select-cat"}]},
-  "joueur":     {title:"Nouveau joueur",fields:[{id:"cat",label:"Categorie",type:"select-cat"},{id:"nom",label:"Joueur (liste des inscrits)",type:"select-player"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numero de maillot",ph:"#7"},{id:"equipe",label:"Equipe",type:"select-team"}]},
-  "tournoi":    {title:"Nouveau tournoi",fields:[{id:"nom",label:"Nom du tournoi",ph:"Ex: Tournoi de Noel"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"format",label:"Format",ph:"3x3, 5x5, mixte..."},{id:"notes",label:"Notes",ph:""}]},
-  "evenement":  {title:"Nouvel evenement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
-  "groupe":     {title:"Nouveau groupe",fields:[{id:"nom",label:"Nom du groupe",ph:"Ex: Loisir Adultes Mardi"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"niveau",label:"Niveau",ph:"Debutant, Intermediaire..."},{id:"jour",label:"Jour",ph:"Lundi, Mardi..."},{id:"heure",label:"Heure",ph:"18h00 - 20h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."}]},
-  "seance":     {title:"Nouvelle seance",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"18h00"},{id:"groupe",label:"Groupe",ph:"Nom du groupe"},{id:"cat",label:"Categorie",type:"select-cat"},{id:"theme",label:"Theme",ph:"Tir, Dribble, Match..."}]},
+  "session":    {title:"Nouvelle session",fields:[{id:"nom",label:"Nom de la session",ph:"Ex: Séance technique U13"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"Ex: 14h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."},{id:"notes",label:"Notes",ph:"Informations..."}]},
+  "participant":{title:"Nouveau participant",fields:[{id:"nom",label:"Nom complet",ph:"Prénom Nom"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"contact",label:"Contact",ph:"06..."}]},
+  "equipe":     {title:"Nouvelle équipe",fields:[{id:"nom",label:"Nom de l'équipe",ph:"Ex: U13F ASMB"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"coach",label:"Coach",ph:"Prénom Nom"},{id:"notes",label:"Notes",ph:""}]},
+  "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",type:"select-lieu"},{id:"equipe",label:"Notre équipe",type:"select-team"},{id:"cat",label:"Catégorie",type:"select-cat"}]},
+  "joueur":     {title:"Nouveau joueur",fields:[{id:"cat",label:"Catégorie",type:"select-cat"},{id:"nom",label:"Joueur (liste des inscrits)",type:"select-player"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numéro de maillot",ph:"#7"},{id:"equipe",label:"Équipe",type:"select-team"}]},
+  "tournoi":    {title:"Nouveau tournoi",fields:[{id:"nom",label:"Nom du tournoi",ph:"Ex: Tournoi de Noel"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"format",label:"Format",ph:"3x3, 5x5, mixte..."},{id:"notes",label:"Notes",ph:""}]},
+  "evenement":  {title:"Nouvel événement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
+  "groupe":     {title:"Nouveau groupe",fields:[{id:"nom",label:"Nom du groupe",ph:"Ex: Loisir Adultes Mardi"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"niveau",label:"Niveau",ph:"Debutant, Intermediaire..."},{id:"jour",label:"Jour",ph:"Lundi, Mardi..."},{id:"heure",label:"Heure",ph:"18h00 - 20h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."}]},
+  "seance":     {title:"Nouvelle séance",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"18h00"},{id:"groupe",label:"Groupe",ph:"Nom du groupe"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"theme",label:"Theme",ph:"Tir, Dribble, Match..."}]},
 };
 
 function getPoleData(poleId){
@@ -5887,7 +5887,7 @@ function buildPoleScreen(poleId){
   var others=data.filter(function(d){return d.type!=="equipe"&&d.type!=="joueur"&&d.type!=="match";});
 
   if(equipes.length||joueurs.length){
-    if(equipes.length)listEl.innerHTML+='<div class="sec" style="padding-left:0">Equipes</div>';
+    if(equipes.length)listEl.innerHTML+='<div class="sec" style="padding-left:0">Équipes</div>';
     equipes.forEach(function(eq){
       renderItemCard(eq,0);
       var assigned=joueurs.filter(function(j){return j.equipe===eq.nom;});
@@ -5895,7 +5895,7 @@ function buildPoleScreen(poleId){
     });
     var unassigned=joueurs.filter(function(j){return !equipes.some(function(eq){return eq.nom===j.equipe;});});
     if(unassigned.length){
-      listEl.innerHTML+='<div class="sec" style="padding-left:0">Joueurs sans equipe assignee</div>';
+      listEl.innerHTML+='<div class="sec" style="padding-left:0">Joueurs sans équipe assignee</div>';
       unassigned.forEach(function(j){renderItemCard(j,0);});
     }
   }
@@ -5925,18 +5925,18 @@ function showAddPoleItem(poleId,type){
     } else if(f.type==="select-cat"){
       var opts=CATS_OPT.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
       var catOnchange=(currentPoleType==="joueur")?' onchange="refreshPlayerSelect(this.value)"':"";
-      html+='<select class="form-select" id="pf-'+f.id+'"'+catOnchange+'><option value="">Selectionnez une categorie...</option>'+opts+'</select>';
+      html+='<select class="form-select" id="pf-'+f.id+'"'+catOnchange+'><option value="">Sélectionnez une catégorie...</option>'+opts+'</select>';
     } else if(f.type==="select-team"){
       var teamOpts=getTeams().map(function(t){return '<option value="'+t.name+'">'+t.name+' ('+t.cat+')</option>';}).join("");
       if(!getTeams().length){
-        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Aucune equipe creee - Admin > Equipes</option></select>';
+        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Aucune équipe créée - Admin > Équipes</option></select>';
       } else {
-        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez une equipe...</option>'+teamOpts+'</select>';
+        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Sélectionnez une équipe...</option>'+teamOpts+'</select>';
       }
     } else if(f.type==="select-lieu"){
-      html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Selectionnez...</option><option value="Domicile">Domicile</option><option value="Exterieur">Exterieur</option></select>';
+      html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Sélectionnez...</option><option value="Domicile">Domicile</option><option value="Exterieur">Exterieur</option></select>';
     } else if(f.type==="select-player"){
-      html+='<select class="form-select" id="pf-'+f.id+'" onchange="prefillFromPlayer(this.value)"><option value="">D\'abord choisir une categorie...</option></select>';
+      html+='<select class="form-select" id="pf-'+f.id+'" onchange="prefillFromPlayer(this.value)"><option value="">D\'abord choisir une catégorie...</option></select>';
     } else {
       html+='<input class="form-input" id="pf-'+f.id+'" placeholder="'+(f.ph||'')+'">';
     }
@@ -5949,17 +5949,17 @@ function showAddPoleItem(poleId,type){
 function refreshPlayerSelect(cat){
   var sel=document.getElementById("pf-nom");
   if(!sel)return;
-  if(!cat){sel.innerHTML='<option value="">D\'abord choisir une categorie...</option>';return;}
+  if(!cat){sel.innerHTML='<option value="">D\'abord choisir une catégorie...</option>';return;}
   var players=getPlayers().filter(function(p){return p.cat===cat;});
   if(!players.length){
-    sel.innerHTML='<option value="">Aucun joueur inscrit dans cette categorie</option>';
+    sel.innerHTML='<option value="">Aucun joueur inscrit dans cette catégorie</option>';
     return;
   }
   var opts=players.map(function(pl){
     var dot=pl.genre==="M"?"🔵":(pl.genre==="F"?"🌸":"⚪");
     return '<option value="'+pl.prenom+' '+pl.nom+'">'+dot+' '+pl.prenom+' '+pl.nom+'</option>';
   }).join("");
-  sel.innerHTML='<option value="">Selectionnez un joueur...</option>'+opts;
+  sel.innerHTML='<option value="">Sélectionnez un joueur...</option>'+opts;
 }
 
 function prefillFromPlayer(fullName){
@@ -5988,15 +5988,15 @@ function savePoleItem(){
   data.push(item);
   savePoleData(currentPoleId,data);
 
-  // Lien automatique : un match cree dans un pole cree aussi l'evenement dans le Planning
+  // Lien automatique : un match cree dans un pole cree aussi l'événement dans le Planning
   if(currentPoleType==="match"&&item.date){
     var events=getEvents();
     events.push({
       id:"planning-"+item.id,
-      titre:(item.equipe?item.equipe+" ":"")+"vs "+(item.adversaire||"Adversaire"),
+      titre:(item.équipe?item.équipe+" ":"")+"vs "+(item.adversaire||"Adversaire"),
       type:"match",date:item.date,heure:item.heure||"",lieu:item.lieu||"",
-      equipe:item.equipe||item.cat||"",
-      presences:{}
+      équipe:item.équipe||item.cat||"",
+      présences:{}
     });
     saveEvents(events);
   }
@@ -6022,7 +6022,7 @@ function initProfile(){
   var profile = localStorage.getItem("asmb_profile");
   injectRoleLogo();
   if(profile==="parent"&&!myPhone){
-    // Sans numero enregistre, on considere que c'est une nouvelle arrivee a chaque fois
+    // Sans numéro enregistré, on considere que c'est une nouvelle arrivee a chaque fois
     localStorage.removeItem("asmb_profile");
     localStorage.removeItem("asmb_parent_teams");
     localStorage.removeItem("asmb_parent_active_team");
@@ -6101,12 +6101,12 @@ function chooseRole(role){
 var joueurIdentifiedPlayer=null;
 
 function openJoueurCheckin(){
-  var phone=prompt("Ton numero de telephone (celui donne au club) :");
+  var phone=prompt("Ton numéro de téléphone (celui donne au club) :");
   if(!phone)return;
   phone=phone.trim().replace(/\s+/g,"");
   var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
   if(!player){
-    alert("Numero non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
+    alert("Numéro non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
   }
   joueurIdentifiedPlayer=player;
@@ -6155,7 +6155,7 @@ function buildJoueurScreen(player){
     var exitBtn='<button onclick="exitJoueurScreen()" style="margin-top:24px;width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:none;cursor:pointer">Quitter</button>';
 
     if(!todaysEvents.length){
-      html+='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun entrainement aujourd\'hui</div></div>'+exitBtn;
+      html+='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun entraînement aujourd\'hui</div></div>'+exitBtn;
       el.innerHTML=html;
       return;
     }
@@ -6206,15 +6206,15 @@ function checkExistingCheckin(eventId,playerId){
 
 function checkinButtonsHtml(playerId,eventId){
   return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
-    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Present</button>'+
+    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'présent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
     '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
   '</div>';
 }
 
 function checkinBadgeHtml(playerId,eventId,status){
-  var lbl={present:"✓ Present",retard:"⏰ En retard",absent:"✕ Absent"};
+  var lbl={present:"✓ Présent",retard:"⏰ En retard",absent:"✕ Absent"};
   var col={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
-  return '<div onclick="reopenCheckin(this,\''+playerId+'\',\''+eventId+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistre (toucher pour modifier)</div>';
+  return '<div onclick="reopenCheckin(this,\''+playerId+'\',\''+eventId+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistré (toucher pour modifier)</div>';
 }
 
 function reopenCheckin(el,playerId,eventId){
@@ -6222,7 +6222,7 @@ function reopenCheckin(el,playerId,eventId){
 }
 
 function joueurSelfCheckin(playerId,eventId,status){
-  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   var player=getPlayers().find(function(p){return p.id===playerId;});
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
@@ -6244,18 +6244,18 @@ function joueurSelfCheckin(playerId,eventId,status){
     if((status==="absent"||status==="retard")&&ev){
       var channelId=findChannelForTeamText(ev.equipe||player.cat);
       var msgTxt=status==="absent"?
-        ("🔴 <b>"+player.prenom+" "+player.nom+"</b> s'est declare(e) absent(e) a \""+ev.titre+"\""):
-        ("🟠 <b>"+player.prenom+" "+player.nom+"</b> s'est declare(e) en retard a \""+ev.titre+"\"");
+        ("🔴 <b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) absent(e) a \""+ev.titre+"\""):
+        ("🟠 <b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) en retard a \""+ev.titre+"\"");
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
         text:msgTxt,pseudo:"📋 Systeme ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
-  }).catch(function(){alert("Erreur, reessayez");});
+  }).catch(function(){alert("Erreur, réessayez");});
 }
 
 function registerParentPhone(){
   if(myPhone){openTeamPicker(false);return;}
-  var phone=prompt("Entrez votre numero de telephone (le meme que celui fournit au club) pour rejoindre le groupe de votre enfant :");
+  var phone=prompt("Entrez votre numéro de téléphone (le meme que celui fournit au club) pour rejoindre le groupe de votre enfant :");
   if(!phone){
     notifyPhoneSkipped();
     openTeamPicker(false);
@@ -6270,7 +6270,7 @@ function registerParentPhone(){
 function notifyPhoneSkipped(){
   if(!window.fbReady)return;
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels","general","messages"),{
-    text:"⚠️ Un parent a rejoint l'application sans renseigner son numero de telephone. Il n'a pas encore acces a la communaute.",
+    text:"⚠️ Un parent a rejoint l'application sans renseigner son numéro de téléphone. Il n'a pas encore accès a la communaute.",
     pseudo:"⚠️ Systeme ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
   });
 }
@@ -6287,7 +6287,7 @@ function autoLinkParentToChannel(phone){
     openTeamPicker(false);
     return;
   }
-  // Auto-selectionner l'equipe correspondant a la categorie de l'enfant
+  // Auto-selectionner l'équipe correspondant a la catégorie de l'enfant
   var matchingTeams=getTeams().filter(function(t){return t.cat===lic.categorie;});
   var parentTeams=getParentTeams();
   matchingTeams.forEach(function(t){if(parentTeams.indexOf(t.id)<0)parentTeams.push(t.id);});
@@ -6311,7 +6311,7 @@ function autoLinkParentToChannel(phone){
   }
 
   if(matchingTeams.length){
-    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'equipe "+matchingTeams[0].name+" et au canal correspondant.");
+    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'équipe "+matchingTeams[0].name+" et au canal correspondant.");
     saveParentTeams();
   } else {
     openTeamPicker(false);
@@ -6343,7 +6343,7 @@ function navToCoach(which){
 }
 
 function switchProfile(){
-  if(!confirm("Changer de profil ? Vous devrez re-selectionner Parent ou Coach."))return;
+  if(!confirm("Changer de profil ? Vous devrez re-sélectionner Parent ou Coach."))return;
   localStorage.removeItem("asmb_profile");
   localStorage.removeItem("asmb_parent_teams");
   localStorage.removeItem("asmb_parent_active_team");
@@ -6361,13 +6361,13 @@ var teamPickerContext="parent";
 function openTeamPicker(fromHome){
   teamPickerContext="parent";
   document.getElementById("tp-icon").textContent="👨‍👩‍👧";
-  document.getElementById("tp-title").textContent="Quelle equipe suivez-vous ?";
-  document.getElementById("tp-sub").textContent="Vous pouvez suivre plusieurs equipes";
+  document.getElementById("tp-title").textContent="Quelle équipe suivez-vous ?";
+  document.getElementById("tp-sub").textContent="Vous pouvez suivre plusieurs équipes";
   var teams=getTeams();
   var selected=getParentTeams();
   var el=document.getElementById("team-picker-list");
   if(!teams.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune equipe creee</div><div style="font-size:11px;margin-top:4px">Contactez un responsable du club</div></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune équipe créée</div><div style="font-size:11px;margin-top:4px">Contactez un responsable du club</div></div>';
   } else {
     el.innerHTML="";
     teams.forEach(function(t){
@@ -6398,7 +6398,7 @@ var pendingJoinRequestPhone=null;
 
 function saveParentTeams(){
   var selected=getParentTeams();
-  if(!selected.length){alert("Selectionnez au moins une equipe");return;}
+  if(!selected.length){alert("Sélectionnez au moins une équipe");return;}
   if(!getActiveTeamId()||selected.indexOf(getActiveTeamId())<0)setActiveTeamId(selected[0]);
   buildBottomNav("parent");
 
@@ -6420,21 +6420,21 @@ function submitJoinRequest(phone,teamIds){
   if(!window.fbReady)return;
   var teams=getTeams().filter(function(t){return teamIds.indexOf(t.id)>=0;});
   var teamNames=teams.map(function(t){return t.name;}).join(", ");
-  var childName=prompt("Prenom de votre enfant (pour la demande envoyee au coach) :")||"Parent";
+  var childName=prompt("Prénom de votre enfant (pour la demande envoyée au coach) :")||"Parent";
   window.fbAddDoc(window.fbCollection(window.fbDb,"joinRequests"),{
     phone:phone,childName:childName,teamIds:teamIds,teamNames:teamNames,
     status:"pending",ts:window.fbServerTimestamp()
   });
-  alert("Votre demande a ete envoyee au coach. Vous aurez acces au canal de l'equipe une fois validee.");
+  alert("Votre demande a ete envoyée au coach. Vous aurez accès au canal de l'équipe une fois validée.");
 }
 
 // ── TUTORIEL PARENT (premiere connexion) ────────────────────────────
 var tutoStep=0;
 var TUTO_STEPS=[
-  {icon:"🏠",titre:"Bienvenue !",texte:"Retrouvez ici tout ce qui concerne l'equipe de votre enfant : prochains matchs, entrainements et resultats."},
-  {icon:"🛡️",titre:"Onglet Equipe",texte:"Consultez la composition de l'equipe, les postes et numeros de maillot de chaque joueur."},
-  {icon:"📊",titre:"Onglet Stats",texte:"Suivez le bilan de presence et l'assiduite de l'equipe au fil de la saison."},
-  {icon:"📅",titre:"Onglet Evenement",texte:"Retrouvez tous les matchs et entrainements a venir, avec les convocations du coach."},
+  {icon:"🏠",titre:"Bienvenue !",texte:"Retrouvez ici tout ce qui concerne l'équipe de votre enfant : prochains matchs, entraînements et résultats."},
+  {icon:"🛡️",titre:"Onglet Équipe",texte:"Consultez la composition de l'équipe, les postes et numéros de maillot de chaque joueur."},
+  {icon:"📊",titre:"Onglet Stats",texte:"Suivez le bilan de présence et l'assiduité de l'équipe au fil de la saison."},
+  {icon:"📅",titre:"Onglet Événement",texte:"Retrouvez tous les matchs et entraînements a venir, avec les convocations du coach."},
   {icon:"💬",titre:"Communaute",texte:"Echangez avec les autres familles et le club dans les canaux de discussion dedies."}
 ];
 
@@ -6458,7 +6458,7 @@ function renderTutoStep(){
     '<div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">'+
       '<div style="display:flex;justify-content:center;gap:6px">'+dots+'</div>'+
       '<div style="display:flex;gap:10px">'+
-        (tutoStep>0?'<button onclick="tutoPrev()" style="flex:1;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:600;border:none;cursor:pointer">Precedent</button>':'<button onclick="skipTutoriel()" style="flex:1;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:600;border:none;cursor:pointer">Passer</button>')+
+        (tutoStep>0?'<button onclick="tutoPrev()" style="flex:1;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:600;border:none;cursor:pointer">Précédent</button>':'<button onclick="skipTutoriel()" style="flex:1;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:600;border:none;cursor:pointer">Passer</button>')+
         '<button onclick="tutoNext()" style="flex:2;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">'+(tutoStep===TUTO_STEPS.length-1?"C'est parti !":"Suivant")+'</button>'+
       '</div>'+
     '</div>';
@@ -6484,13 +6484,13 @@ function setCoachTeam(id){localStorage.setItem("asmb_coach_team",id);}
 function openCoachTeamPicker(){
   teamPickerContext="coach";
   document.getElementById("tp-icon").textContent="🏀";
-  document.getElementById("tp-title").textContent="Quelle equipe entrainez-vous ?";
+  document.getElementById("tp-title").textContent="Quelle équipe entrainez-vous ?";
   document.getElementById("tp-sub").textContent="Vous pourrez modifier ce choix plus tard";
   var teams=getTeams();
   var current=getCoachTeam();
   var el=document.getElementById("team-picker-list");
   if(!teams.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune equipe creee</div><div style="font-size:11px;margin-top:4px">Contactez un responsable du club</div></div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">👥</div><div style="font-size:13px;font-weight:600">Aucune équipe créée</div><div style="font-size:11px;margin-top:4px">Contactez un responsable du club</div></div>';
   } else {
     el.innerHTML="";
     teams.forEach(function(t){
@@ -6509,7 +6509,7 @@ function openCoachTeamPicker(){
 
 function confirmTeamPicker(){
   if(teamPickerContext==="coach"){
-    if(!getCoachTeam()){alert("Selectionnez votre equipe");return;}
+    if(!getCoachTeam()){alert("Sélectionnez votre équipe");return;}
     buildBottomNav("coach");
     navToCoach("equipe");
   } else {
@@ -6533,7 +6533,7 @@ function buildParentHome(){
   var pHomeLogo=document.getElementById("home-logo");
   if(pLogoEl&&pHomeLogo&&pHomeLogo.innerHTML)pLogoEl.innerHTML=pHomeLogo.innerHTML;
   document.getElementById("parent-hero-team").textContent="ASMB · "+activeTeam.name;
-  fillTodayHero("parent-hero-event","parent-date",activeTeam,null,"Aucun entrainement aujourd'hui");
+  fillTodayHero("parent-hero-event","parent-date",activeTeam,null,"Aucun entraînement aujourd'hui");
 
   // Resume : matchs joues + statut licence
   var summaryEl=document.getElementById("parent-summary-row");
@@ -6547,7 +6547,7 @@ function buildParentHome(){
   var licBadge="";
   if(myLic){
     var licColors={"validee":"#27AE60","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#6a9e72"};
-    var licLabels={"validee":"Licence validee","recue":"Fiche recue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche a completer"};
+    var licLabels={"validee":"Licence validée","recue":"Fiche reçue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche a completer"};
     licBadge='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
       '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(licLabels[myLic.statut]||"Licence")+'</div>'+
@@ -6573,7 +6573,7 @@ function buildParentHome(){
   var nextEv=getNextEventForTeam(activeTeam);
   var evEl=document.getElementById("parent-next-event");
   if(!nextEv){
-    evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun evenement a venir</div></div>';
+    evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun événement a venir</div></div>';
   } else {
     var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
     var col=typeColors[nextEv.type]||"#1B5C28";
@@ -6614,11 +6614,11 @@ function buildParentHome(){
     statsEl.innerHTML='<div class="empty-state" style="padding:24px 20px"><div style="font-size:12px;color:var(--mut)">Pas d\'historique de données pour le moment</div></div>';
   } else {
     statsEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow);display:flex;align-items:center;justify-content:space-around;text-align:center">'+
-      '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite</div></div>'+
+      '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
       '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
-      '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Presences</div></div>'+
+      '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>'+
       '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
-      '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+stats.total+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Seances</div></div>'+
+      '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+stats.total+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Séances</div></div>'+
     '</div>';
   }
 }
@@ -6639,19 +6639,19 @@ function getMyLicenceForTeam(team){
 
 function signalerAbsence(eventId){
   if(!checkMyPhone())return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et reessayez");return;}
+  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
 
-  // Retrouver l'enfant lie a ce parent (via son telephone) pour verifier les doublons
+  // Retrouver l'enfant lie a ce parent (via son téléphone) pour verifier les doublons
   var linkedPlayer=getLinkedPlayerForCheckin();
 
   var proceed=function(nom,playerId){
     var motif=prompt("Motif (optionnel) :","")||"";
-    var channelId=findChannelForTeamText(ev.equipe);
+    var channelId=findChannelForTeamText(ev.équipe);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"🙋 <b>Absence signalee</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
+      text:"🙋 <b>Absence signalée</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
       pseudo:"🙋 "+(nom||"Parent"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
     if(playerId){
@@ -6661,21 +6661,21 @@ function signalerAbsence(eventId){
         status:"absent",ts:window.fbServerTimestamp(),source:"parent"
       });
     }
-    alert("Absence signalee dans le canal de l'equipe.");
+    alert("Absence signalée dans le canal de l'equipe.");
   };
 
   if(linkedPlayer){
-    // Verifier si un pointage existe deja pour cet enfant sur cet evenement
+    // Verifier si un pointage existe déjà pour cet enfant sur cet événement
     checkExistingCheckin(eventId,linkedPlayer.id).then(function(existing){
       if(existing){
-        var labels={present:"present(e)",retard:"en retard",absent:"absent(e)"};
-        alert(linkedPlayer.prenom+" s'est deja declare(e) "+(labels[existing.status]||existing.status)+" pour cet evenement. Pas besoin de le refaire.");
+        var labels={présent:"present(e)",retard:"en retard",absent:"absent(e)"};
+        alert(linkedPlayer.prénom+" s'est déjà declare(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
         return;
       }
-      proceed(linkedPlayer.prenom+" "+linkedPlayer.nom,linkedPlayer.id);
+      proceed(linkedPlayer.prénom+" "+linkedPlayer.nom,linkedPlayer.id);
     });
   } else {
-    var nom=prompt("Prenom du joueur absent :");
+    var nom=prompt("Prénom du joueur absent :");
     if(!nom)return;
     proceed(nom,null);
   }
@@ -6686,8 +6686,8 @@ function getLastMatchesForTeam(team){
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var matched=events.filter(function(e){
-    if(e.type!=="match"||!e.score||!e.equipe)return false;
-    var eq=e.equipe.toUpperCase();
+    if(e.type!=="match"||!e.score||!e.équipe)return false;
+    var eq=e.équipe.toUpperCase();
     return (eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0)&&e.date<=todayStr;
   });
   matched.sort(function(a,b){return b.date>a.date?1:-1;});
@@ -6698,8 +6698,8 @@ function getNextEventForTeam(team){
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var matched=events.filter(function(e){
-    if(!e.equipe||e.cancelled)return false;
-    var eq=e.equipe.toUpperCase();
+    if(!e.équipe||e.cancelled)return false;
+    var eq=e.équipe.toUpperCase();
     return eq.indexOf(team.cat.toUpperCase())>=0||eq.indexOf(team.name.toUpperCase())>=0;
   }).filter(function(e){return e.date>=todayStr;});
   matched.sort(function(a,b){return a.date>b.date?1:-1;});
@@ -6707,16 +6707,16 @@ function getNextEventForTeam(team){
 }
 
 function getTeamPresenceStats(team){
-  if(!team)return{total:0,present:0,pct:0};
+  if(!team)return{total:0,présent:0,pct:0};
   var events=getEvents().filter(function(e){
-    if(!e.presences||!Object.keys(e.presences).length||!e.equipe)return false;
-    return e.equipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
+    if(!e.présences||!Object.keys(e.présences).length||!e.équipe)return false;
+    return e.équipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
   });
-  var total=0,present=0;
+  var total=0,présent=0;
   events.forEach(function(e){
-    Object.keys(e.presences).forEach(function(k){total++;if(e.presences[k]==="present")present++;});
+    Object.keys(e.présences).forEach(function(k){total++;if(e.présences[k]==="présent")présent++;});
   });
-  return{total:total,present:present,pct:total?Math.round(present/total*100):0};
+  return{total:total,présent:présent,pct:total?Math.round(présent/total*100):0};
 }
 
 // ── PARENT EQUIPE TAB ─────────────────────────────────────────────
@@ -6724,7 +6724,7 @@ function buildParentEquipe(){
   var activeId=getActiveTeamId();
   var teams=getTeams();
   var team=teams.find(function(t){return t.id===activeId;});
-  if(!team){document.getElementById("parent-eq-name").textContent="Aucune equipe";return;}
+  if(!team){document.getElementById("parent-eq-name").textContent="Aucune équipe";return;}
   var logoEl=document.getElementById("parent-eq-logo");
   var homeLogo=document.getElementById("home-logo");
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
@@ -6738,27 +6738,27 @@ function buildParentEquipe(){
   var teamCatIdx=CATS_ORD.indexOf(team.cat);
   var posteEligible=teamCatIdx>=CATS_ORD.indexOf("U15");
   players.forEach(function(p){
-    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
-      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
+      div.onclick=function(){alert(p.prénom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
     }
     el.appendChild(div);
   });
 }
 
-// ── COACH EQUIPE TAB (restreinte a sa seule equipe) ────────────────
+// ── COACH EQUIPE TAB (restreinte a sa seule équipe) ────────────────
 function buildCoachEquipe(){
   var teamId=getCoachTeam();
   var teams=getTeams();
   var team=teams.find(function(t){return t.id===teamId;});
-  if(!team){document.getElementById("coach-eq-name").textContent="Aucune equipe";return;}
+  if(!team){document.getElementById("coach-eq-name").textContent="Aucune équipe";return;}
   var logoEl=document.getElementById("coach-eq-logo");
   var homeLogo=document.getElementById("home-logo");
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
@@ -6773,15 +6773,15 @@ function buildCoachEquipe(){
   var posteEligibleCoach=teamCatIdxCoach>=CATS_ORD_COACH.indexOf("U15");
   el.innerHTML="";
   players.forEach(function(p){
-    var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
+    var initials=(p.prénom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
-    var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non defini";
+    var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non défini";
     var metaTxt=posteEligibleCoach?posteTxt:"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">👕 Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">🆔 Licence</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prénom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
     el.appendChild(div);
   });
 }
@@ -6790,7 +6790,7 @@ function editPlayerMaillot(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numero de maillot pour "+p.prenom+" "+p.nom+" :",p.maillot||"");
+  var num=prompt("Numéro de maillot pour "+p.prénom+" "+p.nom+" :",p.maillot||"");
   if(num===null)return;
   p.maillot=num.trim();
   savePlayers(players);
@@ -6801,12 +6801,12 @@ function editPlayerLicence(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numero de licence pour "+p.prenom+" "+p.nom+" :",p.numLicence||"0C");
+  var num=prompt("Numéro de licence pour "+p.prénom+" "+p.nom+" :",p.numLicence||"0C");
   if(num===null)return;
-  var type=prompt("Type de licence (competition / loisir) :",p.typeLicence||"competition");
+  var type=prompt("Type de licence (compétition / loisir) :",p.typeLicence||"compétition");
   if(type===null)return;
   p.numLicence=num.trim();
-  p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
+  p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"compétition";
   savePlayers(players);
   buildCoachEquipe();
   alert("Licence mise a jour.");
@@ -6821,27 +6821,27 @@ function buildParentEvents(){
   var el=document.getElementById("parent-events-list");
   if(!team){el.innerHTML="";return;}
   var events=getEvents().filter(function(e){
-    if(!e.equipe)return false;
-    return e.equipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
+    if(!e.équipe)return false;
+    return e.équipe.toUpperCase().indexOf(team.cat.toUpperCase())>=0;
   });
   events.sort(function(a,b){return a.date>b.date?1:-1;});
   if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun evenement</div></div>';return;}
   el.innerHTML="";
-  var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
+  var typeColors={"match":"#C0392B","entraînement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
   events.forEach(function(e){
     var col=typeColors[e.type]||"#1B5C28";
     var div=document.createElement("div");
     div.className="event-card";
     var presInfo="";
-    if(e.presences&&Object.keys(e.presences).length){
-      var pres=Object.values(e.presences).filter(function(v){return v==="present";}).length;
-      var tot=Object.keys(e.presences).length;
+    if(e.présences&&Object.keys(e.présences).length){
+      var pres=Object.values(e.présences).filter(function(v){return v==="présent";}).length;
+      var tot=Object.keys(e.présences).length;
       presInfo='<div style="font-size:11px;color:#27AE60;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
     }
     var convocInfo="";
     if(e.convocations&&e.convocations.length){
       var convPlayers=getPlayers();
-      var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prenom:null;}).filter(Boolean);
+      var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prénom:null;}).filter(Boolean);
       convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">📋 Convoques : '+noms.join(", ")+'</div>';
     }
     var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">🚫 ANNULE</div>':"";
@@ -6866,20 +6866,20 @@ function buildParentStats(){
     html+='<div class="empty-state"><div class="empty-state-icon">'+String.fromCodePoint(128202)+'</div><div style="font-size:13px;font-weight:600">Pas d\'historique de données</div><div style="font-size:11px;margin-top:4px">pour les critères sélectionnés</div></div>';
   } else {
     html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px">';
-    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Bilan des presences</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Bilan des présences</div>';
     html+='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center">';
-    html+='<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduite</div></div>';
+    html+='<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>';
     html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';
-    html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Presences</div></div>';
+    html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>';
     html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';
     html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+(stats.total-stats.present)+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Absences</div></div>';
     html+='</div></div>';
 
     // Progress bar
     html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow)">';
-    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Taux d\'assiduite</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Taux d\'assiduité</div>';
     html+='<div class="prog-bar" style="height:10px"><div class="prog-fill" style="width:'+stats.pct+'%"></div></div>';
-    html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">'+stats.present+' presences sur '+stats.total+' seances enregistrees</div>';
+    html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">'+stats.present+' présences sur '+stats.total+' séances enregistrees</div>';
     html+='</div>';
   }
 
@@ -6910,15 +6910,15 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
   } else if(profile==="coach"){
     nav.innerHTML=
-      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
+      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
-      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
-      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
+      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'compétition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
+      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'événements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communaute</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
-      '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
+      '<button class="bni" id="bni-eq" onclick="navToParent(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Equipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
       '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>';
   }
@@ -6946,7 +6946,7 @@ function toggleTheme(){
 (function(){
   var lics = getLicences();
   if(!lics.find(function(l){return l.code==="ASMB-TEST-0001";})){
-    lics.push({code:"ASMB-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyee",createdAt:Date.now(),ouvertLe:null,fiche:null,categorie:null});
+    lics.push({code:"ASMB-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyée",createdAt:Date.now(),ouvertLe:null,fiche:null,catégorie:null});
     saveLicences(lics);
   }
 }());
@@ -6955,7 +6955,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784351904";
+var APP_VERSION="1784367155";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -6982,20 +6982,20 @@ function refreshCurrentScreen(){
   try{
     if(id==="portal")buildPortal();
     else if(id==="parent-home")buildParentHome();
-    else if(id==="parent-equipe")buildParentEquipe();
+    else if(id==="parent-équipe")buildParentEquipe();
     else if(id==="parent-events")buildParentEvents();
     else if(id==="parent-stats")buildParentStats();
-    else if(id==="coach-equipe")buildCoachEquipe();
+    else if(id==="coach-équipe")buildCoachEquipe();
     else if(id==="communaute")buildCommunaute();
     else if(id==="admin")buildAdminHome();
     else if(id==="inscriptions")renderPlayers();
-    else if(id==="equipes")buildTeams();
+    else if(id==="équipes")buildTeams();
     else if(id==="planning")buildPlanning();
     else if(id==="documents")buildDocs();
     else if(id==="licences")buildLicences();
     else if(id==="annuaire")buildAnnuaire();
     else if(id==="galerie")buildGalerie();
-    else if(id==="parametres")buildParametres();
+    else if(id==="paramètres")buildParametres();
     else if(id==="elite")buildElite();
     else if(id&&id.startsWith("pole-")&&typeof currentPoleId!=="undefined")buildPoleScreen(currentPoleId);
   }catch(e){}
@@ -7068,11 +7068,11 @@ function checkEventReminders(){
   var notified=JSON.parse(localStorage.getItem("asmb_reminded")||"{}");
   events.forEach(function(e){
     if(!localStorage.getItem("asmb_notif")==="on")return;
-    var typeKey=e.type==="match"?"match":(e.type==="entrainement"?"entrainement":"evenement");
+    var typeKey=e.type==="match"?"match":(e.type==="entraînement"?"entraînement":"événement");
     if(localStorage.getItem("asmb_notif_"+typeKey)==="off")return;
     var evDate=new Date(e.date+(e.heure?" "+e.heure.replace("h",":"):" 00:00"));
     var diffH=(evDate-now)/3600000;
-    // Fenetre de rappel : entre 20h et 24h avant (verifie a chaque ouverture de l'app)
+    // Fenetre de rappel : entre 20h et 24h avant (vérifié a chaque ouverture de l'app)
     if(diffH>0&&diffH<=24&&!notified[e.id]){
       try{
         var icon=e.type==="match"?"🏆":(e.type==="entrainement"?"🏀":"🎉");
