@@ -905,7 +905,7 @@ initChannels();
         <div class="form-group" style="flex:1"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
       </div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder="Gymnase..."></div>
-      <div class="form-group"><label class="form-label">Équipes concernees</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+      <div class="form-group"><label class="form-label">Équipes concernees</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box"></div></div>
 
       <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
       <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Participants concernes</div>
@@ -4688,7 +4688,7 @@ function renderEvTeamChecks(){
     var btn=document.createElement("button");
     btn.type="button";
     btn.textContent=t.name;
-    btn.style.cssText="padding:7px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--mut)")+";cursor:pointer";
+    btn.style.cssText="padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--mut)")+";cursor:pointer;white-space:normal;max-width:100%;word-break:break-word;text-align:center;line-height:1.3";
     btn.onclick=function(){toggleEvTeam(t.id);};
     el.appendChild(btn);
   });
@@ -7005,7 +7005,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784368617";
+var APP_VERSION="1784368861";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
