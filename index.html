@@ -1147,16 +1147,32 @@ initChannels();
 
   <!-- ══════════════ CALENDRIER PARTAGE (semaine) ══════════════ -->
   <div class="scr" id="scr-calendrier">
-    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
-      <button onclick="shiftCalWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">‹</button>
-      <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entrainements et matchs</div></div>
-      <button onclick="shiftCalWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">›</button>
+    <div style="padding:14px 16px 0;display:flex;gap:8px">
+      <button class="cat-filter on" onclick="switchCalTab(\'semaine\')" id="caltab-semaine" style="flex:1;text-align:center">📅 Semaine</button>
+      <button class="cat-filter" onclick="switchCalTab(\'matchs\')" id="caltab-matchs" style="flex:1;text-align:center">🏀 Matchs</button>
     </div>
-    <div id="cal-filter-row" style="display:none;padding:10px 16px;gap:8px">
-      <button class="cat-filter on" onclick="setCalFilter(\'mine\')" id="cal-filter-mine">Mon equipe</button>
-      <button class="cat-filter" onclick="setCalFilter(\'all\')" id="cal-filter-all">Toutes les equipes</button>
+
+    <div id="cal-tab-semaine">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+        <button onclick="shiftCalWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">‹</button>
+        <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entrainements et matchs</div></div>
+        <button onclick="shiftCalWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">›</button>
+      </div>
+      <div id="cal-filter-row" style="display:none;padding:10px 16px;gap:8px">
+        <button class="cat-filter on" onclick="setCalFilter(\'mine\')" id="cal-filter-mine">Mon equipe</button>
+        <button class="cat-filter" onclick="setCalFilter(\'all\')" id="cal-filter-all">Toutes les equipes</button>
+      </div>
+      <div id="cal-week-content" style="padding:12px 0 80px"></div>
     </div>
-    <div id="cal-week-content" style="padding:12px 0 80px"></div>
+
+    <div id="cal-tab-matchs" style="display:none">
+      <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les matchs</div><div style="font-size:11px;color:var(--mut)">Passes et a venir</div></div>
+        <button onclick="showMatchFilter()" style="padding:8px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">⚙️ Filtrer</button>
+      </div>
+      <div id="match-filter-row" style="display:none;padding:0 16px 10px;overflow-x:auto;gap:8px;white-space:nowrap"></div>
+      <div id="match-list-content" style="padding:8px 0 80px"></div>
+    </div>
   </div>
 
   <div class="scr" id="scr-annuaire">
@@ -3428,7 +3444,115 @@ function openCalendrier(){
   calWeekOffset=0;
   stack.push("calendrier");
   showScr("calendrier");
-  buildCalendrier();
+  switchCalTab("semaine");
+}
+
+var calCurrentTab="semaine";
+var matchFilterCat="all";
+
+function switchCalTab(tab){
+  calCurrentTab=tab;
+  document.getElementById("caltab-semaine").classList.toggle("on",tab==="semaine");
+  document.getElementById("caltab-matchs").classList.toggle("on",tab==="matchs");
+  document.getElementById("cal-tab-semaine").style.display=tab==="semaine"?"block":"none";
+  document.getElementById("cal-tab-matchs").style.display=tab==="matchs"?"block":"none";
+  if(tab==="semaine")buildCalendrier();
+  else buildMatchList();
+}
+
+function showMatchFilter(){
+  var row=document.getElementById("match-filter-row");
+  if(row.style.display==="flex"){row.style.display="none";return;}
+  var teams=getTeams();
+  var cats=[];
+  teams.forEach(function(t){if(cats.indexOf(t.cat)<0)cats.push(t.cat);});
+  var html='<button class="cat-filter'+(matchFilterCat==="all"?" on":"")+'" onclick="setMatchFilter(\'all\')" style="display:inline-block;margin-right:6px">Tous</button>';
+  cats.forEach(function(c){
+    html+='<button class="cat-filter'+(matchFilterCat===c?" on":"")+'" onclick="setMatchFilter(\''+c+'\')" style="display:inline-block;margin-right:6px">'+c+'</button>';
+  });
+  row.innerHTML=html;
+  row.style.display="flex";
+}
+
+function setMatchFilter(cat){
+  matchFilterCat=cat;
+  showMatchFilter();
+  showMatchFilter();
+  buildMatchList();
+}
+
+function buildMatchList(){
+  var content=document.getElementById("match-list-content");
+  content.innerHTML='<div style="text-align:center;padding:30px;font-size:12px;color:var(--mut)">Chargement...</div>';
+  fetchEventsFromCloud().then(function(events){
+    var matches=events.filter(function(e){return e.type==="match"&&!e.cancelled;});
+    if(matchFilterCat!=="all"){
+      matches=matches.filter(function(e){return (e.equipe||"").toUpperCase().indexOf(matchFilterCat.toUpperCase())>=0;});
+    }
+    matches.sort(function(a,b){return b.date>a.date?1:-1;});
+    if(!matches.length){
+      content.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏀</div><div style="font-size:13px;font-weight:600">Aucun match</div></div>';
+      return;
+    }
+    var todayStr=new Date().toISOString().slice(0,10);
+    var monthLabels={};
+    content.innerHTML="";
+    matches.forEach(function(e){
+      var d=new Date(e.date);
+      var monthKey=d.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+      if(!monthLabels[monthKey]){
+        monthLabels[monthKey]=true;
+        var monthDiv=document.createElement("div");
+        monthDiv.style.cssText="padding:14px 16px 6px;font-size:12px;font-weight:800;color:#E8670A;text-transform:uppercase;letter-spacing:.5px";
+        monthDiv.textContent=monthKey;
+        content.appendChild(monthDiv);
+      }
+      var isPast=e.date<todayStr;
+      var card=document.createElement("div");
+      card.style.cssText="margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;box-shadow:0 2px 8px var(--shadow);display:flex;gap:12px;align-items:flex-start";
+      card.innerHTML='<div style="text-align:center;flex-shrink:0;width:40px">'+
+          '<div style="font-size:16px;font-weight:900;color:var(--txt)">'+d.getDate()+'</div>'+
+          '<div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase">'+d.toLocaleDateString("fr-FR",{month:"short"})+'</div>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(e.heure||"?")+(e.lieu?" · "+e.lieu:"")+'</div>'+
+          '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
+          '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
+        '</div>';
+      content.appendChild(card);
+
+      window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+        var pres=0,abs=0;
+        snap.forEach(function(d2){var c=d2.data();if(c.eventId===e.id){if(c.status==="present")pres++;else if(c.status==="absent")abs++;}});
+        var countsEl=document.getElementById("match-counts-"+e.id);
+        if(countsEl){
+          countsEl.innerHTML='<span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#27AE60;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+            '<span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
+        }
+      });
+
+      var linkedPlayer=getLinkedPlayerForCheckin();
+      var actionsEl=document.getElementById("match-actions-"+e.id);
+      if(linkedPlayer&&actionsEl){
+        var eq=(e.equipe||"").toUpperCase();
+        if(eq.indexOf(linkedPlayer.cat.toUpperCase())>=0){
+          checkExistingCheckin(e.id,linkedPlayer.id).then(function(existing){
+            if(existing&&(existing.status==="present"||existing.status==="absent")){
+              var lbl={present:"✓ Present",absent:"✕ Absent"};
+              var col={present:"#27AE60",absent:"#C0392B"};
+              actionsEl.innerHTML='<div style="text-align:center;padding:7px;border-radius:var(--rx);background:'+col[existing.status]+';color:#fff;font-size:11px;font-weight:800">'+lbl[existing.status]+' · enregistre</div>';
+            } else {
+              actionsEl.innerHTML='<div style="display:flex;gap:6px">'+
+                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'present\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Present</button>'+
+                '<button onclick="joueurSelfCheckin(\''+linkedPlayer.id+'\',\''+e.id+'\',\'absent\')" style="flex:1;padding:8px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Absent</button>'+
+              '</div>';
+            }
+          });
+        }
+      }
+    });
+  });
 }
 
 function shiftCalWeek(dir){
@@ -3517,9 +3641,9 @@ function buildCalendrier(){
       } else {
         dayEvents.forEach(function(e){
           var isMatch=e.type==="match";
-          eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px'+(isMatch?";cursor:pointer":"")+'"'+(isMatch?' onclick="toggleCalEventExpand(\''+e.id+'\')"':"")+'>'+
-            '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<span style="color:var(--mut);font-size:14px" id="cal-chevron-'+e.id+'">›</span>':"")+'</div>'+
-            (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="display:none" onclick="event.stopPropagation()"></div>':"")+
+          eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
+            '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
+            (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
           '</div>';
         });
       }
@@ -3528,24 +3652,32 @@ function buildCalendrier(){
       content.appendChild(dayBlock);
     });
 
-    // Ligne "absences/retards declares", visible par tous, sur chaque evenement
+    // Compteurs Present/Absent + liste des absents, visible par tous
     events.forEach(function(e){
       var absEl=document.getElementById("cal-absences-"+e.id);
-      if(!absEl)return;
+      var countsEl=document.getElementById("cal-counts-"+e.id);
+      if(!absEl&&!countsEl)return;
       window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
         var notable=[];
+        var pres=0,abs=0;
         snap.forEach(function(d){
           var c=d.data();
-          if(c.eventId===e.id&&(c.status==="absent"||c.status==="retard"))notable.push(c);
+          if(c.eventId!==e.id)return;
+          if(c.status==="present")pres++;
+          else if(c.status==="absent"){abs++;notable.push(c);}
         });
-        if(!notable.length)return;
-        var icons={absent:"🔴",retard:"🟠"};
-        var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
-        notable.forEach(function(c){
-          html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+(icons[c.status]||"")+' '+c.playerName+' '+(c.status==="absent"?"absent(e)":"en retard")+'</div>';
-        });
-        html+='</div>';
-        absEl.innerHTML=html;
+        if(countsEl){
+          countsEl.innerHTML='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#27AE60;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+            '<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
+        }
+        if(absEl&&notable.length){
+          var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
+          notable.forEach(function(c){
+            html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">🔴 '+c.playerName+' absent(e)</div>';
+          });
+          html+='</div>';
+          absEl.innerHTML=html;
+        }
       }).catch(function(){});
     });
 
@@ -3835,11 +3967,12 @@ function loadDemoData(){
       var pid="demo-player-t"+ti+"-"+i;
       memberIds.push(pid);
       if(!players.find(function(p){return p.id===pid;})){
+        var telEnfantDemo="06"+String(ti).padStart(2,"0")+String(i).padStart(2,"0")+"0000";
         players.push({
           id:pid,prenom:prenoms[i],nom:noms[i],naissance:(td.cat==="U13"?"2013-01-01":"1998-01-01"),
           cat:td.cat,genre:genre,poste:postes[i%postes.length],maillot:String(i+1),
           licence:"ok",typeLicence:"competition",numLicence:"0C",
-          contact:"06 00 00 00 00",notes:"",demo:true
+          contact:"06 00 00 00 00",telEnfant:telEnfantDemo,notes:"",demo:true
         });
       }
     }
@@ -3850,7 +3983,7 @@ function loadDemoData(){
   saveTeams(teams);
   savePlayers(players);
 
-  alert("Donnees de demo chargees ! 4 equipes (U13F, U13G, SeniorF, SeniorM) de 10 joueurs chacune, chacune avec son canal de discussion.");
+  alert("Donnees de demo chargees ! 4 equipes de 10 joueurs chacune.\n\nPour tester \"Je suis Joueur\" : Lea Martin (U13 Filles) a le numero 0600000000");
   buildAdminHome();
 }
 
@@ -6808,7 +6941,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784306769";
+var APP_VERSION="1784347924";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
