@@ -1148,8 +1148,8 @@ initChannels();
   <!-- ══════════════ CALENDRIER PARTAGE (semaine) ══════════════ -->
   <div class="scr" id="scr-calendrier">
     <div style="padding:14px 16px 0;display:flex;gap:8px">
-      <button class="cat-filter on" onclick="switchCalTab(\'semaine\')" id="caltab-semaine" style="flex:1;text-align:center">📅 Semaine</button>
-      <button class="cat-filter" onclick="switchCalTab(\'matchs\')" id="caltab-matchs" style="flex:1;text-align:center">🏀 Matchs</button>
+      <button class="cat-filter on" onclick="switchCalTab('semaine')" id="caltab-semaine" style="flex:1;text-align:center">📅 Semaine</button>
+      <button class="cat-filter" onclick="switchCalTab('matchs')" id="caltab-matchs" style="flex:1;text-align:center">🏀 Matchs</button>
     </div>
 
     <div id="cal-tab-semaine">
@@ -1159,8 +1159,8 @@ initChannels();
         <button onclick="shiftCalWeek(1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">›</button>
       </div>
       <div id="cal-filter-row" style="display:none;padding:10px 16px;gap:8px">
-        <button class="cat-filter on" onclick="setCalFilter(\'mine\')" id="cal-filter-mine">Mon equipe</button>
-        <button class="cat-filter" onclick="setCalFilter(\'all\')" id="cal-filter-all">Toutes les equipes</button>
+        <button class="cat-filter on" onclick="setCalFilter('mine')" id="cal-filter-mine">Mon equipe</button>
+        <button class="cat-filter" onclick="setCalFilter('all')" id="cal-filter-all">Toutes les equipes</button>
       </div>
       <div id="cal-week-content" style="padding:12px 0 80px"></div>
     </div>
@@ -3983,7 +3983,24 @@ function loadDemoData(){
   saveTeams(teams);
   savePlayers(players);
 
-  alert("Donnees de demo chargees ! 4 equipes de 10 joueurs chacune.\n\nPour tester \"Je suis Joueur\" : Lea Martin (U13 Filles) a le numero 0600000000");
+  // Fiche licence demo pour tester le lien Parent (via son propre numero, different de l'enfant)
+  var lics=getLicences();
+  if(!lics.find(function(l){return l.code==="DEMO01";})){
+    lics.push({
+      code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
+      statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
+      categorie:"U13",
+      fiche:{
+        prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
+        telephone:"",respTel:"0700000000",resp2Tel:"",
+        adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
+        urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
+      }
+    });
+    saveLicences(lics);
+  }
+
+  alert("Donnees de demo chargees ! 4 equipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Lea Martin) : 0600000000\n- \"Je suis Parent\" (parent de Lea) : 0700000000");
   buildAdminHome();
 }
 
@@ -6941,7 +6958,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784347924";
+var APP_VERSION="1784349467";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
