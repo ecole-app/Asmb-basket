@@ -1148,9 +1148,10 @@ initChannels();
 
   <!-- ══════════════ CALENDRIER PARTAGE (semaine) ══════════════ -->
   <div class="scr" id="scr-calendrier">
-    <div style="padding:14px 16px 0;display:flex;gap:8px">
+    <div style="padding:14px 16px 0;display:flex;gap:6px">
       <button class="cat-filter on" onclick="switchCalTab('semaine')" id="caltab-semaine" style="flex:1;text-align:center">📅 Semaine</button>
       <button class="cat-filter" onclick="switchCalTab('matchs')" id="caltab-matchs" style="flex:1;text-align:center">🏀 Matchs</button>
+      <button class="cat-filter" onclick="switchCalTab('classement')" id="caltab-classement" style="flex:1;text-align:center">🏆 Classement</button>
     </div>
 
     <div id="cal-tab-semaine">
@@ -1174,8 +1175,18 @@ initChannels();
       <div id="match-filter-row" style="display:none;padding:0 16px 10px;overflow-x:auto;gap:8px;white-space:nowrap"></div>
       <div id="match-list-content" style="padding:8px 0 80px"></div>
     </div>
+
+    <div id="cal-tab-classement" style="display:none">
+      <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div id="classement-team-select" style="display:flex;gap:8px;overflow-x:auto"></div>
+        <button id="classement-add-btn" onclick="showAddClassementRow()" style="display:none;padding:8px 14px;border-radius:20px;background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;flex-shrink:0;margin-left:8px">+ Ligne</button>
+      </div>
+      <div id="classement-phase-select" style="display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px"></div>
+      <div id="classement-content" style="padding:8px 16px 80px"></div>
+    </div>
   </div>
 
+  <!-- ══════════════ CLASSEMENT (saisie manuelle) ══════════════ -->
   <div class="scr" id="scr-annuaire">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Annuaire du club</div><div style="font-size:11px;color:var(--mut)">Contacts utiles ASMB</div></div>
@@ -1417,7 +1428,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -3455,10 +3466,13 @@ function switchCalTab(tab){
   calCurrentTab=tab;
   document.getElementById("caltab-semaine").classList.toggle("on",tab==="semaine");
   document.getElementById("caltab-matchs").classList.toggle("on",tab==="matchs");
+  document.getElementById("caltab-classement").classList.toggle("on",tab==="classement");
   document.getElementById("cal-tab-semaine").style.display=tab==="semaine"?"block":"none";
   document.getElementById("cal-tab-matchs").style.display=tab==="matchs"?"block":"none";
+  document.getElementById("cal-tab-classement").style.display=tab==="classement"?"block":"none";
   if(tab==="semaine")buildCalendrier();
-  else buildMatchList();
+  else if(tab==="matchs")buildMatchList();
+  else buildClassement();
 }
 
 function showMatchFilter(){
@@ -3712,6 +3726,134 @@ function buildCalendrier(){
       });
     }
   });
+}
+
+var classementActiveTeamId=null;
+
+function openClassement(){
+  openCalendrier();
+  switchCalTab("classement");
+}
+
+function getClassement(){
+  try{return JSON.parse(localStorage.getItem("asmb_classement")||"{}");}catch(e){return {};}
+}
+function saveClassement(data){
+  localStorage.setItem("asmb_classement",JSON.stringify(data));
+  if(window.fbReady){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","classement"),{data:JSON.stringify(data)},{merge:true}).catch(function(){});
+  }
+}
+function fetchClassementFromCloud(){
+  if(!window.fbReady)return Promise.resolve(getClassement());
+  return window.fbGetDocs(window.fbCollection(window.fbDb,"app_data")).then(function(snap){
+    var found=null;
+    snap.forEach(function(d){if(d.id==="classement")found=d.data();});
+    if(found&&found.data){try{return JSON.parse(found.data);}catch(e){return getClassement();}}
+    return getClassement();
+  }).catch(function(){return getClassement();});
+}
+
+var classementActivePhase="phase1";
+var PHASES=[{id:"phase1",label:"Phase 1"},{id:"phase2",label:"Phase 2"},{id:"phase3",label:"Phase 3 / Finales"}];
+
+function buildClassement(){
+  var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
+  var teams=getTeams();
+  var selEl=document.getElementById("classement-team-select");
+  if(!classementActiveTeamId&&teams.length)classementActiveTeamId=teams[0].id;
+  selEl.innerHTML="";
+  teams.forEach(function(t){
+    var on=t.id===classementActiveTeamId;
+    var btn=document.createElement("button");
+    btn.textContent=t.name;
+    btn.style.cssText="flex-shrink:0;padding:7px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--mut)")+";cursor:pointer";
+    btn.onclick=function(){classementActiveTeamId=t.id;buildClassement();};
+    selEl.appendChild(btn);
+  });
+  document.getElementById("classement-add-btn").style.display=isCoachOrDir?"block":"none";
+
+  var phaseEl=document.getElementById("classement-phase-select");
+  if(phaseEl){
+    phaseEl.innerHTML="";
+    PHASES.forEach(function(ph){
+      var on=ph.id===classementActivePhase;
+      var b=document.createElement("button");
+      b.textContent=ph.label;
+      b.className="cat-filter"+(on?" on":"");
+      b.style.cssText="flex-shrink:0";
+      b.onclick=function(){classementActivePhase=ph.id;buildClassement();};
+      phaseEl.appendChild(b);
+    });
+  }
+
+  fetchClassementFromCloud().then(function(all){
+    var teamData=(classementActiveTeamId&&all[classementActiveTeamId])||{};
+    var rows=teamData[classementActivePhase]||[];
+    rows=rows.slice().sort(function(a,b){return (a.rang||99)-(b.rang||99);});
+    var el=document.getElementById("classement-content");
+    if(!rows.length){
+      el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🏆</div><div style="font-size:13px;font-weight:600">Classement non renseigne</div>'+(isCoachOrDir?'<div style="font-size:11px;margin-top:6px">Touchez + Ligne pour ajouter les equipes de la poule</div>':'')+'</div>';
+      return;
+    }
+    var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      '<tr style="color:var(--mut);text-transform:uppercase;border-bottom:2px solid var(--bdr)">'+
+        '<td style="padding:8px 4px;font-weight:700">Pos</td>'+
+        '<td style="font-weight:700">Equipe</td>'+
+        '<td style="text-align:center;font-weight:700">Pts</td>'+
+        '<td style="text-align:center;font-weight:700">J</td>'+
+        '<td style="text-align:center;font-weight:700">G</td>'+
+        '<td style="text-align:center;font-weight:700">P</td>'+
+        '<td style="text-align:center;font-weight:700">Pm</td>'+
+        '<td style="text-align:center;font-weight:700">Pe</td>'+
+        (isCoachOrDir?'<td></td>':'')+
+      '</tr>';
+    rows.forEach(function(r){
+      var isUs=r.equipe&&r.equipe.toUpperCase().indexOf("ASMB")>=0;
+      html+='<tr style="border-bottom:1px solid var(--bdr);'+(isUs?"background:rgba(27,92,40,.08)":"")+'">'+
+        '<td style="padding:8px 4px;font-size:12px;font-weight:800;color:var(--txt)">'+r.rang+'</td>'+
+        '<td style="font-size:12px;font-weight:'+(isUs?"700":"400")+';color:var(--txt);white-space:nowrap">'+r.equipe+'</td>'+
+        '<td style="text-align:center;font-size:12px;font-weight:800;color:var(--txt)">'+(r.points||0)+'</td>'+
+        '<td style="text-align:center;color:var(--mut)">'+(r.joues||0)+'</td>'+
+        '<td style="text-align:center;color:#27AE60;font-weight:700">'+(r.victoires||0)+'</td>'+
+        '<td style="text-align:center;color:#C0392B;font-weight:700">'+(r.defaites||0)+'</td>'+
+        '<td style="text-align:center;color:var(--mut)">'+(r.pointsMarques||0)+'</td>'+
+        '<td style="text-align:center;color:var(--mut)">'+(r.pointsEncaisses||0)+'</td>'+
+        (isCoachOrDir?'<td><button onclick="deleteClassementRow(\''+r.id+'\')" style="padding:4px 8px;border-radius:12px;background:rgba(192,57,43,.1);color:#C0392B;font-size:10px;border:none;cursor:pointer">✕</button></td>':'')+
+      '</tr>';
+    });
+    html+='</table></div>';
+    el.innerHTML=html;
+  });
+}
+
+function showAddClassementRow(){
+  if(!classementActiveTeamId){alert("Creez d\'abord une equipe");return;}
+  var equipe=prompt("Nom de l\'equipe (mettre ASMB dans le nom pour votre equipe) :");
+  if(!equipe)return;
+  var rang=parseInt(prompt("Position dans la poule :","1")||"1",10);
+  var points=parseInt(prompt("Points :","0")||"0",10);
+  var joues=parseInt(prompt("Matchs joues (J) :","0")||"0",10);
+  var victoires=parseInt(prompt("Gagnes (G) :","0")||"0",10);
+  var defaites=parseInt(prompt("Perdus (P) :","0")||"0",10);
+  var pointsMarques=parseInt(prompt("Points marques (Pm) :","0")||"0",10);
+  var pointsEncaisses=parseInt(prompt("Points encaisses (Pe) :","0")||"0",10);
+  var all=getClassement();
+  if(!all[classementActiveTeamId])all[classementActiveTeamId]={};
+  if(!all[classementActiveTeamId][classementActivePhase])all[classementActiveTeamId][classementActivePhase]=[];
+  all[classementActiveTeamId][classementActivePhase].push({id:Date.now().toString(),equipe:equipe,rang:rang,points:points,joues:joues,victoires:victoires,defaites:defaites,pointsMarques:pointsMarques,pointsEncaisses:pointsEncaisses});
+  saveClassement(all);
+  buildClassement();
+}
+
+function deleteClassementRow(rowId){
+  if(!confirm("Supprimer cette ligne ?"))return;
+  var all=getClassement();
+  if(all[classementActiveTeamId]&&all[classementActiveTeamId][classementActivePhase]){
+    all[classementActiveTeamId][classementActivePhase]=all[classementActiveTeamId][classementActivePhase].filter(function(r){return r.id!==rowId;});
+  }
+  saveClassement(all);
+  buildClassement();
 }
 
 function openAnnuaire(){
@@ -7016,7 +7158,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784389694";
+var APP_VERSION="1784483146";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -7033,6 +7175,28 @@ function applyUpdate(){
 }
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,120000);
+
+function checkTomorrowReminders(){
+  if(!window.fbReady)return;
+  var todayStr=new Date().toISOString().slice(0,10);
+  var lastCheck=localStorage.getItem("asmb_reminder_check");
+  if(lastCheck===todayStr)return;
+  localStorage.setItem("asmb_reminder_check",todayStr);
+  var tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+  var tomorrowStr=tomorrow.toISOString().slice(0,10);
+  fetchEventsFromCloud().then(function(events){
+    var matches=events.filter(function(e){return e.date===tomorrowStr&&e.type==="match"&&!e.cancelled;});
+    matches.forEach(function(m){
+      var channelId=findChannelForTeamText(m.equipe);
+      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+        text:"🔔 <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" a "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
+        pseudo:"🔔 ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+      });
+    });
+  });
+}
+setTimeout(checkTomorrowReminders,4000);
+setInterval(checkTomorrowReminders,3600000);
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="visible")checkForUpdate();
 });
