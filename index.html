@@ -1294,7 +1294,8 @@ const POLES=[
    items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Séances adaptees et bienveillantes"]}
 ];
 const ELITE_CATS=[
-  {id:"u9u11",name:"U9 - U11",desc:"3 cycles · 16 séances · Mini-basket",icon:"🤸",color:"#E8670A",ready:true},
+  {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"🤸",color:"#E8670A",ready:true},
+  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"🏃",color:"#16A085",ready:true},
   {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · 2025-2026",icon:"🏀",color:"#27AE60",ready:true}
 ];
 const VACS=[
@@ -1306,15 +1307,18 @@ const VACS=[
 const KC=["#16A085","#8E44AD","#27AE60","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";
-function getCyclesForCat(catId){return catId==="u9u11"?CYCLES_U9U11:CYCLES;}
+function getCyclesForCat(catId){
+  if(catId==="u9")return CYCLES_U9;
+  if(catId==="u11")return CYCLES_U11;
+  return CYCLES;
+}
 function activeCycles(){return getCyclesForCat(activeCatId);}
 function findCycle(cyId){
-  var f=CYCLES.find(function(c){return c.id==cyId;});
-  if(f)return f;
-  return CYCLES_U9U11.find(function(c){return c.id==cyId;});
+  var all=CYCLES.concat(CYCLES_U9).concat(CYCLES_U11);
+  return all.find(function(c){return c.id==cyId;});
 }
 
-const CYCLES_U9U11=[
+const CYCLES_U9=[
   {id:101,n:"Decouverte et motricite",sh:"Motricite",p:"Sept. - mi-oct.",s:6,c:"#E8670A",e:"🤸",
    objs:["Se reperer dans l'espace de jeu","Coordonner course, arret, saut","Apprivoiser le ballon (porter, rouler, lancer)","Respecter les regles simples et les autres","Prendre plaisir a jouer"],
    seas:[
@@ -1390,6 +1394,81 @@ const CYCLES_U9U11=[
       {ti:"Echauffement collectif",dur:"20 min",desc:"Ateliers courts : dribble, passes, tirs. Tous les joueurs tournent.",org:"3 ateliers.",axes:["En musique","Avec un binome"],kws:["Preparer","Ensemble","Concentration","Energie"],ch:null},
       {ti:"Matchs de plateau",dur:"40 min",desc:"Serie de matchs 4c4 de 6 minutes contre les autres equipes du club.",org:"2 terrains. Rotation.",axes:["Tous jouent le meme temps","Arbitrage partage"],kws:["Fair-play","Effort","Respect","Plaisir"],ch:"ok:Plateau mini-basket - format FFBB"},
       {ti:"Gouter et bilan",dur:"25 min",desc:"Retour au calme, discussion sur les progres de chacun, remise de diplomes.",org:"Groupe assis en cercle.",axes:["Chacun cite un progres","Elire le meilleur esprit d'equipe"],kws:["Bilan","Fierte","Progres","Convivialite"],ch:null}]}
+   ]}
+];
+
+const CYCLES_U11=[
+  {id:201,n:"Technique individuelle",sh:"Technique",p:"Sept. - mi-oct.",s:5,c:"#16A085",e:"⚙️",
+   objs:["Dribbler des deux mains en avancant","Realiser un tir en course (lay-up)","Passer avec precision a 6 metres","Adopter une position defensive correcte","Connaitre les regles de base (marcher, reprise)"],
+   seas:[
+    {num:"201.1",t:"Dribble des deux mains",dur:"1h30",obj:"Maitriser le dribble main faible",sits:[
+      {ti:"Dribble stationnaire varie",dur:"20 min",desc:"Dribble bas, haut, croise devant, tour de taille. 30 secondes par exercice, les deux mains.",org:"Joueurs espaces, 1 ballon chacun.",axes:["Yeux fermes 10 secondes","Deux ballons simultanes"],kws:["Bout des doigts","Poignet","Tete haute","Main faible"],ch:null},
+      {ti:"Slalom chronometre",dur:"25 min",desc:"Parcours de 6 plots en slalom avec changement de main a chaque plot, puis tir.",org:"2 parcours. Chrono individuel.",axes:["Changement dans le dos","Retour en dribble arriere"],kws:["Changer","Proteger","Accelerer","Finir"],ch:null},
+      {ti:"1c1 depart lateral",dur:"30 min",desc:"Attaquant part du cote, defenseur le contraint vers l'exterieur. Trois dribbles maximum.",org:"Files des deux cotes. Rotation.",axes:["Limiter a deux dribbles","Defenseur passif au depart"],kws:["Premier appui","Vitesse","Lecture","Conclusion"],ch:"ok:Defense individuelle 1v1 - conforme charte"}]},
+    {num:"201.2",t:"Le tir en course",dur:"1h30",obj:"Acquerir le lay-up des deux cotes",sits:[
+      {ti:"Pas chasses sans ballon",dur:"15 min",desc:"Travail du rythme deux appuis : droite-gauche-saut cote droit, puis inverse.",org:"Files sous le panier, sans ballon.",axes:["Avec ballon porte","Depart plus loin"],kws:["Rythme","Genou leve","Impulsion","Planche"],ch:null},
+      {ti:"Lay-up avec dribble",dur:"30 min",desc:"Depart de la ligne des 3 points, deux dribbles puis tir en course sur la planche.",org:"File droite puis file gauche. Rebondeur.",axes:["Cote gauche obligatoire","Depart en course"],kws:["Deux appuis","Banque","Main haute","Continuite"],ch:null},
+      {ti:"Course-poursuite",dur:"30 min",desc:"Deux joueurs partent, celui devant doit marquer en lay-up, celui derriere tente de rattraper.",org:"Depart ligne de fond decale de 2m.",axes:["Reduire l'ecart de depart","Defenseur part en meme temps"],kws:["Sprint","Sang-froid","Protection","Reussite"],ch:null}]},
+    {num:"201.3",t:"Passes precises et variees",dur:"1h30",obj:"Diversifier les types de passe",sits:[
+      {ti:"Les 4 passes",dur:"20 min",desc:"Poitrine, rebond, au-dessus de la tete, a une main. 10 repetitions de chaque par binome.",org:"Binomes a 5m. 1 ballon.",axes:["Augmenter a 7m","Sous pression d'un defenseur"],kws:["Extension","Poignets","Cible poitrine","Choix"],ch:null},
+      {ti:"Passes en mouvement",dur:"25 min",desc:"Monter le terrain a deux en se faisant des passes, sans dribble, et conclure au panier.",org:"Binomes, terrain complet.",axes:["A trois joueurs","Chronometrer la montee"],kws:["Timing","Course","Devant soi","Conclure"],ch:null},
+      {ti:"Ballon capitaine",dur:"30 min",desc:"Match 4c4 ou il faut passer au capitaine place derriere la ligne de fond adverse pour marquer.",org:"Terrain complet. 2 capitaines.",axes:["Interdire le dribble","Deux capitaines par equipe"],kws:["Ouvrir","Voir loin","Se demarquer","Patience"],ch:null}]},
+    {num:"201.4",t:"Position defensive",dur:"1h30",obj:"Defendre sans faire faute",sits:[
+      {ti:"Glissades defensives",dur:"20 min",desc:"Deplacement lateral en position basse sans croiser les pieds, sur signal du coach.",org:"En ligne sur la largeur.",axes:["Signaux aleatoires","Ajouter un sprint retour"],kws:["Pas chasses","Bassin bas","Bras ecartes","Regard"],ch:"ok:Defense individuelle - base charte CD42"},
+      {ti:"Miroir avec ballon",dur:"25 min",desc:"L'attaquant dribble lentement, le defenseur reste face a lui a un bras de distance.",org:"Binomes dans un couloir.",axes:["Attaquant plus rapide","Autoriser l'interception"],kws:["Distance","Anticiper","Ne pas croiser","Main basse"],ch:"ok:Defense individuelle stricte"},
+      {ti:"Shell drill simplifie",dur:"30 min",desc:"4 attaquants font circuler le ballon, 4 defenseurs ajustent leur position a chaque passe.",org:"Demi-terrain, positions fixes.",axes:["Ajouter une coupe","Autoriser le tir apres 4 passes"],kws:["Ajuster","Communiquer","Voir ballon et joueur","Ensemble"],ch:"ok:Defense individuelle - pas de zone en U11"}]},
+    {num:"201.5",t:"Les regles du jeu",dur:"1h30",obj:"Comprendre et appliquer les regles",sits:[
+      {ti:"Atelier regles",dur:"20 min",desc:"Le coach mime des actions, les joueurs disent si c'est faute, marcher, reprise ou correct.",org:"Groupe assis. Demonstrations.",axes:["Les joueurs miment a leur tour","Quiz par equipe"],kws:["Marcher","Reprise","Faute","Sortie"],ch:null},
+      {ti:"Match arbitre par les joueurs",dur:"35 min",desc:"4c4 ou deux joueurs arbitrent en alternance avec le coach en soutien.",org:"Demi-terrain. Sifflets.",axes:["Arbitre unique","Expliquer chaque coup de sifflet"],kws:["Observer","Decider","Assumer","Respecter"],ch:null},
+      {ti:"Concours lancers-francs",dur:"25 min",desc:"Serie de 5 lancers-francs par joueur, avec la vraie procedure et le respect du rituel.",org:"Par panier, groupes de 4.",axes:["Sous pression du groupe","Match nul = mort subite"],kws:["Rituel","Respirer","Routine","Concentration"],ch:null}]}
+   ]},
+  {id:202,n:"Jeu a deux et lecture",sh:"Jeu a deux",p:"Nov. - dec.",s:5,c:"#8E44AD",e:"🤝",
+   objs:["Realiser un passe-et-va efficace","Exploiter le surnombre 2c1 et 3c2","Se demarquer sur porteur en difficulte","Prendre le rebond offensif et defensif","Choisir entre tir, passe et dribble"],
+   seas:[
+    {num:"202.1",t:"Passe et va",dur:"1h30",obj:"Enchainer passe et coupe au panier",sits:[
+      {ti:"Passe et va a vide",dur:"20 min",desc:"Je passe au coach, je coupe vers le panier, je recois et je marque en lay-up.",org:"File unique. Coach relayeur.",axes:["Coupe devant puis derriere","Ajouter un defenseur passif"],kws:["Passer","Couper vite","Demander","Finir"],ch:null},
+      {ti:"Passe et va 2c2",dur:"30 min",desc:"Deux attaquants contre deux defenseurs, obligation de jouer un passe-et-va avant de conclure.",org:"Demi-terrain. Rotation.",axes:["Defense stricte","Ajouter un ecran"],kws:["Fixer","Couper","Servir","Marquer"],ch:"ok:2c2 defense individuelle"},
+      {ti:"Match a theme",dur:"30 min",desc:"5c5 ou le panier compte double s'il vient d'un passe-et-va.",org:"Terrain complet.",axes:["Compter les coupes reussies","Sans dribble apres la passe"],kws:["Mouvement","Timing","Recompense","Repetition"],ch:null}]},
+    {num:"202.2",t:"Le surnombre",dur:"1h30",obj:"Exploiter la superiorite numerique",sits:[
+      {ti:"2c1 en montee",dur:"25 min",desc:"Deux attaquants montent contre un defenseur. Lire la position du defenseur pour choisir.",org:"Terrain complet, rotation rapide.",axes:["Interdire le dribble","Defenseur agressif"],kws:["Ecarter","Fixer","Lire","Servir"],ch:"ok:Surnombre 2c1 - progressivite adaptee"},
+      {ti:"3c2 organise",dur:"30 min",desc:"Trois attaquants en triangle contre deux defenseurs, conclure en moins de 6 secondes.",org:"Demi-terrain. Chrono.",axes:["4c3","Defenseurs en ligne puis en triangle"],kws:["Largeur","Vision","Extra-passe","Vitesse"],ch:"ok:Surnombre 3c2 - lecture de jeu"},
+      {ti:"Transition continue",dur:"25 min",desc:"Apres chaque conclusion, les defenseurs repartent en attaque avec un partenaire supplementaire.",org:"Terrain complet, flux continu.",axes:["Panier obligatoire pour repartir","Ajouter un ballon"],kws:["Enchainer","Courir","Communiquer","Endurance"],ch:null}]},
+    {num:"202.3",t:"Se rendre disponible",dur:"1h30",obj:"Aider le porteur en difficulte",sits:[
+      {ti:"Porteur bloque",dur:"20 min",desc:"Le porteur est sous pression et immobile. Les partenaires doivent venir a lui pour le liberer.",org:"Groupes de 4 dans une zone.",axes:["Ajouter un second defenseur","Chronometrer la sortie de balle"],kws:["Venir","Appeler","Angle","Sauver"],ch:null},
+      {ti:"Remise en jeu sous pression",dur:"25 min",desc:"Remise en jeu depuis la ligne de fond avec defense sur tous les receveurs.",org:"Demi-terrain, 4c4.",axes:["5 secondes strictes","Defense tout terrain"],kws:["Bouger","Se croiser","Feinter","Recevoir"],ch:null},
+      {ti:"Match sans dribble",dur:"35 min",desc:"5c5 avec dribble interdit, obligeant le mouvement permanent sans ballon.",org:"Terrain complet.",axes:["Autoriser un dribble","Compter les passes reussies"],kws:["Bouger","Anticiper","Espacer","Collectif"],ch:null}]},
+    {num:"202.4",t:"Le rebond",dur:"1h30",obj:"Gagner la bataille du rebond",sits:[
+      {ti:"Ecran retard",dur:"20 min",desc:"Au tir, le defenseur se retourne et bloque son adversaire avant d'aller au ballon.",org:"Binomes sous le panier. Coach tireur.",axes:["Attaquant tres actif","Compter les rebonds gagnes"],kws:["Se retourner","Contact","Pousser","Chercher"],ch:null},
+      {ti:"Rebond 3c3",dur:"30 min",desc:"Trois contre trois, seul le rebond offensif rapporte des points pendant 5 minutes.",org:"Un panier. Coach tireur.",axes:["Rebond defensif aussi","Deuxieme chance obligatoire"],kws:["Volonte","Placement","Timing","Second effort"],ch:null},
+      {ti:"Match rebond valorise",dur:"30 min",desc:"5c5 classique, chaque rebond offensif rapporte un point bonus.",org:"Terrain complet.",axes:["Bonus double en fin de match","Compter par equipe"],kws:["Agressivite","Anticiper","Sauter","Conclure"],ch:null}]},
+    {num:"202.5",t:"Tournoi de fin d annee",dur:"1h30",obj:"Appliquer les acquis en competition",sits:[
+      {ti:"Echauffement autonome",dur:"20 min",desc:"Les joueurs conduisent eux-memes leur echauffement, par groupes de 4.",org:"Groupes autonomes.",axes:["Un capitaine par groupe","Coach observe seulement"],kws:["Autonomie","Serieux","Prepare","Responsable"],ch:null},
+      {ti:"Ateliers defis",dur:"25 min",desc:"Trois defis techniques : lay-up chrono, passes precises, lancers-francs.",org:"3 ateliers tournants.",axes:["Score cumule par equipe","Battre son record"],kws:["Precision","Regularite","Defi","Progres"],ch:null},
+      {ti:"Tournoi 4c4",dur:"40 min",desc:"Matchs de 8 minutes entre toutes les equipes, avec arbitrage partage.",org:"2 terrains. Tableau.",axes:["Tous jouent le meme temps","Bonus fair-play"],kws:["Competition","Respect","Effort","Plaisir"],ch:"ok:Format 4c4 - adapte U11"}]}
+   ]},
+  {id:203,n:"Jeu collectif et competition",sh:"Collectif",p:"Janv. - mars",s:5,c:"#1A2E5A",e:"🏆",
+   objs:["Occuper les 5 postes sur le terrain","Organiser une contre-attaque a 3 couloirs","Defendre collectivement en individuelle","Gerer les temps forts et faibles d un match","Representer le club en plateau"],
+   seas:[
+    {num:"203.1",t:"Occuper l espace",dur:"1h30",obj:"Comprendre le placement collectif",sits:[
+      {ti:"Les 5 zones",dur:"20 min",desc:"Cinq plots marquent les positions. Les joueurs occupent une zone chacun et font circuler le ballon.",org:"Demi-terrain, 5 plots.",axes:["Changer de zone apres la passe","Ajouter une defense"],kws:["Ecarter","Occuper","Voir","Circuler"],ch:null},
+      {ti:"Circulation 5c0",dur:"30 min",desc:"Cinq attaquants font circuler le ballon en respectant les espaces, conclusion apres 6 passes.",org:"Demi-terrain, sans defense.",axes:["Ajouter des coupes","Chronometrer"],kws:["Espacement","Rythme","Continuite","Discipline"],ch:null},
+      {ti:"Match espaces valorises",dur:"30 min",desc:"5c5. Le coach arrete le jeu quand deux joueurs sont trop proches.",org:"Terrain complet.",axes:["Zone interdite a deux joueurs","Bonus si tir apres circulation"],kws:["Distance","Lecture","Corriger","Repeter"],ch:null}]},
+    {num:"203.2",t:"La contre-attaque a 3 couloirs",dur:"1h30",obj:"Organiser la remontee rapide",sits:[
+      {ti:"3 couloirs a vide",dur:"20 min",desc:"Trois joueurs remontent le terrain, un par couloir, en se faisant des passes.",org:"Terrain complet. Vagues de 3.",axes:["Sans dribble","Chronometrer la remontee"],kws:["Couloirs","Largeur","Vitesse","Conclusion"],ch:null},
+      {ti:"Rebond puis contre",dur:"30 min",desc:"Apres un rebond defensif, l'equipe declenche immediatement la contre-attaque a 3.",org:"Terrain complet. Coach tireur.",axes:["Ajouter un defenseur de retard","Limiter a 8 secondes"],kws:["Premier relais","Courir","Devancer","Finir"],ch:null},
+      {ti:"Match transitions rapides",dur:"30 min",desc:"5c5 avec obligation de tirer dans les 10 secondes suivant une recuperation.",org:"Terrain complet. Chrono visible.",axes:["Reduire a 8 secondes","Panier en contre = 3 points"],kws:["Reactivite","Anticiper","Decider","Oser"],ch:null}]},
+    {num:"203.3",t:"Defense collective",dur:"1h30",obj:"Defendre ensemble en individuelle",sits:[
+      {ti:"Aide et recuperation",dur:"25 min",desc:"Sur penetration, un partenaire vient aider puis chacun retrouve son joueur.",org:"3c3 demi-terrain.",axes:["Deux aides possibles","Communication obligatoire a voix haute"],kws:["Aider","Parler","Revenir","Solidarite"],ch:"ok:Defense individuelle avec aide - conforme U11"},
+      {ti:"Defense tout terrain",dur:"25 min",desc:"Chaque defenseur prend son adversaire des la remise en jeu.",org:"Terrain complet, 4c4.",axes:["Sur une moitie seulement","Interdire l'interception"],kws:["Pression","Endurance","Individuel","Discipline"],ch:"ok:Individuelle tout terrain - pas de zone"},
+      {ti:"Match defense valorisee",dur:"30 min",desc:"5c5. Chaque arret defensif (stop) rapporte un point.",org:"Terrain complet.",axes:["Compter les stops consecutifs","Objectif : 3 stops de suite"],kws:["Concentration","Effort","Ensemble","Fierte"],ch:null}]},
+    {num:"203.4",t:"Gerer un match",dur:"1h30",obj:"Comprendre les temps forts et faibles",sits:[
+      {ti:"Situations de fin de match",dur:"25 min",desc:"Scenarios : mener de 2 a 1 minute, etre mene de 4. Les equipes doivent adapter leur jeu.",org:"5c5. Chrono et score affiches.",axes:["Faute obligatoire si mene","Gerer le temps si devant"],kws:["Lucidite","Choix","Calme","Strategie"],ch:null},
+      {ti:"Temps morts joueurs",dur:"20 min",desc:"Les joueurs prennent eux-memes un temps mort et decident de la consigne.",org:"Match arrete par les capitaines.",axes:["Coach silencieux","Un joueur different a chaque fois"],kws:["Parler","Ecouter","Decider","Leadership"],ch:null},
+      {ti:"Match complet",dur:"35 min",desc:"Match 5c5 en 4 periodes de 6 minutes avec feuille de match et arbitrage.",org:"Terrain complet. Table de marque.",axes:["Rotation obligatoire","Statistiques tenues par les remplacants"],kws:["Format reel","Rythme","Serieux","Equipe"],ch:"ok:5c5 - format competition U11"}]},
+    {num:"203.5",t:"Plateau et bilan",dur:"1h30",obj:"Representer le club en competition",sits:[
+      {ti:"Preparation collective",dur:"20 min",desc:"Echauffement type match, rappel des consignes et du role de chacun.",org:"Groupe complet.",axes:["Mene par les capitaines","Rituel d'avant-match"],kws:["Preparer","Concentrer","Motiver","Rituel"],ch:null},
+      {ti:"Matchs de plateau",dur:"45 min",desc:"Trois matchs de 4 periodes contre les clubs invites.",org:"2 terrains. Feuilles de match.",axes:["Temps de jeu equitable","Chacun essaie un poste different"],kws:["Competition","Fair-play","Adaptation","Progres"],ch:"ok:Plateau U11 - format FFBB"},
+      {ti:"Bilan et projection",dur:"25 min",desc:"Retour collectif sur la saison, objectifs individuels pour la suite, remise de recompenses.",org:"Groupe assis en cercle.",axes:["Chacun fixe un objectif","Vote du meilleur coequipier"],kws:["Bilan","Objectif","Reconnaissance","Avenir"],ch:null}]}
    ]}
 ];
 
@@ -1796,18 +1875,23 @@ function buildElite(){
   ELITE_CATS.forEach(function(cat){el.appendChild(makeCard(cat,function(){openCat(cat.id);}));});
 }
 function openCat(id){
-  if(id==="u13f"||id==="u13"){activeCatId="u13";stack.push("u13home");buildU13Home();showScr("u13home");}
-  else if(id==="u9u11"){activeCatId="u9u11";stack.push("u13home");buildU13Home();showScr("u13home");}
+  if(id==="u13f"||id==="u13")activeCatId="u13";
+  else if(id==="u9")activeCatId="u9";
+  else if(id==="u11")activeCatId="u11";
+  else return;
+  stack.push("u13home");buildU13Home();showScr("u13home");
 }
 function buildU13Home(){
   var chips=document.getElementById("u13chips");
   if(chips){
     chips.innerHTML="";
-    var infos=activeCatId==="u9u11"?["1 séance / semaine","1h30 par séance","Mini-basket FFBB"]:["2 séances / semaine","1h30 par séance","Zone A Rhone-Alpes"];
+    var infos=activeCatId==="u9"?["1 séance / semaine","1h30 par séance","Decouverte FFBB"]:
+              activeCatId==="u11"?["2 séances / semaine","1h30 par séance","Mini-basket FFBB"]:
+              ["2 séances / semaine","1h30 par séance","Zone A Rhone-Alpes"];
     infos.forEach(function(t){var s=document.createElement("span");s.className="chip";s.textContent=t;chips.appendChild(s);});
   }
   var ttl=document.getElementById("u13title");
-  if(ttl)ttl.textContent=activeCatId==="u9u11"?"U9 - U11 Mini-basket":"U13 Filles et Garcons";
+  if(ttl)ttl.textContent=activeCatId==="u9"?"U9 Decouverte":(activeCatId==="u11"?"U11 Mini-basket":"U13 Filles et Garcons");
   var vl=document.getElementById("vacList");
   if(vl&&!vl.dataset.built){vl.dataset.built="1";VACS.forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+v.c+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+v.d+'</div></div><div class="vimp">'+v.imp+'</div></div>';});}
   var cl=document.getElementById("cyList");cl.innerHTML="";
@@ -7253,7 +7337,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784585589";
+var APP_VERSION="1784586181";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
