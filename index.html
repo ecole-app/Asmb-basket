@@ -762,7 +762,7 @@ initChannels();
       <button onclick="document.getElementById('chat-media-input').click()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📎</button>
       <input type="file" id="chat-media-input" accept="image/*" style="display:none" onchange="sendMediaMessage(this)">
       <input id="chat-pseudo" placeholder="Pseudo..." style="width:70px;padding:9px 8px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:12px;outline:none;flex-shrink:0">
-      <input id="chat-msg" placeholder="Message..." style="flex:1;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
+      <input id="chat-msg" placeholder="Message..." style="flex:1;min-width:0;padding:9px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
       <button onclick="sendMsg()" style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
     </div>
   </div>
@@ -816,7 +816,7 @@ initChannels();
   <div class="scr" id="scr-channel-detail">
     <div id="chdet-hdr" style="padding:14px 16px;border-bottom:1px solid var(--bdr)"></div>
     <div style="padding:12px 16px 8px;display:flex;gap:8px">
-      <input id="member-phone" placeholder="06 12 34 56 78" style="flex:1;padding:11px 13px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" type="tel">
+      <input id="member-phone" placeholder="06 12 34 56 78" style="flex:1;min-width:0;padding:11px 13px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;outline:none" type="tel">
       <button onclick="addMemberToChannel()" style="padding:11px 18px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ajouter</button>
     </div>
     <div style="padding:0 16px 8px">
@@ -7113,15 +7113,15 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
   } else if(profile==="coach"){
     nav.innerHTML=
-      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
+      '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
-      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'compétition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
-      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'événements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
+      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
+      '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
-      '<button class="bni" id="bni-eq" onclick="navToParent(\'équipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
+      '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
       '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>';
   }
@@ -7158,7 +7158,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784483146";
+var APP_VERSION="1784582153";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -7178,21 +7178,27 @@ setInterval(checkForUpdate,120000);
 
 function checkTomorrowReminders(){
   if(!window.fbReady)return;
-  var todayStr=new Date().toISOString().slice(0,10);
-  var lastCheck=localStorage.getItem("asmb_reminder_check");
-  if(lastCheck===todayStr)return;
-  localStorage.setItem("asmb_reminder_check",todayStr);
   var tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   var tomorrowStr=tomorrow.toISOString().slice(0,10);
   fetchEventsFromCloud().then(function(events){
     var matches=events.filter(function(e){return e.date===tomorrowStr&&e.type==="match"&&!e.cancelled;});
-    matches.forEach(function(m){
-      var channelId=findChannelForTeamText(m.equipe);
-      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-        text:"🔔 <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" a "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
-        pseudo:"🔔 ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    if(!matches.length)return;
+    // Verrou PARTAGE (Firestore) : evite que chaque appareil poste le meme rappel
+    window.fbGetDocs(window.fbCollection(window.fbDb,"reminders_sent")).then(function(snap){
+      var already={};
+      snap.forEach(function(d){already[d.id]=true;});
+      matches.forEach(function(m){
+        var key=m.id+"_"+tomorrowStr;
+        if(already[key])return;
+        window.fbSetDoc(window.fbDoc(window.fbDb,"reminders_sent",key),{eventId:m.id,date:tomorrowStr,ts:window.fbServerTimestamp()}).then(function(){
+          var channelId=findChannelForTeamText(m.equipe);
+          window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+            text:"🔔 <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" a "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
+            pseudo:"🔔 ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+          });
+        }).catch(function(){});
       });
-    });
+    }).catch(function(){});
   });
 }
 setTimeout(checkTomorrowReminders,4000);
