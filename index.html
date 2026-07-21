@@ -256,7 +256,6 @@ initChannels();
   <button class="hbk" id="hbk" onclick="goBack()">&#8592;</button>
   <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Étienne Métropole Basket</div></div>
   <button class="theme-btn" onclick="switchProfile()" title="Changer de profil">&#128100;</button>
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
 <div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">📡 Mode hors-ligne · Vous consultez les dernieres données chargées</div>
@@ -970,6 +969,13 @@ initChannels();
     </div>
     <div class="sec">Statistiques du club</div>
     <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
+    <div class="sec">Apparence</div>
+    <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+      <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div><div style="font-size:13px;font-weight:700;color:var(--txt)">🌙 Mode sombre</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Theme fonce pour les salles peu eclairees</div></div>
+        <input type="checkbox" id="gp-dark" onchange="toggleTheme()" style="width:44px;height:24px;accent-color:var(--dkg)">
+      </label>
+    </div>
     <div class="sec">Notifications</div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
       <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-bottom:12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">
@@ -3773,6 +3779,8 @@ function sendBroadcast(){
 
 // ═══ PARAMETRES ══════════════════════════════════════════════════
 function buildParametres(){
+  var gd=document.getElementById("gp-dark");
+  if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
   var toggle=document.getElementById("notif-toggle");
   if(toggle)toggle.checked=localStorage.getItem("asmb_notif")==="on";
   ["messages","match","entrainement","evenement"].forEach(function(t){
@@ -7781,12 +7789,14 @@ function changeParentPhone(){
 
 function toggleTheme(){
   var dark=document.documentElement.getAttribute("data-theme")==="dark";
-  if(dark){document.documentElement.removeAttribute("data-theme");localStorage.setItem("asmb_theme","light");document.getElementById("theme-btn").textContent="🌙";}
-  else{document.documentElement.setAttribute("data-theme","dark");localStorage.setItem("asmb_theme","dark");document.getElementById("theme-btn").textContent="☀️";}
+  if(dark){document.documentElement.removeAttribute("data-theme");localStorage.setItem("asmb_theme","light");}
+  else{document.documentElement.setAttribute("data-theme","dark");localStorage.setItem("asmb_theme","dark");}
+  var pd=document.getElementById("pp-dark");if(pd)pd.checked=!dark;
+  var gd=document.getElementById("gp-dark");if(gd)gd.checked=!dark;
 }
 
 // ═══ INIT ════════════════════════════════════════════════════════
-(function(){var t=localStorage.getItem("asmb_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");var b=document.getElementById("theme-btn");if(b)b.textContent="☀️";}}());
+(function(){var t=localStorage.getItem("asmb_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}());
 
 // Demo : injecter une fiche de test si aucune n'existe
 (function(){
@@ -7801,7 +7811,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784638913";
+var APP_VERSION="1784639101";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
