@@ -167,6 +167,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .member-card{margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px var(--shadow)}
 .member-avatar{width:36px;height:36px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 
 <script>
@@ -3147,7 +3148,7 @@ function createLicence(){
 
 function sendLicenceMail(lic){
   var sujet="Votre inscription ASMB - Code "+lic.code;
-  var appUrl="https://ecole-app.github.io/Asmb-basket/";
+  var appUrl="https://ecole-app.github.io/Asmb-basket/?inscription=1";
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
     "L'ASMB (Saint-Étienne Métropole Basket) vous invite a completer votre fiche d'inscription en ligne.\n\n"+
@@ -3677,7 +3678,13 @@ function soumettreFiche(){
   lics[idx].fiche=fiche;lics[idx].statut="recue";
   saveLicences(lics);buildLicences();
   var el=document.getElementById("insc-public-content");
-  if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px"></div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:24px">Votre fiche a bien ete transmise au club. Vous serez contacte prochainement.</div><button onclick="buildInscriptionPublic()" style="padding:12px 24px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Nouvelle inscription</button></div>';
+  if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:20px">Votre fiche a bien ete transmise au club.</div><div style="display:flex;justify-content:center"><div style="width:32px;height:32px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);animation:spin .8s linear infinite"></div></div><div style="font-size:11px;color:var(--mut);margin-top:12px">Bienvenue au club...</div></div>';
+  setTimeout(function(){
+    localStorage.removeItem("asmb_profile");
+    stack=["role-select"];
+    showScr("role-select");
+    injectRoleLogo();
+  },1800);
 }
 
 
@@ -6804,6 +6811,13 @@ function deletePoleItem(poleId,id){
 var ASMB_LOGO_B64_REF = null; // will reuse existing home-logo html via cloning
 
 function initProfile(){
+  var urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.has("inscription")){
+    stack=["inscription"];
+    showScr("inscription");
+    buildInscriptionPublic();
+    return;
+  }
   var profile = localStorage.getItem("asmb_profile");
   injectRoleLogo();
   if(profile==="parent"&&!myPhone){
@@ -7871,7 +7885,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784664165";
+var APP_VERSION="1784664515";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
