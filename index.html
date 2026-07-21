@@ -4699,16 +4699,17 @@ function renderPlayers(){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var col=CAT_COLORS[p.cat]||"#1B5C28";
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
+    var genreBadge=p.genre==="F"?'<span class="status-badge" style="background:rgba(142,68,173,.12);color:#8E44AD;margin-left:5px">F</span>':p.genre==="M"?'<span class="status-badge" style="background:rgba(22,160,133,.12);color:#16A085;margin-left:5px">M</span>':'';
     var d=document.createElement("div");d.className="player-card";
     var meta=p.cat+" · "+p.naissance+(p.poste?" - "+p.poste:"");
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
-    btns+='<button onclick="showPresenceHistory(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
-    btns+='<button onclick="editPlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
-    btns+='<button onclick="deletePlayer(\"'+p.id+'\")" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
+    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
+    btns+='<button onclick="editPlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
+    btns+='<button onclick="deletePlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
       +'<div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
-      +'<div style="margin-top:4px">'+status+'</div></div>'+btns;
+      +'<div style="margin-top:4px">'+status+genreBadge+'</div></div>'+btns;
     el.appendChild(d);
   });
 }
@@ -6149,10 +6150,11 @@ function buildCommunaute(){
     var channels=[];
     var isCoach=localStorage.getItem("asmb_profile")==="coach";
     var coachTeamIds=isCoach?getCoachTeams():null;
+    var CLUB_WIDE=["general","coaches","evenements"];
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
       if(ch.deleted)return;
-      if(isCoach&&coachTeamIds.indexOf(ch.id)<0)return;
+      if(isCoach&&coachTeamIds.indexOf(ch.id)<0&&CLUB_WIDE.indexOf(ch.id)<0)return;
       channels.push(ch);
     });
     renderChannelList(channels);
@@ -7868,7 +7870,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784661682";
+var APP_VERSION="1784662501";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
