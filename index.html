@@ -6147,9 +6147,13 @@ function buildCommunaute(){
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
     var channels=[];
+    var isCoach=localStorage.getItem("asmb_profile")==="coach";
+    var coachTeamIds=isCoach?getCoachTeams():null;
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
-      if(!ch.deleted)channels.push(ch);
+      if(ch.deleted)return;
+      if(isCoach&&coachTeamIds.indexOf(ch.id)<0)return;
+      channels.push(ch);
     });
     renderChannelList(channels);
   });
@@ -7305,30 +7309,52 @@ function finishTutoriel(){
 }
 
 // ── COACH TEAM (équipe unique) ────────────────────────────────────
-function getCoachTeam(){return localStorage.getItem("asmb_coach_team")||"";}
-function setCoachTeam(id){localStorage.setItem("asmb_coach_team",id);}
+function getCoachTeams(){
+  try{
+    var raw=localStorage.getItem("asmb_coach_teams");
+    if(raw)return JSON.parse(raw);
+  }catch(e){}
+  var legacy=localStorage.getItem("asmb_coach_team");
+  return legacy?[legacy]:[];
+}
+function saveCoachTeams(ids){localStorage.setItem("asmb_coach_teams",JSON.stringify(ids));}
+function toggleCoachTeam(id){
+  var ids=getCoachTeams();
+  var i=ids.indexOf(id);
+  if(i>=0)ids.splice(i,1);else ids.push(id);
+  saveCoachTeams(ids);
+  localStorage.setItem("asmb_coach_team",ids[0]||"");
+}
+function getCoachTeam(){return getCoachTeams()[0]||"";}
+function setCoachTeam(id){saveCoachTeams([id]);localStorage.setItem("asmb_coach_team",id);}
 
 function openCoachTeamPicker(){
   teamPickerContext="coach";
   document.getElementById("tp-icon").textContent="";
-  document.getElementById("tp-title").textContent="Quelle équipe entrainez-vous ?";
-  document.getElementById("tp-sub").textContent="Vous pourrez modifier ce choix plus tard";
+  document.getElementById("tp-title").textContent="Quelle(s) équipe(s) entrainez-vous ?";
+  document.getElementById("tp-sub").textContent="Selectionnez une ou plusieurs équipes, puis validez";
   var teams=getTeams();
   var current=getCoachTeam();
   var el=document.getElementById("team-picker-list");
   if(!teams.length){
     el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune équipe créée</div><div style="font-size:11px;margin-top:4px">Contactez un responsable du club</div></div>';
   } else {
+    var selected=getCoachTeams();
     el.innerHTML="";
     teams.forEach(function(t){
-      var isSel=t.id===current;
+      var isSel=selected.indexOf(t.id)>=0;
       var div=document.createElement("div");
       div.className="cy-card";
       div.style.cursor="pointer";
-      div.onclick=function(){setCoachTeam(t.id);openCoachTeamPicker();};
+      div.onclick=function(){toggleCoachTeam(t.id);openCoachTeamPicker();};
       div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"#27AE60":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"#27AE60":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
       el.appendChild(div);
     });
+    var doneBtn=document.createElement("button");
+    doneBtn.textContent="Valider";
+    doneBtn.style.cssText="width:100%;margin-top:12px;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer";
+    doneBtn.onclick=function(){if(!getCoachTeams().length){alert("Sélectionnez au moins une équipe");return;}navToCoach("equipe");};
+    el.appendChild(doneBtn);
   }
   stack.push("team-picker");
   showScr("team-picker");
@@ -7847,7 +7873,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784661210";
+var APP_VERSION="1784661505";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
