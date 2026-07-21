@@ -1183,7 +1183,7 @@ initChannels();
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="parent-hero-logo" style="flex-shrink:0"></div>
         <div id="parent-hero-team" style="flex:1;min-width:0;font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
-        <button onclick="openParentSettings()" aria-label="Parametres" style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center">&#9881;</button>
+        <button onclick="openParentSettings()" aria-label="Parametres" style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;font-size:18px;color:#fff;display:flex;align-items:center;justify-content:center">⚙️</button>
       </div>
       <div id="parent-hero-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="parent-hero-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
@@ -7753,7 +7753,8 @@ function buildBottomNav(profile){
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
       '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
-      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>';
+      '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>'+
+      '<button class="bni" id="bni-p-communaute" onclick="navToParent(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
   }
 }
 
@@ -7763,6 +7764,22 @@ function navToParent(which){
   else if(which==="equipe"){document.getElementById("bni-eq").classList.add("on");stack=["parent-equipe"];showScr("parent-equipe");buildParentEquipe();}
   else if(which==="stats"){document.getElementById("bni-stats").classList.add("on");stack=["parent-stats"];showScr("parent-stats");buildParentStats();}
   else if(which==="events"){document.getElementById("bni-ev").classList.add("on");stack=["parent-events"];showScr("parent-events");buildParentEvents();}
+  else if(which==="communaute"){
+    var b=document.getElementById("bni-p-communaute");if(b)b.classList.add("on");
+    var teams=getTeams();
+    var activeId=getActiveTeamId();
+    var activeTeam=teams.find(function(t){return t.id===activeId;})||teams[0];
+    if(activeTeam&&window.fbReady){
+      window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+        var chData=null;
+        snap.forEach(function(d){if(d.id===activeTeam.id)chData={id:d.id,name:(d.data().name||activeTeam.name),desc:d.data().desc||"",members:d.data().members||[],icon:d.data().icon||""};});
+        if(!chData)chData={id:activeTeam.id,name:activeTeam.name,desc:"Canal de l'équipe "+activeTeam.name,members:[],icon:""};
+        openChannel(chData);
+      });
+    } else {
+      stack=["communaute"];showScr("communaute");buildCommunaute();
+    }
+  }
 }
 
 // ═══ THEME ════════════════════════════════════════════════════════
@@ -7830,7 +7847,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784640781";
+var APP_VERSION="1784660632";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
