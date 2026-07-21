@@ -186,7 +186,7 @@ if('caches' in window){
 <script type="module">
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, updateDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -223,6 +223,7 @@ window.fbDoc = doc;
 window.fbSetDoc = setDoc;
 window.fbGetDocs = getDocs;
 window.fbUpdateDoc = updateDoc;
+window.fbDeleteDoc = deleteDoc;
 window.fbArrayUnion = arrayUnion;
 window.fbArrayRemove = arrayRemove;
 window.fbReady = true;
@@ -3994,13 +3995,15 @@ function buildCalendrier(){
           countsEl.innerHTML='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#27AE60;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
             '<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
         }
-        if(absEl&&notable.length){
-          var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
-          notable.forEach(function(c){
-            html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">🔴 '+c.playerName+' absent(e)</div>';
-          });
-          html+='</div>';
-          absEl.innerHTML=html;
+        if(absEl){
+          if(notable.length){
+            var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
+            notable.forEach(function(c){
+              html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">🔴 '+c.playerName+' absent(e)</div>';
+            });
+            html+='</div>';
+            absEl.innerHTML=html;
+          } else absEl.innerHTML="";
         }
       }).catch(function(){});
     });
@@ -6745,6 +6748,37 @@ function checkExistingCheckin(eventId,playerId){
   }).catch(function(){return null;});
 }
 
+function refreshEventCounts(eventId){
+  if(!window.fbReady)return;
+  var absEl=document.getElementById("cal-absences-"+eventId);
+  var countsEl=document.getElementById("cal-counts-"+eventId);
+  var mCountsEl=document.getElementById("match-counts-"+eventId);
+  if(!absEl&&!countsEl&&!mCountsEl)return;
+  window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+    var notable=[],pres=0,abs=0;
+    snap.forEach(function(d){
+      var c=d.data();
+      if(c.eventId!==eventId)return;
+      if(c.status==="present")pres++;
+      else if(c.status==="absent"){abs++;notable.push(c);}
+    });
+    var badges='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#27AE60;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+      '<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
+    if(countsEl)countsEl.innerHTML=badges;
+    if(mCountsEl)mCountsEl.innerHTML=badges;
+    if(absEl){
+      if(notable.length){
+        var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
+        notable.forEach(function(c){
+          html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">🔴 '+c.playerName+' absent(e)</div>';
+        });
+        html+='</div>';
+        absEl.innerHTML=html;
+      } else absEl.innerHTML="";
+    }
+  }).catch(function(){});
+}
+
 function checkinButtonsHtml(playerId,eventId){
   return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
     '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'présent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
@@ -6760,6 +6794,10 @@ function checkinBadgeHtml(playerId,eventId,status){
 
 function reopenCheckin(el,playerId,eventId){
   el.outerHTML=checkinButtonsHtml(playerId,eventId);
+  if(!window.fbReady)return;
+  window.fbDeleteDoc(window.fbDoc(window.fbDb,"checkins",eventId+"_"+playerId)).then(function(){
+    refreshEventCounts(eventId);
+  }).catch(function(){});
 }
 
 function joueurSelfCheckin(playerId,eventId,status){
@@ -6782,6 +6820,7 @@ function joueurSelfCheckin(playerId,eventId,status){
     if(calSlot)calSlot.innerHTML=badgeHtml;
     var matchActionsEl=document.getElementById("match-actions-"+eventId);
     if(matchActionsEl)matchActionsEl.innerHTML=badgeHtml;
+    refreshEventCounts(eventId);
     if((status==="absent"||status==="retard")&&ev){
       var channelId=findChannelForTeamText(ev.equipe||player.cat);
       var msgTxt=status==="absent"?
@@ -7496,7 +7535,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784619341";
+var APP_VERSION="1784637844";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
