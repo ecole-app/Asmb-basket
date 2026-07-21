@@ -3147,7 +3147,7 @@ function createLicence(){
 
 function sendLicenceMail(lic){
   var sujet="Votre inscription ASMB - Code "+lic.code;
-  var appUrl=window.location.href.split("?")[0];
+  var appUrl="https://ecole-app.github.io/Asmb-basket/";
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
     "L'ASMB (Saint-Étienne Métropole Basket) vous invite a completer votre fiche d'inscription en ligne.\n\n"+
@@ -3156,10 +3156,11 @@ function sendLicenceMail(lic){
     "        "+lic.code+"\n\n"+
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"+
     "Comment proceder :\n"+
-    "1. Ouvrez l'application ASMB\n"+
+    "1. Ouvrez ce lien : "+appUrl+"\n"+
     "2. Appuyez sur l'onglet « Inscription »\n"+
     "3. Entrez votre code ci-dessus\n"+
     "4. Remplissez et validez votre fiche\n\n"+
+    "Astuce : vous pouvez aussi ajouter cette page a votre ecran d'accueil pour un acces rapide.\n\n"+
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de probleme, contactez le club directement.\n\n"+
     "L'équipe ASMB\n"+
@@ -7870,7 +7871,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784662501";
+var APP_VERSION="1784664165";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
