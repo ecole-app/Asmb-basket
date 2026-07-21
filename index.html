@@ -255,7 +255,7 @@ initChannels();
 <header class="hdr">
   <button class="hbk" id="hbk" onclick="goBack()">&#8592;</button>
   <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Étienne Métropole Basket</div></div>
-  <button class="theme-btn" onclick="switchProfile()" title="Changer de profil">&#128100;</button>
+  <button class="theme-btn" id="hdr-profile-btn" onclick="switchProfile()" title="Changer de profil" style="display:none">&#128100;</button>
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
 <div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">📡 Mode hors-ligne · Vous consultez les dernieres données chargées</div>
@@ -1169,6 +1169,9 @@ initChannels();
         </div>
       </div>
 
+      <div style="margin-top:18px">
+        <button onclick="logoutUser()" style="width:100%;padding:13px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">🚪 Se déconnecter</button>
+      </div>
       <div style="margin-top:18px;text-align:center;font-size:10px;color:var(--mut)">ASMB Basket · version <span id="pp-version"></span></div>
     </div>
   </div>
@@ -1806,6 +1809,7 @@ function showScr(id){
   var navEl=document.getElementById("bnav-main");
   if(navEl)navEl.style.display=(id==="role-select")?"none":"flex";
   document.querySelector(".main").scrollTop=0;
+  refreshHeaderProfileBtn();
   updateHdr(id);
 }
 function updateHdr(id){
@@ -6873,7 +6877,8 @@ function chooseRole(role){
 var joueurIdentifiedPlayer=null;
 
 function openJoueurCheckin(){
-  var phone=prompt("Ton numéro de téléphone (celui donne au club) :");
+  var saved=localStorage.getItem("asmb_joueur_phone")||"";
+  var phone=prompt("Ton numéro de téléphone (celui donne au club) :",saved);
   if(!phone)return;
   phone=phone.trim().replace(/\s+/g,"");
   var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
@@ -6881,6 +6886,7 @@ function openJoueurCheckin(){
     alert("Numéro non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
   }
+  localStorage.setItem("asmb_joueur_phone",phone);
   joueurIdentifiedPlayer=player;
   stack=["joueur"];
   showScr("joueur");
@@ -6924,7 +6930,7 @@ function buildJoueurScreen(player){
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
     '</div>';
 
-    var exitBtn='<button onclick="exitJoueurScreen()" style="margin-top:24px;width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:none;cursor:pointer">Quitter</button>';
+    var exitBtn='<button onclick="logoutUser()" style="margin-top:24px;width:100%;padding:12px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer">🚪 Se déconnecter</button>';
 
     if(!todaysEvents.length){
       html+='<div class="empty-state"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun entraînement aujourd\'hui</div></div>'+exitBtn;
@@ -6956,14 +6962,9 @@ function buildJoueurScreen(player){
       });
     });
     var exitDiv=document.createElement("div");
-    exitDiv.innerHTML='<button onclick="exitJoueurScreen()" style="margin-top:10px;width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:none;cursor:pointer">Quitter</button>';
+    exitDiv.innerHTML='<button onclick="logoutUser()" style="margin-top:16px;width:100%;padding:12px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer">🚪 Se déconnecter</button>';
     el.appendChild(exitDiv);
   });
-}
-
-function exitJoueurScreen(){
-  stack=["role-select"];
-  showScr("role-select");
 }
 
 function checkExistingCheckin(eventId,playerId){
@@ -7148,6 +7149,22 @@ function navToCoach(which){
     stack=["communaute"];showScr("communaute");buildCommunaute();
   }
   if(hbk)hbk.classList.remove("show");
+}
+
+function refreshHeaderProfileBtn(){
+  var prof=localStorage.getItem("asmb_profile")||"";
+  var isStaff=prof==="coach"||prof==="dirigeant";
+  var pb=document.getElementById("hdr-profile-btn");
+  if(pb)pb.style.display=isStaff?"flex":"none";
+}
+
+function logoutUser(){
+  if(!confirm("Se déconnecter ? Votre numéro reste enregistré pour votre prochain retour."))return;
+  // On garde asmb_phone et asmb_pseudo pour un retour rapide
+  ["asmb_profile","asmb_parent_teams","asmb_parent_active_team"].forEach(function(k){
+    localStorage.removeItem(k);
+  });
+  location.reload();
 }
 
 function switchProfile(){
@@ -7811,7 +7828,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784639101";
+var APP_VERSION="1784639652";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
