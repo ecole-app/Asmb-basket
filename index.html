@@ -1095,13 +1095,86 @@ initChannels();
     </div>
   </div>
 
+  <!-- ══════════════ PARAMETRES PARENT ══════════════ -->
+  <div class="scr" id="scr-parent-params">
+    <div style="padding:16px 16px 80px">
+
+      <div class="sec" style="padding:0 0 8px">Agenda et rappels</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden">
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid var(--bdr)">
+          <span style="flex:1;min-width:0"><span style="font-size:13px;font-weight:700;color:var(--txt)">Rappel dans l'agenda</span><br><span style="font-size:11px;color:var(--mut)">Ajoute une alarme dans l'événement exporté</span></span>
+          <input type="checkbox" id="pp-ics-alarm" onchange="savePP('asmb_ics_alarm',this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
+        </label>
+        <div style="padding:14px;border-bottom:1px solid var(--bdr)">
+          <div style="font-size:13px;font-weight:700;color:var(--txt)">Delai du rappel</div>
+          <select id="pp-ics-delay" onchange="savePPVal('asmb_ics_delay',this.value)" class="form-input" style="margin-top:8px">
+            <option value="60">1 heure avant</option>
+            <option value="120">2 heures avant</option>
+            <option value="180">3 heures avant</option>
+            <option value="1440">La veille</option>
+          </select>
+        </div>
+        <div style="padding:14px">
+          <div style="font-size:13px;font-weight:700;color:var(--txt)">Heure de rendez-vous avant match</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px">Utilise pour l'agenda et le covoiturage</div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">A domicile</div>
+              <select id="pp-rdv-home" onchange="savePPVal('asmb_rdv_home',this.value)" class="form-input">
+                <option value="30">30 min</option><option value="45">45 min</option><option value="60">1h</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">A l'exterieur</div>
+              <select id="pp-rdv-away" onchange="savePPVal('asmb_rdv_away',this.value)" class="form-input">
+                <option value="45">45 min</option><option value="60">1h</option><option value="90">1h30</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec" style="padding:16px 0 8px">Notifications</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden">
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid var(--bdr)">
+          <span style="flex:1;min-width:0"><span style="font-size:13px;font-weight:700;color:var(--txt)">Rappel de match</span><br><span style="font-size:11px;color:var(--mut)">Message dans le canal la veille</span></span>
+          <input type="checkbox" id="pp-notif-match" onchange="savePP('asmb_pp_match',this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
+        </label>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px">
+          <span style="flex:1;min-width:0"><span style="font-size:13px;font-weight:700;color:var(--txt)">Messages du canal</span><br><span style="font-size:11px;color:var(--mut)">Badge de messages non lus</span></span>
+          <input type="checkbox" id="pp-notif-chat" onchange="savePP('asmb_pp_chat',this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
+        </label>
+      </div>
+
+      <div class="sec" style="padding:16px 0 8px">Mon compte</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden">
+        <div style="padding:14px;border-bottom:1px solid var(--bdr)">
+          <div style="font-size:11px;color:var(--mut)">Mon numéro enregistré</div>
+          <div id="pp-phone" style="font-size:14px;font-weight:800;color:var(--txt);margin-top:3px">-</div>
+          <button onclick="changeParentPhone()" style="margin-top:10px;padding:7px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer">Modifier</button>
+        </div>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid var(--bdr)">
+          <span style="flex:1;min-width:0"><span style="font-size:13px;font-weight:700;color:var(--txt)">Mode sombre</span></span>
+          <input type="checkbox" id="pp-dark" onchange="toggleThemeFromParams(this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
+        </label>
+        <div style="padding:14px">
+          <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,174,96,.1);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">📆 Exporter la saison vers mon agenda</button>
+          <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation reapparaitra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">📲 Revoir l'aide a l'installation</button>
+        </div>
+      </div>
+
+      <div style="margin-top:18px;text-align:center;font-size:10px;color:var(--mut)">ASMB Basket · version <span id="pp-version"></span></div>
+    </div>
+  </div>
+
   <!-- ══════════════ ACCUEIL PARENT ══════════════ -->
   <div class="scr" id="scr-parent-home">
     <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="parent-hero-logo" style="flex-shrink:0"></div>
-        <div id="parent-hero-team" style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
+        <div id="parent-hero-team" style="flex:1;min-width:0;font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
+        <button onclick="openParentSettings()" aria-label="Parametres" style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center">⚙️</button>
       </div>
       <div id="parent-hero-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="parent-hero-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
@@ -1113,8 +1186,19 @@ initChannels();
     <div style="padding:14px 12px 8px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr);background:var(--sf)" id="parent-team-chips"></div>
     <div style="padding:16px">
       <div id="parent-summary-row" style="display:flex;gap:10px;margin-bottom:16px"></div>
+      <div id="pwa-install-hint" style="display:none;margin-bottom:14px;padding:12px 14px;border-radius:var(--r);background:rgba(27,92,40,.08);border:1px solid var(--bdr)">
+        <div style="font-size:12px;font-weight:800;color:var(--txt)">📲 Installer l'application</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:4px" id="pwa-install-txt"></div>
+        <div style="margin-top:8px">
+          <button id="pwa-install-btn" onclick="triggerPwaInstall()" style="display:none;padding:7px 14px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Installer</button>
+          <button onclick="dismissPwaHint()" style="padding:7px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer">Plus tard</button>
+        </div>
+      </div>
       <div class="sec" style="padding:0 0 8px">Prochain événement</div>
       <div id="parent-next-event"></div>
+      <div style="margin-top:10px">
+        <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,174,96,.1);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">📆 Ajouter toute la saison a mon agenda</button>
+      </div>
       <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
       <div id="parent-last-matches"></div>
       <div class="sec" style="padding:16px 0 8px">Bilan de présence</div>
@@ -1720,7 +1804,7 @@ function showScr(id){
 }
 function updateHdr(id){
   var t=document.getElementById("htit"),s=document.getElementById("hsub");
-  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+  var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
   var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -3961,13 +4045,15 @@ function buildCalendrier(){
           var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
           var itinBtn=(e.type==="match"&&e.lieu)?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none">🧭 Itineraire</a>':'';
           var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'';
+          var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">📆 Agenda</button>':'';
+          var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer">🚗 Covoiturage</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
             ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer">📋 Convocation</button>'+
             '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>')
             :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'');
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+(typeColors[e.type]||"#8E44AD")+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
-            '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+coachBtns+'</div>'+
+            '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+icsBtn+carBtn+coachBtns+'</div>'+
             (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
           '</div>';
         });
@@ -5497,6 +5583,140 @@ function checkWeatherAlerts(){
       })
       .catch(function(){});
   });
+}
+
+var deferredPwaPrompt=null;
+window.addEventListener("beforeinstallprompt",function(ev){
+  ev.preventDefault();deferredPwaPrompt=ev;
+  var b=document.getElementById("pwa-install-btn");if(b)b.style.display="inline-block";
+});
+
+function isStandalonePwa(){
+  return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+}
+
+function maybeShowPwaHint(){
+  var box=document.getElementById("pwa-install-hint");
+  if(!box)return;
+  if(isStandalonePwa()||localStorage.getItem("asmb_pwa_hint")==="off"){box.style.display="none";return;}
+  var ua=navigator.userAgent||"";
+  var isIos=/iPad|iPhone|iPod/.test(ua);
+  var txt=document.getElementById("pwa-install-txt");
+  if(txt){
+    txt.textContent=isIos
+      ? "Sur iPhone : touchez le bouton Partager puis \"Sur l\'écran d\'accueil\"."
+      : "Ajoutez ASMB a votre écran d\'accueil pour un accès direct, sans passer par le navigateur.";
+  }
+  var b=document.getElementById("pwa-install-btn");
+  if(b)b.style.display=deferredPwaPrompt?"inline-block":"none";
+  box.style.display="block";
+}
+
+function triggerPwaInstall(){
+  if(!deferredPwaPrompt)return;
+  deferredPwaPrompt.prompt();
+  deferredPwaPrompt.userChoice.then(function(){
+    deferredPwaPrompt=null;
+    dismissPwaHint();
+  });
+}
+
+function dismissPwaHint(){
+  localStorage.setItem("asmb_pwa_hint","off");
+  var box=document.getElementById("pwa-install-hint");if(box)box.style.display="none";
+}
+
+function icsEscape(s){return String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");}
+
+function icsStamp(dateStr,heureStr,offsetMin){
+  var hm=(heureStr||"00:00").replace("h",":").split(":");
+  var h=parseInt(hm[0]||"0",10),mi=parseInt(hm[1]||"0",10);
+  var d=new Date(dateStr+"T00:00:00");
+  d.setHours(h,mi,0,0);
+  if(offsetMin)d.setMinutes(d.getMinutes()+offsetMin);
+  function p(n){return (n<10?"0":"")+n;}
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"T"+p(d.getHours())+p(d.getMinutes())+"00";
+}
+
+function eventToVEVENT(e){
+  var isMatch=e.type==="match";
+  // Pour un match : rendez-vous 1h avant (45 min a domicile)
+  var rdvOffset=isMatch?-parseInt(/domicile/i.test(e.lieu||"")?ppGet("asmb_rdv_home","45"):ppGet("asmb_rdv_away","60"),10):0;
+  var start=icsStamp(e.date,e.heure,rdvOffset);
+  var end=icsStamp(e.date,e.heure,isMatch?90:90);
+  var desc=isMatch?("Rendez-vous "+Math.abs(rdvOffset)+" min avant le match ("+(e.heure||"")+")"+(e.equipe?" - "+e.equipe:"")):(e.equipe||"");
+  var alarm=[];
+  if(ppGet("asmb_ics_alarm","on")==="on"){
+    alarm=["BEGIN:VALARM","TRIGGER:-PT"+parseInt(ppGet("asmb_ics_delay","120"),10)+"M","ACTION:DISPLAY","DESCRIPTION:"+icsEscape(e.titre),"END:VALARM"];
+  }
+  return ["BEGIN:VEVENT",
+    "UID:"+e.id+"@asmb-basket",
+    "DTSTAMP:"+icsStamp(e.date,e.heure,0)+"Z",
+    "DTSTART:"+start,
+    "DTEND:"+end,
+    "SUMMARY:"+icsEscape((isMatch?"🏀 ":"")+e.titre),
+    "LOCATION:"+icsEscape(e.lieu||""),
+    "DESCRIPTION:"+icsEscape(desc)]
+    .concat(alarm)
+    .concat(["END:VEVENT"]).join("\r\n");
+}
+
+function downloadIcs(filename,events){
+  if(!events.length){alert("Aucun événement a exporter");return;}
+  var body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ASMB Basket//FR","CALSCALE:GREGORIAN"]
+    .concat(events.map(eventToVEVENT)).concat(["END:VCALENDAR"]).join("\r\n");
+  var blob=new Blob([body],{type:"text/calendar;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1500);
+}
+
+function exportEventIcs(eventId){
+  var e=getEvents().find(function(x){return x.id===eventId;});
+  if(!e)return;
+  downloadIcs("asmb-"+(e.titre||"event").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".ics",[e]);
+}
+
+function exportSeasonIcs(){
+  var lp=getLinkedPlayerForCheckin();
+  var all=getEvents().filter(function(e){return e.date&&!e.cancelled;});
+  var mine=lp?all.filter(function(e){return eventMatchesPlayer(e,lp);}):all;
+  if(!mine.length)mine=all;
+  downloadIcs("asmb-saison.ics",mine);
+}
+
+function rdvTimeFor(e){
+  var atHome=/domicile/i.test(e.lieu||"");
+  var mins=parseInt(atHome?ppGet("asmb_rdv_home","45"):ppGet("asmb_rdv_away","60"),10);
+  var hm=(e.heure||"").replace("h",":").split(":");
+  if(!hm[0])return null;
+  var d=new Date(e.date+"T00:00:00");
+  d.setHours(parseInt(hm[0],10),parseInt(hm[1]||"0",10),0,0);
+  d.setMinutes(d.getMinutes()-mins);
+  function p(n){return (n<10?"0":"")+n;}
+  return {txt:p(d.getHours())+"h"+p(d.getMinutes()),mins:mins};
+}
+
+function shareCovoiturage(eventId){
+  var e=getEvents().find(function(x){return x.id===eventId;});
+  if(!e)return;
+  var d=new Date(e.date+"T00:00:00");
+  var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  var rdv=rdvTimeFor(e);
+  var lignes=["🏀 "+e.titre];
+  if(e.equipe)lignes.push("👥 "+e.equipe);
+  lignes.push("📅 "+jour+(e.heure?" a "+e.heure:""));
+  if(e.lieu)lignes.push("📍 "+e.lieu);
+  if(rdv)lignes.push("⏰ RDV sur place a "+rdv.txt+" ("+rdv.mins+" min avant)");
+  lignes.push("");
+  lignes.push("Qui peut emmener / ramener des joueurs ?");
+  var txt=lignes.join("\n");
+  if(navigator.share){
+    navigator.share({title:e.titre,text:txt}).catch(function(){});
+  } else {
+    window.open("https://wa.me/?text="+encodeURIComponent(txt),"_blank");
+  }
 }
 
 function showWeather(eventId){
@@ -7151,6 +7371,7 @@ function buildParentHome(){
 
   // Prochain événement
   var nextEv=getNextEventForTeam(activeTeam);
+  maybeShowPwaHint();
   var evEl=document.getElementById("parent-next-event");
   if(!nextEv){
     evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div class="empty-state-icon">📅</div><div style="font-size:13px;font-weight:600">Aucun événement a venir</div></div>';
@@ -7160,13 +7381,18 @@ function buildParentHome(){
     var dateObj=new Date(nextEv.date);
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
     var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none">🗺️ Itineraire</a>'):"";
-    var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-left:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button>';
+    var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer">🙋 Signaler une absence</button>';
+    var rdv=(nextEv.type==="match")?rdvTimeFor(nextEv):null;
+    var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">⏰ RDV sur place a '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
+    var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(39,174,96,.1);color:#27AE60;font-size:11px;font-weight:700;border:none;cursor:pointer">📆 Agenda</button>'):'';
+    var carB=(nextEv.type==="match")?('<button onclick="shareCovoiturage(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:11px;font-weight:700;border:none;cursor:pointer">🚗 Covoiturage</button>'):'';
     evEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow)">'+
       '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;color:#fff;background:'+col+'">'+nextEv.type.toUpperCase()+'</span>'+
-      '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-top:10px">'+nextEv.titre+'</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-top:6px">📅 '+dStr+(nextEv.heure?" · "+nextEv.heure:"")+'</div>'+
-      (nextEv.lieu?'<div style="font-size:12px;color:var(--mut);margin-top:2px">📍 '+nextEv.lieu+'</div>':'')+
-      mapsBtn+absenceBtn+
+      '<div style="font-size:17px;font-weight:900;color:var(--txt);margin-top:10px;line-height:1.25">'+nextEv.titre+'</div>'+
+      '<div style="font-size:13px;color:var(--mut);margin-top:6px">📅 '+dStr+(nextEv.heure?" · "+nextEv.heure:"")+'</div>'+
+      (nextEv.lieu?'<div style="font-size:13px;color:var(--mut);margin-top:2px">📍 '+nextEv.lieu+'</div>':'')+
+      rdvLine+
+      '<div style="display:flex;flex-wrap:wrap">'+absenceBtn+mapsBtn+icsB+carB+'</div>'+
     '</div>';
   }
 
@@ -7513,6 +7739,46 @@ function navToParent(which){
 }
 
 // ═══ THEME ════════════════════════════════════════════════════════
+function ppGet(k,def){var v=localStorage.getItem(k);return v===null?def:v;}
+function savePP(k,checked){localStorage.setItem(k,checked?"on":"off");}
+function savePPVal(k,v){localStorage.setItem(k,v);}
+
+function openParentSettings(){
+  stack.push("parent-params");
+  showScr("parent-params");
+  buildParentSettings();
+}
+
+function buildParentSettings(){
+  function setChk(id,key,def){var el=document.getElementById(id);if(el)el.checked=ppGet(key,def)==="on";}
+  function setSel(id,key,def){var el=document.getElementById(id);if(el)el.value=ppGet(key,def);}
+  setChk("pp-ics-alarm","asmb_ics_alarm","on");
+  setSel("pp-ics-delay","asmb_ics_delay","120");
+  setSel("pp-rdv-home","asmb_rdv_home","45");
+  setSel("pp-rdv-away","asmb_rdv_away","60");
+  setChk("pp-notif-match","asmb_pp_match","on");
+  setChk("pp-notif-chat","asmb_pp_chat","on");
+  var ph=document.getElementById("pp-phone");
+  if(ph)ph.textContent=myPhone||"Non renseigné";
+  var dk=document.getElementById("pp-dark");
+  if(dk)dk.checked=document.documentElement.getAttribute("data-theme")==="dark";
+  var vv=document.getElementById("pp-version");
+  if(vv)vv.textContent=APP_VERSION;
+}
+
+function toggleThemeFromParams(){toggleTheme();}
+
+function changeParentPhone(){
+  var p=prompt("Votre numéro de téléphone :",myPhone||"");
+  if(p===null)return;
+  p=p.trim().replace(/\s+/g,"");
+  myPhone=p;
+  localStorage.setItem("asmb_phone",p);
+  var ph=document.getElementById("pp-phone");
+  if(ph)ph.textContent=myPhone||"Non renseigné";
+  if(p)autoLinkParentToChannel(p);
+}
+
 function toggleTheme(){
   var dark=document.documentElement.getAttribute("data-theme")==="dark";
   if(dark){document.documentElement.removeAttribute("data-theme");localStorage.setItem("asmb_theme","light");document.getElementById("theme-btn").textContent="🌙";}
@@ -7535,7 +7801,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784638017";
+var APP_VERSION="1784638913";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
@@ -7555,6 +7821,7 @@ setInterval(checkForUpdate,120000);
 
 function checkTomorrowReminders(){
   if(!window.fbReady)return;
+  if(ppGet("asmb_pp_match","on")!=="on")return;
   var tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   var tomorrowStr=tomorrow.toISOString().slice(0,10);
   fetchEventsFromCloud().then(function(events){
