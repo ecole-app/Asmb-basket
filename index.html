@@ -6074,7 +6074,7 @@ function listenMessages(channelId){
           cvHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bdr)">'+
             '<span style="font-size:12px;color:var(--txt)">'+p.nom+'</span>'+
             '<div style="display:flex;gap:5px">'+
-              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'présent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#27AE60":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
+              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#27AE60":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
               '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'absent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="absent"?"#C0392B":"rgba(0,0,0,.08)")+';color:'+(resp==="absent"?"#fff":"var(--mut)")+'">✕ Absent</span>'+
             '</div></div>';
         });
@@ -6781,7 +6781,7 @@ function refreshEventCounts(eventId){
 
 function checkinButtonsHtml(playerId,eventId){
   return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
-    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'présent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
+    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
     '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
   '</div>';
 }
@@ -7535,7 +7535,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784637844";
+var APP_VERSION="1784638017";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
