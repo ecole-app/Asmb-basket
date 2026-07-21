@@ -4902,7 +4902,7 @@ function eventMatchesPlayer(ev,player){
   if(!ev.equipe)return false;
   var eq=ev.equipe.toUpperCase();
   var teams=getTeams().filter(function(t){return t.cat===player.cat;});
-  var playerTeams=teams.filter(function(t){return getPlayersForTeam(t).indexOf(player)>=0;});
+  var playerTeams=teams.filter(function(t){return getPlayersForTeam(t).some(function(p){return p.id===player.id;});});
   if(playerTeams.length)return playerTeams.some(function(t){return eq.indexOf(t.name.toUpperCase())>=0;});
   return eq.indexOf(player.cat.toUpperCase())>=0;
 }
@@ -4915,7 +4915,7 @@ function getPlayersForEvent(ev){
   if(matchedTeams.length){
     var all=[];
     matchedTeams.forEach(function(t){
-      getPlayersForTeam(t).forEach(function(p){if(all.indexOf(p)<0)all.push(p);});
+      getPlayersForTeam(t).forEach(function(p){if(!all.some(function(q){return q.id===p.id;}))all.push(p);});
     });
     return all;
   }
@@ -7496,7 +7496,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784619100";
+var APP_VERSION="1784619341";
 function checkForUpdate(){
   fetch("./version.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
