@@ -6042,7 +6042,7 @@ function buildAdminComm(){
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
     el.innerHTML="";
-    document.getElementById("admcomm-count").textContent=snap.size+" canal"+(snap.size>1?"aux":"");
+    document.getElementById("admcomm-count").textContent=snap.size+(snap.size>1?" canaux":" canal");
     if(!snap.size){el.innerHTML='<div class="empty-state"><div>Aucun canal</div></div>';return;}
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
@@ -8081,7 +8081,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784732959";
+var APP_VERSION="1784733116";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
