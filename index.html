@@ -251,6 +251,7 @@ async function initChannels(){
 initChannels();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -877,6 +878,17 @@ initChannels();
   </div>
 
   <!-- ═══ MODAL METEO ═══ -->
+  <div id="modal-qr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="qr-title">QR code</div><div style="font-size:11px;color:var(--mut)" id="qr-sub"></div></div>
+        <button onclick="closeModal('modal-qr')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div style="display:flex;justify-content:center;padding:10px 0"><div id="qr-canvas" style="background:#fff;padding:14px;border-radius:12px"></div></div>
+      <div id="qr-url" style="font-size:11px;color:var(--mut);text-align:center;word-break:break-all;margin-top:10px"></div>
+    </div>
+  </div>
+
   <div id="modal-weather" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -983,6 +995,14 @@ initChannels();
  <div><div style="font-size:13px;font-weight:700;color:var(--txt)"> Mode sombre</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Theme fonce pour les salles peu eclairees</div></div>
  <input type="checkbox" id="gp-dark" onchange="toggleTheme()" style="width:44px;height:24px;accent-color:var(--dkg)">
  </label>
+ </div>
+ <div class="sec">Partage & QR codes</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <button onclick="showQrModal('app')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">QR Rejoindre l'app</button>
+ <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
+ </div>
  </div>
  <div class="sec">Notifications</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
@@ -1185,6 +1205,10 @@ initChannels();
   </div>
 
   <!-- ══════════════ ACCUEIL PARENT ══════════════ -->
+  <div class="scr" id="scr-matchday">
+    <div id="matchday-content"></div>
+  </div>
+
   <div class="scr" id="scr-parent-home">
     <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
@@ -1202,6 +1226,7 @@ initChannels();
     <div id="parent-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
     <div style="padding:14px 12px 8px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr);background:var(--sf)" id="parent-team-chips"></div>
     <div style="padding:16px">
+      <div id="parent-matchday-banner" style="margin:0 0 14px"></div>
       <div id="parent-summary-row" style="display:flex;gap:10px;margin-bottom:16px"></div>
       <div id="pwa-install-hint" style="display:none;margin-bottom:14px;padding:12px 14px;border-radius:var(--r);background:rgba(27,92,40,.08);border:1px solid var(--bdr)">
         <div style="font-size:12px;font-weight:800;color:var(--txt)">Installer l'application</div>
@@ -1339,6 +1364,7 @@ initChannels();
       <div id="coach-eq-name" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
     <div class="sec">Membres de l'équipe</div>
+ <div id="coach-matchday-banner" style="margin:12px 0 0"></div>
  <div id="coach-eq-members" style="padding-bottom:20px"></div>
  <div style="text-align:center;padding-bottom:80px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
  <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Modifier mon équipe</button>
@@ -1822,7 +1848,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
+ var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],documents:["Documents","Fichiers et formulaires"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -5724,6 +5750,122 @@ function exportSeasonIcs(){
   downloadIcs("asmb-saison.ics",mine);
 }
 
+function getTodayMatchForTeams(teamNames){
+  var todayStr=new Date().toISOString().slice(0,10);
+  var evs=getEvents().filter(function(e){
+    if(e.type!=="match"||e.cancelled||e.date!==todayStr)return false;
+    if(!e.equipe)return false;
+    var eq=e.equipe.toUpperCase();
+    return teamNames.some(function(n){return eq.indexOf(n.toUpperCase())>=0;});
+  });
+  evs.sort(function(a,b){return (a.heure||"")>(b.heure||"")?1:-1;});
+  return evs[0]||null;
+}
+
+function matchdayBannerHtml(ev,mini){
+  var d=new Date(ev.date+"T00:00:00");
+  var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  var rdv=rdvTimeFor(ev);
+  if(mini){
+    return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;background:linear-gradient(135deg,#E8670A,#c0560a);border-radius:var(--r);padding:12px 14px;color:#fff;display:flex;align-items:center;gap:12px;box-shadow:0 3px 12px rgba(232,103,10,.28)">'+
+      '<div style="font-size:22px">🏀</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.85;text-transform:uppercase">Jour de match</div><div style="font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ev.titre+'</div></div>'+
+      '<div style="font-size:20px">›</div></div>';
+  }
+  return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), linear-gradient(160deg,#1B5C28 0%,#0d3016 60%,#050f07 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
+    '<div style="font-size:64px;margin-bottom:14px">🏀</div>'+
+    '<div style="display:inline-block;margin:0 auto 16px;background:var(--red);font-size:11px;font-weight:800;padding:5px 16px;border-radius:20px;letter-spacing:1px">JOUR DE MATCH</div>'+
+    '<div style="font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px">'+ev.titre+'</div>'+
+    '<div style="font-size:14px;opacity:.85;margin-bottom:6px">'+jour+(ev.heure?" · "+ev.heure:"")+'</div>'+
+    (ev.lieu?'<div style="font-size:14px;opacity:.85">📍 '+ev.lieu+'</div>':'')+
+    (rdv?'<div style="margin:22px auto 0;background:rgba(232,103,10,.2);border:1px solid rgba(232,103,10,.5);border-radius:var(--rs);padding:12px 18px;font-size:15px;font-weight:800">⏰ RDV sur place à '+rdv.txt+'</div>':'')+
+    '<div style="margin-top:28px;font-size:13px;font-weight:800;background:#fff;color:#1B5C28;padding:14px;border-radius:var(--rx)">Appuyer pour voir les details ›</div></div>';
+}
+
+function renderMatchdayBanner(containerId,teamNames){
+  var el=document.getElementById(containerId);
+  if(!el)return;
+  var ev=getTodayMatchForTeams(teamNames);
+  if(!ev){el.innerHTML="";el.style.display="none";return;}
+  el.style.display="block";
+  var seen=localStorage.getItem("asmb_md_seen_"+ev.id)==="1";
+  el.innerHTML=matchdayBannerHtml(ev,seen);
+}
+
+function openMatchday(eventId){
+  localStorage.setItem("asmb_md_seen_"+eventId,"1");
+  stack.push("matchday");
+  showScr("matchday");
+  buildMatchday(eventId);
+}
+
+function buildMatchday(eventId){
+  var ev=getEvents().find(function(e){return e.id===eventId;});
+  var el=document.getElementById("matchday-content");
+  if(!ev){el.innerHTML='<div class="empty-state"><div>Match introuvable</div></div>';return;}
+  var d=new Date(ev.date+"T00:00:00");
+  var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  var rdv=rdvTimeFor(ev);
+  var mapsBtn=ev.lieu?'<button onclick="window.open(\'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(ev.lieu)+'\',\'_blank\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(26,46,90,.1);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer">🧭 Itineraire</button>':'';
+  var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+ev.id+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'';
+
+  el.innerHTML=
+    '<div style="padding:22px 18px;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.22) 0%, transparent 50%), linear-gradient(160deg,#1B5C28 0%,#0d3016 60%,#050f07 100%);color:#fff">'+
+      '<div style="display:inline-block;background:var(--red);font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:.5px">MATCH</div>'+
+      '<div style="font-size:22px;font-weight:900;line-height:1.15;margin-top:12px">'+ev.titre+'</div>'+
+      '<div style="font-size:13px;opacity:.85;margin-top:8px">'+jour+(ev.heure?" · "+ev.heure:"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+
+      (rdv?'<div style="background:rgba(232,103,10,.18);border:1px solid rgba(232,103,10,.4);border-radius:var(--rs);padding:12px 14px;margin-top:14px;font-size:14px;font-weight:800">⏰ RDV sur place à '+rdv.txt+' ('+rdv.mins+' min avant)</div>':'')+
+    '</div>'+
+    '<div style="padding:16px">'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px">'+mapsBtn+weatherBtn+'</div>'+
+      '<div id="md-counts" style="display:flex;gap:10px;margin-bottom:14px"></div>'+
+      '<div class="sec" style="padding:0 0 8px">Effectif convoqué</div>'+
+      '<div id="md-players"></div>'+
+    '</div>';
+
+  renderMatchdayPlayers(ev);
+}
+
+function renderMatchdayPlayers(ev){
+  var players=getPlayersForEvent(ev);
+  var countsEl=document.getElementById("md-counts");
+  var listEl=document.getElementById("md-players");
+  if(!listEl)return;
+  if(!window.fbReady){
+    listEl.innerHTML='<div style="font-size:12px;color:var(--mut);padding:10px">Connexion requise pour voir les pointages.</div>';
+    return;
+  }
+  window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+    var status={};
+    snap.forEach(function(doc){
+      var c=doc.data();
+      if(c.eventId===ev.id)status[c.playerId]=c.status;
+    });
+    var pres=0,abs=0,none=0;
+    var rows="";
+    players.forEach(function(p){
+      var st=status[p.id];
+      if(st==="present")pres++;else if(st==="absent")abs++;else none++;
+      var initials=((p.prenom||"?")[0]+(p.nom||"?")[0]).toUpperCase();
+      var badge=st==="present"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:rgba(39,174,96,.15);color:#27AE60">Present</span>':
+                st==="absent"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B">Absent</span>':
+                '<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:var(--bdr);color:var(--mut)">—</span>';
+      rows+='<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px">'+
+        '<div style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">'+initials+'</div>'+
+        '<div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+badge+'</div>';
+    });
+    if(countsEl){
+      countsEl.innerHTML=
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#27AE60"><div style="font-size:26px;font-weight:900">'+pres+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Presents</div></div>'+
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#C0392B"><div style="font-size:26px;font-weight:900">'+abs+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Absents</div></div>'+
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a9a90"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans reponse</div></div>';
+    }
+    listEl.innerHTML=rows||'<div style="font-size:12px;color:var(--mut);padding:10px">Aucun joueur convoqué.</div>';
+  }).catch(function(){
+    listEl.innerHTML='<div style="font-size:12px;color:var(--mut);padding:10px">Erreur de chargement.</div>';
+  });
+}
+
 function rdvTimeFor(e){
   var atHome=/domicile/i.test(e.lieu||"");
   var mins=parseInt(atHome?ppGet("asmb_rdv_home","45"):ppGet("asmb_rdv_away","60"),10);
@@ -5755,6 +5897,19 @@ function shareCovoiturage(eventId){
   } else {
     window.open("https://wa.me/?text="+encodeURIComponent(txt),"_blank");
   }
+}
+
+function showQrModal(kind){
+  var base="https://ecole-app.github.io/Asmb-basket/";
+  var url=kind==="inscription"?base+"?inscription=1":base;
+  document.getElementById("qr-title").textContent=kind==="inscription"?"QR S'inscrire":"QR Rejoindre l'app";
+  document.getElementById("qr-sub").textContent=kind==="inscription"?"Ouvre directement la fiche d'inscription":"Ouvre l'application ASMB";
+  document.getElementById("qr-url").textContent=url;
+  var box=document.getElementById("qr-canvas");
+  box.innerHTML="";
+  document.getElementById("modal-qr").style.display="flex";
+  if(typeof QRCode==="undefined"){box.innerHTML='<div style="font-size:12px;color:#888;padding:20px">Chargement du generateur, réessayez dans un instant.</div>';return;}
+  new QRCode(box,{text:url,width:220,height:220,colorDark:"#1A2E5A",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
 }
 
 function showWeather(eventId){
@@ -6968,6 +7123,12 @@ function buildJoueurScreen(player){
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
     '</div>';
 
+    var mdMatch=getTodayMatchForTeams(myTeam?[myTeam.name]:[player.cat]);
+    if(mdMatch){
+      var mdSeen=localStorage.getItem("asmb_md_seen_"+mdMatch.id)==="1";
+      html+='<div style="margin-bottom:20px">'+matchdayBannerHtml(mdMatch,mdSeen)+'</div>';
+    }
+
     var exitBtn='<button onclick="logoutUser()" style="margin-top:24px;width:100%;padding:12px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer"> Se déconnecter</button>';
 
     if(!todaysEvents.length){
@@ -7403,6 +7564,7 @@ function buildParentHome(){
   var teamIds=getParentTeams();
   var allTeams=getTeams();
   var myTeams=allTeams.filter(function(t){return teamIds.indexOf(t.id)>=0;});
+  renderMatchdayBanner("parent-matchday-banner",myTeams.map(function(t){return t.name;}));
   if(!myTeams.length){openTeamPicker(false);return;}
   var activeId=getActiveTeamId();
   if(!myTeams.find(function(t){return t.id===activeId;}))activeId=myTeams[0].id;
@@ -7650,6 +7812,8 @@ function buildCoachEquipe(){
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
   document.getElementById("coach-eq-cat").textContent="ASMB · "+team.cat;
   fillTodayHero("coach-next-event","coach-eq-name",team);
+  var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
+  renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);
 
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("coach-eq-members");
@@ -7900,7 +8064,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784716001";
+var APP_VERSION="1784725344";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
