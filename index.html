@@ -171,15 +171,19 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 </style>
 
 <script>
-// Desinstalle tout service worker existant + vide les caches (évite le cache bloqué)
+// Service worker : lancement hors-ligne, piloté par la version (jamais bloqué sur une vieille version)
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(reg){ reg.unregister(); });
-  });
-}
-if('caches' in window){
-  caches.keys().then(function(names){
-    names.forEach(function(name){ caches.delete(name); });
+  window.addEventListener('load', function(){
+    fetch('./version.json?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var v=(d&&d.v)?d.v:'base';
+        navigator.serviceWorker.register('./sw.js?v='+v).catch(function(){});
+      })
+      .catch(function(){
+        // hors-ligne au premier chargement : on tente quand meme d'enregistrer
+        navigator.serviceWorker.register('./sw.js').catch(function(){});
+      });
   });
 }
 </script>
@@ -7895,7 +7899,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784712649";
+var APP_VERSION="1784713540";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -7908,7 +7912,14 @@ function checkForUpdate(){
  .catch(function(){});
 }
 function applyUpdate(){
- location.href=location.href.split("?")[0]+"?v="+Date.now();
+ if('serviceWorker' in navigator){
+   navigator.serviceWorker.getRegistrations().then(function(regs){
+     regs.forEach(function(r){r.unregister();});
+     location.href=location.href.split("?")[0]+"?v="+Date.now();
+   }).catch(function(){location.href=location.href.split("?")[0]+"?v="+Date.now();});
+ } else {
+   location.href=location.href.split("?")[0]+"?v="+Date.now();
+ }
 }
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,120000);
