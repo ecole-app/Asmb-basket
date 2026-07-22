@@ -247,11 +247,15 @@ async function initChannels(){
     await setDoc(doc(db,"channels",ch.id), ch, {merge:true});
   }
   // Migration: ballon pour les canaux d'equipe, rien pour les canaux generaux
+  // (on matche par id ET par nom, pour aussi corriger d'anciens doublons crees avec un id different)
   const noEmojiIds=["general","coaches","evenements"];
+  const noEmojiNames=["général","general","coachs","coaches","evenements","evénements","evenement","événement"];
   try{
     const allSnap=await getDocs(collection(db,"channels"));
     for(const d of allSnap.docs){
-      const wanted=noEmojiIds.includes(d.id)?"":"🏀";
+      const nameNorm=(d.data().name||"").toLowerCase().trim();
+      const isGeneral=noEmojiIds.includes(d.id)||noEmojiNames.includes(nameNorm);
+      const wanted=isGeneral?"":"🏀";
       if((d.data().icon||"")!==wanted){
         await setDoc(doc(db,"channels",d.id), {icon:wanted}, {merge:true});
       }
@@ -8075,7 +8079,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784725344";
+var APP_VERSION="1784732530";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
