@@ -6166,12 +6166,14 @@ function createChannel(){
 async function deleteChannel(id,name){
  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
  if(!confirm('Supprimer le canal "'+name+'" et tous ses messages ?'))return;
- // Delete messages subcollection
+ // Supprime tous les messages du canal
  var msgsSnap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels",id,"messages"));
- msgsSnap.forEach(function(d){ /* Firestore client SDK can't batch delete easily here, skip for simplicity */ });
- await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{deleted:true,members:[]},{merge:true});
- // Actually remove doc entirely would need deleteDoc - using set with tombstone instead for simplicity, then filter in UI
- alert("Canal supprime (les messages restent archives)");
+ for(const d of msgsSnap.docs){
+   await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",id,"messages",d.id));
+ }
+ // Supprime le canal lui-meme
+ await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",id));
+ alert("Canal supprime");
 }
 
 function openChannelDetail(ch){
@@ -8079,7 +8081,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784732530";
+var APP_VERSION="1784732959";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
