@@ -454,6 +454,9 @@ initChannels();
       <button class="cat-filter" onclick="filterCat('U17')" id="cat-U17">U17</button>
       <button class="cat-filter" onclick="filterCat('Senior')" id="cat-Senior">Senior</button>
     </div>
+    <div style="padding:0 12px 4px">
+      <input id="insc-search" type="search" placeholder="Rechercher un joueur..." oninput="renderPlayers()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box">
+    </div>
     <div id="playerList" style="padding:8px 0 80px"></div>
     <!-- Modal ajout joueur -->
     <div id="modal-player" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
@@ -1287,6 +1290,7 @@ initChannels();
  <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Annuaire du club</div><div style="font-size:11px;color:var(--mut)">Contacts utiles ASMB</div></div>
  <button id="annuaire-add-btn" onclick="showAddContact()" style="display:none;padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Contact</button>
  </div>
+ <div style="padding:10px 16px 4px"><input id="annuaire-search" type="search" placeholder="Rechercher un contact..." oninput="buildAnnuaire()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box"></div>
  <div id="annuaire-list" style="padding:8px 0 80px"></div>
  </div>
 
@@ -4281,8 +4285,11 @@ function openAnnuaire(){
 function buildAnnuaire(){
   var el=document.getElementById("annuaire-list");if(!el)return;
   var contacts=getAnnuaire();
+  var searchEl=document.getElementById("annuaire-search");
+  var q=searchEl?searchEl.value.trim().toLowerCase():"";
+  if(q){contacts=contacts.filter(function(c){return (c.nom||"").toLowerCase().indexOf(q)>=0||(c.role||"").toLowerCase().indexOf(q)>=0;});}
   if(!contacts.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun contact pour le moment</div>'+(window.asmbCoachMode?'<div style="font-size:11px;margin-top:4px">Appuyez sur + Contact</div>':"")+'</div>';
+    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun contact pour le moment")+'</div>'+(!q&&window.asmbCoachMode?'<div style="font-size:11px;margin-top:4px">Appuyez sur + Contact</div>':"")+'</div>';
     return;
   }
   el.innerHTML="";
@@ -4699,9 +4706,12 @@ function buildPlayers(){renderPlayers();}
 function renderPlayers(){
   var players=getPlayers();
   var filtered=currentCatFilter==="all"?players:players.filter(function(p){return p.cat===currentCatFilter;});
+  var searchEl=document.getElementById("insc-search");
+  var q=searchEl?searchEl.value.trim().toLowerCase():"";
+  if(q){filtered=filtered.filter(function(p){return ((p.prenom||"")+" "+(p.nom||"")).toLowerCase().indexOf(q)>=0||(p.poste||"").toLowerCase().indexOf(q)>=0;});}
   var el=document.getElementById("playerList");if(!el)return;
   document.getElementById("insc-count").textContent=players.length+" joueur"+(players.length>1?"s":"");
-  if(!filtered.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun joueur</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Ajouter</div></div>';return;}
+  if(!filtered.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun joueur")+'</div><div style="font-size:11px;margin-top:4px">'+(q?"Essayez un autre nom":"Appuyez sur + Ajouter")+'</div></div>';return;}
   el.innerHTML="";
   filtered.forEach(function(p){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
@@ -7885,7 +7895,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784664515";
+var APP_VERSION="1784712649";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
