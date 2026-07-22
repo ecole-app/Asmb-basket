@@ -2143,11 +2143,11 @@ function buildCycle(cy){
   var sl=document.getElementById("cySeances");sl.innerHTML="";
   var pr=cycleProgress(cy.id);
   if(pr&&pr.total>0){var pct=Math.round(pr.done/pr.total*100);var _pw=document.createElement("div");_pw.className="prog-wrap";_pw.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut)">Progression</span><span style="font-size:11px;font-weight:700;color:var(--ltg)">'+pr.done+'/'+pr.total+' séances</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>';sl.appendChild(_pw);}
-  cy.seas.forEach(function(s){
+  cy.seas.forEach(function(s,si){
     var done=isDone(cy.id,s.num);
     var d=document.createElement("div");d.className="sea-card";
     d.onclick=function(){openSea(cy.id,s.num);};
-    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#27AE60":cy.c)+'">'+(done?"✓":s.num)+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#27AE60":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#27AE60":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
+    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#27AE60":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#27AE60":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#27AE60":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
     sl.appendChild(d);
   });
 }
@@ -2162,7 +2162,8 @@ function buildSeance(cy,s){
   hdr.innerHTML="";
   var top=document.createElement("div");
   top.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:6px";
-  top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+s.num+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
+  var seaIdx=curCy.seas.findIndex(function(x){return x.num===s.num;})+1;
+  top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+seaIdx+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
  var ttl=document.createElement("div");ttl.style.cssText="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px";ttl.textContent=s.t;
  var obj=document.createElement("div");obj.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.4;margin-bottom:8px";obj.textContent=s.obj;
  var btn=document.createElement("button");
@@ -7899,7 +7900,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784713540";
+var APP_VERSION="1784716001";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
