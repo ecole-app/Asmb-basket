@@ -237,15 +237,26 @@ window.fbReady = true;
 async function initChannels(){
   const channels = [
     {id:"general", name:"Général", icon:"", desc:"Canal principal ASMB"},
-    {id:"u13f", name:"U13 Féminin", icon:"", desc:"Équipe U13F"},
-    {id:"u15", name:"U15", icon:"", desc:"Équipe U15"},
-    {id:"seniors", name:"Seniors", icon:"", desc:"Équipe Seniors"},
+    {id:"u13f", name:"U13 Féminin", icon:"🏀", desc:"Équipe U13F"},
+    {id:"u15", name:"U15", icon:"🏀", desc:"Équipe U15"},
+    {id:"seniors", name:"Seniors", icon:"🏀", desc:"Équipe Seniors"},
     {id:"coaches", name:"Coachs", icon:"", desc:"Staff et encadrants"},
     {id:"evenements", name:"Evénements", icon:"", desc:"Annonces et événements"},
   ];
   for(const ch of channels){
     await setDoc(doc(db,"channels",ch.id), ch, {merge:true});
   }
+  // Migration: ballon pour les canaux d'equipe, rien pour les canaux generaux
+  const noEmojiIds=["general","coaches","evenements"];
+  try{
+    const allSnap=await getDocs(collection(db,"channels"));
+    for(const d of allSnap.docs){
+      const wanted=noEmojiIds.includes(d.id)?"":"🏀";
+      if((d.data().icon||"")!==wanted){
+        await setDoc(doc(db,"channels",d.id), {icon:wanted}, {merge:true});
+      }
+    }
+  }catch(e){}
   window.dispatchEvent(new Event("fb-ready"));
 }
 initChannels();
@@ -5548,7 +5559,7 @@ function findChannelForTeamText(teamText){
 function ensureTeamChannel(team){
   if(!window.fbReady)return;
   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",team.id),{
-    id:team.id,name:team.name,icon:"",desc:"Canal de l'équipe "+team.name
+    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'équipe "+team.name
   },{merge:true});
 }
 
