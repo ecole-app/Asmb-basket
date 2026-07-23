@@ -729,9 +729,13 @@ initChannels();
       <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Evénements</div><div style="font-size:11px;color:var(--mut)" id="evenement-count">0 événement</div></div>
     </div>
     <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
-      <button onclick="showAddPoleItem('evenement','evenement')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid #8E44AD;color:#8E44AD;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Evénement</button>
+      <button onclick="showAddEvent()" style="padding:8px 16px;border-radius:20px;background:var(--dkg);border:1.5px solid var(--dkg);color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Nouvel événement</button>
+      <button onclick="showAddPoleItem('evenement','evenement')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid #8E44AD;color:#8E44AD;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Annonce</button>
       <button onclick="showAddPoleItem('evenement','tournoi')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Tournoi</button>
     </div>
+    <div class="sec">Événements (calendrier)</div>
+    <div id="real-events-list" style="padding:0 0 8px"></div>
+    <div class="sec">Annonces</div>
     <div id="evenement-list" style="padding:8px 0 80px"></div>
   </div>
 
@@ -990,9 +994,10 @@ initChannels();
         </label>
       </div>
       <div style="display:flex;gap:12px">
-        <div class="form-group" style="flex:1"><label class="form-label">Date *</label><input class="form-input" id="ev-date" type="date"></div>
-        <div class="form-group" style="flex:1"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Date de debut *</label><input class="form-input" id="ev-date" type="date"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Date de fin</label><input class="form-input" id="ev-date-fin" type="date"></div>
       </div>
+      <div class="form-group"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder="Gymnase..."></div>
       <div class="form-group"><label class="form-label">Équipes concernees</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box"></div></div>
 
@@ -5410,7 +5415,7 @@ function buildPlanning(){
     var d=document.createElement("div");d.className="event-card";
     var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
     var evCol=typeColors[e.type]||"#1B5C28";
-    var evDate=e.date+(e.heure?" · "+e.heure:"");
+    var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
     var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
@@ -5595,6 +5600,38 @@ function saveEvalCriteriaFromModal(){
 var creneauType="entrainement";
 var creneauJour="Lundi";
 
+// ── LISTE EVENEMENTS REELS DANS L'ONGLET "ÉVÉNEMENT" (coach + dirigeant) ──
+function buildRealEventsList(){
+  var el=document.getElementById("real-events-list");if(!el)return;
+  var events=getEvents();
+  var profile=localStorage.getItem("asmb_profile");
+  if(profile==="coach"){
+    var teamId=getCoachTeam();
+    var team=getTeams().find(function(t){return t.id===teamId;});
+    if(team){
+      events=events.filter(function(e){return (e.equipe||"").toUpperCase().indexOf(team.name.toUpperCase())>=0;});
+    }
+  }
+  if(!events.length){el.innerHTML='<div class="empty-state" style="padding:16px"><div style="font-size:12px;color:var(--mut)">Aucun événement</div></div>';return;}
+  el.innerHTML="";
+  events.sort(function(a,b){return a.date>b.date?1:-1;});
+  events.forEach(function(e){
+    var d=document.createElement("div");d.className="event-card";
+    var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","stage":"#8E44AD","autre":"#8E44AD"};
+    var evCol=typeColors[e.type]||"#1B5C28";
+    var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
+    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
+    var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
+    var presenceCount=e.presences?Object.keys(e.presences).length:0;
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
+    var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
+    var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+presBtn+evalBtn+editTimeBtn+"</div>"+delBtn+"</div>";
+    el.appendChild(d);
+  });
+}
+
 function showAddCreneau(){
   creneauType="entrainement";
   creneauJour="Lundi";
@@ -5667,7 +5704,7 @@ function saveCreneau(){
   }
   saveEvents(events);
   closeModal("modal-creneau");
-  buildPlanning();buildAdminHome();
+  buildPlanning();buildAdminHome();buildRealEventsList();
   if(occurrences>1)alert(occurrences+" créneaux crees (repetition hebdomadaire)");
 }
 
@@ -5683,8 +5720,13 @@ function toggleEvEvalOption(){
 function showAddEvent(){
   evExternes=[];
   evSelectedTeams=[];
+  if(localStorage.getItem("asmb_profile")==="coach"){
+    var ct=getCoachTeam();
+    if(ct)evSelectedTeams=[ct];
+  }
   document.getElementById("ev-titre").value="";
   document.getElementById("ev-date").value="";
+  document.getElementById("ev-date-fin").value="";
   document.getElementById("ev-heure").value="";
   document.getElementById("ev-lieu").value="";
   document.getElementById("ev-type").value="autre";
@@ -5702,6 +5744,13 @@ function renderEvTeamChecks(){
   var teams=getTeams();
   if(!teams.length){el.innerHTML='<div style="font-size:11px;color:var(--mut)">Aucune équipe creee - Admin > Équipes</div>';return;}
   el.innerHTML="";
+  var noneBtn=document.createElement("button");
+  noneBtn.type="button";
+  noneBtn.textContent="Aucune équipe";
+  var noneOn=evSelectedTeams.length===0;
+  noneBtn.style.cssText="padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid "+(noneOn?"var(--mut)":"var(--bdr)")+";background:"+(noneOn?"var(--bdr)":"var(--card)")+";color:var(--mut);cursor:pointer;white-space:normal;max-width:100%;word-break:break-word;text-align:center;line-height:1.3";
+  noneBtn.onclick=function(){evSelectedTeams=[];renderEvTeamChecks();renderEvPlayers();};
+  el.appendChild(noneBtn);
   teams.forEach(function(t){
     var on=evSelectedTeams.indexOf(t.id)>=0;
     var btn=document.createElement("button");
@@ -5772,6 +5821,7 @@ function saveEventFull(){
   var titre=document.getElementById("ev-titre").value.trim();
   var type=document.getElementById("ev-type").value;
   var date=document.getElementById("ev-date").value;
+  var dateFin=document.getElementById("ev-date-fin").value;
   var heure=document.getElementById("ev-heure").value;
   var lieu=document.getElementById("ev-lieu").value.trim();
   var teams=getTeams();
@@ -5782,14 +5832,14 @@ function saveEventFull(){
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
   var eventObj={
-    id:Date.now().toString(),titre:titre,type:type,date:date,heure:heure||"",lieu:lieu||"",equipe:equipe||"",
+    id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
     presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked)
   };
   var events=getEvents();
   events.push(eventObj);
   saveEvents(events);
-  buildPlanning();buildAdminHome();
+  buildPlanning();buildAdminHome();buildRealEventsList();
   closeModal("modal-event-full");
   // Envoi au canal si selectionne
   if(canal&&window.fbReady){
@@ -5802,7 +5852,7 @@ function saveEventFull(){
     alert("Événement cree !");
   }
 }
-function deleteEvent(id){if(!confirm("Supprimer cet événement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();}
+function deleteEvent(id){if(!confirm("Supprimer cet événement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();}
 
 function cancelEvent(eventId){
   var events=getEvents();
@@ -7294,7 +7344,7 @@ var POLE_FORMS={
   "match":      {title:"Nouveau match",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"14h00"},{id:"adversaire",label:"Adversaire",ph:"Nom du club"},{id:"lieu",label:"Lieu",type:"select-lieu"},{id:"equipe",label:"Notre équipe",type:"select-team"},{id:"cat",label:"Catégorie",type:"select-cat"}]},
   "joueur":     {title:"Nouveau joueur",fields:[{id:"cat",label:"Catégorie",type:"select-cat"},{id:"nom",label:"Joueur (liste des inscrits)",type:"select-player"},{id:"poste",label:"Poste",ph:"Meneur, Ailier..."},{id:"num",label:"Numéro de maillot",ph:"#7"},{id:"equipe",label:"Équipe",type:"select-team"}]},
   "tournoi":    {title:"Nouveau tournoi",fields:[{id:"nom",label:"Nom du tournoi",ph:"Ex: Tournoi de Noel"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"format",label:"Format",ph:"3x3, 5x5, mixte..."},{id:"notes",label:"Notes",ph:""}]},
-  "evenement":  {title:"Nouvel événement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date",label:"Date",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
+  "evenement":  {title:"Nouvel événement",fields:[{id:"nom",label:"Nom",ph:"Ex: Fete du club"},{id:"date_debut",label:"Date de debut",type:"date"},{id:"date_fin",label:"Date de fin",type:"date"},{id:"lieu",label:"Lieu",ph:"Adresse..."},{id:"desc",label:"Description",ph:"Details..."},{id:"notes",label:"Notes",ph:""}]},
   "groupe":     {title:"Nouveau groupe",fields:[{id:"nom",label:"Nom du groupe",ph:"Ex: Loisir Adultes Mardi"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"niveau",label:"Niveau",ph:"Debutant, Intermediaire..."},{id:"jour",label:"Jour",ph:"Lundi, Mardi..."},{id:"heure",label:"Heure",ph:"18h00 - 20h00"},{id:"lieu",label:"Lieu",ph:"Gymnase..."}]},
   "seance":     {title:"Nouvelle séance",fields:[{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:"18h00"},{id:"groupe",label:"Groupe",ph:"Nom du groupe"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"theme",label:"Theme",ph:"Tir, Dribble, Match..."}]},
 };
@@ -7314,6 +7364,7 @@ function openPoleScreen(poleId){
 }
 
 function buildPoleScreen(poleId){
+  if(poleId==="evenement"){var rel=document.getElementById("real-events-list");if(rel)buildRealEventsList();}
   var data=getPoleData(poleId);
   var pole=POLES.find(function(p){return p.id===poleId;});
   var countEl=document.getElementById(poleId+"-count");
@@ -7338,7 +7389,8 @@ function buildPoleScreen(poleId){
     var div=document.createElement("div");
     div.style.cssText="margin:0 12px 8px 0 12px;margin-left:"+(12+indent)+"px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:13px 14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:flex-start;justify-content:space-between"+(indent?";border-left:3px solid var(--dkg)":"");
     var mainInfo=item.nom||item.adversaire||item.titre||"Sans nom";
-    var subInfo=[item.cat,item.date,item.heure,item.lieu,item.groupe].filter(Boolean).join(" · ");
+    var dateRange=item.date_debut?(item.date_fin&&item.date_fin!==item.date_debut?(item.date_debut+" → "+item.date_fin):item.date_debut):item.date;
+    var subInfo=[item.cat,dateRange,item.heure,item.lieu,item.groupe].filter(Boolean).join(" · ");
     var subHtml=subInfo?"<div style=\"font-size:11px;color:var(--mut)\">"+subInfo+"</div>":"";
     var delBtn="<button onclick=\"deletePoleItem('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?" ":"")+mainInfo+"</div>"+subHtml+"</div>"+delBtn;
@@ -8567,7 +8619,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784808097";
+var APP_VERSION="1784808886";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
