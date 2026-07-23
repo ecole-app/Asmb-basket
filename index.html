@@ -955,7 +955,13 @@ initChannels();
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noel"></div>
-      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group" id="ev-eval-option" style="display:none">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="ev-eval-enabled" style="width:18px;height:18px;accent-color:var(--dkg)">
+          <span style="font-size:12px;color:var(--txt)">Activer l'évaluation des joueurs pour cet événement</span>
+        </label>
+      </div>
       <div style="display:flex;gap:12px">
         <div class="form-group" style="flex:1"><label class="form-label">Date *</label><input class="form-input" id="ev-date" type="date"></div>
         <div class="form-group" style="flex:1"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
@@ -5479,6 +5485,12 @@ function saveCreneau(){
 var evExternes=[];
 var evSelectedTeams=[];
 
+function toggleEvEvalOption(){
+  var type=document.getElementById("ev-type").value;
+  var box=document.getElementById("ev-eval-option");
+  if(box)box.style.display=(type==="stage")?"block":"none";
+}
+
 function showAddEvent(){
   evExternes=[];
   evSelectedTeams=[];
@@ -5488,6 +5500,8 @@ function showAddEvent(){
   document.getElementById("ev-lieu").value="";
   document.getElementById("ev-type").value="autre";
   document.getElementById("ev-canal").value="";
+  document.getElementById("ev-eval-enabled").checked=false;
+  toggleEvEvalOption();
   renderEvExternes();
   renderEvTeamChecks();
   renderEvPlayers();
@@ -5581,7 +5595,7 @@ function saveEventFull(){
   var eventObj={
     id:Date.now().toString(),titre:titre,type:type,date:date,heure:heure||"",lieu:lieu||"",equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
-    presences:{}
+    presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked)
   };
   var events=getEvents();
   events.push(eventObj);
@@ -8364,7 +8378,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784775885";
+var APP_VERSION="1784807087";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
