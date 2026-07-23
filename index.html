@@ -657,6 +657,7 @@ initChannels();
         </div>
         <div class="form-group"><label class="form-label">Email du licencie *</label><input class="form-input" id="lic-email" type="email" placeholder="prenom.nom@mail.com"></div>
         <div class="form-group"><label class="form-label">Nom (optionnel)</label><input class="form-input" id="lic-nom-dest" placeholder="Pour personnaliser le mail"></div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</div>
         <button onclick="createLicence()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Generer le code et envoyer</button>
       </div>
     </div>
@@ -993,6 +994,8 @@ initChannels();
  <div id="broadcast-count" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
  <div class="form-group"><label class="form-label">Objet</label><input class="form-input" id="bc-sujet" placeholder="Ex: Reprise des entraînements"></div>
  <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="bc-message" rows="6" placeholder="Votre message aux familles..."></textarea></div>
+ <div class="form-group"><label class="form-label">Signature</label><input class="form-input" id="bc-signature" placeholder="Ex: Le Président, Jean Dupont / La Secrétaire, Marie Martin"></div>
+ <div style="font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</div>
  <button onclick="sendBroadcast()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer"> Ouvrir le mail avec tous les destinataires</button>
  </div>
  </div>
@@ -3332,7 +3335,7 @@ function sendLicenceMail(lic){
     "Astuce : vous pouvez aussi ajouter cette page a votre ecran d'accueil pour un acces rapide.\n\n"+
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de probleme, contactez le club directement.\n\n"+
-    "L'équipe ASMB\n"+
+    "Secrétariat\n"+
  "Saint-Étienne Métropole Basket\n"+
  "—\n"+
  " ASMB · EST. 2022";
@@ -3944,16 +3947,20 @@ function showBroadcast(){
   document.getElementById("broadcast-count").textContent=emails.length+" destinataire"+(emails.length>1?"s":"")+" trouve"+(emails.length>1?"s":"")+" dans les inscriptions";
   document.getElementById("bc-sujet").value="";
   document.getElementById("bc-message").value="";
+  document.getElementById("bc-signature").value=localStorage.getItem("asmb_broadcast_signature")||"";
   document.getElementById("modal-broadcast").style.display="flex";
 }
 
 function sendBroadcast(){
   var sujet=document.getElementById("bc-sujet").value.trim();
   var message=document.getElementById("bc-message").value.trim();
+  var signature=document.getElementById("bc-signature").value.trim();
   if(!sujet||!message){alert("Objet et message obligatoires");return;}
   var emails=getAllContactEmails();
   if(!emails.length){alert("Aucun contact email trouve");return;}
-  var body="Bonjour,\n\n"+message+"\n\nL'équipe ASMB\nSaint-Étienne Métropole Basket";
+  localStorage.setItem("asmb_broadcast_signature",signature);
+  var sigBlock=signature?(signature+"\nASMB · Saint-Étienne Métropole Basket"):"L'équipe ASMB\nSaint-Étienne Métropole Basket";
+  var body="Bonjour,\n\n"+message+"\n\n"+sigBlock;
   var mailto="mailto:?bcc="+emails.join(",")+"&subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
   window.location.href=mailto;
   closeModal("modal-broadcast");
@@ -8224,7 +8231,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784773178";
+var APP_VERSION="1784774360";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
