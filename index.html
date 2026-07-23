@@ -33,8 +33,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .scr{display:none;min-height:100%}.scr.on{display:block}
 #scr-chat.on{display:flex}
 .bnav{display:flex;background:var(--sf);border-top:1px solid var(--bdr);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));flex-shrink:0;box-shadow:0 -4px 20px var(--shadow)}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;border:none;background:none;color:var(--mut);font-size:8.5px;font-weight:600;text-transform:uppercase;transition:color .15s;white-space:nowrap}
-.bni.on{color:var(--ltg)}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 2px 4px;border:none;background:none;color:var(--mut);font-size:8.5px;font-weight:600;text-transform:uppercase;transition:color .15s;white-space:nowrap;position:relative}
+.bni::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:0 0 3px 3px;background:var(--ltg);transition:width .18s}
+.bni.on{color:var(--ltg);font-weight:800}.bni.on::before{width:22px}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
 .sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:16px 16px 8px}
 .hero{background:linear-gradient(160deg,#0d2b14,#1B5C28,#0d2b14);padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
 [data-theme="dark"] .hero{background:linear-gradient(160deg,#040a05,#0a1f0c,#040a05)}
@@ -1852,8 +1853,19 @@ function showScr(id){
  var el=document.getElementById("scr-"+id);
  if(el)el.classList.add("on");
  document.querySelectorAll(".bni").forEach(function(b){b.classList.remove("on");});
- var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
- var nb=document.getElementById("bni-"+(map[id]||"portal"));
+ var profile=localStorage.getItem("asmb_profile");
+ var navKey=null;
+ if(profile==="parent"){
+   var parentMap={"parent-home":"portal",portal:"portal","parent-equipe":"eq","parent-events":"ev","parent-stats":"stats",communaute:"p-communaute",chat:"p-communaute"};
+   navKey=parentMap[id]||"portal";
+ } else if(profile==="coach"){
+   var coachMap={"coach-equipe":"c-equipe",elite:"c-formation",u13home:"c-formation",cycle:"c-formation",seance:"c-formation","pole-competition":"c-competition","pole-evenement":"c-evenements",communaute:"c-communaute",chat:"c-communaute"};
+   navKey=coachMap[id]||"c-equipe";
+ } else {
+   var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin",inscription:"inscription"};
+   navKey=map[id]||"portal";
+ }
+ var nb=navKey?document.getElementById("bni-"+navKey):null;
  if(nb)nb.classList.add("on");
  document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
  var navEl=document.getElementById("bnav-main");
@@ -8212,7 +8224,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784772356";
+var APP_VERSION="1784773178";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
