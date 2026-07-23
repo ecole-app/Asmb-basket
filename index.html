@@ -1964,10 +1964,14 @@ function buildDashboard(){
   html+='</div>';
 
   if(upcoming){
+    var typeLabels={match:"Prochain match",entrainement:"Prochain entraînement",tournoi:"Prochain tournoi"};
+    var upcomingLabel=typeLabels[upcoming.type]||"Prochain événement";
+    var upDateParts=upcoming.date.split("-");
+    var upDateFr=upDateParts.length===3?(upDateParts[2]+"/"+upDateParts[1]+"/"+upDateParts[0]):upcoming.date;
     html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
-      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Prochain événement</div>'+
+      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+upcomingLabel+'</div>'+
       '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upcoming.date+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
   }
 
   el.innerHTML=html;
@@ -8105,7 +8109,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784770616";
+var APP_VERSION="1784771088";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
