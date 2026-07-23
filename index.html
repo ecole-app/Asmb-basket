@@ -6171,6 +6171,17 @@ function deleteDoc(id){if(!confirm("Supprimer ce document ?"))return;var docs=ge
 // ── MODAL UTILS ──────────────────────────────────────────────────
 function closeModal(id){var m=document.getElementById(id);if(m)m.style.display="none";}
 
+// Fermer n'importe quelle modale en cliquant en dehors (sur le fond sombre)
+document.addEventListener("click",function(ev){
+  var t=ev.target;
+  if(!t||!t.id)return;
+  if(t.id.indexOf("modal-")!==0)return;
+  // On ne ferme que si on clique sur le voile lui-meme (pas sur le contenu)
+  if(t.style&&t.style.position==="fixed"&&t.style.display!=="none"){
+    t.style.display="none";
+  }
+});
+
 
 
 
@@ -8247,7 +8258,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784774600";
+var APP_VERSION="1784774799";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
