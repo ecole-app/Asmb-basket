@@ -796,6 +796,22 @@ initChannels();
     </div>
   </div>
 
+  <!-- ═══ PICKER DE REACTION (appui long sur un message) ═══ -->
+  <div id="reaction-picker" style="display:none;position:fixed;z-index:200;background:var(--sf);border:1px solid var(--bdr);border-radius:30px;padding:6px 8px;box-shadow:0 4px 20px var(--shadow)">
+    <div id="reaction-picker-inner" style="display:flex;gap:4px;align-items:center"></div>
+  </div>
+
+  <!-- ═══ MODAL PLUS D'EMOJIS (reaction) ═══ -->
+  <div id="modal-reaction-more" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Choisir une réaction</div>
+        <button onclick="closeModal('modal-reaction-more')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div id="reaction-more-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px"></div>
+    </div>
+  </div>
+
   <!-- ═══ MODAL CREATION SONDAGE ═══ -->
   <div id="modal-poll" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
@@ -6723,15 +6739,19 @@ function listenMessages(channelId){
         msgsEl.appendChild(wrap);
         return;
       }
-      var likeUsers=msg.likeUsers||[];
-      var heartUsers=msg.heartUsers||[];
+      var reactions=msg.reactions||{};
       var myPseudo=savedPseudo||"moi";
-      var likedByMe=likeUsers.indexOf(myPseudo)>=0;
-      var heartedByMe=heartUsers.indexOf(myPseudo)>=0;
+      var myReaction=null;
+      Object.keys(reactions).forEach(function(em){if((reactions[em]||[]).indexOf(myPseudo)>=0)myReaction=em;});
       var canDelete=isOut||window.asmbCoachMode;
-      var reactHtml='<div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">'+
-        '<span onclick="toggleReaction(\''+channelId+'\',\''+d.id+'\',\'like\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:'+(likedByMe?"rgba(39,174,96,.25)":"rgba(0,0,0,.08)")+'">'+(likeUsers.length||"")+'</span>'+
-        '<span onclick="toggleReaction(\''+channelId+'\',\''+d.id+'\',\'heart\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:'+(heartedByMe?"rgba(192,57,43,.2)":"rgba(0,0,0,.08)")+'">'+(heartUsers.length||"")+'</span>';
+      var reactHtml='<div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;align-items:center">';
+      Object.keys(reactions).forEach(function(em){
+        var users=reactions[em]||[];
+        if(!users.length)return;
+        var mine=users.indexOf(myPseudo)>=0;
+        reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"rgba(39,174,96,.22)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
+      });
+      reactHtml+='<span onclick="openReactionPicker(event,\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:12px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.06);color:var(--mut)">+</span>';
       if(window.asmbCoachMode){
         reactHtml+='<span onclick="togglePin(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">'+(pinnedIds.indexOf(d.id)>=0?"Retirer":"Epingler")+'</span>';
       }
@@ -6739,6 +6759,13 @@ function listenMessages(channelId){
         reactHtml+='<span onclick="deleteMessage(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(192,57,43,.12);color:var(--red)"></span>';
       }
       reactHtml+='</div>';
+      bubble.setAttribute("onmousedown","startLongPress(event,'"+channelId+"','"+d.id+"')");
+      bubble.setAttribute("onmouseup","cancelLongPress()");
+      bubble.setAttribute("onmouseleave","cancelLongPress()");
+      bubble.setAttribute("ontouchstart","startLongPress(event,'"+channelId+"','"+d.id+"')");
+      bubble.setAttribute("ontouchend","cancelLongPress()");
+      bubble.setAttribute("ontouchmove","cancelLongPress()");
+      bubble.setAttribute("oncontextmenu","event.preventDefault();openReactionPicker(event,'"+channelId+"','"+d.id+"');return false;");
       bubble.innerHTML=msg.text+'<div class="msg-time">'+time+'</div>'+reactHtml;
       wrap.appendChild(bubble);
       msgsEl.appendChild(wrap);
@@ -6756,20 +6783,99 @@ function listenMessages(channelId){
   });
 }
 
-function toggleReaction(channelId,msgId,type){
+// ── REACTIONS (style WhatsApp : appui long ou clic droit) ──────────
+var QUICK_REACTIONS=["👍","👎","❤️","😂","😮","🙏"];
+var MORE_REACTIONS=["😢","🔥","🎉","👏","😍","🤔","😅","💪","🏀","🥳","👀","🙌","😴","😡","🤝","✅","❌","💯"];
+var longPressTimer=null;
+var reactionPickerTarget=null;
+
+function startLongPress(ev,channelId,msgId){
+  cancelLongPress();
+  longPressTimer=setTimeout(function(){
+    openReactionPicker(ev,channelId,msgId);
+  },450);
+}
+function cancelLongPress(){
+  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+}
+
+function openReactionPicker(ev,channelId,msgId){
+  if(ev&&ev.preventDefault)ev.preventDefault();
+  reactionPickerTarget={channelId:channelId,msgId:msgId};
+  var picker=document.getElementById("reaction-picker");
+  var inner=document.getElementById("reaction-picker-inner");
+  inner.innerHTML="";
+  QUICK_REACTIONS.forEach(function(em){
+    var b=document.createElement("span");
+    b.textContent=em;
+    b.style.cssText="cursor:pointer;font-size:22px;padding:2px 4px";
+    b.onclick=function(){setReaction(channelId,msgId,em);closeReactionPicker();};
+    inner.appendChild(b);
+  });
+  var plus=document.createElement("span");
+  plus.textContent="+";
+  plus.style.cssText="cursor:pointer;font-size:18px;font-weight:800;color:var(--mut);padding:2px 8px;border-radius:50%;background:rgba(0,0,0,.06)";
+  plus.onclick=function(){openMoreReactions();};
+  inner.appendChild(plus);
+
+  var x=(ev&&(ev.touches&&ev.touches[0]?ev.touches[0].clientX:ev.clientX))||window.innerWidth/2;
+  var y=(ev&&(ev.touches&&ev.touches[0]?ev.touches[0].clientY:ev.clientY))||window.innerHeight/2;
+  picker.style.display="block";
+  var pw=Math.min(320,QUICK_REACTIONS.length*34+50);
+  var left=Math.max(8,Math.min(window.innerWidth-pw-8,x-pw/2));
+  var top=Math.max(8,y-60);
+  picker.style.left=left+"px";
+  picker.style.top=top+"px";
+}
+
+function closeReactionPicker(){
+  var picker=document.getElementById("reaction-picker");
+  if(picker)picker.style.display="none";
+}
+
+document.addEventListener("click",function(ev){
+  var picker=document.getElementById("reaction-picker");
+  if(picker&&picker.style.display==="block"&&!picker.contains(ev.target)){
+    closeReactionPicker();
+  }
+});
+
+function openMoreReactions(){
+  closeReactionPicker();
+  var grid=document.getElementById("reaction-more-grid");
+  grid.innerHTML="";
+  QUICK_REACTIONS.concat(MORE_REACTIONS).forEach(function(em){
+    var b=document.createElement("button");
+    b.textContent=em;
+    b.style.cssText="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer";
+    b.onclick=function(){
+      if(reactionPickerTarget)setReaction(reactionPickerTarget.channelId,reactionPickerTarget.msgId,em);
+      closeModal("modal-reaction-more");
+    };
+    grid.appendChild(b);
+  });
+  document.getElementById("modal-reaction-more").style.display="flex";
+}
+
+function setReaction(channelId,msgId,emoji){
   if(!window.fbReady)return;
   if(!checkMyPhone())return;
   var pseudo=savedPseudo||"moi";
-  var field=type==="like"?"likeUsers":"heartUsers";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
-    var current=[];
-    snap.forEach(function(d){if(d.id===msgId){current=d.data()[field]||[];}});
-    var already=current.indexOf(pseudo)>=0;
-    var update={};
-    update[field]=already?window.fbArrayRemove(pseudo):window.fbArrayUnion(pseudo);
-    window.fbUpdateDoc(msgRef,update).catch(function(){
-      window.fbSetDoc(msgRef,update,{merge:true});
+    var reactions={};
+    snap.forEach(function(d){if(d.id===msgId){reactions=JSON.parse(JSON.stringify(d.data().reactions||{}));}});
+    var hadThis=(reactions[emoji]||[]).indexOf(pseudo)>=0;
+    // Retire mon pseudo de toutes les reactions existantes (une seule reaction par personne)
+    Object.keys(reactions).forEach(function(em){
+      reactions[em]=(reactions[em]||[]).filter(function(p){return p!==pseudo;});
+    });
+    if(!hadThis){
+      reactions[emoji]=(reactions[emoji]||[]);
+      reactions[emoji].push(pseudo);
+    }
+    window.fbUpdateDoc(msgRef,{reactions:reactions}).catch(function(){
+      window.fbSetDoc(msgRef,{reactions:reactions},{merge:true});
     });
   });
 }
@@ -8258,7 +8364,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784774799";
+var APP_VERSION="1784775885";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
