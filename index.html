@@ -830,13 +830,45 @@ initChannels();
         <button onclick="closeModal('modal-channel')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Nom du canal</label><input class="form-input" id="ch-name" placeholder="Ex: U17 Masculin"></div>
-      <div class="form-group"><label class="form-label">Icône (emoji)</label><input class="form-input" id="ch-icon" placeholder="" value=""></div>
+      <div class="form-group"><label class="form-label">Icône</label>
+        <div id="ch-icon-picker" onclick="document.getElementById('modal-emoji').style.display='flex'" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">
+          <span id="ch-icon-preview" style="font-size:20px">🏀</span>
+          <span style="font-size:13px;color:var(--mut)">Choisir un emoji</span>
+        </div>
+        <input type="hidden" id="ch-icon" value="🏀">
+      </div>
       <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Équipe U17M"></div>
       <button onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
     </div>
   </div>
 
-  <!-- ═══ DETAIL CANAL ADMIN (membres) ═══ -->
+  <!-- ═══ MODAL CHOIX EMOJI ═══ -->
+  <div id="modal-emoji" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:110;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Choisir une icône</div>
+        <button onclick="closeModal('modal-emoji')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+        <button onclick="pickChannelEmoji('')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">∅</button>
+        <button onclick="pickChannelEmoji('🏀')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏀</button>
+        <button onclick="pickChannelEmoji('⚽')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">⚽</button>
+        <button onclick="pickChannelEmoji('🏐')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏐</button>
+        <button onclick="pickChannelEmoji('🎾')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🎾</button>
+        <button onclick="pickChannelEmoji('🏆')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏆</button>
+        <button onclick="pickChannelEmoji('📣')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📣</button>
+        <button onclick="pickChannelEmoji('🎉')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🎉</button>
+        <button onclick="pickChannelEmoji('⭐')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">⭐</button>
+        <button onclick="pickChannelEmoji('💬')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">💬</button>
+        <button onclick="pickChannelEmoji('👥')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">👥</button>
+        <button onclick="pickChannelEmoji('📅')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📅</button>
+        <button onclick="pickChannelEmoji('🔔')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🔔</button>
+        <button onclick="pickChannelEmoji('🥇')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🥇</button>
+        <button onclick="pickChannelEmoji('🚌')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🚌</button>
+        <button onclick="pickChannelEmoji('📍')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📍</button>
+      </div>
+    </div>
+  </div>
   <div class="scr" id="scr-channel-detail">
     <div id="chdet-hdr" style="padding:14px 16px;border-bottom:1px solid var(--bdr)"></div>
     <div style="padding:12px 16px 8px;display:flex;gap:8px">
@@ -6148,6 +6180,11 @@ function viewFicheModal(phone){
 }
 
 function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
+function pickChannelEmoji(e){
+  document.getElementById("ch-icon").value=e;
+  document.getElementById("ch-icon-preview").textContent=e||"∅";
+  closeModal("modal-emoji");
+}
 
 function createChannel(){
  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
@@ -8081,7 +8118,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784733116";
+var APP_VERSION="1784770331";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
