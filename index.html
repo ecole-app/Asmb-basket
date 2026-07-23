@@ -5791,7 +5791,8 @@ function renderEvPlayers(){
   players.forEach(function(p){
     var lbl=document.createElement("label");
     lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
-    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" checked style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
+    var checkedAttr=selectedTeams.length?"checked":"";
+    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
     el.appendChild(lbl);
   });
 }
@@ -8619,7 +8620,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784808886";
+var APP_VERSION="1784809113";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
