@@ -657,7 +657,10 @@ initChannels();
         </div>
         <div class="form-group"><label class="form-label">Email du licencie *</label><input class="form-input" id="lic-email" type="email" placeholder="prenom.nom@mail.com"></div>
         <div class="form-group"><label class="form-label">Nom (optionnel)</label><input class="form-input" id="lic-nom-dest" placeholder="Pour personnaliser le mail"></div>
-        <div style="font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</div>
+        <div id="lic-mail-tip" style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">
+          <span style="flex:1">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</span>
+          <button onclick="dismissMailTip('lic-mail-tip','asmb_tip_lic_mail_dismissed')" style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:10px;color:var(--mut);line-height:1;padding:0">✕</button>
+        </div>
         <button onclick="createLicence()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Generer le code et envoyer</button>
       </div>
     </div>
@@ -995,7 +998,10 @@ initChannels();
  <div class="form-group"><label class="form-label">Objet</label><input class="form-input" id="bc-sujet" placeholder="Ex: Reprise des entraînements"></div>
  <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="bc-message" rows="6" placeholder="Votre message aux familles..."></textarea></div>
  <div class="form-group"><label class="form-label">Signature</label><input class="form-input" id="bc-signature" placeholder="Ex: Le Président, Jean Dupont / La Secrétaire, Marie Martin"></div>
- <div style="font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</div>
+ <div id="bc-mail-tip" style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">
+   <span style="flex:1">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</span>
+   <button onclick="dismissMailTip('bc-mail-tip','asmb_tip_bc_mail_dismissed')" style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:10px;color:var(--mut);line-height:1;padding:0">✕</button>
+ </div>
  <button onclick="sendBroadcast()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer"> Ouvrir le mail avec tous les destinataires</button>
  </div>
  </div>
@@ -3294,6 +3300,8 @@ function buildLicences(){
 }
 
 function showNewLicence(){
+  var tip=document.getElementById("lic-mail-tip");
+  if(tip)tip.style.display=localStorage.getItem("asmb_tip_lic_mail_dismissed")?"none":"flex";
   document.getElementById("modal-new-lic").style.display="flex";
 }
 function closeNewLicence(){
@@ -3948,7 +3956,15 @@ function showBroadcast(){
   document.getElementById("bc-sujet").value="";
   document.getElementById("bc-message").value="";
   document.getElementById("bc-signature").value=localStorage.getItem("asmb_broadcast_signature")||"";
+  var tip=document.getElementById("bc-mail-tip");
+  if(tip)tip.style.display=localStorage.getItem("asmb_tip_bc_mail_dismissed")?"none":"flex";
   document.getElementById("modal-broadcast").style.display="flex";
+}
+
+function dismissMailTip(elId,storageKey){
+  localStorage.setItem(storageKey,"1");
+  var el=document.getElementById(elId);
+  if(el)el.style.display="none";
 }
 
 function sendBroadcast(){
@@ -8231,7 +8247,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784774360";
+var APP_VERSION="1784774600";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
