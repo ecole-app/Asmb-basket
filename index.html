@@ -1380,6 +1380,7 @@ initChannels();
     </div>
     <div class="sec">Membres de l'équipe</div>
  <div id="coach-matchday-banner" style="margin:12px 0 0"></div>
+ <div id="coach-presence-summary" style="padding:0 12px"></div>
  <div id="coach-eq-members" style="padding-bottom:20px"></div>
  <div style="text-align:center;padding-bottom:80px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
  <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Modifier mon équipe</button>
@@ -1917,6 +1918,8 @@ function updateCountdownBanner(bannerId){
 }
 
 function buildCoachDashboard(el){
+  el=el||document.getElementById("coach-presence-summary")||document.getElementById("dashboard-dirigeant");
+  if(!el)return;
   var teamId=getCoachTeam();
   var team=getTeams().find(function(t){return t.id===teamId;});
   if(!team){el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:13px;font-weight:600">Aucune équipe assignée</div></div>';return;}
@@ -2001,7 +2004,7 @@ function relancerSansReponse(eventId){
     var responded={};
     snap.forEach(function(d){var data=d.data();if(data.eventId===eventId)responded[data.playerId]=true;});
     var noResponse=players.filter(function(p){return !responded[p.id];});
-    if(!noResponse.length){alert("Tout le monde a répondu !");buildCoachDashboard(document.getElementById("dashboard-dirigeant"));return;}
+    if(!noResponse.length){alert("Tout le monde a répondu !");buildCoachDashboard();return;}
     var noms=noResponse.map(function(p){return p.prenom+" "+p.nom;}).join(", ");
     var channelId=findChannelForTeamText(ev.equipe);
     if(!channelId){alert("Aucun canal trouvé pour cette équipe");return;}
@@ -7958,6 +7961,7 @@ function buildCoachEquipe(){
   fillTodayHero("coach-next-event","coach-eq-name",team);
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
   renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);
+  buildCoachDashboard(document.getElementById("coach-presence-summary"));
 
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("coach-eq-members");
@@ -8208,7 +8212,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784771689";
+var APP_VERSION="1784772356";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
