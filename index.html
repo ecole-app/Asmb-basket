@@ -826,49 +826,17 @@ initChannels();
   <div id="modal-channel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau canal</div>
+        <div id="modal-channel-title" style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau canal</div>
         <button onclick="closeModal('modal-channel')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Nom du canal</label><input class="form-input" id="ch-name" placeholder="Ex: U17 Masculin"></div>
-      <div class="form-group"><label class="form-label">Icône</label>
-        <div id="ch-icon-picker" onclick="document.getElementById('modal-emoji').style.display='flex'" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">
-          <span id="ch-icon-preview" style="font-size:20px">🏀</span>
-          <span style="font-size:13px;color:var(--mut)">Choisir un emoji</span>
-        </div>
-        <input type="hidden" id="ch-icon" value="🏀">
-      </div>
+      <div class="form-group"><label class="form-label">Icône (emoji)</label><input class="form-input" id="ch-icon" placeholder="" value=""></div>
       <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Équipe U17M"></div>
-      <button onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
+      <button id="modal-channel-btn" onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
     </div>
   </div>
 
-  <!-- ═══ MODAL CHOIX EMOJI ═══ -->
-  <div id="modal-emoji" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:110;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:var(--txt)">Choisir une icône</div>
-        <button onclick="closeModal('modal-emoji')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
-        <button onclick="pickChannelEmoji('')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">∅</button>
-        <button onclick="pickChannelEmoji('🏀')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏀</button>
-        <button onclick="pickChannelEmoji('⚽')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">⚽</button>
-        <button onclick="pickChannelEmoji('🏐')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏐</button>
-        <button onclick="pickChannelEmoji('🎾')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🎾</button>
-        <button onclick="pickChannelEmoji('🏆')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🏆</button>
-        <button onclick="pickChannelEmoji('📣')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📣</button>
-        <button onclick="pickChannelEmoji('🎉')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🎉</button>
-        <button onclick="pickChannelEmoji('⭐')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">⭐</button>
-        <button onclick="pickChannelEmoji('💬')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">💬</button>
-        <button onclick="pickChannelEmoji('👥')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">👥</button>
-        <button onclick="pickChannelEmoji('📅')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📅</button>
-        <button onclick="pickChannelEmoji('🔔')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🔔</button>
-        <button onclick="pickChannelEmoji('🥇')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🥇</button>
-        <button onclick="pickChannelEmoji('🚌')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">🚌</button>
-        <button onclick="pickChannelEmoji('📍')" style="font-size:22px;padding:10px 0;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer">📍</button>
-      </div>
-    </div>
-  </div>
+  <!-- ═══ DETAIL CANAL ADMIN (membres) ═══ -->
   <div class="scr" id="scr-channel-detail">
     <div id="chdet-hdr" style="padding:14px 16px;border-bottom:1px solid var(--bdr)"></div>
     <div style="padding:12px 16px 8px;display:flex;gap:8px">
@@ -6081,7 +6049,7 @@ function buildAdminComm(){
       var memberCount=(ch.members||[]).length;
       var div=document.createElement("div");div.className="admin-card";
       div.onclick=function(){openChannelDetail(ch);};
-      div.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:var(--dkg)">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+ch.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+ch.desc+'</div><div style="font-size:11px;color:var(--mut)">'+memberCount+' membre'+(memberCount>1?'s':'')+' autorise'+(memberCount>1?'s':'')+'</div></div><button onclick="event.stopPropagation();deleteChannel(\''+ch.id+'\',\''+ch.name.replace(/'/g,"")+'\')" style="padding:6px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">✕</button></div>';
+      div.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:var(--dkg)">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+ch.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+ch.desc+'</div><div style="font-size:11px;color:var(--mut)">'+memberCount+' membre'+(memberCount>1?'s':'')+' autorise'+(memberCount>1?'s':'')+'</div></div><button onclick="event.stopPropagation();editChannelInfo('+JSON.stringify(ch).replace(/"/g,"&quot;")+')" style="padding:6px 10px;border-radius:var(--rx);background:rgba(0,0,0,.06);color:var(--txt);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-right:6px">✎</button><button onclick="event.stopPropagation();deleteChannel(\''+ch.id+'\',\''+ch.name.replace(/'/g,"")+'\')" style="padding:6px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">✕</button></div>';
       el.appendChild(div);
     });
   });
@@ -6179,11 +6147,23 @@ function viewFicheModal(phone){
  document.getElementById("modal-fiche-view").style.display="flex";
 }
 
-function showAddChannel(){document.getElementById("modal-channel").style.display="flex";}
-function pickChannelEmoji(e){
-  document.getElementById("ch-icon").value=e;
-  document.getElementById("ch-icon-preview").textContent=e||"∅";
-  closeModal("modal-emoji");
+var editingChannelId=null;
+function showAddChannel(){
+  editingChannelId=null;
+  document.getElementById("modal-channel-title").textContent="Nouveau canal";
+  document.getElementById("modal-channel-btn").textContent="Créer le canal";
+  document.getElementById("ch-name").value="";document.getElementById("ch-desc").value="";
+  document.getElementById("ch-icon").value="";
+  document.getElementById("modal-channel").style.display="flex";
+}
+function editChannelInfo(ch){
+  editingChannelId=ch.id;
+  document.getElementById("modal-channel-title").textContent="Modifier le canal";
+  document.getElementById("modal-channel-btn").textContent="Enregistrer";
+  document.getElementById("ch-name").value=ch.name||"";
+  document.getElementById("ch-desc").value=ch.desc||"";
+  document.getElementById("ch-icon").value=ch.icon||"";
+  document.getElementById("modal-channel").style.display="flex";
 }
 
 function createChannel(){
@@ -6192,10 +6172,17 @@ function createChannel(){
  var icon=document.getElementById("ch-icon").value.trim()||"";
  var desc=document.getElementById("ch-desc").value.trim();
  if(!name){alert("Nom du canal obligatoire");return;}
- var id=name.toLowerCase().replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-");
- window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
- id:id,name:name,icon:icon,desc:desc,members:[]
- },{merge:true});
+ if(editingChannelId){
+   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
+     name:name,icon:icon,desc:desc
+   },{merge:true});
+   editingChannelId=null;
+ }else{
+   var id=name.toLowerCase().replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-");
+   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
+   id:id,name:name,icon:icon,desc:desc,members:[]
+   },{merge:true});
+ }
  closeModal("modal-channel");
  document.getElementById("ch-name").value="";document.getElementById("ch-desc").value="";
 }
@@ -8118,7 +8105,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784770331";
+var APP_VERSION="1784770616";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
