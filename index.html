@@ -864,6 +864,37 @@ initChannels();
     </div>
   </div>
 
+  <!-- ═══ HISTORIQUE JOUEUR (coach) ═══ -->
+  <div class="scr" id="scr-player-history" style="flex-direction:column">
+    <div style="padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr)">
+      <div id="ph2-avatar" style="width:44px;height:44px;border-radius:50%;background:var(--dkg);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+      <div><div id="ph2-name" style="font-size:15px;font-weight:800;color:var(--txt)"></div><div id="ph2-sub" style="font-size:11px;color:var(--mut)"></div></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 0 30px">
+      <div class="sec">📅 Assiduité saison</div>
+      <div id="ph2-attendance" style="margin:0 12px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)"></div>
+
+      <div class="sec" style="justify-content:space-between">⭐ Évaluations mensuelles <button onclick="showMonthlyEvalForm()" style="font-size:10px;font-weight:700;color:var(--dkg);background:rgba(27,92,40,.08);padding:5px 10px;border-radius:20px;border:none;cursor:pointer">+ Évaluer ce mois-ci</button></div>
+      <div id="ph2-monthly" style="margin:0 12px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)"></div>
+
+      <div class="sec">🏕️ Évaluations stages/camps</div>
+      <div id="ph2-events" style="margin:0 12px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)"></div>
+    </div>
+  </div>
+
+  <!-- ═══ FORMULAIRE EVALUATION MENSUELLE ═══ -->
+  <div id="modal-monthly-eval" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div id="monthly-eval-title" style="font-size:15px;font-weight:800;color:var(--txt)">Évaluation du mois</div>
+        <button onclick="closeModal('modal-monthly-eval')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <div style="font-size:11px;color:var(--mut);margin-bottom:14px">Note chaque critère, une seule évaluation par mois (tu peux la modifier tant que le mois n'est pas fini)</div>
+      <div id="monthly-eval-fields"></div>
+      <button onclick="saveMonthlyEval()" style="width:100%;padding:13px;border-radius:8px;background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:14px">Enregistrer</button>
+    </div>
+  </div>
+
   <!-- ═══ ADMIN COMMUNAUTE ═══ -->
   <div class="scr" id="scr-admin-comm">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
@@ -1922,7 +1953,7 @@ function showScr(id){
    var parentMap={"parent-home":"portal",portal:"portal","parent-equipe":"eq","parent-events":"ev","parent-stats":"stats",communaute:"p-communaute",chat:"p-communaute"};
    navKey=parentMap[id]||"portal";
  } else if(profile==="coach"){
-   var coachMap={"coach-equipe":"c-equipe",elite:"c-formation",u13home:"c-formation",cycle:"c-formation",seance:"c-formation","pole-competition":"c-competition","pole-evenement":"c-evenements",communaute:"c-communaute",chat:"c-communaute"};
+   var coachMap={"coach-equipe":"c-equipe","player-history":"c-equipe",elite:"c-formation",u13home:"c-formation",cycle:"c-formation",seance:"c-formation","pole-competition":"c-competition","pole-evenement":"c-evenements",communaute:"c-communaute",chat:"c-communaute"};
    navKey=coachMap[id]||"c-equipe";
  } else {
    var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin","live-eval":"admin",inscription:"inscription"};
@@ -1939,7 +1970,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],documents:["Documents","Fichiers et formulaires"]};
+ var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -8387,7 +8418,8 @@ function buildCoachEquipe(){
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+'</div>';
+    var historyBtn='<button onclick="openPlayerHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
     el.appendChild(div);
   });
 }
@@ -8416,6 +8448,183 @@ function editPlayerLicence(playerId){
   savePlayers(players);
   buildCoachEquipe();
   alert("Licence mise a jour.");
+}
+
+// ── HISTORIQUE JOUEUR (coach) : assiduite + evaluations mensuelles + stages ──
+var currentHistoryPlayerId=null;
+var MONTH_NAMES_FR=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+function getMonthlyEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_monthly_evaluations")||"{}");}catch(e){return {};}}
+function saveMonthlyEvaluations(obj){localStorage.setItem("asmb_monthly_evaluations",JSON.stringify(obj));}
+
+function openPlayerHistory(playerId){
+  currentHistoryPlayerId=playerId;
+  stack.push("player-history");showScr("player-history");
+  buildPlayerHistoryScreen();
+}
+
+function buildPlayerHistoryScreen(){
+  var p=getPlayers().find(function(x){return x.id===currentHistoryPlayerId;});
+  if(!p)return;
+  var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
+  document.getElementById("ph2-avatar").textContent=initials;
+  document.getElementById("ph2-name").textContent=p.prenom+" "+p.nom;
+  document.getElementById("ph2-sub").textContent=(p.cat||"")+(p.maillot?" · #"+p.maillot:"");
+
+  // Bloc 1 : assiduite (resume + lien vers le detail existant)
+  var events=getEvents().filter(function(e){return e.presences&&e.presences[p.id];});
+  var total=events.length;
+  var present=events.filter(function(e){return e.presences[p.id]==="present";}).length;
+  var pct=total?Math.round(present/total*100):0;
+  var attEl=document.getElementById("ph2-attendance");
+  attEl.innerHTML='<div style="display:flex;gap:8px;margin-bottom:'+(total?"10px":"0")+'">'+
+    '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(39,174,96,.12)"><div style="font-size:18px;font-weight:900;color:#27AE60">'+pct+'%</div><div style="font-size:9px;font-weight:600;color:#27AE60;text-transform:uppercase">Présence</div></div>'+
+    '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(0,0,0,.05)"><div style="font-size:18px;font-weight:900;color:var(--txt)">'+total+'</div><div style="font-size:9px;font-weight:600;color:var(--mut);text-transform:uppercase">Séances</div></div>'+
+    '</div>'+
+    (total?'<div style="text-align:center"><span onclick="showPresenceHistory(\''+p.id+'\')" style="font-size:11px;color:var(--dkg);font-weight:700;cursor:pointer">Voir le détail complet →</span></div>':'<div style="font-size:12px;color:var(--mut)">Aucune donnée pour le moment</div>');
+
+  // Bloc 2 : evaluations mensuelles
+  var criteria=getEvalCriteria();
+  var monthlyAll=getMonthlyEvaluations()[p.id]||{};
+  var monthKeys=Object.keys(monthlyAll).sort(function(a,b){return a<b?1:-1;});
+  var monthlyEl=document.getElementById("ph2-monthly");
+  if(!monthKeys.length){
+    monthlyEl.innerHTML='<div style="font-size:12px;color:var(--mut)">Aucune évaluation mensuelle pour le moment</div>';
+  } else {
+    monthlyEl.innerHTML="";
+    monthKeys.forEach(function(mk,idx){
+      var scores=monthlyAll[mk]||{};
+      var prevScores=monthKeys[idx+1]?(monthlyAll[monthKeys[idx+1]]||{}):null;
+      var total=criteria.reduce(function(s,c){return s+(scores[c]||0);},0);
+      var parts=mk.split("-");
+      var label=MONTH_NAMES_FR[parseInt(parts[1],10)-1]+" "+parts[0];
+      monthlyEl.appendChild(buildEvalAccordionRow(label,null,total,criteria.length*5,criteria,scores,prevScores));
+    });
+  }
+
+  // Bloc 3 : evaluations stages/camps
+  var allEvals=getAllEvaluations();
+  var eventEntries=[];
+  Object.keys(allEvals).forEach(function(eventId){
+    if(allEvals[eventId][p.id]){
+      var ev=getEvents().find(function(e){return e.id===eventId;});
+      if(ev)eventEntries.push({event:ev,scores:allEvals[eventId][p.id]});
+    }
+  });
+  eventEntries.sort(function(a,b){return a.event.date<b.event.date?1:-1;});
+  var eventsEl=document.getElementById("ph2-events");
+  if(!eventEntries.length){
+    eventsEl.innerHTML='<div style="font-size:12px;color:var(--mut)">Aucune évaluation de stage/camp pour le moment</div>';
+  } else {
+    eventsEl.innerHTML="";
+    eventEntries.forEach(function(entry,idx){
+      var total=criteria.reduce(function(s,c){return s+(entry.scores[c]||0);},0);
+      var prevScores=eventEntries[idx+1]?eventEntries[idx+1].scores:null;
+      var sub=entry.event.date+(entry.event.dateFin&&entry.event.dateFin!==entry.event.date?(" → "+entry.event.dateFin):"");
+      eventsEl.appendChild(buildEvalAccordionRow(entry.event.titre,sub,total,criteria.length*5,criteria,entry.scores,prevScores));
+    });
+  }
+}
+
+function buildEvalAccordionRow(title,subLabel,total,maxTotal,criteria,scores,prevScores){
+  var wrap=document.createElement("div");
+  wrap.style.cssText="border-bottom:1px solid var(--bdr)";
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer";
+  hdr.innerHTML='<span style="font-size:12.5px;font-weight:800;color:var(--txt)">'+title+'</span>'+
+    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#27AE60">'+total.toFixed(1)+' / '+maxTotal+'</span><span class="ph2-arrow" style="font-size:11px;color:var(--mut);transition:transform .18s">▾</span></div>';
+  var detail=document.createElement("div");
+  detail.style.cssText="display:none;padding:0 0 10px";
+  var detailHtml=subLabel?('<div style="font-size:10.5px;color:var(--mut);margin-bottom:6px">'+subLabel+'</div>'):"";
+  criteria.forEach(function(c){
+    var val=scores[c]||0;
+    var full=Math.floor(val),half=(val-full)===0.5;
+    var starsStr="★".repeat(full)+(half?"½":"");
+    var trendHtml="";
+    if(prevScores){
+      var prevVal=prevScores[c]||0;
+      var diff=val-prevVal;
+      if(diff>0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(39,174,96,.15);color:#27AE60">▲ +'+diff.toFixed(1)+'</span>';
+      else if(diff<0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(192,57,43,.12);color:#C0392B">▼ '+diff.toFixed(1)+'</span>';
+      else trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(0,0,0,.06);color:var(--mut)">＝</span>';
+    }
+    detailHtml+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);margin-bottom:3px"><b style="color:var(--txt);width:82px;flex-shrink:0;font-weight:700">'+c+'</b><span style="color:#F5A623;letter-spacing:1px">'+(starsStr||"—")+'</span>'+trendHtml+'</div>';
+  });
+  detail.innerHTML=detailHtml;
+  hdr.onclick=function(){
+    var open=detail.style.display==="block";
+    detail.style.display=open?"none":"block";
+    hdr.querySelector(".ph2-arrow").style.transform=open?"":"rotate(180deg)";
+  };
+  wrap.appendChild(hdr);wrap.appendChild(detail);
+  return wrap;
+}
+
+function showMonthlyEvalForm(){
+  var p=getPlayers().find(function(x){return x.id===currentHistoryPlayerId;});
+  if(!p)return;
+  var now=new Date();
+  var monthKey=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  document.getElementById("monthly-eval-title").textContent="Évaluation · "+MONTH_NAMES_FR[now.getMonth()]+" "+now.getFullYear();
+  var criteria=getEvalCriteria();
+  var existing=(getMonthlyEvaluations()[p.id]||{})[monthKey]||{};
+  var fieldsEl=document.getElementById("monthly-eval-fields");
+  fieldsEl.innerHTML="";
+  criteria.forEach(function(c){
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:10px";
+    var lbl=document.createElement("div");
+    lbl.style.cssText="width:90px;font-size:12.5px;font-weight:700;color:var(--txt);flex-shrink:0";
+    lbl.textContent=c;
+    row.appendChild(lbl);
+    row.appendChild(monthlyEvalStarsWrap(c,existing[c]));
+    fieldsEl.appendChild(row);
+  });
+  document.getElementById("modal-monthly-eval").style.display="flex";
+}
+
+var monthlyEvalDraft={};
+function monthlyEvalStarsWrap(critName,val){
+  val=val||0;
+  monthlyEvalDraft[critName]=val;
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;gap:2px";
+  wrap.setAttribute("data-crit",critName);
+  for(var i=1;i<=5;i++){
+    var frac=Math.max(0,Math.min(1,val-(i-1)));
+    var box=document.createElement("span");
+    box.style.cssText="position:relative;display:inline-block;width:22px;height:22px;font-size:20px;line-height:1;cursor:pointer";
+    var bg=document.createElement("span");bg.textContent="★";bg.style.cssText="position:absolute;top:0;left:0;color:var(--bdr)";
+    var fg=document.createElement("span");fg.textContent="★";fg.style.cssText="position:absolute;top:0;left:0;color:#F5A623;overflow:hidden;width:"+(frac*100)+"%;white-space:nowrap";
+    box.appendChild(bg);box.appendChild(fg);
+    box.addEventListener("click",(function(starIdx){
+      return function(ev){
+        var rect=ev.currentTarget.getBoundingClientRect();
+        var half=(ev.clientX-rect.left)<rect.width/2;
+        var newVal=half?starIdx-0.5:starIdx;
+        if(monthlyEvalDraft[critName]===newVal)newVal=0;
+        monthlyEvalDraft[critName]=newVal;
+        var newWrap=monthlyEvalStarsWrap(critName,newVal);
+        wrap.replaceWith(newWrap);
+      };
+    })(i));
+    wrap.appendChild(box);
+  }
+  return wrap;
+}
+
+function saveMonthlyEval(){
+  var p=getPlayers().find(function(x){return x.id===currentHistoryPlayerId;});
+  if(!p)return;
+  var now=new Date();
+  var monthKey=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  var all=getMonthlyEvaluations();
+  if(!all[p.id])all[p.id]={};
+  all[p.id][monthKey]=Object.assign({},monthlyEvalDraft);
+  saveMonthlyEvaluations(all);
+  monthlyEvalDraft={};
+  closeModal("modal-monthly-eval");
+  buildPlayerHistoryScreen();
 }
 
 // ── PARENT EVENEMENTS TAB ─────────────────────────────────────────
@@ -8620,7 +8829,7 @@ buildPortal();
 setTimeout(initProfile,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784809113";
+var APP_VERSION="1784885359";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
