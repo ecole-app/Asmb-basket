@@ -5010,7 +5010,7 @@ function openAdminModule(id){
 
 // ── PLAYERS ──────────────────────────────────────────────────────
 function getPlayers(){try{return JSON.parse(localStorage.getItem("asmb_players")||"[]");}catch(e){return [];}}
-function savePlayers(p){localStorage.setItem("asmb_players",JSON.stringify(p));}
+function savePlayers(p){localStorage.setItem("asmb_players",JSON.stringify(p));fsWriteCollection("players",p);}
 
 function filterCat(cat){
   currentCatFilter=cat;
@@ -5521,6 +5521,72 @@ function saveEvalCriteria(arr){localStorage.setItem("asmb_eval_criteria",JSON.st
 
 function getAllEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_evaluations")||"{}");}catch(e){return {};}}
 function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));}
+
+// ═══ STEP 3 : SYNC LIVE FIRESTORE (lecture onSnapshot + écriture par doc) ═══
+var FS_PREV = {};      // dernier état connu par collection (baseline pour diff écriture)
+var FS_UNSUB = {};     // désabonnements onSnapshot
+var FS_SYNC_STARTED = false;
+
+function fsArrFromSnap(snap){ var a=[]; snap.forEach(function(d){ a.push(d.data()); }); return a; }
+
+function fsStartSync(coll, lsKey){
+  if(FS_UNSUB[coll] || !window.fbDb || !window.fbOnSnapshot) return;
+  FS_UNSUB[coll]=window.fbOnSnapshot(
+    window.fbCollection(window.fbDb, coll),
+    function(snap){
+      var arr=fsArrFromSnap(snap);
+      FS_PREV[coll]=arr.slice();
+      localStorage.setItem(lsKey, JSON.stringify(arr));
+      refreshCurrentScreen();
+    },
+    function(err){ console.log("sync "+coll+":", (err&&err.code)||err); }
+  );
+}
+
+// Écrit un tableau d'entités : seuls les docs nouveaux/modifiés sont poussés, les retirés sont supprimés
+function fsWriteCollection(coll, arr){
+  if(!window.fbDb || !window.fbSetDoc) return;
+  var prev=FS_PREV[coll]||[];
+  var prevMap={};
+  prev.forEach(function(x){ if(x&&x.id!=null) prevMap[String(x.id)]=JSON.stringify(x); });
+  var curIds={};
+  (arr||[]).forEach(function(x){
+    if(!x||x.id==null) return;
+    var k=String(x.id); curIds[k]=1;
+    var s=JSON.stringify(x);
+    if(prevMap[k]!==s){
+      window.fbSetDoc(window.fbDoc(window.fbDb,coll,k), x).catch(function(e){ console.log("write "+coll+"/"+k, (e&&e.code)||e); });
+    }
+  });
+  prev.forEach(function(x){
+    if(x&&x.id!=null && !curIds[String(x.id)]){
+      window.fbDeleteDoc(window.fbDoc(window.fbDb,coll,String(x.id))).catch(function(){});
+    }
+  });
+  FS_PREV[coll]=(arr||[]).slice();
+}
+
+// Re-rendu best-effort de l'écran courant (no-op si non couvert)
+function refreshCurrentScreen(){
+  try{
+    var id=(typeof stack!=="undefined"&&stack.length)?stack[stack.length-1]:null;
+    if(!id) return;
+    var map={
+      portal:window.buildPortal, "parent-home":window.buildParentHome, admin:window.buildAdminHome,
+      equipes:window.buildTeams, planning:window.buildPlanning, licences:window.buildLicences,
+      parametres:window.buildParametres, "live-eval":window.buildLiveEval, inscriptions:window.buildPlayers
+    };
+    var f=map[id];
+    if(typeof f==="function") f();
+  }catch(e){ console.log("refresh:", e); }
+}
+
+function initFirestoreSync(){
+  if(FS_SYNC_STARTED || !window.fbDb) return;
+  FS_SYNC_STARTED=true;
+  fsStartSync("players","asmb_players");
+  // teams, events, licences, evaluations : ajoutés aux steps suivants
+}
 
 // ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
 function migrateToFirestore(){
@@ -7892,6 +7958,7 @@ function finishAuthedUser(user, u){
     localStorage.setItem("asmb_parent_teams", JSON.stringify(u.linkedTeamIds));
   }
   initProfile(); // routage existant, inchangé
+  initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
 }
 
 // Gate au démarrage : remplace l'appel direct à initProfile
