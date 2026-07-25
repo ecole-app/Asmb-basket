@@ -6071,6 +6071,18 @@ function renderEvTeamChecks(){
   noneBtn.style.cssText="padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid "+(noneOn?"var(--mut)":"var(--bdr)")+";background:"+(noneOn?"var(--bdr)":"var(--card)")+";color:var(--mut);cursor:pointer;white-space:normal;max-width:100%;word-break:break-word;text-align:center;line-height:1.3";
   noneBtn.onclick=function(){evSelectedTeams=[];renderEvTeamChecks();renderEvPlayers();};
   el.appendChild(noneBtn);
+  // Chips "Tout le club"
+  var allOn=evSelectedTeams.indexOf("__all__")>=0;
+  var allBtn=document.createElement("button");
+  allBtn.type="button";
+  allBtn.textContent="Tout le club";
+  allBtn.style.cssText="padding:6px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid "+(allOn?"var(--dkg)":"var(--bdr)")+";background:"+(allOn?"var(--dkg)":"var(--card)")+";color:"+(allOn?"#fff":"var(--mut)")+";cursor:pointer;white-space:normal;max-width:100%;word-break:break-word;text-align:center;line-height:1.3";
+  allBtn.onclick=function(){
+    if(evSelectedTeams.indexOf("__all__")>=0){evSelectedTeams=[];}
+    else{evSelectedTeams=["__all__"];}
+    renderEvTeamChecks();renderEvPlayers();
+  };
+  el.appendChild(allBtn);
   teams.forEach(function(t){
     var on=evSelectedTeams.indexOf(t.id)>=0;
     var btn=document.createElement("button");
@@ -6093,18 +6105,23 @@ function toggleEvTeam(teamId){
 function renderEvPlayers(){
   var el=document.getElementById("ev-players-list");if(!el)return;
   var teams=getTeams();
-  var selectedTeams=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;});
+  var allClub=evSelectedTeams.indexOf("__all__")>=0;
   var players;
-  if(!selectedTeams.length){
+  if(allClub){
     players=getPlayers();
   } else {
-    var allowedIds=[];
-    var allowedCats=[];
-    selectedTeams.forEach(function(t){
-      if(t.members&&t.members.length)allowedIds=allowedIds.concat(t.members);
-      else allowedCats.push(t.cat);
-    });
-    players=getPlayers().filter(function(p){return allowedIds.indexOf(p.id)>=0||allowedCats.indexOf(p.cat)>=0;});
+    var selectedTeams=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;});
+    if(!selectedTeams.length){
+      players=getPlayers();
+    } else {
+      var allowedIds=[];
+      var allowedCats=[];
+      selectedTeams.forEach(function(t){
+        if(t.members&&t.members.length)allowedIds=allowedIds.concat(t.members);
+        else allowedCats.push(t.cat);
+      });
+      players=getPlayers().filter(function(p){return allowedIds.indexOf(p.id)>=0||allowedCats.indexOf(p.cat)>=0;});
+    }
   }
   if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur concerne</div>';return;}
   el.innerHTML="";
