@@ -5390,40 +5390,59 @@ function openAddTeamMember(teamId){
   if(!team) return;
   var currentIds=team.members||[];
   var players=getPlayers().filter(function(p){return currentIds.indexOf(p.id)<0;});
-  if(!players.length){alert("Tous les joueurs sont déjà dans cette équipe ou il n'y a aucun joueur enregistré.");return;}
+  if(!players.length){alert("Tous les joueurs sont déjà dans cette équipe ou aucun joueur n'est enregistré.");return;}
   var modal=document.createElement("div");
-  modal.className='team-member-modal';
+  modal.className="team-member-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
-  var cats=[...new Set(players.map(function(p){return p.cat;}))].sort();
-  var opts=players.map(function(p){
-    return '<label style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--bdr);cursor:pointer">'
-      +'<input type="checkbox" value="'+p.id+'" style="width:18px;height:18px;accent-color:var(--dkg)">'
-      +'<span style="font-size:13px;color:var(--txt);font-weight:600">'+p.prenom+' '+p.nom+'</span>'
-      +'<span style="font-size:10px;color:var(--mut);margin-left:auto">'+p.cat+'</span>'
-      +'</label>';
-  }).join("");
-  modal.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;display:flex;flex-direction:column">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
-    +'<div style="font-size:15px;font-weight:800;color:var(--txt)">Ajouter des joueurs</div>'
-    +'<button onclick="this.closest(\'.team-member-modal\').remove()" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'
-    +'</div>'
-    +'<div style="overflow-y:auto;flex:1">'+opts+'</div>'
-    +'<button onclick="confirmAddTeamMembers(\''+teamId+'\')" style="width:100%;margin-top:14px;padding:14px;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;font-size:14px;font-weight:800;cursor:pointer">Ajouter la sélection</button>'
-    +'</div>';
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;display:flex;flex-direction:column";
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Ajouter des joueurs";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="✕";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(){modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  players.forEach(function(p){
+    var lbl=document.createElement("label");
+    lbl.style.cssText="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--bdr);cursor:pointer";
+    var chk=document.createElement("input");
+    chk.type="checkbox";chk.value=p.id;
+    chk.style.cssText="width:18px;height:18px;accent-color:var(--dkg);flex-shrink:0";
+    var name=document.createElement("span");
+    name.style.cssText="font-size:13px;color:var(--txt);font-weight:600;flex:1";
+    name.textContent=p.prenom+" "+p.nom;
+    var cat=document.createElement("span");
+    cat.style.cssText="font-size:10px;color:var(--mut)";
+    cat.textContent=p.cat;
+    lbl.appendChild(chk);lbl.appendChild(name);lbl.appendChild(cat);
+    list.appendChild(lbl);
+  });
+  var addBtn=document.createElement("button");
+  addBtn.textContent="Ajouter la sélection";
+  addBtn.style.cssText="width:100%;margin-top:14px;padding:14px;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;font-size:14px;font-weight:800;cursor:pointer";
+  addBtn.addEventListener("click",function(){
+    var checked=[].slice.call(list.querySelectorAll("input[type=checkbox]:checked")).map(function(c){return c.value;});
+    modal.remove();
+    if(!checked.length) return;
+    var teams=getTeams();
+    var t=teams.find(function(x){return x.id===teamId;});
+    if(!t) return;
+    t.members=(t.members||[]).concat(checked.filter(function(id){return (t.members||[]).indexOf(id)<0;}));
+    saveTeams(teams);
+    buildTeams();
+  });
+  modal.addEventListener("click",function(e){if(e.target===modal)modal.remove();});
+  inner.appendChild(hdr);inner.appendChild(list);inner.appendChild(addBtn);
+  modal.appendChild(inner);
   document.body.appendChild(modal);
 }
-function confirmAddTeamMembers(teamId){
-  var checked=[].slice.call(document.querySelectorAll('.team-member-modal input[type=checkbox]:checked')).map(function(c){return c.value;});
-  var modal=document.querySelector('.team-member-modal');
-  if(modal) modal.remove();
-  if(!checked.length) return;
-  var teams=getTeams();
-  var team=teams.find(function(t){return t.id===teamId;});
-  if(!team) return;
-  team.members=(team.members||[]).concat(checked.filter(function(id){return (team.members||[]).indexOf(id)<0;}));
-  saveTeams(teams);
-  buildTeams();
-}
+function confirmAddTeamMembers(){}
 function removeTeamMember(teamId,playerId){
   var teams=getTeams();
   var team=teams.find(function(t){return t.id===teamId;});
