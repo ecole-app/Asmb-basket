@@ -5368,20 +5368,60 @@ function buildTeams(){
   teams.forEach(function(t){
     var col=CAT_COLORS[t.cat]||"#1B5C28";
     var members=players.filter(function(p){return (t.members||[]).includes(p.id);});
-    var d=document.createElement("div");d.className="team-card";
-    var membersHtml=members.length?members.map(function(p){
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr)">'
-        +'<span style="font-size:12px;color:var(--txt)">'+p.prenom+" "+p.nom+' <span style="color:var(--mut);font-size:10px">'+p.poste+'</span></span>'
-        +'<button onclick="removeTeamMember(\''+t.id+'\',\''+p.id+'\')" style="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;line-height:1">×</button>'
-        +'</div>';
-    }).join(""):'<div style="font-size:12px;color:var(--mut);padding:6px 0">Aucun joueur assigné</div>';
     var plural=members.length>1?"s":"";
-    d.innerHTML="<div class=\"team-hdr\" onclick=\"toggleTeam('"+t.id+"')\"><div><div class=\"team-title\">"+t.name+"</div><div style=\"font-size:11px;color:var(--mut)\">"+t.cat+" · "+members.length+" joueur"+plural+"</div></div><div style=\"display:flex;align-items:center;gap:8px\"><span class=\"player-badge\" style=\"background:"+col+"\">"+t.cat+"</span><span style=\"color:var(--mut)\">▾</span></div></div>"
-      +"<div class=\"team-body\" id=\"team-body-"+t.id+"\"><div style=\"border-top:1px solid var(--bdr);padding-top:10px\">"
-      +membersHtml
-      +'<button onclick="openAddTeamMember(\''+t.id+'\')" style="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:1px solid rgba(39,174,96,.3);cursor:pointer;margin-right:8px">+ Ajouter un joueur</button>'
-      +'<button onclick="deleteTeam(\''+t.id+'\')" style="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer">Supprimer</button>'
-      +"</div></div>";
+    var d=document.createElement("div");d.className="team-card";
+
+    // Header
+    var hdr=document.createElement("div");hdr.className="team-hdr";
+    hdr.addEventListener("click",function(){toggleTeam(t.id);});
+    var hdrLeft=document.createElement("div");
+    var hdrTitle=document.createElement("div");hdrTitle.className="team-title";hdrTitle.textContent=t.name;
+    var hdrSub=document.createElement("div");hdrSub.style.cssText="font-size:11px;color:var(--mut)";
+    hdrSub.textContent=t.cat+" · "+members.length+" joueur"+plural;
+    hdrLeft.appendChild(hdrTitle);hdrLeft.appendChild(hdrSub);
+    var hdrRight=document.createElement("div");hdrRight.style.cssText="display:flex;align-items:center;gap:8px";
+    var badge=document.createElement("span");badge.className="player-badge";badge.style.background=col;badge.textContent=t.cat;
+    var arrow=document.createElement("span");arrow.style.cssText="color:var(--mut)";arrow.textContent="▾";
+    hdrRight.appendChild(badge);hdrRight.appendChild(arrow);
+    hdr.appendChild(hdrLeft);hdr.appendChild(hdrRight);
+
+    // Body
+    var body=document.createElement("div");body.className="team-body";body.id="team-body-"+t.id;
+    var bodyInner=document.createElement("div");bodyInner.style.cssText="border-top:1px solid var(--bdr);padding-top:10px";
+
+    // Liste membres
+    if(members.length){
+      members.forEach(function(p){
+        var row=document.createElement("div");row.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr)";
+        var info=document.createElement("span");info.style.cssText="font-size:12px;color:var(--txt)";
+        info.textContent=p.prenom+" "+p.nom+" ";
+        var poste=document.createElement("span");poste.style.cssText="color:var(--mut);font-size:10px";poste.textContent=p.poste||"";
+        info.appendChild(poste);
+        var rm=document.createElement("button");rm.textContent="×";
+        rm.style.cssText="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;line-height:1";
+        (function(pid){rm.addEventListener("click",function(e){e.stopPropagation();removeTeamMember(t.id,pid);});})(p.id);
+        row.appendChild(info);row.appendChild(rm);bodyInner.appendChild(row);
+      });
+    } else {
+      var empty=document.createElement("div");empty.style.cssText="font-size:12px;color:var(--mut);padding:6px 0";
+      empty.textContent="Aucun joueur assigné";bodyInner.appendChild(empty);
+    }
+
+    // Bouton ajouter
+    var addBtn=document.createElement("button");
+    addBtn.textContent="+ Ajouter un joueur";
+    addBtn.style.cssText="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:1px solid rgba(39,174,96,.3);cursor:pointer;margin-right:8px";
+    (function(tid){addBtn.addEventListener("click",function(e){e.stopPropagation();openAddTeamMember(tid);});})(t.id);
+
+    // Bouton supprimer
+    var delBtn=document.createElement("button");
+    delBtn.textContent="Supprimer";
+    delBtn.style.cssText="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer";
+    (function(tid){delBtn.addEventListener("click",function(e){e.stopPropagation();deleteTeam(tid);});})(t.id);
+
+    bodyInner.appendChild(addBtn);bodyInner.appendChild(delBtn);
+    body.appendChild(bodyInner);
+    d.appendChild(hdr);d.appendChild(body);
     el.appendChild(d);
   });
 }
