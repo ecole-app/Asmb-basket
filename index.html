@@ -5632,7 +5632,7 @@ function getEvalCriteria(){
 function saveEvalCriteria(arr){localStorage.setItem("asmb_eval_criteria",JSON.stringify(arr));}
 
 function getAllEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_evaluations")||"{}");}catch(e){return {};}}
-function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));fsWriteEvaluations(obj);}
+function saveAllEvaluations(obj){console.log("saveAllEvaluations appelé, clés:", Object.keys(obj));localStorage.setItem("asmb_evaluations",JSON.stringify(obj));fsWriteEvaluations(obj);}
 
 // ═══ STEP 3 : SYNC LIVE FIRESTORE (lecture onSnapshot + écriture par doc) ═══
 var FS_PREV = {};      // dernier état connu par collection (baseline pour diff écriture)
