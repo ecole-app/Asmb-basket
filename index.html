@@ -192,8 +192,9 @@ if('serviceWorker' in navigator){
 <script type="module">
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
@@ -212,6 +213,20 @@ window.fbUploadBytes = uploadBytes;
 window.fbGetDownloadURL = getDownloadURL;
 window.fbStorage = storage;
 
+// ── Authentification (comptes réels e-mail/mot de passe) ──
+const auth = getAuth(fbApp);
+setPersistence(auth, browserLocalPersistence).catch(function(e){console.log("Persistance auth:",e&&e.code);});
+window.fbAuth = auth;
+window.fbCreateUser = createUserWithEmailAndPassword;
+window.fbSignIn = signInWithEmailAndPassword;
+window.fbSendReset = sendPasswordResetEmail;
+window.fbOnAuthState = onAuthStateChanged;
+window.fbSignOut = signOut;
+window.fbUpdatePassword = updatePassword;
+window.fbReauth = reauthenticateWithCredential;
+window.fbEmailAuthProvider = EmailAuthProvider;
+window.fbAuthReady = true;
+
 // Persistance hors-ligne : garde les derniers messages/canaux consultes visibles sans reseau
 enableIndexedDbPersistence(db).catch(function(err){
   console.log("Persistance hors-ligne indisponible:", err.code);
@@ -219,6 +234,8 @@ enableIndexedDbPersistence(db).catch(function(err){
 
 // Expose to window for use in main script
 window.fbDb = db;
+window.fbGetDoc = getDoc;
+window.fbWhere = where;
 window.fbCollection = collection;
 window.fbAddDoc = addDoc;
 window.fbQuery = query;
@@ -1216,6 +1233,11 @@ initChannels();
  </div>
  </div>
 
+ <!-- ══════════════ AUTHENTIFICATION ══════════════ -->
+ <div class="scr" id="scr-auth">
+ <div id="auth-content" style="min-height:100%;display:flex;flex-direction:column"></div>
+ </div>
+
  <!-- ══════════════ ECRAN JOUEUR (auto-pointage) ══════════════ -->
  <div class="scr" id="scr-joueur">
  <div id="joueur-content" style="min-height:100%;display:flex;flex-direction:column;padding:24px 20px"></div>
@@ -1940,7 +1962,7 @@ function cycleProgress(cyId){
 
 // ═══ NAV ═════════════════════════════════════════════════════════
 var stack=["portal"],curCy=null,curSea=null;
-var ROOTS=["portal","plan","admin-login","inscription","communaute","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","pole-competition","pole-evenement","tutoriel","joueur"];
+var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","pole-competition","pole-evenement","tutoriel","joueur"];
 
 function showScr(id){
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
@@ -1956,21 +1978,21 @@ function showScr(id){
    var coachMap={"coach-equipe":"c-equipe","player-history":"c-equipe",elite:"c-formation",u13home:"c-formation",cycle:"c-formation",seance:"c-formation","pole-competition":"c-competition","pole-evenement":"c-evenements",communaute:"c-communaute",chat:"c-communaute"};
    navKey=coachMap[id]||"c-equipe";
  } else {
-   var map={"role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin","live-eval":"admin",inscription:"inscription"};
+   var map={"auth":"auth","role-select":"role-select","team-picker":"team-picker","parent-equipe":"portal","parent-events":"portal","parent-stats":"portal",portal:"portal",plan:"plan",elite:"plan",u13home:"plan",cycle:"plan",seance:"plan","communaute":"communaute","chat":"communaute","admin-comm":"admin","channel-detail":"admin","parametres":"admin","pole-elite":"portal","pole-competition":"portal","pole-3x3":"portal","pole-evenement":"portal","pole-basketpourtous":"portal","admin-login":"admin",admin:"admin",licences:"admin","licence-detail":"admin",inscriptions:"admin",equipes:"admin",planning:"admin",documents:"admin","live-eval":"admin",inscription:"inscription"};
    navKey=map[id]||"portal";
  }
  var nb=navKey?document.getElementById("bni-"+navKey):null;
  if(nb)nb.classList.add("on");
  document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
  var navEl=document.getElementById("bnav-main");
- if(navEl)navEl.style.display=(id==="role-select")?"none":"flex";
+ if(navEl)navEl.style.display=(id==="role-select"||id==="auth")?"none":"flex";
  document.querySelector(".main").scrollTop=0;
  refreshHeaderProfileBtn();
  updateHdr(id);
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
+ var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -7563,6 +7585,258 @@ function deletePoleItem(poleId,id){
 }
 
 
+// ═══ AUTHENTIFICATION (comptes réels e-mail/mot de passe) ═══════════
+var BOOTSTRAP_DIRIGEANT_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2"; // compte dirigeant bootstrap (console Firebase)
+var AUTH_STATE = {}; // état transitoire (numéro saisi, résultat lookup)
+
+function authNormPhone(p){ return (p||"").trim().replace(/\s+/g,""); }
+
+function authEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// Cherche un numéro dans les données club (localStorage pour l'instant ; Firestore plus tard)
+function authLookupPhone(phone){
+  var np=authNormPhone(phone);
+  if(!np) return {found:false, phone:np};
+  try{
+    var lics=(typeof getLicences==="function")?getLicences():[];
+    for(var i=0;i<lics.length;i++){
+      var l=lics[i]; if(!l||!l.fiche) continue;
+      var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
+      if(phones.indexOf(np)>=0){
+        var prenom=l.fiche.prenom||"", nom=l.fiche.nom||"";
+        return {found:true, phone:np, role:"parent", playerName:(prenom+" "+nom).trim(), playerIds:[l.id].filter(Boolean), teamIds:[l.fiche.equipe].filter(Boolean)};
+      }
+    }
+  }catch(e){ console.log("lookup licences:",e); }
+  return {found:false, phone:np};
+}
+
+function authLogoHtml(){
+  var hl=document.getElementById("home-logo");
+  if(hl && hl.innerHTML && hl.innerHTML.indexOf("img")>=0){
+    return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+hl.innerHTML.replace(/width="\d+"/,'width="64"').replace(/height="\d+"/,'height="64"')+'</div>';
+  }
+  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(127,232,154,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#7FE89A;letter-spacing:1px">ASMB</div>';
+}
+
+function authHero(title, tag){
+  return '<div style="background:linear-gradient(160deg,#0d2b14,#1B5C28,#0d2b14);padding:30px 22px 26px;text-align:center">'
+    +'<div style="display:flex;justify-content:center;margin-bottom:12px">'+authLogoHtml()+'</div>'
+    +'<div style="font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-.3px">'+authEsc(title)+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:7px;text-transform:uppercase;letter-spacing:.5px">'+authEsc(tag)+'</div>'
+    +'</div>';
+}
+
+var AUTH_LBL='font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dkg);display:block;margin:14px 2px 6px';
+var AUTH_INP='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:15px;background:#fff;color:var(--txt);outline:none;-webkit-appearance:none';
+var AUTH_BTN='width:100%;padding:15px;border:none;border-radius:var(--rs);background:var(--grn);color:#fff;font-size:15px;font-weight:800;margin-top:22px;cursor:pointer';
+var AUTH_BTN2='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radius:var(--rs);background:transparent;color:var(--dkg);font-size:14px;font-weight:800;margin-top:10px;cursor:pointer';
+
+function showAuth(step, data){
+  data=data||{};
+  var el=document.getElementById("auth-content");
+  if(!el) return;
+  stack=["auth"]; showScr("auth");
+  var h="";
+  if(step==="entry"){
+    h=authHero("ASMB Basket","Espace du club")
+      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Saisir le numéro de téléphone pour accéder à l\'espace du club.</p>'
+      +'<label style="'+AUTH_LBL+'">Téléphone</label>'
+      +'<input id="auth-phone" type="tel" inputmode="tel" style="'+AUTH_INP+'" value="'+authEsc(AUTH_STATE.phone||"")+'" placeholder="06 12 34 56 78">'
+      +'<button style="'+AUTH_BTN+'" onclick="authContinue()">Continuer</button>'
+      +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:18px;cursor:pointer" onclick="showAuth(\'login\')">J\'ai déjà un compte</p>'
+      +'<div style="flex:1"></div>'
+      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e6f0e9;border-radius:var(--rx)">App réservée aux membres. Seuls les numéros déjà enregistrés par le club peuvent créer un compte.</p>'
+      +'</div>';
+  } else if(step==="signup"){
+    var chips="";
+    if(data.playerName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);border:1px solid rgba(39,174,96,.3)">'+authEsc(data.playerName)+'</span></div>'; }
+    h=authHero("Bienvenue","Numéro reconnu")
+      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px">Ce numéro est rattaché au club.</p>'
+      +chips
+      +'<label style="'+AUTH_LBL+'">E-mail (pour la connexion)</label>'
+      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
+      +'<label style="'+AUTH_LBL+'">Mot de passe (6 caractères min.)</label>'
+      +'<input id="auth-pass" type="password" style="'+AUTH_INP+'" placeholder="••••••••">'
+      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+      +'<button style="'+AUTH_BTN+'" onclick="authDoSignup()">Créer le compte</button>'
+      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
+      +'</div>';
+  } else if(step==="login"){
+    h=authHero("Connexion","Espace du club")
+      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<label style="'+AUTH_LBL+'">E-mail</label>'
+      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(data.email||"")+'" placeholder="prenom@email.fr">'
+      +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
+      +'<input id="auth-pass" type="password" style="'+AUTH_INP+'" placeholder="••••••••">'
+      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+      +'<button style="'+AUTH_BTN+'" onclick="authDoLogin()">Se connecter</button>'
+      +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:16px;cursor:pointer" onclick="showAuth(\'reset\')">Mot de passe oublié ?</p>'
+      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
+      +'</div>';
+  } else if(step==="unknown"){
+    h=authHero("Numéro inconnu","Pas enregistré au club")
+      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<div style="background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:600;padding:14px;border-radius:var(--rs);text-align:center;line-height:1.45">Ce numéro n\'est pas reconnu. Se rapprocher du club pour l\'ajouter, puis réessayer.</div>'
+      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Réessayer avec un autre numéro</button>'
+      +'</div>';
+  } else if(step==="reset"){
+    h=authHero("Réinitialiser","Nouveau mot de passe")
+      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px;line-height:1.45">Saisir l\'e-mail : un lien de réinitialisation sera envoyé.</p>'
+      +'<label style="'+AUTH_LBL+'">E-mail</label>'
+      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
+      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+      +'<button style="'+AUTH_BTN+'" onclick="authDoReset()">Envoyer le lien</button>'
+      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'login\')">Retour</button>'
+      +'</div>';
+  }
+  el.innerHTML=h;
+}
+
+function authErr(msg){
+  var e=document.getElementById("auth-err");
+  if(e){ e.textContent=msg; e.style.display="block"; }
+  else alert(msg);
+}
+
+function authContinue(){
+  var inp=document.getElementById("auth-phone");
+  var phone=authNormPhone(inp?inp.value:"");
+  if(phone.length<6){ alert("Numéro invalide"); return; }
+  AUTH_STATE.phone=phone;
+  var res=authLookupPhone(phone);
+  AUTH_STATE.lookup=res;
+  if(!res.found){ showAuth("unknown"); return; }
+  // Un compte existe-t-il déjà pour ce numéro ?
+  try{
+    window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("phone","==",phone))).then(function(snap){
+      if(snap && !snap.empty){
+        var d=snap.docs[0].data();
+        showAuth("login",{email:d.email||""});
+      } else {
+        showAuth("signup",res);
+      }
+    }).catch(function(e){ console.log("users query:",e); showAuth("signup",res); });
+  }catch(e){ showAuth("signup",res); }
+}
+
+function authDoSignup(){
+  var email=(document.getElementById("auth-email")||{}).value||"";
+  var pass=(document.getElementById("auth-pass")||{}).value||"";
+  email=email.trim();
+  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
+  if(pass.length<6){ authErr("Mot de passe : 6 caractères minimum"); return; }
+  var res=AUTH_STATE.lookup||{};
+  window.fbCreateUser(window.fbAuth, email, pass).then(function(cred){
+    var uid=cred.user.uid;
+    return window.fbSetDoc(window.fbDoc(window.fbDb,"users",uid), {
+      phone: AUTH_STATE.phone||"",
+      email: email,
+      roles: ["parent"],
+      linkedPlayerIds: res.playerIds||[],
+      linkedTeamIds: res.teamIds||[],
+      createdAt: window.fbServerTimestamp()
+    });
+  }).catch(function(e){
+    var c=e&&e.code||"";
+    if(c==="auth/email-already-in-use") authErr("Cet e-mail a déjà un compte. Utiliser « J'ai déjà un compte ».");
+    else if(c==="auth/weak-password") authErr("Mot de passe trop faible (6 caractères min.)");
+    else if(c==="auth/invalid-email") authErr("E-mail invalide");
+    else authErr("Erreur : "+(c||e.message||"inconnue"));
+  });
+  // la suite (routage) est gérée par onAuthStateChanged
+}
+
+function authDoLogin(){
+  var email=((document.getElementById("auth-email")||{}).value||"").trim();
+  var pass=(document.getElementById("auth-pass")||{}).value||"";
+  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
+  if(!pass){ authErr("Mot de passe requis"); return; }
+  window.fbSignIn(window.fbAuth, email, pass).catch(function(e){
+    var c=e&&e.code||"";
+    if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found") authErr("E-mail ou mot de passe incorrect");
+    else if(c==="auth/too-many-requests") authErr("Trop de tentatives. Réessayer plus tard.");
+    else authErr("Erreur : "+(c||e.message||"inconnue"));
+  });
+}
+
+function authDoReset(){
+  var email=((document.getElementById("auth-email")||{}).value||"").trim();
+  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
+  window.fbSendReset(window.fbAuth, email).then(function(){
+    var el=document.getElementById("auth-content");
+    if(el) el.innerHTML=authHero("Lien envoyé","Vérifier la boîte mail")
+      +'<div style="padding:24px 20px;text-align:center"><p style="font-size:14px;color:var(--txt2);line-height:1.5">Un e-mail de réinitialisation vient d\'être envoyé à<br><b>'+authEsc(email)+'</b></p>'
+      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'login\')">Retour à la connexion</button></div>';
+  }).catch(function(e){
+    var c=e&&e.code||"";
+    if(c==="auth/user-not-found") authErr("Aucun compte pour cet e-mail");
+    else authErr("Erreur : "+(c||e.message||"inconnue"));
+  });
+}
+
+function authLogout(){
+  window.fbSignOut(window.fbAuth).then(function(){
+    localStorage.removeItem("asmb_profile");
+    try{ location.reload(); }catch(e){ showAuth("entry"); }
+  });
+}
+
+// Applique l'utilisateur authentifié : lit users/{uid}, amorce le dirigeant si besoin, puis route
+function applyAuthedUser(user){
+  window.fbGetDoc(window.fbDoc(window.fbDb,"users",user.uid)).then(function(snap){
+    if(snap && snap.exists()){
+      finishAuthedUser(user, snap.data());
+    } else if(user.uid===BOOTSTRAP_DIRIGEANT_UID && BOOTSTRAP_DIRIGEANT_UID){
+      var seed={ phone:"", email:user.email||"", roles:["dirigeant"], linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp() };
+      window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid), seed).then(function(){ finishAuthedUser(user, seed); });
+    } else {
+      // Compte auth sans doc users : sécurité, on déconnecte
+      alert("Compte non rattaché au club. Contacter un dirigeant.");
+      window.fbSignOut(window.fbAuth);
+      showAuth("entry");
+    }
+  }).catch(function(e){
+    console.log("applyAuthedUser:",e);
+    alert("Erreur de connexion aux données. Réessayer.");
+  });
+}
+
+function finishAuthedUser(user, u){
+  var roles=u.roles||[];
+  var profile = roles.indexOf("dirigeant")>=0 ? "dirigeant"
+              : roles.indexOf("coach")>=0 ? "coach"
+              : roles.indexOf("parent")>=0 ? "parent"
+              : "parent";
+  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
+  localStorage.setItem("asmb_profile", profile);
+  if(u.phone){ myPhone=u.phone; localStorage.setItem("asmb_phone", u.phone); }
+  if(profile==="parent" && (u.linkedTeamIds||[]).length){
+    localStorage.setItem("asmb_parent_teams", JSON.stringify(u.linkedTeamIds));
+  }
+  initProfile(); // routage existant, inchangé
+}
+
+// Gate au démarrage : remplace l'appel direct à initProfile
+function initAuthGate(){
+  var urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
+  if(!window.fbAuthReady || !window.fbAuth){
+    // Firebase pas prêt : on retente brièvement, sinon fallback ancien comportement
+    if(!window.__authWait){ window.__authWait=0; }
+    if(window.__authWait++ < 40){ setTimeout(initAuthGate,100); return; }
+    initProfile(); return;
+  }
+  window.fbOnAuthState(window.fbAuth, function(user){
+    if(user){ applyAuthedUser(user); }
+    else { showAuth("entry"); }
+  });
+}
+
+
 // ═══ SYSTEME PROFIL PARENT / COACH ═══════════════════════════════
 var ASMB_LOGO_B64_REF = null; // will reuse existing home-logo html via cloning
 
@@ -8826,7 +9100,7 @@ function toggleTheme(){
 }());
 
 buildPortal();
-setTimeout(initProfile,80);
+setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
 var APP_VERSION="1784885359";
