@@ -5392,6 +5392,7 @@ function openAddTeamMember(teamId){
   var players=getPlayers().filter(function(p){return currentIds.indexOf(p.id)<0;});
   if(!players.length){alert("Tous les joueurs sont déjà dans cette équipe ou il n'y a aucun joueur enregistré.");return;}
   var modal=document.createElement("div");
+  modal.className='team-member-modal';
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var cats=[...new Set(players.map(function(p){return p.cat;}))].sort();
   var opts=players.map(function(p){
@@ -5404,7 +5405,7 @@ function openAddTeamMember(teamId){
   modal.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;display:flex;flex-direction:column">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
     +'<div style="font-size:15px;font-weight:800;color:var(--txt)">Ajouter des joueurs</div>'
-    +'<button onclick="this.closest(\'[style*=fixed]\').remove()" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'
+    +'<button onclick="this.closest(\'.team-member-modal\').remove()" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'
     +'</div>'
     +'<div style="overflow-y:auto;flex:1">'+opts+'</div>'
     +'<button onclick="confirmAddTeamMembers(\''+teamId+'\')" style="width:100%;margin-top:14px;padding:14px;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;font-size:14px;font-weight:800;cursor:pointer">Ajouter la sélection</button>'
@@ -5412,8 +5413,8 @@ function openAddTeamMember(teamId){
   document.body.appendChild(modal);
 }
 function confirmAddTeamMembers(teamId){
-  var checked=[].slice.call(document.querySelectorAll('[style*=fixed] input[type=checkbox]:checked')).map(function(c){return c.value;});
-  var modal=document.querySelector('[style*=fixed][style*=z-index:300]');
+  var checked=[].slice.call(document.querySelectorAll('.team-member-modal input[type=checkbox]:checked')).map(function(c){return c.value;});
+  var modal=document.querySelector('.team-member-modal');
   if(modal) modal.remove();
   if(!checked.length) return;
   var teams=getTeams();
