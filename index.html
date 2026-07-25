@@ -3347,7 +3347,7 @@ SIT_DUR["5.2-2"]=5000;SIT_ANIMS["5.2-2"]=function(ctx,t){if(!ctx)return;
 // ═══ SYSTÈME LICENCES ════════════════════════════════════════════
 
 function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){return [];}}
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));}
+function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);}
 
 function genCode(){
  var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -5359,7 +5359,7 @@ function getPlayersForEvent(ev){
   }
   return getPlayers().filter(function(p){return p.cat&&equipeUp.indexOf(p.cat.toUpperCase())>=0;});
 }
-function saveTeams(t){localStorage.setItem("asmb_teams",JSON.stringify(t));}
+function saveTeams(t){localStorage.setItem("asmb_teams",JSON.stringify(t));fsWriteCollection("teams",t);}
 function buildTeams(){
   var teams=getTeams(),players=getPlayers();
   var el=document.getElementById("teamList");if(!el)return;
@@ -5392,20 +5392,14 @@ function deleteTeam(id){if(!confirm("Supprimer cette équipe ?"))return;var team
 function getEvents(){try{return JSON.parse(localStorage.getItem("asmb_events")||"[]");}catch(e){return [];}}
 function saveEvents(e){
   localStorage.setItem("asmb_events",JSON.stringify(e));
-  if(window.fbReady){
-    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","events"),{list:JSON.stringify(e)},{merge:true}).catch(function(){});
-  }
+  fsWriteCollection("events",e);
 }
 
 function fetchEventsFromCloud(){
-  if(!window.fbReady)return Promise.resolve(getEvents());
-  return window.fbGetDocs(window.fbCollection(window.fbDb,"app_data")).then(function(snap){
-    var found=null;
-    snap.forEach(function(d){if(d.id==="events")found=d.data();});
-    if(found&&found.list){
-      try{return JSON.parse(found.list);}catch(e){return getEvents();}
-    }
-    return getEvents();
+  if(!window.fbReady||!window.fbGetDocs)return Promise.resolve(getEvents());
+  return window.fbGetDocs(window.fbCollection(window.fbDb,"events")).then(function(snap){
+    var a=[]; snap.forEach(function(d){a.push(d.data());});
+    return a.length?a:getEvents();
   }).catch(function(){return getEvents();});
 }
 var planViewMode="list";
@@ -5520,7 +5514,7 @@ function getEvalCriteria(){
 function saveEvalCriteria(arr){localStorage.setItem("asmb_eval_criteria",JSON.stringify(arr));}
 
 function getAllEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_evaluations")||"{}");}catch(e){return {};}}
-function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));}
+function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));fsWriteEvaluations(obj);}
 
 // ═══ STEP 3 : SYNC LIVE FIRESTORE (lecture onSnapshot + écriture par doc) ═══
 var FS_PREV = {};      // dernier état connu par collection (baseline pour diff écriture)
@@ -5566,6 +5560,37 @@ function fsWriteCollection(coll, arr){
   FS_PREV[coll]=(arr||[]).slice();
 }
 
+// Évaluations : stockées en map {eventId:{playerId:{critère:score}}} → 1 doc par eventId
+var FS_PREV_EVAL={};
+function fsStartSyncEvaluations(){
+  if(FS_UNSUB["evaluations"] || !window.fbDb || !window.fbOnSnapshot) return;
+  FS_UNSUB["evaluations"]=window.fbOnSnapshot(
+    window.fbCollection(window.fbDb,"evaluations"),
+    function(snap){
+      var map={};
+      snap.forEach(function(d){ var v=d.data(); map[d.id]=(v&&v.scores)?v.scores:{}; });
+      FS_PREV_EVAL=JSON.parse(JSON.stringify(map));
+      localStorage.setItem("asmb_evaluations", JSON.stringify(map));
+      refreshCurrentScreen();
+    },
+    function(err){ console.log("sync evaluations:", (err&&err.code)||err); }
+  );
+}
+function fsWriteEvaluations(obj){
+  if(!window.fbDb || !window.fbSetDoc) return;
+  obj=obj||{};
+  Object.keys(obj).forEach(function(evId){
+    var s=JSON.stringify(obj[evId]);
+    if(JSON.stringify(FS_PREV_EVAL[evId])!==s){
+      window.fbSetDoc(window.fbDoc(window.fbDb,"evaluations",String(evId)), {scores:obj[evId]}).catch(function(e){ console.log("write eval/"+evId, (e&&e.code)||e); });
+    }
+  });
+  Object.keys(FS_PREV_EVAL).forEach(function(evId){
+    if(!(evId in obj)){ window.fbDeleteDoc(window.fbDoc(window.fbDb,"evaluations",String(evId))).catch(function(){}); }
+  });
+  FS_PREV_EVAL=JSON.parse(JSON.stringify(obj));
+}
+
 // Re-rendu best-effort de l'écran courant (no-op si non couvert)
 function refreshCurrentScreen(){
   try{
@@ -5585,7 +5610,10 @@ function initFirestoreSync(){
   if(FS_SYNC_STARTED || !window.fbDb) return;
   FS_SYNC_STARTED=true;
   fsStartSync("players","asmb_players");
-  // teams, events, licences, evaluations : ajoutés aux steps suivants
+  fsStartSync("teams","asmb_teams");
+  fsStartSync("licences","asmb_licences");
+  fsStartSync("events","asmb_events");
+  fsStartSyncEvaluations();
 }
 
 // ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
