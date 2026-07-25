@@ -1114,6 +1114,11 @@ initChannels();
  <div style="font-size:16px;font-weight:800;color:var(--txt)">Paramètres</div>
  <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Données</div>
  </div>
+ <div class="sec">Compte</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div id="account-info-box" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
+ <button onclick="authConfirmLogout()" style="width:100%;padding:12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:13px;font-weight:700;border:none;cursor:pointer">Se déconnecter</button>
+ </div>
  <div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
  <div class="sec">Apparence</div>
@@ -1175,6 +1180,12 @@ initChannels();
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Sauvegarde automatique</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos données sont sauvegardees automatiquement dans le cloud</div>
  <button onclick="restoreFromCloud()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Restaurer depuis le cloud</button>
+ </div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:13px;font-weight:700;color:var(--txt)">Migration vers Firestore</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px">Copier joueurs, équipes, événements, licences et évaluations vers le cloud partagé (1 document par entité).</div>
+ <button onclick="migrateToFirestore()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Lancer la migration</button>
+ <div id="migration-status" style="font-size:11px;color:var(--mut);margin-top:10px;line-height:1.5"></div>
  </div>
  <div class="sec">Demonstration</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
@@ -4099,7 +4110,18 @@ function buildParametres(){
     var tg=document.getElementById("notif-"+t+"-toggle");
     if(tg)tg.checked=localStorage.getItem("asmb_notif_"+t)!=="off";
   });
+  var accEl=document.getElementById("account-info-box");
+  if(accEl){
+    var u=window.ASMB_USER;
+    accEl.innerHTML = u
+      ? "Connecté en tant que <b>"+authEsc(u.email||"")+"</b>"
+      : "Connexion en cours...";
+  }
   buildClubStats();
+}
+
+function authConfirmLogout(){
+  if(confirm("Se déconnecter de l'application ?")) authLogout();
 }
 
 function toggleNotifType(type,checked){
@@ -5499,6 +5521,39 @@ function saveEvalCriteria(arr){localStorage.setItem("asmb_eval_criteria",JSON.st
 
 function getAllEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_evaluations")||"{}");}catch(e){return {};}}
 function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));}
+
+// ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
+function migrateToFirestore(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ alert("Réservé au dirigeant."); return; }
+  if(!window.fbDb || !window.fbSetDoc){ alert("Firestore non disponible."); return; }
+  if(!confirm("Copier toutes les données locales vers Firestore ?\n\n(Sans risque : écrase les documents existants, peut être relancé.)")) return;
+  var statusEl=document.getElementById("migration-status");
+  function log(msg){ if(statusEl){ statusEl.innerHTML=msg; } }
+  log("Migration en cours...");
+  var tasks=[], counts={players:0,teams:0,events:0,licences:0,evaluations:0}, errors=[];
+  function push(coll,id,data,key){
+    if(id==null||id==="") return;
+    tasks.push(
+      window.fbSetDoc(window.fbDoc(window.fbDb,coll,String(id)),data)
+        .then(function(){ counts[key]++; })
+        .catch(function(e){ errors.push(coll+"/"+id+" ("+((e&&e.code)||(e&&e.message)||"err")+")"); })
+    );
+  }
+  try{
+    getPlayers().forEach(function(p){ if(p) push("players",p.id,p,"players"); });
+    getTeams().forEach(function(t){ if(t) push("teams",t.id,t,"teams"); });
+    getEvents().forEach(function(e){ if(e) push("events",e.id,e,"events"); });
+    getLicences().forEach(function(l){ if(l) push("licences",l.id,l,"licences"); });
+    var evals=getAllEvaluations();
+    Object.keys(evals).forEach(function(evId){ push("evaluations",evId,{scores:evals[evId]},"evaluations"); });
+  }catch(err){ log("Erreur préparation : "+err.message); return; }
+  if(!tasks.length){ log("Aucune donnée locale à migrer."); return; }
+  Promise.all(tasks).then(function(){
+    var msg="✔ Terminé : "+counts.players+" joueurs · "+counts.teams+" équipes · "+counts.events+" événements · "+counts.licences+" licences · "+counts.evaluations+" évals.";
+    if(errors.length){ msg+="<br><span style=\"color:#C0392B\">"+errors.length+" échec(s) : "+errors.slice(0,4).join(" | ")+(errors.length>4?"…":"")+"</span>"; }
+    log(msg);
+  });
+}
 
 function openLiveEval(eventId){
   currentEvalEventId=eventId;
