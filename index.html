@@ -7632,6 +7632,25 @@ var AUTH_INP='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radiu
 var AUTH_BTN='width:100%;padding:15px;border:none;border-radius:var(--rs);background:var(--grn);color:#fff;font-size:15px;font-weight:800;margin-top:22px;cursor:pointer';
 var AUTH_BTN2='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radius:var(--rs);background:transparent;color:var(--dkg);font-size:14px;font-weight:800;margin-top:10px;cursor:pointer';
 
+var AUTH_EYE_OPEN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var AUTH_EYE_CLOSED='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.94M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+function authPassField(id, placeholder){
+  return '<div style="position:relative">'
+    +'<input id="'+id+'" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
+    +'<button type="button" onclick="authTogglePass(\''+id+'\',this)" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
+    +'</div>';
+}
+
+function authTogglePass(id, btn){
+  var inp=document.getElementById(id);
+  if(!inp) return;
+  var show = inp.type==="password";
+  inp.type = show ? "text" : "password";
+  btn.innerHTML = show ? AUTH_EYE_OPEN : AUTH_EYE_CLOSED;
+  btn.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+}
+
 function showAuth(step, data){
   data=data||{};
   var el=document.getElementById("auth-content");
@@ -7659,7 +7678,7 @@ function showAuth(step, data){
       +'<label style="'+AUTH_LBL+'">E-mail (pour la connexion)</label>'
       +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
       +'<label style="'+AUTH_LBL+'">Mot de passe (6 caractères min.)</label>'
-      +'<input id="auth-pass" type="password" style="'+AUTH_INP+'" placeholder="••••••••">'
+      +authPassField("auth-pass","••••••••")
       +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoSignup()">Créer le compte</button>'
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
@@ -7670,7 +7689,7 @@ function showAuth(step, data){
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
       +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(data.email||"")+'" placeholder="prenom@email.fr">'
       +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
-      +'<input id="auth-pass" type="password" style="'+AUTH_INP+'" placeholder="••••••••">'
+      +authPassField("auth-pass","••••••••")
       +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoLogin()">Se connecter</button>'
       +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:16px;cursor:pointer" onclick="showAuth(\'reset\')">Mot de passe oublié ?</p>'
