@@ -5632,7 +5632,7 @@ function getEvalCriteria(){
 function saveEvalCriteria(arr){localStorage.setItem("asmb_eval_criteria",JSON.stringify(arr));}
 
 function getAllEvaluations(){try{return JSON.parse(localStorage.getItem("asmb_evaluations")||"{}");}catch(e){return {};}}
-function saveAllEvaluations(obj){console.log("saveAllEvaluations appelé, clés:", Object.keys(obj));localStorage.setItem("asmb_evaluations",JSON.stringify(obj));fsWriteEvaluations(obj);}
+function saveAllEvaluations(obj){localStorage.setItem("asmb_evaluations",JSON.stringify(obj));fsWriteEvaluations(obj);}
 
 // ═══ STEP 3 : SYNC LIVE FIRESTORE (lecture onSnapshot + écriture par doc) ═══
 var FS_PREV = {};      // dernier état connu par collection (baseline pour diff écriture)
@@ -5695,17 +5695,12 @@ function fsStartSyncEvaluations(){
   );
 }
 function fsWriteEvaluations(obj){
-  if(!window.fbDb || !window.fbSetDoc){ console.log("fsWriteEvaluations: fbDb ou fbSetDoc manquant"); return; }
+  if(!window.fbDb || !window.fbSetDoc) return;
   obj=obj||{};
-  console.log("fsWriteEvaluations appelé, clés:", Object.keys(obj), "FS_PREV_EVAL:", JSON.stringify(FS_PREV_EVAL));
   Object.keys(obj).forEach(function(evId){
     var s=JSON.stringify(obj[evId]);
-    var prev=JSON.stringify(FS_PREV_EVAL[evId]);
-    console.log("evId="+evId+" prev="+prev+" new="+s+" changed="+(prev!==s));
-    if(prev!==s){
-      window.fbSetDoc(window.fbDoc(window.fbDb,"evaluations",String(evId)), {scores:obj[evId]})
-        .then(function(){console.log("eval/"+evId+" écrit OK");})
-        .catch(function(e){ console.log("write eval/"+evId, (e&&e.code)||e); });
+    if(JSON.stringify(FS_PREV_EVAL[evId])!==s){
+      window.fbSetDoc(window.fbDoc(window.fbDb,"evaluations",String(evId)), {scores:obj[evId]}).catch(function(e){ console.log("write eval/"+evId, (e&&e.code)||e); });
     }
   });
   Object.keys(FS_PREV_EVAL).forEach(function(evId){
