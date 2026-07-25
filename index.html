@@ -5390,12 +5390,13 @@ function openAddTeamMember(teamId){
   if(!team) return;
   var currentIds=team.members||[];
   var players=getPlayers().filter(function(p){return currentIds.indexOf(p.id)<0;});
-  if(!players.length){alert("Tous les joueurs sont déjà dans cette équipe ou aucun joueur n'est enregistré.");return;}
+  if(!players.length){alert("Aucun joueur disponible à ajouter.");return;}
   var modal=document.createElement("div");
   modal.className="team-member-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
   inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
   var title=document.createElement("div");
@@ -5404,7 +5405,7 @@ function openAddTeamMember(teamId){
   var closeBtn=document.createElement("button");
   closeBtn.textContent="✕";
   closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
-  closeBtn.addEventListener("click",function(){modal.remove();});
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
   hdr.appendChild(title);hdr.appendChild(closeBtn);
   var list=document.createElement("div");
   list.style.cssText="overflow-y:auto;flex:1";
@@ -5426,18 +5427,19 @@ function openAddTeamMember(teamId){
   var addBtn=document.createElement("button");
   addBtn.textContent="Ajouter la sélection";
   addBtn.style.cssText="width:100%;margin-top:14px;padding:14px;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;font-size:14px;font-weight:800;cursor:pointer";
-  addBtn.addEventListener("click",function(){
+  addBtn.addEventListener("click",function(e){
+    e.stopPropagation();
     var checked=[].slice.call(list.querySelectorAll("input[type=checkbox]:checked")).map(function(c){return c.value;});
-    modal.remove();
-    if(!checked.length) return;
+    if(!checked.length){alert("Aucun joueur sélectionné.");return;}
     var teams=getTeams();
     var t=teams.find(function(x){return x.id===teamId;});
     if(!t) return;
     t.members=(t.members||[]).concat(checked.filter(function(id){return (t.members||[]).indexOf(id)<0;}));
     saveTeams(teams);
+    modal.remove();
     buildTeams();
   });
-  modal.addEventListener("click",function(e){if(e.target===modal)modal.remove();});
+  modal.addEventListener("click",function(){modal.remove();});
   inner.appendChild(hdr);inner.appendChild(list);inner.appendChild(addBtn);
   modal.appendChild(inner);
   document.body.appendChild(modal);
