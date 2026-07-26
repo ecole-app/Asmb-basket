@@ -4241,6 +4241,37 @@ function askPrompt(title, opts){
   });
 }
 
+// askAlert(message, {title}) -> Promise<void> (résolu quand l'utilisateur clique OK)
+function askAlert(message, opts){
+  opts=opts||{};
+  var title=opts.title||"Information";
+  return new Promise(function(resolve){
+    var modal=document.createElement("div");
+    modal.className="alert-modal";
+    modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px";
+    var box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:18px;padding:22px 20px 18px;width:100%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center";
+    box.addEventListener("click",function(e){e.stopPropagation();});
+    var titleEl=document.createElement("div");
+    titleEl.style.cssText="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px";
+    titleEl.textContent=title;
+    var subEl=document.createElement("div");
+    subEl.style.cssText="font-size:13px;color:var(--txt2);line-height:1.45;margin-bottom:20px;white-space:pre-line";
+    subEl.textContent=String(message);
+    var okBtn=document.createElement("button");
+    okBtn.textContent="OK";
+    okBtn.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+    function finish(){ modal.remove(); resolve(); }
+    okBtn.addEventListener("click",finish);
+    modal.addEventListener("click",finish);
+    box.appendChild(titleEl);box.appendChild(subEl);box.appendChild(okBtn);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+  });
+}
+// Remplace l'alert() natif du navigateur par la modale maison (non bloquant, ne change pas le flux existant)
+window.alert = function(message){ askAlert(message); };
+
 function authConfirmLogout(){
   askConfirm("Se déconnecter de l'application ?", {title:"Déconnexion", confirmText:"Se déconnecter"}).then(function(ok){
     if(ok) authLogout();
@@ -4934,8 +4965,7 @@ function restoreFromCloud(){
       ["elite","competition","3x3","evenement","basketpourtous"].forEach(function(id){
         localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
       });
-      alert("Données restaurees depuis le cloud ! L'application va se recharger.");
-      location.reload();
+      askAlert("Données restaurées depuis le cloud ! L'application va se recharger.").then(function(){location.reload();});
     }).catch(function(){alert("Erreur lors de la restauration");});
   });
 }
@@ -4947,8 +4977,7 @@ function resetAllData(){
       if(!ok2)return;
       ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
       Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
-      alert("Données supprimees. L'application va se recharger.");
-      location.reload();
+      askAlert("Données supprimées. L'application va se recharger.").then(function(){location.reload();});
     });
   });
 }
@@ -9976,7 +10005,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785086589";
+var APP_VERSION="1785086922";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
