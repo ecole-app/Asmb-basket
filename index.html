@@ -1121,6 +1121,13 @@ initChannels();
  <div id="account-info-box" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
  <button onclick="authConfirmLogout()" style="width:100%;padding:12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:13px;font-weight:700;border:none;cursor:pointer">Se déconnecter</button>
  </div>
+ <div class="sec">Avis et suggestions</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
+ <textarea id="feedback-text" rows="3" placeholder="Ecrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
+ <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
+ <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien ete envoye.</div>
+ </div>
  <div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
  <div class="sec">Apparence</div>
@@ -4121,6 +4128,34 @@ function buildParametres(){
       : "Connexion en cours...";
   }
   buildClubStats();
+  var fbBtn=document.getElementById("feedback-send-btn");
+  if(fbBtn && !fbBtn.dataset.wired){
+    fbBtn.dataset.wired="1";
+    fbBtn.addEventListener("click", sendFeedback);
+  }
+}
+
+function sendFeedback(){
+  var ta=document.getElementById("feedback-text");
+  var msg=(ta&&ta.value||"").trim();
+  if(!msg){ alert("Ecrire un message avant d'envoyer."); return; }
+  if(!window.fbDb || !window.fbAddDoc){ alert("Connexion en cours, reessayer dans quelques secondes."); return; }
+  var btn=document.getElementById("feedback-send-btn");
+  if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
+  var u=window.ASMB_USER||{};
+  window.fbAddDoc(window.fbCollection(window.fbDb,"feedback"),{
+    uid:u.uid||"", email:u.email||"", phone:u.phone||"",
+    roles:u.roles||[], message:msg, status:"nouveau",
+    ts:window.fbServerTimestamp()
+  }).then(function(){
+    if(ta) ta.value="";
+    var st=document.getElementById("feedback-status");
+    if(st){ st.style.display="block"; setTimeout(function(){st.style.display="none";},3000); }
+  }).catch(function(e){
+    alert("Erreur d'envoi : "+((e&&e.code)||e));
+  }).finally(function(){
+    if(btn){ btn.disabled=false; btn.textContent="Envoyer"; }
+  });
 }
 
 function authConfirmLogout(){
@@ -4963,6 +4998,7 @@ var ADMIN_MODULES=[
  {id:"planning",name:"Planning",sub:"Salles · Créneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
  {id:"documents",name:"Documents",sub:"Fichiers · Formulaires",icon:"📁",color:"#8E44AD",scr:"documents"},
  {id:"acces",name:"Accès coach",sub:"Rôles · Équipes des comptes",icon:"🔑",color:"#E8670A",scr:"admin"},
+ {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","Senior":"#E8670A"};
@@ -4997,12 +5033,14 @@ function getAdminCount(id){
   if(id==="planning"){var e=getEvents();return e.length+" evenement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
   if(id==="acces")return "Rôles & équipes";
+  if(id==="avis")return "Retours des membres";
   return "";
 }
 function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   if(id==="acces"){openAccesCoach();return;}
+  if(id==="avis"){openAvisModule();return;}
   stack.push(m.scr);
   if(id==="parametres"){buildParametres();}
   else if(id==="communaute"){buildAdminComm();}
@@ -5132,6 +5170,79 @@ function renderAccesList(list,users){
     list.appendChild(card);
   });
 }
+
+// ── AVIS & SUGGESTIONS (retours des membres) ──────────────────────
+function openAvisModule(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  var modal=document.createElement("div");
+  modal.className="avis-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Avis & suggestions";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px">Chargement…</div>';
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"feedback"),window.fbOrderBy("ts","desc"))).then(function(snap){
+    var items=[];snap.forEach(function(d){var v=d.data();v._id=d.id;items.push(v);});
+    renderAvisList(list,items);
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+}
+function renderAvisList(list,items){
+  list.innerHTML="";
+  if(!items.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucun avis pour le moment</div>';return;}
+  items.forEach(function(it){
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px"+(it.status==="traite"?";opacity:.55":"");
+    var meta=document.createElement("div");
+    meta.style.cssText="font-size:11px;color:var(--mut);margin-bottom:6px";
+    var when="";
+    try{ when = it.ts&&it.ts.toDate? it.ts.toDate().toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : ""; }catch(e){}
+    meta.textContent=(it.email||it.phone||"Anonyme")+(when?(" · "+when):"");
+    var msg=document.createElement("div");
+    msg.style.cssText="font-size:13px;color:var(--txt);line-height:1.4;margin-bottom:10px;white-space:pre-wrap";
+    msg.textContent=it.message||"";
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px";
+    var toggleBtn=document.createElement("button");
+    toggleBtn.textContent=it.status==="traite"?"Marquer non traité":"Marquer traité";
+    toggleBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    toggleBtn.addEventListener("click",function(){
+      var newStatus=it.status==="traite"?"nouveau":"traite";
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"feedback",it._id),{status:newStatus}).then(function(){
+        it.status=newStatus;
+        card.style.opacity=newStatus==="traite"?".55":"1";
+        toggleBtn.textContent=newStatus==="traite"?"Marquer non traité":"Marquer traité";
+      });
+    });
+    var delBtn=document.createElement("button");
+    delBtn.textContent="Supprimer";
+    delBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer";
+    delBtn.addEventListener("click",function(){
+      if(!confirm("Supprimer cet avis ?"))return;
+      window.fbDeleteDoc(window.fbDoc(window.fbDb,"feedback",it._id)).then(function(){card.remove();});
+    });
+    btnRow.appendChild(toggleBtn);btnRow.appendChild(delBtn);
+    card.appendChild(meta);card.appendChild(msg);card.appendChild(btnRow);
+    list.appendChild(card);
+  });
+}
+
 function getPlayers(){try{return JSON.parse(localStorage.getItem("asmb_players")||"[]");}catch(e){return [];}}
 function savePlayers(p){localStorage.setItem("asmb_players",JSON.stringify(p));fsWriteCollection("players",p);}
 
@@ -9698,7 +9809,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785041131";
+var APP_VERSION="1785041332";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
