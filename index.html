@@ -2172,7 +2172,7 @@ function buildDashboard(){
  if(localStorage.getItem("asmb_profile")==="coach"){buildCoachDashboard(el);return;}
 
  var players=getPlayers();
- var CATS_ALL=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
+ var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
  var byCat={};
  CATS_ALL.forEach(function(c){byCat[c]=0;});
  players.forEach(function(p){if(byCat.hasOwnProperty(p.cat))byCat[p.cat]++;});
@@ -4255,7 +4255,7 @@ function buildClubStats(){
   var el=document.getElementById("club-stats-box");
   if(!el)return;
   var players=getPlayers();
-  var CATS_ALL=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
+  var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
   var byCat={};
   CATS_ALL.forEach(function(c){byCat[c]=0;});
   players.forEach(function(p){if(byCat.hasOwnProperty(p.cat))byCat[p.cat]++;});
@@ -5111,7 +5111,7 @@ var ADMIN_MODULES=[
  {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
-var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","Senior":"#E8670A"};
+var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
 var editingPlayerId=null;
 
@@ -5406,9 +5406,11 @@ function editPlayer(id){
   renderPlayerForm(p);
   document.getElementById("modal-player").style.display="flex";
 }
-// Catégorie FFBB à partir de l'année de naissance (règle biennale officielle,
-// âge apprécié au 1er janvier de la saison en cours).
-function categorieFromNaissance(dateStr){
+// Catégorie FFBB à partir de l'année de naissance (règle officielle : âge apprécié
+// au 1er janvier de la saison en cours). U15 est suivi de U18 (regroupe U16/U17/U18)
+// puis, chez les garçons en région ARA, de U21 (regroupe U19/U20/U21) avant Senior.
+// Chez les filles : U15 → U18 → Senior directement (pas de U21).
+function categorieFromNaissance(dateStr, genre){
   if(!dateStr) return null;
   var birthYear=parseInt(dateStr.slice(0,4),10);
   if(!birthYear||isNaN(birthYear)) return null;
@@ -5420,21 +5422,25 @@ function categorieFromNaissance(dateStr){
   if(age<=10) return "U11";
   if(age<=12) return "U13";
   if(age<=14) return "U15";
-  if(age<=16) return "U17";
+  if(age<=17) return "U18";
+  if(genre==="M" && age<=20) return "U21";
   return "Senior";
 }
 function wirePlayerCatAutofill(){
   var naissanceInp=document.getElementById("fp-naissance");
   var catSel=document.getElementById("fp-cat");
+  var genreSel=document.getElementById("fp-genre");
   if(!naissanceInp||!catSel||naissanceInp.dataset.catWired)return;
   naissanceInp.dataset.catWired="1";
-  naissanceInp.addEventListener("change",function(){
-    var cat=categorieFromNaissance(naissanceInp.value);
+  function recompute(){
+    var cat=categorieFromNaissance(naissanceInp.value,(genreSel||{}).value);
     if(cat) catSel.value=cat;
-  });
+  }
+  naissanceInp.addEventListener("change",recompute);
+  if(genreSel) genreSel.addEventListener("change",recompute);
 }
 function renderPlayerForm(p){
-  var CATS_ALL=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
+  var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
     var cats=CATS_ALL.map(function(c){return '<option value="'+c+'"'+(p&&p.cat===c?' selected':'')+'>'+c+'</option>';}).join("");
   var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
   var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencie</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
@@ -9970,7 +9976,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785085906";
+var APP_VERSION="1785086282";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
