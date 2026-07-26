@@ -1976,7 +1976,7 @@ function cycleProgress(cyId){
 
 // ═══ NAV ═════════════════════════════════════════════════════════
 var stack=["portal"],curCy=null,curSea=null;
-var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","pole-competition","pole-evenement","tutoriel","joueur"];
+var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","tutoriel","joueur"];
 
 function showScr(id){
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
@@ -1997,7 +1997,7 @@ function showScr(id){
  }
  var nb=navKey?document.getElementById("bni-"+navKey):null;
  if(nb)nb.classList.add("on");
- document.getElementById("hbk").classList.toggle("show",!ROOTS.includes(id));
+ document.getElementById("hbk").classList.toggle("show", stack.length>1 && !ROOTS.includes(id));
  var navEl=document.getElementById("bnav-main");
  if(navEl)navEl.style.display=(id==="role-select"||id==="auth")?"none":"flex";
  document.querySelector(".main").scrollTop=0;
@@ -9698,7 +9698,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785040893";
+var APP_VERSION="1785041131";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
