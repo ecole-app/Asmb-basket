@@ -8196,17 +8196,9 @@ function authContinue(){
   var res=authLookupPhone(phone);
   AUTH_STATE.lookup=res;
   if(!res.found){ showAuth("unknown"); return; }
-  // Un compte existe-t-il déjà pour ce numéro ?
-  try{
-    window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("phone","==",phone))).then(function(snap){
-      if(snap && !snap.empty){
-        var d=snap.docs[0].data();
-        showAuth("login",{email:d.email||""});
-      } else {
-        showAuth("signup",res);
-      }
-    }).catch(function(e){ console.log("users query:",e); showAuth("signup",res); });
-  }catch(e){ showAuth("signup",res); }
+  // Pas de requête Firestore ici : la collection users est protégée avant connexion.
+  // Si un compte existe déjà, createUser renverra email-already-in-use et on renvoie vers la connexion.
+  showAuth("signup",res);
 }
 
 function authDoSignup(){
@@ -9696,7 +9688,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785039069";
+var APP_VERSION="1785040051";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
