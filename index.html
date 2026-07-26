@@ -8016,7 +8016,7 @@ var AUTH_EYE_CLOSED='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
 function authPassField(id, placeholder){
   return '<div style="position:relative">'
     +'<input id="'+id+'" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
-    +'<button type="button" onclick="authTogglePass(\''+id+'\',this)" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
+    +'<button type="button" class="auth-eye-btn" data-target="'+id+'" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
     +'</div>';
 }
 
@@ -8027,6 +8027,16 @@ function authTogglePass(id, btn){
   inp.type = show ? "text" : "password";
   btn.innerHTML = show ? AUTH_EYE_OPEN : AUTH_EYE_CLOSED;
   btn.setAttribute("aria-label", show ? "Masquer le mot de passe" : "Afficher le mot de passe");
+}
+function authWirePassToggles(){
+  document.querySelectorAll(".auth-eye-btn").forEach(function(btn){
+    if(btn.dataset.wired) return;
+    btn.dataset.wired="1";
+    btn.addEventListener("click",function(e){
+      e.preventDefault();e.stopPropagation();
+      authTogglePass(btn.getAttribute("data-target"), btn);
+    });
+  });
 }
 
 function showAuth(step, data){
@@ -8093,6 +8103,7 @@ function showAuth(step, data){
       +'</div>';
   }
   el.innerHTML=h;
+  authWirePassToggles();
 }
 
 function authErr(msg){
