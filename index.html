@@ -4469,14 +4469,15 @@ function buildCalendrier(){
 
   var filterRow=document.getElementById("cal-filter-row");
   var isCoach=localStorage.getItem("asmb_profile")==="coach";
-  var coachTeam=isCoach?getCoachTeam():null;
-  if(filterRow)filterRow.style.display=(isCoach&&coachTeam)?"flex":"none";
+  var coachTeamId=isCoach?getCoachTeam():null;
+  var coachTeamObj=coachTeamId?getTeams().find(function(t){return t.id===coachTeamId;}):null;
+  if(filterRow)filterRow.style.display=(isCoach&&coachTeamObj)?"flex":"none";
 
   fetchEventsFromCloud().then(function(events){
-    if(isCoach&&coachTeam&&calFilterMode==="mine"){
+    if(isCoach&&coachTeamObj&&calFilterMode==="mine"){
       events=events.filter(function(e){
         var eq=(e.equipe||"").toUpperCase();
-        return eq.indexOf(coachTeam.name.toUpperCase())>=0;
+        return eq.indexOf(coachTeamObj.name.toUpperCase())>=0;
       });
     }
     var content=document.getElementById("cal-week-content");
@@ -5405,6 +5406,33 @@ function editPlayer(id){
   renderPlayerForm(p);
   document.getElementById("modal-player").style.display="flex";
 }
+// Catégorie FFBB à partir de l'année de naissance (règle biennale officielle,
+// âge apprécié au 1er janvier de la saison en cours).
+function categorieFromNaissance(dateStr){
+  if(!dateStr) return null;
+  var birthYear=parseInt(dateStr.slice(0,4),10);
+  if(!birthYear||isNaN(birthYear)) return null;
+  var now=new Date();
+  var seasonRefYear = (now.getMonth()>=8) ? now.getFullYear()+1 : now.getFullYear(); // saison sept->juin, reference = 1er janvier
+  var age=seasonRefYear-birthYear;
+  if(age<=6) return "U7";
+  if(age<=8) return "U9";
+  if(age<=10) return "U11";
+  if(age<=12) return "U13";
+  if(age<=14) return "U15";
+  if(age<=16) return "U17";
+  return "Senior";
+}
+function wirePlayerCatAutofill(){
+  var naissanceInp=document.getElementById("fp-naissance");
+  var catSel=document.getElementById("fp-cat");
+  if(!naissanceInp||!catSel||naissanceInp.dataset.catWired)return;
+  naissanceInp.dataset.catWired="1";
+  naissanceInp.addEventListener("change",function(){
+    var cat=categorieFromNaissance(naissanceInp.value);
+    if(cat) catSel.value=cat;
+  });
+}
 function renderPlayerForm(p){
   var CATS_ALL=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
     var cats=CATS_ALL.map(function(c){return '<option value="'+c+'"'+(p&&p.cat===c?' selected':'')+'>'+c+'</option>';}).join("");
@@ -5424,6 +5452,7 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
     '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+(p?p.contact:'')+'" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+(p?p.notes:'')+'</textarea></div>';
+  wirePlayerCatAutofill();
 }
 function savePlayer(){
   var prenom=document.getElementById("fp-prenom").value.trim();
@@ -9941,7 +9970,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785065866";
+var APP_VERSION="1785085906";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
