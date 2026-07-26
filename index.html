@@ -933,6 +933,7 @@ initChannels();
       <div class="form-group"><label class="form-label">Icône (emoji)</label><input class="form-input" id="ch-icon" placeholder="" value=""></div>
       <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Équipe U17M"></div>
       <div class="form-group"><label class="form-label">Équipe liée (optionnel)</label><select class="form-input" id="ch-team"><option value="">Aucune</option></select></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);margin:4px 0 12px;cursor:pointer"><input type="checkbox" id="ch-clubwide" style="width:16px;height:16px;accent-color:var(--dkg)"> Canal public (visible par tous les coachs)</label>
       <button id="modal-channel-btn" onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
     </div>
   </div>
@@ -7035,6 +7036,7 @@ function showAddChannel(){
   document.getElementById("modal-channel-btn").textContent="Créer le canal";
   document.getElementById("ch-name").value="";document.getElementById("ch-desc").value="";
   document.getElementById("ch-icon").value="";
+  document.getElementById("ch-clubwide").checked=false;
   fillChannelTeamSelect("");
   document.getElementById("modal-channel").style.display="flex";
 }
@@ -7054,6 +7056,7 @@ function editChannelInfo(ch){
   document.getElementById("ch-name").value=ch.name||"";
   document.getElementById("ch-desc").value=ch.desc||"";
   document.getElementById("ch-icon").value=ch.icon||"";
+  document.getElementById("ch-clubwide").checked=!!ch.clubWide;
   fillChannelTeamSelect(ch.teamId||"");
   document.getElementById("modal-channel").style.display="flex";
 }
@@ -7064,16 +7067,17 @@ function createChannel(){
  var icon=document.getElementById("ch-icon").value.trim()||"";
  var desc=document.getElementById("ch-desc").value.trim();
  var teamId=(document.getElementById("ch-team")||{}).value||"";
+ var clubWide=!!(document.getElementById("ch-clubwide")||{}).checked;
  if(!name){alert("Nom du canal obligatoire");return;}
  if(editingChannelId){
    window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
-     name:name,icon:icon,desc:desc,teamId:teamId
+     name:name,icon:icon,desc:desc,teamId:teamId,clubWide:clubWide
    },{merge:true});
    editingChannelId=null;
  }else{
    var id=name.toLowerCase().replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-");
    window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
-   id:id,name:name,icon:icon,desc:desc,members:[],teamId:teamId
+   id:id,name:name,icon:icon,desc:desc,members:[],teamId:teamId,clubWide:clubWide
    },{merge:true});
  }
  closeModal("modal-channel");
@@ -7249,12 +7253,14 @@ var typingUnsubscribe=null;
 var typingDebounce=null;
 var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
 
-// Un canal est visible pour l'utilisateur courant si : il n'est lié à aucune équipe (canal club-wide),
-// ou s'il est lié à une équipe que le coach entraîne. Dirigeant/parent voient tout (badge Membre/Privé géré ailleurs).
+// Un canal est visible pour un coach si : il est explicitement marqué "public" (clubWide),
+// ou lié à une équipe que ce coach entraîne. Sinon (pas taggé), il reste masqué par défaut.
+// Dirigeant/parent voient toujours tout (badge Membre/Privé géré ailleurs par renderChannelList).
 function channelVisibleToMe(ch){
   var profile=localStorage.getItem("asmb_profile");
   if(profile!=="coach") return true;
-  if(!ch.teamId) return true;
+  if(ch.clubWide) return true;
+  if(!ch.teamId) return false;
   return getCoachTeams().indexOf(ch.teamId)>=0;
 }
 
@@ -9671,7 +9677,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785038214";
+var APP_VERSION="1785038484";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
