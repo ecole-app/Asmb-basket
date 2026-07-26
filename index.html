@@ -5031,10 +5031,13 @@ function openAccesCoach(){
   closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
   closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
   hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var note=document.createElement("div");
+  note.style.cssText="font-size:11px;color:var(--mut);background:#e6f0e9;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4";
+  note.textContent="La personne concernée doit se déconnecter puis se reconnecter pour que le changement de rôle prenne effet.";
   var list=document.createElement("div");
   list.style.cssText="overflow-y:auto;flex:1";
   list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px">Chargement des comptes…</div>';
-  inner.appendChild(hdr);inner.appendChild(list);
+  inner.appendChild(hdr);inner.appendChild(note);inner.appendChild(list);
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
   document.body.appendChild(modal);
@@ -8033,11 +8036,12 @@ function showAuth(step, data){
   stack=["auth"]; showScr("auth");
   var h="";
   if(step==="entry"){
+    var savedPhone=AUTH_STATE.phone||localStorage.getItem("asmb_phone")||"";
     h=authHero("ASMB Basket","Espace du club")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
       +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Saisir le numéro de téléphone pour accéder à l\'espace du club.</p>'
       +'<label style="'+AUTH_LBL+'">Téléphone</label>'
-      +'<input id="auth-phone" type="tel" inputmode="tel" style="'+AUTH_INP+'" value="'+authEsc(AUTH_STATE.phone||"")+'" placeholder="06 12 34 56 78">'
+      +'<input id="auth-phone" type="tel" inputmode="tel" style="'+AUTH_INP+'" value="'+authEsc(savedPhone)+'" placeholder="06 12 34 56 78">'
       +'<button style="'+AUTH_BTN+'" onclick="authContinue()">Continuer</button>'
       +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:18px;cursor:pointer" onclick="showAuth(\'login\')">J\'ai déjà un compte</p>'
       +'<div style="flex:1"></div>'
@@ -8059,10 +8063,11 @@ function showAuth(step, data){
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
       +'</div>';
   } else if(step==="login"){
+    var savedEmail=data.email||localStorage.getItem("asmb_last_email")||"";
     h=authHero("Connexion","Espace du club")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
-      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(data.email||"")+'" placeholder="prenom@email.fr">'
+      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="prenom@email.fr">'
       +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
       +authPassField("auth-pass","••••••••")
       +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
@@ -8207,6 +8212,7 @@ function finishAuthedUser(user, u){
               : "parent";
   window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
   localStorage.setItem("asmb_profile", profile);
+  if(window.ASMB_USER.email){ localStorage.setItem("asmb_last_email", window.ASMB_USER.email); }
   if(u.phone){ myPhone=u.phone; localStorage.setItem("asmb_phone", u.phone); }
   if(profile==="parent" && (u.linkedTeamIds||[]).length){
     localStorage.setItem("asmb_parent_teams", JSON.stringify(u.linkedTeamIds));
