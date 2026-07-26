@@ -1507,6 +1507,7 @@ initChannels();
       </div>
       <div id="coach-eq-name" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
+    <div id="coach-team-chips" style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 0"></div>
     <div class="sec">Membres de l'équipe</div>
  <div id="coach-matchday-banner" style="margin:12px 0 0"></div>
  <div id="coach-presence-summary" style="padding:0 12px"></div>
@@ -8267,6 +8268,10 @@ function finishAuthedUser(user, u){
   if(profile==="parent" && (u.linkedTeamIds||[]).length){
     localStorage.setItem("asmb_parent_teams", JSON.stringify(u.linkedTeamIds));
   }
+  if(roles.indexOf("coach")>=0 && (u.linkedTeamIds||[]).length){
+    localStorage.setItem("asmb_coach_teams", JSON.stringify(u.linkedTeamIds));
+    localStorage.setItem("asmb_coach_team", u.linkedTeamIds[0]);
+  }
   initProfile(); // routage existant, inchangé
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
   try{
@@ -9194,9 +9199,23 @@ function buildParentEquipe(){
 
 // ── COACH EQUIPE TAB (restreinte a sa seule équipe) ────────────────
 function buildCoachEquipe(){
+  var myTeamIds=getCoachTeams();
   var teamId=getCoachTeam();
   var teams=getTeams();
   var team=teams.find(function(t){return t.id===teamId;});
+  var chipsEl=document.getElementById("coach-team-chips");
+  if(chipsEl){
+    chipsEl.innerHTML="";
+    if(myTeamIds.length>1){
+      teams.filter(function(t){return myTeamIds.indexOf(t.id)>=0;}).forEach(function(t){
+        var b=document.createElement("button");
+        b.className="cat-filter"+(t.id===teamId?" on":"");
+        b.textContent=t.name;
+        b.addEventListener("click",function(){setCoachTeam(t.id);buildCoachEquipe();});
+        chipsEl.appendChild(b);
+      });
+    }
+  }
   if(!team){document.getElementById("coach-eq-name").textContent="Aucune équipe";return;}
   var logoEl=document.getElementById("coach-eq-logo");
   var homeLogo=document.getElementById("home-logo");
