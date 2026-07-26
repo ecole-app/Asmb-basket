@@ -6930,8 +6930,25 @@ function buildAdminComm(){
       var ch=d.data();ch.id=d.id;
       var memberCount=(ch.members||[]).length;
       var div=document.createElement("div");div.className="admin-card";
-      div.onclick=function(){openChannelDetail(ch);};
-      div.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:var(--dkg)">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+ch.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+ch.desc+'</div><div style="font-size:11px;color:var(--mut)">'+memberCount+' membre'+(memberCount>1?'s':'')+' autorise'+(memberCount>1?'s':'')+'</div></div><button onclick="event.stopPropagation();editChannelInfo('+JSON.stringify(ch).replace(/"/g,"&quot;")+')" style="padding:6px 10px;border-radius:var(--rx);background:rgba(0,0,0,.06);color:var(--txt);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-right:6px">✎</button><button onclick="event.stopPropagation();deleteChannel(\''+ch.id+'\',\''+ch.name.replace(/'/g,"")+'\')" style="padding:6px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">✕</button></div>';
+      div.addEventListener("click",function(){openChannelDetail(ch);});
+      var ci=document.createElement("div");ci.className="admin-ci";
+      var icon=document.createElement("div");icon.className="admin-icon";icon.style.background="var(--dkg)";icon.textContent=ch.icon||"";
+      var info=document.createElement("div");info.style.cssText="flex:1;min-width:0";
+      var nm=document.createElement("div");nm.style.cssText="font-size:14px;font-weight:800;color:var(--txt)";nm.textContent=ch.name||"";
+      var desc=document.createElement("div");desc.style.cssText="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px";desc.textContent=ch.desc||"";
+      var meta=document.createElement("div");meta.style.cssText="font-size:11px;color:var(--mut)";
+      meta.textContent=memberCount+" membre"+(memberCount>1?"s":"")+" autorise"+(memberCount>1?"s":"")+(ch.teamId?" · lié":"")+(ch.clubWide?" · public":"");
+      info.appendChild(nm);info.appendChild(desc);info.appendChild(meta);
+      var editBtn=document.createElement("button");
+      editBtn.textContent="✎";
+      editBtn.style.cssText="padding:6px 10px;border-radius:var(--rx);background:rgba(0,0,0,.06);color:var(--txt);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-right:6px";
+      editBtn.addEventListener("click",function(e){e.stopPropagation();editChannelInfo(ch);});
+      var delBtn=document.createElement("button");
+      delBtn.textContent="✕";
+      delBtn.style.cssText="padding:6px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer";
+      delBtn.addEventListener("click",function(e){e.stopPropagation();deleteChannel(ch.id,ch.name||"");});
+      ci.appendChild(icon);ci.appendChild(info);ci.appendChild(editBtn);ci.appendChild(delBtn);
+      div.appendChild(ci);
       el.appendChild(div);
     });
   });
@@ -9677,7 +9694,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785038484";
+var APP_VERSION="1785038703";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
