@@ -4198,6 +4198,49 @@ function askConfirm(message, opts){
   });
 }
 
+// askPrompt(title, {placeholder, defaultValue, confirmText, type}) -> Promise<string|null>
+function askPrompt(title, opts){
+  opts=opts||{};
+  var placeholder=opts.placeholder||"";
+  var defaultValue=opts.defaultValue||"";
+  var confirmText=opts.confirmText||"Valider";
+  var type=opts.type||"text";
+  return new Promise(function(resolve){
+    var modal=document.createElement("div");
+    modal.className="prompt-modal";
+    modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px";
+    var box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:18px;padding:22px 20px 18px;width:100%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+    box.addEventListener("click",function(e){e.stopPropagation();});
+    var titleEl=document.createElement("div");
+    titleEl.style.cssText="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:14px;text-align:center";
+    titleEl.textContent=title;
+    var input=document.createElement("input");
+    input.type=type;
+    input.placeholder=placeholder;
+    input.value=defaultValue;
+    input.style.cssText="width:100%;padding:12px;border:1.5px solid var(--bdr);border-radius:12px;font-size:15px;background:var(--bg);color:var(--txt);outline:none;margin-bottom:18px";
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:10px";
+    var cancelBtn=document.createElement("button");
+    cancelBtn.textContent="Annuler";
+    cancelBtn.style.cssText="flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);cursor:pointer";
+    var okBtn=document.createElement("button");
+    okBtn.textContent=confirmText;
+    okBtn.style.cssText="flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+    function finish(result){ modal.remove(); resolve(result); }
+    cancelBtn.addEventListener("click",function(){finish(null);});
+    okBtn.addEventListener("click",function(){finish(input.value);});
+    input.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();finish(input.value);}});
+    modal.addEventListener("click",function(){finish(null);});
+    btnRow.appendChild(cancelBtn);btnRow.appendChild(okBtn);
+    box.appendChild(titleEl);box.appendChild(input);box.appendChild(btnRow);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+    setTimeout(function(){input.focus();},50);
+  });
+}
+
 function authConfirmLogout(){
   askConfirm("Se déconnecter de l'application ?", {title:"Déconnexion", confirmText:"Se déconnecter"}).then(function(ok){
     if(ok) authLogout();
@@ -4641,17 +4684,17 @@ function buildClassement(){
   });
 }
 
-function showAddClassementRow(){
+async function showAddClassementRow(){
   if(!classementActiveTeamId){alert("Creez d\'abord une equipe");return;}
-  var equipe=prompt("Nom de l\'equipe (mettre ASMB dans le nom pour votre equipe) :");
+  var equipe=await askPrompt("Nom de l'équipe", {placeholder:"Mettre ASMB dans le nom pour votre équipe", confirmText:"Suivant"});
   if(!equipe)return;
-  var rang=parseInt(prompt("Position dans la poule :","1")||"1",10);
-  var points=parseInt(prompt("Points :","0")||"0",10);
-  var joues=parseInt(prompt("Matchs joues (J) :","0")||"0",10);
-  var victoires=parseInt(prompt("Gagnes (G) :","0")||"0",10);
-  var defaites=parseInt(prompt("Perdus (P) :","0")||"0",10);
-  var pointsMarques=parseInt(prompt("Points marques (Pm) :","0")||"0",10);
-  var pointsEncaisses=parseInt(prompt("Points encaisses (Pe) :","0")||"0",10);
+  var rang=parseInt((await askPrompt("Position dans la poule", {defaultValue:"1", type:"number", confirmText:"Suivant"}))||"1",10);
+  var points=parseInt((await askPrompt("Points", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
+  var joues=parseInt((await askPrompt("Matchs joués (J)", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
+  var victoires=parseInt((await askPrompt("Gagnés (G)", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
+  var defaites=parseInt((await askPrompt("Perdus (P)", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
+  var pointsMarques=parseInt((await askPrompt("Points marqués (Pm)", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
+  var pointsEncaisses=parseInt((await askPrompt("Points encaissés (Pe)", {defaultValue:"0", type:"number", confirmText:"Ajouter"}))||"0",10);
   var all=getClassement();
   if(!all[classementActiveTeamId])all[classementActiveTeamId]={};
   if(!all[classementActiveTeamId][classementActivePhase])all[classementActiveTeamId][classementActivePhase]=[];
@@ -5798,9 +5841,11 @@ function removeTeamMember(teamId,playerId){
   buildTeams();
 }
 function toggleTeam(id){var b=document.getElementById("team-body-"+id);if(b)b.style.display=b.style.display==="block"?"none":"block";}
-function showAddTeam(){
-  var name=prompt("Nom de l'équipe (ex: U13F) :");if(!name)return;
-  var cat=prompt("Catégorie (U7/U9/U11/U13/U15/U17/Senior) :");if(!cat)return;
+async function showAddTeam(){
+  var name=await askPrompt("Nom de l'équipe", {placeholder:"ex: U13F", confirmText:"Suivant"});
+  if(!name)return;
+  var cat=await askPrompt("Catégorie", {placeholder:"U7/U9/U11/U13/U15/U17/Senior", confirmText:"Créer"});
+  if(!cat)return;
   var teams=getTeams();
   var newTeam={id:Date.now().toString(),name:name,cat:cat,members:[]};
   teams.push(newTeam);
@@ -6520,23 +6565,23 @@ function cancelEvent(eventId){
   });
 }
 
-function editEventDateTime(eventId){
+async function editEventDateTime(eventId){
   var events=getEvents();
   var idx=events.findIndex(function(e){return e.id===eventId;});
   if(idx<0)return;
   var ev=events[idx];
   var oldDate=ev.date,oldHeure=ev.heure,oldEquipe=ev.equipe,oldLieu=ev.lieu;
 
-  var newDate=prompt("Date (AAAA-MM-JJ) :",ev.date);
+  var newDate=await askPrompt("Date", {defaultValue:ev.date, placeholder:"AAAA-MM-JJ", confirmText:"Suivant"});
   if(newDate===null)return;
-  var newHeure=prompt("Heure :",ev.heure||"");
+  var newHeure=await askPrompt("Heure", {defaultValue:ev.heure||"", confirmText:"Suivant"});
   if(newHeure===null)return;
 
   var teams=getTeams();
   var teamNames=teams.map(function(t){return t.name;}).join(", ");
-  var newEquipe=prompt("Équipe concernee (options : "+teamNames+") :",ev.equipe||"");
+  var newEquipe=await askPrompt("Équipe concernée", {defaultValue:ev.equipe||"", placeholder:teamNames, confirmText:"Suivant"});
   if(newEquipe===null)return;
-  var newLieu=prompt("Lieu :",ev.lieu||"");
+  var newLieu=await askPrompt("Lieu", {defaultValue:ev.lieu||"", confirmText:"Enregistrer"});
   if(newLieu===null)return;
 
   var changed=(newDate!==oldDate)||(newHeure!==oldHeure)||(newEquipe!==oldEquipe)||(newLieu!==oldLieu);
@@ -6559,15 +6604,15 @@ function editEventDateTime(eventId){
     alert("Créneau modifié, alerte envoyée dans le canal.");
   }
 }
-function editScore(eventId){
+async function editScore(eventId){
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
-  var adversaire=prompt("Nom de l adversaire :",(ev.score&&ev.score.adversaire)||"");
+  var adversaire=await askPrompt("Nom de l'adversaire", {defaultValue:(ev.score&&ev.score.adversaire)||"", confirmText:"Suivant"});
   if(adversaire===null)return;
-  var scoreAsmb=prompt("Score ASMB :",(ev.score&&ev.score.asmb)||"0");
+  var scoreAsmb=await askPrompt("Score ASMB", {defaultValue:(ev.score&&ev.score.asmb)||"0", type:"number", confirmText:"Suivant"});
   if(scoreAsmb===null)return;
-  var scoreAdv=prompt("Score adversaire :",(ev.score&&ev.score.adv)||"0");
+  var scoreAdv=await askPrompt("Score adversaire", {defaultValue:(ev.score&&ev.score.adv)||"0", type:"number", confirmText:"Enregistrer"});
   if(scoreAdv===null)return;
   ev.score={adversaire:adversaire.trim()||"Adversaire",asmb:parseInt(scoreAsmb,10)||0,adv:parseInt(scoreAdv,10)||0};
   saveEvents(events);
@@ -7328,7 +7373,7 @@ function renderMembers(ch){
 }
 
 async function editMemberLabel(phone,currentLabel){
-  var newLabel=prompt("Nom d'identification (ex: Lucas-U13) :",currentLabel||"");
+  var newLabel=await askPrompt("Nom d'identification", {defaultValue:currentLabel||"", placeholder:"ex: Lucas-U13", confirmText:"Enregistrer"});
   if(newLabel===null)return;
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
@@ -7445,9 +7490,9 @@ function getLicencedContacts(){
 // ═══ COTE MEMBRE - VERIFICATION TELEPHONE ═══════════════════════
 var myPhone=localStorage.getItem("asmb_phone")||"";
 
-function checkMyPhone(){
+async function checkMyPhone(){
   if(myPhone)return true;
-  var phone=prompt("Entrez votre numéro de téléphone pour acceder a la communaute (le meme que celui fourni au club) :");
+  var phone=await askPrompt("Votre numéro de téléphone", {placeholder:"Le même que celui fourni au club", confirmText:"Valider"});
   if(!phone)return false;
   myPhone=phone.trim().replace(/\s+/g,"");
   localStorage.setItem("asmb_phone",myPhone);
@@ -7524,11 +7569,11 @@ function renderChannelList(channels){
   checkUnreadBadges();
 }
 
-function openChannel(ch){
+async function openChannel(ch){
   var members=ch.members||[];
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   if(members.length>0 && !isDirigeant){
-    if(!myPhone){if(!checkMyPhone()){return;}}
+    if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     if(!isAuth){alert("Ce canal est reserve aux membres autorises. Contactez un responsable ASMB.");return;}
   }
@@ -7805,9 +7850,9 @@ function openMoreReactions(){
   document.getElementById("modal-reaction-more").style.display="flex";
 }
 
-function setReaction(channelId,msgId,emoji){
+async function setReaction(channelId,msgId,emoji){
   if(!window.fbReady)return;
-  if(!checkMyPhone())return;
+  if(!(await checkMyPhone()))return;
   var pseudo=savedPseudo||"moi";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
@@ -7855,9 +7900,9 @@ function deleteMessage(channelId,msgId){
   });
 }
 
-function sendMsg(){
+async function sendMsg(){
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
-  if(!checkMyPhone())return;
+  if(!(await checkMyPhone()))return;
   var msgEl=document.getElementById("chat-msg");
   var pseudoEl=document.getElementById("chat-pseudo");
   if(!msgEl||!pseudoEl)return;
@@ -7872,10 +7917,10 @@ function sendMsg(){
   localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
 }
 
-function sendMediaMessage(input){
+async function sendMediaMessage(input){
   if(!input.files||!input.files[0])return;
   if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
-  if(!checkMyPhone())return;
+  if(!(await checkMyPhone()))return;
   var file=input.files[0];
   if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptees (pas de video)");input.value="";return;}
   var pseudoEl=document.getElementById("chat-pseudo");
@@ -7926,9 +7971,9 @@ function createPoll(){
   closeModal("modal-poll");
 }
 
-function votePoll(channelId,msgId,optionIndex){
+async function votePoll(channelId,msgId,optionIndex){
   if(!window.fbReady)return;
-  if(!checkMyPhone())return;
+  if(!(await checkMyPhone()))return;
   var pseudo=savedPseudo||"moi";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
@@ -7958,9 +8003,9 @@ function votePoll(channelId,msgId,optionIndex){
   });
 }
 
-function respondConvocation(channelId,msgId,playerId,status){
+async function respondConvocation(channelId,msgId,playerId,status){
   if(!window.fbReady)return;
-  if(!checkMyPhone())return;
+  if(!(await checkMyPhone()))return;
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
     var msgData=null;
@@ -8586,9 +8631,9 @@ function injectRoleLogo(){
   if(homeLogo&&homeLogo.innerHTML){el.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="90"').replace(/height="175"/,'height="112"');}
 }
 
-function chooseRole(role){
+async function chooseRole(role){
   if(role==="dirigeant"){
-    var code=prompt("Code dirigeant :");
+    var code=await askPrompt("Code dirigeant", {confirmText:"Valider"});
     if(code===null)return;
     var validCode=localStorage.getItem("asmb_coach_code")||"ASMB2025";
     if(code.trim().toUpperCase()!==validCode.toUpperCase()){
@@ -8620,9 +8665,9 @@ function chooseRole(role){
 // ── ESPACE JOUEUR (auto-pointage) ──────────────────────────────────
 var joueurIdentifiedPlayer=null;
 
-function openJoueurCheckin(){
+async function openJoueurCheckin(){
   var saved=localStorage.getItem("asmb_joueur_phone")||"";
-  var phone=prompt("Ton numéro de téléphone (celui donne au club) :",saved);
+  var phone=await askPrompt("Ton numéro de téléphone", {defaultValue:saved, placeholder:"Celui donné au club", confirmText:"Valider"});
   if(!phone)return;
   phone=phone.trim().replace(/\s+/g,"");
   var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
@@ -8812,9 +8857,9 @@ function joueurSelfCheckin(playerId,eventId,status){
   }).catch(function(){alert("Erreur, réessayez");});
 }
 
-function registerParentPhone(){
+async function registerParentPhone(){
   if(myPhone){openTeamPicker(false);return;}
-  var phone=prompt("Entrez votre numéro de téléphone (le meme que celui fournit au club) pour rejoindre le groupe de votre enfant :");
+  var phone=await askPrompt("Votre numéro de téléphone", {placeholder:"Le même que celui fourni au club", confirmText:"Rejoindre"});
   if(!phone){
     notifyPhoneSkipped();
     openTeamPicker(false);
@@ -9044,11 +9089,11 @@ function saveParentTeams(){
   }
 }
 
-function submitJoinRequest(phone,teamIds){
+async function submitJoinRequest(phone,teamIds){
   if(!window.fbReady)return;
   var teams=getTeams().filter(function(t){return teamIds.indexOf(t.id)>=0;});
   var teamNames=teams.map(function(t){return t.name;}).join(", ");
-  var childName=prompt("Prénom de votre enfant (pour la demande envoyée au coach) :")||"Parent";
+  var childName=(await askPrompt("Prénom de votre enfant", {placeholder:"Pour la demande envoyée au coach", confirmText:"Envoyer"}))||"Parent";
   window.fbAddDoc(window.fbCollection(window.fbDb,"joinRequests"),{
     phone:phone,childName:childName,teamIds:teamIds,teamNames:teamNames,
     status:"pending",ts:window.fbServerTimestamp()
@@ -9324,8 +9369,8 @@ function getMyLicenceForTeam(team){
   })||null;
 }
 
-function signalerAbsence(eventId){
-  if(!checkMyPhone())return;
+async function signalerAbsence(eventId){
+  if(!(await checkMyPhone()))return;
   if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
@@ -9334,8 +9379,8 @@ function signalerAbsence(eventId){
   // Retrouver l'enfant lie a ce parent (via son téléphone) pour verifier les doublons
  var linkedPlayer=getLinkedPlayerForCheckin();
 
- var proceed=function(nom,playerId){
- var motif=prompt("Motif (optionnel) :","")||"";
+ var proceed=async function(nom,playerId){
+ var motif=(await askPrompt("Motif", {placeholder:"Optionnel", confirmText:"Envoyer"}))||"";
  var channelId=findChannelForTeamText(ev.equipe);
  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
  text:" <b>Absence signalée</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
@@ -9362,7 +9407,7 @@ function signalerAbsence(eventId){
       proceed(linkedPlayer.prenom+" "+linkedPlayer.nom,linkedPlayer.id);
     });
   } else {
-    var nom=prompt("Prénom du joueur absent :");
+    var nom=await askPrompt("Prénom du joueur absent", {confirmText:"Suivant"});
     if(!nom)return;
     proceed(nom,null);
   }
@@ -9491,24 +9536,24 @@ function buildCoachEquipe(){
   });
 }
 
-function editPlayerMaillot(playerId){
+async function editPlayerMaillot(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numéro de maillot pour "+p.prenom+" "+p.nom+" :",p.maillot||"");
+  var num=await askPrompt("Numéro de maillot", {defaultValue:p.maillot||"", placeholder:p.prenom+" "+p.nom, confirmText:"Enregistrer"});
   if(num===null)return;
   p.maillot=num.trim();
   savePlayers(players);
   buildCoachEquipe();
 }
 
-function editPlayerLicence(playerId){
+async function editPlayerLicence(playerId){
   var players=getPlayers();
   var p=players.find(function(x){return x.id===playerId;});
   if(!p)return;
-  var num=prompt("Numéro de licence pour "+p.prenom+" "+p.nom+" :",p.numLicence||"0C");
+  var num=await askPrompt("Numéro de licence", {defaultValue:p.numLicence||"0C", placeholder:p.prenom+" "+p.nom, confirmText:"Suivant"});
   if(num===null)return;
-  var type=prompt("Type de licence (compétition / loisir) :",p.typeLicence||"competition");
+  var type=await askPrompt("Type de licence", {defaultValue:p.typeLicence||"competition", placeholder:"compétition / loisir", confirmText:"Enregistrer"});
   if(type===null)return;
   p.numLicence=num.trim();
   p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
@@ -9861,8 +9906,8 @@ function buildParentSettings(){
 
 function toggleThemeFromParams(){toggleTheme();}
 
-function changeParentPhone(){
-  var p=prompt("Votre numéro de téléphone :",myPhone||"");
+async function changeParentPhone(){
+  var p=await askPrompt("Votre numéro de téléphone", {defaultValue:myPhone||"", confirmText:"Enregistrer"});
   if(p===null)return;
   p=p.trim().replace(/\s+/g,"");
   myPhone=p;
@@ -9896,7 +9941,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785065149";
+var APP_VERSION="1785065866";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
