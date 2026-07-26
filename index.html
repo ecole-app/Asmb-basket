@@ -8237,30 +8237,33 @@ function authLogout(){
 
 // Applique l'utilisateur authentifié : lit users/{uid}, amorce le dirigeant si besoin, puis route
 function applyAuthedUser(user){
-  window.fbGetDoc(window.fbDoc(window.fbDb,"users",user.uid)).then(function(snap){
+  if(window.__userDocUnsub){ try{window.__userDocUnsub();}catch(e){} }
+  var firstLoad=true;
+  window.__userDocUnsub = window.fbOnSnapshot(window.fbDoc(window.fbDb,"users",user.uid), function(snap){
     if(snap && snap.exists()){
-      finishAuthedUser(user, snap.data());
-    } else if(user.uid===BOOTSTRAP_DIRIGEANT_UID && BOOTSTRAP_DIRIGEANT_UID){
+      finishAuthedUser(user, snap.data(), !firstLoad);
+      firstLoad=false;
+    } else if(firstLoad && user.uid===BOOTSTRAP_DIRIGEANT_UID && BOOTSTRAP_DIRIGEANT_UID){
       var seed={ phone:"", email:user.email||"", roles:["dirigeant"], linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp() };
-      window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid), seed).then(function(){ finishAuthedUser(user, seed); });
-    } else {
-      // Compte auth sans doc users : sécurité, on déconnecte
+      window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid), seed).then(function(){ finishAuthedUser(user, seed); firstLoad=false; });
+    } else if(firstLoad){
       alert("Compte non rattaché au club. Contacter un dirigeant.");
       window.fbSignOut(window.fbAuth);
       showAuth("entry");
     }
-  }).catch(function(e){
-    console.log("applyAuthedUser:",e);
-    alert("Erreur de connexion aux données. Réessayer.");
+  }, function(err){
+    console.log("applyAuthedUser:",err);
+    if(firstLoad){ alert("Erreur de connexion aux données. Réessayer."); firstLoad=false; }
   });
 }
 
-function finishAuthedUser(user, u){
+function finishAuthedUser(user, u, isUpdate){
   var roles=u.roles||[];
   var profile = roles.indexOf("dirigeant")>=0 ? "dirigeant"
               : roles.indexOf("coach")>=0 ? "coach"
               : roles.indexOf("parent")>=0 ? "parent"
               : "parent";
+  var previousProfile=localStorage.getItem("asmb_profile");
   window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
   localStorage.setItem("asmb_profile", profile);
   if(window.ASMB_USER.email){ localStorage.setItem("asmb_last_email", window.ASMB_USER.email); }
@@ -8270,9 +8273,13 @@ function finishAuthedUser(user, u){
   }
   if(roles.indexOf("coach")>=0 && (u.linkedTeamIds||[]).length){
     localStorage.setItem("asmb_coach_teams", JSON.stringify(u.linkedTeamIds));
-    localStorage.setItem("asmb_coach_team", u.linkedTeamIds[0]);
+    if(u.linkedTeamIds.indexOf(getCoachTeam())<0){ localStorage.setItem("asmb_coach_team", u.linkedTeamIds[0]); }
   }
-  initProfile(); // routage existant, inchangé
+  if(!isUpdate || profile!==previousProfile){
+    initProfile(); // routage existant, inchangé (au login, ou si le rôle actif change)
+  } else {
+    refreshCurrentScreen(); // mise à jour silencieuse (ex: nouvelle équipe assignée), sans changer d'écran
+  }
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
   try{
     var btn=document.getElementById("hdr-profile-btn");
@@ -9653,7 +9660,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1784885359";
+var APP_VERSION="1785037392";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
