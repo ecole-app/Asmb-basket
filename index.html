@@ -4959,6 +4959,7 @@ var ADMIN_MODULES=[
  {id:"equipes",name:"Équipes",sub:"Composition · Staff · Maillots",icon:"👥",color:"#16A085",scr:"equipes"},
  {id:"planning",name:"Planning",sub:"Salles · Créneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
  {id:"documents",name:"Documents",sub:"Fichiers · Formulaires",icon:"📁",color:"#8E44AD",scr:"documents"},
+ {id:"acces",name:"Accès coach",sub:"Rôles · Équipes des comptes",icon:"🔑",color:"#E8670A",scr:"admin"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","Senior":"#E8670A"};
@@ -4992,11 +4993,13 @@ function getAdminCount(id){
   if(id==="equipes"){var t=getTeams();return t.length+" equipe"+(t.length>1?"s":"");}
   if(id==="planning"){var e=getEvents();return e.length+" evenement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
+  if(id==="acces")return "Rôles & équipes";
   return "";
 }
 function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
+  if(id==="acces"){openAccesCoach();return;}
   stack.push(m.scr);
   if(id==="parametres"){buildParametres();}
   else if(id==="communaute"){buildAdminComm();}
@@ -5008,7 +5011,95 @@ function openAdminModule(id){
   showScr(m.scr);
 }
 
-// ── PLAYERS ──────────────────────────────────────────────────────
+// ── STEP 7 : ACCÈS COACH (attribution rôles/équipes par le dirigeant) ──
+function openAccesCoach(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  var modal=document.createElement("div");
+  modal.className="acces-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Accès coach";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px">Chargement des comptes…</div>';
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  window.fbGetDocs(window.fbCollection(window.fbDb,"users")).then(function(snap){
+    var users=[];snap.forEach(function(d){var v=d.data();v._uid=d.id;users.push(v);});
+    renderAccesList(list,users);
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+}
+function renderAccesList(list,users){
+  list.innerHTML="";
+  if(!users.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucun compte enregistré</div>';return;}
+  var teams=getTeams();
+  users.forEach(function(u){
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px";
+    var head=document.createElement("div");
+    head.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    head.textContent=u.email||u.phone||u._uid;
+    var sub=document.createElement("div");
+    sub.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
+    sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
+    card.appendChild(head);card.appendChild(sub);
+    var state={roles:(u.roles||[]).slice(),teams:(u.linkedTeamIds||[]).slice()};
+    var teamBox=document.createElement("div");
+    var roleWrap=document.createElement("div");
+    roleWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px";
+    ["dirigeant","coach","parent"].forEach(function(r){
+      var chip=document.createElement("button");
+      function paint(){var on=state.roles.indexOf(r)>=0;chip.style.cssText="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--grn)":"var(--bdr)")+";background:"+(on?"var(--grn)":"transparent")+";color:"+(on?"#fff":"var(--mut)");}
+      chip.textContent=roleLabel(r);paint();
+      chip.addEventListener("click",function(e){e.stopPropagation();var i=state.roles.indexOf(r);if(i>=0)state.roles.splice(i,1);else state.roles.push(r);paint();teamBox.style.display=(state.roles.indexOf("coach")>=0)?"block":"none";});
+      roleWrap.appendChild(chip);
+    });
+    card.appendChild(roleWrap);
+    teamBox.style.cssText="margin-bottom:10px;display:"+((state.roles.indexOf("coach")>=0)?"block":"none");
+    var tl=document.createElement("div");
+    tl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
+    tl.textContent="Équipes du coach";
+    teamBox.appendChild(tl);
+    if(!teams.length){var no=document.createElement("div");no.style.cssText="font-size:11px;color:var(--mut)";no.textContent="Aucune équipe";teamBox.appendChild(no);}
+    teams.forEach(function(t){
+      var lbl=document.createElement("label");
+      lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--txt);cursor:pointer";
+      var chk=document.createElement("input");chk.type="checkbox";chk.checked=state.teams.indexOf(t.id)>=0;
+      chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
+      chk.addEventListener("change",function(){var i=state.teams.indexOf(t.id);if(chk.checked){if(i<0)state.teams.push(t.id);}else if(i>=0)state.teams.splice(i,1);});
+      lbl.appendChild(chk);lbl.appendChild(document.createTextNode(t.name));
+      teamBox.appendChild(lbl);
+    });
+    card.appendChild(teamBox);
+    var save=document.createElement("button");
+    save.textContent="Enregistrer";
+    save.style.cssText="padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
+    save.addEventListener("click",function(e){
+      e.stopPropagation();save.textContent="…";
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams}).then(function(){
+        save.textContent="\u2713 Enregistré";
+        sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
+        setTimeout(function(){save.textContent="Enregistrer";},1500);
+      }).catch(function(err){save.textContent="Erreur";alert((err&&err.code)||err);});
+    });
+    card.appendChild(save);
+    list.appendChild(card);
+  });
+}
 function getPlayers(){try{return JSON.parse(localStorage.getItem("asmb_players")||"[]");}catch(e){return [];}}
 function savePlayers(p){localStorage.setItem("asmb_players",JSON.stringify(p));fsWriteCollection("players",p);}
 
