@@ -8122,6 +8122,10 @@ function finishAuthedUser(user, u){
   }
   initProfile(); // routage existant, inchangé
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
+  try{
+    var btn=document.getElementById("hdr-profile-btn");
+    if(btn) btn.style.display=(roles.length>1)?"flex":"none";
+  }catch(e){}
 }
 
 // Gate au démarrage : remplace l'appel direct à initProfile
@@ -8530,12 +8534,55 @@ function logoutUser(){
   location.reload();
 }
 
+function roleLabel(r){
+  return {dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur"}[r]||r;
+}
 function switchProfile(){
-  if(!confirm("Changer de profil ? Vous devrez re-sélectionner Parent ou Coach."))return;
-  localStorage.removeItem("asmb_profile");
-  localStorage.removeItem("asmb_parent_teams");
-  localStorage.removeItem("asmb_parent_active_team");
-  location.reload();
+  var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  if(roles.length<2){ return; }
+  var current=localStorage.getItem("asmb_profile");
+  var modal=document.createElement("div");
+  modal.className="identity-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Se connecter en tant que";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  inner.appendChild(hdr);
+  roles.forEach(function(r){
+    var isCur=(r===current);
+    var row=document.createElement("button");
+    row.style.cssText="width:100%;display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--rs);border:1.5px solid "+(isCur?"var(--grn)":"var(--bdr)")+";background:"+(isCur?"rgba(39,174,96,.08)":"var(--card)")+";cursor:pointer;text-align:left";
+    var av=document.createElement("div");
+    av.style.cssText="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0";
+    av.textContent=roleLabel(r).charAt(0);
+    var lbl=document.createElement("div");
+    lbl.style.cssText="flex:1;font-size:14px;font-weight:700;color:var(--txt)";
+    lbl.textContent=roleLabel(r);
+    if(isCur){var chk=document.createElement("span");chk.style.cssText="color:var(--grn);font-weight:800";chk.textContent="\u2713";lbl.appendChild(document.createTextNode(" "));row.appendChild(av);row.appendChild(lbl);row.appendChild(chk);}
+    else {row.appendChild(av);row.appendChild(lbl);}
+    row.addEventListener("click",function(e){
+      e.stopPropagation();
+      modal.remove();
+      if(r===current) return;
+      localStorage.setItem("asmb_profile", r);
+      if(r!=="parent"){ localStorage.removeItem("asmb_parent_active_team"); }
+      initProfile();
+    });
+    inner.appendChild(row);
+  });
+  modal.addEventListener("click",function(){modal.remove();});
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
 }
 
 // ── PARENT TEAMS ─────────────────────────────────────────────────
