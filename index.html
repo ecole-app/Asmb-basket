@@ -3400,7 +3400,39 @@ SIT_DUR["5.2-2"]=5000;SIT_ANIMS["5.2-2"]=function(ctx,t){if(!ctx)return;
 // ═══ SYSTÈME LICENCES ════════════════════════════════════════════
 
 function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){return [];}}
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);}
+// ── PHONE_INDEX (lecture publique) : permet a un appareil neuf de retrouver
+// un numero deja connu du club sans etre encore connecte.
+var PHONE_INDEX_PREV={};
+function syncPhoneIndexFromLicences(lics){
+  if(!window.fbDb||!window.fbSetDoc) return;
+  var entries={};
+  (lics||[]).forEach(function(l){
+    if(!l||!l.fiche) return;
+    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
+    var prenom=l.fiche.prenom||"", nom=l.fiche.nom||"";
+    var playerName=(prenom+" "+nom).trim();
+    var teamIds=[l.fiche.equipe].filter(Boolean);
+    phones.forEach(function(p){
+      if(!p) return;
+      if(!entries[p]) entries[p]={role:"parent",playerIds:[],playerName:playerName,teamIds:teamIds.slice()};
+      if(entries[p].playerIds.indexOf(l.id)<0) entries[p].playerIds.push(l.id);
+    });
+  });
+  Object.keys(entries).forEach(function(phone){
+    var s=JSON.stringify(entries[phone]);
+    if(PHONE_INDEX_PREV[phone]!==s){
+      window.fbSetDoc(window.fbDoc(window.fbDb,"phone_index",phone), entries[phone]).catch(function(e){console.log("phone_index write",phone,e);});
+    }
+  });
+  Object.keys(PHONE_INDEX_PREV).forEach(function(phone){
+    if(!(phone in entries) && window.fbDeleteDoc){
+      window.fbDeleteDoc(window.fbDoc(window.fbDb,"phone_index",phone)).catch(function(){});
+    }
+  });
+  PHONE_INDEX_PREV={};
+  Object.keys(entries).forEach(function(p){PHONE_INDEX_PREV[p]=JSON.stringify(entries[p]);});
+}
+function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);}
 
 function genCode(){
  var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -6261,6 +6293,7 @@ function migrateToFirestoreConfirmed(){
     var msg="✔ Terminé : "+counts.players+" joueurs · "+counts.teams+" équipes · "+counts.events+" événements · "+counts.licences+" licences · "+counts.evaluations+" évals.";
     if(errors.length){ msg+="<br><span style=\"color:#C0392B\">"+errors.length+" échec(s) : "+errors.slice(0,4).join(" | ")+(errors.length>4?"…":"")+"</span>"; }
     log(msg);
+    syncPhoneIndexFromLicences(getLicences());
   });
 }
 
@@ -8432,7 +8465,7 @@ function authNormPhone(p){ return (p||"").trim().replace(/\s+/g,""); }
 function authEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
 // Cherche un numéro dans les données club (localStorage pour l'instant ; Firestore plus tard)
-function authLookupPhone(phone){
+function authLookupPhoneLocal(phone){
   var np=authNormPhone(phone);
   if(!np) return {found:false, phone:np};
   try{
@@ -8447,6 +8480,39 @@ function authLookupPhone(phone){
     }
   }catch(e){ console.log("lookup licences:",e); }
   return {found:false, phone:np};
+}
+
+// Repli Firestore (phone_index, lecture publique) : couvre le cas d'un appareil
+// qui n'a jamais eu de cache local synchronise (nouveau telephone).
+function authLookupPhoneRemote(phone){
+  var np=authNormPhone(phone);
+  if(!window.fbDb||!window.fbGetDoc) return Promise.resolve({found:false,phone:np});
+  return window.fbGetDoc(window.fbDoc(window.fbDb,"phone_index",np)).then(function(snap){
+    if(snap && snap.exists()){
+      var d=snap.data();
+      return {found:true, phone:np, role:d.role||"parent", playerName:d.playerName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[]};
+    }
+    return {found:false, phone:np};
+  }).catch(function(){ return {found:false, phone:np}; });
+}
+
+function authLookupPhone(phone){
+  var local=authLookupPhoneLocal(phone);
+  if(local.found) return Promise.resolve(local);
+  return authLookupPhoneRemote(phone);
+}
+
+async function authContinue(){
+  var inp=document.getElementById("auth-phone");
+  var phone=authNormPhone(inp?inp.value:"");
+  if(phone.length<6){ alert("Numéro invalide"); return; }
+  AUTH_STATE.phone=phone;
+  var res=await authLookupPhone(phone);
+  AUTH_STATE.lookup=res;
+  if(!res.found){ showAuth("unknown"); return; }
+  // Pas de requête sur la collection users ici (protégée avant connexion).
+  // Si un compte existe déjà, createUser renverra email-already-in-use et on renvoie vers la connexion.
+  showAuth("signup",res);
 }
 
 function authLogoHtml(){
@@ -8573,18 +8639,6 @@ function authErr(msg){
   else alert(msg);
 }
 
-function authContinue(){
-  var inp=document.getElementById("auth-phone");
-  var phone=authNormPhone(inp?inp.value:"");
-  if(phone.length<6){ alert("Numéro invalide"); return; }
-  AUTH_STATE.phone=phone;
-  var res=authLookupPhone(phone);
-  AUTH_STATE.lookup=res;
-  if(!res.found){ showAuth("unknown"); return; }
-  // Pas de requête Firestore ici : la collection users est protégée avant connexion.
-  // Si un compte existe déjà, createUser renverra email-already-in-use et on renvoie vers la connexion.
-  showAuth("signup",res);
-}
 
 function authDoSignup(){
   var email=(document.getElementById("auth-email")||{}).value||"";
@@ -10246,7 +10300,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785101753";
+var APP_VERSION="1785102106";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
