@@ -8588,6 +8588,14 @@ function switchProfile(){
 // ── PARENT TEAMS ─────────────────────────────────────────────────
 function getParentTeams(){try{return JSON.parse(localStorage.getItem("asmb_parent_teams")||"[]");}catch(e){return [];}}
 function saveParentTeamsList(ids){localStorage.setItem("asmb_parent_teams",JSON.stringify(ids));}
+function getParentChildren(){
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(!ids.length) return [];
+  return getPlayers().filter(function(p){return ids.indexOf(p.id)>=0;});
+}
+function getTeamForPlayer(pid){
+  return getTeams().find(function(t){return (t.members||[]).indexOf(pid)>=0;})||null;
+}
 function getActiveTeamId(){return localStorage.getItem("asmb_parent_active_team")||"";}
 function setActiveTeamId(id){localStorage.setItem("asmb_parent_active_team",id);}
 
@@ -8772,7 +8780,15 @@ function confirmTeamPicker(){
 // ── PARENT HOME ───────────────────────────────────────────────────
 function buildParentHome(){
   updateCountdownBanner("parent-countdown");
-  var teamIds=getParentTeams();
+  var children=getParentChildren();
+  var teamIds;
+  if(children.length){
+    teamIds=[];
+    children.forEach(function(c){var t=getTeamForPlayer(c.id);if(t&&teamIds.indexOf(t.id)<0)teamIds.push(t.id);});
+    if(teamIds.length)saveParentTeamsList(teamIds); else teamIds=getParentTeams();
+  } else {
+    teamIds=getParentTeams();
+  }
   var allTeams=getTeams();
   var myTeams=allTeams.filter(function(t){return teamIds.indexOf(t.id)>=0;});
   renderMatchdayBanner("parent-matchday-banner",myTeams.map(function(t){return t.name;}));
@@ -8811,16 +8827,33 @@ function buildParentHome(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joue'+(matchesPlayed>1?"s":"")+'</div>'+
   '</div>'+licBadge;
 
-  // Chips équipes
+  // Chips : enfants (avatar) si rattachés, sinon équipes
   var chipsEl=document.getElementById("parent-team-chips");
   chipsEl.innerHTML="";
-  myTeams.forEach(function(t){
-    var b=document.createElement("button");
-    b.className="cat-filter"+(t.id===activeId?" on":"");
-    b.textContent=t.name;
-    b.onclick=function(){setActiveTeamId(t.id);buildParentHome();};
-    chipsEl.appendChild(b);
-  });
+  if(children.length){
+    children.forEach(function(c){
+      var t=getTeamForPlayer(c.id);
+      var isActive=t&&t.id===activeId;
+      var b=document.createElement("button");
+      b.className="cat-filter"+(isActive?" on":"");
+      b.style.cssText="display:inline-flex;align-items:center;gap:6px";
+      var av=document.createElement("span");
+      av.style.cssText="width:22px;height:22px;border-radius:50%;background:var(--dkg);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0";
+      av.textContent=(c.prenom||"?").charAt(0).toUpperCase();
+      b.appendChild(av);
+      b.appendChild(document.createTextNode(c.prenom+(t?"":" (sans équipe)")));
+      if(t){ (function(tid){b.addEventListener("click",function(){setActiveTeamId(tid);buildParentHome();});})(t.id); }
+      chipsEl.appendChild(b);
+    });
+  } else {
+    myTeams.forEach(function(t){
+      var b=document.createElement("button");
+      b.className="cat-filter"+(t.id===activeId?" on":"");
+      b.textContent=t.name;
+      b.onclick=function(){setActiveTeamId(t.id);buildParentHome();};
+      chipsEl.appendChild(b);
+    });
+  }
 
   // Prochain événement
   var nextEv=getNextEventForTeam(activeTeam);
