@@ -4158,8 +4158,50 @@ function sendFeedback(){
   });
 }
 
+// ── CONFIRMATION MAISON (remplace confirm() du navigateur) ────────
+// askConfirm(message, {title, confirmText, cancelText, danger}) -> Promise<boolean>
+function askConfirm(message, opts){
+  opts=opts||{};
+  var title=opts.title||"Confirmer";
+  var confirmText=opts.confirmText||"Confirmer";
+  var cancelText=opts.cancelText||"Annuler";
+  var danger=!!opts.danger;
+  return new Promise(function(resolve){
+    var modal=document.createElement("div");
+    modal.className="confirm-modal";
+    modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px";
+    var box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:18px;padding:22px 20px 18px;width:100%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center";
+    box.addEventListener("click",function(e){e.stopPropagation();});
+    var titleEl=document.createElement("div");
+    titleEl.style.cssText="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px";
+    titleEl.textContent=title;
+    var subEl=document.createElement("div");
+    subEl.style.cssText="font-size:13px;color:var(--txt2);line-height:1.45;margin-bottom:20px;white-space:pre-line";
+    subEl.textContent=message;
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:10px";
+    var cancelBtn=document.createElement("button");
+    cancelBtn.textContent=cancelText;
+    cancelBtn.style.cssText="flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);cursor:pointer";
+    var okBtn=document.createElement("button");
+    okBtn.textContent=confirmText;
+    okBtn.style.cssText="flex:1;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:"+(danger?"var(--red)":"var(--dkg)");
+    function finish(result){ modal.remove(); resolve(result); }
+    cancelBtn.addEventListener("click",function(){finish(false);});
+    okBtn.addEventListener("click",function(){finish(true);});
+    modal.addEventListener("click",function(){finish(false);});
+    btnRow.appendChild(cancelBtn);btnRow.appendChild(okBtn);
+    box.appendChild(titleEl);box.appendChild(subEl);box.appendChild(btnRow);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+  });
+}
+
 function authConfirmLogout(){
-  if(confirm("Se déconnecter de l'application ?")) authLogout();
+  askConfirm("Se déconnecter de l'application ?", {title:"Déconnexion", confirmText:"Se déconnecter"}).then(function(ok){
+    if(ok) authLogout();
+  });
 }
 
 function toggleNotifType(type,checked){
@@ -4619,13 +4661,15 @@ function showAddClassementRow(){
 }
 
 function deleteClassementRow(rowId){
-  if(!confirm("Supprimer cette ligne ?"))return;
-  var all=getClassement();
-  if(all[classementActiveTeamId]&&all[classementActiveTeamId][classementActivePhase]){
-    all[classementActiveTeamId][classementActivePhase]=all[classementActiveTeamId][classementActivePhase].filter(function(r){return r.id!==rowId;});
-  }
-  saveClassement(all);
-  buildClassement();
+  askConfirm("Supprimer cette ligne ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var all=getClassement();
+    if(all[classementActiveTeamId]&&all[classementActiveTeamId][classementActivePhase]){
+      all[classementActiveTeamId][classementActivePhase]=all[classementActiveTeamId][classementActivePhase].filter(function(r){return r.id!==rowId;});
+    }
+    saveClassement(all);
+    buildClassement();
+  });
 }
 
 function openAnnuaire(){
@@ -4682,10 +4726,12 @@ function saveContact(){
 }
 
 function deleteContact(id){
-  if(!confirm("Supprimer ce contact ?"))return;
-  var contacts=getAnnuaire().filter(function(c){return c.id!==id;});
-  saveAnnuaireList(contacts);
-  buildAnnuaire();
+  askConfirm("Supprimer ce contact ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var contacts=getAnnuaire().filter(function(c){return c.id!==id;});
+    saveAnnuaireList(contacts);
+    buildAnnuaire();
+  });
 }
 
 // ── GALERIE PHOTOS ────────────────────────────────────────────────
@@ -4791,9 +4837,11 @@ function viewChatMedia(url){
 
 function deleteGalleryPhoto(){
   if(!currentPhotoId||!window.fbReady)return;
-  if(!confirm("Supprimer cette photo ?"))return;
-  window.fbSetDoc(window.fbDoc(window.fbDb,"gallery",currentPhotoId),{deleted:true},{merge:true});
-  closeModal("modal-photo-view");
+  askConfirm("Supprimer cette photo ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    window.fbSetDoc(window.fbDoc(window.fbDb,"gallery",currentPhotoId),{deleted:true},{merge:true});
+    closeModal("modal-photo-view");
+  });
 }
 
 function collectAllData(){
@@ -4826,38 +4874,49 @@ function backupToCloud(){
 
 function restoreFromCloud(){
   if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
-  if(!confirm("Ceci va REMPLACER toutes vos données locales par la dernière sauvegarde cloud. Continuer ?"))return;
-  window.fbGetDocs(window.fbCollection(window.fbDb,"backups")).then(function(snap){
-    var found=null;
-    snap.forEach(function(d){if(d.id==="latest")found=d.data();});
-    if(!found||!found.data){alert("Aucune sauvegarde cloud disponible");return;}
-    var data=JSON.parse(found.data);
-    localStorage.setItem("asmb_players",JSON.stringify(data.players||[]));
-    localStorage.setItem("asmb_teams",JSON.stringify(data.teams||[]));
-    localStorage.setItem("asmb_events",JSON.stringify(data.events||[]));
-    localStorage.setItem("asmb_docs",JSON.stringify(data.docs||[]));
-    localStorage.setItem("asmb_licences",JSON.stringify(data.licences||[]));
-    localStorage.setItem("asmb_annuaire",JSON.stringify(data.annuaire||[]));
-    ["elite","competition","3x3","evenement","basketpourtous"].forEach(function(id){
-      localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
-    });
-    alert("Données restaurees depuis le cloud ! L'application va se recharger.");
-    location.reload();
-  }).catch(function(){alert("Erreur lors de la restauration");});
+  askConfirm("Ceci va remplacer toutes vos données locales par la dernière sauvegarde cloud.", {title:"Restaurer la sauvegarde ?", confirmText:"Restaurer"}).then(function(ok){
+    if(!ok)return;
+    window.fbGetDocs(window.fbCollection(window.fbDb,"backups")).then(function(snap){
+      var found=null;
+      snap.forEach(function(d){if(d.id==="latest")found=d.data();});
+      if(!found||!found.data){alert("Aucune sauvegarde cloud disponible");return;}
+      var data=JSON.parse(found.data);
+      localStorage.setItem("asmb_players",JSON.stringify(data.players||[]));
+      localStorage.setItem("asmb_teams",JSON.stringify(data.teams||[]));
+      localStorage.setItem("asmb_events",JSON.stringify(data.events||[]));
+      localStorage.setItem("asmb_docs",JSON.stringify(data.docs||[]));
+      localStorage.setItem("asmb_licences",JSON.stringify(data.licences||[]));
+      localStorage.setItem("asmb_annuaire",JSON.stringify(data.annuaire||[]));
+      ["elite","competition","3x3","evenement","basketpourtous"].forEach(function(id){
+        localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
+      });
+      alert("Données restaurees depuis le cloud ! L'application va se recharger.");
+      location.reload();
+    }).catch(function(){alert("Erreur lors de la restauration");});
+  });
 }
 
 function resetAllData(){
-  if(!confirm("ATTENTION : Ceci va supprimer TOUTES les données locales (joueurs, équipes, événements, documents, licences). Cette action est irreversible. Continuer ?"))return;
-  if(!confirm("Etes-vous vraiment sur ? Cette action ne peut pas être annulée."))return;
-  ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
-  Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
-  alert("Données supprimees. L'application va se recharger.");
-  location.reload();
+  askConfirm("Ceci va supprimer TOUTES les données locales (joueurs, équipes, événements, documents, licences). Cette action est irréversible.", {title:"Attention", confirmText:"Continuer", danger:true}).then(function(ok){
+    if(!ok)return;
+    askConfirm("Cette action ne peut pas être annulée.", {title:"Êtes-vous vraiment sûr ?", confirmText:"Tout supprimer", danger:true}).then(function(ok2){
+      if(!ok2)return;
+      ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
+      Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
+      alert("Données supprimees. L'application va se recharger.");
+      location.reload();
+    });
+  });
 }
 
 // ── DONNEES DE DEMO ───────────────────────────────────────────────
 function loadDemoData(){
-  if(!confirm("Charger 4 équipes et 40 joueurs de demonstration pour tester l'app ?"))return;
+  askConfirm("Charger 4 équipes et 40 joueurs de démonstration pour tester l'app ?", {title:"Données de démonstration", confirmText:"Charger"}).then(function(ok){
+    if(!ok)return;
+    loadDemoDataConfirmed();
+  });
+}
+function loadDemoDataConfirmed(){
 
   var teamDefs=[
     {id:"demo-team-u13f",name:"U13 Filles ASMB (Demo)",cat:"U13"},
@@ -4923,7 +4982,12 @@ function loadDemoData(){
 }
 
 function loadDemoEvents(){
-  if(!confirm("Ajouter des entraînements fictifs pour la semaine prochaine (+ un match samedi) ?"))return;
+  askConfirm("Ajouter des entraînements fictifs pour la semaine prochaine (+ un match samedi) ?", {title:"Données de démonstration", confirmText:"Ajouter"}).then(function(ok){
+    if(!ok)return;
+    loadDemoEventsConfirmed();
+  });
+}
+function loadDemoEventsConfirmed(){
   var teams=getTeams();
   var demoTeams=teams.filter(function(t){return t.demo;});
   if(!demoTeams.length){
@@ -4975,17 +5039,19 @@ function loadDemoEvents(){
 }
 
 function clearDemoData(){
- if(!confirm("Supprimer uniquement les données de demonstration (équipes/joueurs/événements/licences marques Demo) ?"))return;
- var teams=getTeams().filter(function(t){return !t.demo;});
- saveTeams(teams);
- var players=getPlayers().filter(function(p){return !p.demo;});
- savePlayers(players);
- var events=getEvents().filter(function(e){return !e.demo;});
- saveEvents(events);
- var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
- saveLicences(lics);
- alert("Données de demo supprimees.");
- buildAdminHome();
+ askConfirm("Supprimer uniquement les données de démonstration (équipes/joueurs/événements/licences marquées Demo) ?", {title:"Supprimer les données démo", confirmText:"Supprimer", danger:true}).then(function(ok){
+   if(!ok)return;
+   var teams=getTeams().filter(function(t){return !t.demo;});
+   saveTeams(teams);
+   var players=getPlayers().filter(function(p){return !p.demo;});
+   savePlayers(players);
+   var events=getEvents().filter(function(e){return !e.demo;});
+   saveEvents(events);
+   var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
+   saveLicences(lics);
+   alert("Données de demo supprimees.");
+   buildAdminHome();
+ });
 }
 
 // ═══ ADMIN ════════════════════════════════════════════════════════
@@ -5234,8 +5300,10 @@ function renderAvisList(list,items){
     delBtn.textContent="Supprimer";
     delBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer";
     delBtn.addEventListener("click",function(){
-      if(!confirm("Supprimer cet avis ?"))return;
-      window.fbDeleteDoc(window.fbDoc(window.fbDb,"feedback",it._id)).then(function(){card.remove();});
+      askConfirm("Supprimer cet avis ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+        if(!ok)return;
+        window.fbDeleteDoc(window.fbDoc(window.fbDb,"feedback",it._id)).then(function(){card.remove();});
+      });
     });
     btnRow.appendChild(toggleBtn);btnRow.appendChild(delBtn);
     card.appendChild(meta);card.appendChild(msg);card.appendChild(btnRow);
@@ -5328,9 +5396,11 @@ function savePlayer(){
   buildAdminHome();
 }
 function deletePlayer(id){
-  if(!confirm("Supprimer ce joueur ?"))return;
-  var players=getPlayers().filter(function(p){return p.id!==id;});
-  savePlayers(players);renderPlayers();buildAdminHome();
+  askConfirm("Supprimer ce joueur ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var players=getPlayers().filter(function(p){return p.id!==id;});
+    savePlayers(players);renderPlayers();buildAdminHome();
+  });
 }
 
 // ── HISTORIQUE PRESENCE PAR JOUEUR ─────────────────────────────────
@@ -5738,7 +5808,7 @@ function showAddTeam(){
   ensureTeamChannel(newTeam);
   buildTeams();buildAdminHome();
 }
-function deleteTeam(id){if(!confirm("Supprimer cette équipe ?"))return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();}
+function deleteTeam(id){askConfirm("Supprimer cette équipe ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();});}
 
 // ── PLANNING ─────────────────────────────────────────────────────
 function getEvents(){try{return JSON.parse(localStorage.getItem("asmb_events")||"[]");}catch(e){return [];}}
@@ -5972,7 +6042,12 @@ function initFirestoreSync(){
 function migrateToFirestore(){
   if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ alert("Réservé au dirigeant."); return; }
   if(!window.fbDb || !window.fbSetDoc){ alert("Firestore non disponible."); return; }
-  if(!confirm("Copier toutes les données locales vers Firestore ?\n\n(Sans risque : écrase les documents existants, peut être relancé.)")) return;
+  askConfirm("Sans risque : écrase les documents existants, peut être relancé.", {title:"Copier les données vers Firestore ?", confirmText:"Lancer"}).then(function(ok){
+    if(!ok)return;
+    migrateToFirestoreConfirmed();
+  });
+}
+function migrateToFirestoreConfirmed(){
   var statusEl=document.getElementById("migration-status");
   function log(msg){ if(statusEl){ statusEl.innerHTML=msg; } }
   log("Migration en cours...");
@@ -6424,23 +6499,25 @@ function saveEventFull(){
     alert("Événement cree !");
   }
 }
-function deleteEvent(id){if(!confirm("Supprimer cet événement ?"))return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();}
+function deleteEvent(id){askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();});}
 
 function cancelEvent(eventId){
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
-  if(!confirm('Annuler "'+ev.titre+'" du '+ev.date+' ? Une alerte sera envoyée dans le canal.'))return;
-  ev.cancelled=true;
-  saveEvents(events);
-  buildPlanning();
-  if(window.fbReady){
-    var channelId=findChannelForTeamText(ev.equipe);
-    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annulé.",
-      pseudo:"ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
-    });
-  }
+  askConfirm('"'+ev.titre+'" du '+ev.date+' — une alerte sera envoyée dans le canal.', {title:"Annuler cet événement ?", confirmText:"Annuler l'événement", danger:true}).then(function(ok){
+    if(!ok)return;
+    ev.cancelled=true;
+    saveEvents(events);
+    buildPlanning();
+    if(window.fbReady){
+      var channelId=findChannelForTeamText(ev.equipe);
+      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
+        text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annulé.",
+        pseudo:"ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+      });
+    }
+  });
 }
 
 function editEventDateTime(eventId){
@@ -7007,7 +7084,7 @@ function handleFiles(files){
   saveDocs(docs);buildDocs();buildAdminHome();
   alert(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
 }
-function deleteDoc(id){if(!confirm("Supprimer ce document ?"))return;var docs=getDocs().filter(function(d){return d.id!==id;});saveDocs(docs);buildDocs();buildAdminHome();}
+function deleteDoc(id){askConfirm("Supprimer ce document ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var docs=getDocs().filter(function(d){return d.id!==id;});saveDocs(docs);buildDocs();buildAdminHome();});}
 
 // ── MODAL UTILS ──────────────────────────────────────────────────
 function closeModal(id){var m=document.getElementById(id);if(m)m.style.display="none";}
@@ -7118,8 +7195,10 @@ function acceptJoinRequest(reqId){
 }
 
 function rejectJoinRequest(reqId){
-  if(!confirm("Refuser cette demande d'adhesion ?"))return;
-  window.fbSetDoc(window.fbDoc(window.fbDb,"joinRequests",reqId),{status:"rejected"},{merge:true});
+  askConfirm("Refuser cette demande d'adhésion ?", {danger:true, confirmText:"Refuser"}).then(function(ok){
+    if(!ok)return;
+    window.fbSetDoc(window.fbDoc(window.fbDb,"joinRequests",reqId),{status:"rejected"},{merge:true});
+  });
 }
 
 function showJoinReqFiche(){
@@ -7214,7 +7293,8 @@ function createChannel(){
 
 async function deleteChannel(id,name){
  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
- if(!confirm('Supprimer le canal "'+name+'" et tous ses messages ?'))return;
+ var ok=await askConfirm('Le canal "'+name+'" et tous ses messages seront définitivement supprimés.', {title:"Supprimer ce canal ?", confirmText:"Supprimer", danger:true});
+ if(!ok)return;
  // Supprime tous les messages du canal
  var msgsSnap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels",id,"messages"));
  for(const d of msgsSnap.docs){
@@ -7286,7 +7366,8 @@ async function addMemberToChannel(){
 
 async function removeMemberFromChannel(phone){
   if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
-  if(!confirm("Revoquer l'accès de "+phone+" ?"))return;
+  var ok=await askConfirm("Révoquer l'accès de "+phone+" à ce canal ?", {title:"Révoquer l'accès", confirmText:"Révoquer", danger:true});
+  if(!ok)return;
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
@@ -7764,11 +7845,13 @@ function togglePin(channelId,msgId){
 
 function deleteMessage(channelId,msgId){
   if(!window.fbReady)return;
-  if(!confirm("Supprimer ce message ?"))return;
-  var deletedBy=window.asmbCoachMode?"le coach":(savedPseudo||"vous");
-  var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
-  window.fbUpdateDoc(msgRef,{deleted:true,deletedBy:deletedBy}).catch(function(){
-    window.fbSetDoc(msgRef,{deleted:true,deletedBy:deletedBy},{merge:true});
+  askConfirm("Supprimer ce message ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var deletedBy=window.asmbCoachMode?"le coach":(savedPseudo||"vous");
+    var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
+    window.fbUpdateDoc(msgRef,{deleted:true,deletedBy:deletedBy}).catch(function(){
+      window.fbSetDoc(msgRef,{deleted:true,deletedBy:deletedBy},{merge:true});
+    });
   });
 }
 
@@ -8141,12 +8224,14 @@ function savePoleItem(){
 }
 
 function deletePoleItem(poleId,id){
-  if(!confirm("Supprimer cet élément ?"))return;
-  var data=getPoleData(poleId).filter(function(d){return d.id!==id;});
-  savePoleData(poleId,data);
-  var events=getEvents().filter(function(e){return e.id!=="planning-"+id;});
-  saveEvents(events);
-  buildPoleScreen(poleId);
+  askConfirm("Supprimer cet élément ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var data=getPoleData(poleId).filter(function(d){return d.id!==id;});
+    savePoleData(poleId,data);
+    var events=getEvents().filter(function(e){return e.id!=="planning-"+id;});
+    saveEvents(events);
+    buildPoleScreen(poleId);
+  });
 }
 
 
@@ -8824,12 +8909,14 @@ function refreshHeaderProfileBtn(){
 }
 
 function logoutUser(){
-  if(!confirm("Se déconnecter ? Votre numéro reste enregistré pour votre prochain retour."))return;
-  // On garde asmb_phone et asmb_pseudo pour un retour rapide
-  ["asmb_profile","asmb_parent_teams","asmb_parent_active_team"].forEach(function(k){
-    localStorage.removeItem(k);
+  askConfirm("Votre numéro reste enregistré pour votre prochain retour.", {title:"Se déconnecter ?", confirmText:"Se déconnecter"}).then(function(ok){
+    if(!ok)return;
+    // On garde asmb_phone et asmb_pseudo pour un retour rapide
+    ["asmb_profile","asmb_parent_teams","asmb_parent_active_team"].forEach(function(k){
+      localStorage.removeItem(k);
+    });
+    location.reload();
   });
-  location.reload();
 }
 
 function roleLabel(r){
@@ -9809,7 +9896,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785041533";
+var APP_VERSION="1785065149";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
