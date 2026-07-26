@@ -1124,9 +1124,9 @@ initChannels();
  <div class="sec">Avis et suggestions</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
- <textarea id="feedback-text" rows="3" placeholder="Ecrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
+ <textarea id="feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
  <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
- <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien ete envoye.</div>
+ <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
  </div>
  <div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
@@ -9809,7 +9809,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785041332";
+var APP_VERSION="1785041533";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
