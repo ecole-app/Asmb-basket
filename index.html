@@ -8922,10 +8922,20 @@ function toggleCoachTeam(id){
   var i=ids.indexOf(id);
   if(i>=0)ids.splice(i,1);else ids.push(id);
   saveCoachTeams(ids);
+  localStorage.setItem("asmb_coach_active_team",ids[0]||"");
   localStorage.setItem("asmb_coach_team",ids[0]||"");
 }
-function getCoachTeam(){return getCoachTeams()[0]||"";}
-function setCoachTeam(id){saveCoachTeams([id]);localStorage.setItem("asmb_coach_team",id);}
+// Équipe actuellement affichée (parmi celles assignées) : ne modifie jamais la liste complète
+function getCoachTeam(){
+  var ids=getCoachTeams();
+  if(!ids.length) return "";
+  var active=localStorage.getItem("asmb_coach_active_team");
+  return (active && ids.indexOf(active)>=0) ? active : ids[0];
+}
+function setCoachTeam(id){
+  localStorage.setItem("asmb_coach_active_team",id);
+  localStorage.setItem("asmb_coach_team",id);
+}
 
 function openCoachTeamPicker(){
   teamPickerContext="coach";
@@ -9688,7 +9698,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785040051";
+var APP_VERSION="1785040565";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
