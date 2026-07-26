@@ -932,6 +932,7 @@ initChannels();
       <div class="form-group"><label class="form-label">Nom du canal</label><input class="form-input" id="ch-name" placeholder="Ex: U17 Masculin"></div>
       <div class="form-group"><label class="form-label">Icône (emoji)</label><input class="form-input" id="ch-icon" placeholder="" value=""></div>
       <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ch-desc" placeholder="Ex: Équipe U17M"></div>
+      <div class="form-group"><label class="form-label">Équipe liée (optionnel)</label><select class="form-input" id="ch-team"><option value="">Aucune</option></select></div>
       <button id="modal-channel-btn" onclick="createChannel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Créer le canal</button>
     </div>
   </div>
@@ -5046,6 +5047,30 @@ function openAccesCoach(){
     renderAccesList(list,users);
   }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
 }
+// Ajoute/retire le coach des canaux liés à ses équipes selon son affectation actuelle
+function syncCoachChannels(u, newTeamIds){
+  if(!window.fbGetDocs||!window.fbDb) return Promise.resolve();
+  var phone=u.phone;
+  if(!phone) return Promise.resolve();
+  return window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+    var tasks=[];
+    snap.forEach(function(d){
+      var ch=d.data();
+      if(!ch.teamId) return;
+      var members=ch.members||[];
+      var idx=members.findIndex(function(m){return (typeof m==="string"?m:m.phone)===phone;});
+      var shouldBeMember=newTeamIds.indexOf(ch.teamId)>=0;
+      if(shouldBeMember && idx<0){
+        members=members.concat([{phone:phone,label:u.email||""}]);
+        tasks.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",d.id),{members:members}));
+      } else if(!shouldBeMember && idx>=0){
+        members=members.filter(function(m){return (typeof m==="string"?m:m.phone)!==phone;});
+        tasks.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",d.id),{members:members}));
+      }
+    });
+    return Promise.all(tasks);
+  }).catch(function(e){console.log("syncCoachChannels:",e);});
+}
 function renderAccesList(list,users){
   list.innerHTML="";
   if(!users.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucun compte enregistré</div>';return;}
@@ -5094,6 +5119,8 @@ function renderAccesList(list,users){
     save.addEventListener("click",function(e){
       e.stopPropagation();save.textContent="…";
       window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams}).then(function(){
+        return syncCoachChannels(u,state.teams);
+      }).then(function(){
         save.textContent="\u2713 Enregistré";
         sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
         setTimeout(function(){save.textContent="Enregistrer";},1500);
@@ -7007,7 +7034,17 @@ function showAddChannel(){
   document.getElementById("modal-channel-btn").textContent="Créer le canal";
   document.getElementById("ch-name").value="";document.getElementById("ch-desc").value="";
   document.getElementById("ch-icon").value="";
+  fillChannelTeamSelect("");
   document.getElementById("modal-channel").style.display="flex";
+}
+function fillChannelTeamSelect(selectedId){
+  var sel=document.getElementById("ch-team");if(!sel)return;
+  sel.innerHTML='<option value="">Aucune</option>';
+  getTeams().forEach(function(t){
+    var o=document.createElement("option");o.value=t.id;o.textContent=t.name;
+    if(t.id===selectedId)o.selected=true;
+    sel.appendChild(o);
+  });
 }
 function editChannelInfo(ch){
   editingChannelId=ch.id;
@@ -7016,6 +7053,7 @@ function editChannelInfo(ch){
   document.getElementById("ch-name").value=ch.name||"";
   document.getElementById("ch-desc").value=ch.desc||"";
   document.getElementById("ch-icon").value=ch.icon||"";
+  fillChannelTeamSelect(ch.teamId||"");
   document.getElementById("modal-channel").style.display="flex";
 }
 
@@ -7024,16 +7062,17 @@ function createChannel(){
  var name=document.getElementById("ch-name").value.trim();
  var icon=document.getElementById("ch-icon").value.trim()||"";
  var desc=document.getElementById("ch-desc").value.trim();
+ var teamId=(document.getElementById("ch-team")||{}).value||"";
  if(!name){alert("Nom du canal obligatoire");return;}
  if(editingChannelId){
    window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
-     name:name,icon:icon,desc:desc
+     name:name,icon:icon,desc:desc,teamId:teamId
    },{merge:true});
    editingChannelId=null;
  }else{
    var id=name.toLowerCase().replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-");
    window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
-   id:id,name:name,icon:icon,desc:desc,members:[]
+   id:id,name:name,icon:icon,desc:desc,members:[],teamId:teamId
    },{merge:true});
  }
  closeModal("modal-channel");
