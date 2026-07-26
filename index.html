@@ -7312,10 +7312,11 @@ function renderChannelList(channels){
   channels.sort(function(a,b){return (lastUsedActivity[b.id]||lastUsed[b.id]||0)-(lastUsedActivity[a.id]||lastUsed[a.id]||0);});
 
   el.innerHTML="";
+  var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   channels.forEach(function(ch){
     var members=ch.members||[];
     var isRestricted=members.length>0;
-    var isMember=!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var isMember=isDirigeant||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
     div.style.position="relative";
     if(isMember){
@@ -7333,7 +7334,8 @@ function renderChannelList(channels){
 
 function openChannel(ch){
   var members=ch.members||[];
-  if(members.length>0){
+  var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
+  if(members.length>0 && !isDirigeant){
     if(!myPhone){if(!checkMyPhone()){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     if(!isAuth){alert("Ce canal est reserve aux membres autorises. Contactez un responsable ASMB.");return;}
@@ -9694,7 +9696,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785038703";
+var APP_VERSION="1785039069";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
