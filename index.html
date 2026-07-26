@@ -7888,7 +7888,7 @@ function buildPoleScreen(poleId){
   }
   listEl.innerHTML=aboutHtml;
   if(!data.length){
-    listEl.innerHTML+='<div class="empty-state" style="padding-top:16px"><div class="empty-state-icon">'+getPoleIcon(poleId)+'</div><div style="font-size:13px;font-weight:600">Aucun élément ajouté</div><div style="font-size:11px;margin-top:4px">Utilisez les chips ci-dessus</div></div>';
+    listEl.innerHTML+='<div class="empty-state" style="padding-top:16px"><div class="empty-state-icon">'+getPoleIcon(poleId)+'</div><div style="font-size:13px;font-weight:600">Aucun élément ajouté</div><div style="font-size:11px;margin-top:4px">Utilisez les boutons ci-dessus pour ajouter</div></div>';
     return;
   }
   listEl.innerHTML="";
@@ -9698,7 +9698,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785040565";
+var APP_VERSION="1785040893";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
