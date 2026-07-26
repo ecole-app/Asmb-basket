@@ -4717,7 +4717,7 @@ function buildClassement(){
 }
 
 async function showAddClassementRow(){
-  if(!classementActiveTeamId){alert("Creez d\'abord une equipe");return;}
+  if(!classementActiveTeamId){alert("Créez d\'abord une équipe");return;}
   var equipe=await askPrompt("Nom de l'équipe", {placeholder:"Mettre ASMB dans le nom pour votre équipe", confirmText:"Suivant"});
   if(!equipe)return;
   var rang=parseInt((await askPrompt("Position dans la poule", {defaultValue:"1", type:"number", confirmText:"Suivant"}))||"1",10);
@@ -5122,7 +5122,7 @@ function clearDemoData(){
    saveEvents(events);
    var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
    saveLicences(lics);
-   alert("Données de demo supprimees.");
+   alert("Données de démo supprimées.");
    buildAdminHome();
  });
 }
@@ -6603,9 +6603,9 @@ function saveEventFull(){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
       text:msg,pseudo:"Admin ASMB",ts:window.fbServerTimestamp()
     });
-    alert("Événement cree et annonce envoyée dans le canal !");
+    alert("Événement créé et annonce envoyée dans le canal !");
   } else {
-    alert("Événement cree !");
+    alert("Événement créé !");
   }
 }
 function deleteEvent(id){askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();});}
@@ -7378,7 +7378,7 @@ function editChannelInfo(ch){
 }
 
 function createChannel(){
- if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+ if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
  var name=document.getElementById("ch-name").value.trim();
  var icon=document.getElementById("ch-icon").value.trim()||"";
  var desc=document.getElementById("ch-desc").value.trim();
@@ -7401,7 +7401,7 @@ function createChannel(){
 }
 
 async function deleteChannel(id,name){
- if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et reessayez");return;}
+ if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
  var ok=await askConfirm('Le canal "'+name+'" et tous ses messages seront définitivement supprimés.', {title:"Supprimer ce canal ?", confirmText:"Supprimer", danger:true});
  if(!ok)return;
  // Supprime tous les messages du canal
@@ -7411,7 +7411,7 @@ async function deleteChannel(id,name){
  }
  // Supprime le canal lui-meme
  await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",id));
- alert("Canal supprime");
+ alert("Canal supprimé");
 }
 
 function openChannelDetail(ch){
@@ -7639,7 +7639,7 @@ async function openChannel(ch){
   if(members.length>0 && !isDirigeant){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
-    if(!isAuth){alert("Ce canal est reserve aux membres autorises. Contactez un responsable ASMB.");return;}
+    if(!isAuth){alert("Ce canal est réservé aux membres autorisés. Contactez un responsable ASMB.");return;}
   }
   currentChannelId=ch.id;currentChannelData=ch;
   document.getElementById("chat-icon").textContent=ch.icon;
@@ -9457,7 +9457,7 @@ async function signalerAbsence(eventId){
  status:"absent",ts:window.fbServerTimestamp(),source:"parent"
  });
  }
- alert("Absence signalée dans le canal de l'equipe.");
+ alert("Absence signalée dans le canal de l'équipe.");
   };
 
   if(linkedPlayer){
@@ -10005,7 +10005,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785086922";
+var APP_VERSION="1785087052";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
