@@ -7249,6 +7249,15 @@ var typingUnsubscribe=null;
 var typingDebounce=null;
 var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
 
+// Un canal est visible pour l'utilisateur courant si : il n'est lié à aucune équipe (canal club-wide),
+// ou s'il est lié à une équipe que le coach entraîne. Dirigeant/parent voient tout (badge Membre/Privé géré ailleurs).
+function channelVisibleToMe(ch){
+  var profile=localStorage.getItem("asmb_profile");
+  if(profile!=="coach") return true;
+  if(!ch.teamId) return true;
+  return getCoachTeams().indexOf(ch.teamId)>=0;
+}
+
 function buildCommunaute(){
   var el=document.getElementById("channel-list");if(!el)return;
   window.asmbCoachMode=(["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0);
@@ -7260,13 +7269,10 @@ function buildCommunaute(){
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
     var channels=[];
-    var isCoach=localStorage.getItem("asmb_profile")==="coach";
-    var coachTeamIds=isCoach?getCoachTeams():null;
-    var CLUB_WIDE=["general","coaches","evenements"];
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
       if(ch.deleted)return;
-      if(isCoach&&coachTeamIds.indexOf(ch.id)<0&&CLUB_WIDE.indexOf(ch.id)<0)return;
+      if(!channelVisibleToMe(ch))return;
       channels.push(ch);
     });
     renderChannelList(channels);
@@ -7759,7 +7765,12 @@ function checkUnreadBadges(){
   window.fbGetDocs(q).then(function(snap){
     var totalUnread=0;
     var checks=[];
-    snap.forEach(function(d){checks.push(d.id);});
+    snap.forEach(function(d){
+      var ch=d.data();ch.id=d.id;
+      if(ch.deleted)return;
+      if(!channelVisibleToMe(ch))return;
+      checks.push(d.id);
+    });
     var pending=checks.length;
     if(!pending){updateNavBadge(0);return;}
     checks.forEach(function(chId){
@@ -9660,7 +9671,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785037392";
+var APP_VERSION="1785038214";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
