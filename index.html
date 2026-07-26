@@ -169,6 +169,27 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .member-avatar{width:36px;height:36px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* ── THEME ANIME (meteo/saison) ── */
+.ta-flake{position:absolute;top:-10px;background:#fff;border-radius:50%;opacity:.85;animation:ta-fall linear infinite;z-index:1;pointer-events:none}
+@keyframes ta-fall{to{transform:translateY(220px) translateX(var(--ta-drift,0px));}}
+.ta-sun{position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;
+     background:radial-gradient(circle,#FFE9A8 0%,#FFD166 45%,rgba(255,209,102,0) 70%);
+     animation:ta-sunpulse 4s ease-in-out infinite;z-index:1;pointer-events:none}
+@keyframes ta-sunpulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
+.ta-cloud{position:absolute;top:20px;opacity:.9;animation:ta-drift linear infinite;z-index:1;pointer-events:none}
+@keyframes ta-drift{from{transform:translateX(-60px)}to{transform:translateX(360px)}}
+.ta-drop{position:absolute;top:-20px;width:2px;height:16px;background:linear-gradient(#bcdfff,rgba(188,223,255,0));border-radius:2px;animation:ta-raindrop linear infinite;z-index:1;pointer-events:none}
+@keyframes ta-raindrop{to{transform:translateY(220px)}}
+.ta-leaf{position:absolute;top:-14px;font-size:15px;animation:ta-leaffall linear infinite;z-index:1;pointer-events:none}
+@keyframes ta-leaffall{0%{transform:translateY(0) rotate(0deg) translateX(0);}50%{transform:translateY(110px) rotate(180deg) translateX(20px);}100%{transform:translateY(220px) rotate(360deg) translateX(-10px);}}
+.ta-petal{position:absolute;top:-14px;width:8px;height:8px;background:#FBC4D4;border-radius:50% 0 50% 50%;animation:ta-petalfall linear infinite;z-index:1;pointer-events:none}
+@keyframes ta-petalfall{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(220px) rotate(300deg);}}
+.ta-moon{position:absolute;top:-18px;right:-18px;width:70px;height:70px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #fdfdf5 0%, #e8e6d9 55%, #cfcdbe 100%);
+      box-shadow:0 0 26px rgba(255,255,240,.35);animation:ta-moonglow 6s ease-in-out infinite;z-index:1;pointer-events:none}
+@keyframes ta-moonglow{0%,100%{opacity:.92}50%{opacity:1}}
+.ta-star{position:absolute;background:#fff;border-radius:50%;animation:ta-twinkle ease-in-out infinite;z-index:1;pointer-events:none}
+@keyframes ta-twinkle{0%,100%{opacity:.25}50%{opacity:1}}
 </style>
 
 <script>
@@ -377,7 +398,7 @@ initChannels();
 <div class="main" id="main-scroll">
   <div class="scr on" id="scr-portal">
     <div id="portal-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
-    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-portal" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="home-logo" style="flex-shrink:0"></div>
@@ -1121,6 +1142,25 @@ initChannels();
  <div id="account-info-box" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
  <button onclick="authConfirmLogout()" style="width:100%;padding:12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:13px;font-weight:700;border:none;cursor:pointer">Se déconnecter</button>
  </div>
+ <div class="sec">Thèmes animés</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <label style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">
+ <span style="font-size:13px;font-weight:700;color:var(--txt)">Activer les thèmes animés</span>
+ <input type="checkbox" id="ta-enabled" style="width:20px;height:20px;accent-color:var(--dkg)">
+ </label>
+ <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Style</div>
+ <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-style" value="meteo" id="ta-style-meteo"> Météo du jour</label>
+ <label style="display:flex;align-items:center;gap:8px;padding:5px 0 12px;font-size:13px;color:var(--txt)"><input type="radio" name="ta-style" value="saison" id="ta-style-saison"> Saisonnier</label>
+ <div id="ta-city-wrap">
+ <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ville (météo)</div>
+ <input type="text" id="ta-city" placeholder="Nom de la ville" style="width:100%;padding:9px 10px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;background:var(--bg);color:var(--txt);margin-bottom:12px">
+ </div>
+ <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Durée de l'animation</div>
+ <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="5" id="ta-dur-5"> 5 secondes</label>
+ <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="10" id="ta-dur-10"> 10 secondes</label>
+ <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="15" id="ta-dur-15"> 15 secondes</label>
+ <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="continu" id="ta-dur-continu"> Continu en fond (écran d'accueil)</label>
+ </div>
  <div class="sec">Avis et suggestions</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
@@ -1362,7 +1402,7 @@ initChannels();
   </div>
 
   <div class="scr" id="scr-parent-home">
-    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-parent" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="parent-hero-logo" style="flex-shrink:0"></div>
@@ -1503,7 +1543,7 @@ initChannels();
 
   <!-- ══════════════ EQUIPE (coach) ══════════════ -->
   <div class="scr" id="scr-coach-equipe">
-    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-coach" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="coach-eq-logo" style="flex-shrink:0"></div>
@@ -2010,6 +2050,9 @@ function showScr(id){
  document.querySelector(".main").scrollTop=0;
  refreshHeaderProfileBtn();
  updateHdr(id);
+ if(id==="portal"||id==="parent-home"||id==="coach-equipe"){
+   setTimeout(maybeShowDailyThemeAnimation, 60);
+ }
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
@@ -4132,6 +4175,42 @@ function buildParametres(){
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
     fbBtn.addEventListener("click", sendFeedback);
+  }
+  wireThemeAnimSettings();
+}
+
+function wireThemeAnimSettings(){
+  var settings=taGetSettings();
+  var enabledInp=document.getElementById("ta-enabled");
+  var styleMeteo=document.getElementById("ta-style-meteo");
+  var styleSaison=document.getElementById("ta-style-saison");
+  var cityInp=document.getElementById("ta-city");
+  var cityWrap=document.getElementById("ta-city-wrap");
+  if(!enabledInp) return;
+  enabledInp.checked=settings.enabled;
+  if(settings.style==="saison"){ styleSaison.checked=true; } else { styleMeteo.checked=true; }
+  cityInp.value=settings.city;
+  cityWrap.style.display=(settings.style==="saison")?"none":"block";
+  var durInp=document.getElementById("ta-dur-"+settings.duration);
+  if(durInp) durInp.checked=true;
+
+  if(!enabledInp.dataset.wired){
+    enabledInp.dataset.wired="1";
+    enabledInp.addEventListener("change",function(){ taSaveSetting("enabled", enabledInp.checked?"on":"off"); });
+    [styleMeteo,styleSaison].forEach(function(r){
+      r.addEventListener("change",function(){
+        taSaveSetting("style", r.value);
+        cityWrap.style.display=(r.value==="saison")?"none":"block";
+      });
+    });
+    cityInp.addEventListener("change",function(){
+      taSaveSetting("city", cityInp.value.trim()||"Saint-Étienne");
+      localStorage.removeItem("asmb_theme_weather_cache"); // invalide le cache si la ville change
+    });
+    ["5","10","15","continu"].forEach(function(v){
+      var r=document.getElementById("ta-dur-"+v);
+      if(r) r.addEventListener("change",function(){ taSaveSetting("duration", v); });
+    });
   }
 }
 
@@ -8640,6 +8719,167 @@ function initAuthGate(){
 // ═══ SYSTEME PROFIL PARENT / COACH ═══════════════════════════════
 var ASMB_LOGO_B64_REF = null; // will reuse existing home-logo html via cloning
 
+// ═══ THEME ANIME (meteo du jour / saisonnier) ══════════════════════
+function taGetSettings(){
+  return {
+    enabled: localStorage.getItem("asmb_theme_anim_enabled")!=="off",
+    style: localStorage.getItem("asmb_theme_anim_style")||"meteo",
+    city: localStorage.getItem("asmb_theme_anim_city")||"Saint-Étienne",
+    duration: localStorage.getItem("asmb_theme_anim_duration")||"10"
+  };
+}
+function taSaveSetting(key,val){ localStorage.setItem("asmb_theme_anim_"+key, val); }
+
+function taTodayStr(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function taIsNight(){ var h=new Date().getHours(); return h<7||h>=21; }
+
+// Code meteo Open-Meteo -> type d'animation
+function taWeatherCodeToType(code, isDay){
+  if(code===0||code===1) return isDay?"soleil":"nuit";
+  if(code===2||code===3||code===45||code===48) return "nuages";
+  if((code>=51&&code<=67)||(code>=80&&code<=82)||(code>=95&&code<=99)) return "pluie";
+  if((code>=71&&code<=77)||code===85||code===86) return "neige";
+  return "nuages";
+}
+function taSeasonType(){
+  var m=new Date().getMonth(); // 0=jan
+  if(m===11||m===0||m===1) return "neige";
+  if(m>=2&&m<=4) return "printemps";
+  if(m>=5&&m<=7) return taIsNight()?"nuit":"soleil";
+  return "automne";
+}
+
+// Recupere (avec cache journalier) le type d'animation meteo pour la ville reglee
+function taGetWeatherType(city){
+  var cacheRaw=localStorage.getItem("asmb_theme_weather_cache");
+  var today=taTodayStr();
+  try{
+    var cache=cacheRaw?JSON.parse(cacheRaw):null;
+    if(cache && cache.date===today && cache.city===city){
+      return Promise.resolve(cache.type);
+    }
+  }catch(e){}
+  return fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(city)+"&count=1&language=fr&format=json")
+    .then(function(r){return r.json();})
+    .then(function(geo){
+      if(!geo.results||!geo.results.length) throw new Error("ville introuvable");
+      var lat=geo.results[0].latitude, lon=geo.results[0].longitude;
+      return fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current_weather=true&timezone=auto");
+    })
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var cw=data.current_weather;
+      var type=taWeatherCodeToType(cw.weathercode, cw.is_day===1);
+      localStorage.setItem("asmb_theme_weather_cache", JSON.stringify({date:today,city:city,type:type}));
+      return type;
+    })
+    .catch(function(){ return taSeasonType(); }); // repli silencieux sur le thème saisonnier si la météo échoue
+}
+
+function taGetVisibleHomeHero(){
+  var ids=["home-hero-portal","home-hero-parent","home-hero-coach"];
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i]);
+    if(el){
+      var scr=el.closest(".scr");
+      if(scr && scr.classList.contains("on")) return el;
+    }
+  }
+  return null;
+}
+
+function taSpawnAnimation(hero,type){
+  if(!hero||hero.dataset.taSpawned)return;
+  hero.dataset.taSpawned="1";
+  var nodes=[];
+  function add(el){ nodes.push(el); hero.appendChild(el); }
+  if(type==="neige"){
+    for(var i=0;i<24;i++){
+      var f=document.createElement("div");f.className="ta-flake";
+      var size=2+Math.random()*4;
+      f.style.width=size+"px";f.style.height=size+"px";
+      f.style.left=Math.random()*100+"%";
+      f.style.setProperty("--ta-drift",(Math.random()*40-20)+"px");
+      f.style.animationDuration=(3+Math.random()*3)+"s";
+      f.style.animationDelay=(Math.random()*3)+"s";
+      add(f);
+    }
+  } else if(type==="soleil"){
+    var s=document.createElement("div");s.className="ta-sun";add(s);
+  } else if(type==="nuit"){
+    var m=document.createElement("div");m.className="ta-moon";add(m);
+    for(var i=0;i<20;i++){
+      var st=document.createElement("div");st.className="ta-star";
+      var size=1+Math.random()*2;
+      st.style.width=size+"px";st.style.height=size+"px";
+      st.style.left=Math.random()*100+"%";
+      st.style.top=Math.random()*70+"%";
+      st.style.animationDuration=(1.5+Math.random()*2)+"s";
+      st.style.animationDelay=(Math.random()*3)+"s";
+      add(st);
+    }
+  } else if(type==="nuages"){
+    ["☁️","☁️","☁️"].forEach(function(c,i){
+      var el=document.createElement("div");el.className="ta-cloud";el.textContent=c;
+      el.style.fontSize=(20+i*7)+"px";
+      el.style.top=(8+i*16)+"px";
+      el.style.animationDuration=(14+i*4)+"s";
+      el.style.animationDelay=(i*3)+"s";
+      add(el);
+    });
+  } else if(type==="pluie"){
+    for(var i=0;i<28;i++){
+      var d=document.createElement("div");d.className="ta-drop";
+      d.style.left=Math.random()*100+"%";
+      d.style.animationDuration=(0.5+Math.random()*0.4)+"s";
+      d.style.animationDelay=(Math.random()*1.5)+"s";
+      add(d);
+    }
+  } else if(type==="automne"){
+    var leaves=["🍁","🍂"];
+    for(var i=0;i<12;i++){
+      var l=document.createElement("div");l.className="ta-leaf";l.textContent=leaves[i%2];
+      l.style.left=Math.random()*100+"%";
+      l.style.animationDuration=(3.5+Math.random()*2)+"s";
+      l.style.animationDelay=(Math.random()*3)+"s";
+      add(l);
+    }
+  } else if(type==="printemps"){
+    for(var i=0;i<16;i++){
+      var p=document.createElement("div");p.className="ta-petal";
+      p.style.left=Math.random()*100+"%";
+      p.style.animationDuration=(3+Math.random()*2)+"s";
+      p.style.animationDelay=(Math.random()*3)+"s";
+      add(p);
+    }
+  }
+  var settings=taGetSettings();
+  if(settings.duration!=="continu"){
+    setTimeout(function(){
+      nodes.forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
+    }, parseInt(settings.duration,10)*1000);
+  }
+}
+
+function maybeShowDailyThemeAnimation(){
+  var settings=taGetSettings();
+  if(!settings.enabled) return;
+  var already = localStorage.getItem("asmb_theme_anim_shown_date")===taTodayStr();
+  if(already && settings.duration!=="continu") return; // deja joue aujourd'hui (mode duree fixe)
+  var hero=taGetVisibleHomeHero();
+  if(!hero) return;
+  if(already && settings.duration==="continu" && hero.dataset.taSpawned) return; // deja affiche cette visite
+  function spawnWith(type){
+    localStorage.setItem("asmb_theme_anim_shown_date", taTodayStr());
+    taSpawnAnimation(hero, type);
+  }
+  if(settings.style==="saison"){
+    spawnWith(taSeasonType());
+  } else {
+    taGetWeatherType(settings.city).then(spawnWith);
+  }
+}
+
 function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){
@@ -10005,7 +10245,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785087202";
+var APP_VERSION="1785101659";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
