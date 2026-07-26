@@ -6711,13 +6711,13 @@ function showConvocation(eventId){
 
 function findChannelForTeamText(teamText){
   var text=(teamText||"").toUpperCase();
-  // 1. Chercher une equipe reelle correspondante (par nom ou categorie) et utiliser son propre canal
+  // 1. Chercher une equipe reelle correspondante (par nom ou categorie) et utiliser son propre canal,
+  // SANS le recréer s'il a été supprimé volontairement (voir showAddTeam pour la création du canal).
   var teams=getTeams();
   var matchedTeam=teams.find(function(t){
     return text.indexOf(t.name.toUpperCase())>=0||t.name.toUpperCase().indexOf(text)>=0||text===t.cat.toUpperCase();
   });
   if(matchedTeam){
-    ensureTeamChannel(matchedTeam);
     return matchedTeam.id;
   }
   // 2. Repli sur les canaux generiques par categorie
@@ -10005,7 +10005,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785087052";
+var APP_VERSION="1785087202";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
