@@ -7812,9 +7812,11 @@ async function openChannel(ch){
   if(pollBtn)pollBtn.style.display=window.asmbCoachMode?"flex":"none";
   stack.push("chat");
   showScr("chat");
-  listenMessages(ch.id);
+  // On capture le seuil "dernier lu" AVANT de le mettre a jour, pour savoir
+  // ou placer le repere "Nouveaux messages" dans cette ouverture du canal.
+  var prevLastRead=parseInt(localStorage.getItem("asmb_lastread_"+ch.id)||"0",10);
+  listenMessages(ch.id, prevLastRead);
   listenTyping(ch.id);
-  setTimeout(function(){var msgs=document.getElementById("chat-messages");if(msgs)msgs.scrollTop=msgs.scrollHeight;},300);
   // Marquer comme lu
   localStorage.setItem("asmb_lastread_"+ch.id, Date.now().toString());
 }
@@ -7855,7 +7857,7 @@ function listenTyping(channelId){
 
 var REACTION_EMOJIS=["",""];
 
-function listenMessages(channelId){
+function listenMessages(channelId, prevLastRead){
   if(chatUnsubscribe)chatUnsubscribe();
   var msgsEl=document.getElementById("chat-messages");
   if(!msgsEl)return;
@@ -7877,13 +7879,35 @@ function listenMessages(channelId){
         }
       });
     }
+    var thisLoadIsFirst=isFirstLoad;
     isFirstLoad=false;
     msgsEl.innerHTML="";
     var lastDay="";
     var pinnedIds=(currentChannelData&&currentChannelData.pinnedMessageIds)||[];
     var pinnedMsgs=[];
+    var allMsgs=[];snap.forEach(function(d){allMsgs.push(d.data());});
+    // Repere "Nouveaux messages" : uniquement si on avait deja lu ce canal avant (pas la toute premiere visite),
+    // et qu'il y a au moins un message plus ancien ET un message plus recent que ce seuil.
+    var bannerIndex=-1;
+    if(thisLoadIsFirst && prevLastRead>0){
+      for(var i=0;i<allMsgs.length;i++){
+        var t=allMsgs[i].ts&&allMsgs[i].ts.toDate?allMsgs[i].ts.toDate().getTime():0;
+        if(t>prevLastRead){ bannerIndex=i; break; }
+      }
+      if(bannerIndex===0) bannerIndex=-1; // tout est "nouveau" : le repere n'apporte rien tout en haut
+    }
+    var bannerEl=null;
+    var msgIndex=-1;
     snap.forEach(function(d){
+      msgIndex++;
       var msg=d.data();
+      if(msgIndex===bannerIndex){
+        bannerEl=document.createElement("div");
+        bannerEl.className="unread-divider";
+        bannerEl.style.cssText="display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--grn);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px";
+        bannerEl.innerHTML='<div style="flex:1;height:1px;background:var(--grn);opacity:.4"></div><span>Nouveaux messages</span><div style="flex:1;height:1px;background:var(--grn);opacity:.4"></div>';
+        msgsEl.appendChild(bannerEl);
+      }
       if(pinnedIds.indexOf(d.id)>=0)pinnedMsgs.push({id:d.id,text:msg.text||msg.question||"Message"});
       var isOut=msg.pseudo===(savedPseudo||"moi");
       var ts=msg.ts?msg.ts.toDate():new Date();
@@ -7997,7 +8021,13 @@ function listenMessages(channelId){
         }).join("");
       } else{pinEl.style.display="none";pinEl.innerHTML="";}
     }
-    setTimeout(function(){msgsEl.scrollTop=msgsEl.scrollHeight;},50);
+    setTimeout(function(){
+      if(thisLoadIsFirst && bannerEl){
+        bannerEl.scrollIntoView({block:"center"});
+      } else {
+        msgsEl.scrollTop=msgsEl.scrollHeight;
+      }
+    },50);
   });
 }
 
@@ -10442,7 +10472,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785140671";
+var APP_VERSION="1785146442";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
