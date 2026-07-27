@@ -316,6 +316,7 @@ initChannels();
   <button class="hbk" id="hbk" onclick="goBack()">&#8592;</button>
   <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Étienne Métropole Basket</div></div>
   <button class="theme-btn" id="hdr-profile-btn" onclick="switchProfile()" title="Changer de profil" style="display:none">&#128100;</button>
+  <button class="theme-btn" id="hdr-settings-btn" onclick="openParametres()" title="Paramètres">&#9881;</button>
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
 <div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">Mode hors-ligne · Vous consultez les dernieres données chargées</div>
@@ -1389,6 +1390,34 @@ initChannels();
         </div>
       </div>
 
+      <div class="sec" style="padding:16px 0 8px">Thèmes animés</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;padding:14px">
+        <label style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">
+          <span style="font-size:13px;font-weight:700;color:var(--txt)">Activer les thèmes animés</span>
+          <input type="checkbox" id="pp-ta-enabled" style="width:20px;height:20px;accent-color:var(--dkg)">
+        </label>
+        <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Style</div>
+        <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-style" value="meteo" id="pp-ta-style-meteo"> Météo du jour</label>
+        <label style="display:flex;align-items:center;gap:8px;padding:5px 0 12px;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-style" value="saison" id="pp-ta-style-saison"> Saisonnier</label>
+        <div id="pp-ta-city-wrap">
+          <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ville (météo)</div>
+          <input type="text" id="pp-ta-city" placeholder="Nom de la ville" style="width:100%;padding:9px 10px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;background:var(--bg);color:var(--txt);margin-bottom:12px">
+        </div>
+        <div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Durée de l'animation</div>
+        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="5" id="pp-ta-dur-5"> 5 secondes</label>
+        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="10" id="pp-ta-dur-10"> 10 secondes</label>
+        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="15" id="pp-ta-dur-15"> 15 secondes</label>
+        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="continu" id="pp-ta-dur-continu"> Continu en fond (écran d'accueil)</label>
+      </div>
+
+      <div class="sec" style="padding:16px 0 8px">Avis et suggestions</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;padding:14px">
+        <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
+        <textarea id="pp-feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
+        <button id="pp-feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
+        <div id="pp-feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
+      </div>
+
       <div style="margin-top:18px">
         <button onclick="logoutUser()" style="width:100%;padding:13px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">Se déconnecter</button>
       </div>
@@ -1547,7 +1576,8 @@ initChannels();
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="coach-eq-logo" style="flex-shrink:0"></div>
-        <div id="coach-eq-cat" style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
+        <div id="coach-eq-cat" style="flex:1;min-width:0;font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase"></div>
+        <button onclick="openParametres()" aria-label="Parametres" style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;font-size:18px;color:#fff;display:flex;align-items:center;justify-content:center">⚙️</button>
       </div>
       <div id="coach-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="coach-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
@@ -4206,52 +4236,66 @@ function buildParametres(){
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
-    fbBtn.addEventListener("click", sendFeedback);
+    fbBtn.addEventListener("click", function(){ sendFeedback(""); });
   }
-  wireThemeAnimSettings();
+  wireThemeAnimSettings("");
 }
 
-function wireThemeAnimSettings(){
+function wireThemeAnimSettings(prefix){
+  prefix=prefix||"";
   var settings=taGetSettings();
-  var enabledInp=document.getElementById("ta-enabled");
-  var styleMeteo=document.getElementById("ta-style-meteo");
-  var styleSaison=document.getElementById("ta-style-saison");
-  var cityInp=document.getElementById("ta-city");
-  var cityWrap=document.getElementById("ta-city-wrap");
+  var enabledInp=document.getElementById(prefix+"ta-enabled");
+  var styleMeteo=document.getElementById(prefix+"ta-style-meteo");
+  var styleSaison=document.getElementById(prefix+"ta-style-saison");
+  var cityInp=document.getElementById(prefix+"ta-city");
+  var cityWrap=document.getElementById(prefix+"ta-city-wrap");
   if(!enabledInp) return;
   enabledInp.checked=settings.enabled;
   if(settings.style==="saison"){ styleSaison.checked=true; } else { styleMeteo.checked=true; }
   cityInp.value=settings.city;
   cityWrap.style.display=(settings.style==="saison")?"none":"block";
-  var durInp=document.getElementById("ta-dur-"+settings.duration);
+  var durInp=document.getElementById(prefix+"ta-dur-"+settings.duration);
   if(durInp) durInp.checked=true;
+
+  // Rejoue l'animation immediatement en fond pour donner un retour visuel live du reglage
+  function livePreview(){
+    localStorage.removeItem("asmb_theme_anim_shown_date");
+    ["home-hero-portal","home-hero-parent","home-hero-coach"].forEach(function(id){
+      var h=document.getElementById(id);
+      if(h){ h.querySelectorAll(".ta-flake,.ta-sun,.ta-cloud,.ta-drop,.ta-leaf,.ta-petal,.ta-moon,.ta-star").forEach(function(n){n.remove();}); delete h.dataset.taSpawned; }
+    });
+    maybeShowDailyThemeAnimation();
+  }
 
   if(!enabledInp.dataset.wired){
     enabledInp.dataset.wired="1";
-    enabledInp.addEventListener("change",function(){ taSaveSetting("enabled", enabledInp.checked?"on":"off"); });
+    enabledInp.addEventListener("change",function(){ taSaveSetting("enabled", enabledInp.checked?"on":"off"); livePreview(); });
     [styleMeteo,styleSaison].forEach(function(r){
       r.addEventListener("change",function(){
         taSaveSetting("style", r.value);
         cityWrap.style.display=(r.value==="saison")?"none":"block";
+        livePreview();
       });
     });
     cityInp.addEventListener("change",function(){
       taSaveSetting("city", cityInp.value.trim()||"Saint-Étienne");
       localStorage.removeItem("asmb_theme_weather_cache"); // invalide le cache si la ville change
+      livePreview();
     });
     ["5","10","15","continu"].forEach(function(v){
-      var r=document.getElementById("ta-dur-"+v);
-      if(r) r.addEventListener("change",function(){ taSaveSetting("duration", v); });
+      var r=document.getElementById(prefix+"ta-dur-"+v);
+      if(r) r.addEventListener("change",function(){ taSaveSetting("duration", v); livePreview(); });
     });
   }
 }
 
-function sendFeedback(){
-  var ta=document.getElementById("feedback-text");
+function sendFeedback(prefix){
+  prefix=prefix||"";
+  var ta=document.getElementById(prefix+"feedback-text");
   var msg=(ta&&ta.value||"").trim();
   if(!msg){ alert("Ecrire un message avant d'envoyer."); return; }
   if(!window.fbDb || !window.fbAddDoc){ alert("Connexion en cours, reessayer dans quelques secondes."); return; }
-  var btn=document.getElementById("feedback-send-btn");
+  var btn=document.getElementById(prefix+"feedback-send-btn");
   if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
   var u=window.ASMB_USER||{};
   window.fbAddDoc(window.fbCollection(window.fbDb,"feedback"),{
@@ -4260,7 +4304,7 @@ function sendFeedback(){
     ts:window.fbServerTimestamp()
   }).then(function(){
     if(ta) ta.value="";
-    var st=document.getElementById("feedback-status");
+    var st=document.getElementById(prefix+"feedback-status");
     if(st){ st.style.display="block"; setTimeout(function(){st.style.display="none";},3000); }
   }).catch(function(e){
     alert("Erreur d'envoi : "+((e&&e.code)||e));
@@ -9326,6 +9370,13 @@ function logoutUser(){
 function roleLabel(r){
   return {dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur"}[r]||r;
 }
+function openParametres(){
+  var profile=localStorage.getItem("asmb_profile");
+  if(profile==="parent"){ openParentSettings(); return; }
+  stack.push("parametres");
+  buildParametres();
+  showScr("parametres");
+}
 function switchProfile(){
   var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
   if(roles.length<2){ return; }
@@ -10261,6 +10312,12 @@ function buildParentSettings(){
   if(dk)dk.checked=document.documentElement.getAttribute("data-theme")==="dark";
   var vv=document.getElementById("pp-version");
   if(vv)vv.textContent=APP_VERSION;
+  wireThemeAnimSettings("pp-");
+  var fbBtn=document.getElementById("pp-feedback-send-btn");
+  if(fbBtn && !fbBtn.dataset.wired){
+    fbBtn.dataset.wired="1";
+    fbBtn.addEventListener("click", function(){ sendFeedback("pp-"); });
+  }
 }
 
 function toggleThemeFromParams(){toggleTheme();}
@@ -10300,7 +10357,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785102106";
+var APP_VERSION="1785136716";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
