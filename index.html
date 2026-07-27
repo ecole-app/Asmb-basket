@@ -1178,6 +1178,7 @@ initChannels();
  <input type="checkbox" id="gp-dark" onchange="toggleTheme()" style="width:44px;height:24px;accent-color:var(--dkg)">
  </label>
  </div>
+ <div id="params-dirigeant-only">
  <div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>
@@ -1254,6 +1255,7 @@ initChannels();
     <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
       <div style="font-size:13px;font-weight:700;color:var(--red)">Reinitialiser l'application</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé toutes les données locales (irreversible)</div>
+    </div>
     </div>
   </div>
 
@@ -4217,6 +4219,9 @@ function sendBroadcast(){
 
 // ═══ PARAMETRES ══════════════════════════════════════════════════
 function buildParametres(){
+  var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
+  var adminOnly=document.getElementById("params-dirigeant-only");
+  if(adminOnly) adminOnly.style.display=isDirigeant?"block":"none";
   var gd=document.getElementById("gp-dark");
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
   var toggle=document.getElementById("notif-toggle");
@@ -10437,7 +10442,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785137610";
+var APP_VERSION="1785140671";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
