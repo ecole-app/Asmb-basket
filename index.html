@@ -8795,6 +8795,8 @@ function finishAuthedUser(user, u, isUpdate){
   try{
     var btn=document.getElementById("hdr-profile-btn");
     if(btn) btn.style.display=(roles.length>1)?"flex":"none";
+    var setBtn=document.getElementById("hdr-settings-btn");
+    if(setBtn) setBtn.style.display=(profile==="dirigeant")?"none":"flex";
   }catch(e){}
 }
 
@@ -9102,6 +9104,83 @@ function getLinkedPlayerForCheckin(){
   return null;
 }
 
+// ── REGLAGES JOUEUR (modale legere, pas de compte) ────────────────
+async function joueurNotMe(){
+  var ok=await askConfirm("Ta fiche sera oubliée sur cet appareil. Tu pourras te réidentifier avec ton numéro.", {title:"Ce n'est pas moi ?", confirmText:"Confirmer", danger:true});
+  if(!ok) return;
+  localStorage.removeItem("asmb_joueur_phone");
+  joueurIdentifiedPlayer=null;
+  var m=document.querySelector(".joueur-settings-modal");
+  if(m) m.remove();
+  showAuth("entry");
+}
+async function joueurChangePhone(){
+  var saved=localStorage.getItem("asmb_joueur_phone")||"";
+  var phone=await askPrompt("Ton numéro de téléphone", {defaultValue:saved, placeholder:"Celui donné au club", confirmText:"Valider"});
+  if(!phone) return;
+  phone=phone.trim().replace(/\s+/g,"");
+  var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
+  if(!player){ alert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche."); return; }
+  localStorage.setItem("asmb_joueur_phone",phone);
+  joueurIdentifiedPlayer=player;
+  var m=document.querySelector(".joueur-settings-modal");
+  if(m) m.remove();
+  buildJoueurScreen(player);
+}
+function openJoueurSettings(){
+  var modal=document.createElement("div");
+  modal.className="joueur-settings-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">Réglages</div>'+
+      '<button id="pj-close-btn" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div class="sec" style="padding:0 0 8px">Affichage</div>'+
+    '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:16px">'+
+      '<label style="display:flex;align-items:center;justify-content:space-between;padding:14px">'+
+        '<span style="font-size:13px;font-weight:700;color:var(--txt)">Mode sombre</span>'+
+        '<input type="checkbox" id="pj-dark" style="width:20px;height:20px;accent-color:var(--dkg)">'+
+      '</label>'+
+    '</div>'+
+    '<div class="sec" style="padding:0 0 8px">Thèmes animés</div>'+
+    '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;padding:14px;margin-bottom:16px">'+
+      '<label style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">'+
+        '<span style="font-size:13px;font-weight:700;color:var(--txt)">Activer les thèmes animés</span>'+
+        '<input type="checkbox" id="pj-ta-enabled" style="width:20px;height:20px;accent-color:var(--dkg)">'+
+      '</label>'+
+      '<div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Style</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-style" value="meteo" id="pj-ta-style-meteo"> Météo du jour</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:5px 0 12px;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-style" value="saison" id="pj-ta-style-saison"> Saisonnier</label>'+
+      '<div id="pj-ta-city-wrap">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ville (météo)</div>'+
+        '<input type="text" id="pj-ta-city" placeholder="Nom de la ville" style="width:100%;padding:9px 10px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;background:var(--bg);color:var(--txt);margin-bottom:12px">'+
+      '</div>'+
+      '<div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Durée de l\'animation</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-dur" value="5" id="pj-ta-dur-5"> 5 secondes</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-dur" value="10" id="pj-ta-dur-10"> 10 secondes</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-dur" value="15" id="pj-ta-dur-15"> 15 secondes</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pj-ta-dur" value="continu" id="pj-ta-dur-continu"> Continu en fond (écran d\'accueil)</label>'+
+    '</div>'+
+    '<div class="sec" style="padding:0 0 8px">Mon numéro</div>'+
+    '<button id="pj-change-phone-btn" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px">Changer mon numéro</button>'+
+    '<button id="pj-not-me-btn" style="width:100%;padding:12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:13px;font-weight:700;border:none;cursor:pointer">Ce n\'est pas moi</button>';
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+
+  var darkInp=document.getElementById("pj-dark");
+  darkInp.checked=document.documentElement.getAttribute("data-theme")==="dark";
+  darkInp.addEventListener("change",function(){ toggleTheme(); });
+  document.getElementById("pj-close-btn").addEventListener("click",function(){modal.remove();});
+  document.getElementById("pj-change-phone-btn").addEventListener("click",joueurChangePhone);
+  document.getElementById("pj-not-me-btn").addEventListener("click",joueurNotMe);
+  wireThemeAnimSettings("pj-");
+}
+
 function buildJoueurScreen(player){
   var el=document.getElementById("joueur-content");
   el.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:13px;color:var(--mut)">Chargement...</div></div>';
@@ -9116,7 +9195,8 @@ function buildJoueurScreen(player){
       return eventMatchesPlayer(e,player);
     });
 
-    var html='<div style="text-align:center;margin-bottom:24px">'+
+    var html='<div style="text-align:center;margin-bottom:24px;position:relative">'+
+      '<button onclick="openJoueurSettings()" aria-label="Parametres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>'+
       '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+player.prenom[0]+player.nom[0]+'</div>'+
       '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+player.prenom+' '+player.nom+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
@@ -10357,7 +10437,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785136716";
+var APP_VERSION="1785137610";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
