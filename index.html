@@ -8028,6 +8028,11 @@ function listenMessages(channelId, prevLastRead){
         msgsEl.scrollTop=msgsEl.scrollHeight;
       }
     },50);
+    // Tant que le canal reste affiche, chaque nouvelle mise a jour (message recu ou envoye)
+    // est consideree comme vue : on avance le seuil "dernier lu" en continu (pas seulement a l'ouverture).
+    if(!thisLoadIsFirst){
+      localStorage.setItem("asmb_lastread_"+channelId, Date.now().toString());
+    }
   });
 }
 
@@ -8169,7 +8174,6 @@ async function sendMsg(){
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
     text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
   });
-  localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
 }
 
 async function sendMediaMessage(input){
@@ -8190,7 +8194,6 @@ async function sendMediaMessage(input){
       type:"media",mediaUrl:dataUrl,mediaType:"image",
       pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
   }).catch(function(err){
     alert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
@@ -8222,7 +8225,6 @@ function createPoll(){
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
     type:"poll",question:question,options:options,allowMultiple:allowMultiple,deadline:deadline,pseudo:pseudo,ts:window.fbServerTimestamp()
   });
-  localStorage.setItem("asmb_lastread_"+currentChannelId, Date.now().toString());
   closeModal("modal-poll");
 }
 
@@ -10472,7 +10474,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785146442";
+var APP_VERSION="1785146800";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
