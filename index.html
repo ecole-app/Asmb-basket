@@ -5235,10 +5235,20 @@ function restoreFromCloud(){
 }
 
 async function resetAllData(){
-  var ok=await askConfirm("Ceci va supprimer les données du club (joueurs, équipes, événements, documents, licences, évaluations), y compris dans le cloud partagé. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action irréversible.", {title:"Attention", confirmText:"Continuer", danger:true});
+  var counts="";
+  if(window.fbDb && window.fbGetDocs){
+    try{
+      var p=await window.fbGetDocs(window.fbCollection(window.fbDb,"players"));
+      var t=await window.fbGetDocs(window.fbCollection(window.fbDb,"teams"));
+      var e=await window.fbGetDocs(window.fbCollection(window.fbDb,"events"));
+      var l=await window.fbGetDocs(window.fbCollection(window.fbDb,"licences"));
+      counts="Actuellement dans le cloud : "+p.size+" joueur(s), "+t.size+" équipe(s), "+e.size+" événement(s), "+l.size+" licence(s).\n\n";
+    }catch(err){}
+  }
+  var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club, y compris dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
-  var ok2=await askConfirm("Cette action ne peut pas être annulée.", {title:"Êtes-vous vraiment sûr ?", confirmText:"Tout supprimer", danger:true});
-  if(!ok2)return;
+  var typed=await askPrompt("Pour confirmer la suppression définitive, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
+  if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
 
   ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done"].forEach(function(k){localStorage.removeItem(k);});
   Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
@@ -10696,7 +10706,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785254743";
+var APP_VERSION="1785260184";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
