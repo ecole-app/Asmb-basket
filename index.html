@@ -3498,11 +3498,20 @@ function isStaffUser(){
 }
 
 // Recherche d'un code : cache local (appareil staff) puis index public (appareil neuf)
-function lookupInscriptionCode(code){
+function lookupInscriptionCode(code, attempt){
+  attempt=attempt||0;
   var lics=getLicences();
   var local=lics.find(function(l){return l.code===code;});
   if(local) return Promise.resolve({found:true, local:local, code:code});
-  if(!window.fbDb||!window.fbGetDoc) return Promise.resolve({found:false, code:code});
+  if(!window.fbDb||!window.fbGetDoc){
+    // Firebase pas encore initialise (appareil neuf, page qui vient de charger) : on reessaie brievement.
+    if(attempt<30){
+      return new Promise(function(resolve){
+        setTimeout(function(){ resolve(lookupInscriptionCode(code, attempt+1)); }, 150);
+      });
+    }
+    return Promise.resolve({found:false, code:code});
+  }
   return window.fbGetDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).then(function(snap){
     if(snap&&snap.exists()){
       var d=snap.data();
@@ -3838,7 +3847,7 @@ function renderCodeEntry(){
       '<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Fiche d\'inscription</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code reçu par mail</div>'+
       '<input id="code-input" type="text" placeholder="ASMB-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
-      '<button onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Acceder a ma fiche</button>'+
+      '<button id="valider-code-btn" onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Acceder a ma fiche</button>'+
     '</div>'+
   '</div>';
 }
@@ -3854,7 +3863,10 @@ function formatCodeInput(el){
 async function validerCode(){
   var code=document.getElementById("code-input").value.trim().toUpperCase();
   if(!code){alert("Entrez votre code");return;}
+  var btn=document.getElementById("valider-code-btn");
+  if(btn){btn.disabled=true;btn.textContent="Vérification...";}
   var res=await lookupInscriptionCode(code);
+  if(btn){btn.disabled=false;btn.textContent="Acceder a ma fiche";}
   if(!res.found){alert("Code invalide. Vérifiez votre mail.");return;}
   licCurrentCode=code;
 
@@ -10684,7 +10696,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785254187";
+var APP_VERSION="1785254743";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
