@@ -3464,7 +3464,55 @@ function syncPhoneIndexFromLicences(lics){
   PHONE_INDEX_PREV={};
   Object.keys(entries).forEach(function(p){PHONE_INDEX_PREV[p]=JSON.stringify(entries[p]);});
 }
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);}
+// ── INDEX DES CODES D'INSCRIPTION (lecture publique) ──────────────
+// Ne contient QUE : l'id interne de la licence + le type deja choisi.
+// Aucun nom, aucune adresse, aucun contact, aucun document. Sert uniquement
+// a repondre "ce code existe-t-il ?" sur un appareil non connecte.
+var INSCRIPTION_CODES_PREV={};
+function syncInscriptionCodes(lics){
+  if(!window.fbDb||!window.fbSetDoc) return;
+  var entries={};
+  (lics||[]).forEach(function(l){
+    if(!l||!l.code) return;
+    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null};
+  });
+  Object.keys(entries).forEach(function(code){
+    var s=JSON.stringify(entries[code]);
+    if(INSCRIPTION_CODES_PREV[code]!==s){
+      window.fbSetDoc(window.fbDoc(window.fbDb,"inscription_codes",code), entries[code]).catch(function(e){console.log("inscription_codes write",code,e);});
+    }
+  });
+  Object.keys(INSCRIPTION_CODES_PREV).forEach(function(code){
+    if(!(code in entries) && window.fbDeleteDoc){
+      window.fbDeleteDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).catch(function(){});
+    }
+  });
+  INSCRIPTION_CODES_PREV={};
+  Object.keys(entries).forEach(function(c){INSCRIPTION_CODES_PREV[c]=JSON.stringify(entries[c]);});
+}
+
+// Vrai si l'utilisateur courant est connecte avec un role staff (peut ecrire dans licences)
+function isStaffUser(){
+  var r=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  return r.indexOf("dirigeant")>=0||r.indexOf("coach")>=0;
+}
+
+// Recherche d'un code : cache local (appareil staff) puis index public (appareil neuf)
+function lookupInscriptionCode(code){
+  var lics=getLicences();
+  var local=lics.find(function(l){return l.code===code;});
+  if(local) return Promise.resolve({found:true, local:local, code:code});
+  if(!window.fbDb||!window.fbGetDoc) return Promise.resolve({found:false, code:code});
+  return window.fbGetDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).then(function(snap){
+    if(snap&&snap.exists()){
+      var d=snap.data();
+      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null};
+    }
+    return {found:false, code:code};
+  }).catch(function(){ return {found:false, code:code}; });
+}
+
+function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);}
 
 function genCode(){
  var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -3767,6 +3815,7 @@ function copyCode(code){
 
 // ── CÔTÉ LICENCIÉ : FICHE PUBLIQUE ───────────────────────────────
 var licCurrentCode=null;
+var licCurrentType=null;
 
 function buildInscriptionPublic(){
   var el=document.getElementById("insc-public-content");if(!el)return;
@@ -3795,27 +3844,33 @@ function formatCodeInput(el){
   if(v.length>8)parts.push(v.slice(8,12));
   el.value=parts.join("-");
 }
-function validerCode(){
+async function validerCode(){
   var code=document.getElementById("code-input").value.trim().toUpperCase();
   if(!code){alert("Entrez votre code");return;}
-  var lics=getLicences();
-  var idx=lics.findIndex(function(l){return l.code===code;});
-  if(idx<0){alert("Code invalide. Vérifiez votre mail.");return;}
-  var now=new Date();
-  var dateStr=now.toLocaleDateString("fr-FR")+" a "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
-  if(!lics[idx].ouvertLe){
-    lics[idx].ouvertLe=dateStr;
-    lics[idx].statut="ouverte";
-    saveLicences(lics);
-    buildLicences();
-  }
+  var res=await lookupInscriptionCode(code);
+  if(!res.found){alert("Code invalide. Vérifiez votre mail.");return;}
   licCurrentCode=code;
-  // Si licence type déjà choisi, aller direct à la fiche
-  if(lics[idx].typeLicence){
-    renderFicheForm(lics[idx]);
-  } else {
-    renderLicenceChoice(lics[idx]);
+
+  if(res.local){
+    // Appareil du staff : on peut marquer l'ouverture et ecrire dans les licences
+    var lics=getLicences();
+    var idx=lics.findIndex(function(l){return l.code===code;});
+    if(idx>=0 && !lics[idx].ouvertLe && isStaffUser()){
+      var now=new Date();
+      lics[idx].ouvertLe=now.toLocaleDateString("fr-FR")+" a "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+      lics[idx].statut="ouverte";
+      saveLicences(lics);
+      buildLicences();
+    }
+    if(lics[idx] && lics[idx].typeLicence){ renderFicheForm(lics[idx]); }
+    else { renderLicenceChoice(lics[idx]||{code:code}); }
+    return;
   }
+
+  // Appareil public (lien recu par mail) : aucune ecriture, on part d'une fiche vierge
+  var stub={code:code, typeLicence:res.typeLicence||null, fiche:null};
+  if(stub.typeLicence){ renderFicheForm(stub); }
+  else { renderLicenceChoice(stub); }
 }
 
 function renderLicenceChoice(lic){
@@ -3876,19 +3931,23 @@ function renderLicenceChoice(lic){
 function choisirLicence(type){
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===licCurrentCode;});
-  if(idx<0)return;
-  lics[idx].typeLicence=type;
-  saveLicences(lics);
-  buildLicences();
-  renderFicheForm(lics[idx]);
+  if(idx>=0){
+    lics[idx].typeLicence=type;
+    if(isStaffUser()){ saveLicences(lics); buildLicences(); }
+    renderFicheForm(lics[idx]);
+    return;
+  }
+  // Appareil public : pas de licence en local, on garde le choix en memoire seulement
+  renderFicheForm({code:licCurrentCode, typeLicence:type, fiche:null});
 }
 
 function renderFicheForm(lic){
   var el=document.getElementById("insc-public-content");if(!el)return;
+  licCurrentType=(lic&&lic.typeLicence)||null;
   var f=lic.fiche||{};
   el.innerHTML=
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
-      '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;}))" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
+      '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;})||{code:licCurrentCode})" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
       '<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--txt)">Ma fiche</div><div style="font-size:10px;color:var(--mut)">'+lic.code+'</div></div>'+
       (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#27AE60")+'">'+( lic.typeLicence==="competition"?"Compétition":"Loisir")+'</div>':'')+
     '</div>'+
@@ -3963,7 +4022,7 @@ function renderFicheForm(lic){
         '<label class="form-label">Medecin / Établissement</label>'+
         '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="Dr ...">'+
       '</div>'+
-      '<button onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px"> Valider ma fiche</button>'+
+      '<button id="fiche-submit-btn" onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px"> Valider ma fiche</button>'+
     '</div>';
 
   // Bind cert button
@@ -4088,17 +4147,43 @@ function soumettreFiche(){
   };
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===licCurrentCode;});
-  if(idx<0){alert("Erreur : code introuvable");return;}
-  lics[idx].fiche=fiche;lics[idx].statut="recue";
-  saveLicences(lics);buildLicences();
-  var el=document.getElementById("insc-public-content");
-  if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:20px">Votre fiche a bien ete transmise au club.</div><div style="display:flex;justify-content:center"><div style="width:32px;height:32px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);animation:spin .8s linear infinite"></div></div><div style="font-size:11px;color:var(--mut);margin-top:12px">Bienvenue au club...</div></div>';
-  setTimeout(function(){
-    localStorage.removeItem("asmb_profile");
-    stack=["role-select"];
-    showScr("role-select");
-    injectRoleLogo();
-  },1800);
+
+  function showSuccess(){
+    var el=document.getElementById("insc-public-content");
+    if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:6px">Votre fiche a bien été transmise au club.</div><div style="font-size:12px;color:var(--mut);line-height:1.5;max-width:280px;margin:0 auto">Un responsable va la valider. Vous pourrez ensuite créer votre compte dans l\'application avec votre numéro de téléphone.</div></div>';
+  }
+
+  if(idx>=0 && isStaffUser()){
+    // Saisie depuis un appareil du staff : ecriture directe dans la licence
+    lics[idx].fiche=fiche;lics[idx].statut="recue";
+    saveLicences(lics);buildLicences();
+    showSuccess();
+    setTimeout(function(){
+      localStorage.removeItem("asmb_profile");
+      stack=["role-select"];
+      showScr("role-select");
+      injectRoleLogo();
+    },1800);
+    return;
+  }
+
+  // Appareil public : depot dans une collection dediee, en creation seule.
+  // Le visiteur ne peut ni relire, ni lister, ni modifier quoi que ce soit.
+  if(!window.fbDb||!window.fbAddDoc){alert("Connexion en cours, réessayez dans quelques secondes.");return;}
+  var btn=document.getElementById("fiche-submit-btn");
+  if(btn){btn.disabled=true;btn.textContent="Envoi...";}
+  window.fbAddDoc(window.fbCollection(window.fbDb,"inscription_submissions"),{
+    code:licCurrentCode,
+    typeLicence:(document.getElementById("f-type")||{}).value||licCurrentType||null,
+    fiche:fiche,
+    status:"nouvelle",
+    ts:window.fbServerTimestamp()
+  }).then(function(){
+    showSuccess();
+  }).catch(function(e){
+    if(btn){btn.disabled=false;btn.textContent="Envoyer ma fiche";}
+    alert("Erreur lors de l'envoi : "+((e&&e.code)||e)+"\nRéessayez ou contactez le club.");
+  });
 }
 
 
@@ -5298,6 +5383,7 @@ var ADMIN_MODULES=[
  {id:"documents",name:"Documents",sub:"Fichiers · Formulaires",icon:"📁",color:"#8E44AD",scr:"documents"},
  {id:"acces",name:"Accès coach",sub:"Rôles · Équipes des comptes",icon:"🔑",color:"#E8670A",scr:"admin"},
  {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
+ {id:"fiches",name:"Fiches reçues",sub:"Inscriptions à valider",icon:"📥",color:"#16A085",scr:"admin"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
@@ -5340,6 +5426,7 @@ function openAdminModule(id){
   if(!m)return;
   if(id==="acces"){openAccesCoach();return;}
   if(id==="avis"){openAvisModule();return;}
+  if(id==="fiches"){openFichesRecues();return;}
   stack.push(m.scr);
   if(id==="parametres"){buildParametres();}
   else if(id==="communaute"){buildAdminComm();}
@@ -5466,6 +5553,95 @@ function renderAccesList(list,users){
       }).catch(function(err){save.textContent="Erreur";alert((err&&err.code)||err);});
     });
     card.appendChild(save);
+    list.appendChild(card);
+  });
+}
+
+// ── FICHES D'INSCRIPTION RECUES (deposees via le lien public) ──────
+function openFichesRecues(){
+  if(!isStaffUser()){alert("Réservé au staff.");return;}
+  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  var modal=document.createElement("div");
+  modal.className="fiches-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Fiches reçues";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px">Chargement…</div>';
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  window.fbGetDocs(window.fbCollection(window.fbDb,"inscription_submissions")).then(function(snap){
+    var items=[];snap.forEach(function(d){var v=d.data();v._id=d.id;items.push(v);});
+    items.sort(function(a,b){
+      var ta=a.ts&&a.ts.toDate?a.ts.toDate().getTime():0;
+      var tb=b.ts&&b.ts.toDate?b.ts.toDate().getTime():0;
+      return tb-ta;
+    });
+    renderFichesRecues(list,items);
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+}
+function renderFichesRecues(list,items){
+  list.innerHTML="";
+  if(!items.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucune fiche reçue pour le moment</div>';return;}
+  items.forEach(function(it){
+    var f=it.fiche||{};
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px"+(it.status==="importee"?";opacity:.55":"");
+    var name=document.createElement("div");
+    name.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    name.textContent=((f.prenom||"")+" "+(f.nom||"")).trim()||"(sans nom)";
+    var meta=document.createElement("div");
+    meta.style.cssText="font-size:11px;color:var(--mut);margin-bottom:8px";
+    meta.textContent="Code "+(it.code||"?")+(f.naissance?(" · né(e) le "+f.naissance):"")+(it.status==="importee"?" · déjà importée":"");
+    var detail=document.createElement("div");
+    detail.style.cssText="font-size:11px;color:var(--txt2);line-height:1.5;margin-bottom:10px";
+    detail.textContent=[f.telephone,f.emailLic,f.respNom?("Resp. "+f.respNom):""].filter(Boolean).join(" · ");
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+    var importBtn=document.createElement("button");
+    importBtn.textContent=it.status==="importee"?"Réimporter":"Importer dans la licence";
+    importBtn.style.cssText="padding:7px 12px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
+    importBtn.addEventListener("click",function(){
+      var lics=getLicences();
+      var idx=lics.findIndex(function(l){return l.code===it.code;});
+      if(idx<0){alert("Aucune licence ne correspond au code "+it.code+".");return;}
+      lics[idx].fiche=it.fiche;
+      lics[idx].statut="recue";
+      if(it.typeLicence) lics[idx].typeLicence=it.typeLicence;
+      saveLicences(lics);
+      buildLicences();
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"inscription_submissions",it._id),{status:"importee"}).catch(function(){});
+      it.status="importee";
+      card.style.opacity=".55";
+      importBtn.textContent="Réimporter";
+      meta.textContent="Code "+(it.code||"?")+(f.naissance?(" · né(e) le "+f.naissance):"")+" · déjà importée";
+      alert("Fiche importée dans la licence "+it.code+".");
+    });
+    var delBtn=document.createElement("button");
+    delBtn.textContent="Supprimer";
+    delBtn.style.cssText="padding:7px 12px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer";
+    delBtn.addEventListener("click",function(){
+      askConfirm("Supprimer définitivement cette fiche reçue ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
+        if(!ok)return;
+        window.fbDeleteDoc(window.fbDoc(window.fbDb,"inscription_submissions",it._id)).then(function(){card.remove();});
+      });
+    });
+    btnRow.appendChild(importBtn);btnRow.appendChild(delBtn);
+    card.appendChild(name);card.appendChild(meta);card.appendChild(detail);card.appendChild(btnRow);
     list.appendChild(card);
   });
 }
@@ -6343,6 +6519,7 @@ function migrateToFirestoreConfirmed(){
     if(errors.length){ msg+="<br><span style=\"color:#C0392B\">"+errors.length+" échec(s) : "+errors.slice(0,4).join(" | ")+(errors.length>4?"…":"")+"</span>"; }
     log(msg);
     syncPhoneIndexFromLicences(getLicences());
+    syncInscriptionCodes(getLicences());
   });
 }
 
@@ -9022,7 +9199,10 @@ function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){
     stack=["inscription"];
-    buildBottomNav("dirigeant");
+    var nav=document.getElementById("bnav-main");
+    if(nav){
+      nav.innerHTML='<button class="bni on" id="bni-inscription"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>';
+    }
     showScr("inscription");
     buildInscriptionPublic();
     return;
@@ -10475,7 +10655,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785238399";
+var APP_VERSION="1785238935";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
