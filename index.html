@@ -3613,6 +3613,7 @@ function createLicence(){
   if(!email){alert("Adresse mail obligatoire");return;}
   var code=genCode();
   var lic={
+    id:Date.now().toString(),
     code:code,email:email,nomDest:nom,
     statut:"envoyee",createdAt:Date.now(),
     ouvertLe:null,fiche:null,categorie:null
@@ -10706,7 +10707,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785260184";
+var APP_VERSION="1785260522";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
