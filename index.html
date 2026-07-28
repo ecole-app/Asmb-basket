@@ -9255,6 +9255,10 @@ function initProfile(){
     if(nav){
       nav.innerHTML='<button class="bni on" id="bni-inscription"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>';
     }
+    var setBtn=document.getElementById("hdr-settings-btn");
+    if(setBtn) setBtn.style.display="none";
+    var profBtn=document.getElementById("hdr-profile-btn");
+    if(profBtn) profBtn.style.display="none";
     showScr("inscription");
     buildInscriptionPublic();
     return;
@@ -10707,7 +10711,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785260522";
+var APP_VERSION="1785260783";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
