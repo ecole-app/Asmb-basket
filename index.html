@@ -9022,6 +9022,7 @@ function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){
     stack=["inscription"];
+    buildBottomNav("dirigeant");
     showScr("inscription");
     buildInscriptionPublic();
     return;
@@ -10474,7 +10475,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785146800";
+var APP_VERSION="1785238399";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
