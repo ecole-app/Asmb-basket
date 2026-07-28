@@ -5222,16 +5222,29 @@ function restoreFromCloud(){
   });
 }
 
-function resetAllData(){
-  askConfirm("Ceci va supprimer TOUTES les données locales (joueurs, équipes, événements, documents, licences). Cette action est irréversible.", {title:"Attention", confirmText:"Continuer", danger:true}).then(function(ok){
-    if(!ok)return;
-    askConfirm("Cette action ne peut pas être annulée.", {title:"Êtes-vous vraiment sûr ?", confirmText:"Tout supprimer", danger:true}).then(function(ok2){
-      if(!ok2)return;
-      ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
-      Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
-      askAlert("Données supprimées. L'application va se recharger.").then(function(){location.reload();});
-    });
-  });
+async function resetAllData(){
+  var ok=await askConfirm("Ceci va supprimer les données du club (joueurs, équipes, événements, documents, licences, évaluations), y compris dans le cloud partagé. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action irréversible.", {title:"Attention", confirmText:"Continuer", danger:true});
+  if(!ok)return;
+  var ok2=await askConfirm("Cette action ne peut pas être annulée.", {title:"Êtes-vous vraiment sûr ?", confirmText:"Tout supprimer", danger:true});
+  if(!ok2)return;
+
+  ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done"].forEach(function(k){localStorage.removeItem(k);});
+  Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
+
+  if(window.fbDb && window.fbGetDocs && window.fbDeleteDoc){
+    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes"];
+    for(var i=0;i<collections.length;i++){
+      try{
+        var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,collections[i]));
+        var dels=[];
+        snap.forEach(function(d){ dels.push(window.fbDeleteDoc(window.fbDoc(window.fbDb,collections[i],d.id))); });
+        await Promise.all(dels);
+      }catch(e){ console.log("reset "+collections[i]+":", e); }
+    }
+  }
+
+  await askAlert("Données du club supprimées (localement et dans le cloud). L'application va se recharger.");
+  location.reload();
 }
 
 // ── DONNEES DE DEMO ───────────────────────────────────────────────
@@ -10671,7 +10684,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785241619";
+var APP_VERSION="1785254187";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
