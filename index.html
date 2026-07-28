@@ -5227,7 +5227,7 @@ function resetAllData(){
     if(!ok)return;
     askConfirm("Cette action ne peut pas être annulée.", {title:"Êtes-vous vraiment sûr ?", confirmText:"Tout supprimer", danger:true}).then(function(ok2){
       if(!ok2)return;
-      ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
+      ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done","asmb_theme","asmb_phone","asmb_pseudo","asmb_notif"].forEach(function(k){localStorage.removeItem(k);});
       Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
       askAlert("Données supprimées. L'application va se recharger.").then(function(){location.reload();});
     });
@@ -5364,16 +5364,25 @@ function loadDemoEventsConfirmed(){
 }
 
 function clearDemoData(){
- askConfirm("Supprimer uniquement les données de démonstration (équipes/joueurs/événements/licences marquées Demo) ?", {title:"Supprimer les données démo", confirmText:"Supprimer", danger:true}).then(function(ok){
+ askConfirm("Supprimer uniquement les données de démonstration (équipes/joueurs/événements/licences/évaluations marquées Demo) ?", {title:"Supprimer les données démo", confirmText:"Supprimer", danger:true}).then(function(ok){
    if(!ok)return;
    var teams=getTeams().filter(function(t){return !t.demo;});
    saveTeams(teams);
    var players=getPlayers().filter(function(p){return !p.demo;});
    savePlayers(players);
-   var events=getEvents().filter(function(e){return !e.demo;});
+   var allEvents=getEvents();
+   var removedEventIds=allEvents.filter(function(e){return e.demo;}).map(function(e){return e.id;});
+   var events=allEvents.filter(function(e){return !e.demo;});
    saveEvents(events);
    var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
    saveLicences(lics);
+   // Purge les évaluations rattachées aux événements démo supprimés
+   var allEvals=getAllEvaluations();
+   var evalsChanged=false;
+   removedEventIds.forEach(function(evId){
+     if(allEvals[evId]){ delete allEvals[evId]; evalsChanged=true; }
+   });
+   if(evalsChanged) saveAllEvaluations(allEvals);
    alert("Données de démo supprimées.");
    buildAdminHome();
  });
@@ -10662,7 +10671,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785239267";
+var APP_VERSION="1785241619";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
