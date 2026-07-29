@@ -191,8 +191,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .ta-star{position:absolute;background:#fff;border-radius:50%;animation:ta-twinkle ease-in-out infinite;z-index:1;pointer-events:none}
 @keyframes ta-twinkle{0%,100%{opacity:.25}50%{opacity:1}}
 /* ── MODE ORGANISATION (cartes qui gigotent) ── */
-@keyframes card-wiggle{0%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}100%{transform:rotate(-.6deg)}}
-.admin-card.wiggle,.param-block.wiggle{animation:card-wiggle .25s ease-in-out infinite}
+/* ── MODE ORGANISATION (appui long + glisser) ── */
+.admin-card.editing,.param-block.editing{border:1.5px dashed var(--bdr)}
+.press-dragging{z-index:500!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;opacity:.96;touch-action:none}
 </style>
 
 <script>
@@ -4595,28 +4596,23 @@ function buildParametresLayout(){
   // Etat visuel + controles
   groups.forEach(function(group,parent){
     var visible=Array.prototype.slice.call(parent.children).filter(function(c){return c.classList&&c.classList.contains("param-block");});
-    visible.forEach(function(block,i){
+    visible.forEach(function(block){
       var secId=block.dataset.sec;
       var isCustom=secId.indexOf("custom-")===0;
       var isHidden=hidden.indexOf(secId)>=0;
       block.style.display=(isHidden && !PARAMS_EDIT_MODE)?"none":"";
       block.style.opacity=(isHidden && PARAMS_EDIT_MODE)?".45":"1";
-      block.classList.toggle("wiggle", PARAMS_EDIT_MODE);
+      block.classList.toggle("editing", PARAMS_EDIT_MODE);
       var oldCtrl=block.querySelector(".param-ctrl");
       if(oldCtrl) oldCtrl.remove();
       if(!PARAMS_EDIT_MODE) return;
       var ctrl=document.createElement("div");
       ctrl.className="param-ctrl";
-      ctrl.style.cssText="display:flex;gap:6px;justify-content:flex-end;padding:0 12px 12px;flex-wrap:wrap";
-      var upBtn=document.createElement("button");
-      upBtn.textContent="\u2191";
-      upBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===0?";opacity:.3":"");
-      upBtn.addEventListener("click",function(e){e.stopPropagation();moveParamBlock(secId,-1);});
-      var downBtn=document.createElement("button");
-      downBtn.textContent="\u2193";
-      downBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===visible.length-1?";opacity:.3":"");
-      downBtn.addEventListener("click",function(e){e.stopPropagation();moveParamBlock(secId,1);});
-      ctrl.appendChild(upBtn);ctrl.appendChild(downBtn);
+      ctrl.style.cssText="display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:0 12px 12px";
+      var handle=document.createElement("span");
+      handle.style.cssText="color:var(--mut);font-size:16px;margin-right:auto;padding:4px";
+      handle.textContent="\u2807";
+      ctrl.appendChild(handle);
       if(isCustom){
         var delBtn=document.createElement("button");
         delBtn.textContent="Supprimer";
@@ -4640,6 +4636,13 @@ function buildParametresLayout(){
       }
       block.appendChild(ctrl);
     });
+    if(PARAMS_EDIT_MODE && visible.length>1){
+      enablePressDrag(visible, function(newOrder){
+        var globalOrder=getParamsOrder().filter(function(id){return newOrder.indexOf(id)<0;});
+        saveParamsOrder(globalOrder.concat(newOrder));
+        buildParametresLayout();
+      });
+    }
   });
 
   renderParamsAddTile();
@@ -5868,6 +5871,76 @@ function enterAdmin(){
  stack.push("admin");
  showScr("admin");
 }
+// ── APPUI LONG + GLISSER (reordonnancement tactile, generique) ─────
+var PRESS_DRAG_STATE={active:false,item:null,placeholder:null,offsetY:0,onDrop:null};
+var PRESS_DRAG_GLOBAL_WIRED=false;
+function wirePressDragGlobalListenersOnce(){
+  if(PRESS_DRAG_GLOBAL_WIRED) return;
+  PRESS_DRAG_GLOBAL_WIRED=true;
+  document.addEventListener("pointermove",function(e){
+    var s=PRESS_DRAG_STATE;
+    if(!s.active) return;
+    e.preventDefault();
+    var item=s.item;
+    item.style.top=(e.clientY-s.offsetY)+"px";
+    var siblings=Array.prototype.slice.call(item.parentNode.children).filter(function(c){return c!==item && c!==s.placeholder;});
+    for(var i=0;i<siblings.length;i++){
+      var r=siblings[i].getBoundingClientRect();
+      if(e.clientY<r.top+r.height/2){ item.parentNode.insertBefore(s.placeholder,siblings[i]); break; }
+      if(i===siblings.length-1){ item.parentNode.insertBefore(s.placeholder,siblings[i].nextSibling); }
+    }
+  },{passive:false});
+  document.addEventListener("pointerup",finishPressDrag);
+  document.addEventListener("pointercancel",finishPressDrag);
+}
+function finishPressDrag(){
+  var s=PRESS_DRAG_STATE;
+  if(!s.active) return;
+  s.active=false;
+  var item=s.item, placeholder=s.placeholder, onDrop=s.onDrop;
+  item.classList.remove("press-dragging");
+  item.style.position="";item.style.left="";item.style.top="";item.style.width="";
+  item.parentNode.insertBefore(item,placeholder);
+  placeholder.remove();
+  var order=Array.prototype.slice.call(item.parentNode.children)
+    .filter(function(c){return c.classList&&(c.classList.contains("admin-card")||c.classList.contains("param-block"));})
+    .map(function(c){return c.dataset.moduleId||c.dataset.sec;});
+  s.item=null;s.placeholder=null;s.onDrop=null;
+  if(onDrop) onDrop(order);
+}
+// items : tableau d'elements DOM freres (deja dans l'ordre affiche) ; onDrop(newOrderIds) est
+// appele avec la nouvelle liste d'ids (data-module-id ou data-sec) apres relachement.
+function enablePressDrag(items, onDrop){
+  wirePressDragGlobalListenersOnce();
+  items.forEach(function(item){
+    var pressTimer=null, startY=0, startX=0;
+    function cancelPress(){ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} }
+    item.addEventListener("pointerdown",function(e){
+      if(e.target.closest("button")) return;
+      startY=e.clientY; startX=e.clientX;
+      pressTimer=setTimeout(function(){
+        var rect=item.getBoundingClientRect();
+        var placeholder=document.createElement("div");
+        placeholder.style.cssText="height:"+rect.height+"px;margin:"+getComputedStyle(item).marginTop+" 0";
+        item.parentNode.insertBefore(placeholder,item.nextSibling);
+        item.classList.add("press-dragging");
+        item.style.position="fixed";
+        item.style.left=rect.left+"px";
+        item.style.top=rect.top+"px";
+        item.style.width=rect.width+"px";
+        PRESS_DRAG_STATE={active:true,item:item,placeholder:placeholder,offsetY:startY-rect.top,onDrop:onDrop};
+        if(navigator.vibrate) navigator.vibrate(15);
+      }, 380);
+    });
+    item.addEventListener("pointermove",function(e){
+      if(PRESS_DRAG_STATE.active) return;
+      if(Math.abs(e.clientY-startY)>8 || Math.abs(e.clientX-startX)>8) cancelPress();
+    });
+    item.addEventListener("pointerup",cancelPress);
+    item.addEventListener("pointerleave",function(){ if(!PRESS_DRAG_STATE.active) cancelPress(); });
+  });
+}
+
 // ── MODE ORGANISATION DES MODULES ADMIN (ordre + masquage) ─────────
 var ADMIN_EDIT_MODE=false;
 function getAdminModuleOrder(){try{return JSON.parse(localStorage.getItem("asmb_admin_module_order")||"[]");}catch(e){return [];}}
@@ -5933,33 +6006,31 @@ function buildAdminHome(){
  var hidden=getHiddenAdminModules();
  var isHidden=hidden.indexOf(m.id)>=0;
  if(isHidden && !ADMIN_EDIT_MODE) return;
- var d=document.createElement("div");d.className="admin-card"+(ADMIN_EDIT_MODE?" wiggle":"");
+ var d=document.createElement("div");d.className="admin-card"+(ADMIN_EDIT_MODE?" editing":"");
+ d.dataset.moduleId=m.id;
  d.style.cssText="position:relative"+(isHidden?";opacity:.45":"");
  if(!ADMIN_EDIT_MODE) d.onclick=function(){openAdminModule(m.id);};
  var count=getAdminCount(m.id);
- d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
+ d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div style="color:var(--mut);font-size:16px;padding:4px">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
  if(ADMIN_EDIT_MODE){
    var ctrl=document.createElement("div");
-   ctrl.style.cssText="display:flex;gap:6px;justify-content:flex-end;padding:0 12px 10px";
-   var upBtn=document.createElement("button");
-   upBtn.textContent="\u2191";
-   upBtn.disabled=(i===0);
-   upBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===0?";opacity:.3":"");
-   upBtn.addEventListener("click",function(e){e.stopPropagation();moveAdminModule(m.id,-1);});
-   var downBtn=document.createElement("button");
-   downBtn.textContent="\u2193";
-   downBtn.disabled=(i===arr.length-1);
-   downBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===arr.length-1?";opacity:.3":"");
-   downBtn.addEventListener("click",function(e){e.stopPropagation();moveAdminModule(m.id,1);});
+   ctrl.style.cssText="display:flex;justify-content:flex-end;padding:0 12px 10px";
    var hideBtn=document.createElement("button");
    hideBtn.textContent=isHidden?"Afficher":"Masquer";
    hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(39,174,96,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
    hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleHiddenAdminModule(m.id);});
-   ctrl.appendChild(upBtn);ctrl.appendChild(downBtn);ctrl.appendChild(hideBtn);
+   ctrl.appendChild(hideBtn);
    d.appendChild(ctrl);
  }
     el.appendChild(d);
   });
+  if(ADMIN_EDIT_MODE){
+    var cards=Array.prototype.slice.call(el.querySelectorAll(".admin-card"));
+    enablePressDrag(cards, function(newOrder){
+      saveAdminModuleOrder(newOrder);
+      buildAdminHome();
+    });
+  }
 }
 function getAdminCount(id){
   if(id==="parametres")return "Configuration";
@@ -11535,7 +11606,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785359467";
+var APP_VERSION="1785360080";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
