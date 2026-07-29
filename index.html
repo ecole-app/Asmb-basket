@@ -1697,8 +1697,8 @@ const ELITE_CATS=[
  {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · 2026-2027",icon:"",color:"#27AE60",ready:true}
 ];
 const VACS=[
- {n:"Toussaint",d:"18 oct. - 3 nov. 2025",imp:"4 séances",c:"#E8670A"},
- {n:"Noel",d:"20 dec. 2025 - 5 janv. 2026",imp:"5 séances",c:"#8E44AD"},
+ {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
+ {n:"Noel",d:"19 dec. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"},
  {n:"Hiver",d:"21 fev. - 9 mars 2026",imp:"4 séances",c:"#1A2E5A"},
  {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 séances",c:"#27AE60"}
 ];
@@ -1871,7 +1871,7 @@ const CYCLES_U11=[
 ];
 
 const CYCLES=[
- {id:1,n:"Fondamentaux Individuels",sh:"Fondamentaux",p:"Sept. - mi-oct. 2025",s:10,c:"#27AE60",e:"",
+ {id:1,n:"Fondamentaux Individuels",sh:"Fondamentaux",p:"Sept. - mi-oct. 2026",s:10,c:"#27AE60",e:"",
  objs:["Maitriser le dribble en deplacement","Passes precises : poitrine rebond une main","Acquerir le tir BEEF et le lay-up","Position défensive individuelle de base","Automatiser le pied-pivot"],
  seas:[
  {num:"1.1",t:"Prise en main et dribble",dur:"1h30",obj:"Evaluer le niveau et decouvrir le dribble",sits:[
@@ -1915,7 +1915,7 @@ const CYCLES=[
  {ti:"Defis par equipe",dur:"25 min",desc:"Les scores individuels sont cumules par equipe. Classement affiche.",org:"Equipes equilibrees.",axes:["Handicap pour les plus forts","Bonus fair-play"],kws:["Cohesion","Encouragement","Depassement","Esprit"],ch:null},
  {ti:"Match bilan",dur:"30 min",desc:"5c5 libre, le coach observe l application des fondamentaux travailles.",org:"Terrain complet.",axes:["Arret sur image pedagogique","Bonus si fondamental bien execute"],kws:["Transfert","Automatisme","Lucidite","Plaisir"],ch:null}]}
  ]},
- {id:2,n:"Jeu Collectif en Attaque",sh:"Jeu Collectif",p:"Nov. - mi-dec. 2025",s:8,c:"#16A085",e:"",
+ {id:2,n:"Jeu Collectif en Attaque",sh:"Jeu Collectif",p:"Nov. - mi-dec. 2026",s:8,c:"#16A085",e:"",
  objs:["Maitriser le jeu a 2 (passe-et-va 2v1)","Comprendre et appliquer le démarquage","Developper le 3v2","Organiser la remontee rapide","Creer des decalages sans ecran"],
  seas:[
  {num:"2.1",t:"Passe-et-va et surnombre 2v1",dur:"1h30",obj:"Creer le surnombre avec le passe-et-va",sits:[
@@ -11044,7 +11044,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785340184";
+var APP_VERSION="1785340393";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
