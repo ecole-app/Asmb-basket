@@ -719,7 +719,7 @@ initChannels();
       <div style="font-size:28px"></div>
       <div>
         <div style="font-size:18px;font-weight:900;color:#fff">Mon inscription</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Saison 2025-2026</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Saison 2026-2027</div>
       </div>
     </div>
     <div id="insc-public-content"></div>
@@ -1650,7 +1650,7 @@ initChannels();
 const ELITE_CATS=[
  {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · 2025-2026",icon:"",color:"#27AE60",ready:true}
+ {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · 2026-2027",icon:"",color:"#27AE60",ready:true}
 ];
 const VACS=[
  {n:"Toussaint",d:"18 oct. - 3 nov. 2025",imp:"4 séances",c:"#E8670A"},
@@ -2088,7 +2088,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2025-2026"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
+ var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2026-2027"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -10723,7 +10723,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785303877";
+var APP_VERSION="1785303939";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
