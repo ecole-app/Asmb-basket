@@ -4610,7 +4610,8 @@ function buildParametresLayout(){
       ctrl.className="param-ctrl";
       ctrl.style.cssText="display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:0 12px 12px";
       var handle=document.createElement("span");
-      handle.style.cssText="color:var(--mut);font-size:16px;margin-right:auto;padding:4px";
+      handle.className="drag-handle";
+      handle.style.cssText="color:var(--mut);font-size:20px;margin-right:auto;padding:10px;cursor:grab";
       handle.textContent="\u2807";
       ctrl.appendChild(handle);
       if(isCustom){
@@ -5913,10 +5914,11 @@ function finishPressDrag(){
 function enablePressDrag(items, onDrop){
   wirePressDragGlobalListenersOnce();
   items.forEach(function(item){
+    var handle=item.querySelector(".drag-handle")||item;
+    handle.style.touchAction="none"; // seule la poignee bloque le scroll natif, pas toute la carte
     var pressTimer=null, startY=0, startX=0;
     function cancelPress(){ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} }
-    item.addEventListener("pointerdown",function(e){
-      if(e.target.closest("button")) return;
+    handle.addEventListener("pointerdown",function(e){
       startY=e.clientY; startX=e.clientX;
       pressTimer=setTimeout(function(){
         var rect=item.getBoundingClientRect();
@@ -5932,12 +5934,12 @@ function enablePressDrag(items, onDrop){
         if(navigator.vibrate) navigator.vibrate(15);
       }, 380);
     });
-    item.addEventListener("pointermove",function(e){
+    handle.addEventListener("pointermove",function(e){
       if(PRESS_DRAG_STATE.active) return;
-      if(Math.abs(e.clientY-startY)>8 || Math.abs(e.clientX-startX)>8) cancelPress();
+      if(Math.abs(e.clientY-startY)>18 || Math.abs(e.clientX-startX)>18) cancelPress();
     });
-    item.addEventListener("pointerup",cancelPress);
-    item.addEventListener("pointerleave",function(){ if(!PRESS_DRAG_STATE.active) cancelPress(); });
+    handle.addEventListener("pointerup",cancelPress);
+    handle.addEventListener("pointerleave",function(){ if(!PRESS_DRAG_STATE.active) cancelPress(); });
   });
 }
 
@@ -6011,7 +6013,7 @@ function buildAdminHome(){
  d.style.cssText="position:relative"+(isHidden?";opacity:.45":"");
  if(!ADMIN_EDIT_MODE) d.onclick=function(){openAdminModule(m.id);};
  var count=getAdminCount(m.id);
- d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div style="color:var(--mut);font-size:16px;padding:4px">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
+ d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div class="drag-handle" style="color:var(--mut);font-size:20px;padding:10px;cursor:grab">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
  if(ADMIN_EDIT_MODE){
    var ctrl=document.createElement("div");
    ctrl.style.cssText="display:flex;justify-content:flex-end;padding:0 12px 10px";
@@ -11606,7 +11608,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785360080";
+var APP_VERSION="1785361373";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
