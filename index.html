@@ -486,6 +486,7 @@ initChannels();
       </div>
     </div>
     <div class="sec">Gestion</div>
+    <div id="season-banner"></div>
     <div id="adminCards" style="padding-bottom:16px"></div>
   </div>
 
@@ -686,6 +687,7 @@ initChannels();
       <button onclick="showNewLicence()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Nouvelle fiche</button>
     </div>
     <div id="lic-counter-box" style="margin:12px 12px 4px"></div>
+    <div id="lic-archive-toggle" style="display:none"></div>
     <div id="licenceList" style="padding:8px 0 80px"></div>
     <!-- Modal nouvelle fiche -->
     <div id="modal-new-lic" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
@@ -759,7 +761,7 @@ initChannels();
       <div style="font-size:28px"></div>
       <div>
         <div style="font-size:18px;font-weight:900;color:#fff">Mon inscription</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Saison 2026-2027</div>
+        <div id="hero-season-sub" style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Saison 2026-2027</div>
       </div>
     </div>
     <div id="insc-public-content"></div>
@@ -1273,6 +1275,12 @@ initChannels();
  <button onclick="restoreFromCloud()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Restaurer depuis le cloud</button>
  </div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:13px;font-weight:700;color:var(--txt)">Saison en cours</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px" id="season-status">Chargement…</div>
+ <button onclick="startNewSeason()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Démarrer la saison suivante</button>
+ <div style="font-size:10px;color:var(--mut);margin-top:8px;line-height:1.4">Archive les licences de la saison en cours (elles restent consultables). Les joueurs et équipes ne sont pas touchés.</div>
+ </div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:13px;font-weight:700;color:var(--txt)">Migration vers Firestore</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px">Copier joueurs, équipes, événements, licences et évaluations vers le cloud partagé (1 document par entité).</div>
  <button onclick="migrateToFirestore()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Lancer la migration</button>
@@ -1694,7 +1702,7 @@ initChannels();
 const ELITE_CATS=[
  {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · 2026-2027",icon:"",color:"#27AE60",ready:true}
+ {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#27AE60",ready:true}
 ];
 const VACS=[
  {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
@@ -2132,7 +2140,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2026-2027"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"]};
+ var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison "+getCurrentSeason()],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -3567,6 +3575,51 @@ function lookupInscriptionCode(code, attempt){
 
 function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);}
 
+// ── GESTION DE SAISON (archivage annuel des licences) ──────────────
+// Saison "naturelle" deduite de la date du jour (rentree = debut septembre)
+function computeNaturalSeason(d){
+  d=d||new Date();
+  var y=d.getFullYear();
+  return (d.getMonth()>=7) ? (y+"-"+(y+1)) : ((y-1)+"-"+y);
+}
+function getCurrentSeason(){
+  return localStorage.getItem("asmb_current_season") || computeNaturalSeason();
+}
+function setCurrentSeason(s){
+  localStorage.setItem("asmb_current_season", s);
+  if(window.fbDb && window.fbSetDoc){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","season"),{value:s},{merge:true}).catch(function(){});
+  }
+}
+function nextSeasonLabel(season){
+  var m=/^(\d{4})-(\d{4})$/.exec(season||"");
+  if(!m) return computeNaturalSeason();
+  var y=parseInt(m[2],10);
+  return y+"-"+(y+1);
+}
+// Applique le label de saison courant partout ou il est affiche
+function applySeasonLabels(){
+  var season=getCurrentSeason();
+  var heroEl=document.getElementById("hero-season-sub");
+  if(heroEl) heroEl.textContent="ASMB · Saison "+season;
+}
+async function startNewSeason(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  var current=getCurrentSeason();
+  var next=nextSeasonLabel(current);
+  var lics=getLicences();
+  var activeCount=lics.filter(function(l){return (l.saison||current)===current;}).length;
+  var ok=await askConfirm("Saison actuelle : "+current+" ("+activeCount+" licence(s) active(s)).\n\nLa nouvelle saison "+next+" va démarrer. Les licences de "+current+" seront archivées (elles restent consultables, mais ne comptent plus comme actives). Les joueurs et équipes ne sont pas touchés.", {title:"Passer à la saison "+next+" ?", confirmText:"Démarrer la saison "+next});
+  if(!ok)return;
+  lics.forEach(function(l){ if(!l.saison) l.saison=current; });
+  saveLicences(lics);
+  setCurrentSeason(next);
+  applySeasonLabels();
+  await askAlert("Saison "+next+" démarrée. Les licences de "+current+" sont archivées.");
+  buildLicences();
+  buildAdminHome();
+}
+
 function genCode(){
  var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
  var part=function(n){var s="";for(var i=0;i<n;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;};
@@ -3591,10 +3644,23 @@ var CATS_LIC=["U7","U9","U11","U13","U15","U18","U21","Senior"];
 var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
+var licShowArchived=false;
 function buildLicences(){
- var lics=getLicences();
+ var season=getCurrentSeason();
+ var allLics=getLicences();
+ var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison!==season;})
+                           : allLics.filter(function(l){return !l.saison || l.saison===season;});
  var el=document.getElementById("licenceList");if(!el)return;
- document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"");
+ document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"")+" · Saison "+season+(licShowArchived?" (archives)":"");
+
+ var archBox=document.getElementById("lic-archive-toggle");
+ if(archBox){
+   var archivedCount=allLics.filter(function(l){return l.saison && l.saison!==season;}).length;
+   if(archivedCount>0){
+     archBox.style.display="block";
+     archBox.innerHTML='<button onclick="licShowArchived=!licShowArchived;buildLicences();" style="width:100%;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer;margin:0 12px 10px;width:calc(100% - 24px)">'+(licShowArchived?"← Retour à la saison "+season:"Voir les saisons précédentes ("+archivedCount+")")+'</button>';
+   } else { archBox.style.display="none"; archBox.innerHTML=""; }
+ }
 
  var counterEl=document.getElementById("lic-counter-box");
  if(counterEl){
@@ -3660,7 +3726,8 @@ function createLicence(){
     id:Date.now().toString(),
     code:code,email:email,nomDest:nom,
     statut:"envoyee",createdAt:Date.now(),
-    ouvertLe:null,fiche:null,categorie:null
+    ouvertLe:null,fiche:null,categorie:null,
+    saison:getCurrentSeason()
   };
   var lics=getLicences();lics.push(lic);saveLicences(lics);
   closeNewLicence();
@@ -4383,6 +4450,15 @@ function buildParametres(){
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   var adminOnly=document.getElementById("params-dirigeant-only");
   if(adminOnly) adminOnly.style.display=isDirigeant?"block":"none";
+  var seasonEl=document.getElementById("season-status");
+  if(seasonEl){
+    var cur=getCurrentSeason(), natural=computeNaturalSeason();
+    if(natural!==cur){
+      seasonEl.innerHTML='Saison affichée : <b>'+cur+'</b><br><span style="color:#E8670A;font-weight:700">La saison '+natural+' a commencé — pensez à archiver.</span>';
+    } else {
+      seasonEl.textContent="Saison affichée : "+cur;
+    }
+  }
   var gd=document.getElementById("gp-dark");
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
   var toggle=document.getElementById("notif-toggle");
@@ -5545,6 +5621,16 @@ function enterAdmin(){
 }
 function buildAdminHome(){
  var el=document.getElementById("adminCards");if(!el)return;el.innerHTML="";
+ var banner=document.getElementById("season-banner");
+ if(banner){
+   var cur=getCurrentSeason(), natural=computeNaturalSeason();
+   if(natural!==cur){
+     banner.innerHTML='<div style="margin:0 12px 14px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
+       '<div style="font-size:13px;font-weight:700;color:#E8670A">La saison '+natural+' a commencé</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">Vous affichez encore la saison '+cur+'. Archivez les licences et passez à la nouvelle saison depuis Paramètres → Données.</div>'+
+       '</div>';
+   } else { banner.innerHTML=""; }
+ }
  ADMIN_MODULES.forEach(function(m){
  var d=document.createElement("div");d.className="admin-card";
  d.onclick=function(){openAdminModule(m.id);};
@@ -6680,6 +6766,14 @@ function initFirestoreSync(){
   fsStartSyncEvaluations();
   if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
     fsStartSync("comptabilite","asmb_comptabilite");
+  }
+  if(window.fbGetDoc){
+    window.fbGetDoc(window.fbDoc(window.fbDb,"app_data","season")).then(function(snap){
+      if(snap && snap.exists() && snap.data().value){
+        localStorage.setItem("asmb_current_season", snap.data().value);
+        applySeasonLabels();
+      }
+    }).catch(function(){});
   }
 }
 
@@ -9387,6 +9481,7 @@ function finishAuthedUser(user, u, isUpdate){
   }
   if(!isUpdate || profile!==previousProfile){
     initProfile(); // routage existant, inchangé (au login, ou si le rôle actif change)
+    applySeasonLabels();
   } else {
     refreshCurrentScreen(); // mise à jour silencieuse (ex: nouvelle équipe assignée), sans changer d'écran
   }
@@ -11044,7 +11139,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785340393";
+var APP_VERSION="1785340722";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
