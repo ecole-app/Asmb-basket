@@ -5295,19 +5295,32 @@ async function resetAllData(){
       var t=await window.fbGetDocs(window.fbCollection(window.fbDb,"teams"));
       var e=await window.fbGetDocs(window.fbCollection(window.fbDb,"events"));
       var l=await window.fbGetDocs(window.fbCollection(window.fbDb,"licences"));
-      counts="Actuellement dans le cloud : "+p.size+" joueur(s), "+t.size+" équipe(s), "+e.size+" événement(s), "+l.size+" licence(s).\n\n";
+      var ch=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels"));
+      counts="Actuellement dans le cloud : "+p.size+" joueur(s), "+t.size+" équipe(s), "+e.size+" événement(s), "+l.size+" licence(s), "+ch.size+" canal/canaux de discussion.\n\n";
     }catch(err){}
   }
-  var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club, y compris dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
+  var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club (y compris les canaux de discussion et leurs messages), dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
   var typed=await askPrompt("Pour confirmer la suppression définitive, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
   if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
 
   ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done"].forEach(function(k){localStorage.removeItem(k);});
-  Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_");}).forEach(function(k){localStorage.removeItem(k);});
+  Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_")||k.startsWith("asmb_lastread_");}).forEach(function(k){localStorage.removeItem(k);});
 
   if(window.fbDb && window.fbGetDocs && window.fbDeleteDoc){
-    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes"];
+    // Canaux : purger d'abord les messages (sous-collection) de chaque canal, puis le canal lui-meme
+    try{
+      var chansSnap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels"));
+      for(const chanDoc of chansSnap.docs){
+        var msgsSnap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels",chanDoc.id,"messages"));
+        var msgDels=[];
+        msgsSnap.forEach(function(m){ msgDels.push(window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",chanDoc.id,"messages",m.id))); });
+        await Promise.all(msgDels);
+        await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",chanDoc.id));
+      }
+    }catch(e){ console.log("reset channels:", e); }
+
+    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes","inscription_submissions","comptabilite"];
     for(var i=0;i<collections.length;i++){
       try{
         var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,collections[i]));
@@ -10954,7 +10967,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785304309";
+var APP_VERSION="1785304645";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
