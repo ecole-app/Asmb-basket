@@ -713,6 +713,46 @@ initChannels();
     <div id="lic-detail-content" style="padding:16px;padding-bottom:80px"></div>
   </div>
 
+  <!-- ═══ COMPTABILITE ═══ -->
+  <div class="scr" id="scr-comptabilite">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--txt)">Comptabilité</div>
+        <div style="font-size:11px;color:var(--mut)" id="compta-count">0 ligne</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportComptaCsv()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter</button>
+        <button onclick="showAddComptaLine()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ligne</button>
+      </div>
+    </div>
+    <div id="compta-filters" style="padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap"></div>
+    <div id="compta-totals" style="margin:0 12px 10px"></div>
+    <div id="compta-list" style="padding:0 0 80px"></div>
+
+    <!-- Modal nouvelle ligne comptable -->
+    <div id="modal-compta-line" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)" id="compta-modal-title">Nouvelle ligne</div>
+          <button onclick="closeModal('modal-compta-line')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button id="compta-type-recette" onclick="setComptaType('recette')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">+ Recette</button>
+          <button id="compta-type-depense" onclick="setComptaType('depense')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">− Dépense</button>
+        </div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="cl-date" type="date"></div>
+        <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="cl-montant" type="number" step="0.01" placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="cl-categorie" list="compta-cat-list" placeholder="Ex: Séance, Cotisation, Materiel..."><datalist id="compta-cat-list"></datalist></div>
+        <div class="form-group"><label class="form-label">Motif du paiement</label><input class="form-input" id="cl-motif" list="compta-motif-list" placeholder="Ex: Cotisation annuelle"><datalist id="compta-motif-list"></datalist></div>
+        <div class="form-group"><label class="form-label">Tiers / Membre</label><input class="form-input" id="cl-tiers" list="compta-tiers-list" placeholder="Nom du membre ou du tiers"><datalist id="compta-tiers-list"></datalist></div>
+        <div class="form-group"><label class="form-label">Moyen de paiement</label><select class="form-input" id="cl-moyen"><option value="Espèces">Espèces</option><option value="Chèque">Chèque</option><option value="Virement">Virement</option><option value="CB">CB</option><option value="Autre">Autre</option></select></div>
+        <div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="cl-reference" placeholder="Note libre"></div>
+        <button id="compta-save-btn" onclick="saveComptaLine()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="compta-delete-btn" onclick="deleteComptaLine()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cette ligne</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ INSCRIPTION PUBLIQUE ═══ -->
   <div class="scr" id="scr-inscription">
     <div class="hero" style="padding:16px 16px 14px;text-align:left;display:flex;align-items:center;gap:12px">
@@ -2088,7 +2128,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2026-2027"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"]};
+ var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison 2026-2027"],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -5448,6 +5488,7 @@ var ADMIN_MODULES=[
  {id:"acces",name:"Accès coach",sub:"Rôles · Équipes des comptes",icon:"🔑",color:"#E8670A",scr:"admin"},
  {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
  {id:"fiches",name:"Fiches reçues",sub:"Inscriptions à valider",icon:"📥",color:"#16A085",scr:"admin"},
+ {id:"comptabilite",name:"Comptabilité",sub:"Recettes · Dépenses",icon:"💶",color:"#1A2E5A",scr:"comptabilite"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
@@ -5481,6 +5522,7 @@ function getAdminCount(id){
   if(id==="equipes"){var t=getTeams();return t.length+" equipe"+(t.length>1?"s":"");}
   if(id==="planning"){var e=getEvents();return e.length+" evenement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
+  if(id==="comptabilite"){var c=getComptabilite();return c.length+" ligne"+(c.length>1?"s":"");}
   if(id==="acces")return "Rôles & équipes";
   if(id==="avis")return "Retours des membres";
   return "";
@@ -5499,6 +5541,7 @@ function openAdminModule(id){
   else if(id==="equipes")buildTeams();
   else if(id==="planning")buildPlanning();
   else if(id==="documents")buildDocs();
+  else if(id==="comptabilite")buildComptabilite();
   showScr(m.scr);
 }
 
@@ -6545,6 +6588,9 @@ function initFirestoreSync(){
   fsStartSync("licences","asmb_licences");
   fsStartSync("events","asmb_events");
   fsStartSyncEvaluations();
+  if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
+    fsStartSync("comptabilite","asmb_comptabilite");
+  }
 }
 
 // ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
@@ -7534,6 +7580,191 @@ function showWeather(eventId){
 // ── DOCUMENTS ────────────────────────────────────────────────────
 function getDocs(){try{return JSON.parse(localStorage.getItem("asmb_docs")||"[]");}catch(e){return [];}}
 function saveDocs(d){localStorage.setItem("asmb_docs",JSON.stringify(d));}
+
+// ── COMPTABILITE (reserve dirigeant) ────────────────────────────────
+function getComptabilite(){try{return JSON.parse(localStorage.getItem("asmb_comptabilite")||"[]");}catch(e){return [];}}
+function saveComptabilite(c){localStorage.setItem("asmb_comptabilite",JSON.stringify(c));fsWriteCollection("comptabilite",c);}
+
+var COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:""};
+var comptaEditId=null;
+
+function comptaFilteredList(){
+  var lines=getComptabilite().slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+  return lines.filter(function(l){
+    if(COMPTA_FILTERS.du && (l.date||"") < COMPTA_FILTERS.du) return false;
+    if(COMPTA_FILTERS.au && (l.date||"") > COMPTA_FILTERS.au) return false;
+    if(COMPTA_FILTERS.categorie && l.categorie!==COMPTA_FILTERS.categorie) return false;
+    if(COMPTA_FILTERS.moyen && l.moyen!==COMPTA_FILTERS.moyen) return false;
+    return true;
+  });
+}
+
+function buildComptabilite(){
+  if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){
+    var listElNo=document.getElementById("compta-list");
+    if(listElNo) listElNo.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Réservé au dirigeant</div></div>';
+    return;
+  }
+  var all=getComptabilite();
+  document.getElementById("compta-count").textContent=all.length+" ligne"+(all.length>1?"s":"");
+
+  // Filtres
+  var fEl=document.getElementById("compta-filters");
+  var cats=[].concat.apply([],[getComptabilite().map(function(l){return l.categorie;})]).filter(Boolean);
+  var uniqCats=cats.filter(function(c,i){return cats.indexOf(c)===i;});
+  fEl.innerHTML="";
+  var duInp=document.createElement("input");duInp.type="date";duInp.value=COMPTA_FILTERS.du;
+  duInp.style.cssText="flex:1;min-width:120px;padding:8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;background:var(--bg);color:var(--txt)";
+  duInp.addEventListener("change",function(){COMPTA_FILTERS.du=duInp.value;buildComptabilite();});
+  var auInp=document.createElement("input");auInp.type="date";auInp.value=COMPTA_FILTERS.au;
+  auInp.style.cssText=duInp.style.cssText;
+  auInp.addEventListener("change",function(){COMPTA_FILTERS.au=auInp.value;buildComptabilite();});
+  var catSel=document.createElement("select");
+  catSel.style.cssText="flex:1;min-width:120px;padding:8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;background:var(--bg);color:var(--txt)";
+  catSel.innerHTML='<option value="">Toutes catégories</option>'+uniqCats.map(function(c){return '<option value="'+c+'"'+(COMPTA_FILTERS.categorie===c?" selected":"")+'>'+c+'</option>';}).join("");
+  catSel.addEventListener("change",function(){COMPTA_FILTERS.categorie=catSel.value;buildComptabilite();});
+  var moyenSel=document.createElement("select");
+  moyenSel.style.cssText=catSel.style.cssText;
+  moyenSel.innerHTML='<option value="">Tout moyen</option>'+["Espèces","Chèque","Virement","CB","Autre"].map(function(m){return '<option value="'+m+'"'+(COMPTA_FILTERS.moyen===m?" selected":"")+'>'+m+'</option>';}).join("");
+  moyenSel.addEventListener("change",function(){COMPTA_FILTERS.moyen=moyenSel.value;buildComptabilite();});
+  fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);
+  if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen){
+    var clearBtn=document.createElement("button");
+    clearBtn.textContent="Réinitialiser";
+    clearBtn.style.cssText="padding:8px 12px;border-radius:8px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer";
+    clearBtn.addEventListener("click",function(){COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:""};buildComptabilite();});
+    fEl.appendChild(clearBtn);
+  }
+
+  // Datalists pour le formulaire (suggestions)
+  var motifs=all.map(function(l){return l.motif;}).filter(Boolean);
+  var tiers=all.map(function(l){return l.tiers;}).filter(Boolean);
+  var uniq=function(arr){return arr.filter(function(v,i){return arr.indexOf(v)===i;});};
+  var dlCat=document.getElementById("compta-cat-list");
+  if(dlCat) dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+c+'">';}).join("");
+  var dlMotif=document.getElementById("compta-motif-list");
+  if(dlMotif) dlMotif.innerHTML=uniq(motifs).map(function(m){return '<option value="'+m+'">';}).join("");
+  var dlTiers=document.getElementById("compta-tiers-list");
+  if(dlTiers) dlTiers.innerHTML=uniq(tiers).map(function(t){return '<option value="'+t+'">';}).join("");
+
+  // Liste + totaux
+  var filtered=comptaFilteredList();
+  var totalRecette=0,totalDepense=0;
+  filtered.forEach(function(l){
+    if(l.type==="depense") totalDepense+=(l.montant||0); else totalRecette+=(l.montant||0);
+  });
+  var totEl=document.getElementById("compta-totals");
+  totEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;display:flex;justify-content:space-between;font-size:12px">'+
+    '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Recettes</div><div style="color:var(--grn);font-weight:800;font-size:15px">'+totalRecette.toFixed(2)+' €</div></div>'+
+    '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Dépenses</div><div style="color:var(--red);font-weight:800;font-size:15px">'+totalDepense.toFixed(2)+' €</div></div>'+
+    '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Solde</div><div style="color:var(--dkg);font-weight:800;font-size:15px">'+(totalRecette-totalDepense).toFixed(2)+' €</div></div>'+
+  '</div>';
+
+  var listEl=document.getElementById("compta-list");
+  listEl.innerHTML="";
+  if(!filtered.length){listEl.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune ligne</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Ligne pour ajouter</div></div>';return;}
+  filtered.forEach(function(l){
+    var row=document.createElement("div");
+    row.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(l.type==="depense"?"var(--red)":"var(--grn)")+";border-radius:var(--rs);padding:12px;cursor:pointer";
+    row.addEventListener("click",function(){showAddComptaLine(l.id);});
+    var top=document.createElement("div");
+    top.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px";
+    var left=document.createElement("div");left.style.cssText="flex:1;min-width:0";
+    var dateSpan=document.createElement("div");dateSpan.style.cssText="font-size:11px;color:var(--mut)";
+    dateSpan.textContent=(l.date?new Date(l.date).toLocaleDateString("fr-FR"):"")+(l.categorie?" · "+l.categorie:"");
+    var motifDiv=document.createElement("div");motifDiv.style.cssText="font-size:13px;font-weight:700;color:var(--txt);margin-top:2px";
+    motifDiv.textContent=l.motif||"(sans motif)";
+    var tiersDiv=document.createElement("div");tiersDiv.style.cssText="font-size:11px;color:var(--txt2);margin-top:2px";
+    tiersDiv.textContent=[l.tiers,l.moyen].filter(Boolean).join(" · ");
+    left.appendChild(dateSpan);left.appendChild(motifDiv);left.appendChild(tiersDiv);
+    var montantDiv=document.createElement("div");
+    montantDiv.style.cssText="font-size:15px;font-weight:800;flex-shrink:0;color:"+(l.type==="depense"?"var(--red)":"var(--grn)");
+    montantDiv.textContent=(l.type==="depense"?"-":"+")+(l.montant||0).toFixed(2)+" €";
+    top.appendChild(left);top.appendChild(montantDiv);
+    row.appendChild(top);
+    listEl.appendChild(row);
+  });
+}
+
+var comptaCurrentType="recette";
+function setComptaType(type){
+  comptaCurrentType=type;
+  var rB=document.getElementById("compta-type-recette"), dB=document.getElementById("compta-type-depense");
+  rB.style.background=type==="recette"?"var(--grn)":"var(--card)";
+  rB.style.color=type==="recette"?"#fff":"var(--mut)";
+  rB.style.borderColor=type==="recette"?"var(--grn)":"var(--bdr)";
+  dB.style.background=type==="depense"?"var(--red)":"var(--card)";
+  dB.style.color=type==="depense"?"#fff":"var(--mut)";
+  dB.style.borderColor=type==="depense"?"var(--red)":"var(--bdr)";
+}
+function showAddComptaLine(editId){
+  comptaEditId=editId||null;
+  var lines=getComptabilite();
+  var existing=comptaEditId?lines.find(function(l){return l.id===comptaEditId;}):null;
+  document.getElementById("compta-modal-title").textContent=existing?"Modifier la ligne":"Nouvelle ligne";
+  document.getElementById("cl-date").value=existing?existing.date:new Date().toISOString().slice(0,10);
+  document.getElementById("cl-montant").value=existing?existing.montant:"";
+  document.getElementById("cl-categorie").value=existing?existing.categorie||"":"";
+  document.getElementById("cl-motif").value=existing?existing.motif||"":"";
+  document.getElementById("cl-tiers").value=existing?existing.tiers||"":"";
+  document.getElementById("cl-moyen").value=existing?existing.moyen||"Espèces":"Espèces";
+  document.getElementById("cl-reference").value=existing?existing.reference||"":"";
+  setComptaType(existing?existing.type:"recette");
+  var delBtn=document.getElementById("compta-delete-btn");
+  if(delBtn) delBtn.style.display=existing?"block":"none";
+  buildComptabilite(); // rafraichit les datalists de suggestion
+  document.getElementById("modal-compta-line").style.display="flex";
+}
+function saveComptaLine(){
+  var date=document.getElementById("cl-date").value;
+  var montant=parseFloat(document.getElementById("cl-montant").value);
+  if(!date){alert("Date obligatoire");return;}
+  if(!montant||montant<=0){alert("Montant invalide");return;}
+  var lines=getComptabilite();
+  var data={
+    date:date, montant:montant, type:comptaCurrentType,
+    categorie:document.getElementById("cl-categorie").value.trim(),
+    motif:document.getElementById("cl-motif").value.trim(),
+    tiers:document.getElementById("cl-tiers").value.trim(),
+    moyen:document.getElementById("cl-moyen").value,
+    reference:document.getElementById("cl-reference").value.trim()
+  };
+  if(comptaEditId){
+    var idx=lines.findIndex(function(l){return l.id===comptaEditId;});
+    if(idx>=0) lines[idx]=Object.assign({id:comptaEditId},data);
+  } else {
+    data.id=Date.now().toString();
+    lines.push(data);
+  }
+  saveComptabilite(lines);
+  closeModal("modal-compta-line");
+  buildComptabilite();
+}
+async function deleteComptaLine(){
+  if(!comptaEditId)return;
+  var ok=await askConfirm("Supprimer cette ligne comptable ?", {danger:true, confirmText:"Supprimer"});
+  if(!ok)return;
+  var lines=getComptabilite().filter(function(l){return l.id!==comptaEditId;});
+  saveComptabilite(lines);
+  closeModal("modal-compta-line");
+  buildComptabilite();
+}
+function exportComptaCsv(){
+  var lines=comptaFilteredList();
+  if(!lines.length){alert("Aucune ligne à exporter.");return;}
+  var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Référence"];
+  var rows=lines.map(function(l){
+    return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",l.reference||""]
+      .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(";");
+  });
+  var csv=header.join(";")+"\n"+rows.join("\n");
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="comptabilite-asmb-"+taTodayStr().replace(/\//g,"-")+".csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
 var currentDocCatFilter="all";
 var pendingDocCategory="autre";
 var DOC_CAT_LABELS={"reglement":"Règlement","autorisation":"Autorisation","formulaire":"Formulaire","autre":"Autre"};
@@ -10723,7 +10954,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785303939";
+var APP_VERSION="1785304309";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
