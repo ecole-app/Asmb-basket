@@ -5607,16 +5607,38 @@ function openAccesCoach(){
   var note=document.createElement("div");
   note.style.cssText="font-size:11px;color:var(--mut);background:#e6f0e9;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4";
   note.textContent="La personne concernée doit se déconnecter puis se reconnecter pour que le changement de rôle prenne effet.";
+  var searchWrap=document.createElement("div");
+  searchWrap.style.cssText="margin-bottom:12px";
+  var searchInp=document.createElement("input");
+  searchInp.type="text";
+  searchInp.placeholder="Rechercher par e-mail ou numéro...";
+  searchInp.style.cssText="width:100%;padding:11px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;background:var(--bg);color:var(--txt)";
+  searchWrap.appendChild(searchInp);
   var list=document.createElement("div");
   list.style.cssText="overflow-y:auto;flex:1";
-  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px">Chargement des comptes…</div>';
-  inner.appendChild(hdr);inner.appendChild(note);inner.appendChild(list);
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tapez un nom, un e-mail ou un numéro pour rechercher un compte.</div>';
+  inner.appendChild(hdr);inner.appendChild(note);inner.appendChild(searchWrap);inner.appendChild(list);
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
   document.body.appendChild(modal);
+  var allUsers=[];
+  searchInp.addEventListener("input",function(){
+    var q=searchInp.value.trim().toLowerCase();
+    if(q.length<2){
+      list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tapez un nom, un e-mail ou un numéro pour rechercher un compte.</div>';
+      return;
+    }
+    var matches=allUsers.filter(function(u){
+      return (u.email||"").toLowerCase().indexOf(q)>=0 || (u.phone||"").indexOf(q)>=0;
+    });
+    if(!matches.length){
+      list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucun compte trouvé.</div>';
+      return;
+    }
+    renderAccesList(list,matches);
+  });
   window.fbGetDocs(window.fbCollection(window.fbDb,"users")).then(function(snap){
-    var users=[];snap.forEach(function(d){var v=d.data();v._uid=d.id;users.push(v);});
-    renderAccesList(list,users);
+    snap.forEach(function(d){var v=d.data();v._uid=d.id;allUsers.push(v);});
   }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
 }
 // Ajoute/retire le coach des canaux liés à ses équipes selon son affectation actuelle
@@ -10993,7 +11015,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785304776";
+var APP_VERSION="1785305059";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
