@@ -190,6 +190,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 @keyframes ta-moonglow{0%,100%{opacity:.92}50%{opacity:1}}
 .ta-star{position:absolute;background:#fff;border-radius:50%;animation:ta-twinkle ease-in-out infinite;z-index:1;pointer-events:none}
 @keyframes ta-twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+/* ── MODE ORGANISATION (cartes qui gigotent) ── */
+@keyframes card-wiggle{0%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}100%{transform:rotate(-.6deg)}}
+.admin-card.wiggle,.param-block.wiggle{animation:card-wiggle .25s ease-in-out infinite}
 </style>
 
 <script>
@@ -480,10 +483,11 @@ initChannels();
   <div class="scr" id="scr-admin">
     <div class="hero" style="padding:16px 16px 14px;display:flex;align-items:center;gap:12px;text-align:left">
       <div style="font-size:28px"></div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div style="font-size:18px;font-weight:900;color:#fff">Espace Admin</div>
         <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Responsables</div>
       </div>
+      <button id="admin-edit-toggle" onclick="toggleAdminEditMode()" style="flex-shrink:0;padding:8px 12px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Organiser</button>
     </div>
     <div class="sec">Gestion</div>
     <div id="season-banner"></div>
@@ -1251,13 +1255,6 @@ initChannels();
  <div style="font-size:12px;font-weight:600;color:var(--txt)"> Rappel événements</div>
  <input type="checkbox" id="notif-evenement-toggle" onchange="toggleNotifType('evenement',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
  </label>
- </div>
- <div class="sec">Apparence</div>
- <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
- <div style="display:flex;align-items:center;justify-content:space-between">
- <div style="font-size:13px;font-weight:700;color:var(--txt)">Theme sombre</div>
- <button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer">Basculer</button>
- </div>
  </div>
  <div class="sec">Communication</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="showBroadcast()">
@@ -3576,11 +3573,12 @@ function lookupInscriptionCode(code, attempt){
 function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);}
 
 // ── GESTION DE SAISON (archivage annuel des licences) ──────────────
-// Saison "naturelle" deduite de la date du jour (rentree = debut septembre)
+// Saison "naturelle" deduite de la date du jour (nouvelle saison des debut juillet,
+// pour que les licences entrees en ete comptent deja pour l'annee suivante)
 function computeNaturalSeason(d){
   d=d||new Date();
   var y=d.getFullYear();
-  return (d.getMonth()>=7) ? (y+"-"+(y+1)) : ((y-1)+"-"+y);
+  return (d.getMonth()>=6) ? (y+"-"+(y+1)) : ((y-1)+"-"+y);
 }
 function getCurrentSeason(){
   return localStorage.getItem("asmb_current_season") || computeNaturalSeason();
@@ -3834,6 +3832,11 @@ function renderLicenceDetail(lic){
 
   // Actions
   var actions="";
+  var curSeason=getCurrentSeason();
+  if(lic.saison && lic.saison!==curSeason){
+    actions+='<button onclick="renewLicence(\''+lic.code+'\')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Renouveler pour la saison '+curSeason+'</button>';
+    actions+='<div style="font-size:11px;color:var(--mut);text-align:center;margin-top:4px">Recopie la fiche existante (identité, contacts...) sans tout ressaisir.</div>';
+  }
   if(lic.statut==="recue"){
     actions='<button onclick="validerLicence()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Valider la licence</button>';
   }
@@ -3869,6 +3872,36 @@ function setLicCat(cat){
   saveLicences(lics);
   renderLicenceDetail(lics[idx]);
   buildLicences();
+}
+
+async function renewLicence(oldCode){
+  var lics=getLicences();
+  var old=lics.find(function(l){return l.code===oldCode;});
+  if(!old){alert("Fiche introuvable.");return;}
+  var season=getCurrentSeason();
+  var ok=await askConfirm("Une nouvelle fiche va être créée pour "+((old.fiche&&old.fiche.prenom)||"")+" "+((old.fiche&&old.fiche.nom)||"")+", saison "+season+", en recopiant les informations existantes (identité, contacts, adresse...). La catégorie sera recalculée selon son âge actuel.", {title:"Renouveler la licence", confirmText:"Renouveler"});
+  if(!ok)return;
+  var newFiche=old.fiche?Object.assign({},old.fiche):null;
+  var newCat=newFiche&&newFiche.naissance?categorieFromNaissance(newFiche.naissance,newFiche.genre):null;
+  var neu={
+    id:Date.now().toString(),
+    code:genCode(),
+    email:old.email,
+    nomDest:old.nomDest,
+    statut:newFiche?"recue":"envoyee",
+    createdAt:Date.now(),
+    ouvertLe:null,
+    fiche:newFiche,
+    categorie:(newCat&&CATS_LIC.indexOf(newCat)>=0)?newCat:null,
+    typeLicence:old.typeLicence||null,
+    saison:season,
+    renouveleeDeCode:oldCode
+  };
+  lics.push(neu);
+  saveLicences(lics);
+  buildLicences();
+  await askAlert("Fiche renouvelée pour la saison "+season+". Vérifiez les informations puis validez.");
+  openLicenceDetail(neu.code);
 }
 
 function validerLicence(){
@@ -5619,6 +5652,48 @@ function enterAdmin(){
  stack.push("admin");
  showScr("admin");
 }
+// ── MODE ORGANISATION DES MODULES ADMIN (ordre + masquage) ─────────
+var ADMIN_EDIT_MODE=false;
+function getAdminModuleOrder(){try{return JSON.parse(localStorage.getItem("asmb_admin_module_order")||"[]");}catch(e){return [];}}
+function saveAdminModuleOrder(o){localStorage.setItem("asmb_admin_module_order",JSON.stringify(o));}
+function getHiddenAdminModules(){try{return JSON.parse(localStorage.getItem("asmb_admin_module_hidden")||"[]");}catch(e){return [];}}
+function saveHiddenAdminModules(h){localStorage.setItem("asmb_admin_module_hidden",JSON.stringify(h));}
+function getOrderedAdminModules(){
+  var order=getAdminModuleOrder();
+  var byId={};ADMIN_MODULES.forEach(function(m){byId[m.id]=m;});
+  var ordered=order.map(function(id){return byId[id];}).filter(Boolean);
+  ADMIN_MODULES.forEach(function(m){ if(ordered.indexOf(m)<0) ordered.push(m); });
+  return ordered;
+}
+function moveAdminModule(id,delta){
+  var ids=getOrderedAdminModules().map(function(m){return m.id;});
+  var from=ids.indexOf(id);
+  if(from<0) return;
+  var to=from+delta;
+  if(to<0||to>=ids.length) return;
+  ids.splice(from,1);
+  ids.splice(to,0,id);
+  saveAdminModuleOrder(ids);
+  buildAdminHome();
+}
+function toggleHiddenAdminModule(id){
+  var h=getHiddenAdminModules();
+  var i=h.indexOf(id);
+  if(i>=0) h.splice(i,1); else h.push(id);
+  saveHiddenAdminModules(h);
+  buildAdminHome();
+}
+function toggleAdminEditMode(){
+  ADMIN_EDIT_MODE=!ADMIN_EDIT_MODE;
+  var btn=document.getElementById("admin-edit-toggle");
+  if(btn){
+    btn.textContent=ADMIN_EDIT_MODE?"Terminé":"Organiser";
+    btn.style.background=ADMIN_EDIT_MODE?"#fff":"rgba(255,255,255,.15)";
+    btn.style.color=ADMIN_EDIT_MODE?"var(--dkg)":"#fff";
+  }
+  buildAdminHome();
+}
+
 function buildAdminHome(){
  var el=document.getElementById("adminCards");if(!el)return;el.innerHTML="";
  var banner=document.getElementById("season-banner");
@@ -5630,12 +5705,43 @@ function buildAdminHome(){
        '<div style="font-size:11px;color:var(--mut);margin-top:2px">Vous affichez encore la saison '+cur+'. Archivez les licences et passez à la nouvelle saison depuis Paramètres → Données.</div>'+
        '</div>';
    } else { banner.innerHTML=""; }
+   var mismatched=findMiscategorizedPlayers();
+   if(mismatched.length){
+     banner.innerHTML+='<div onclick="openReclassementModal()" style="margin:0 12px 14px;background:rgba(11,114,133,.1);border:1px solid rgba(11,114,133,.3);border-radius:var(--rs);padding:12px 14px;cursor:pointer">'+
+       '<div style="font-size:13px;font-weight:700;color:#0B7285">'+mismatched.length+' joueur'+(mismatched.length>1?"s":"")+' à reclasser</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">Leur âge ne correspond plus à leur catégorie actuelle. Appuyez pour vérifier.</div>'+
+       '</div>';
+   }
  }
- ADMIN_MODULES.forEach(function(m){
- var d=document.createElement("div");d.className="admin-card";
- d.onclick=function(){openAdminModule(m.id);};
+ getOrderedAdminModules().forEach(function(m,i,arr){
+ var hidden=getHiddenAdminModules();
+ var isHidden=hidden.indexOf(m.id)>=0;
+ if(isHidden && !ADMIN_EDIT_MODE) return;
+ var d=document.createElement("div");d.className="admin-card"+(ADMIN_EDIT_MODE?" wiggle":"");
+ d.style.cssText="position:relative"+(isHidden?";opacity:.45":"");
+ if(!ADMIN_EDIT_MODE) d.onclick=function(){openAdminModule(m.id);};
  var count=getAdminCount(m.id);
- d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div><div style="color:var(--mut);font-size:18px">›</div></div>';
+ d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
+ if(ADMIN_EDIT_MODE){
+   var ctrl=document.createElement("div");
+   ctrl.style.cssText="display:flex;gap:6px;justify-content:flex-end;padding:0 12px 10px";
+   var upBtn=document.createElement("button");
+   upBtn.textContent="\u2191";
+   upBtn.disabled=(i===0);
+   upBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===0?";opacity:.3":"");
+   upBtn.addEventListener("click",function(e){e.stopPropagation();moveAdminModule(m.id,-1);});
+   var downBtn=document.createElement("button");
+   downBtn.textContent="\u2193";
+   downBtn.disabled=(i===arr.length-1);
+   downBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===arr.length-1?";opacity:.3":"");
+   downBtn.addEventListener("click",function(e){e.stopPropagation();moveAdminModule(m.id,1);});
+   var hideBtn=document.createElement("button");
+   hideBtn.textContent=isHidden?"Afficher":"Masquer";
+   hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(39,174,96,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
+   hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleHiddenAdminModule(m.id);});
+   ctrl.appendChild(upBtn);ctrl.appendChild(downBtn);ctrl.appendChild(hideBtn);
+   d.appendChild(ctrl);
+ }
     el.appendChild(d);
   });
 }
@@ -6126,6 +6232,80 @@ function deletePlayer(id){
     if(!ok)return;
     var players=getPlayers().filter(function(p){return p.id!==id;});
     savePlayers(players);renderPlayers();buildAdminHome();
+  });
+}
+
+// ── RECLASSEMENT DE CATEGORIE (age qui a change de tranche) ────────
+function findMiscategorizedPlayers(){
+  return getPlayers().filter(function(p){
+    if(!p.naissance) return false;
+    var suggested=categorieFromNaissance(p.naissance,p.genre);
+    return suggested && p.cat && suggested!==p.cat;
+  });
+}
+function openReclassementModal(){
+  var mismatched=findMiscategorizedPlayers();
+  var modal=document.createElement("div");
+  modal.className="reclass-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Joueurs à reclasser";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  renderReclassementList(list);
+}
+function renderReclassementList(list){
+  var mismatched=findMiscategorizedPlayers();
+  list.innerHTML="";
+  if(!mismatched.length){
+    list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tous les joueurs sont dans la bonne catégorie.</div>';
+    return;
+  }
+  mismatched.forEach(function(p){
+    var suggested=categorieFromNaissance(p.naissance,p.genre);
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px";
+    var name=document.createElement("div");
+    name.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    name.textContent=p.prenom+" "+p.nom;
+    var meta=document.createElement("div");
+    meta.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
+    meta.innerHTML="Actuellement <b>"+p.cat+"</b> → devrait être <b style=\"color:var(--dkg)\">"+suggested+"</b>";
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px";
+    var applyBtn=document.createElement("button");
+    applyBtn.textContent="Appliquer "+suggested;
+    applyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
+    applyBtn.addEventListener("click",function(){
+      var players=getPlayers();
+      var idx=players.findIndex(function(x){return x.id===p.id;});
+      if(idx>=0){ players[idx].cat=suggested; savePlayers(players); }
+      card.remove();
+      buildAdminHome();
+      if(!findMiscategorizedPlayers().length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tous les joueurs sont dans la bonne catégorie.</div>'; }
+    });
+    var ignoreBtn=document.createElement("button");
+    ignoreBtn.textContent="Ignorer";
+    ignoreBtn.style.cssText="padding:7px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer";
+    ignoreBtn.addEventListener("click",function(){card.remove();});
+    btnRow.appendChild(applyBtn);btnRow.appendChild(ignoreBtn);
+    card.appendChild(name);card.appendChild(meta);card.appendChild(btnRow);
+    list.appendChild(card);
   });
 }
 
@@ -11139,7 +11319,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785340722";
+var APP_VERSION="1785359311";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
