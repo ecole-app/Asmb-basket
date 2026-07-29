@@ -3543,8 +3543,8 @@ var STATUTS=[
  {id:"recue",label:"Reçue",icon:"",color:"#8E44AD"},
  {id:"validee",label:"Validée",icon:"",color:"#27AE60"},
 ];
-var CATS_LIC=["U7","U9","U11","U13","U15","U17","Senior"];
-var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","Senior":"#E8670A"};
+var CATS_LIC=["U7","U9","U11","U13","U15","U18","U21","Senior"];
+var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 function buildLicences(){
@@ -3667,6 +3667,18 @@ function renderLicenceDetail(lic){
  var el=document.getElementById("lic-detail-content");if(!el)return;
  var st=STATUTS.find(function(s){return s.id===lic.statut;})||STATUTS[0];
  var fiche=lic.fiche||{};
+
+ // Auto-suggestion de la catégorie FFBB depuis la date de naissance + genre,
+ // si aucune catégorie n'a encore été choisie manuellement.
+ if(!lic.categorie && fiche.naissance){
+   var suggested=categorieFromNaissance(fiche.naissance, fiche.genre);
+   if(suggested && CATS_LIC.indexOf(suggested)>=0){
+     lic.categorie=suggested;
+     var lics=getLicences();
+     var idx=lics.findIndex(function(l){return l.code===lic.code;});
+     if(idx>=0 && !lics[idx].categorie){ lics[idx].categorie=suggested; saveLicences(lics); }
+   }
+ }
 
  // Statut steps
  var steps=STATUTS.map(function(s,i){
@@ -10711,7 +10723,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785260783";
+var APP_VERSION="1785303877";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
