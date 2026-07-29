@@ -1180,16 +1180,19 @@ initChannels();
 
  <!-- ═══ PARAMETRES ═══ -->
  <div class="scr" id="scr-parametres">
- <div style="padding:14px 16px;border-bottom:1px solid var(--bdr)">
+ <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:10px">
+ <div style="flex:1;min-width:0">
  <div style="font-size:16px;font-weight:800;color:var(--txt)">Paramètres</div>
  <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Données</div>
+ </div>
+ <button id="params-edit-toggle" onclick="toggleParamsEditMode()" style="flex-shrink:0;padding:8px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Organiser</button>
  </div>
  <div class="sec">Compte</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div id="account-info-box" style="font-size:12px;color:var(--mut);margin-bottom:12px"></div>
  <button onclick="authConfirmLogout()" style="width:100%;padding:12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:13px;font-weight:700;border:none;cursor:pointer">Se déconnecter</button>
  </div>
- <div class="sec">Thèmes animés</div>
+ <div class="param-block" data-sec="themes"><div class="sec">Thèmes animés</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <label style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">
  <span style="font-size:13px;font-weight:700;color:var(--txt)">Activer les thèmes animés</span>
@@ -1208,24 +1211,24 @@ initChannels();
  <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="15" id="ta-dur-15"> 15 secondes</label>
  <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="ta-dur" value="continu" id="ta-dur-continu"> Continu en fond (écran d'accueil)</label>
  </div>
- <div class="sec">Avis et suggestions</div>
+ </div><div class="param-block" data-sec="avis"><div class="sec">Avis et suggestions</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
  <textarea id="feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
  <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
  <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
  </div>
- <div class="sec">Statistiques du club</div>
+ </div><div class="param-block" data-sec="stats"><div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
- <div class="sec">Apparence</div>
+ </div><div class="param-block" data-sec="apparence"><div class="sec">Apparence</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
  <div><div style="font-size:13px;font-weight:700;color:var(--txt)"> Mode sombre</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Theme fonce pour les salles peu eclairees</div></div>
  <input type="checkbox" id="gp-dark" onchange="toggleTheme()" style="width:44px;height:24px;accent-color:var(--dkg)">
  </label>
  </div>
- <div id="params-dirigeant-only">
- <div class="sec">Partage & QR codes</div>
+ </div><div id="params-dirigeant-only">
+ <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>
  <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1233,7 +1236,7 @@ initChannels();
  <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
  </div>
  </div>
- <div class="sec">Notifications</div>
+ </div><div class="param-block" data-sec="notifications"><div class="sec">Notifications</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-bottom:12px;border-bottom:1px solid var(--bdr);margin-bottom:12px">
  <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Autoriser les notifications</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Requis pour toutes les alertes ci-dessous</div></div>
@@ -1256,12 +1259,12 @@ initChannels();
  <input type="checkbox" id="notif-evenement-toggle" onchange="toggleNotifType('evenement',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
  </label>
  </div>
- <div class="sec">Communication</div>
+ </div><div class="param-block" data-sec="communication"><div class="sec">Communication</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="showBroadcast()">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Envoyer une info aux familles</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px">Email groupe a tous les contacts valides</div>
  </div>
- <div class="sec">Données</div>
+ </div><div class="param-block" data-sec="donnees"><div class="sec">Données</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="exportData()">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Exporter les données</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px">Telecharger un fichier de sauvegarde</div>
@@ -1283,7 +1286,7 @@ initChannels();
  <button onclick="migrateToFirestore()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Lancer la migration</button>
  <div id="migration-status" style="font-size:11px;color:var(--mut);margin-top:10px;line-height:1.5"></div>
  </div>
- <div class="sec">Demonstration</div>
+ </div><div class="param-block" data-sec="demo"><div class="sec">Demonstration</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Charger des données de demo</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px">4 équipes + 40 joueurs fictifs pour tester l'app</div>
@@ -1296,7 +1299,7 @@ initChannels();
       <div style="font-size:13px;font-weight:700;color:var(--txt)">Vider les données de demo</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé équipes/joueurs/événements de test</div>
     </div>
-    <div class="sec">Zone dangereuse</div>
+    </div><div id="params-custom-list"></div><div class="sec">Zone dangereuse</div>
     <div style="margin:0 12px 12px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
       <div style="font-size:13px;font-weight:700;color:var(--red)">Réinitialiser les données du club</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Joueurs, équipes, événements, licences, évaluations, canaux de discussion (irréversible). Ne touche pas à la comptabilité.</div>
@@ -4514,6 +4517,219 @@ function buildParametres(){
     fbBtn.addEventListener("click", function(){ sendFeedback(""); });
   }
   wireThemeAnimSettings("");
+  buildParametresLayout();
+}
+
+// ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
+var PARAMS_EDIT_MODE=false;
+var PARAMS_SECTION_NAMES={
+  themes:"Thèmes animés",avis:"Avis et suggestions",stats:"Statistiques du club",
+  apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
+  communication:"Communication",donnees:"Données",demo:"Demonstration"
+};
+function getParamsOrder(){try{return JSON.parse(localStorage.getItem("asmb_params_order")||"[]");}catch(e){return [];}}
+function saveParamsOrder(o){localStorage.setItem("asmb_params_order",JSON.stringify(o));}
+function getParamsHidden(){try{return JSON.parse(localStorage.getItem("asmb_params_hidden")||"[]");}catch(e){return [];}}
+function saveParamsHidden(h){localStorage.setItem("asmb_params_hidden",JSON.stringify(h));}
+function getCustomShortcuts(){try{return JSON.parse(localStorage.getItem("asmb_params_shortcuts")||"[]");}catch(e){return [];}}
+function saveCustomShortcuts(s){localStorage.setItem("asmb_params_shortcuts",JSON.stringify(s));}
+
+function toggleParamsEditMode(){
+  PARAMS_EDIT_MODE=!PARAMS_EDIT_MODE;
+  var btn=document.getElementById("params-edit-toggle");
+  if(btn){
+    btn.textContent=PARAMS_EDIT_MODE?"Terminé":"Organiser";
+    btn.style.background=PARAMS_EDIT_MODE?"var(--dkg)":"var(--bdr)";
+    btn.style.color=PARAMS_EDIT_MODE?"#fff":"var(--mut)";
+  }
+  buildParametresLayout();
+}
+
+function moveParamBlock(secId,delta){
+  // On ne reordonne qu'a l'interieur du meme groupe (sections partagees vs reservees dirigeant),
+  // pour ne jamais faire sortir une section admin de son conteneur protege.
+  var block=document.querySelector('#scr-parametres .param-block[data-sec="'+secId+'"]');
+  if(!block) return;
+  var siblings=Array.prototype.slice.call(block.parentNode.children).filter(function(c){return c.classList&&c.classList.contains("param-block");});
+  var ids=siblings.map(function(b){return b.dataset.sec;});
+  var from=ids.indexOf(secId);
+  var to=from+delta;
+  if(from<0||to<0||to>=ids.length) return;
+  ids.splice(from,1);
+  ids.splice(to,0,secId);
+  // Fusionne dans l'ordre global enregistre
+  var globalOrder=getParamsOrder().filter(function(id){return ids.indexOf(id)<0;});
+  saveParamsOrder(globalOrder.concat(ids));
+  buildParametresLayout();
+}
+function toggleParamHidden(secId){
+  var h=getParamsHidden();
+  var i=h.indexOf(secId);
+  if(i>=0) h.splice(i,1); else h.push(secId);
+  saveParamsHidden(h);
+  buildParametresLayout();
+}
+
+function buildParametresLayout(){
+  renderCustomShortcuts();
+  var order=getParamsOrder();
+  var hidden=getParamsHidden();
+  var allBlocks=Array.prototype.slice.call(document.querySelectorAll("#scr-parametres .param-block"));
+
+  // Reordonne les vrais noeuds du DOM, groupe par parent reel
+  var groups=new Map();
+  allBlocks.forEach(function(b){
+    if(!groups.has(b.parentNode)) groups.set(b.parentNode,[]);
+    groups.get(b.parentNode).push(b);
+  });
+  groups.forEach(function(group,parent){
+    var sorted=group.slice().sort(function(a,b){
+      var ia=order.indexOf(a.dataset.sec), ib=order.indexOf(b.dataset.sec);
+      if(ia<0) ia=999+group.indexOf(a);
+      if(ib<0) ib=999+group.indexOf(b);
+      return ia-ib;
+    });
+    sorted.forEach(function(b){ parent.appendChild(b); });
+  });
+
+  // Etat visuel + controles
+  groups.forEach(function(group,parent){
+    var visible=Array.prototype.slice.call(parent.children).filter(function(c){return c.classList&&c.classList.contains("param-block");});
+    visible.forEach(function(block,i){
+      var secId=block.dataset.sec;
+      var isCustom=secId.indexOf("custom-")===0;
+      var isHidden=hidden.indexOf(secId)>=0;
+      block.style.display=(isHidden && !PARAMS_EDIT_MODE)?"none":"";
+      block.style.opacity=(isHidden && PARAMS_EDIT_MODE)?".45":"1";
+      block.classList.toggle("wiggle", PARAMS_EDIT_MODE);
+      var oldCtrl=block.querySelector(".param-ctrl");
+      if(oldCtrl) oldCtrl.remove();
+      if(!PARAMS_EDIT_MODE) return;
+      var ctrl=document.createElement("div");
+      ctrl.className="param-ctrl";
+      ctrl.style.cssText="display:flex;gap:6px;justify-content:flex-end;padding:0 12px 12px;flex-wrap:wrap";
+      var upBtn=document.createElement("button");
+      upBtn.textContent="\u2191";
+      upBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===0?";opacity:.3":"");
+      upBtn.addEventListener("click",function(e){e.stopPropagation();moveParamBlock(secId,-1);});
+      var downBtn=document.createElement("button");
+      downBtn.textContent="\u2193";
+      downBtn.style.cssText="width:34px;height:34px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:16px;font-weight:800;cursor:pointer"+(i===visible.length-1?";opacity:.3":"");
+      downBtn.addEventListener("click",function(e){e.stopPropagation();moveParamBlock(secId,1);});
+      ctrl.appendChild(upBtn);ctrl.appendChild(downBtn);
+      if(isCustom){
+        var delBtn=document.createElement("button");
+        delBtn.textContent="Supprimer";
+        delBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;cursor:pointer";
+        delBtn.addEventListener("click",function(e){
+          e.stopPropagation();
+          askConfirm("Supprimer ce raccourci ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+            if(!ok)return;
+            var scId=secId.replace("custom-","");
+            saveCustomShortcuts(getCustomShortcuts().filter(function(s){return s.id!==scId;}));
+            buildParametresLayout();
+          });
+        });
+        ctrl.appendChild(delBtn);
+      } else {
+        var hideBtn=document.createElement("button");
+        hideBtn.textContent=isHidden?"Afficher":"Masquer";
+        hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(39,174,96,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
+        hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleParamHidden(secId);});
+        ctrl.appendChild(hideBtn);
+      }
+      block.appendChild(ctrl);
+    });
+  });
+
+  renderParamsAddTile();
+}
+
+function renderParamsAddTile(){
+  var old=document.getElementById("params-add-tile");
+  if(old) old.remove();
+  if(!PARAMS_EDIT_MODE) return;
+  var tile=document.createElement("div");
+  tile.id="params-add-tile";
+  tile.style.cssText="margin:4px 12px 20px";
+  tile.innerHTML='<button onclick="openAddShortcutModal()" style="width:100%;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer">+ Ajouter un raccourci</button>';
+  var container=document.getElementById("params-custom-list");
+  if(container && container.parentNode) container.parentNode.insertBefore(tile, container.nextSibling);
+}
+
+// ── Raccourcis personnalises : vers une destination existante de l'app ──
+var SHORTCUT_TARGETS=[
+  {id:"comptabilite",label:"Comptabilité",icon:"💶"},
+  {id:"fiches",label:"Fiches reçues",icon:"📥"},
+  {id:"acces",label:"Accès coach",icon:"🔑"},
+  {id:"avis",label:"Avis & suggestions",icon:"💡"},
+  {id:"licences",label:"Licences",icon:"📋"},
+  {id:"inscriptions",label:"Inscriptions",icon:"📝"},
+  {id:"equipes",label:"Équipes",icon:"👥"},
+  {id:"planning",label:"Planning",icon:"📅"},
+  {id:"documents",label:"Documents",icon:"📁"}
+];
+function renderCustomShortcuts(){
+  var container=document.getElementById("params-custom-list");
+  if(!container) return;
+  container.innerHTML="";
+  getCustomShortcuts().forEach(function(sc){
+    var target=SHORTCUT_TARGETS.find(function(t){return t.id===sc.target;});
+    var block=document.createElement("div");
+    block.className="param-block";
+    block.dataset.sec="custom-"+sc.id;
+    block.innerHTML='<div class="sec">'+authEsc(sc.label)+'</div>';
+    var card=document.createElement("div");
+    card.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer;display:flex;align-items:center;gap:12px";
+    card.innerHTML='<span style="font-size:22px;flex-shrink:0">'+(target?target.icon:"⭐")+'</span>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(sc.label)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Ouvre : '+(target?authEsc(target.label):"destination inconnue")+'</div></div>'+
+      '<div style="color:var(--mut);font-size:18px">\u203a</div>';
+    card.addEventListener("click",function(){
+      if(PARAMS_EDIT_MODE) return;
+      if(target) openAdminModule(target.id);
+    });
+    block.appendChild(card);
+    container.appendChild(block);
+  });
+}
+function openAddShortcutModal(){
+  var modal=document.createElement("div");
+  modal.className="shortcut-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px";
+  hdr.innerHTML='<div style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau raccourci</div>';
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(){modal.remove();});
+  hdr.appendChild(closeBtn);
+  var hint=document.createElement("div");
+  hint.style.cssText="font-size:11px;color:var(--mut);margin-bottom:14px;line-height:1.4";
+  hint.textContent="Choisir la page que ce raccourci doit ouvrir.";
+  inner.appendChild(hdr);inner.appendChild(hint);
+  SHORTCUT_TARGETS.forEach(function(t){
+    var row=document.createElement("button");
+    row.style.cssText="width:100%;display:flex;align-items:center;gap:12px;padding:13px;margin-bottom:8px;border-radius:var(--rs);border:1.5px solid var(--bdr);background:var(--card);cursor:pointer;text-align:left";
+    row.innerHTML='<span style="font-size:20px">'+t.icon+'</span><span style="font-size:13px;font-weight:700;color:var(--txt)">'+t.label+'</span>';
+    row.addEventListener("click",function(){ modal.remove(); finishAddShortcut(t); });
+    inner.appendChild(row);
+  });
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+}
+async function finishAddShortcut(target){
+  var label=await askPrompt("Nom du raccourci",{defaultValue:target.label,confirmText:"Ajouter"});
+  if(label===null) return;
+  var list=getCustomShortcuts();
+  list.push({id:Date.now().toString(),label:(label.trim()||target.label),target:target.id});
+  saveCustomShortcuts(list);
+  buildParametresLayout();
 }
 
 function wireThemeAnimSettings(prefix){
@@ -11319,7 +11535,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785359311";
+var APP_VERSION="1785359467";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
