@@ -1292,9 +1292,13 @@ initChannels();
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé équipes/joueurs/événements de test</div>
     </div>
     <div class="sec">Zone dangereuse</div>
-    <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
-      <div style="font-size:13px;font-weight:700;color:var(--red)">Reinitialiser l'application</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé toutes les données locales (irreversible)</div>
+    <div style="margin:0 12px 12px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
+      <div style="font-size:13px;font-weight:700;color:var(--red)">Réinitialiser les données du club</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Joueurs, équipes, événements, licences, évaluations, canaux de discussion (irréversible). Ne touche pas à la comptabilité.</div>
+    </div>
+    <div style="margin:0 12px 20px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetComptabilite()">
+      <div style="font-size:13px;font-weight:700;color:var(--red)">Réinitialiser la comptabilité</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime uniquement les lignes de recettes/dépenses (irréversible)</div>
     </div>
     </div>
   </div>
@@ -5320,7 +5324,7 @@ async function resetAllData(){
       }
     }catch(e){ console.log("reset channels:", e); }
 
-    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes","inscription_submissions","comptabilite"];
+    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes","inscription_submissions"];
     for(var i=0;i<collections.length;i++){
       try{
         var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,collections[i]));
@@ -5333,6 +5337,28 @@ async function resetAllData(){
 
   await askAlert("Données du club supprimées (localement et dans le cloud). L'application va se recharger.");
   location.reload();
+}
+
+async function resetComptabilite(){
+  if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  var count=getComptabilite().length;
+  var ok=await askConfirm("Ceci va supprimer les "+count+" ligne(s) de comptabilité (recettes et dépenses), dans le cloud partagé. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
+  if(!ok)return;
+  var typed=await askPrompt("Pour confirmer, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
+  if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
+
+  localStorage.removeItem("asmb_comptabilite");
+  if(window.fbDb && window.fbGetDocs && window.fbDeleteDoc){
+    try{
+      var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,"comptabilite"));
+      var dels=[];
+      snap.forEach(function(d){ dels.push(window.fbDeleteDoc(window.fbDoc(window.fbDb,"comptabilite",d.id))); });
+      await Promise.all(dels);
+    }catch(e){ console.log("reset comptabilite:", e); }
+  }
+  await askAlert("Comptabilité réinitialisée.");
+  buildParametres();
+  if(document.getElementById("compta-list")) buildComptabilite();
 }
 
 // ── DONNEES DE DEMO ───────────────────────────────────────────────
@@ -10967,7 +10993,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785304645";
+var APP_VERSION="1785304776";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
