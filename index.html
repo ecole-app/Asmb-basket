@@ -5611,34 +5611,54 @@ function openAccesCoach(){
   searchWrap.style.cssText="margin-bottom:12px";
   var searchInp=document.createElement("input");
   searchInp.type="text";
-  searchInp.placeholder="Rechercher par e-mail ou numéro...";
+  searchInp.placeholder="Rechercher : prénom, nom, e-mail ou numéro...";
   searchInp.style.cssText="width:100%;padding:11px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:13px;background:var(--bg);color:var(--txt)";
   searchWrap.appendChild(searchInp);
   var list=document.createElement("div");
   list.style.cssText="overflow-y:auto;flex:1";
-  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tapez un nom, un e-mail ou un numéro pour rechercher un compte.</div>';
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Chargement…</div>';
   inner.appendChild(hdr);inner.appendChild(note);inner.appendChild(searchWrap);inner.appendChild(list);
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
   document.body.appendChild(modal);
+
+  // Croise les numéros de téléphone des comptes avec les fiches de licence,
+  // pour pouvoir chercher/afficher les comptes par prénom/nom du licencié.
+  var phoneToName={};
+  getLicences().forEach(function(l){
+    if(!l||!l.fiche) return;
+    var name=((l.fiche.prenom||"")+" "+(l.fiche.nom||"")).trim();
+    if(!name) return;
+    [l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).forEach(function(p){
+      phoneToName[p.replace(/\s+/g,"")]=name;
+    });
+  });
+
   var allUsers=[];
-  searchInp.addEventListener("input",function(){
-    var q=searchInp.value.trim().toLowerCase();
-    if(q.length<2){
-      list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Tapez un nom, un e-mail ou un numéro pour rechercher un compte.</div>';
+  function renderDefaultView(){
+    var configured=allUsers.filter(function(u){return (u.roles||[]).length>0;});
+    if(!configured.length){
+      list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucun compte configuré pour le moment. Recherchez un licencié ci-dessus pour lui attribuer un rôle.</div>';
       return;
     }
+    renderAccesList(list,configured);
+  }
+  searchInp.addEventListener("input",function(){
+    var q=searchInp.value.trim().toLowerCase();
+    if(q.length<2){ renderDefaultView(); return; }
     var matches=allUsers.filter(function(u){
-      return (u.email||"").toLowerCase().indexOf(q)>=0 || (u.phone||"").indexOf(q)>=0;
+      var name=(phoneToName[(u.phone||"").replace(/\s+/g,"")]||"").toLowerCase();
+      return (u.email||"").toLowerCase().indexOf(q)>=0 || (u.phone||"").indexOf(q)>=0 || name.indexOf(q)>=0;
     });
     if(!matches.length){
       list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucun compte trouvé.</div>';
       return;
     }
-    renderAccesList(list,matches);
+    renderAccesList(list,matches,phoneToName);
   });
   window.fbGetDocs(window.fbCollection(window.fbDb,"users")).then(function(snap){
     snap.forEach(function(d){var v=d.data();v._uid=d.id;allUsers.push(v);});
+    renderDefaultView();
   }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
 }
 // Ajoute/retire le coach des canaux liés à ses équipes selon son affectation actuelle
@@ -5665,20 +5685,29 @@ function syncCoachChannels(u, newTeamIds){
     return Promise.all(tasks);
   }).catch(function(e){console.log("syncCoachChannels:",e);});
 }
-function renderAccesList(list,users){
+function renderAccesList(list,users,phoneToName){
+  phoneToName=phoneToName||{};
   list.innerHTML="";
   if(!users.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucun compte enregistré</div>';return;}
   var teams=getTeams();
   users.forEach(function(u){
     var card=document.createElement("div");
     card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px";
+    var name=phoneToName[(u.phone||"").replace(/\s+/g,"")];
     var head=document.createElement("div");
     head.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
-    head.textContent=u.email||u.phone||u._uid;
+    head.textContent=name||u.email||u.phone||u._uid;
+    card.appendChild(head);
+    if(name){
+      var subEmail=document.createElement("div");
+      subEmail.style.cssText="font-size:11px;color:var(--mut)";
+      subEmail.textContent=u.email||u.phone||"";
+      card.appendChild(subEmail);
+    }
     var sub=document.createElement("div");
     sub.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
     sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
-    card.appendChild(head);card.appendChild(sub);
+    card.appendChild(sub);
     var state={roles:(u.roles||[]).slice(),teams:(u.linkedTeamIds||[]).slice()};
     var teamBox=document.createElement("div");
     var roleWrap=document.createElement("div");
@@ -11015,7 +11044,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785305059";
+var APP_VERSION="1785305282";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
