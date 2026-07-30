@@ -5878,10 +5878,39 @@ var PRESS_DRAG_GLOBAL_WIRED=false;
 function wirePressDragGlobalListenersOnce(){
   if(PRESS_DRAG_GLOBAL_WIRED) return;
   PRESS_DRAG_GLOBAL_WIRED=true;
+  var autoScrollInterval=null;
+  var lastPointerY=0;
+  function getScrollEl(){
+    return document.getElementById("main-scroll") || document.scrollingElement;
+  }
+  function startAutoScroll(){
+    if(autoScrollInterval) return;
+    autoScrollInterval=setInterval(function(){
+      var s=PRESS_DRAG_STATE;
+      if(!s.active){ stopAutoScroll(); return; }
+      var scrollEl=getScrollEl();
+      if(!scrollEl) return;
+      var vh=window.innerHeight;
+      var edge=90; // zone sensible en haut/bas de l'ecran
+      var speed=0;
+      if(lastPointerY<edge) speed=-(edge-lastPointerY)/edge*16;
+      else if(lastPointerY>vh-edge) speed=(lastPointerY-(vh-edge))/edge*16;
+      if(speed!==0){
+        scrollEl.scrollTop+=speed;
+        // L'element glisse suit le doigt (position:fixed), pas besoin de recalculer sa position ici :
+        // le prochain pointermove recalculera item.style.top normalement.
+      }
+    },16);
+  }
+  function stopAutoScroll(){
+    if(autoScrollInterval){ clearInterval(autoScrollInterval); autoScrollInterval=null; }
+  }
   document.addEventListener("pointermove",function(e){
     var s=PRESS_DRAG_STATE;
     if(!s.active) return;
     e.preventDefault();
+    lastPointerY=e.clientY;
+    startAutoScroll();
     var item=s.item;
     item.style.top=(e.clientY-s.offsetY)+"px";
     var siblings=Array.prototype.slice.call(item.parentNode.children).filter(function(c){return c!==item && c!==s.placeholder;});
@@ -5891,8 +5920,8 @@ function wirePressDragGlobalListenersOnce(){
       if(i===siblings.length-1){ item.parentNode.insertBefore(s.placeholder,siblings[i].nextSibling); }
     }
   },{passive:false});
-  document.addEventListener("pointerup",finishPressDrag);
-  document.addEventListener("pointercancel",finishPressDrag);
+  document.addEventListener("pointerup",function(){stopAutoScroll();finishPressDrag();});
+  document.addEventListener("pointercancel",function(){stopAutoScroll();finishPressDrag();});
 }
 function finishPressDrag(){
   var s=PRESS_DRAG_STATE;
@@ -11608,7 +11637,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785361373";
+var APP_VERSION="1785405769";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
