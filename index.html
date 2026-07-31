@@ -3913,6 +3913,11 @@ function validerLicence(){
   var idx=lics.findIndex(function(l){return l.code===currentLicCode;});
   if(idx<0)return;
   if(!lics[idx].categorie){alert("Assignez une catégorie avant de valider");return;}
+  var f0=lics[idx].fiche||{};
+  if(f0.surclassement && (!f0.certificat || !f0.certDate)){
+    alert("Surclassement coché sur cette fiche : le certificat médical (fichier + date) est obligatoire avant de valider.");
+    return;
+  }
   lics[idx].statut="validee";
   saveLicences(lics);
   renderLicenceDetail(lics[idx]);
@@ -4125,6 +4130,7 @@ function renderFicheForm(lic){
   var el=document.getElementById("insc-public-content");if(!el)return;
   licCurrentType=(lic&&lic.typeLicence)||null;
   var f=lic.fiche||{};
+  ficheSurclassement=(f.surclassement===true);
   el.innerHTML=
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
       '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;})||{code:licCurrentCode})" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
@@ -4184,8 +4190,16 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Notes / Informations medicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
+      '<div class="form-group" style="background:rgba(232,103,10,.06);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
+        '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
+          '<input type="checkbox" id="f-surclassement" onchange="toggleSurclassement(this.checked)" '+(f.surclassement?"checked":"")+' style="width:20px;height:20px;margin-top:1px;accent-color:#E8670A;flex-shrink:0">'+
+          '<span><span style="font-size:13px;font-weight:700;color:var(--txt)">Surclassement</span><br>'+
+          '<span style="font-size:11px;color:var(--txt2);line-height:1.4">Le joueur évolue dans une catégorie d\'âge supérieure à la sienne. Un certificat médical devient alors obligatoire pour valider la fiche.</span></span>'+
+        '</label>'+
+      '</div>'+
+      '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Certificat medical</div>'+
-      '<div style="background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.25);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px">'+
+      '<div id="cert-banner" style="background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.25);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px">'+
         '<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat medical de non contre-indication a la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>'+
       '</div>'+
       '<div class="form-group">'+
@@ -4209,6 +4223,7 @@ function renderFicheForm(lic){
   setTimeout(function(){
     var btn=document.getElementById("cert-btn");
     if(btn)btn.onclick=function(){var inp=document.getElementById("cert-input");if(inp)inp.click();};
+    updateCertBanner();
   },50);
   // Mise a jour statut en cours si fiche déjà partiellement remplie
   var lics=getLicences();
@@ -4218,8 +4233,27 @@ function renderFicheForm(lic){
 
 var ficheGenre="";
 var ficheNeEtranger=false;
+var ficheSurclassement=false;
 var fichePhoto="";
 var ficheCertificat="";
+
+function toggleSurclassement(val){
+  ficheSurclassement=val;
+  updateCertBanner();
+}
+function updateCertBanner(){
+  var box=document.getElementById("cert-banner");
+  if(!box)return;
+  if(ficheSurclassement){
+    box.style.background="rgba(192,57,43,.08)";
+    box.style.borderColor="rgba(192,57,43,.3)";
+    box.innerHTML='<div style="font-size:11px;color:var(--red);line-height:1.5;font-weight:700">Surclassement coché : le certificat médical est obligatoire pour valider la fiche.</div>';
+  } else {
+    box.style.background="rgba(39,174,96,.08)";
+    box.style.borderColor="rgba(39,174,96,.25)";
+    box.innerHTML='<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat medical de non contre-indication a la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>';
+  }
+}
 
 
 function addResp2(){
@@ -4299,10 +4333,18 @@ function soumettreFiche(){
   var naissance=(document.getElementById("f-naissance")||{}).value||"";
   if(!prenom||!nom||!naissance){alert("Prénom, nom et date de naissance sont obligatoires");return;}
   if(!ficheGenre){alert("Sélectionnez votre genre");return;}
+  if(ficheSurclassement){
+    var certDateVal=(document.getElementById("f-certDate")||{}).value||"";
+    if(!ficheCertificat || !certDateVal){
+      alert("Surclassement coché : le certificat médical (fichier + date) est obligatoire pour valider la fiche.");
+      return;
+    }
+  }
   var fiche={
     genre:ficheGenre,prenom:prenom.trim(),nom:nom.trim(),
     naissance:naissance,
     neEtranger:ficheNeEtranger,
+    surclassement:ficheSurclassement,
     villeNaiss:ficheNeEtranger?((document.getElementById("f-villeNaiss")||{}).value||""):"",
     paysNaiss:ficheNeEtranger?((document.getElementById("f-paysNaiss")||{}).value||""):"",
     adresse:(document.getElementById("f-adresse")||{}).value||"",
@@ -11637,7 +11679,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785405769";
+var APP_VERSION="1785506359";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
