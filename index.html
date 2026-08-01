@@ -6092,6 +6092,14 @@ function buildAdminHome(){
        '<div style="font-size:11px;color:var(--mut);margin-top:2px">La catégorie ne correspond plus à la majorité des joueurs de l\'équipe. Appuyez pour vérifier.</div>'+
        '</div>';
    }
+   var pendingEvts=getPendingEvents();
+   if(pendingEvts.length){
+     banner.innerHTML+='<div onclick="openEventsValidationModal()" style="margin:0 12px 14px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px;cursor:pointer">'+
+       '<div style="font-size:13px;font-weight:700;color:#E8670A">'+pendingEvts.length+' événement'+(pendingEvts.length>1?"s":"")+' à valider</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">Proposé par un coach. Appuyez pour valider ou refuser.</div>'+
+       '</div>';
+   }
+   cleanupExpiredEventChannelAccess();
  }
  getOrderedAdminModules().forEach(function(m,i,arr){
  var hidden=getHiddenAdminModules();
@@ -7201,11 +7209,11 @@ function saveEvents(e){
 }
 
 function fetchEventsFromCloud(){
-  if(!window.fbReady||!window.fbGetDocs)return Promise.resolve(getEvents());
+  if(!window.fbReady||!window.fbGetDocs)return Promise.resolve(getVisibleEvents());
   return window.fbGetDocs(window.fbCollection(window.fbDb,"events")).then(function(snap){
-    var a=[]; snap.forEach(function(d){a.push(d.data());});
-    return a.length?a:getEvents();
-  }).catch(function(){return getEvents();});
+    var a=[]; snap.forEach(function(d){var e=d.data(); if(e.statut!=="attente") a.push(e);});
+    return a.length?a:getVisibleEvents();
+  }).catch(function(){return getVisibleEvents();});
 }
 var planViewMode="list";
 var planCalMonth=new Date().getMonth();
@@ -7279,7 +7287,7 @@ function showDayEvents(dateStr){
 }
 
 function buildPlanning(){
-  var events=getEvents();
+  var events=getVisibleEvents();
   var el=document.getElementById("planningList");if(!el)return;
   if(!events.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun événement</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Événement</div></div>';return;}
   el.innerHTML="";
@@ -7628,7 +7636,7 @@ var creneauJour="Lundi";
 // ── LISTE EVENEMENTS REELS DANS L'ONGLET "ÉVÉNEMENT" (coach + dirigeant) ──
 function buildRealEventsList(){
   var el=document.getElementById("real-events-list");if(!el)return;
-  var events=getEvents();
+  var events=getVisibleEvents();
   var profile=localStorage.getItem("asmb_profile");
   if(profile==="coach"){
     var teamId=getCoachTeam();
@@ -7867,22 +7875,38 @@ function saveEventFull(){
   var heure=document.getElementById("ev-heure").value;
   var lieu=document.getElementById("ev-lieu").value.trim();
   var teams=getTeams();
+  var realSelectedTeamIds=evSelectedTeams.filter(function(id){return id!=="__all__";});
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
   var canal=document.getElementById("ev-canal").value;
   if(!titre||!date){alert("Titre et date obligatoires");return;}
   var participantsClub=Array.from(document.querySelectorAll(".ev-player-cb:checked")).map(function(cb){return cb.value;});
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
+  var isDirigeant=(window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
   var eventObj={
     id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
-    presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked)
+    presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked),
+    canalId:canal||null, canalAutoTeamIds:(canal&&realSelectedTeamIds.length)?realSelectedTeamIds:[],
+    canalAccessGranted:false, canalAccessRevoked:false,
+    statut:isDirigeant?"validee":"attente",
+    creePar:(window.ASMB_USER&&window.ASMB_USER.email)||"",
+    creeParRole:isDirigeant?"dirigeant":"coach"
   };
   var events=getEvents();
   events.push(eventObj);
   saveEvents(events);
   buildPlanning();buildAdminHome();buildRealEventsList();
   closeModal("modal-event-full");
+  if(!isDirigeant){
+    alert("Événement soumis au dirigeant pour validation. Il apparaîtra dans le calendrier une fois approuvé.");
+    return;
+  }
+  if(eventObj.canalId && eventObj.canalAutoTeamIds.length){ grantEventChannelAccess(eventObj); }
+  finishSaveEventFullNotify(eventObj, canal, participantsNoms);
+}
+function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
+  var titre=eventObj.titre, date=eventObj.date, heure=eventObj.heure, lieu=eventObj.lieu, equipe=eventObj.equipe;
   // Envoi au canal si selectionne
   if(canal&&window.fbReady){
     var msg="<b>"+titre+"</b><br>"+date+(heure?" · "+heure:"")+"<br>"+(lieu?"📍 "+lieu+"<br>":"")+(equipe?equipe+"<br>":"")+(participantsNoms.length?"Participants : "+participantsNoms.join(", "):"");
@@ -7895,6 +7919,156 @@ function saveEventFull(){
   }
 }
 function deleteEvent(id){askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();});}
+
+// ── ACCES AUTOMATIQUE AU CANAL POUR LES EQUIPES SELECTIONNEES (point 6) ──
+function grantEventChannelAccess(eventObj){
+  if(!window.fbDb||!window.fbGetDocs||!eventObj.canalId||!eventObj.canalAutoTeamIds||!eventObj.canalAutoTeamIds.length) return;
+  window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+    var byId={}; snap.forEach(function(d){ byId[d.id]=d.data(); });
+    var targetChannel=byId[eventObj.canalId];
+    if(!targetChannel) return;
+    var existing=(targetChannel.members||[]).slice();
+    var existingPhones=existing.map(function(m){return typeof m==="string"?m:m.phone;});
+    var added=false;
+    eventObj.canalAutoTeamIds.forEach(function(teamId){
+      // Trouve le canal propre a cette equipe (lie via teamId) pour recuperer ses membres
+      Object.keys(byId).forEach(function(chId){
+        var ch=byId[chId];
+        if(ch.teamId===teamId && ch.members){
+          ch.members.forEach(function(m){
+            var phone=typeof m==="string"?m:m.phone;
+            if(phone && existingPhones.indexOf(phone)<0){
+              existing.push({phone:phone, label:(typeof m==="string"?"":m.label)||"", tempForEvent:eventObj.id});
+              existingPhones.push(phone);
+              added=true;
+            }
+          });
+        }
+      });
+    });
+    if(added){
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",eventObj.canalId),{members:existing}).then(function(){
+        var events=getEvents();
+        var idx=events.findIndex(function(e){return e.id===eventObj.id;});
+        if(idx>=0){ events[idx].canalAccessGranted=true; saveEvents(events); }
+      }).catch(function(){});
+    } else {
+      var events=getEvents();
+      var idx=events.findIndex(function(e){return e.id===eventObj.id;});
+      if(idx>=0){ events[idx].canalAccessGranted=true; saveEvents(events); }
+    }
+  }).catch(function(){});
+}
+function revokeEventChannelAccess(eventObj){
+  if(!window.fbDb||!window.fbGetDoc||!eventObj.canalId) return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"channels",eventObj.canalId)).then(function(snap){
+    if(!snap||!snap.exists()) return;
+    var ch=snap.data();
+    var members=(ch.members||[]).filter(function(m){
+      return !(m && typeof m==="object" && m.tempForEvent===eventObj.id);
+    });
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",eventObj.canalId),{members:members}).catch(function(){});
+  }).catch(function(){});
+}
+// A appeler periodiquement (ex: a l'ouverture de l'app dirigeant) pour retirer
+// l'acces temporaire des evenements dont la date est passee.
+function cleanupExpiredEventChannelAccess(){
+  var events=getEvents();
+  var today=new Date().toISOString().slice(0,10);
+  var changed=false;
+  events.forEach(function(e){
+    var endDate=e.dateFin||e.date;
+    if(e.canalAccessGranted && !e.canalAccessRevoked && endDate<today){
+      revokeEventChannelAccess(e);
+      e.canalAccessRevoked=true;
+      changed=true;
+    }
+  });
+  if(changed) saveEvents(events);
+}
+
+// ── VALIDATION DES EVENEMENTS CREES PAR UN COACH (point 3) ──────────
+// Evenements reellement affiches (exclut ceux en attente de validation dirigeant, point 3)
+function getVisibleEvents(){
+  return getEvents().filter(function(e){ return e.statut!=="attente"; });
+}
+function getPendingEvents(){ return getEvents().filter(function(e){ return e.statut==="attente"; }); }
+async function approveEvent(id){
+  var events=getEvents();
+  var idx=events.findIndex(function(e){return e.id===id;});
+  if(idx<0) return;
+  events[idx].statut="validee";
+  saveEvents(events);
+  buildPlanning();buildAdminHome();buildRealEventsList();
+  var ev=events[idx];
+  if(ev.canalId && ev.canalAutoTeamIds && ev.canalAutoTeamIds.length){ grantEventChannelAccess(ev); }
+  if(document.getElementById("events-validation-list")) renderEventsValidationList(document.getElementById("events-validation-list"));
+}
+async function rejectEvent(id){
+  var ok=await askConfirm("Refuser et supprimer cet événement proposé ?",{danger:true,confirmText:"Refuser"});
+  if(!ok)return;
+  var events=getEvents().filter(function(e){return e.id!==id;});
+  saveEvents(events);
+  buildPlanning();buildAdminHome();buildRealEventsList();
+  if(document.getElementById("events-validation-list")) renderEventsValidationList(document.getElementById("events-validation-list"));
+}
+function openEventsValidationModal(){
+  var modal=document.createElement("div");
+  modal.className="events-validation-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Événements à valider";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.id="events-validation-list";
+  list.style.cssText="overflow-y:auto;flex:1";
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  renderEventsValidationList(list);
+}
+function renderEventsValidationList(list){
+  var pending=getPendingEvents();
+  list.innerHTML="";
+  if(!pending.length){
+    list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucun événement en attente.</div>';
+    return;
+  }
+  pending.forEach(function(e){
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+eventTypeColor(e.type)+";border-radius:var(--rs);padding:14px;margin-bottom:10px";
+    var title=document.createElement("div");
+    title.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    title.textContent=e.titre;
+    var meta=document.createElement("div");
+    meta.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
+    meta.textContent=eventTypeLabel(e.type)+" · "+e.date+(e.heure?" · "+e.heure:"")+(e.lieu?" · "+e.lieu:"")+(e.equipe?" · "+e.equipe:"")+" · proposé par "+(e.creePar||"un coach");
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px";
+    var okBtn=document.createElement("button");
+    okBtn.textContent="Valider";
+    okBtn.style.cssText="padding:7px 14px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
+    okBtn.addEventListener("click",function(){ approveEvent(e.id); });
+    var refBtn=document.createElement("button");
+    refBtn.textContent="Refuser";
+    refBtn.style.cssText="padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    refBtn.addEventListener("click",function(){ rejectEvent(e.id); });
+    btnRow.appendChild(okBtn);btnRow.appendChild(refBtn);
+    card.appendChild(title);card.appendChild(meta);card.appendChild(btnRow);
+    list.appendChild(card);
+  });
+}
 
 function cancelEvent(eventId){
   var events=getEvents();
@@ -11660,7 +11834,7 @@ function buildParentEvents(){
   document.getElementById("parent-events-sub").textContent=team?team.name:"";
   var el=document.getElementById("parent-events-list");
   if(!team){el.innerHTML="";return;}
-  var events=getEvents().filter(function(e){
+  var events=getVisibleEvents().filter(function(e){
     if(!e.equipe)return false;
     return e.equipe.toUpperCase().indexOf(team.name.toUpperCase())>=0;
   });
@@ -11859,7 +12033,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785584936";
+var APP_VERSION="1785595725";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
