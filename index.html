@@ -6085,6 +6085,13 @@ function buildAdminHome(){
        '<div style="font-size:11px;color:var(--mut);margin-top:2px">Leur âge ne correspond plus à leur catégorie actuelle. Appuyez pour vérifier.</div>'+
        '</div>';
    }
+   var mismatchedTeams=findMiscategorizedTeams();
+   if(mismatchedTeams.length){
+     banner.innerHTML+='<div onclick="openTeamReclassementModal()" style="margin:0 12px 14px;background:rgba(94,53,177,.1);border:1px solid rgba(94,53,177,.3);border-radius:var(--rs);padding:12px 14px;cursor:pointer">'+
+       '<div style="font-size:13px;font-weight:700;color:#5E35B1">'+mismatchedTeams.length+' équipe'+(mismatchedTeams.length>1?"s":"")+' à reclasser</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">La catégorie ne correspond plus à la majorité des joueurs de l\'équipe. Appuyez pour vérifier.</div>'+
+       '</div>';
+   }
  }
  getOrderedAdminModules().forEach(function(m,i,arr){
  var hidden=getHiddenAdminModules();
@@ -6614,6 +6621,103 @@ function findMiscategorizedPlayers(){
     return suggested && p.cat && suggested!==p.cat;
   });
 }
+
+// ── RECLASSEMENT DES EQUIPES (categorie de l'equipe qui ne colle plus a ses joueurs) ──
+function findMiscategorizedTeams(){
+  var players=getPlayers();
+  var out=[];
+  getTeams().forEach(function(t){
+    var members=(t.members||[]).map(function(id){return players.find(function(p){return p.id===id;});}).filter(Boolean);
+    if(!members.length) return;
+    var tally={};
+    members.forEach(function(p){ if(p.cat) tally[p.cat]=(tally[p.cat]||0)+1; });
+    var bestCat=null, bestCount=0;
+    Object.keys(tally).forEach(function(c){ if(tally[c]>bestCount){bestCount=tally[c];bestCat=c;} });
+    if(bestCat && bestCat!==t.cat && CATS_LIC.indexOf(bestCat)>=0){
+      out.push({team:t, suggested:bestCat, matchCount:bestCount, totalCount:members.length});
+    }
+  });
+  return out;
+}
+function openTeamReclassementModal(){
+  var modal=document.createElement("div");
+  modal.className="team-reclass-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Équipes à reclasser";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  inner.appendChild(hdr);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  renderTeamReclassementList(list);
+}
+function renderTeamReclassementList(list){
+  var mismatched=findMiscategorizedTeams();
+  list.innerHTML="";
+  if(!mismatched.length){
+    list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Toutes les équipes correspondent à leurs joueurs.</div>';
+    return;
+  }
+  mismatched.forEach(function(entry){
+    var t=entry.team;
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px";
+    var name=document.createElement("div");
+    name.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    name.textContent=t.name;
+    var meta=document.createElement("div");
+    meta.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
+    meta.innerHTML="Catégorie actuelle <b>"+t.cat+"</b> · "+entry.matchCount+"/"+entry.totalCount+" joueurs en <b style=\"color:var(--dkg)\">"+entry.suggested+"</b>";
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+    var renameBtn=document.createElement("button");
+    renameBtn.textContent="Renommer et reclasser";
+    renameBtn.style.cssText="padding:7px 12px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
+    renameBtn.addEventListener("click",async function(){
+      var suggestedName=t.name.split(t.cat).join(entry.suggested);
+      var newName=await askPrompt("Nom de l'équipe", {defaultValue:suggestedName, confirmText:"Appliquer"});
+      if(newName===null) return;
+      var teams=getTeams();
+      var idx=teams.findIndex(function(x){return x.id===t.id;});
+      if(idx>=0){ teams[idx].cat=entry.suggested; teams[idx].name=newName.trim()||suggestedName; saveTeams(teams); }
+      card.remove();
+      buildAdminHome();
+      if(!findMiscategorizedTeams().length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Toutes les équipes correspondent à leurs joueurs.</div>'; }
+    });
+    var catOnlyBtn=document.createElement("button");
+    catOnlyBtn.textContent="Catégorie seule ("+entry.suggested+")";
+    catOnlyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    catOnlyBtn.addEventListener("click",function(){
+      var teams=getTeams();
+      var idx=teams.findIndex(function(x){return x.id===t.id;});
+      if(idx>=0){ teams[idx].cat=entry.suggested; saveTeams(teams); }
+      card.remove();
+      buildAdminHome();
+      if(!findMiscategorizedTeams().length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Toutes les équipes correspondent à leurs joueurs.</div>'; }
+    });
+    var ignoreBtn=document.createElement("button");
+    ignoreBtn.textContent="Ignorer";
+    ignoreBtn.style.cssText="padding:7px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer";
+    ignoreBtn.addEventListener("click",function(){card.remove();});
+    btnRow.appendChild(renameBtn);btnRow.appendChild(catOnlyBtn);btnRow.appendChild(ignoreBtn);
+    card.appendChild(name);card.appendChild(meta);card.appendChild(btnRow);
+    list.appendChild(card);
+  });
+}
+
 function openReclassementModal(){
   var mismatched=findMiscategorizedPlayers();
   var modal=document.createElement("div");
@@ -11755,7 +11859,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785582310";
+var APP_VERSION="1785584936";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
