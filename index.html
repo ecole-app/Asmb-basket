@@ -1717,15 +1717,75 @@ const VACS=[
 const KC=["#16A085","#8E44AD","#27AE60","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";
-function getCyclesForCat(catId){
+
+// ── CYCLES MODIFIABLES (point 4) ────────────────────────────────────
+// Le contenu pedagogique d'origine reste dans le code (CYCLES / CYCLES_U9 / CYCLES_U11).
+// Les ajouts et modifications du dirigeant sont stockes a part et fusionnes par-dessus,
+// ce qui permet d'editer sans jamais perdre le contenu de reference.
+function builtinCyclesForCat(catId){
  if(catId==="u9")return CYCLES_U9;
  if(catId==="u11")return CYCLES_U11;
  return CYCLES;
 }
+function getCycleOverrides(){try{return JSON.parse(localStorage.getItem("asmb_cycles_custom")||"{}");}catch(e){return {};}}
+function saveCycleOverrides(o){
+  localStorage.setItem("asmb_cycles_custom",JSON.stringify(o));
+  if(window.fbDb&&window.fbSetDoc){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","cycles_custom"),{data:JSON.stringify(o)},{merge:true}).catch(function(){});
+  }
+}
+function fetchCycleOverridesFromCloud(){
+  if(!window.fbDb||!window.fbGetDoc)return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"app_data","cycles_custom")).then(function(snap){
+    if(snap&&snap.exists()&&snap.data().data){
+      localStorage.setItem("asmb_cycles_custom",snap.data().data);
+      if(document.getElementById("scr-u13home")&&document.querySelector("#scr-u13home.on")) buildU13Home();
+    }
+  }).catch(function(){});
+}
+function getCyclesForCat(catId){
+ var ov=getCycleOverrides();
+ var base=builtinCyclesForCat(catId).map(function(cy){
+   var patch=ov.edits&&ov.edits[cy.id];
+   if(!patch)return cy;
+   var merged=Object.assign({},cy,patch);
+   var seas=cy.seas.slice();
+   // Modifications ciblees de seances d'origine (titre / objectif / duree)
+   if(patch.seaPatches){
+     seas=seas.map(function(s){
+       var sp=patch.seaPatches[s.num];
+       return sp?Object.assign({},s,sp):s;
+     });
+   }
+   // Seances d'origine masquees
+   if(patch.hiddenSeas&&patch.hiddenSeas.length){
+     seas=seas.filter(function(s){return patch.hiddenSeas.indexOf(s.num)<0;});
+   }
+   // Seances ajoutees par le dirigeant
+   if(patch.extraSeas&&patch.extraSeas.length){
+     seas=seas.concat(patch.extraSeas);
+   }
+   merged.seas=seas;
+   merged.s=seas.length;
+   delete merged.extraSeas;
+   delete merged.seaPatches;
+   delete merged.hiddenSeas;
+   return merged;
+ });
+ // Retire les cycles d'origine masques
+ if(ov.hidden&&ov.hidden.length){
+   base=base.filter(function(cy){return ov.hidden.indexOf(cy.id)<0;});
+ }
+ // Ajoute les cycles crees de toutes pieces pour cette categorie
+ var customs=(ov.custom||[]).filter(function(cy){return cy.cat===catId;});
+ return base.concat(customs);
+}
+function allCyclesFlat(){
+ return getCyclesForCat("u9").concat(getCyclesForCat("u11")).concat(getCyclesForCat("u13"));
+}
 function activeCycles(){return getCyclesForCat(activeCatId);}
 function findCycle(cyId){
- var all=CYCLES.concat(CYCLES_U9).concat(CYCLES_U11);
- return all.find(function(c){return c.id==cyId;});
+ return allCyclesFlat().find(function(c){return c.id==cyId;});
 }
 
 const CYCLES_U9=[
@@ -2568,7 +2628,196 @@ function buildU13Home(){
     d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"#27AE60":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"#27AE60":cy.c)+'">'+(allDone?"✓":cycleNum(cy))+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"#27AE60":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"#27AE60":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
     cl.appendChild(d);
   });
+  if(canEditCycles()){
+    var addBtn=document.createElement("button");
+    addBtn.textContent="+ Ajouter un cycle";
+    addBtn.style.cssText="width:calc(100% - 24px);margin:8px 12px 16px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer";
+    addBtn.addEventListener("click",function(){openCycleEditModal(null);});
+    cl.appendChild(addBtn);
+  }
 }
+// ── EDITION DES CYCLES ET SEANCES (reserve dirigeant) ───────────────
+function canEditCycles(){
+  return (window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
+}
+function isCustomCycle(cy){
+  var ov=getCycleOverrides();
+  return (ov.custom||[]).some(function(c){return c.id==cy.id;});
+}
+function openCycleEditModal(cyId){
+  if(!canEditCycles()){alert("Réservé au dirigeant.");return;}
+  var existing=cyId?findCycle(cyId):null;
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var colorOpts=KC.map(function(c){return '<option value="'+c+'"'+(existing&&existing.c===c?" selected":"")+'>'+c+'</option>';}).join("");
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">'+(existing?"Modifier le cycle":"Nouveau cycle")+'</div>'+
+      '<button id="cyed-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div class="form-group"><label class="form-label">Nom du cycle</label><input class="form-input" id="cyed-nom" value="'+(existing?authEsc(existing.n):"")+'" placeholder="Ex: Fondamentaux Individuels"></div>'+
+    '<div class="form-group"><label class="form-label">Période</label><input class="form-input" id="cyed-periode" value="'+(existing?authEsc(existing.p):"")+'" placeholder="Ex: Sept. - mi-oct. 2026"></div>'+
+    '<div class="form-group"><label class="form-label">Couleur</label><select class="form-input" id="cyed-couleur">'+colorOpts+'</select></div>'+
+    '<div class="form-group"><label class="form-label">Objectifs (un par ligne)</label><textarea class="form-input" id="cyed-objs" rows="5" placeholder="Un objectif par ligne">'+(existing&&existing.objs?authEsc(existing.objs.join("\n")):"")+'</textarea></div>'+
+    '<button id="cyed-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>'+
+    (existing?'<button id="cyed-del" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">'+(isCustomCycle(existing)?"Supprimer ce cycle":"Masquer ce cycle")+'</button>':'');
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById("cyed-close").addEventListener("click",function(){modal.remove();});
+  document.getElementById("cyed-save").addEventListener("click",function(){
+    var nom=document.getElementById("cyed-nom").value.trim();
+    var periode=document.getElementById("cyed-periode").value.trim();
+    var couleur=document.getElementById("cyed-couleur").value;
+    var objs=document.getElementById("cyed-objs").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    if(!nom){alert("Le nom du cycle est obligatoire");return;}
+    var ov=getCycleOverrides();
+    if(existing){
+      if(isCustomCycle(existing)){
+        var ci=(ov.custom||[]).findIndex(function(c){return c.id==existing.id;});
+        if(ci>=0){ ov.custom[ci].n=nom; ov.custom[ci].p=periode; ov.custom[ci].c=couleur; ov.custom[ci].objs=objs; }
+      } else {
+        ov.edits=ov.edits||{};
+        ov.edits[existing.id]=Object.assign({},ov.edits[existing.id]||{},{n:nom,p:periode,c:couleur,objs:objs});
+      }
+    } else {
+      ov.custom=ov.custom||[];
+      var newId=Date.now();
+      ov.custom.push({id:newId,cat:activeCatId,n:nom,sh:nom,p:periode,s:0,c:couleur,e:"",objs:objs,seas:[]});
+    }
+    saveCycleOverrides(ov);
+    modal.remove();
+    buildU13Home();
+    if(existing&&document.querySelector("#scr-cycle.on")){ curCy=findCycle(existing.id); if(curCy) buildCycle(curCy); }
+  });
+  var delBtn=document.getElementById("cyed-del");
+  if(delBtn){
+    delBtn.addEventListener("click",function(){
+      var custom=isCustomCycle(existing);
+      askConfirm(custom?"Supprimer définitivement ce cycle ?":"Masquer ce cycle ? Le contenu d'origine est conservé et pourra être réaffiché.",{danger:true,confirmText:custom?"Supprimer":"Masquer"}).then(function(ok){
+        if(!ok)return;
+        var ov=getCycleOverrides();
+        if(custom){ ov.custom=(ov.custom||[]).filter(function(c){return c.id!=existing.id;}); }
+        else { ov.hidden=ov.hidden||[]; if(ov.hidden.indexOf(existing.id)<0) ov.hidden.push(existing.id); }
+        saveCycleOverrides(ov);
+        modal.remove();
+        if(document.querySelector("#scr-cycle.on")){ goBack(); }
+        buildU13Home();
+      });
+    });
+  }
+}
+function openSeanceEditModal(cyId,seaNum){
+  if(!canEditCycles()){alert("Réservé au dirigeant.");return;}
+  var cy=findCycle(cyId);
+  if(!cy)return;
+  var existing=seaNum?cy.seas.find(function(s){return s.num===seaNum;}):null;
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var existingContent="";
+  if(existing&&existing.sits&&existing.sits.length===1&&existing.sits[0].freeText){ existingContent=existing.sits[0].desc||""; }
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">'+(existing?"Modifier la séance":"Nouvelle séance")+'</div>'+
+      '<button id="sed-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div class="form-group"><label class="form-label">Titre</label><input class="form-input" id="sed-titre" value="'+(existing?authEsc(existing.t):"")+'" placeholder="Ex: Dribble et changement de main"></div>'+
+    '<div class="form-group"><label class="form-label">Objectif</label><input class="form-input" id="sed-obj" value="'+(existing?authEsc(existing.obj):"")+'" placeholder="Ex: Progresser dans la maitrise du dribble"></div>'+
+    '<div class="form-group"><label class="form-label">Durée</label><input class="form-input" id="sed-dur" value="'+(existing?authEsc(existing.dur):"1h30")+'" placeholder="1h30"></div>'+
+    (existing&&!existingContent&&existing.sits&&existing.sits.length
+      ? '<div style="font-size:11px;color:var(--mut);background:#e6f0e9;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4">Cette séance contient '+existing.sits.length+' situation(s) détaillée(s) du contenu d\'origine. Elles sont conservées telles quelles.</div>'
+      : '<div class="form-group"><label class="form-label">Contenu de la séance</label><textarea class="form-input" id="sed-contenu" rows="6" placeholder="Décrire le déroulé, les exercices, l\'organisation...">'+authEsc(existingContent)+'</textarea></div>')+
+    '<button id="sed-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>'+
+    (existing?'<button id="sed-del" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cette séance</button>':'');
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById("sed-close").addEventListener("click",function(){modal.remove();});
+  document.getElementById("sed-save").addEventListener("click",function(){
+    var titre=document.getElementById("sed-titre").value.trim();
+    var obj=document.getElementById("sed-obj").value.trim();
+    var dur=document.getElementById("sed-dur").value.trim()||"1h30";
+    var contenuEl=document.getElementById("sed-contenu");
+    if(!titre){alert("Le titre est obligatoire");return;}
+    var ov=getCycleOverrides();
+    var custom=isCustomCycle(cy);
+    function applyToSeance(s){
+      s.t=titre; s.obj=obj; s.dur=dur;
+      if(contenuEl){
+        var txt=contenuEl.value.trim();
+        s.sits=txt?[{ti:titre,dur:dur,desc:txt,org:"",axes:[],kws:[],ch:null,freeText:true}]:[];
+      }
+      return s;
+    }
+    if(existing){
+      if(custom){
+        var ci=(ov.custom||[]).findIndex(function(c){return c.id==cy.id;});
+        if(ci>=0){
+          var si=ov.custom[ci].seas.findIndex(function(s){return s.num===seaNum;});
+          if(si>=0) applyToSeance(ov.custom[ci].seas[si]);
+        }
+      } else {
+        ov.edits=ov.edits||{};
+        ov.edits[cy.id]=ov.edits[cy.id]||{};
+        var extra=ov.edits[cy.id].extraSeas||[];
+        var ei=extra.findIndex(function(s){return s.num===seaNum;});
+        if(ei>=0){ applyToSeance(extra[ei]); ov.edits[cy.id].extraSeas=extra; }
+        else {
+          // Modification d'une seance d'origine : on stocke un patch cible
+          ov.edits[cy.id].seaPatches=ov.edits[cy.id].seaPatches||{};
+          ov.edits[cy.id].seaPatches[seaNum]={t:titre,obj:obj,dur:dur};
+        }
+      }
+    } else {
+      var newNum=cy.id+"."+(cy.seas.length+1);
+      var newSea=applyToSeance({num:newNum,t:"",obj:"",dur:dur,sits:[]});
+      if(custom){
+        var ci2=(ov.custom||[]).findIndex(function(c){return c.id==cy.id;});
+        if(ci2>=0){ ov.custom[ci2].seas.push(newSea); ov.custom[ci2].s=ov.custom[ci2].seas.length; }
+      } else {
+        ov.edits=ov.edits||{};
+        ov.edits[cy.id]=ov.edits[cy.id]||{};
+        ov.edits[cy.id].extraSeas=(ov.edits[cy.id].extraSeas||[]).concat([newSea]);
+      }
+    }
+    saveCycleOverrides(ov);
+    modal.remove();
+    curCy=findCycle(cy.id);
+    if(curCy) buildCycle(curCy);
+    buildU13Home();
+  });
+  var sdel=document.getElementById("sed-del");
+  if(sdel){
+    sdel.addEventListener("click",function(){
+      askConfirm("Supprimer cette séance ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+        if(!ok)return;
+        var ov=getCycleOverrides();
+        if(isCustomCycle(cy)){
+          var ci=(ov.custom||[]).findIndex(function(c){return c.id==cy.id;});
+          if(ci>=0){ ov.custom[ci].seas=ov.custom[ci].seas.filter(function(s){return s.num!==seaNum;}); ov.custom[ci].s=ov.custom[ci].seas.length; }
+        } else {
+          ov.edits=ov.edits||{};
+          ov.edits[cy.id]=ov.edits[cy.id]||{};
+          var extra=(ov.edits[cy.id].extraSeas||[]).filter(function(s){return s.num!==seaNum;});
+          if(extra.length!==(ov.edits[cy.id].extraSeas||[]).length){ ov.edits[cy.id].extraSeas=extra; }
+          else { ov.edits[cy.id].hiddenSeas=(ov.edits[cy.id].hiddenSeas||[]).concat([seaNum]); }
+        }
+        saveCycleOverrides(ov);
+        modal.remove();
+        curCy=findCycle(cy.id);
+        if(curCy) buildCycle(curCy);
+        buildU13Home();
+      });
+    });
+  }
+}
+
 function openCy(id){curCy=findCycle(id);stack.push("cycle");buildCycle(curCy);showScr("cycle");}
 function buildCycle(cy){
   if(!cy)return;
@@ -2582,8 +2831,27 @@ function buildCycle(cy){
     var d=document.createElement("div");d.className="sea-card";
     d.onclick=function(){openSea(cy.id,s.num);};
     d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#27AE60":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#27AE60":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#27AE60":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
+    if(canEditCycles()){
+      var editSea=document.createElement("button");
+      editSea.textContent="Modifier";
+      editSea.style.cssText="margin:0 0 0 auto;display:block;padding:5px 12px;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer";
+      editSea.addEventListener("click",function(e){e.stopPropagation();openSeanceEditModal(cy.id,s.num);});
+      d.appendChild(editSea);
+    }
     sl.appendChild(d);
   });
+  if(canEditCycles()){
+    var addSea=document.createElement("button");
+    addSea.textContent="+ Ajouter une séance";
+    addSea.style.cssText="width:100%;margin-top:10px;padding:12px;border-radius:var(--rs);background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.25);color:#fff;font-size:13px;font-weight:700;cursor:pointer";
+    addSea.addEventListener("click",function(){openSeanceEditModal(cy.id,null);});
+    sl.appendChild(addSea);
+    var editCy=document.createElement("button");
+    editCy.textContent="Modifier ce cycle";
+    editCy.style.cssText="width:100%;margin-top:8px;padding:11px;border-radius:var(--rs);background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer";
+    editCy.addEventListener("click",function(){openCycleEditModal(cy.id);});
+    sl.appendChild(editCy);
+  }
 }
 function openSea(cyId,sNum){
   curCy=findCycle(cyId);
@@ -7430,6 +7698,7 @@ function initFirestoreSync(){
   if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
     fsStartSync("comptabilite","asmb_comptabilite");
   }
+  fetchCycleOverridesFromCloud();
   if(window.fbGetDoc){
     window.fbGetDoc(window.fbDoc(window.fbDb,"app_data","season")).then(function(snap){
       if(snap && snap.exists() && snap.data().value){
@@ -12033,7 +12302,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785595725";
+var APP_VERSION="1785787621";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
