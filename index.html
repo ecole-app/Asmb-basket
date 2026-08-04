@@ -1221,6 +1221,11 @@ initChannels();
  <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
  <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
  </div>
+ </div><div class="param-block" data-sec="notesfrais"><div class="sec">Notes de frais</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Dépense pour le club ? Faites une photo du justificatif et soumettez-la au dirigeant.</div>
+ <button onclick="openNotesFrais()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Mes notes de frais</button>
+ </div>
  </div><div class="param-block" data-sec="stats"><div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
  </div><div class="param-block" data-sec="apparence"><div class="sec">Apparence</div>
@@ -1599,6 +1604,10 @@ initChannels();
  <button id="annuaire-add-btn" onclick="showAddContact()" style="display:none;padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Contact</button>
  </div>
  <div style="padding:10px 16px 4px"><input id="annuaire-search" type="search" placeholder="Rechercher un contact..." oninput="buildAnnuaire()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box"></div>
+ <div style="display:flex;gap:8px;padding:8px 16px 0">
+   <button id="annuaire-tab-tous" class="cat-filter on" onclick="setAnnuaireFilter('tous')">Tous</button>
+   <button id="annuaire-tab-benevoles" class="cat-filter" onclick="setAnnuaireFilter('benevole')">Bénévoles</button>
+ </div>
  <div id="annuaire-list" style="padding:8px 0 80px"></div>
  </div>
 
@@ -1613,6 +1622,13 @@ initChannels();
  <div class="form-group"><label class="form-label">Role / Fonction</label><input class="form-input" id="ct-role" placeholder="Ex: President, Tresoriere, Responsable U13..."></div>
  <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ct-tel" type="tel" placeholder="06..."></div>
  <div class="form-group"><label class="form-label">Email (optionnel)</label><input class="form-input" id="ct-email" type="email" placeholder="email@..."></div>
+ <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer">
+   <input type="checkbox" id="ct-benevole" onchange="document.getElementById('ct-dispo-wrap').style.display=this.checked?'block':'none'" style="width:18px;height:18px;accent-color:var(--dkg)">
+   C'est un bénévole
+ </label>
+ <div id="ct-dispo-wrap" style="display:none">
+   <div class="form-group"><label class="form-label">Disponibilités / tâches proposées</label><textarea class="form-input" id="ct-dispo" rows="2" placeholder="Ex: buvette les samedis, transport, arbitrage..."></textarea></div>
+ </div>
  <button onclick="saveContact()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
@@ -4127,6 +4143,7 @@ function renderLicenceDetail(lic){
   }
   if(lic.fiche){
     actions+='<button onclick="showEditFiche()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(26,46,90,.12);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Modifier la fiche (dirigeant)</button>';
+    actions+='<button onclick="addLicenceAsBenevole(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
   }
 
   el.innerHTML=
@@ -4144,6 +4161,36 @@ function renderLicenceDetail(lic){
     '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Catégorie</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">'+catSel+'</div>'+
     ficheHtml+actions;
+}
+
+async function addLicenceAsBenevole(code){
+  var lics=getLicences();
+  var lic=lics.find(function(l){return l.code===code;});
+  if(!lic||!lic.fiche){alert("Fiche introuvable.");return;}
+  var f=lic.fiche;
+  var contacts=getAnnuaire();
+  var existing=contacts.find(function(c){return c.linkedLicenceCode===code;});
+  if(existing){
+    if(existing.type==="benevole"){ alert("Déjà enregistré comme bénévole."); return; }
+    existing.type="benevole";
+    saveAnnuaireList(contacts);
+    alert("Ajouté aux bénévoles.");
+    return;
+  }
+  var nomComplet=((f.respNom||"").trim())||((f.prenom||"")+" "+(f.nom||"")).trim();
+  var dispo=await askPrompt("Disponibilités / tâches proposées", {placeholder:"Ex: buvette, transport, arbitrage...", confirmText:"Ajouter"});
+  contacts.push({
+    id:Date.now().toString(),
+    nom:nomComplet,
+    role:"Bénévole ("+((f.prenom||"")+" "+(f.nom||"")).trim()+")",
+    tel:f.respTel||f.telephone||"",
+    email:f.respEmail||f.emailLic||"",
+    type:"benevole",
+    dispo:dispo||"",
+    linkedLicenceCode:code
+  });
+  saveAnnuaireList(contacts);
+  await askAlert("Ajouté aux bénévoles.");
 }
 
 function setLicCat(cat){
@@ -4844,7 +4891,7 @@ function buildParametres(){
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  themes:"Thèmes animés",avis:"Avis et suggestions",stats:"Statistiques du club",
+  themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Demonstration"
 };
@@ -5302,7 +5349,7 @@ function toggleNotif(checked){
 
 // ── ANNUAIRE DU CLUB ────────────────────────────────────────────
 function getAnnuaire(){try{return JSON.parse(localStorage.getItem("asmb_annuaire")||"[]");}catch(e){return [];}}
-function saveAnnuaireList(list){localStorage.setItem("asmb_annuaire",JSON.stringify(list));}
+function saveAnnuaireList(list){localStorage.setItem("asmb_annuaire",JSON.stringify(list));fsWriteCollection("annuaire",list);}
 
 var calWeekOffset=0;
 
@@ -5726,14 +5773,23 @@ function openAnnuaire(){
   buildAnnuaire();
 }
 
+var annuaireFilter="tous";
+function setAnnuaireFilter(f){
+  annuaireFilter=f;
+  var tTous=document.getElementById("annuaire-tab-tous"), tBen=document.getElementById("annuaire-tab-benevoles");
+  if(tTous)tTous.classList.toggle("on",f==="tous");
+  if(tBen)tBen.classList.toggle("on",f==="benevole");
+  buildAnnuaire();
+}
 function buildAnnuaire(){
   var el=document.getElementById("annuaire-list");if(!el)return;
   var contacts=getAnnuaire();
+  if(annuaireFilter==="benevole"){ contacts=contacts.filter(function(c){return c.type==="benevole";}); }
   var searchEl=document.getElementById("annuaire-search");
   var q=searchEl?searchEl.value.trim().toLowerCase():"";
   if(q){contacts=contacts.filter(function(c){return (c.nom||"").toLowerCase().indexOf(q)>=0||(c.role||"").toLowerCase().indexOf(q)>=0;});}
   if(!contacts.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun contact pour le moment")+'</div>'+(!q&&window.asmbCoachMode?'<div style="font-size:11px;margin-top:4px">Appuyez sur + Contact</div>':"")+'</div>';
+    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":(annuaireFilter==="benevole"?"Aucun bénévole pour le moment":"Aucun contact pour le moment"))+'</div>'+(!q&&window.asmbCoachMode?'<div style="font-size:11px;margin-top:4px">Appuyez sur + Contact</div>':"")+'</div>';
     return;
   }
   el.innerHTML="";
@@ -5743,7 +5799,9 @@ function buildAnnuaire(){
     div.className="player-card";
     var delBtn=window.asmbCoachMode?('<button onclick="deleteContact(\''+c.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0">✕</button>'):"";
     var telLink=c.tel?('<a href="tel:'+c.tel+'" style="font-size:11px;color:var(--ltg);text-decoration:none">'+c.tel+'</a>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+c.nom+'</div><div class="player-meta">'+(c.role||"")+'</div>'+(telLink?'<div style="margin-top:3px">'+telLink+'</div>':"")+'</div>'+delBtn;
+    var benBadge=c.type==="benevole"?'<span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;background:rgba(232,103,10,.12);color:#E8670A;font-size:9px;font-weight:800;text-transform:uppercase">Bénévole</span>':"";
+    var dispoLine=(c.type==="benevole"&&c.dispo)?('<div style="font-size:11px;color:var(--mut);margin-top:2px">'+c.dispo+'</div>'):"";
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+c.nom+benBadge+'</div><div class="player-meta">'+(c.role||"")+'</div>'+(telLink?'<div style="margin-top:3px">'+telLink+'</div>':"")+dispoLine+'</div>'+delBtn;
     el.appendChild(div);
   });
 }
@@ -5753,18 +5811,24 @@ function showAddContact(){
   document.getElementById("ct-role").value="";
   document.getElementById("ct-tel").value="";
   document.getElementById("ct-email").value="";
+  document.getElementById("ct-benevole").checked=false;
+  document.getElementById("ct-dispo").value="";
+  document.getElementById("ct-dispo-wrap").style.display="none";
   document.getElementById("modal-contact").style.display="flex";
 }
 
 function saveContact(){
   var nom=document.getElementById("ct-nom").value.trim();
   if(!nom){alert("Nom obligatoire");return;}
+  var isBenevole=document.getElementById("ct-benevole").checked;
   var contacts=getAnnuaire();
   contacts.push({
     id:Date.now().toString(),nom:nom,
     role:document.getElementById("ct-role").value.trim(),
     tel:document.getElementById("ct-tel").value.trim(),
-    email:document.getElementById("ct-email").value.trim()
+    email:document.getElementById("ct-email").value.trim(),
+    type:isBenevole?"benevole":"contact",
+    dispo:isBenevole?document.getElementById("ct-dispo").value.trim():""
   });
   saveAnnuaireList(contacts);
   closeModal("modal-contact");
@@ -6178,6 +6242,7 @@ var ADMIN_MODULES=[
  {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
  {id:"fiches",name:"Fiches reçues",sub:"Inscriptions à valider",icon:"📥",color:"#16A085",scr:"admin"},
  {id:"comptabilite",name:"Comptabilité",sub:"Recettes · Dépenses",icon:"💶",color:"#1A2E5A",scr:"comptabilite"},
+ {id:"notesfrais",name:"Notes de frais",sub:"Dépenses des coachs/bénévoles",icon:"🧾",color:"#E8670A",scr:"admin"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
@@ -6408,6 +6473,7 @@ function getAdminCount(id){
   if(id==="planning"){var e=getEvents();return e.length+" evenement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
   if(id==="comptabilite"){var c=getComptabilite();return c.length+" ligne"+(c.length>1?"s":"");}
+  if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
   if(id==="acces")return "Rôles & équipes";
   if(id==="avis")return "Retours des membres";
   return "";
@@ -6418,6 +6484,7 @@ function openAdminModule(id){
   if(id==="acces"){openAccesCoach();return;}
   if(id==="avis"){openAvisModule();return;}
   if(id==="fiches"){openFichesRecues();return;}
+  if(id==="notesfrais"){openNotesFrais();return;}
   stack.push(m.scr);
   if(id==="parametres"){buildParametres();}
   else if(id==="communaute"){buildAdminComm();}
@@ -6881,6 +6948,243 @@ function savePlayer(){
   renderPlayers();
   buildAdminHome();
 }
+// ── NOTES DE FRAIS (point 2) ────────────────────────────────────────
+function getNotesFrais(){try{return JSON.parse(localStorage.getItem("asmb_notes_frais")||"[]");}catch(e){return [];}}
+function saveNotesFrais(list){localStorage.setItem("asmb_notes_frais",JSON.stringify(list));fsWriteCollection("notes_frais",list);}
+
+function openNotesFrais(){
+  var isDir=isStaffUser()&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
+  var modal=document.createElement("div");
+  modal.className="notesfrais-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;display:flex;flex-direction:column";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var hdr=document.createElement("div");
+  hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px";
+  var title=document.createElement("div");
+  title.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
+  title.textContent="Notes de frais";
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="\u2715";
+  closeBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
+  closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
+  hdr.appendChild(title);hdr.appendChild(closeBtn);
+  var subLabel=document.createElement("div");
+  subLabel.style.cssText="font-size:11px;color:var(--mut);margin-bottom:12px";
+  subLabel.textContent=isDir?"Toutes les notes de l'équipe":"Vos notes de frais";
+  var addBtn=document.createElement("button");
+  addBtn.textContent="+ Nouvelle note de frais";
+  addBtn.style.cssText="width:100%;padding:12px;border-radius:var(--rs);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:14px";
+  addBtn.addEventListener("click",function(){ openNoteFraisForm(modal); });
+  var list=document.createElement("div");
+  list.style.cssText="overflow-y:auto;flex:1";
+  inner.appendChild(hdr);inner.appendChild(subLabel);inner.appendChild(addBtn);inner.appendChild(list);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  renderNotesFraisList(list,isDir);
+}
+function renderNotesFraisList(list,isDir){
+  var all=getNotesFrais();
+  var myEmail=(window.ASMB_USER&&window.ASMB_USER.email)||"";
+  var notes=isDir?all:all.filter(function(n){return n.demandeurEmail===myEmail;});
+  notes.sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+  list.innerHTML="";
+  if(!notes.length){
+    list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucune note de frais.</div>';
+    return;
+  }
+  var statutColors={soumise:"#E8670A",remboursee:"#27AE60",refusee:"#C0392B"};
+  var statutLabels={soumise:"Soumise",remboursee:"Remboursée",refusee:"Refusée"};
+  notes.forEach(function(n){
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(statutColors[n.statut]||"#8E44AD")+";border-radius:var(--rs);padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start";
+    if(n.photo){
+      var img=document.createElement("img");
+      img.src=n.photo;
+      img.style.cssText="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer";
+      img.addEventListener("click",function(){window.open(n.photo,"_blank");});
+      card.appendChild(img);
+    }
+    var body=document.createElement("div");
+    body.style.cssText="flex:1;min-width:0";
+    var top=document.createElement("div");
+    top.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px";
+    var left=document.createElement("div");
+    left.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(n.motif||"(sans motif)")+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(n.date?new Date(n.date).toLocaleDateString("fr-FR"):"")+(n.categorie?" · "+authEsc(n.categorie):"")+(isDir?" · "+authEsc(n.demandeurNom||n.demandeurEmail||""):"")+'</div>';
+    var montant=document.createElement("div");
+    montant.style.cssText="font-size:15px;font-weight:800;color:var(--txt);flex-shrink:0";
+    montant.textContent=(n.montant||0).toFixed(2)+" €";
+    top.appendChild(left);top.appendChild(montant);
+    var statutBadge=document.createElement("div");
+    statutBadge.style.cssText="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:800;color:#fff;background:"+(statutColors[n.statut]||"#8E44AD");
+    statutBadge.textContent=statutLabels[n.statut]||n.statut;
+    body.appendChild(top);body.appendChild(statutBadge);
+    var btnRow=document.createElement("div");
+    btnRow.style.cssText="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap";
+    var printBtn=document.createElement("button");
+    printBtn.textContent="Imprimer";
+    printBtn.style.cssText="padding:6px 12px;border-radius:16px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer";
+    printBtn.addEventListener("click",function(e){e.stopPropagation();printNoteFrais(n);});
+    var sendBtn=document.createElement("button");
+    sendBtn.textContent="Envoyer";
+    sendBtn.style.cssText="padding:6px 12px;border-radius:16px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer";
+    sendBtn.addEventListener("click",function(e){e.stopPropagation();sendNoteFraisMail(n);});
+    btnRow.appendChild(printBtn);btnRow.appendChild(sendBtn);
+    if(isDir&&n.statut==="soumise"){
+      var okBtn=document.createElement("button");
+      okBtn.textContent="Marquer remboursée";
+      okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
+      okBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"remboursee",list,isDir);});
+      var refBtn=document.createElement("button");
+      refBtn.textContent="Refuser";
+      refBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:700;border:none;cursor:pointer";
+      refBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"refusee",list,isDir);});
+      btnRow.appendChild(okBtn);btnRow.appendChild(refBtn);
+    }
+    var delBtn=document.createElement("button");
+    delBtn.textContent="Supprimer";
+    delBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:700;border:none;cursor:pointer";
+    delBtn.addEventListener("click",function(e){
+      e.stopPropagation();
+      askConfirm("Supprimer cette note de frais ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+        if(!ok)return;
+        saveNotesFrais(getNotesFrais().filter(function(x){return x.id!==n.id;}));
+        renderNotesFraisList(list,isDir);
+      });
+    });
+    btnRow.appendChild(delBtn);
+    body.appendChild(btnRow);
+    card.appendChild(body);
+    list.appendChild(card);
+  });
+}
+function markNoteFraisStatut(id,statut,list,isDir){
+  var notes=getNotesFrais();
+  var idx=notes.findIndex(function(n){return n.id===id;});
+  if(idx<0)return;
+  notes[idx].statut=statut;
+  saveNotesFrais(notes);
+  if(statut==="remboursee"){
+    var n=notes[idx];
+    var compta=getComptabilite();
+    compta.push({
+      id:Date.now().toString(),date:new Date().toISOString().slice(0,10),montant:n.montant||0,type:"depense",
+      categorie:"Note de frais",motif:n.motif||"",tiers:n.demandeurNom||n.demandeurEmail||"",moyen:"Virement",
+      reference:"Note de frais #"+n.id
+    });
+    saveComptabilite(compta);
+  }
+  renderNotesFraisList(list,isDir);
+}
+function openNoteFraisForm(parentModal){
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvelle note de frais</div>'+
+      '<button id="nf-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="nf-date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+    '<div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="nf-montant" type="number" step="0.01" placeholder="0.00"></div>'+
+    '<div class="form-group"><label class="form-label">Motif</label><input class="form-input" id="nf-motif" placeholder="Ex: Essence déplacement match"></div>'+
+    '<div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="nf-categorie" list="nf-cat-list" placeholder="Ex: Déplacement, Matériel, Repas..."><datalist id="nf-cat-list"></datalist></div>'+
+    '<div class="form-group"><label class="form-label">Photo du justificatif</label>'+
+      '<input type="file" id="nf-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleNoteFraisPhoto(this)">'+
+      '<button type="button" id="nf-photo-btn" style="width:100%;padding:12px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer">📷 Prendre / choisir une photo</button>'+
+      '<div id="nf-photo-preview" style="margin-top:8px"></div>'+
+    '</div>'+
+    '<button id="nf-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>';
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  var dlCat=document.getElementById("nf-cat-list");
+  var cats=getNotesFrais().map(function(n){return n.categorie;}).filter(Boolean);
+  var uniqCats=cats.filter(function(c,i){return cats.indexOf(c)===i;});
+  dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+c+'">';}).join("");
+  document.getElementById("nf-photo-btn").addEventListener("click",function(){document.getElementById("nf-photo-input").click();});
+  document.getElementById("nf-close").addEventListener("click",function(){modal.remove();});
+  document.getElementById("nf-save").addEventListener("click",function(){ saveNoteFrais(modal,parentModal); });
+}
+var noteFraisPhotoData=null;
+function handleNoteFraisPhoto(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var preview=document.getElementById("nf-photo-preview");
+  var btn=document.getElementById("nf-photo-btn");
+  btn.textContent="Compression...";btn.disabled=true;
+  compressImageFile(file,900,0.55).then(function(dataUrl){
+    if(dataUrl.length>700000){ return compressImageFile(file,600,0.4); }
+    return dataUrl;
+  }).then(function(dataUrl){
+    noteFraisPhotoData=dataUrl;
+    preview.innerHTML='<img src="'+dataUrl+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px">';
+    btn.textContent="📷 Changer la photo";btn.disabled=false;
+  }).catch(function(){
+    btn.textContent="📷 Prendre / choisir une photo";btn.disabled=false;
+    alert("Erreur lors du traitement de la photo.");
+  });
+}
+function saveNoteFrais(modal,parentModal){
+  var date=document.getElementById("nf-date").value;
+  var montant=parseFloat(document.getElementById("nf-montant").value);
+  var motif=document.getElementById("nf-motif").value.trim();
+  var categorie=document.getElementById("nf-categorie").value.trim();
+  if(!date){alert("Date obligatoire");return;}
+  if(!montant||montant<=0){alert("Montant invalide");return;}
+  if(!motif){alert("Motif obligatoire");return;}
+  var u=window.ASMB_USER||{};
+  var notes=getNotesFrais();
+  notes.push({
+    id:Date.now().toString(),date:date,montant:montant,motif:motif,categorie:categorie,
+    photo:noteFraisPhotoData||null,statut:"soumise",
+    demandeurEmail:u.email||"",demandeurNom:u.email||"",
+    ts:Date.now()
+  });
+  saveNotesFrais(notes);
+  noteFraisPhotoData=null;
+  modal.remove();
+  if(parentModal){
+    var list=parentModal.querySelector("div[style*='overflow-y']");
+    var isDir=isStaffUser()&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
+    if(list) renderNotesFraisList(list,isDir);
+  }
+}
+function printNoteFrais(n){
+  var win=window.open("","_blank");
+  var html='<html><head><title>Note de frais</title><style>'+
+    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2e1e}'+
+    'h1{font-size:20px;border-bottom:2px solid #1B5C28;padding-bottom:10px}'+
+    '.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}'+
+    '.row b{color:#1B5C28}'+
+    'img{max-width:100%;margin-top:20px;border-radius:8px}'+
+    '</style></head><body>'+
+    '<h1>Note de frais — ASMB Basket</h1>'+
+    '<div class="row"><span>Demandeur</span><b>'+authEsc(n.demandeurNom||n.demandeurEmail||"")+'</b></div>'+
+    '<div class="row"><span>Date</span><b>'+(n.date?new Date(n.date).toLocaleDateString("fr-FR"):"")+'</b></div>'+
+    '<div class="row"><span>Motif</span><b>'+authEsc(n.motif||"")+'</b></div>'+
+    '<div class="row"><span>Catégorie</span><b>'+authEsc(n.categorie||"-")+'</b></div>'+
+    '<div class="row"><span>Montant</span><b>'+(n.montant||0).toFixed(2)+' €</b></div>'+
+    '<div class="row"><span>Statut</span><b>'+authEsc(n.statut||"")+'</b></div>'+
+    (n.photo?'<img src="'+n.photo+'">':'')+
+    '</body></html>';
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+function sendNoteFraisMail(n){
+  var subject="Note de frais - "+(n.motif||"")+" ("+(n.montant||0).toFixed(2)+" €)";
+  var body="Note de frais\n\nDemandeur : "+(n.demandeurNom||n.demandeurEmail||"")+"\nDate : "+(n.date||"")+"\nMotif : "+(n.motif||"")+"\nCatégorie : "+(n.categorie||"-")+"\nMontant : "+(n.montant||0).toFixed(2)+" €\nStatut : "+(n.statut||"")+
+    (n.photo?"\n\n(Photo du justificatif disponible dans l'application, section Notes de frais)":"");
+  var mailto="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  window.location.href=mailto;
+}
+
 function deletePlayer(id){
   askConfirm("Supprimer ce joueur ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
@@ -7694,6 +7998,8 @@ function initFirestoreSync(){
   fsStartSync("teams","asmb_teams");
   fsStartSync("licences","asmb_licences");
   fsStartSync("events","asmb_events");
+  fsStartSync("annuaire","asmb_annuaire");
+  fsStartSync("notes_frais","asmb_notes_frais");
   fsStartSyncEvaluations();
   if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
     fsStartSync("comptabilite","asmb_comptabilite");
@@ -12302,7 +12608,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785787621";
+var APP_VERSION="1785828845";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
