@@ -1106,7 +1106,7 @@ initChannels();
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noel"></div>
-      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="formation">Formation (arbitre, table de marque...)</option><option value="autre" selected>Autre</option></select></div>
       <div class="form-group" id="ev-eval-option" style="display:none">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input type="checkbox" id="ev-eval-enabled" style="width:18px;height:18px;accent-color:var(--dkg)">
@@ -2189,8 +2189,8 @@ function cycleProgress(cyId){
 var stack=["portal"],curCy=null,curSea=null;
 // Couleurs et libellés partages pour differencier visuellement les types d'evenement
 // (utilise partout ou des evenements sont affiches : Calendrier, onglet Evenements, etc.)
-var EVENT_TYPE_COLORS={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","stage":"#8E44AD","autre":"#8E44AD"};
-var EVENT_TYPE_LABELS={"match":"Match","entrainement":"Entraînement","tournoi":"Tournoi","stage":"Stage/Camp","autre":"Événement"};
+var EVENT_TYPE_COLORS={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","stage":"#8E44AD","formation":"#0B7285","autre":"#8E44AD"};
+var EVENT_TYPE_LABELS={"match":"Match","entrainement":"Entraînement","tournoi":"Tournoi","stage":"Stage/Camp","formation":"Formation","autre":"Événement"};
 function eventTypeColor(type){ return EVENT_TYPE_COLORS[type]||"#8E44AD"; }
 function eventTypeLabel(type){ return EVENT_TYPE_LABELS[type]||(type?type.charAt(0).toUpperCase()+type.slice(1):"Événement"); }
 
@@ -7415,12 +7415,11 @@ function renderPresenceHistory(){
   var listEl=document.getElementById("ph-detail-list");
   if(!total){listEl.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Aucune donnée pour cette période</div></div>';return;}
   listEl.innerHTML="";
-  var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
   events.forEach(function(e){
     var isPresent=e.presences[phCurrentPlayerId]==="present";
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"#27AE60":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+(typeColors[e.type]?e.type:"autre")+'</div></div>';
+    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"#27AE60":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+eventTypeLabel(e.type)+'</div></div>';
     listEl.appendChild(div);
   });
 
@@ -7811,7 +7810,6 @@ function togglePlanningView(){
 function renderPlanningCalendar(){
   var el=document.getElementById("planning-calendar");if(!el)return;
   var events=getEvents();
-  var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
   var monthNames=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Décembre"];
   var firstDay=new Date(planCalYear,planCalMonth,1);
   var startOffset=(firstDay.getDay()+6)%7; // lundi=0
@@ -7834,7 +7832,7 @@ function renderPlanningCalendar(){
     var dateStr=planCalYear+"-"+String(planCalMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
     var dayEvents=events.filter(function(e){return e.date===dateStr;});
     var isToday=dateStr===todayStr;
-    var dots=dayEvents.slice(0,3).map(function(e){return '<span style="width:5px;height:5px;border-radius:50%;background:'+(typeColors[e.type]||"#1B5C28")+';display:inline-block;margin:0 1px"></span>';}).join("");
+    var dots=dayEvents.slice(0,3).map(function(e){return '<span style="width:5px;height:5px;border-radius:50%;background:'+eventTypeColor(e.type)+';display:inline-block;margin:0 1px"></span>';}).join("");
     html+='<div onclick="showDayEvents(\''+dateStr+'\')" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;background:'+(isToday?"var(--dkg)":"var(--card)")+';border:1px solid var(--bdr)">'+
       '<span style="font-size:11px;font-weight:'+(isToday?"800":"600")+';color:'+(isToday?"#fff":"var(--txt)")+'">'+day+'</span>'+
       '<div style="height:6px;margin-top:2px">'+dots+'</div>'+
@@ -7867,8 +7865,7 @@ function buildPlanning(){
   events.sort(function(a,b){return a.date>b.date?1:-1;});
   events.forEach(function(e){
     var d=document.createElement("div");d.className="event-card";
-    var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
-    var evCol=typeColors[e.type]||"#1B5C28";
+    var evCol=eventTypeColor(e.type);
     var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
     var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
@@ -11964,8 +11961,7 @@ function buildParentHome(){
   if(!nextEv){
     evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div style="font-size:13px;font-weight:600">Aucun événement a venir</div></div>';
   } else {
-    var typeColors={"match":"#C0392B","entrainement":"#1B5C28","tournoi":"#E8670A","autre":"#8E44AD"};
-    var col=typeColors[nextEv.type]||"#1B5C28";
+    var col=eventTypeColor(nextEv.type);
     var dateObj=new Date(nextEv.date);
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
     var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none"> Itineraire</a>'):"";
@@ -12608,7 +12604,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785828845";
+var APP_VERSION="1785829324";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
