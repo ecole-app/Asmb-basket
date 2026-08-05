@@ -761,6 +761,48 @@ initChannels();
     </div>
   </div>
 
+  <!-- ═══ INVENTAIRE BUVETTE ET MATERIEL ═══ -->
+  <div class="scr" id="scr-inventaire">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--txt)">Inventaire</div>
+        <div style="font-size:11px;color:var(--mut)" id="inv-count">0 article</div>
+      </div>
+      <button onclick="showAddInvItem()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Article</button>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 12px 0">
+      <button id="inv-tab-buvette" class="cat-filter on" onclick="setInvTab('buvette')">🥤 Buvette</button>
+      <button id="inv-tab-materiel" class="cat-filter" onclick="setInvTab('materiel')">🏀 Matériel</button>
+    </div>
+    <div style="padding:10px 12px 0"><input id="inv-search" type="search" placeholder="Rechercher un article..." oninput="buildInventaire()" style="width:100%;padding:10px 12px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box"></div>
+    <div id="inv-alert-banner" style="margin:10px 12px 0"></div>
+    <div id="inv-list" style="padding:10px 0 80px"></div>
+
+    <!-- Modal article inventaire -->
+    <div id="modal-inv-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)" id="inv-modal-title">Nouvel article</div>
+          <button onclick="closeModal('modal-inv-item')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button id="inv-cat-buvette" onclick="setInvItemCat('buvette')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">🥤 Buvette</button>
+          <button id="inv-cat-materiel" onclick="setInvItemCat('materiel')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">🏀 Matériel</button>
+        </div>
+        <div class="form-group"><label class="form-label">Nom de l'article</label><input class="form-input" id="inv-nom" placeholder="Ex: Coca-Cola 33cl, Ballon taille 5..."></div>
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:1"><label class="form-label">Quantité actuelle</label><input class="form-input" id="inv-qte" type="number" step="1" placeholder="0"></div>
+          <div class="form-group" style="flex:1"><label class="form-label">Unité</label><input class="form-input" id="inv-unite" placeholder="unité, paquet..."></div>
+        </div>
+        <div class="form-group"><label class="form-label">Seuil d'alerte (optionnel)</label><input class="form-input" id="inv-seuil" type="number" step="1" placeholder="Ex: 5 — alerte si stock en dessous"></div>
+        <div class="form-group"><label class="form-label">Emplacement (optionnel)</label><input class="form-input" id="inv-emplacement" placeholder="Ex: Local buvette, armoire matériel..."></div>
+        <div class="form-group"><label class="form-label">Notes (optionnel)</label><textarea class="form-input" id="inv-notes" rows="2"></textarea></div>
+        <button id="inv-save-btn" onclick="saveInvItem()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="inv-delete-btn" onclick="deleteInvItem()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cet article</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ INSCRIPTION PUBLIQUE ═══ -->
   <div class="scr" id="scr-inscription">
     <div class="hero" style="padding:16px 16px 14px;text-align:left;display:flex;align-items:center;gap:12px">
@@ -2227,7 +2269,7 @@ function showScr(id){
 }
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison "+getCurrentSeason()],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"]};
+ var map={"auth":["Connexion",""],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison "+getCurrentSeason()],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"],inventaire:["Inventaire","Buvette · Matériel"]};
  var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
@@ -6243,6 +6285,7 @@ var ADMIN_MODULES=[
  {id:"fiches",name:"Fiches reçues",sub:"Inscriptions à valider",icon:"📥",color:"#16A085",scr:"admin"},
  {id:"comptabilite",name:"Comptabilité",sub:"Recettes · Dépenses",icon:"💶",color:"#1A2E5A",scr:"comptabilite"},
  {id:"notesfrais",name:"Notes de frais",sub:"Dépenses des coachs/bénévoles",icon:"🧾",color:"#E8670A",scr:"admin"},
+ {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
@@ -6432,6 +6475,13 @@ function buildAdminHome(){
        '<div style="font-size:11px;color:var(--mut);margin-top:2px">Proposé par un coach. Appuyez pour valider ou refuser.</div>'+
        '</div>';
    }
+   var lowStockItems=getInventaire().filter(function(it){return it.seuil!=null && it.seuil!=="" && Number(it.qte)<Number(it.seuil);});
+   if(lowStockItems.length){
+     banner.innerHTML+='<div onclick="openAdminModule(\'inventaire\')" style="margin:0 12px 14px;background:rgba(22,160,133,.1);border:1px solid rgba(22,160,133,.3);border-radius:var(--rs);padding:12px 14px;cursor:pointer">'+
+       '<div style="font-size:13px;font-weight:700;color:#16A085">'+lowStockItems.length+' article'+(lowStockItems.length>1?"s":"")+' en stock bas</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+lowStockItems.slice(0,4).map(function(it){return authEsc(it.nom);}).join(", ")+(lowStockItems.length>4?"…":"")+'</div>'+
+       '</div>';
+   }
    cleanupExpiredEventChannelAccess();
  }
  getOrderedAdminModules().forEach(function(m,i,arr){
@@ -6474,6 +6524,7 @@ function getAdminCount(id){
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
   if(id==="comptabilite"){var c=getComptabilite();return c.length+" ligne"+(c.length>1?"s":"");}
   if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
+  if(id==="inventaire"){var inv=getInventaire();return inv.length+" article"+(inv.length>1?"s":"");}
   if(id==="acces")return "Rôles & équipes";
   if(id==="avis")return "Retours des membres";
   return "";
@@ -6494,6 +6545,7 @@ function openAdminModule(id){
   else if(id==="planning")buildPlanning();
   else if(id==="documents")buildDocs();
   else if(id==="comptabilite")buildComptabilite();
+  else if(id==="inventaire")buildInventaire();
   showScr(m.scr);
 }
 
@@ -8000,6 +8052,7 @@ function initFirestoreSync(){
   fsStartSyncEvaluations();
   if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
     fsStartSync("comptabilite","asmb_comptabilite");
+    fsStartSync("inventaire","asmb_inventaire");
   }
   fetchCycleOverridesFromCloud();
   if(window.fbGetDoc){
@@ -9349,7 +9402,163 @@ function exportComptaCsv(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
 }
-var currentDocCatFilter="all";
+
+// ── INVENTAIRE BUVETTE ET MATERIEL (point 11) ───────────────────────
+function getInventaire(){try{return JSON.parse(localStorage.getItem("asmb_inventaire")||"[]");}catch(e){return [];}}
+function saveInventaire(list){localStorage.setItem("asmb_inventaire",JSON.stringify(list));fsWriteCollection("inventaire",list);}
+
+var invActiveTab="buvette";
+function setInvTab(tab){
+  invActiveTab=tab;
+  var tB=document.getElementById("inv-tab-buvette"), tM=document.getElementById("inv-tab-materiel");
+  if(tB)tB.classList.toggle("on",tab==="buvette");
+  if(tM)tM.classList.toggle("on",tab==="materiel");
+  buildInventaire();
+}
+function invFilteredList(){
+  var all=getInventaire().filter(function(it){return it.categorie===invActiveTab;});
+  var q=(document.getElementById("inv-search")||{}).value||"";
+  q=q.trim().toLowerCase();
+  if(q) all=all.filter(function(it){return (it.nom||"").toLowerCase().indexOf(q)>=0;});
+  all.sort(function(a,b){return (a.nom||"").localeCompare(b.nom||"");});
+  return all;
+}
+function buildInventaire(){
+  var all=getInventaire();
+  document.getElementById("inv-count").textContent=all.length+" article"+(all.length>1?"s":"");
+  var lowStock=all.filter(function(it){return it.seuil!=null && it.seuil!=="" && Number(it.qte)<Number(it.seuil);});
+  var banner=document.getElementById("inv-alert-banner");
+  if(banner){
+    banner.innerHTML=lowStock.length
+      ? '<div style="background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
+          '<div style="font-size:13px;font-weight:700;color:#E8670A">'+lowStock.length+' article'+(lowStock.length>1?"s":"")+' en stock bas</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+lowStock.map(function(it){return authEsc(it.nom);}).join(", ")+'</div>'+
+        '</div>'
+      : "";
+  }
+  var list=document.getElementById("inv-list");
+  if(!list)return;
+  var items=invFilteredList();
+  list.innerHTML="";
+  if(!items.length){
+    list.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun article</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Article</div></div>';
+    return;
+  }
+  items.forEach(function(it){
+    var low=it.seuil!=null && it.seuil!=="" && Number(it.qte)<Number(it.seuil);
+    var card=document.createElement("div");
+    card.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(low?"#E8670A":"var(--grn)")+";border-radius:var(--rs);padding:12px";
+    var top=document.createElement("div");
+    top.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;cursor:pointer";
+    top.addEventListener("click",function(){ showEditInvItem(it.id); });
+    var left=document.createElement("div");
+    left.style.cssText="flex:1;min-width:0";
+    left.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(it.nom||"")+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(it.emplacement?authEsc(it.emplacement):"")+(low?'<span style="color:#E8670A;font-weight:700"> · Stock bas</span>':"")+'</div>';
+    var qteBox=document.createElement("div");
+    qteBox.style.cssText="text-align:right;flex-shrink:0";
+    qteBox.innerHTML='<div style="font-size:16px;font-weight:800;color:'+(low?"#E8670A":"var(--txt)")+'">'+it.qte+'</div><div style="font-size:9px;color:var(--mut)">'+(it.unite||"")+'</div>';
+    top.appendChild(left);top.appendChild(qteBox);
+    card.appendChild(top);
+    var adjRow=document.createElement("div");
+    adjRow.style.cssText="display:flex;gap:8px;margin-top:10px";
+    var minusBtn=document.createElement("button");
+    minusBtn.textContent="− 1";
+    minusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer";
+    minusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,-1);});
+    var plusBtn=document.createElement("button");
+    plusBtn.textContent="+ 1";
+    plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+    plusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,1);});
+    adjRow.appendChild(minusBtn);adjRow.appendChild(plusBtn);
+    card.appendChild(adjRow);
+    list.appendChild(card);
+  });
+}
+function adjustInvQte(id,delta){
+  var items=getInventaire();
+  var idx=items.findIndex(function(x){return x.id===id;});
+  if(idx<0)return;
+  var newQte=Number(items[idx].qte||0)+delta;
+  if(newQte<0)newQte=0;
+  items[idx].qte=newQte;
+  saveInventaire(items);
+  buildInventaire();
+}
+var invEditId=null;
+function setInvItemCat(cat){
+  invEditCat=cat;
+  var bB=document.getElementById("inv-cat-buvette"), bM=document.getElementById("inv-cat-materiel");
+  bB.style.background=cat==="buvette"?"var(--dkg)":"var(--card)";
+  bB.style.color=cat==="buvette"?"#fff":"var(--mut)";
+  bB.style.borderColor=cat==="buvette"?"var(--dkg)":"var(--bdr)";
+  bM.style.background=cat==="materiel"?"var(--dkg)":"var(--card)";
+  bM.style.color=cat==="materiel"?"#fff":"var(--mut)";
+  bM.style.borderColor=cat==="materiel"?"var(--dkg)":"var(--bdr)";
+}
+var invEditCat="buvette";
+function showAddInvItem(){
+  invEditId=null;
+  document.getElementById("inv-modal-title").textContent="Nouvel article";
+  document.getElementById("inv-nom").value="";
+  document.getElementById("inv-qte").value="0";
+  document.getElementById("inv-unite").value="";
+  document.getElementById("inv-seuil").value="";
+  document.getElementById("inv-emplacement").value="";
+  document.getElementById("inv-notes").value="";
+  document.getElementById("inv-delete-btn").style.display="none";
+  setInvItemCat(invActiveTab);
+  document.getElementById("modal-inv-item").style.display="flex";
+}
+function showEditInvItem(id){
+  var it=getInventaire().find(function(x){return x.id===id;});
+  if(!it)return;
+  invEditId=id;
+  document.getElementById("inv-modal-title").textContent="Modifier l'article";
+  document.getElementById("inv-nom").value=it.nom||"";
+  document.getElementById("inv-qte").value=it.qte!=null?it.qte:0;
+  document.getElementById("inv-unite").value=it.unite||"";
+  document.getElementById("inv-seuil").value=it.seuil!=null?it.seuil:"";
+  document.getElementById("inv-emplacement").value=it.emplacement||"";
+  document.getElementById("inv-notes").value=it.notes||"";
+  document.getElementById("inv-delete-btn").style.display="block";
+  setInvItemCat(it.categorie||"buvette");
+  document.getElementById("modal-inv-item").style.display="flex";
+}
+function saveInvItem(){
+  var nom=document.getElementById("inv-nom").value.trim();
+  if(!nom){alert("Le nom de l'article est obligatoire");return;}
+  var qte=parseInt(document.getElementById("inv-qte").value,10)||0;
+  var seuilRaw=document.getElementById("inv-seuil").value;
+  var data={
+    nom:nom,categorie:invEditCat,qte:qte,
+    unite:document.getElementById("inv-unite").value.trim(),
+    seuil:seuilRaw!==""?parseInt(seuilRaw,10):null,
+    emplacement:document.getElementById("inv-emplacement").value.trim(),
+    notes:document.getElementById("inv-notes").value.trim()
+  };
+  var items=getInventaire();
+  if(invEditId){
+    var idx=items.findIndex(function(x){return x.id===invEditId;});
+    if(idx>=0) items[idx]=Object.assign({id:invEditId},data);
+  } else {
+    data.id=Date.now().toString();
+    items.push(data);
+  }
+  saveInventaire(items);
+  closeModal("modal-inv-item");
+  invActiveTab=invEditCat;
+  setInvTab(invEditCat);
+}
+function deleteInvItem(){
+  if(!invEditId)return;
+  askConfirm("Supprimer cet article de l'inventaire ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    saveInventaire(getInventaire().filter(function(x){return x.id!==invEditId;}));
+    closeModal("modal-inv-item");
+    buildInventaire();
+  });
+}
 var pendingDocCategory="autre";
 var DOC_CAT_LABELS={"reglement":"Règlement","autorisation":"Autorisation","formulaire":"Formulaire","autre":"Autre"};
 var DOC_CAT_COLORS={"reglement":"#1A2E5A","autorisation":"#C0392B","formulaire":"#16A085","autre":"#8E44AD"};
@@ -12604,7 +12813,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785829324";
+var APP_VERSION="1785914044";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
