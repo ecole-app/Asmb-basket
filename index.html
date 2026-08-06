@@ -4170,6 +4170,27 @@ function renderLicenceDetail(lic){
     ficheHtml+='</div>';
   }
 
+  // Paiement
+  var paiementHtml="";
+  if(lic.fiche){
+    if(lic.paiement){
+      var p=lic.paiement;
+      paiementHtml='<div style="margin-top:12px;background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.3);border-radius:var(--rs);padding:14px">'+
+        '<div style="font-size:13px;font-weight:800;color:var(--dkg)">✓ Paiement reçu</div>'+
+        '<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+p.moyen+' · '+(p.montant||0).toFixed(2)+' € · '+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+'</div>'+
+        '<div style="display:flex;gap:8px;margin-top:10px">'+
+          '<button onclick="printFactureLicence(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Imprimer</button>'+
+          '<button onclick="sendFactureLicenceMail(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Envoyer</button>'+
+          '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:transparent;border:1px solid var(--bdr);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer">Modifier</button>'+
+        '</div></div>';
+    } else {
+      paiementHtml='<div style="margin-top:12px;background:rgba(232,103,10,.08);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:14px">'+
+        '<div style="font-size:13px;font-weight:800;color:#E8670A">⏳ Paiement non enregistré</div>'+
+        '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
+        '</div>';
+    }
+  }
+
   // Actions
   var actions="";
   var curSeason=getCurrentSeason();
@@ -4202,7 +4223,137 @@ function renderLicenceDetail(lic){
     '</div>'+
     '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Catégorie</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">'+catSel+'</div>'+
-    ficheHtml+actions;
+    ficheHtml+paiementHtml+actions;
+}
+
+// ── PAIEMENT DE LICENCE + FACTURE (point 1) ─────────────────────────
+function openPaiementLicenceModal(code){
+  var lics=getLicences();
+  var lic=lics.find(function(l){return l.code===code;});
+  if(!lic)return;
+  var p=lic.paiement||{};
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var moyens=["Espèces","Chèque","Virement","CB"];
+  var moyenBtns=moyens.map(function(m){
+    var sel=(p.moyen||"Espèces")===m;
+    return '<button type="button" class="pl-moyen-btn" data-moyen="'+m+'" style="flex:1;padding:10px 6px;border-radius:var(--rx);border:2px solid '+(sel?"var(--grn)":"var(--bdr)")+';background:'+(sel?"rgba(39,174,96,.1)":"var(--card)")+';color:'+(sel?"var(--dkg)":"var(--mut)")+';font-size:11px;font-weight:700;cursor:pointer">'+m+'</button>';
+  }).join("");
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">Enregistrer le paiement</div>'+
+      '<button id="pl-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div style="font-size:12px;color:var(--mut);margin-bottom:14px">'+(lic.fiche?authEsc((lic.fiche.prenom||"")+" "+(lic.fiche.nom||"")):"")+(lic.typeLicence?" · "+(lic.typeLicence==="competition"?"Compétition":"Loisir"):"")+'</div>'+
+    '<div class="form-group"><label class="form-label">Moyen de paiement</label><div id="pl-moyen-row" style="display:flex;gap:6px;flex-wrap:wrap">'+moyenBtns+'</div></div>'+
+    '<div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="pl-montant" type="number" step="0.01" value="'+(p.montant!=null?p.montant:"")+'" placeholder="0.00"></div>'+
+    '<div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" id="pl-date" type="date" value="'+(p.date||new Date().toISOString().slice(0,10))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="pl-reference" value="'+authEsc(p.reference||"")+'" placeholder="N° de chèque, etc."></div>'+
+    '<button id="pl-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>';
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  var selectedMoyen=p.moyen||"Espèces";
+  Array.prototype.forEach.call(document.querySelectorAll(".pl-moyen-btn"),function(btn){
+    btn.addEventListener("click",function(){
+      selectedMoyen=btn.dataset.moyen;
+      Array.prototype.forEach.call(document.querySelectorAll(".pl-moyen-btn"),function(b){
+        var sel=b.dataset.moyen===selectedMoyen;
+        b.style.borderColor=sel?"var(--grn)":"var(--bdr)";
+        b.style.background=sel?"rgba(39,174,96,.1)":"var(--card)";
+        b.style.color=sel?"var(--dkg)":"var(--mut)";
+      });
+    });
+  });
+  document.getElementById("pl-close").addEventListener("click",function(){modal.remove();});
+  document.getElementById("pl-save").addEventListener("click",function(){
+    var montant=parseFloat(document.getElementById("pl-montant").value);
+    var date=document.getElementById("pl-date").value;
+    if(!montant||montant<=0){alert("Montant invalide");return;}
+    if(!date){alert("Date obligatoire");return;}
+    savePaiementLicence(code,{
+      moyen:selectedMoyen,montant:montant,date:date,
+      reference:document.getElementById("pl-reference").value.trim()
+    });
+    modal.remove();
+  });
+}
+function savePaiementLicence(code,paiement){
+  var lics=getLicences();
+  var idx=lics.findIndex(function(l){return l.code===code;});
+  if(idx<0)return;
+  var wasAlreadyRecorded=!!lics[idx].paiement;
+  lics[idx].paiement=paiement;
+  saveLicences(lics);
+  // Cree (ou ne duplique pas) la ligne Comptabilite correspondante
+  var compta=getComptabilite();
+  var f=lics[idx].fiche||{};
+  var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
+  var refCompta="Licence "+code;
+  var existingLine=compta.find(function(c){return c.reference===refCompta;});
+  var comptaData={
+    date:paiement.date,montant:paiement.montant,type:"recette",
+    categorie:"Licence",motif:"Licence "+nom+(lics[idx].typeLicence?" ("+(lics[idx].typeLicence==="competition"?"Compétition":"Loisir")+")":""),
+    tiers:f.respNom||nom,moyen:paiement.moyen,reference:refCompta
+  };
+  if(existingLine){
+    Object.assign(existingLine,comptaData);
+  } else {
+    comptaData.id=Date.now().toString();
+    compta.push(comptaData);
+  }
+  saveComptabilite(compta);
+  renderLicenceDetail(lics[idx]);
+  buildLicences();
+}
+function generateFactureHtml(lic){
+  var p=lic.paiement||{};
+  var f=lic.fiche||{};
+  var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
+  return '<h1>Reçu de paiement — ASMB Basket</h1>'+
+    '<div class="row"><span>Licencié(e)</span><b>'+authEsc(nom)+'</b></div>'+
+    '<div class="row"><span>Code licence</span><b>'+authEsc(lic.code)+'</b></div>'+
+    '<div class="row"><span>Catégorie</span><b>'+authEsc(lic.categorie||"-")+'</b></div>'+
+    '<div class="row"><span>Type</span><b>'+(lic.typeLicence==="competition"?"Compétition":"Loisir")+'</b></div>'+
+    '<div class="row"><span>Date de paiement</span><b>'+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+'</b></div>'+
+    '<div class="row"><span>Moyen de paiement</span><b>'+authEsc(p.moyen||"")+'</b></div>'+
+    (p.reference?'<div class="row"><span>Référence</span><b>'+authEsc(p.reference)+'</b></div>':'')+
+    '<div class="row" style="font-size:16px"><span>Montant réglé</span><b style="color:#1B5C28">'+(p.montant||0).toFixed(2)+' €</b></div>';
+}
+function printFactureLicence(code){
+  var lic=getLicences().find(function(l){return l.code===code;});
+  if(!lic||!lic.paiement)return;
+  var win=window.open("","_blank");
+  var html='<html><head><title>Reçu de paiement</title><style>'+
+    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2e1e}'+
+    'h1{font-size:20px;border-bottom:2px solid #1B5C28;padding-bottom:10px}'+
+    '.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}'+
+    '.row b{color:#1B5C28}'+
+    '</style></head><body>'+generateFactureHtml(lic)+'</body></html>';
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+function sendFactureLicenceMail(code){
+  var lic=getLicences().find(function(l){return l.code===code;});
+  if(!lic||!lic.paiement)return;
+  var f=lic.fiche||{};
+  var p=lic.paiement;
+  var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
+  var destEmail=f.respEmail||f.emailLic||lic.email||"";
+  var subject="Reçu de paiement - Licence "+nom+" - ASMB Basket";
+  var body="Bonjour,\n\nNous confirmons la bonne réception de votre paiement pour la licence de "+nom+".\n\n"+
+    "Code licence : "+lic.code+"\n"+
+    "Catégorie : "+(lic.categorie||"-")+"\n"+
+    "Montant réglé : "+(p.montant||0).toFixed(2)+" €\n"+
+    "Moyen de paiement : "+(p.moyen||"")+"\n"+
+    "Date : "+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+"\n\n"+
+    "Merci de votre confiance,\nASMB Basket";
+  var mailto="mailto:"+encodeURIComponent(destEmail)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  window.location.href=mailto;
 }
 
 async function addLicenceAsBenevole(code){
@@ -12813,7 +12964,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1785914044";
+var APP_VERSION="1786029188";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
