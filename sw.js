@@ -14,7 +14,32 @@ const PRECACHE = [
   './',
   './index.html',
   './manifest.json',
-  './version.json'
+  './version.json',
+  './css/style.css',
+  './img/logo.jpg',
+  './js/sw-register.js',
+  './js/firebase-init.js',
+  './js/01-config.js',
+  './js/02-formation-cycles.js',
+  './js/03-nav-portal.js',
+  './js/04-formation-ui.js',
+  './js/05-animations.js',
+  './js/06-licences.js',
+  './js/07-presences.js',
+  './js/08-parametres.js',
+  './js/09-ui-modales.js',
+  './js/10-annuaire-galerie.js',
+  './js/11-admin.js',
+  './js/12-equipes-planning.js',
+  './js/13-firestore-sync.js',
+  './js/14-evenements.js',
+  './js/15-compta-inventaire.js',
+  './js/16-communaute.js',
+  './js/17-poles.js',
+  './js/18-auth.js',
+  './js/19-profils.js',
+  './js/20-parent-tabs.js',
+  './js/21-main.js'
 ];
 
 self.addEventListener('install', function (event) {
