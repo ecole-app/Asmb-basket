@@ -79,6 +79,62 @@ function isPoleActive(poleId){
   return activePoles().some(function(p){ return p.id===poleId; });
 }
 
+// ═══ REGLEMENT PAR CATEGORIE ═════════════════════════════════════
+// Reperes nationaux FFBB. Chaque comite departemental peut les amenager :
+// ces valeurs sont un point de depart a verifier, pas une verite opposable.
+// Exemple reel d'ecart : le national prevoit 6 periodes de 4 min en U9,
+// certains comites appliquent 4 periodes de 6 min decomptees.
+// "Selon comite" = valeur qui varie assez pour ne pas etre affirmee ici :
+// c'est au club de la renseigner depuis son propre reglement departemental.
+const REGLEMENT_CHAMPS=[
+ {k:"format",   n:"Format de jeu"},
+ {k:"periodes", n:"Periodes"},
+ {k:"ballon",   n:"Ballon"},
+ {k:"panier",   n:"Hauteur de panier"},
+ {k:"defense",  n:"Defense"},
+ {k:"trois",    n:"Tir a 3 points"},
+ {k:"tempsJeu", n:"Temps de jeu"},
+ {k:"feuille",  n:"Feuille de marque"}
+];
+const REGLEMENT_FFBB={
+ u7:  {format:"Composition libre",   periodes:"Ateliers et rencontres de 4 a 6 min", ballon:"Tous types sauf T6 et T7", panier:"2,60 m maximum", defense:"Individuelle", trois:"Non autorise", tempsJeu:"Repartition equitable", feuille:"Selon comite"},
+ u9:  {format:"3x3 ou 4x4",          periodes:"6 x 4 min",  ballon:"T4 ou T5", panier:"2,60 m", defense:"Individuelle", trois:"Non autorise", tempsJeu:"Repartition equitable", feuille:"Selon comite"},
+ u11: {format:"4x4 et/ou 5x5",       periodes:"8 x 4 min",  ballon:"T5",       panier:"2,60 m", defense:"Individuelle", trois:"Selon preconisations", tempsJeu:"50% minimum preconise", feuille:"Selon comite"},
+ u13: {format:"5x5",                 periodes:"Selon comite", ballon:"T6",     panier:"3,05 m", defense:"Selon comite", trois:"Selon comite", tempsJeu:"Selon comite", feuille:"Selon comite"},
+ u15: {format:"5x5",                 periodes:"Selon comite", ballon:"T7 (M) / T6 (F)", panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
+ u17m:{format:"5x5",                 periodes:"Selon comite", ballon:"T7",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
+ u18f:{format:"5x5",                 periodes:"Selon comite", ballon:"T6",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
+ u21m:{format:"5x5",                 periodes:"Selon comite", ballon:"T7",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"}
+};
+
+// Departement du club, saisi librement (numero ou nom) : sert d'intitule,
+// aucune liste fermee n'est imposee.
+function getClubDepartement(){
+  return (window.CURRENT_CLUB && window.CURRENT_CLUB.departement) || "";
+}
+// Amenagements saisis par le club, par categorie.
+function getReglementOverrides(){
+  try{ return JSON.parse(localStorage.getItem("asmb_reglements_custom")||"{}"); }catch(e){ return {}; }
+}
+function saveReglementOverrides(o){
+  localStorage.setItem("asmb_reglements_custom",JSON.stringify(o));
+  if(window.fbDb&&window.fbSetDoc&&window.CURRENT_CLUB_ID){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","reglements"),
+      {data:JSON.stringify(o), departement:getClubDepartement()},{merge:true}).catch(function(){});
+  }
+}
+// Reglement effectif : amenagements du club par-dessus les reperes nationaux.
+function getReglement(catId){
+  var base=REGLEMENT_FFBB[catId]||REGLEMENT_FFBB.u13;
+  var ov=getReglementOverrides()[catId];
+  return ov ? Object.assign({},base,ov) : Object.assign({},base);
+}
+// Le club a-t-il amenage cette categorie ?
+function reglementEstAmenage(catId){
+  var ov=getReglementOverrides()[catId];
+  return !!(ov && Object.keys(ov).length);
+}
+
 // Une ligne de classement designe-t-elle notre propre equipe ?
 // (les noms sont saisis librement par le club, on compare au nom du club)
 function isOurTeamName(name){

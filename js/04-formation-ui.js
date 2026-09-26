@@ -168,6 +168,7 @@ function buildU13Home(){
       vl.appendChild(b);
     }
   }
+  buildReglement();
   var cl=document.getElementById("cyList");cl.innerHTML="";
   activeCycles().forEach(function(cy){
     var pr=cycleProgress(cy.id);
@@ -479,4 +480,80 @@ async function openVacancesEdit(){
   saveVacancesOverride(out);
   buildU13Home();
   askAlert("Dates du club enregistrees.");
+}
+
+// ── REGLEMENT DE LA CATEGORIE ───────────────────────────────────────
+// Affiche les reperes nationaux, remplaces par les amenagements du club
+// quand il en a saisi. Un champ "Selon comite" signale ce qui varie trop
+// d'un departement a l'autre pour etre affirme : c'est au club de le remplir.
+function buildReglement(){
+  var sec=document.getElementById("regSec");
+  var el=document.getElementById("regList");
+  if(!el) return;
+  var dep=getClubDepartement();
+  var amenage=reglementEstAmenage(activeCatId);
+  if(sec) sec.textContent="Reglement"+(dep?" \u00b7 "+dep:"")+(amenage?" (amenage par le club)":" (reperes nationaux)");
+  var r=getReglement(activeCatId);
+  el.innerHTML="";
+  var card=document.createElement("div");
+  card.style.cssText="margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden";
+  REGLEMENT_CHAMPS.forEach(function(c,i){
+    var v=r[c.k]||"";
+    var aVerifier=(v.indexOf("Selon comite")>=0);
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:10px;padding:10px 14px"+(i?";border-top:1px solid var(--bdr)":"");
+    row.innerHTML='<div style="flex:1;font-size:12px;color:var(--mut)">'+authEsc(c.n)+'</div>'+
+      '<div style="font-size:12.5px;font-weight:700;color:'+(aVerifier?"var(--mut)":"var(--txt)")+';text-align:right">'+authEsc(v)+'</div>';
+    card.appendChild(row);
+  });
+  el.appendChild(card);
+  if(!dep){
+    var warn=document.createElement("div");
+    warn.style.cssText="margin:0 12px 10px;padding:10px 14px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);font-size:11.5px;color:var(--txt2);line-height:1.45";
+    warn.textContent="Departement non renseigne : les valeurs affichees sont les reperes nationaux. Les comites departementaux les amenagent souvent, verifier votre reglement.";
+    el.appendChild(warn);
+  }
+  if(canEditCycles()){
+    var b=document.createElement("button");
+    b.textContent="Modifier le reglement de cette categorie";
+    b.style.cssText="width:calc(100% - 24px);margin:4px 12px 8px;padding:11px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer";
+    b.addEventListener("click",openReglementEdit);
+    el.appendChild(b);
+  }
+}
+
+async function openReglementEdit(){
+  if(!canEditCycles()) return;
+  var dep=await askPrompt("Departement du club (numero ou nom)",
+    {defaultValue:getClubDepartement(),placeholder:"Ex : 42 ou Loire",confirmText:"Suivant"});
+  if(dep===null) return;
+  dep=String(dep).trim();
+  if(window.CURRENT_CLUB_ID && window.fbUpdateDoc){
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{departement:dep}).catch(function(){});
+  }
+  if(window.CURRENT_CLUB) window.CURRENT_CLUB.departement=dep;
+
+  var cat=ELITE_CATS.filter(function(c){ return c.id===activeCatId; })[0]||{};
+  var r=getReglement(activeCatId);
+  var out={};
+  for(var i=0;i<REGLEMENT_CHAMPS.length;i++){
+    var c=REGLEMENT_CHAMPS[i];
+    var v=await askPrompt((cat.name||activeCatId)+" \u2014 "+c.n,
+      {defaultValue:r[c.k]||"",confirmText:i===REGLEMENT_CHAMPS.length-1?"Enregistrer":"Suivant"});
+    if(v===null) return;
+    out[c.k]=String(v).trim()||r[c.k]||"";
+  }
+  var all=getReglementOverrides();
+  all[activeCatId]=out;
+  saveReglementOverrides(all);
+  buildReglement();
+  askAlert("Reglement enregistre pour "+(cat.name||activeCatId)+".");
+}
+
+// Retour aux reperes nationaux pour la categorie affichee.
+function resetReglement(){
+  var all=getReglementOverrides();
+  delete all[activeCatId];
+  saveReglementOverrides(all);
+  buildReglement();
 }
