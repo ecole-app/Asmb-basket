@@ -32,9 +32,9 @@ service cloud.firestore {
       return !exists(clubPath(clubId)) || get(clubPath(clubId)).data.status != 'suspended';
     }
     function member(clubId) {
-      return signedIn() && exists(userPath()) && me().clubId == clubId && notSuspended(clubId);
+      return signedIn() && exists(userPath()) && me().get('clubId', null) == clubId && notSuspended(clubId);
     }
-    function hasRole(r) { return me().roles.hasAny([r]); }
+    function hasRole(r) { return me().get('roles', []).hasAny([r]); }
     function staff(clubId)     { return member(clubId) && (hasRole('dirigeant') || hasRole('coach')); }
     function dirigeant(clubId) { return member(clubId) && hasRole('dirigeant'); }
 
@@ -65,7 +65,7 @@ service cloud.firestore {
     // ── Comptes utilisateurs ────────────────────────────────────────
     match /users/{uid} {
       allow read: if signedIn()
-        && (request.auth.uid == uid || dirigeant(resource.data.clubId) || superAdmin());
+        && (request.auth.uid == uid || dirigeant(resource.data.get('clubId', null)) || superAdmin());
 
       // a) Parent : auto-inscription, club imposé par l'index téléphone
       allow create: if signedIn() && request.auth.uid == uid
@@ -92,9 +92,9 @@ service cloud.firestore {
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
       allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode']))
-        || (dirigeant(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
+        || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
         || (superAdmin() && request.auth.uid == uid
-            && resource.data.clubId == null && request.resource.data.clubId == "asmb"
+            && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clubId']));
       allow delete: if superAdmin();
     }

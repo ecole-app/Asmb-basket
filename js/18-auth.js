@@ -385,11 +385,13 @@ function loadClubProfile(clubId){
 function applyAuthedUser(user){
   if(window.__userDocUnsub){ try{window.__userDocUnsub();}catch(e){} }
   var firstLoad=true;
+  var rattachementTente=false; // garde-fou : un seul essai par session, jamais de boucle si le serveur refuse
   window.__userDocUnsub = window.fbOnSnapshot(window.fbDoc(window.fbDb,"users",user.uid), function(snap){
     if(snap && snap.exists()){
       var data=snap.data();
       // Compte d'origine créé avant le multi-club : rattachement au club d'origine
-      if(!data.clubId && user.uid===BOOTSTRAP_DIRIGEANT_UID){
+      if(!data.clubId && user.uid===BOOTSTRAP_DIRIGEANT_UID && !rattachementTente){
+        rattachementTente=true;
         window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",user.uid),{clubId:BOOTSTRAP_CLUB_ID})
           .catch(function(e){ console.log("rattachement club:",e&&e.code); });
         data=Object.assign({},data,{clubId:BOOTSTRAP_CLUB_ID});
