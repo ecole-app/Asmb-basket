@@ -111,7 +111,7 @@ function makeCard(p,onclick){
 
 function buildPortal(){
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
-  POLES.forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
+  activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
   buildDashboard();
 }
 

@@ -55,6 +55,30 @@ function clubSlug(){
     .replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"") || "club";
 }
 
+// ═══ POLES ACTIFS PAR CLUB ═══════════════════════════════════════
+// Socle de base, propose a tout club. L'assiduite (pointage, stats, historique
+// joueur) n'est pas un pole : c'est une brique transverse du socle, jamais
+// retiree. Elite Academy reste propre au club d'origine : le suivi
+// individualise demande une autre structure, il n'est pas proposable en option.
+const BASE_POLES=["formation","competition","evenement"];
+const OPTION_POLES=["3x3","basketpourtous"];   // activables plus tard, club par club
+
+// Poles reellement affiches pour le club actif.
+function activePoles(){
+  var c=window.CURRENT_CLUB;
+  var ids=(c && Array.isArray(c.poles) && c.poles.length) ? c.poles : null;
+  if(!ids){
+    // Club d'origine cree avant ce reglage : il conserve tous ses poles.
+    var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
+    ids = (c && c.id===boot) ? POLES.map(function(p){ return p.id; }) : BASE_POLES;
+  }
+  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
+}
+
+function isPoleActive(poleId){
+  return activePoles().some(function(p){ return p.id===poleId; });
+}
+
 // Une ligne de classement designe-t-elle notre propre equipe ?
 // (les noms sont saisis librement par le club, on compare au nom du club)
 function isOurTeamName(name){

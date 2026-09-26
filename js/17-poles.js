@@ -24,6 +24,7 @@ function savePoleData(poleId,data){
 }
 
 function openPoleScreen(poleId){
+  if(typeof isPoleActive==="function" && !isPoleActive(poleId)) return;
   currentPoleId=poleId;
   stack.push("pole-"+poleId);
   buildPoleScreen(poleId);
