@@ -443,24 +443,26 @@ function finishAuthedUser(user, u, isUpdate){
     localStorage.setItem("asmb_coach_teams", JSON.stringify(u.linkedTeamIds));
     if(u.linkedTeamIds.indexOf(getCoachTeam())<0){ localStorage.setItem("asmb_coach_team", u.linkedTeamIds[0]); }
   }
-  if(!isUpdate || profile!==previousProfile){
+  // Super admin : l'accueil est la Plateforme (clubs), jamais le portail d'un
+  // club — décidé AVANT tout routage, pour ne jamais afficher le portail (même
+  // une fraction de seconde) puis le remplacer. Ne concerne QUE ce compte (ou
+  // ?plateforme, diagnostic) : tout dirigeant/coach/parent d'un club normal
+  // continue de passer par initProfile() ci-dessous, sans aucun changement.
+  var forcePf=false;
+  try{ forcePf=new URLSearchParams(window.location.search).has("plateforme"); }catch(e){}
+  var onPf=(typeof stack!=="undefined" && stack.length && stack[stack.length-1]==="plateforme");
+  var wantsPlateforme = !window.SUPPORT_MODE && typeof showPlateformeHome==="function"
+     && (isSuperAdmin() || forcePf) && (!isUpdate || forcePf || onPf);
+
+  if(wantsPlateforme){
+    showPlateformeHome({force:forcePf});
+  } else if(!isUpdate || profile!==previousProfile){
     initProfile(); // routage existant, inchangé (au login, ou si le rôle actif change)
     applySeasonLabels();
   } else {
     refreshCurrentScreen(); // mise à jour silencieuse (ex: nouvelle équipe assignée), sans changer d'écran
   }
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
-  // Super admin : l'accueil est la Plateforme (clubs), pas l'espace d'un club.
-  // Une mise à jour live de la fiche utilisateur ne doit pas ramener ici en cours
-  // de travail — sauf si on s'y trouve déjà, ou si ?plateforme force l'accès.
-  var forcePf=false;
-  try{ forcePf=new URLSearchParams(window.location.search).has("plateforme"); }catch(e){}
-  var onPf=(typeof stack!=="undefined" && stack.length && stack[stack.length-1]==="plateforme");
-  if(!window.SUPPORT_MODE && typeof showPlateformeHome==="function"
-     && (!isUpdate || forcePf || onPf) && (isSuperAdmin() || forcePf)){
-    // différé : passe après le routage synchrone d'initProfile(), qui sinon gagne
-    setTimeout(function(){ showPlateformeHome({force:forcePf}); },0);
-  }
   try{
     var btn=document.getElementById("hdr-profile-btn");
     if(btn) btn.style.display=(roles.length>1)?"flex":"none";
