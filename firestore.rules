@@ -79,12 +79,23 @@ service cloud.firestore {
         && request.resource.data.inviteCode is string
         && inviteValid(request.resource.data.inviteCode, request.resource.data.clubId, request.resource.data.roles)
         && getAfter(invitePath(request.resource.data.inviteCode)).data.usedBy == request.auth.uid;
-      // c) Compte d'origine du super admin
-      allow create: if superAdmin() && request.auth.uid == uid;
+      // c) Compte d'origine du super admin : recréation à l'identique du seed
+      //    posé par applyAuthedUser() (même après suppression), jamais avec un
+      //    autre club ou un autre rôle — sinon la restriction de l'update
+      //    ci-dessous se contournerait par un delete + create.
+      allow create: if superAdmin() && request.auth.uid == uid
+        && request.resource.data.clubId == "asmb"
+        && request.resource.data.roles == ["dirigeant"];
 
+      // Le super admin ne peut pas s'attribuer un clubId à volonté : seul le
+      // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
+      // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
+      // Tout autre club se rejoint via une invitation (branche b ci-dessus).
       allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode']))
         || (dirigeant(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
-        || superAdmin();
+        || (superAdmin() && request.auth.uid == uid
+            && resource.data.clubId == null && request.resource.data.clubId == "asmb"
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clubId']));
       allow delete: if superAdmin();
     }
 
