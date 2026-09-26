@@ -70,3 +70,33 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 Site statique servi par GitHub Pages depuis la racine du dépôt. Aucune étape de build.
 Après un push, bump `version.json` (et `APP_VERSION` dans `21-main.js`) pour déclencher
 la bannière de mise à jour côté utilisateurs et purger l'ancien cache.
+
+## Multi-club
+
+Toutes les données d'un club vivent sous `clubs/{clubId}/...` dans Firestore.
+
+**Le cloisonnement est automatique** : `window.fbCollection` et `window.fbDoc`
+(définis dans `firebase-init.js`) préfixent eux-mêmes le chemin avec le club actif
+(`window.CURRENT_CLUB_ID`). Dans le code applicatif, on continue d'écrire
+`fbCollection(window.fbDb, "players")` : ça cible `clubs/{clubId}/players`.
+Il est donc impossible d'oublier de cloisonner un nouvel appel.
+
+- **Collections globales** (non préfixées) : `users`, `clubs`, `phone_index`,
+  `inscription_codes`. Toute autre collection est une donnée de club.
+- **Sans club actif**, un accès à une donnée de club lève une erreur au lieu
+  d'écrire au mauvais endroit (échec volontairement bruyant).
+- **Club actif** : défini à la connexion depuis `users/{uid}.clubId`
+  (`setActiveClub()` dans `18-auth.js`). Sur la page d'inscription publique
+  (visiteur non connecté), il vient du code d'inscription saisi.
+- **Tâches de démarrage** qui touchent des données : les lancer via
+  `whenClubReady(fn)`, jamais avec un `setTimeout` direct au chargement.
+- **Cache local** : quand le club change sur un appareil, toutes les clés
+  `asmb_*` sont purgées sauf les préférences de l'appareil
+  (`DEVICE_PREF_PREFIXES` dans `18-auth.js`). Une nouvelle préférence propre à
+  l'appareil (et non au club) doit être ajoutée à cette liste.
+- **Sécurité** : la vraie barrière est côté serveur, dans `firestore.rules`
+  (à la racine du dépôt, à publier dans la console Firebase). Toute nouvelle
+  collection doit y être ajoutée sous `match /clubs/{clubId}`.
+
+**Limite connue** : l'index téléphone (`phone_index`) a une entrée par numéro.
+Un même numéro inscrit dans deux clubs différents n'est rattaché qu'à un seul.

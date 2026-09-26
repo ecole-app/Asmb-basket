@@ -23,7 +23,7 @@ buildPortal();
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790399229";
+var APP_VERSION="1790400089";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -74,8 +74,8 @@ function checkTomorrowReminders(){
  }).catch(function(){});
  });
 }
-setTimeout(checkTomorrowReminders,4000);
-setInterval(checkTomorrowReminders,3600000);
+whenClubReady(function(){ setTimeout(checkTomorrowReminders,4000); });
+setInterval(function(){ if(window.CURRENT_CLUB_ID) checkTomorrowReminders(); },3600000);
 document.addEventListener("visibilitychange",function(){
  if(document.visibilityState==="visible")checkForUpdate();
 });
@@ -187,11 +187,16 @@ function checkEventReminders(){
     }
   });
 }
-setTimeout(checkEventReminders,2000);
-setTimeout(checkWeatherAlerts,3000);
-setTimeout(backupToCloud,5000);
-setTimeout(listenJoinRequestsGlobal,3500);
-setInterval(backupToCloud,300000);
+// Multi-club : ces tâches lisent/écrivent des données de club, elles attendent
+// donc que le club de l'utilisateur soit connu (sinon elles échoueraient au
+// démarrage, et l'écoute des demandes d'adhésion ne serait jamais installée).
+whenClubReady(function(){
+  setTimeout(checkEventReminders,2000);
+  setTimeout(checkWeatherAlerts,3000);
+  setTimeout(backupToCloud,5000);
+  setTimeout(listenJoinRequestsGlobal,3500);
+});
+setInterval(function(){ if(window.CURRENT_CLUB_ID) backupToCloud(); },300000);
 document.addEventListener("DOMContentLoaded",function(){
   var home=document.getElementById("home-logo");
   if(home)home.innerHTML='<img src="img/logo.png" style="width:44px;height:44px;object-fit:contain;display:block">';

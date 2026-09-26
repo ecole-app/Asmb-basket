@@ -1,6 +1,7 @@
 /* ===== 18-auth.js — Authentification, comptes, changement d'e-mail ===== */
 // ═══ AUTHENTIFICATION (comptes réels e-mail/mot de passe) ═══════════
 var BOOTSTRAP_DIRIGEANT_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2"; // compte dirigeant bootstrap (console Firebase)
+var BOOTSTRAP_CLUB_ID = "asmb"; // club d'origine, rattaché au compte bootstrap
 var AUTH_STATE = {}; // état transitoire (numéro saisi, résultat lookup)
 
 function authNormPhone(p){ return (p||"").trim().replace(/\s+/g,""); }
@@ -33,15 +34,16 @@ function authLookupPhoneRemote(phone){
   return window.fbGetDoc(window.fbDoc(window.fbDb,"phone_index",np)).then(function(snap){
     if(snap && snap.exists()){
       var d=snap.data();
-      return {found:true, phone:np, role:d.role||"parent", playerName:d.playerName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[]};
+      return {found:true, phone:np, role:d.role||"parent", playerName:d.playerName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[], clubId:d.clubId||null};
     }
     return {found:false, phone:np};
   }).catch(function(){ return {found:false, phone:np}; });
 }
 
+// Multi-club : l'index Firestore fait foi (il connaît le club du numéro).
+// Le cache local n'est plus utilisé ici : sur un appareil partagé, il appartient au
+// dernier club consulté et pourrait rattacher un numéro au mauvais club.
 function authLookupPhone(phone){
-  var local=authLookupPhoneLocal(phone);
-  if(local.found) return Promise.resolve(local);
   return authLookupPhoneRemote(phone);
 }
 
@@ -190,12 +192,14 @@ function authDoSignup(){
   if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
   if(pass.length<6){ authErr("Mot de passe : 6 caractères minimum"); return; }
   var res=AUTH_STATE.lookup||{};
+  if(!res.clubId){ authErr("Ce numéro n'est rattaché à aucun club. Se rapprocher du club."); return; }
   window.fbCreateUser(window.fbAuth, email, pass).then(function(cred){
     var uid=cred.user.uid;
     return window.fbSetDoc(window.fbDoc(window.fbDb,"users",uid), {
       phone: AUTH_STATE.phone||"",
       email: email,
       roles: ["parent"],
+      clubId: res.clubId||null, // club du licencié, fourni par l'index téléphone
       linkedPlayerIds: res.playerIds||[],
       linkedTeamIds: res.teamIds||[],
       createdAt: window.fbServerTimestamp()
@@ -312,19 +316,86 @@ function authLogout(){
   });
 }
 
+// ═══ MULTI-CLUB : club actif de l'utilisateur ═══════════════════════
+// Préférences propres à l'APPAREIL, conservées quand le club change.
+// Tout le reste (clés "asmb_*") est considéré comme donnée de club et purgé,
+// pour qu'aucune donnée en cache d'un club ne puisse être renvoyée dans un autre.
+var DEVICE_PREF_PREFIXES = ["asmb_theme","asmb_notif","asmb_last_email","asmb_pwa_hint",
+  "asmb_tuto_done","asmb_tip_","asmb_params_","asmb_admin_module_","asmb_joueur_phone",
+  "asmb_phone","asmb_pseudo","gm_"];
+
+function purgeClubLocalData(){
+  var toRemove=[];
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(!k || k.indexOf("asmb_")!==0) continue;
+    var keep=DEVICE_PREF_PREFIXES.some(function(p){ return k.indexOf(p)===0; });
+    if(!keep) toRemove.push(k);
+  }
+  toRemove.forEach(function(k){ localStorage.removeItem(k); });
+  return toRemove.length;
+}
+
+// File d'attente : tâches à lancer dès qu'un club est actif (minuteries de démarrage).
+var __clubReadyQueue=[];
+function whenClubReady(fn){
+  if(window.CURRENT_CLUB_ID){ try{ fn(); }catch(e){ console.log("whenClubReady:",e); } }
+  else __clubReadyQueue.push(fn);
+}
+
+function setActiveClub(clubId){
+  var prev=localStorage.getItem("gm_active_club");
+  // Purge aussi quand aucun club n'était mémorisé (premier passage en multi-club) :
+  // le cache éventuel date d'avant le cloisonnement et n'est rattaché à aucun club.
+  if(prev!==clubId){
+    var n=purgeClubLocalData();
+    if(n) console.log("Cache local purgé ("+n+" clés) : changement de club");
+  }
+  localStorage.setItem("gm_active_club", clubId);
+  window.CURRENT_CLUB_ID=clubId;
+  loadClubProfile(clubId);
+  var q=__clubReadyQueue; __clubReadyQueue=[];
+  q.forEach(function(fn){ try{ fn(); }catch(e){ console.log("clubReady task:",e); } });
+}
+
+// Charge la fiche du club (nom, sport, couleurs...) et crée ses canaux par défaut.
+function loadClubProfile(clubId){
+  if(!window.fbGetDoc) return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(snap){
+    if(snap && snap.exists()){
+      window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
+    } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
+      // Premier démarrage multi-club : création de la fiche du club d'origine
+      var club={ name:"ASMB Basket", sport:"basket", ownerUid:BOOTSTRAP_DIRIGEANT_UID,
+                 status:"active", createdAt:window.fbServerTimestamp() };
+      window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",clubId), club).catch(function(e){ console.log("création club:",e&&e.code); });
+      window.CURRENT_CLUB=Object.assign({id:clubId}, club);
+    }
+    var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+    if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels){ window.fbInitClubChannels(clubId); }
+  }).catch(function(e){ console.log("loadClubProfile:", e&&e.code||e); });
+}
+
 // Applique l'utilisateur authentifié : lit users/{uid}, amorce le dirigeant si besoin, puis route
 function applyAuthedUser(user){
   if(window.__userDocUnsub){ try{window.__userDocUnsub();}catch(e){} }
   var firstLoad=true;
   window.__userDocUnsub = window.fbOnSnapshot(window.fbDoc(window.fbDb,"users",user.uid), function(snap){
     if(snap && snap.exists()){
-      finishAuthedUser(user, snap.data(), !firstLoad);
+      var data=snap.data();
+      // Compte d'origine créé avant le multi-club : rattachement au club d'origine
+      if(!data.clubId && user.uid===BOOTSTRAP_DIRIGEANT_UID){
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",user.uid),{clubId:BOOTSTRAP_CLUB_ID})
+          .catch(function(e){ console.log("rattachement club:",e&&e.code); });
+        data=Object.assign({},data,{clubId:BOOTSTRAP_CLUB_ID});
+      }
+      finishAuthedUser(user, data, !firstLoad);
       firstLoad=false;
     } else if(firstLoad && user.uid===BOOTSTRAP_DIRIGEANT_UID && BOOTSTRAP_DIRIGEANT_UID){
-      var seed={ phone:"", email:user.email||"", roles:["dirigeant"], linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp() };
+      var seed={ phone:"", email:user.email||"", roles:["dirigeant"], clubId:BOOTSTRAP_CLUB_ID, linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp() };
       window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid), seed).then(function(){ finishAuthedUser(user, seed); firstLoad=false; });
     } else if(firstLoad){
-      alert("Compte non rattaché au club. Contacter un dirigeant.");
+      alert("Compte non rattaché à un club. Contacter un dirigeant.");
       window.fbSignOut(window.fbAuth);
       showAuth("entry");
     }
@@ -335,13 +406,21 @@ function applyAuthedUser(user){
 }
 
 function finishAuthedUser(user, u, isUpdate){
+  if(!u.clubId){
+    alert("Compte non rattaché à un club. Contacter un dirigeant.");
+    window.fbSignOut(window.fbAuth);
+    showAuth("entry");
+    return;
+  }
   var roles=u.roles||[];
   var profile = roles.indexOf("dirigeant")>=0 ? "dirigeant"
               : roles.indexOf("coach")>=0 ? "coach"
               : roles.indexOf("parent")>=0 ? "parent"
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
-  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
+  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
+  // Club actif AVANT tout accès aux données (routage, synchro Firestore)
+  if(!isUpdate || window.CURRENT_CLUB_ID!==u.clubId){ setActiveClub(u.clubId); }
   localStorage.setItem("asmb_profile", profile);
   if(window.ASMB_USER.email){ localStorage.setItem("asmb_last_email", window.ASMB_USER.email); }
   if(u.phone){ myPhone=u.phone; localStorage.setItem("asmb_phone", u.phone); }

@@ -1,0 +1,139 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════
+//  General Manager — règles de sécurité Firestore (multi-club)
+//
+//  Principe : toutes les données d'un club vivent sous clubs/{clubId}/...
+//  Un utilisateur n'accède qu'aux données du club inscrit dans son
+//  profil (users/{uid}.clubId). Aucune donnée d'un club n'est lisible
+//  ni modifiable depuis un autre club.
+//
+//  Collections globales (hors club) : users, clubs, phone_index,
+//  inscription_codes.
+// ═══════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Fonctions communes ──────────────────────────────────────────
+    function signedIn() { return request.auth != null; }
+
+    // Administrateur de la plateforme (éditeur de General Manager)
+    function superAdmin() {
+      return signedIn() && request.auth.uid == "7f2br1aTiJVWHTEbqVePbMLD0uc2";
+    }
+
+    function userPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function me() { return get(userPath()).data; }
+
+    function member(clubId) {
+      return signedIn() && exists(userPath()) && me().clubId == clubId;
+    }
+    function hasRole(r) { return me().roles.hasAny([r]); }
+    function staff(clubId)     { return member(clubId) && (hasRole('dirigeant') || hasRole('coach')); }
+    function dirigeant(clubId) { return member(clubId) && hasRole('dirigeant'); }
+
+    function changes(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    // ── Comptes utilisateurs ────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if signedIn()
+        && (request.auth.uid == uid || dirigeant(resource.data.clubId) || superAdmin());
+
+      // Auto-inscription : son propre compte, rôle parent uniquement, et club
+      // imposé par l'index téléphone (impossible de se rattacher à un autre club).
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.roles == ['parent']
+        && request.resource.data.phone is string
+        && request.resource.data.clubId ==
+             get(/databases/$(database)/documents/phone_index/$(request.resource.data.phone)).data.clubId;
+      allow create: if superAdmin() && request.auth.uid == uid;
+
+      // Soi-même : tout sauf rôles et club. Un dirigeant : les comptes de son
+      // club, sans pouvoir les déplacer vers un autre club.
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId']))
+        || (dirigeant(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
+        || superAdmin();
+      allow delete: if superAdmin();
+    }
+
+    // ── Clubs ───────────────────────────────────────────────────────
+    match /clubs/{clubId} {
+      allow read: if member(clubId) || superAdmin();
+      allow create, delete: if superAdmin();
+      // Un dirigeant personnalise son club (nom, couleurs, logo...) mais ne
+      // touche ni au statut d'abonnement ni au propriétaire.
+      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan'])) || superAdmin();
+
+      // ── Données sportives ──
+      match /players/{id}     { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /teams/{id}       { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /events/{id}      { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /evaluations/{id} { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /licences/{id}    { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /checkins/{id}    { allow read, write: if member(clubId); }
+      match /joinRequests/{id}{ allow read, write: if member(clubId); }
+
+      // ── Communauté ──
+      match /channels/{chanId} {
+        allow read: if member(clubId);
+        allow write: if staff(clubId);
+        match /messages/{msgId} {
+          allow read, create, update: if member(clubId);
+          allow delete: if staff(clubId);
+        }
+      }
+      match /gallery/{id} {
+        allow read, create, update: if member(clubId);
+        allow delete: if staff(clubId);
+      }
+      match /feedback/{id} {
+        allow create: if member(clubId);
+        allow read, update, delete: if staff(clubId);
+      }
+
+      // ── Gestion (données sensibles) ──
+      match /comptabilite/{id} { allow read, write: if dirigeant(clubId); }
+      match /inventaire/{id}   { allow read, write: if dirigeant(clubId); }
+      match /backups/{id}      { allow read, write: if dirigeant(clubId); }
+      match /notes_frais/{id}  { allow read, write: if staff(clubId); }
+      match /annuaire/{id}     { allow read, write: if staff(clubId); }
+
+      // ── Réglages du club ──
+      match /app_data/{id}       { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /reminders_sent/{id} { allow read: if member(clubId); allow write: if staff(clubId); }
+
+      // ── Fiches d'inscription déposées publiquement ──
+      // Un visiteur non connecté peut uniquement DÉPOSER une fiche, et seulement
+      // avec un code valide appartenant à CE club. Il ne peut ni relire, ni lister.
+      match /inscription_submissions/{id} {
+        allow create: if request.resource.data.code is string
+          && get(/databases/$(database)/documents/inscription_codes/$(request.resource.data.code)).data.clubId == clubId;
+        allow read, update, delete: if staff(clubId);
+      }
+    }
+
+    // ── Index publics (lecture avant connexion) ─────────────────────
+    // Contenu non sensible. Chaque entrée appartient à un club : seul le staff
+    // de ce club peut la créer, la modifier ou la supprimer.
+    match /phone_index/{phone} {
+      allow read: if true;
+      allow create: if staff(request.resource.data.clubId);
+      allow update: if staff(resource.data.clubId)
+        && request.resource.data.clubId == resource.data.clubId;
+      allow delete: if staff(resource.data.clubId);
+    }
+    match /inscription_codes/{code} {
+      allow read: if true;
+      allow create: if staff(request.resource.data.clubId);
+      allow update: if staff(resource.data.clubId)
+        && request.resource.data.clubId == resource.data.clubId;
+      allow delete: if staff(resource.data.clubId);
+    }
+
+    // Tout le reste (dont les anciennes collections à la racine) : refusé.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

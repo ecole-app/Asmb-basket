@@ -349,7 +349,8 @@ function openAccesCoach(){
     }
     renderAccesList(list,matches,phoneToName);
   });
-  window.fbGetDocs(window.fbCollection(window.fbDb,"users")).then(function(snap){
+  // Multi-club : uniquement les comptes du club actif (requête aussi exigée par les règles de sécurité)
+  window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
     snap.forEach(function(d){var v=d.data();v._uid=d.id;allUsers.push(v);});
     renderDefaultView();
   }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});

@@ -6,7 +6,7 @@ function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences
 // un numero deja connu du club sans etre encore connecte.
 var PHONE_INDEX_PREV={};
 function syncPhoneIndexFromLicences(lics){
-  if(!window.fbDb||!window.fbSetDoc) return;
+  if(!window.fbDb||!window.fbSetDoc||!window.CURRENT_CLUB_ID) return;
   var entries={};
   (lics||[]).forEach(function(l){
     if(!l||!l.fiche) return;
@@ -16,7 +16,7 @@ function syncPhoneIndexFromLicences(lics){
     var teamIds=[l.fiche.equipe].filter(Boolean);
     phones.forEach(function(p){
       if(!p) return;
-      if(!entries[p]) entries[p]={role:"parent",playerIds:[],playerName:playerName,teamIds:teamIds.slice()};
+      if(!entries[p]) entries[p]={role:"parent",playerIds:[],playerName:playerName,teamIds:teamIds.slice(),clubId:window.CURRENT_CLUB_ID||null};
       if(entries[p].playerIds.indexOf(l.id)<0) entries[p].playerIds.push(l.id);
     });
   });
@@ -40,11 +40,11 @@ function syncPhoneIndexFromLicences(lics){
 // a repondre "ce code existe-t-il ?" sur un appareil non connecte.
 var INSCRIPTION_CODES_PREV={};
 function syncInscriptionCodes(lics){
-  if(!window.fbDb||!window.fbSetDoc) return;
+  if(!window.fbDb||!window.fbSetDoc||!window.CURRENT_CLUB_ID) return;
   var entries={};
   (lics||[]).forEach(function(l){
     if(!l||!l.code) return;
-    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null};
+    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null, clubId:window.CURRENT_CLUB_ID||null};
   });
   Object.keys(entries).forEach(function(code){
     var s=JSON.stringify(entries[code]);
@@ -72,7 +72,7 @@ function lookupInscriptionCode(code, attempt){
   attempt=attempt||0;
   var lics=getLicences();
   var local=lics.find(function(l){return l.code===code;});
-  if(local) return Promise.resolve({found:true, local:local, code:code});
+  if(local) return Promise.resolve({found:true, local:local, code:code, clubId:localStorage.getItem("gm_active_club")});
   if(!window.fbDb||!window.fbGetDoc){
     // Firebase pas encore initialise (appareil neuf, page qui vient de charger) : on reessaie brievement.
     if(attempt<30){
@@ -85,7 +85,7 @@ function lookupInscriptionCode(code, attempt){
   return window.fbGetDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).then(function(snap){
     if(snap&&snap.exists()){
       var d=snap.data();
-      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null};
+      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null, clubId:d.clubId||null};
     }
     return {found:false, code:code};
   }).catch(function(){ return {found:false, code:code}; });
@@ -727,6 +727,11 @@ async function validerCode(){
   var res=await lookupInscriptionCode(code);
   if(btn){btn.disabled=false;btn.textContent="Acceder a ma fiche";}
   if(!res.found){alert("Code invalide. Vérifiez votre mail.");return;}
+  // Visiteur public (non connecté) : la fiche sera déposée dans le club du code.
+  if(!window.CURRENT_CLUB_ID){
+    if(!res.clubId){alert("Ce code n'est rattaché à aucun club. Contactez le club.");return;}
+    window.CURRENT_CLUB_ID=res.clubId;
+  }
   licCurrentCode=code;
 
   if(res.local){

@@ -46,49 +46,65 @@ enableIndexedDbPersistence(db).catch(function(err){
 window.fbDb = db;
 window.fbGetDoc = getDoc;
 window.fbWhere = where;
-window.fbCollection = collection;
 window.fbAddDoc = addDoc;
 window.fbQuery = query;
 window.fbOrderBy = orderBy;
 window.fbOnSnapshot = onSnapshot;
 window.fbServerTimestamp = serverTimestamp;
-window.fbDoc = doc;
 window.fbSetDoc = setDoc;
 window.fbGetDocs = getDocs;
 window.fbUpdateDoc = updateDoc;
 window.fbDeleteDoc = deleteDoc;
 window.fbArrayUnion = arrayUnion;
 window.fbArrayRemove = arrayRemove;
+
+// ═══ MULTI-CLUB : cloisonnement automatique des données ══════════════
+// Toutes les données d'un club vivent sous clubs/{clubId}/... .
+// Plutôt que de modifier chaque appel dans l'application (~110), les deux points
+// d'entrée fbCollection/fbDoc préfixent eux-mêmes le chemin quand la collection
+// demandée appartient à un club. Oublier un appel est donc impossible.
+//
+// Collections GLOBALES (hors club) : users, clubs, phone_index, inscription_codes.
+// Toute autre collection est traitée comme donnée de club.
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes"]);
+
+function requireClubId(coll){
+  const id = window.CURRENT_CLUB_ID;
+  if(!id){
+    // Echec volontairement bruyant : écrire sans club actif risquerait de mélanger
+    // les données de plusieurs clubs.
+    throw new Error("Aucun club actif pour accéder à '"+coll+"'");
+  }
+  return id;
+}
+window.fbCollection = function(dbRef, coll, ...rest){
+  if(GLOBAL_COLLECTIONS.has(coll)) return collection(dbRef, coll, ...rest);
+  return collection(dbRef, "clubs", requireClubId(coll), coll, ...rest);
+};
+window.fbDoc = function(dbRef, coll, ...rest){
+  if(GLOBAL_COLLECTIONS.has(coll)) return doc(dbRef, coll, ...rest);
+  return doc(dbRef, "clubs", requireClubId(coll), coll, ...rest);
+};
+window.fbHasClub = function(){ return !!window.CURRENT_CLUB_ID; };
+window.fbGlobalCollectionNames = GLOBAL_COLLECTIONS;
 window.fbReady = true;
 
-// Init default channels if needed
-async function initChannels(){
+// Canaux par défaut, créés une seule fois pour chaque club (génériques :
+// les canaux d'équipe sont créés à la création des équipes, pas ici).
+window.fbInitClubChannels = async function(clubId){
+  if(!clubId) return;
   const channels = [
-    {id:"general", name:"Général", icon:"", desc:"Canal principal ASMB"},
-    {id:"u13f", name:"U13 Féminin", icon:"🏀", desc:"Équipe U13F"},
-    {id:"u15", name:"U15", icon:"🏀", desc:"Équipe U15"},
-    {id:"seniors", name:"Seniors", icon:"🏀", desc:"Équipe Seniors"},
-    {id:"coaches", name:"Coachs", icon:"", desc:"Staff et encadrants"},
-    {id:"evenements", name:"Evénements", icon:"", desc:"Annonces et événements"},
+    {id:"general",    name:"Général",    icon:"", desc:"Canal principal du club", clubWide:true},
+    {id:"coaches",    name:"Coachs",     icon:"", desc:"Staff et encadrants"},
+    {id:"evenements", name:"Événements", icon:"", desc:"Annonces et événements", clubWide:true},
   ];
-  for(const ch of channels){
-    await setDoc(doc(db,"channels",ch.id), ch, {merge:true});
-  }
-  // Migration: ballon pour les canaux d'equipe, rien pour les canaux generaux
-  // (on matche par id ET par nom, pour aussi corriger d'anciens doublons crees avec un id different)
-  const noEmojiIds=["general","coaches","evenements"];
-  const noEmojiNames=["général","general","coachs","coaches","evenements","evénements","evenement","événement"];
   try{
-    const allSnap=await getDocs(collection(db,"channels"));
-    for(const d of allSnap.docs){
-      const nameNorm=(d.data().name||"").toLowerCase().trim();
-      const isGeneral=noEmojiIds.includes(d.id)||noEmojiNames.includes(nameNorm);
-      const wanted=isGeneral?"":"🏀";
-      if((d.data().icon||"")!==wanted){
-        await setDoc(doc(db,"channels",d.id), {icon:wanted}, {merge:true});
-      }
+    for(const ch of channels){
+      const ref = doc(db,"clubs",clubId,"channels",ch.id);
+      const snap = await getDoc(ref);
+      if(!snap.exists()) await setDoc(ref, ch);
     }
-  }catch(e){}
-  window.dispatchEvent(new Event("fb-ready"));
-}
-initChannels();
+  }catch(e){ console.log("Init canaux club:", e&&e.code||e); }
+};
+
+window.dispatchEvent(new Event("fb-ready"));
