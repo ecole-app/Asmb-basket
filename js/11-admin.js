@@ -310,7 +310,7 @@ function openAccesCoach(){
   closeBtn.addEventListener("click",function(e){e.stopPropagation();modal.remove();});
   hdr.appendChild(title);hdr.appendChild(closeBtn);
   var note=document.createElement("div");
-  note.style.cssText="font-size:11px;color:var(--mut);background:#e6f0e9;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4";
+  note.style.cssText="font-size:11px;color:var(--mut);background:#e8edf5;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4";
   note.textContent="La personne concernée doit se déconnecter puis se reconnecter pour que le changement de rôle prenne effet.";
   var searchWrap=document.createElement("div");
   searchWrap.style.cssText="margin-bottom:12px";
@@ -951,7 +951,7 @@ function saveNoteFrais(modal,parentModal){
 function printNoteFrais(n){
   var win=window.open("","_blank");
   var html='<html><head><title>Note de frais</title><style>'+
-    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2e1e}'+
+    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2438}'+
     'h1{font-size:20px;border-bottom:2px solid #1A2E5A;padding-bottom:10px}'+
     '.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}'+
     '.row b{color:#1A2E5A}'+

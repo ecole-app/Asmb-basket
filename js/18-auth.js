@@ -127,7 +127,7 @@ function showAuth(step, data){
       +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:18px;cursor:pointer" onclick="showAuth(\'login\')">J\'ai déjà un compte</p>'
       +'<p style="text-align:center;font-size:12px;color:var(--mut);font-weight:700;margin-top:12px;cursor:pointer;text-decoration:underline" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
       +'<div style="flex:1"></div>'
-      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e6f0e9;border-radius:var(--rx)">App réservée aux membres. Seuls les numéros déjà enregistrés par le club peuvent créer un compte.</p>'
+      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e8edf5;border-radius:var(--rx)">App réservée aux membres. Seuls les numéros déjà enregistrés par le club peuvent créer un compte.</p>'
       +'</div>';
   } else if(step==="signup"){
     var chips="";
@@ -448,6 +448,11 @@ function finishAuthedUser(user, u, isUpdate){
     refreshCurrentScreen(); // mise à jour silencieuse (ex: nouvelle équipe assignée), sans changer d'écran
   }
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
+  // Super admin : l'accueil est la Plateforme (clubs), pas l'espace d'un club.
+  // Une mise à jour live de la fiche utilisateur ne doit pas ramener ici en cours de travail.
+  if(!isUpdate && !window.SUPPORT_MODE && typeof showPlateformeHome==="function" && isSuperAdmin()){
+    showPlateformeHome();
+  }
   try{
     var btn=document.getElementById("hdr-profile-btn");
     if(btn) btn.style.display=(roles.length>1)?"flex":"none";

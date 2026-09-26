@@ -871,7 +871,7 @@ function renderMatchdayPlayers(ev){
       countsEl.innerHTML=
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#D4AF37"><div style="font-size:26px;font-weight:900">'+pres+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Presents</div></div>'+
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#C0392B"><div style="font-size:26px;font-weight:900">'+abs+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Absents</div></div>'+
-        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a9a90"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans reponse</div></div>';
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a93a4"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans reponse</div></div>';
     }
     listEl.innerHTML=rows||'<div style="font-size:12px;color:var(--mut);padding:10px">Aucun joueur convoqué.</div>';
   }).catch(function(){

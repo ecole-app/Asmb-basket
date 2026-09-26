@@ -39,6 +39,7 @@ function gmFmtDate(ts){
 // ── Petits composants d'interface ────────────────────────────────────
 function gmSheet(title){
   var modal=document.createElement("div");
+  modal.className="gm-sheet";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
   inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
@@ -208,18 +209,50 @@ function acceptInvite(code, inv){
 }
 
 // ═══ ESPACE PLATEFORME (super admin) ══════════════════════════════════
+var GM_INTRO="Créez les clubs et invitez leur dirigeant. Les données internes d'un club ne sont visibles qu'avec un code d'accès support fourni par le club.";
+
 function openPlateforme(){
   if(!isSuperAdmin()) return;
   var s=gmSheet("Plateforme General Manager");
   var intro=document.createElement("div");
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
-  intro.textContent="Créez les clubs et invitez leur dirigeant. Les données internes d'un club ne sont visibles qu'avec un code d'accès support fourni par le club.";
+  intro.textContent=GM_INTRO;
   s.body.appendChild(intro);
-  s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   var list=document.createElement("div");
+  s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   list.style.marginTop="14px";
   s.body.appendChild(list);
   loadClubsList(list);
+}
+
+// Accueil du super admin : la plateforme, pas l'espace d'un club.
+function showPlateformeHome(){
+  if(!isSuperAdmin()) return;
+  var el=document.getElementById("plateforme-content");
+  if(!el) return;
+  el.innerHTML="";
+  var intro=document.createElement("div");
+  intro.style.cssText="margin:14px 12px 0;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.45";
+  intro.textContent=GM_INTRO;
+  el.appendChild(intro);
+  var list=document.createElement("div");
+  var act=document.createElement("div");
+  act.style.cssText="margin:12px 12px 0";
+  act.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
+  el.appendChild(act);
+  list.style.cssText="margin:14px 12px 24px";
+  el.appendChild(list);
+  loadClubsList(list);
+  stack=["plateforme"];
+  showScr("plateforme");
+}
+
+// Le club d'origine est le seul à s'ouvrir directement : le super admin en est le dirigeant.
+// Tout autre club passe par un code d'accès support fourni par son dirigeant.
+function enterOwnClub(c){
+  if(!isSuperAdmin() || !c || c.id!==BOOTSTRAP_CLUB_ID) return;
+  document.querySelectorAll(".gm-sheet").forEach(function(m){ m.remove(); });
+  initProfile();
 }
 function loadClubsList(list){
   list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Chargement…</div>';
@@ -241,11 +274,15 @@ function renderClubCard(c, list){
     +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.sport||"")+' · '+authEsc(c.id)
     +' · <b style="color:'+(suspended?"var(--red)":"var(--dkg)")+'">'+(suspended?"suspendu":"actif")+'</b></div>';
   var row=gmRow(card);
-  row.appendChild(gmBtn("Inviter un dirigeant","primary",function(){
+  var own=(c.id===BOOTSTRAP_CLUB_ID);
+  if(own){
+    row.appendChild(gmBtn("Entrer dans le club","primary",function(){ enterOwnClub(c); }));
+  }
+  row.appendChild(gmBtn("Inviter un dirigeant",own?"soft":"primary",function(){
     createClubInvite(c.id, c.name, "dirigeant").then(function(code){ showInviteResult(code,"dirigeant",c.name); })
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
-  row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); }));
+  if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }
   row.appendChild(gmBtn(suspended?"Réactiver":"Suspendre", suspended?"soft":"danger", function(){
     askConfirm(suspended?"Réactiver l'accès de ce club ?":"Suspendre ce club ? Ses membres ne pourront plus accéder à l'application.",
       {danger:!suspended, confirmText:suspended?"Réactiver":"Suspendre"}).then(function(ok){

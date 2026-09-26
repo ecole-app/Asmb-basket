@@ -503,7 +503,7 @@ function printFactureLicence(code){
   if(!lic||!lic.paiement)return;
   var win=window.open("","_blank");
   var html='<html><head><title>Reçu de paiement</title><style>'+
-    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2e1e}'+
+    'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2438}'+
     'h1{font-size:20px;border-bottom:2px solid #1A2E5A;padding-bottom:10px}'+
     '.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}'+
     '.row b{color:#1A2E5A}'+
