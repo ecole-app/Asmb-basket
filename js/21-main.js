@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790423721";
+var APP_VERSION="1790423918";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -48,13 +48,17 @@ function checkForUpdate(){
  .catch(function(){});
 }
 function applyUpdate(){
+ // Signale a sw-register.js que le rechargement est volontaire, pour qu'il
+ // n'en ajoute pas un second quand le nouveau service worker prendra la main.
+ try{ sessionStorage.setItem("gm_manual_update","1"); }catch(e){}
+ var dest=location.href.split("?")[0]+"?v="+Date.now();
  if('serviceWorker' in navigator){
    navigator.serviceWorker.getRegistrations().then(function(regs){
      regs.forEach(function(r){r.unregister();});
-     location.href=location.href.split("?")[0]+"?v="+Date.now();
-   }).catch(function(){location.href=location.href.split("?")[0]+"?v="+Date.now();});
+     location.href=dest;
+   }).catch(function(){ location.href=dest; });
  } else {
-   location.href=location.href.split("?")[0]+"?v="+Date.now();
+   location.href=dest;
  }
 }
 setTimeout(checkForUpdate,4000);
