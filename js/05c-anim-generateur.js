@@ -107,8 +107,14 @@ function analyseSituation(sit,catId){
  // Ce que le texte annonce doit se retrouver a l'image. Un exercice qui finit
  // au panier dessine sur un parquet nu, sans cercle, se contredit a l'ecran :
  // ces deux drapeaux permettent aux scenes hors terrain de s'adapter.
- sc.panier=/\btirs?\b|panier|lay-?up|double pas|finition|finir|shoot|adresse|lancer franc|au cercle|planche|marquer/.test(full);
- sc.def=!!sc.ndef||/defenseur|defensive|\bdefense\b|adversaire|genneur|passif|contradicteur/.test(full);
+ // "Cercle" designe le panier, sauf quand le groupe est dispose en cercle.
+ var cercleTir=/\bcercle\b/.test(full) && !/en (demi-)?cercle|demi-cercle|cercle de \d|cercle de joueurs|en ronde/.test(full);
+ sc.panier=/\btirs?\b|\btireu/.test(full)
+   || /panier|lay-?up|double pas|finition|\bfinir\b|shoot|adresse|lancer franc|arceau|planche|marquer|scorer|conclure|mi-distance|3 points/.test(full)
+   || cercleTir;
+ sc.def=!!sc.ndef
+   || /defenseur|defensive|\bdefense\b|adversaire|genneur|passif|aidant|opposant|vis-a-vis|contestation|contester|kick-?out|ressortie|prise a deux|close ?out/.test(full)
+   || (/\baide\b/.test(full) && !/a l aide de/.test(full));
 
  function set(type,note){ sc.type=type; sc.note=note; return sc; }
 
@@ -136,8 +142,12 @@ function analyseSituation(sit,catId){
    if(zoneDef && !zoneAire) return set("zone","Defense de zone");
    if(/presse|pressing|tout terrain defensif/.test(full))
      return set("presse","Presse tout terrain");
-   if(/aide et recup|aide defensive|rotation defensive|prise a deux|close ?out|flash defensif|\baide\b/.test(head))
-     return set("aide","Aide et rotation");
+   // Le vocabulaire de l'aide defensive est plus large que le mot "aide" :
+   // "un aidant", "kick-out", "ressortie" decrivent la meme chose, et ces
+   // termes vivent souvent dans la description plutot que dans le titre.
+   if(/aide et recup|aide defensive|rotation defensive|prise a deux|close ?out|flash defensif|kick-?out|ressortie|aidant/.test(full)
+      || (/\baide\b/.test(full) && !/a l aide de/.test(full)))
+     return set("aide","Aide et ressortie");
    if(/poste bas|poste haut|jeu interieur|pivot bas|joueur interieur|\binterieurs\b|ailier fort|dos au panier/.test(full)
       && !/course interieure|ligne interieure|couloir interieur/.test(full))
      return set("interieur","Jeu interieur");
@@ -654,6 +664,52 @@ function gTrait(type,cle,sc){
  var tr=G_TRAITS[type]; if(!tr) return false;
  var v=tr[cle];
  return (typeof v==="function")?v(sc):!!v;
+}
+// Second controle, independant du premier. Le controle ci-dessus compare le
+// texte au dessin en s'appuyant sur les memes drapeaux que l'analyse : si
+// l'analyse passe a cote d'un mot, le controle passe a cote aussi — c'est ce
+// qui a laisse passer "Penetration et kick-out", dessine en atelier.
+// Celui-ci part du vocabulaire metier et verifie que la scene retenue fait
+// partie de celles qui peuvent legitimement l'illustrer.
+// Les listes acceptables couvrent les chevauchements reels du basket — un
+// exercice de rebond qui enchaine sur contre-attaque peut legitimement etre
+// illustre par l'un ou l'autre. Ce qu'elles excluent volontairement, ce sont
+// les scenes generiques (atelier, jeu, dribble, circulation) : une situation
+// tactique illustree par un parcours de plots est l'erreur a attraper.
+var G_ATTENDU=[
+ {mot:/pick and roll|ecran porteur|ecran sur porteur/, ok:["pnr"]},
+ {mot:/defense de zone|contre une zone|zone 2-3|zone 3-2|zone 1-3-1/, ok:["zone"]},
+ {mot:/kick-?out|ressortie|aidant|aide defensive|rotation defensive/, ok:["aide","opposition","surnombre","zone","interieur","transition","pnr","ecran"]},
+ {mot:/\becrans?\b|screen/, ok:["ecran","pnr","rebond","opposition","interieur","duel"]},
+ {mot:/presse|pressing/, ok:["presse","transition","opposition","zone"]},
+ {mot:/boxout|box out|rebond (defensif|offensif)/, ok:["rebond","opposition","duel","transition"]},
+ {mot:/contre-attaque|3 couloirs|trois couloirs/, ok:["transition","opposition","surnombre","rebond","presse"]},
+ {mot:/poste bas|poste haut|dos au panier/, ok:["interieur","opposition","duel","rebond","ecran","zone","tir"]},
+ {mot:/lancer franc/, ok:["tir"]}
+];
+// Les scenes generiques ne doivent illustrer aucun motif tactique : si l'une
+// d'elles entrait dans une liste ci-dessus, le controle perdrait son objet.
+var G_GENERIQUES=["circuit","jeu","dribble","passe","cercle","theorie","athletique"];
+function verifierArchetypes(){
+ if(typeof ELITE_CATS==="undefined"||typeof getCyclesForCat!=="function") return [];
+ var ecarts=[];
+ ELITE_CATS.forEach(function(cat){
+   getCyclesForCat(cat.id).forEach(function(cy){
+     (cy.seas||[]).forEach(function(s){
+       (s.sits||[]).forEach(function(sit,i){
+         var sc; try{ sc=analyseSituation(sit,cat.id); }catch(e){ return; }
+         var t=gNorm((sit.ti||"")+" . "+(sit.org||"")+" . "+(sit.desc||""));
+         G_ATTENDU.forEach(function(r){
+           if(r.mot.test(t) && r.ok.indexOf(sc.type)<0)
+             ecarts.push(cat.id+" "+s.num+"."+(i+1)+" \""+(sit.ti||"")+"\" : texte "+r.mot.source.slice(0,28)+"... mais scene \""+sc.type+"\"");
+         });
+       });
+     });
+   });
+ });
+ if(ecarts.length) console.warn("Scenes douteuses au regard du vocabulaire ("+ecarts.length+") :\n"+ecarts.join("\n"));
+ else console.log("Scenes : archetype coherent avec le vocabulaire de chaque situation.");
+ return ecarts;
 }
 function verifierCoherenceSchemas(){
  if(typeof ELITE_CATS==="undefined"||typeof getCyclesForCat!=="function") return [];
