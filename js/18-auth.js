@@ -365,9 +365,12 @@ function loadClubProfile(clubId){
     if(snap && snap.exists()){
       window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
       if(typeof applyClubLabels==="function") applyClubLabels();
-      if(snap.data().status==="suspended" && !window.SUPPORT_MODE && !isSuperAdmin()){
-        alert("L'accès de votre club à General Manager est suspendu. Contactez General Manager.");
-        window.fbSignOut(window.fbAuth); showAuth("entry");
+      // Suspendu ou supprime : on n'ejecte plus vers l'ecran de connexion, le club
+      // doit pouvoir lire le motif et le delai dont il dispose pour regulariser.
+      var st=snap.data().status;
+      if((st==="suspended"||st==="deleted") && !window.SUPPORT_MODE && !isSuperAdmin()){
+        if(typeof showClubSuspendu==="function") showClubSuspendu(window.CURRENT_CLUB);
+        else { alert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }
         return;
       }
     } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
