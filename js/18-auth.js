@@ -364,6 +364,11 @@ function loadClubProfile(clubId){
   window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(snap){
     if(snap && snap.exists()){
       window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
+      if(snap.data().status==="suspended" && !window.SUPPORT_MODE && !isSuperAdmin()){
+        alert("L'accès de votre club à General Manager est suspendu. Contactez General Manager.");
+        window.fbSignOut(window.fbAuth); showAuth("entry");
+        return;
+      }
     } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
       // Premier démarrage multi-club : création de la fiche du club d'origine
       var club={ name:"ASMB Basket", sport:"basket", ownerUid:BOOTSTRAP_DIRIGEANT_UID,
@@ -372,7 +377,7 @@ function loadClubProfile(clubId){
       window.CURRENT_CLUB=Object.assign({id:clubId}, club);
     }
     var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
-    if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels){ window.fbInitClubChannels(clubId); }
+    if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels && !window.SUPPORT_MODE){ window.fbInitClubChannels(clubId); }
   }).catch(function(e){ console.log("loadClubProfile:", e&&e.code||e); });
 }
 
@@ -419,8 +424,13 @@ function finishAuthedUser(user, u, isUpdate){
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
   window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
+  // Mode support : le super admin consulte un club qui lui a donné un code d'accès
+  var activeClub=u.clubId;
+  var sup=(typeof getSupportSession==="function")?getSupportSession():null;
+  if(sup && sup.clubId && user.uid===BOOTSTRAP_DIRIGEANT_UID){ activeClub=sup.clubId; window.SUPPORT_MODE=sup; }
   // Club actif AVANT tout accès aux données (routage, synchro Firestore)
-  if(!isUpdate || window.CURRENT_CLUB_ID!==u.clubId){ setActiveClub(u.clubId); }
+  if(!isUpdate || window.CURRENT_CLUB_ID!==activeClub){ setActiveClub(activeClub); }
+  if(window.SUPPORT_MODE){ applySupportModeUI(window.SUPPORT_MODE); }
   localStorage.setItem("asmb_profile", profile);
   if(window.ASMB_USER.email){ localStorage.setItem("asmb_last_email", window.ASMB_USER.email); }
   if(u.phone){ myPhone=u.phone; localStorage.setItem("asmb_phone", u.phone); }
@@ -450,6 +460,7 @@ function finishAuthedUser(user, u, isUpdate){
 function initAuthGate(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
+  if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
   if(!window.fbAuthReady || !window.fbAuth){
     // Firebase pas prêt : on retente brièvement, sinon fallback ancien comportement
     if(!window.__authWait){ window.__authWait=0; }

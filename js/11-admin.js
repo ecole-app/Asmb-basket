@@ -1,6 +1,7 @@
 /* ===== 11-admin.js — Espace Admin, acces coach, fiches recues, notes de frais ===== */
 // ═══ ADMIN ════════════════════════════════════════════════════════
 var ADMIN_MODULES=[
+ {id:"invitations",name:"Accès & invitations",sub:"Inviter coachs · Accès support",icon:"🔐",color:"#1A2E5A",scr:"admin"},
  {id:"parametres",name:"Paramètres",sub:"Notifications - Compte - Données",icon:"⚙",color:"#5a76aa",scr:"parametres"},
  {id:"communaute",name:"Communauté",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
  {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#27AE60",scr:"licences"},
@@ -173,6 +174,15 @@ function toggleAdminEditMode(){
 
 function buildAdminHome(){
  var el=document.getElementById("adminCards");if(!el)return;el.innerHTML="";
+ // Super admin : accès à l'espace plateforme (création des clubs)
+ if(typeof isSuperAdmin==="function" && isSuperAdmin() && !window.SUPPORT_MODE){
+   var pf=document.createElement("div");
+   pf.style.cssText="margin:0 12px 14px;background:linear-gradient(135deg,#0F1B33,#1B2C4F);border-radius:var(--rs);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px";
+   pf.innerHTML='<div style="width:40px;height:40px;border-radius:10px;background:#0F1B33;border:1px solid rgba(232,169,59,.5);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></div>'
+     +'<div style="flex:1"><div style="font-size:14px;font-weight:800;color:#fff">Plateforme General Manager</div><div style="font-size:11px;color:rgba(255,255,255,.65)">Clubs · Invitations · Accès support</div></div><div style="color:#E8A93B;font-size:18px">›</div>';
+   pf.addEventListener("click",openPlateforme);
+   el.appendChild(pf);
+ }
  var banner=document.getElementById("season-banner");
  if(banner){
    var cur=getCurrentSeason(), natural=computeNaturalSeason();
@@ -245,6 +255,7 @@ function buildAdminHome(){
 function getAdminCount(id){
   if(id==="parametres")return "Configuration";
   if(id==="communaute")return "Gestion des canaux";
+  if(id==="invitations")return "Staff et support";
   if(id==="licences"){var l=getLicences();return l.length+" fiche"+(l.length>1?"s":"");}
   if(id==="inscriptions"){var p=getPlayers();return p.length+" joueur"+(p.length>1?"s":"");}
   if(id==="equipes"){var t=getTeams();return t.length+" equipe"+(t.length>1?"s":"");}
@@ -261,6 +272,7 @@ function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   if(id==="acces"){openAccesCoach();return;}
+  if(id==="invitations"){openClubAccessSettings();return;}
   if(id==="avis"){openAvisModule();return;}
   if(id==="fiches"){openFichesRecues();return;}
   if(id==="notesfrais"){openNotesFrais();return;}

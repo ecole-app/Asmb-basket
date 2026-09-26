@@ -23,6 +23,7 @@ function fsStartSync(coll, lsKey){
 // Écrit un tableau d'entités : seuls les docs nouveaux/modifiés sont poussés, les retirés sont supprimés
 function fsWriteCollection(coll, arr){
   if(!window.fbDb || !window.fbSetDoc) return;
+  if(window.SUPPORT_MODE) return; // mode support : lecture seule (aussi imposé par les règles serveur)
   var prev=FS_PREV[coll]||[];
   var prevMap={};
   prev.forEach(function(x){ if(x&&x.id!=null) prevMap[String(x.id)]=JSON.stringify(x); });

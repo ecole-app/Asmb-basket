@@ -1,7 +1,7 @@
 /* ===== firebase-init.js — Initialisation Firebase (module ES6) ===== */
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -57,6 +57,8 @@ window.fbUpdateDoc = updateDoc;
 window.fbDeleteDoc = deleteDoc;
 window.fbArrayUnion = arrayUnion;
 window.fbArrayRemove = arrayRemove;
+// Ecriture groupée atomique (tout passe ou rien) — utilisée pour les invitations à usage unique
+window.fbWriteBatch = function(){ return writeBatch(db); };
 
 // ═══ MULTI-CLUB : cloisonnement automatique des données ══════════════
 // Toutes les données d'un club vivent sous clubs/{clubId}/... .
@@ -64,9 +66,10 @@ window.fbArrayRemove = arrayRemove;
 // d'entrée fbCollection/fbDoc préfixent eux-mêmes le chemin quand la collection
 // demandée appartient à un club. Oublier un appel est donc impossible.
 //
-// Collections GLOBALES (hors club) : users, clubs, phone_index, inscription_codes.
+// Collections GLOBALES (hors club) : users, clubs, phone_index, inscription_codes,
+// club_invites (invitations), support_grants (codes d'accès support).
 // Toute autre collection est traitée comme donnée de club.
-const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes"]);
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes","club_invites","support_grants"]);
 
 function requireClubId(coll){
   const id = window.CURRENT_CLUB_ID;

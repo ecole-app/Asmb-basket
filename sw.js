@@ -43,6 +43,7 @@ const PRECACHE = [
   './js/18-auth.js',
   './js/19-profils.js',
   './js/20-parent-tabs.js',
+  './js/20b-plateforme.js',
   './js/21-main.js'
 ];
 

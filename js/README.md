@@ -46,6 +46,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `18-auth.js` | Authentification, comptes, changement d'e-mail |
 | `19-profils.js` | Profils parent/coach/joueur, thèmes animés |
 | `20-parent-tabs.js` | Onglets événements et statistiques côté parent |
+| `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |
 | `21-main.js` | Thème, initialisation, **démarrage de l'app** (doit rester en dernier) |
 
 ## Points d'attention connus
@@ -100,3 +101,22 @@ Il est donc impossible d'oublier de cloisonner un nouvel appel.
 
 **Limite connue** : l'index téléphone (`phone_index`) a une entrée par numéro.
 Un même numéro inscrit dans deux clubs différents n'est rattaché qu'à un seul.
+
+## Niveaux d'accès (plateforme)
+
+1. **Super admin** (éditeur de General Manager, UID fixe dans les règles) :
+   crée les clubs, invite leur dirigeant, peut suspendre un club
+   (`clubs/{id}.status = "suspended"`). Espace « Plateforme » en tête de l'Espace Admin.
+2. **Dirigeant** : module « Accès & invitations » — invite coachs et co-dirigeants.
+3. **Membres** : coachs (invités), parents (auto-inscription via leur numéro).
+
+**Invitations** (`club_invites/{code}`) : lien `?invite=CODE`, usage unique, 7 jours.
+La création du compte et la consommation de l'invitation se font dans une seule
+écriture groupée (`fbWriteBatch`) ; les règles vérifient les deux ensemble, une
+invitation ne peut donc pas servir deux fois.
+
+**Accès support** : le super admin ne voit AUCUNE donnée interne d'un club par
+défaut. Le dirigeant génère un code (`support_grants/{code}`, 48 h, révocable).
+Le super admin l'entre dans « Plateforme » → session `clubs/{id}/support_sessions/{uid}`
+→ accès en **lecture seule**, garanti par les règles (et `window.SUPPORT_MODE`
+côté app). Révoquer = supprimer le code : l'accès tombe immédiatement.

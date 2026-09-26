@@ -3,13 +3,16 @@ rules_version = '2';
 // ═══════════════════════════════════════════════════════════════════
 //  General Manager — règles de sécurité Firestore (multi-club)
 //
-//  Principe : toutes les données d'un club vivent sous clubs/{clubId}/...
-//  Un utilisateur n'accède qu'aux données du club inscrit dans son
-//  profil (users/{uid}.clubId). Aucune donnée d'un club n'est lisible
-//  ni modifiable depuis un autre club.
+//  3 niveaux d'accès :
+//   1. Super admin (éditeur de la plateforme) : crée les clubs, invite leur
+//      dirigeant, peut suspendre un club. N'a AUCUN accès aux données internes
+//      d'un club, sauf code d'accès support fourni par ce club (lecture seule).
+//   2. Dirigeant d'un club : gère son club, invite son staff.
+//   3. Membres (coachs, parents, joueurs) : accès limité à leur club.
 //
-//  Collections globales (hors club) : users, clubs, phone_index,
-//  inscription_codes.
+//  Toutes les données d'un club vivent sous clubs/{clubId}/... .
+//  Collections globales : users, clubs, phone_index, inscription_codes,
+//  club_invites, support_grants.
 // ═══════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
@@ -17,24 +20,46 @@ service cloud.firestore {
 
     // ── Fonctions communes ──────────────────────────────────────────
     function signedIn() { return request.auth != null; }
-
-    // Administrateur de la plateforme (éditeur de General Manager)
     function superAdmin() {
       return signedIn() && request.auth.uid == "7f2br1aTiJVWHTEbqVePbMLD0uc2";
     }
-
     function userPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
     function me() { return get(userPath()).data; }
+    function clubPath(clubId) { return /databases/$(database)/documents/clubs/$(clubId); }
 
+    // Un club suspendu (abonnement) n'est plus accessible à ses membres.
+    function notSuspended(clubId) {
+      return !exists(clubPath(clubId)) || get(clubPath(clubId)).data.status != 'suspended';
+    }
     function member(clubId) {
-      return signedIn() && exists(userPath()) && me().clubId == clubId;
+      return signedIn() && exists(userPath()) && me().clubId == clubId && notSuspended(clubId);
     }
     function hasRole(r) { return me().roles.hasAny([r]); }
     function staff(clubId)     { return member(clubId) && (hasRole('dirigeant') || hasRole('coach')); }
     function dirigeant(clubId) { return member(clubId) && hasRole('dirigeant'); }
 
+    // Accès support : le super admin lit un club UNIQUEMENT s'il a ouvert une
+    // session avec un code encore valide, que le club n'a pas révoqué.
+    function supportActive(clubId) {
+      let s = /databases/$(database)/documents/clubs/$(clubId)/support_sessions/$(request.auth.uid);
+      return superAdmin() && exists(s)
+        && get(s).data.expiresAt > request.time
+        && exists(/databases/$(database)/documents/support_grants/$(get(s).data.code));
+    }
+    function readMember(clubId)    { return member(clubId)    || supportActive(clubId); }
+    function readStaff(clubId)     { return staff(clubId)     || supportActive(clubId); }
+    function readDirigeant(clubId) { return dirigeant(clubId) || supportActive(clubId); }
+
     function changes(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    // Invitation valide pour ce club et ce rôle (non utilisée, non expirée)
+    function invitePath(code) { return /databases/$(database)/documents/club_invites/$(code); }
+    function inviteValid(code, clubId, roles) {
+      let inv = get(invitePath(code)).data;
+      return inv.usedBy == null && inv.expiresAt > request.time
+        && inv.clubId == clubId && roles == [inv.role];
     }
 
     // ── Comptes utilisateurs ────────────────────────────────────────
@@ -42,94 +67,131 @@ service cloud.firestore {
       allow read: if signedIn()
         && (request.auth.uid == uid || dirigeant(resource.data.clubId) || superAdmin());
 
-      // Auto-inscription : son propre compte, rôle parent uniquement, et club
-      // imposé par l'index téléphone (impossible de se rattacher à un autre club).
+      // a) Parent : auto-inscription, club imposé par l'index téléphone
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.roles == ['parent']
         && request.resource.data.phone is string
         && request.resource.data.clubId ==
              get(/databases/$(database)/documents/phone_index/$(request.resource.data.phone)).data.clubId;
+      // b) Staff invité : invitation valide ET consommée dans la même opération
+      //    (écriture groupée) — une invitation ne sert donc qu'une fois.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.inviteCode is string
+        && inviteValid(request.resource.data.inviteCode, request.resource.data.clubId, request.resource.data.roles)
+        && getAfter(invitePath(request.resource.data.inviteCode)).data.usedBy == request.auth.uid;
+      // c) Compte d'origine du super admin
       allow create: if superAdmin() && request.auth.uid == uid;
 
-      // Soi-même : tout sauf rôles et club. Un dirigeant : les comptes de son
-      // club, sans pouvoir les déplacer vers un autre club.
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode']))
         || (dirigeant(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
         || superAdmin();
       allow delete: if superAdmin();
+    }
+
+    // ── Invitations (usage unique, expirent) ────────────────────────
+    match /club_invites/{code} {
+      allow get: if true;   // consultation par code uniquement (pas de listing public)
+      allow list: if superAdmin() || dirigeant(resource.data.clubId);
+      allow create: if request.resource.data.usedBy == null
+        && (superAdmin()
+            || (dirigeant(request.resource.data.clubId) && request.resource.data.role in ['coach','dirigeant']));
+      // Consommation : uniquement par la personne qui crée son compte, dans la
+      // même opération que la création de ce compte.
+      allow update: if signedIn() && resource.data.usedBy == null
+        && resource.data.expiresAt > request.time
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy','usedAt'])
+        && request.resource.data.usedBy == request.auth.uid
+        && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid));
+      allow delete: if superAdmin() || dirigeant(resource.data.clubId);
+    }
+
+    // ── Codes d'accès support (générés par le club) ─────────────────
+    match /support_grants/{code} {
+      allow get: if superAdmin();                        // uniquement si on connaît le code
+      allow list: if dirigeant(resource.data.clubId);    // le club voit ses codes actifs
+      allow create: if dirigeant(request.resource.data.clubId);
+      allow delete: if dirigeant(resource.data.clubId);  // révocation
     }
 
     // ── Clubs ───────────────────────────────────────────────────────
     match /clubs/{clubId} {
       allow read: if member(clubId) || superAdmin();
       allow create, delete: if superAdmin();
-      // Un dirigeant personnalise son club (nom, couleurs, logo...) mais ne
-      // touche ni au statut d'abonnement ni au propriétaire.
+      // Le dirigeant personnalise son club ; statut, formule et propriétaire
+      // restent du ressort de la plateforme.
       allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan'])) || superAdmin();
 
+      // Session support ouverte par le super admin avec un code valide du club
+      match /support_sessions/{uid} {
+        allow create: if superAdmin() && request.auth.uid == uid
+          && get(/databases/$(database)/documents/support_grants/$(request.resource.data.code)).data.clubId == clubId
+          && request.resource.data.expiresAt ==
+               get(/databases/$(database)/documents/support_grants/$(request.resource.data.code)).data.expiresAt;
+        allow read: if (superAdmin() && request.auth.uid == uid) || dirigeant(clubId);
+        allow delete: if (superAdmin() && request.auth.uid == uid) || dirigeant(clubId);
+      }
+
       // ── Données sportives ──
-      match /players/{id}     { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /teams/{id}       { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /events/{id}      { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /evaluations/{id} { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /licences/{id}    { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /checkins/{id}    { allow read, write: if member(clubId); }
-      match /joinRequests/{id}{ allow read, write: if member(clubId); }
+      match /players/{id}      { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /teams/{id}        { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /licences/{id}     { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /checkins/{id}     { allow read: if readMember(clubId); allow write: if member(clubId); }
+      match /joinRequests/{id} { allow read: if readMember(clubId); allow write: if member(clubId); }
 
       // ── Communauté ──
       match /channels/{chanId} {
-        allow read: if member(clubId);
+        allow read: if readMember(clubId);
         allow write: if staff(clubId);
         match /messages/{msgId} {
-          allow read, create, update: if member(clubId);
+          allow read: if readMember(clubId);
+          allow create, update: if member(clubId);
           allow delete: if staff(clubId);
         }
       }
       match /gallery/{id} {
-        allow read, create, update: if member(clubId);
+        allow read: if readMember(clubId);
+        allow create, update: if member(clubId);
         allow delete: if staff(clubId);
       }
       match /feedback/{id} {
         allow create: if member(clubId);
-        allow read, update, delete: if staff(clubId);
+        allow read: if readStaff(clubId);
+        allow update, delete: if staff(clubId);
       }
 
       // ── Gestion (données sensibles) ──
-      match /comptabilite/{id} { allow read, write: if dirigeant(clubId); }
-      match /inventaire/{id}   { allow read, write: if dirigeant(clubId); }
-      match /backups/{id}      { allow read, write: if dirigeant(clubId); }
-      match /notes_frais/{id}  { allow read, write: if staff(clubId); }
-      match /annuaire/{id}     { allow read, write: if staff(clubId); }
+      match /comptabilite/{id} { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
+      match /inventaire/{id}   { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
+      match /backups/{id}      { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
+      match /notes_frais/{id}  { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
+      match /annuaire/{id}     { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
 
       // ── Réglages du club ──
-      match /app_data/{id}       { allow read: if member(clubId); allow write: if staff(clubId); }
-      match /reminders_sent/{id} { allow read: if member(clubId); allow write: if staff(clubId); }
+      match /app_data/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /reminders_sent/{id} { allow read: if readMember(clubId); allow write: if staff(clubId); }
 
       // ── Fiches d'inscription déposées publiquement ──
-      // Un visiteur non connecté peut uniquement DÉPOSER une fiche, et seulement
-      // avec un code valide appartenant à CE club. Il ne peut ni relire, ni lister.
       match /inscription_submissions/{id} {
         allow create: if request.resource.data.code is string
           && get(/databases/$(database)/documents/inscription_codes/$(request.resource.data.code)).data.clubId == clubId;
-        allow read, update, delete: if staff(clubId);
+        allow read: if readStaff(clubId);
+        allow update, delete: if staff(clubId);
       }
     }
 
     // ── Index publics (lecture avant connexion) ─────────────────────
-    // Contenu non sensible. Chaque entrée appartient à un club : seul le staff
-    // de ce club peut la créer, la modifier ou la supprimer.
     match /phone_index/{phone} {
       allow read: if true;
       allow create: if staff(request.resource.data.clubId);
-      allow update: if staff(resource.data.clubId)
-        && request.resource.data.clubId == resource.data.clubId;
+      allow update: if staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId;
       allow delete: if staff(resource.data.clubId);
     }
     match /inscription_codes/{code} {
       allow read: if true;
       allow create: if staff(request.resource.data.clubId);
-      allow update: if staff(resource.data.clubId)
-        && request.resource.data.clubId == resource.data.clubId;
+      allow update: if staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId;
       allow delete: if staff(resource.data.clubId);
     }
 
