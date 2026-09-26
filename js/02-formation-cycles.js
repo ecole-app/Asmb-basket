@@ -62,12 +62,32 @@ function getCyclesForCat(catId){
  var customs=(ov.custom||[]).filter(function(cy){return cy.cat===catId;});
  return base.concat(customs);
 }
+// Toutes les categories declarees, jamais une liste figee : une categorie
+// ajoutee a ELITE_CATS doit etre trouvable sans toucher a ce code.
 function allCyclesFlat(){
- return getCyclesForCat("u9").concat(getCyclesForCat("u11")).concat(getCyclesForCat("u13"));
+ return ELITE_CATS.reduce(function(acc,c){ return acc.concat(getCyclesForCat(c.id)); },[]);
 }
 function activeCycles(){return getCyclesForCat(activeCatId);}
+// Cherche d'abord dans la categorie affichee. Deux categories peuvent porter le
+// meme identifiant de cycle : renvoyer celui d'une autre categorie afficherait
+// silencieusement le mauvais contenu, sans que rien ne le signale a l'ecran.
 function findCycle(cyId){
+ var inCat=getCyclesForCat(activeCatId).find(function(c){return c.id==cyId;});
+ if(inCat) return inCat;
  return allCyclesFlat().find(function(c){return c.id==cyId;});
+}
+// Garde-fou de developpement : signale des identifiants de cycle en double
+// entre categories, cause d'affichage silencieux du mauvais contenu.
+function checkCycleIdCollisions(){
+ var seen={}, dup=[];
+ ELITE_CATS.forEach(function(cat){
+   getCyclesForCat(cat.id).forEach(function(cy){
+     if(seen[cy.id] && seen[cy.id]!==cat.id) dup.push(cy.id+" ("+seen[cy.id]+" et "+cat.id+")");
+     else seen[cy.id]=cat.id;
+   });
+ });
+ if(dup.length) console.warn("Cycles en double entre categories :",dup.join(", "));
+ return dup;
 }
 
 const CYCLES_U9=[
