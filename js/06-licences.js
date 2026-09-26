@@ -114,7 +114,8 @@ function nextSeasonLabel(season){
 function applySeasonLabels(){
   var season=getCurrentSeason();
   var heroEl=document.getElementById("hero-season-sub");
-  if(heroEl) heroEl.textContent="ASMB · Saison "+season;
+  var cn=(typeof clubTitle==="function")?clubTitle():"";
+  if(heroEl) heroEl.textContent=(cn?cn+" · ":"")+"Saison "+season;
 }
 async function startNewSeason(){
   if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}

@@ -30,7 +30,9 @@
 
 <header class="hdr">
   <button class="hbk" id="hbk" onclick="goBack()">&#8592;</button>
-  <div class="hinfo"><div class="htit" id="htit">ASMB</div><div class="hsub" id="hsub">Saint-Étienne Métropole Basket</div></div>
+  <!-- Vide au chargement : le nom du club actif est injecté par updateHdr().
+       Aucun nom de club en dur ici, sinon il s'afficherait a tous les clubs. -->
+  <div class="hinfo"><div class="htit" id="htit"></div><div class="hsub" id="hsub"></div></div>
   <button class="theme-btn" id="hdr-gm-btn" onclick="showPlateformeHome()" title="Plateforme General Manager" style="display:none;font-weight:900;font-size:12px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></button>
   <button class="theme-btn" id="hdr-profile-btn" onclick="switchProfile()" title="Changer de profil" style="display:none">&#128100;</button>
   <button class="theme-btn" id="hdr-settings-btn" onclick="openParametres()" title="Paramètres">&#9881;</button>
@@ -120,7 +122,7 @@
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="home-logo" style="flex-shrink:0"></div>
-        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase">ASMB</div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase" class="js-club-name"></div>
       </div>
       <div id="portal-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="portal-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
@@ -177,7 +179,7 @@
     <div class="hero" style="padding:32px 16px 28px">
       <div style="font-size:40px;margin-bottom:12px"></div>
       <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px">Espace Responsables</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.6)">Accès réservé aux responsables ASMB</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Accès réservé aux responsables du club</div>
     </div>
     <div style="padding:24px 20px">
       <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;box-shadow:0 4px 20px var(--shadow)">
@@ -199,7 +201,7 @@
       <div style="font-size:28px"></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:18px;font-weight:900;color:#fff">Espace Admin</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Responsables</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)">Responsables</div>
       </div>
       <button id="admin-edit-toggle" onclick="toggleAdminEditMode()" style="flex-shrink:0;padding:8px 12px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Organiser</button>
     </div>
@@ -521,7 +523,7 @@
       <div style="font-size:28px"></div>
       <div>
         <div style="font-size:18px;font-weight:900;color:#fff">Mon inscription</div>
-        <div id="hero-season-sub" style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Saison 2026-2027</div>
+        <div id="hero-season-sub" style="font-size:11px;color:rgba(255,255,255,.6)">Saison 2026-2027</div>
       </div>
     </div>
     <div id="insc-public-content"></div>
@@ -614,7 +616,7 @@
       <div style="font-size:28px"></div>
       <div>
         <div style="font-size:18px;font-weight:900;color:#fff">Communauté</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.6)">ASMB · Messagerie</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)">Messagerie</div>
       </div>
     </div>
     <div class="sec">Canaux</div>
@@ -1080,7 +1082,7 @@
       <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1">
         <div id="role-logo" style="flex-shrink:0"></div>
         <div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase;margin-bottom:6px">ASMB</div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase;margin-bottom:6px" class="js-club-name"></div>
           <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px">Bienvenue</div>
           <div style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px">QUI ETES-VOUS ?</div>
         </div>
@@ -1243,7 +1245,7 @@
         <button onclick="openChangeEmailModal()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:8px">Changer mon e-mail de connexion</button>
         <button onclick="logoutUser()" style="width:100%;padding:13px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">Se déconnecter</button>
       </div>
-      <div style="margin-top:18px;text-align:center;font-size:10px;color:var(--mut)">ASMB Basket · version <span id="pp-version"></span></div>
+      <div style="margin-top:18px;text-align:center;font-size:10px;color:var(--mut)">General Manager · version <span id="pp-version"></span></div>
     </div>
   </div>
 
@@ -1301,7 +1303,7 @@
  <!-- ══════════════ GALERIE PHOTOS ══════════════ -->
  <div class="scr" id="scr-galerie">
  <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
- <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Galerie photos</div><div style="font-size:11px;color:var(--mut)">Événements et matchs ASMB</div></div>
+ <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Galerie photos</div><div style="font-size:11px;color:var(--mut)">Événements et matchs du club</div></div>
  <button id="galerie-add-btn" onclick="document.getElementById('galerie-file-input').click()" style="display:none;padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Photo</button>
       <input type="file" id="galerie-file-input" accept="image/*" style="display:none" onchange="uploadGalleryPhoto(this)">
     </div>
@@ -1359,7 +1361,7 @@
  <!-- ══════════════ CLASSEMENT (saisie manuelle) ══════════════ -->
  <div class="scr" id="scr-annuaire">
  <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
- <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Annuaire du club</div><div style="font-size:11px;color:var(--mut)">Contacts utiles ASMB</div></div>
+ <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Annuaire du club</div><div style="font-size:11px;color:var(--mut)">Contacts utiles du club</div></div>
  <button id="annuaire-add-btn" onclick="showAddContact()" style="display:none;padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Contact</button>
  </div>
  <div style="padding:10px 16px 4px"><input id="annuaire-search" type="search" placeholder="Rechercher un contact..." oninput="buildAnnuaire()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box"></div>

@@ -364,6 +364,7 @@ function loadClubProfile(clubId){
   window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(snap){
     if(snap && snap.exists()){
       window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
+      if(typeof applyClubLabels==="function") applyClubLabels();
       if(snap.data().status==="suspended" && !window.SUPPORT_MODE && !isSuperAdmin()){
         alert("L'accès de votre club à General Manager est suspendu. Contactez General Manager.");
         window.fbSignOut(window.fbAuth); showAuth("entry");
@@ -375,6 +376,7 @@ function loadClubProfile(clubId){
                  status:"active", createdAt:window.fbServerTimestamp() };
       window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",clubId), club).catch(function(e){ console.log("création club:",e&&e.code); });
       window.CURRENT_CLUB=Object.assign({id:clubId}, club);
+      if(typeof applyClubLabels==="function") applyClubLabels();
     }
     var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
     if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels && !window.SUPPORT_MODE){ window.fbInitClubChannels(clubId); }

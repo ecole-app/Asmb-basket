@@ -56,10 +56,27 @@ function showScr(id){
    setTimeout(maybeShowDailyThemeAnimation, 60);
  }
 }
+// Nom du club actif : jamais de nom de club écrit en dur dans l'interface,
+// sinon un autre club verrait « ASMB » dans son propre header.
+function clubTitle(){ return (window.CURRENT_CLUB && window.CURRENT_CLUB.name) || ""; }
+function clubSubtitle(){ return (window.CURRENT_CLUB && window.CURRENT_CLUB.subtitle) || ""; }
+
+// Remplit les emplacements du nom du club (.js-club-name) et rafraîchit le
+// header. Appelé quand la fiche du club est chargée : elle arrive en asynchrone,
+// donc ces emplacements restent vides jusque-là plutôt que d'afficher un nom figé.
+function applyClubLabels(){
+  var n=clubTitle();
+  try{
+    document.querySelectorAll(".js-club-name").forEach(function(el){ el.textContent=n; });
+    if(typeof stack!=="undefined" && stack.length) updateHdr(stack[stack.length-1]);
+  }catch(e){}
+}
+
 function updateHdr(id){
  var t=document.getElementById("htit"),s=document.getElementById("hsub");
- var map={"auth":["Connexion",""],"plateforme":["Plateforme","General Manager · Clubs"],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":["ASMB","Saint-Étienne Métropole Basket"],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos ASMB"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position ASMB"],portal:["ASMB","Saint-Étienne Métropole Basket"],elite:["Pôle Formation","Planification ASMB"],u13home:["U13 Féminin","Saison "+getCurrentSeason()],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté","ASMB · Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin","ASMB · Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence ASMB"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"],inventaire:["Inventaire","Buvette · Matériel"]};
- var v=map[id]||["ASMB",""];t.textContent=v[0];s.textContent=v[1];
+ var club=clubTitle();
+ var map={"auth":["Connexion",""],"plateforme":["Plateforme","General Manager · Clubs"],"role-select":["Bienvenue",""],"joueur":["Espace Joueur","Pointage du jour"],"team-picker":["Mes équipes","Sélection"],"parent-equipe":["Équipe",""],"parent-events":["Événements",""],"parent-stats":["Stats",""],"parent-params":["Paramètres","Mes préférences"],"coach-equipe":["Mon équipe",""],"parent-home":[club,clubSubtitle()],"matchday":["Jour de match",""],"annuaire":["Annuaire","Contacts du club"],"galerie":["Galerie","Photos du club"],"calendrier":["Calendrier","Semaine · Entraînements et matchs"],"classement":["Classement","Poule · Position du club"],portal:[club,clubSubtitle()],elite:["Pôle Formation","Planification"],u13home:["U13 Féminin","Saison "+getCurrentSeason()],cycle:curCy?[curCy.sh,curCy.p]:["Cycle",""],seance:curSea?["Séance "+curSea.num,curSea.t]:["Séance",""],"pole-elite":["Élite Academy","Sessions · Participants"],"pole-competition":["Compétition 5x5","Équipes · Matchs · Joueurs"],"pole-3x3":["3x3","Équipes · Tournois"],"pole-evenement":["Événements","Organisation · Tournois"],"pole-basketpourtous":["Basket Pour Tous","Groupes · Séances"],"parametres":["Paramètres","Configuration"],"admin-comm":["Communauté","Gestion des canaux"],"channel-detail":["Membres","Gestion des accès"],"communaute":["Communauté",club?(club+" · Messagerie"):"Messagerie"],"chat":[currentChannelData?currentChannelData.name:"Chat",currentChannelData?currentChannelData.desc:""],"admin-login":["Connexion","Espace Responsables"],admin:["Espace Admin",club?(club+" · Responsables"):"Responsables"],licences:["Licences","Suivi des fiches"],"licence-detail":["Détail fiche","Licence du club"],inscriptions:["Inscriptions","Gestion des joueurs"],equipes:["Équipes","Composition et staff"],planning:["Planning","Salles · Créneaux · Matchs"],"live-eval":["Évaluation",""],"player-history":["Historique joueur",""],documents:["Documents","Fichiers et formulaires"],comptabilite:["Comptabilité","Recettes · Dépenses"],inventaire:["Inventaire","Buvette · Matériel"]};
+ var v=map[id]||[club,""];t.textContent=v[0];s.textContent=v[1];
 }
 function goBack(){
  stack.pop();var prev=stack[stack.length-1];
