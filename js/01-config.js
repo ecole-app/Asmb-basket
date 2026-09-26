@@ -122,18 +122,61 @@ const POLES=[
  about:"Le basket accessible a toutes et tous, sans distinction. Des séances adaptees, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
  items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Séances adaptees et bienveillantes"]}
 ];
+// Chaque categorie porte son titre et ses chips : ajouter une categorie ne
+// demande plus de toucher au code d'ouverture (openCat etait une liste blanche).
 const ELITE_CATS=[
- {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true},
- {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true},
- {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true}
+ {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true,
+  title:"U9 Decouverte",chips:["1 séance / semaine","1h30 par séance","Decouverte FFBB"]},
+ {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true,
+  title:"U11 Mini-basket",chips:["2 séances / semaine","1h30 par séance","Mini-basket FFBB"]},
+ {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true,
+  title:"U13 Filles et Garcons",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
+ {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true,
+  title:"U15",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true}
 ];
-const VACS=[
+// ═══ VACANCES SCOLAIRES ══════════════════════════════════════════
+// Dates officielles 2026-2027. Toussaint et Noel sont communes aux trois
+// zones ; hiver et printemps different. Le club choisit sa zone et peut
+// surcharger n'importe quelle date (calendrier propre, stage, etc.).
+const VAC_COMMUNES=[
  {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
- {n:"Noel",d:"19 dec. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"},
- {n:"Hiver",d:"21 fev. - 9 mars 2026",imp:"4 séances",c:"#1A2E5A"},
- {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 séances",c:"#D4AF37"}
+ {n:"Noel",d:"19 dec. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"}
 ];
+const VACS_BY_ZONE={
+ A:VAC_COMMUNES.concat([
+  {n:"Hiver",d:"13 fev. - 1 mars 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Printemps",d:"10 avr. - 26 avr. 2027",imp:"4 séances",c:"#D4AF37"}]),
+ B:VAC_COMMUNES.concat([
+  {n:"Hiver",d:"20 fev. - 8 mars 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Printemps",d:"17 avr. - 3 mai 2027",imp:"4 séances",c:"#D4AF37"}]),
+ C:VAC_COMMUNES.concat([
+  {n:"Hiver",d:"6 fev. - 22 fev. 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Printemps",d:"3 avr. - 19 avr. 2027",imp:"4 séances",c:"#D4AF37"}])
+};
+
+// Zone du club (A par defaut). Saint-Etienne est en zone A.
+function getClubZone(){
+  var z=(window.CURRENT_CLUB && window.CURRENT_CLUB.zone) || "A";
+  return VACS_BY_ZONE[z] ? z : "A";
+}
+// Dates personnalisees du club, si le dirigeant en a saisi.
+function getVacancesOverride(){
+  try{ return JSON.parse(localStorage.getItem("asmb_vacances_custom")||"null"); }catch(e){ return null; }
+}
+function saveVacancesOverride(list){
+  if(list===null) localStorage.removeItem("asmb_vacances_custom");
+  else localStorage.setItem("asmb_vacances_custom",JSON.stringify(list));
+  if(window.fbDb&&window.fbSetDoc&&window.CURRENT_CLUB_ID){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"app_data","vacances"),
+      {data:list===null?"":JSON.stringify(list),zone:getClubZone()},{merge:true}).catch(function(){});
+  }
+}
+// Vacances effectivement affichees : surcharge du club sinon zone officielle.
+function getVacances(){
+  var c=getVacancesOverride();
+  if(c && c.length) return c;
+  return VACS_BY_ZONE[getClubZone()];
+}
 const KC=["#16A085","#8E44AD","#D4AF37","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";

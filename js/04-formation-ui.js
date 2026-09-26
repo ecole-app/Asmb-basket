@@ -135,25 +135,39 @@ function buildElite(){
   ELITE_CATS.forEach(function(cat){el.appendChild(makeCard(cat,function(){openCat(cat.id);}));});
 }
 function openCat(id){
-  if(id==="u13f"||id==="u13")activeCatId="u13";
-  else if(id==="u9")activeCatId="u9";
-  else if(id==="u11")activeCatId="u11";
-  else return;
+  // Generique : toute categorie declaree dans ELITE_CATS s'ouvre, sans liste
+  // blanche a maintenir. "u13f" reste accepte pour les anciens liens.
+  if(id==="u13f") id="u13";
+  if(!ELITE_CATS.some(function(c){ return c.id===id; })) return;
+  activeCatId=id;
   stack.push("u13home");buildU13Home();showScr("u13home");
 }
 function buildU13Home(){
+  var cat=ELITE_CATS.filter(function(c){ return c.id===activeCatId; })[0]||{};
   var chips=document.getElementById("u13chips");
   if(chips){
     chips.innerHTML="";
-    var infos=activeCatId==="u9"?["1 séance / semaine","1h30 par séance","Decouverte FFBB"]:
-              activeCatId==="u11"?["2 séances / semaine","1h30 par séance","Mini-basket FFBB"]:
-              ["2 séances / semaine","1h30 par séance","Zone A Rhone-Alpes"];
+    var infos=(cat.chips||["2 séances / semaine","1h30 par séance"]).slice();
+    if(cat.zoneChip) infos.push("Zone "+getClubZone());
     infos.forEach(function(t){var s=document.createElement("span");s.className="chip";s.textContent=t;chips.appendChild(s);});
   }
   var ttl=document.getElementById("u13title");
-  if(ttl)ttl.textContent=activeCatId==="u9"?"U9 Decouverte":(activeCatId==="u11"?"U11 Mini-basket":"U13 Filles et Garcons");
+  if(ttl)ttl.textContent=cat.title||cat.name||"Categorie";
+  // Reconstruit a chaque affichage : la zone ou les dates du club peuvent changer.
+  var vsec=document.getElementById("vacSec");
+  if(vsec)vsec.textContent="Vacances zone "+getClubZone()+(getVacancesOverride()?" (dates du club)":"");
   var vl=document.getElementById("vacList");
-  if(vl&&!vl.dataset.built){vl.dataset.built="1";VACS.forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+v.c+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+v.d+'</div></div><div class="vimp">'+v.imp+'</div></div>';});}
+  if(vl){
+    vl.innerHTML="";
+    getVacances().forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+v.c+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+v.d+'</div></div><div class="vimp">'+v.imp+'</div></div>';});
+    if(canEditCycles()){
+      var b=document.createElement("button");
+      b.textContent="Modifier la zone et les dates";
+      b.style.cssText="width:calc(100% - 24px);margin:4px 12px 8px;padding:11px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer";
+      b.addEventListener("click",openVacancesEdit);
+      vl.appendChild(b);
+    }
+  }
   var cl=document.getElementById("cyList");cl.innerHTML="";
   activeCycles().forEach(function(cy){
     var pr=cycleProgress(cy.id);
@@ -426,3 +440,43 @@ function buildSeance(cy,s){
  },60);
 }
 
+
+// ── ZONE ET DATES DE VACANCES (reserve dirigeant) ───────────────────
+// Le club choisit sa zone academique, ou saisit ses propres dates si son
+// calendrier differe (stage, treve interne, calendrier etranger...).
+async function openVacancesEdit(){
+  if(!canEditCycles()) return;
+  var zones=["A","B","C"];
+  var cur=getClubZone();
+  var z=await askPrompt("Zone academique du club (A, B ou C) \u2014 actuelle : "+cur,
+    {defaultValue:cur,confirmText:"Suivant"});
+  if(z===null) return;
+  z=String(z).trim().toUpperCase();
+  if(zones.indexOf(z)<0){ askAlert("Zone inconnue. Saisir A, B ou C."); return; }
+  if(window.CURRENT_CLUB_ID && window.fbUpdateDoc){
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{zone:z}).catch(function(){});
+  }
+  if(window.CURRENT_CLUB) window.CURRENT_CLUB.zone=z;
+
+  var perso=await askConfirm("Utiliser les dates officielles de la zone "+z+" ?\n\nRepondre Non pour saisir vos propres dates.",
+    {confirmText:"Dates officielles",cancelText:"Mes dates"});
+  if(perso){
+    saveVacancesOverride(null);
+    buildU13Home();
+    askAlert("Zone "+z+" appliquee avec les dates officielles.");
+    return;
+  }
+  var base=getVacances().slice();
+  var out=[];
+  for(var i=0;i<base.length;i++){
+    var v=base[i];
+    var d=await askPrompt(v.n+" \u2014 dates",{defaultValue:v.d,confirmText:"Suivant"});
+    if(d===null) return;
+    var imp=await askPrompt(v.n+" \u2014 seances impactees",{defaultValue:v.imp,confirmText:i===base.length-1?"Enregistrer":"Suivant"});
+    if(imp===null) return;
+    out.push({n:v.n,d:String(d).trim()||v.d,imp:String(imp).trim()||v.imp,c:v.c});
+  }
+  saveVacancesOverride(out);
+  buildU13Home();
+  askAlert("Dates du club enregistrees.");
+}
