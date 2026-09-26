@@ -194,9 +194,9 @@ setTimeout(listenJoinRequestsGlobal,3500);
 setInterval(backupToCloud,300000);
 document.addEventListener("DOMContentLoaded",function(){
   var home=document.getElementById("home-logo");
-  if(home)home.innerHTML='<img src="img/logo.jpg" style="width:44px;height:44px;object-fit:contain;display:block">';
+  if(home)home.innerHTML='<img src="img/logo.png" style="width:44px;height:44px;object-fit:contain;display:block">';
   var hd=document.getElementById("hlogo");
-  if(hd)hd.innerHTML='<img src="img/logo.jpg" style="width:38px;height:38px;object-fit:contain;display:block">';
+  if(hd)hd.innerHTML='<img src="img/logo.png" style="width:38px;height:38px;object-fit:contain;display:block">';
 });
 
 

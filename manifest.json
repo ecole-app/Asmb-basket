@@ -1,7 +1,7 @@
 {
-  "name": "ASMB",
-  "short_name": "ASMB",
-  "description": "Saint-Etienne Metropole Basket",
+  "name": "General Manager",
+  "short_name": "General Manager",
+  "description": "Gestion de club sportif",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f2f7f3",
