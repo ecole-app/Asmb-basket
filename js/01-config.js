@@ -125,7 +125,8 @@ const POLES=[
 const ELITE_CATS=[
  {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true}
+ {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true},
+ {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true}
 ];
 const VACS=[
  {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
