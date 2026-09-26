@@ -439,18 +439,21 @@ function buildSeance(cy,s){
     // mais l'animation dessinee vient de la bibliotheque : une seance modifiee ou
     // creee par le coach peut donc avoir une animation, ce qui etait impossible avant.
     var domKey=s.num+"-"+(i+1);
-    var animId=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i):null;
+    var animId=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i,sit):null;
     var animDiv=animId?'<div style="margin:8px 0"><div class="lbl">Animation</div><div id="anim-'+domKey+'" style="background:var(--bg);border-radius:8px;overflow:hidden"></div></div>':"";
     var d=document.createElement("div");d.className="sit-card";
     d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+sit.ti+'</div><div class="sdur">'+sit.dur+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+sit.desc+'</div><div class="lbl">Organisation</div><div class="txt">'+sit.org+'</div>'+animDiv+'<div class="lbl">Axes evolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+a+'</div>';}).join("")+'</div><div class="lbl">Mots cles</div><div class="kws">'+kws+'</div></div>';
     if(canEditCycles()&&typeof openAnimPicker==="function"){
       var bar=document.createElement("div");
       bar.style.cssText="padding:0 12px 12px";
+      var genere=(typeof estAnimGeneree==="function")&&estAnimGeneree(animId);
       var ab=document.createElement("button");
-      ab.textContent=animId?"Changer l'animation":"Ajouter une animation";
+      ab.textContent=genere?"Remplacer le schema genere":(animId?"Changer l'animation":"Ajouter une animation");
       ab.style.cssText="width:100%;padding:9px;border-radius:14px;background:transparent;border:1px dashed var(--bdr);color:var(--txt2);font-size:11px;font-weight:700;cursor:pointer";
       ab.addEventListener("click",function(){
-        openAnimPicker({catId:activeCatId,seaNum:s.num,sitIdx:i,current:animId,onDone:function(){buildSeance(cy,s);}});
+        openAnimPicker({catId:activeCatId,seaNum:s.num,sitIdx:i,
+          current:genere?null:animId, removable:!!animId,
+          onDone:function(){buildSeance(cy,s);}});
       });
       bar.appendChild(ab);
       d.appendChild(bar);
@@ -459,9 +462,9 @@ function buildSeance(cy,s){
  });
  setTimeout(function(){
  if(typeof SIT_ANIMS==="undefined")return;
- s.sits.forEach(function(_,i){
+ s.sits.forEach(function(sit,i){
    var dk=s.num+"-"+(i+1);
-   var aid=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i):null;
+   var aid=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i,sit):null;
    if(aid)injectSitAnim(dk,aid);
  });
  },60);

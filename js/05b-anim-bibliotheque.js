@@ -115,7 +115,10 @@ function fetchAnimAttachmentsFromCloud(){
 
 // Resolution : le choix du coach prime, puis la cle d'origine — et celle-ci
 // uniquement dans la categorie pour laquelle les animations ont ete dessinees.
-function resolveAnimForSit(catId,seaNum,sitIdx){
+// Ordre : le choix du coach, puis l'animation dessinee a la main quand il en
+// existe une, puis le schema genere a partir du texte de la situation. Aucune
+// situation ne reste donc sans illustration.
+function resolveAnimForSit(catId,seaNum,sitIdx,sit){
  if(typeof SIT_ANIMS==="undefined") return null;
  var att=getAnimAttachments()[animKey(catId,seaNum,sitIdx)];
  if(att==="none") return null;              // animation retiree volontairement
@@ -124,8 +127,12 @@ function resolveAnimForSit(catId,seaNum,sitIdx){
    var legacy=seaNum+"-"+(sitIdx+1);
    if(SIT_ANIMS[legacy]) return legacy;
  }
+ if(sit&&typeof genAnimFor==="function") return genAnimFor(catId,seaNum,sitIdx,sit);
  return null;
 }
+// Un schema genere n'est pas un contenu de la bibliotheque : il ne doit pas
+// apparaitre comme "animation actuelle" dans le selecteur.
+function estAnimGeneree(id){ return typeof id==="string" && id.indexOf("gen|")===0; }
 function attachAnim(catId,seaNum,sitIdx,animId){
  var o=getAnimAttachments();
  o[animKey(catId,seaNum,sitIdx)]=animId;
@@ -311,7 +318,7 @@ function openAnimPicker(opts){
 
  rech.addEventListener("input",majGrille);
 
- if(!browse && current){
+ if(!browse && (current||opts.removable)){
    var retirer=document.createElement("button");
    retirer.textContent="Retirer l'animation de cette situation";
    retirer.style.cssText="width:100%;margin-top:14px;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);"+
