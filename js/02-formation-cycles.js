@@ -9,6 +9,7 @@ function builtinCyclesForCat(catId){
  if(catId==="u15")return CYCLES_U15;
  if(catId==="u17m")return CYCLES_U17M;
  if(catId==="u18f")return CYCLES_U18F;
+ if(catId==="u21m")return CYCLES_U21M;
  return CYCLES;
 }
 function getCycleOverrides(){try{return JSON.parse(localStorage.getItem("asmb_cycles_custom")||"{}");}catch(e){return {};}}
