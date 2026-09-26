@@ -132,7 +132,9 @@ const ELITE_CATS=[
  {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true,
   title:"U13 Filles et Garcons",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
  {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true,
-  title:"U15",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true}
+  title:"U15",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
+ {id:"u17m",name:"U17 Masculins",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#8E44AD",ready:true,
+  title:"U17 Masculins",chips:["2 à 3 séances / semaine","1h45 par séance"],zoneChip:true}
 ];
 // ═══ VACANCES SCOLAIRES ══════════════════════════════════════════
 // Dates officielles 2026-2027. Toussaint et Noel sont communes aux trois
