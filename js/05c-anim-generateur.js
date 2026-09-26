@@ -104,6 +104,12 @@ function analyseSituation(sit,catId){
  var oppo=!!(sc.natt&&sc.ndef);
  if(/tout le terrain|tout terrain|full court|terrain complet|sur la longueur|d un panier a l autre/.test(full)) sc.terr="full";
 
+ // Ce que le texte annonce doit se retrouver a l'image. Un exercice qui finit
+ // au panier dessine sur un parquet nu, sans cercle, se contredit a l'ecran :
+ // ces deux drapeaux permettent aux scenes hors terrain de s'adapter.
+ sc.panier=/\btirs?\b|panier|lay-?up|double pas|finition|finir|shoot|adresse|lancer franc|au cercle|planche|marquer/.test(full);
+ sc.def=!!sc.ndef||/defenseur|defensive|\bdefense\b|adversaire|genneur|passif|contradicteur/.test(full);
+
  function set(type,note){ sc.type=type; sc.note=note; return sc; }
 
  // Theorie : un tableau affiche est un tableau de marque, pas un tableau blanc.
@@ -412,6 +418,8 @@ G_SCENES.tir=function(ctx,t,sc,W,H){
  var panier={x:W/2,y:30};
  spots.forEach(function(s,k){ pl(ctx,s.x,s.y,String(k+1),G_ATT,k===i?13:11,k===i?1:.55); });
  var s0=spots[i];
+ // Tir conteste : le defenseur ferme sur le tireur actif, main haute.
+ if(sc.def) pl(ctx,lp(s0.x+30,s0.x+6,eOut(cl(f*2,0,1))),lp(s0.y-34,s0.y-26,eOut(cl(f*2,0,1))),"D",G_DEF,11,0.92);
  var bxx=bz(f,s0.x,s0.x,panier.x,panier.x), byy=bz(f,s0.y-12,s0.y-120,panier.y-90,panier.y);
  bl(ctx,bxx,byy,7);
  ctx.save();ctx.strokeStyle="rgba(255,255,255,.25)";ctx.setLineDash([3,3]);ctx.lineWidth=1.4;
@@ -431,14 +439,39 @@ G_SCENES.passe=function(ctx,t,sc,W,H){
  var n=Math.max(3,sc.natt||4);
  var sp=gSpots(W,H,Math.min(5,n));
  var ph=t*sp.length, i=Math.floor(ph)%sp.length, nx=(i+1)%sp.length, f=ph-Math.floor(ph);
+ // Un defenseur annonce par le texte doit etre visible, sinon l'exercice parait
+ // se derouler sans opposition alors qu'il en comporte une.
+ if(sc.def){
+   pl(ctx,gDrift(sp[i].x+22,6,t,1),gDrift(sp[i].y-20,5,t,2),"D",G_DEF,11,0.92);
+   if(sp.length>3) pl(ctx,gDrift(sp[2].x-20,6,t,3),gDrift(sp[2].y-18,5,t,1),"D",G_DEF,11,0.92);
+ }
  sp.forEach(function(p,k){ pl(ctx,gDrift(p.x,5,t,k),gDrift(p.y,4,t,k*1.3),String(k+1),G_ATT,12); });
  gArrow(ctx,sp[i].x,sp[i].y,sp[nx].x,sp[nx].y,"rgba(255,255,255,.6)",true);
  bl(ctx,lp(sp[i].x,sp[nx].x,ease(f)),lp(sp[i].y,sp[nx].y,ease(f))-13,7);
- gLegend(ctx,W,H,"Circulation · passer puis se deplacer");
+ gLegend(ctx,W,H,sc.def?"Circulation sous opposition":"Circulation · passer puis se deplacer");
 };
 
 // Dribble : chacun son ballon, changements de main sur la largeur.
 G_SCENES.dribble=function(ctx,t,sc,W,H){
+ if(sc.panier){
+   // Le maniement debouche sur une finition : il faut le cercle a l'image.
+   dhc(ctx,W,H);
+   var panier={x:W/2,y:30};
+   for(var j=0;j<3;j++){
+     var av=cl(t*1.25-j*0.16,0,1);
+     var px=lp(46+j*((W-92)/2),W/2+(j-1)*22,ease(av));
+     var py=lp(H-44,80,ease(av));
+     var osc=Math.sin(t*Math.PI*8+j)*7;
+     if(sc.def&&j===0) pl(ctx,px+16,py-20,"D",G_DEF,11,0.9);
+     pl(ctx,px,py,"A",G_ATT,12);
+     if(j===0&&av>=1){
+       var ft=cl((t-0.8)/0.2,0,1);
+       bl(ctx,bz(ft,px,px,panier.x,panier.x),bz(ft,py-12,py-52,panier.y-38,panier.y),7);
+     } else bl(ctx,px+osc+(osc>0?12:-12),py+8,6);
+   }
+   gLegend(ctx,W,H,"Maniement puis finition");
+   return;
+ }
  pq(ctx,W,H);
  ctx.strokeStyle="rgba(255,255,255,.5)";ctx.lineWidth=2;
  ctx.beginPath();ctx.roundRect(10,10,W-20,H-30,4);ctx.stroke();
@@ -446,6 +479,7 @@ G_SCENES.dribble=function(ctx,t,sc,W,H){
    var y=36+k*((H-70)/3);
    var x=40+((t*1.6+k*0.22)%1)*(W-80);
    var w=Math.sin(t*Math.PI*8+k)*7;
+   if(sc.def&&k===1) pl(ctx,cl(x-34,24,W-24),y,"D",G_DEF,10,0.85);
    pl(ctx,x,y,"A",G_ATT,11);
    bl(ctx,x+w+(w>0?12:-12),y+8,6);
  }
@@ -454,20 +488,40 @@ G_SCENES.dribble=function(ctx,t,sc,W,H){
 };
 
 // Atelier en colonnes : une file traverse un parcours de plots.
+// Si l'exercice se conclut au panier, il est dessine sur un demi-terrain et le
+// parcours debouche sur une finition : un atelier de tir sur parquet nu, sans
+// cercle, contredirait sa propre description.
 G_SCENES.circuit=function(ctx,t,sc,W,H){
- pq(ctx,W,H);
- ctx.strokeStyle="rgba(255,255,255,.5)";ctx.lineWidth=2;
- ctx.beginPath();ctx.roundRect(10,10,W-20,H-30,4);ctx.stroke();
- var cones=[{x:70,y:H-60},{x:130,y:H*0.5},{x:200,y:H-70},{x:262,y:H*0.42}];
+ var auPanier=!!sc.panier;
+ if(auPanier){ dhc(ctx,W,H); }
+ else {
+   pq(ctx,W,H);
+   ctx.strokeStyle="rgba(255,255,255,.5)";ctx.lineWidth=2;
+   ctx.beginPath();ctx.roundRect(10,10,W-20,H-30,4);ctx.stroke();
+ }
+ var cones=auPanier
+   ? [{x:52,y:H-96},{x:104,y:H-136},{x:62,y:H*0.56},{x:112,y:H*0.44}]
+   : [{x:70,y:H-60},{x:130,y:H*0.5},{x:200,y:H-70},{x:262,y:H*0.42}];
+ var depart=auPanier?{x:40,y:H-46}:{x:32,y:H-40};
+ var fin=auPanier?{x:W/2-30,y:78}:{x:W-28,y:38};
+ var panier={x:W/2,y:30};
  cones.forEach(function(c){ gCone(ctx,c.x,c.y); });
- for(var f=0;f<3;f++) pl(ctx,32,H-40-f*26,"A",G_ATT,10,0.85-f*0.18);
- var pts=[{x:32,y:H-40}].concat(cones).concat([{x:W-28,y:38}]);
- var seg=pts.length-1, ph=cl(t,0,0.999)*seg, i=Math.floor(ph), fr=ph-i;
+ for(var f=0;f<3;f++) pl(ctx,depart.x-4,depart.y+f*24,"A",G_ATT,10,0.8-f*0.18);
+ var pts=[depart].concat(cones).concat([fin]);
+ var seg=pts.length-1;
+ // Le dernier cinquieme est reserve a la finition quand il y en a une.
+ var course=auPanier?cl(t/0.8,0,1):cl(t,0,0.999);
+ var ph=course*seg*(auPanier?0.999:1), i=Math.min(seg-1,Math.floor(ph)), fr=ph-i;
  var x=lp(pts[i].x,pts[i+1].x,ease(fr)), y=lp(pts[i].y,pts[i+1].y,ease(fr));
  for(var s=0;s<seg;s++) gArrow(ctx,pts[s].x,pts[s].y,pts[s+1].x,pts[s+1].y,s<=i?"rgba(255,255,255,.5)":"rgba(255,255,255,.15)",true);
+ if(sc.def) pl(ctx,auPanier?panier.x+26:fin.x-24,auPanier?panier.y+46:fin.y+20,"D",G_DEF,11,0.9);
  pl(ctx,x,y,"A",G_ATT,12);
- bl(ctx,x-13,y+7,6);
- gLegend(ctx,W,H,"Atelier · passage en colonne");
+ if(auPanier&&t>0.8){
+   var ft=cl((t-0.8)/0.2,0,1);
+   gArrow(ctx,fin.x,fin.y,panier.x,panier.y+12,"rgba(255,255,255,.5)");
+   bl(ctx,bz(ft,fin.x,fin.x+6,panier.x,panier.x),bz(ft,fin.y-12,fin.y-56,panier.y-40,panier.y),7);
+ } else bl(ctx,x-13,y+7,6);
+ gLegend(ctx,W,H,auPanier?"Atelier · passage puis finition":"Atelier · passage en colonne");
 };
 
 // Jeu en cercle : passes croisees, tout le groupe actif.
@@ -524,7 +578,7 @@ G_SCENES.theorie=function(ctx,t,sc,W,H){
 // ballons. Volontairement generique — l'intention est de montrer l'organisation
 // (tout le monde actif, sur un espace borne), pas un placement tactique.
 G_SCENES.jeu=function(ctx,t,sc,W,H){
- pq(ctx,W,H);
+ if(sc.panier){ dhc(ctx,W,H); } else { pq(ctx,W,H); }
  ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=2;
  ctx.beginPath();ctx.roundRect(14,14,W-28,H-42,6);ctx.stroke();
  ctx.setLineDash([5,4]);ctx.strokeStyle="rgba(255,255,255,.28)";
@@ -574,4 +628,51 @@ function genAnimFor(catId,seaNum,sitIdx,sit){
  SIT_ANIMS[id]=fn;
  SIT_DUR[id]=G_DUREES[sc.type]||6000;
  return id;
+}
+
+// ── GARDE-FOU ───────────────────────────────────────────────────────
+// Un schema qui contredit son propre texte est pire que pas de schema :
+// un atelier de finition dessine sans cercle fait douter le coach de tout le
+// reste. Ce controle compare ce que la situation annonce et ce que la scene
+// dessine reellement. A lancer depuis la console apres toute modification du
+// contenu pedagogique : verifierCoherenceSchemas().
+// Les scenes hors terrain (temps d'echange, travail athletique, jeu en cercle)
+// en sont exemptees : elles n'ont pas vocation a montrer un panier.
+var G_HORS_TERRAIN=["theorie","athletique","cercle"];
+var G_TRAITS={
+ opposition:{panier:1,def:1}, pnr:{panier:1,def:1}, ecran:{panier:1,def:1},
+ zone:{panier:1,def:1}, presse:{panier:1,def:1}, aide:{panier:1,def:1},
+ interieur:{panier:1,def:1}, rebond:{panier:1,def:1}, transition:{panier:1,def:1},
+ surnombre:{panier:1,def:1}, duel:{panier:1,def:1}, tir:{panier:1,def:function(sc){return !!sc.def;}},
+ passe:{panier:1,def:function(sc){return !!sc.def;}},
+ circuit:{panier:function(sc){return !!sc.panier;},def:function(sc){return !!sc.def;}},
+ dribble:{panier:function(sc){return !!sc.panier;},def:function(sc){return !!sc.def;}},
+ jeu:{panier:function(sc){return !!sc.panier;},def:1}, // deux equipes opposees a l'image
+ cercle:{panier:0,def:0}, athletique:{panier:0,def:0}, theorie:{panier:0,def:0}
+};
+function gTrait(type,cle,sc){
+ var tr=G_TRAITS[type]; if(!tr) return false;
+ var v=tr[cle];
+ return (typeof v==="function")?v(sc):!!v;
+}
+function verifierCoherenceSchemas(){
+ if(typeof ELITE_CATS==="undefined"||typeof getCyclesForCat!=="function") return [];
+ var ecarts=[];
+ ELITE_CATS.forEach(function(cat){
+   getCyclesForCat(cat.id).forEach(function(cy){
+     (cy.seas||[]).forEach(function(s){
+       (s.sits||[]).forEach(function(sit,i){
+         var sc; try{ sc=analyseSituation(sit,cat.id); }catch(e){ return; }
+         if(G_HORS_TERRAIN.indexOf(sc.type)>=0) return;
+         if(sc.panier&&!gTrait(sc.type,"panier",sc))
+           ecarts.push(cat.id+" "+s.num+"."+(i+1)+" ("+sc.type+") : parle de panier, n'en dessine pas");
+         if(sc.def&&!gTrait(sc.type,"def",sc))
+           ecarts.push(cat.id+" "+s.num+"."+(i+1)+" ("+sc.type+") : parle de defenseur, n'en dessine pas");
+       });
+     });
+   });
+ });
+ if(ecarts.length) console.warn("Schemas incoherents avec leur texte ("+ecarts.length+") :\n"+ecarts.join("\n"));
+ else console.log("Schemas : texte et dessin coherents sur toutes les situations.");
+ return ecarts;
 }
