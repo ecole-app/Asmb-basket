@@ -221,7 +221,7 @@ function relancerSansReponse(eventId){
     if(!channelId){alert("Aucun canal trouvé pour cette équipe");return;}
     var msg="🔔 <b>Rappel de présence</b><br>Merci de confirmer votre présence à \""+ev.titre+"\" ("+ev.date+(ev.heure?" · "+ev.heure:"")+").<br>En attente de réponse : "+noms;
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:msg,pseudo:"Coach ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+      text:msg,pseudo:clubPseudo("Coach"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     }).then(function(){
       alert("Relance envoyée dans le canal !");
     });

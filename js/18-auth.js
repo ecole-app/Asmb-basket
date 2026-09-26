@@ -65,7 +65,7 @@ function authLogoHtml(){
   if(hl && hl.innerHTML && hl.innerHTML.indexOf("img")>=0){
     return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+hl.innerHTML.replace(/width="\d+"/,'width="64"').replace(/height="\d+"/,'height="64"')+'</div>';
   }
-  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(242,213,126,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#F2D57E;letter-spacing:1px">ASMB</div>';
+  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(242,213,126,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#F2D57E;letter-spacing:1px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></div>';
 }
 
 function authHero(title, tag){
@@ -118,7 +118,7 @@ function showAuth(step, data){
   var h="";
   if(step==="entry"){
     var savedPhone=AUTH_STATE.phone||localStorage.getItem("asmb_phone")||"";
-    h=authHero("ASMB Basket","Espace du club")
+    h=authHero("General Manager","Espace du club")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
       +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Saisir le numéro de téléphone pour accéder à l\'espace du club.</p>'
       +'<label style="'+AUTH_LBL+'">Téléphone</label>'
@@ -372,7 +372,7 @@ function loadClubProfile(clubId){
       }
     } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
       // Premier démarrage multi-club : création de la fiche du club d'origine
-      var club={ name:"ASMB Basket", sport:"basket", ownerUid:BOOTSTRAP_DIRIGEANT_UID,
+      var club={ name:"ASMB Basket", sport:"basket", codePrefix:"ASMB", ownerUid:BOOTSTRAP_DIRIGEANT_UID,
                  status:"active", createdAt:window.fbServerTimestamp() };
       window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",clubId), club).catch(function(e){ console.log("création club:",e&&e.code); });
       window.CURRENT_CLUB=Object.assign({id:clubId}, club);

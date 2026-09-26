@@ -327,6 +327,7 @@ async function createClubFlow(list){
   try{
     await window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",id),{
       name:name, sport:(sport||"basket").trim().toLowerCase(), status:"active", plan:"trial",
+      codePrefix:clubCodePrefixFrom(name),
       createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp()
     });
     var code=await createClubInvite(id, name, "dirigeant");

@@ -281,7 +281,7 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
   if(canal&&window.fbReady){
     var msg="<b>"+titre+"</b><br>"+date+(heure?" · "+heure:"")+"<br>"+(lieu?"📍 "+lieu+"<br>":"")+(equipe?equipe+"<br>":"")+(participantsNoms.length?"Participants : "+participantsNoms.join(", "):"");
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
-      text:msg,pseudo:"Admin ASMB",ts:window.fbServerTimestamp()
+      text:msg,pseudo:clubPseudo("Admin"),ts:window.fbServerTimestamp()
     });
     alert("Événement créé et annonce envoyée dans le canal !");
   } else {
@@ -453,7 +453,7 @@ function cancelEvent(eventId){
       var channelId=findChannelForTeamText(ev.equipe);
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
         text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annulé.",
-        pseudo:"ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+        pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
   });
@@ -493,7 +493,7 @@ async function editEventDateTime(eventId){
     if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       text:"<b>Créneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
-      pseudo:"ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+      pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
     alert("Créneau modifié, alerte envoyée dans le canal.");
   }
@@ -504,7 +504,7 @@ async function editScore(eventId){
   if(!ev)return;
   var adversaire=await askPrompt("Nom de l'adversaire", {defaultValue:(ev.score&&ev.score.adversaire)||"", confirmText:"Suivant"});
   if(adversaire===null)return;
-  var scoreAsmb=await askPrompt("Score ASMB", {defaultValue:(ev.score&&ev.score.asmb)||"0", type:"number", confirmText:"Suivant"});
+  var scoreAsmb=await askPrompt("Score "+clubLabel(), {defaultValue:(ev.score&&ev.score.asmb)||"0", type:"number", confirmText:"Suivant"});
   if(scoreAsmb===null)return;
   var scoreAdv=await askPrompt("Score adversaire", {defaultValue:(ev.score&&ev.score.adv)||"0", type:"number", confirmText:"Enregistrer"});
   if(scoreAdv===null)return;
@@ -583,7 +583,7 @@ function saveConvocation(){
   if(window.fbReady){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       type:"convocation",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventHeure:ev.heure||"",eventLieu:ev.lieu||"",
-      players:convocPlayers,responses:{},pseudo:"Convocation ASMB",ts:window.fbServerTimestamp()
+      players:convocPlayers,responses:{},pseudo:clubPseudo("Convocation"),ts:window.fbServerTimestamp()
     });
     alert("Convocation envoyée dans le canal !");
   } else {
@@ -654,7 +654,7 @@ function checkWeatherAlerts(){
             var channelId=findChannelForTeamText(ev.equipe);
             window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
               text:"<b>Alerte meteo</b><br>"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" a "+ev.heure:"")+" · "+ev.lieu,
-              pseudo:"Alerte Meteo ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+              pseudo:clubPseudo("Alerte Meteo"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
             });
           });
       })
@@ -682,7 +682,7 @@ function maybeShowPwaHint(){
   if(txt){
     txt.textContent=isIos
       ? "Sur iPhone : touchez le bouton Partager puis \"Sur l\'écran d\'accueil\"."
-      : "Ajoutez ASMB a votre écran d\'accueil pour un accès direct, sans passer par le navigateur.";
+      : "Ajoutez "+clubLabel()+" a votre écran d\'accueil pour un accès direct, sans passer par le navigateur.";
   }
   var b=document.getElementById("pwa-install-btn");
   if(b)b.style.display=deferredPwaPrompt?"inline-block":"none";
@@ -740,7 +740,7 @@ function eventToVEVENT(e){
 
 function downloadIcs(filename,events){
   if(!events.length){alert("Aucun événement a exporter");return;}
-  var body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ASMB Basket//FR","CALSCALE:GREGORIAN"]
+  var body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+clubLabel()+"//FR","CALSCALE:GREGORIAN"]
     .concat(events.map(eventToVEVENT)).concat(["END:VCALENDAR"]).join("\r\n");
   var blob=new Blob([body],{type:"text/calendar;charset=utf-8"});
   var url=URL.createObjectURL(blob);
@@ -916,7 +916,7 @@ function showQrModal(kind){
   var base="https://ecole-app.github.io/Asmb-basket/";
   var url=kind==="inscription"?base+"?inscription=1":base;
   document.getElementById("qr-title").textContent=kind==="inscription"?"QR S'inscrire":"QR Rejoindre l'app";
-  document.getElementById("qr-sub").textContent=kind==="inscription"?"Ouvre directement la fiche d'inscription":"Ouvre l'application ASMB";
+  document.getElementById("qr-sub").textContent=kind==="inscription"?"Ouvre directement la fiche d'inscription":"Ouvre l'application";
   document.getElementById("qr-url").textContent=url;
   var box=document.getElementById("qr-canvas");
   box.innerHTML="";

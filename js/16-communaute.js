@@ -443,7 +443,7 @@ async function openChannel(ch){
   if(members.length>0 && !isDirigeant){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
-    if(!isAuth){alert("Ce canal est réservé aux membres autorisés. Contactez un responsable ASMB.");return;}
+    if(!isAuth){alert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
   }
   currentChannelId=ch.id;currentChannelData=ch;
   document.getElementById("chat-icon").textContent=ch.icon;
@@ -516,7 +516,7 @@ function listenMessages(channelId, prevLastRead){
           if(m.pseudo!==(savedPseudo||"moi")){
             try{
               var ch=currentChannelData;
-              new Notification((ch?ch.icon+" "+ch.name:"ASMB")+" - "+m.pseudo,{body:m.text.replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
+              new Notification((ch?ch.icon+" "+ch.name:clubLabel())+" - "+m.pseudo,{body:m.text.replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
             }catch(e){}
           }
         }

@@ -13,8 +13,8 @@ function toggleTheme(){
 // Demo : injecter une fiche de test si aucune n'existe
 (function(){
  var lics = getLicences();
- if(!lics.find(function(l){return l.code==="ASMB-TEST-0001";})){
- lics.push({code:"ASMB-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyee",createdAt:Date.now(),ouvertLe:null,fiche:null,categorie:null});
+ if(!lics.find(function(l){return l.code==="DEMO-TEST-0001";})){
+ lics.push({code:"DEMO-TEST-0001",email:"demo@asmb.fr",nomDest:"Demo",statut:"envoyee",createdAt:Date.now(),ouvertLe:null,fiche:null,categorie:null});
  saveLicences(lics);
  }
 }());
@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790418946";
+var APP_VERSION="1790419661";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -79,7 +79,7 @@ function checkTomorrowReminders(){
  var channelId=findChannelForTeamText(m.equipe);
  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
  text:" <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" a "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
- pseudo:" ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+ pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
  });
  }).catch(function(){});
  });
@@ -192,7 +192,7 @@ function checkEventReminders(){
     if(diffH>0&&diffH<=24&&!notified[e.id]){
       try{
         var icon=e.type==="match"?"":(e.type==="entrainement"?"":"");
-        new Notification(icon+" ASMB - "+e.titre,{body:"Demain"+(e.heure?" a "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
+        new Notification(icon+" "+clubLabel()+" - "+e.titre,{body:"Demain"+(e.heure?" a "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
         notified[e.id]=true;
         localStorage.setItem("asmb_reminded",JSON.stringify(notified));
       }catch(err){}

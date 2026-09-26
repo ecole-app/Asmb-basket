@@ -107,7 +107,7 @@ function sendBroadcast(){
   var emails=getAllContactEmails();
   if(!emails.length){alert("Aucun contact email trouve");return;}
   localStorage.setItem("asmb_broadcast_signature",signature);
-  var sigBlock=signature?(signature+"\nASMB · Saint-Étienne Métropole Basket"):"L'équipe ASMB\nSaint-Étienne Métropole Basket";
+  var sigBlock=signature?(signature+"\n"+clubLabel()):("L'équipe "+clubLabel());
   var body="Bonjour,\n\n"+message+"\n\n"+sigBlock;
   var mailto="mailto:?bcc="+emails.join(",")+"&subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
   window.location.href=mailto;

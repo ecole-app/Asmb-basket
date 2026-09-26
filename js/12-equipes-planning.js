@@ -101,7 +101,7 @@ function exportPlanningPDF(){
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);doc.setTextColor(27,92,40);
-  doc.text("ASMB - Planning",14,16);
+  doc.text(clubLabel()+" - Planning",14,16);
   doc.setFontSize(9);doc.setTextColor(100,100,100);
   doc.text("Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
 
@@ -126,7 +126,7 @@ function exportPlanningPDF(){
   });
   doc.setFontSize(8);doc.setTextColor(150,150,150);
   doc.text("Total : "+events.length+" événement(s)",14,y+6);
-  doc.save("ASMB_planning_"+new Date().toISOString().slice(0,10)+".pdf");
+  doc.save(clubSlug()+"_planning_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
 function importPlayersCSV(input){
@@ -184,7 +184,7 @@ function exportPlayersPDF(){
   var doc=new jsPDF();
   doc.setFontSize(16);
   doc.setTextColor(27,92,40);
-  doc.text("ASMB - Liste des licenciés",14,16);
+  doc.text(clubLabel()+" - Liste des licenciés",14,16);
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
   doc.text("Saint-Étienne Métropole Basket - Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
@@ -218,7 +218,7 @@ function exportPlayersPDF(){
   doc.setTextColor(150,150,150);
   doc.text("Total : "+players.length+" licencie(s)",14,y+6);
 
-  doc.save("ASMB_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
+  doc.save(clubSlug()+"_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
 }
 
 // ── TEAMS ────────────────────────────────────────────────────────
@@ -507,7 +507,7 @@ function buildPlanning(){
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
     var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
-    var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">ASMB "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
+    var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">"+clubLabel()+" "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
     var scoreBtn=(e.type==="match")?("<button onclick=\"editScore('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(e.score?"Modifier score":"Ajouter score")+"</button>"):"";
     var convocCount=e.convocations?e.convocations.length:0;
     var convocBtn=(e.type==="match")?("<button onclick=\"showConvocation('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Convocation"+(convocCount?" ("+convocCount+")":"")+"</button>"):"";

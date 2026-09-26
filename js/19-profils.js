@@ -524,7 +524,7 @@ function joueurSelfCheckin(playerId,eventId,status){
         ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) absent(e) a \""+ev.titre+"\""):
         ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) en retard a \""+ev.titre+"\"");
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-        text:msgTxt,pseudo:"Systeme ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+        text:msgTxt,pseudo:clubPseudo("Systeme"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
   }).catch(function(){alert("Erreur, réessayez");});
@@ -548,7 +548,7 @@ function notifyPhoneSkipped(){
   if(!window.fbReady)return;
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels","general","messages"),{
     text:"Un parent a rejoint l'application sans renseigner son numéro de téléphone. Il n'a pas encore accès a la communaute.",
-    pseudo:"Systeme ASMB",ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    pseudo:clubPseudo("Systeme"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
   });
 }
 
@@ -921,7 +921,7 @@ function buildParentHome(){
   var pLogoEl=document.getElementById("parent-hero-logo");
   var pHomeLogo=document.getElementById("home-logo");
   if(pLogoEl&&pHomeLogo&&pHomeLogo.innerHTML)pLogoEl.innerHTML=pHomeLogo.innerHTML;
-  document.getElementById("parent-hero-team").textContent="ASMB · "+activeTeam.name;
+  document.getElementById("parent-hero-team").textContent=(clubLabel("")?clubLabel()+" · ":"")+activeTeam.name;
   fillTodayHero("parent-hero-event","parent-date",activeTeam,null,"Aucun entraînement aujourd'hui");
 
   // Resume : matchs joues + statut licence
@@ -1013,7 +1013,7 @@ function buildParentHome(){
       var resCol=res==="V"?"#D4AF37":(res==="D"?"#C0392B":"#E8670A");
       var div=document.createElement("div");
       div.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow)";
-      div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">ASMB '+m.score.asmb+' - '+m.score.adv+' '+m.score.adversaire+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+m.date+'</div></div>';
+      div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+clubLabel()+' '+m.score.asmb+' - '+m.score.adv+' '+m.score.adversaire+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+m.date+'</div></div>';
       lmEl.appendChild(div);
     });
   }
@@ -1187,7 +1187,7 @@ function buildCoachEquipe(){
   var logoEl=document.getElementById("coach-eq-logo");
   var homeLogo=document.getElementById("home-logo");
   if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
-  document.getElementById("coach-eq-cat").textContent="ASMB · "+team.cat;
+  document.getElementById("coach-eq-cat").textContent=(clubLabel("")?clubLabel()+" · ":"")+team.cat;
   fillTodayHero("coach-next-event","coach-eq-name",team);
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
   renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);

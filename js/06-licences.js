@@ -141,7 +141,7 @@ function genCode(){
  getLicences().forEach(function(l){ if(l&&l.code) existing[l.code]=true; });
  var code, attempts=0;
  do{
-   code="ASMB-"+part(4)+"-"+part(4);
+   code=clubCodePrefix()+"-"+part(4)+"-"+part(4);
    attempts++;
  } while(existing[code] && attempts<50);
  return code;
@@ -251,11 +251,11 @@ function createLicence(){
 }
 
 function sendLicenceMail(lic){
-  var sujet="Votre inscription ASMB - Code "+lic.code;
+  var sujet="Votre inscription "+clubLabel()+" - Code "+lic.code;
   var appUrl="https://ecole-app.github.io/Asmb-basket/?inscription=1";
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
-    "L'ASMB (Saint-Étienne Métropole Basket) vous invite a completer votre fiche d'inscription en ligne.\n\n"+
+    clubLabel()+" vous invite a completer votre fiche d'inscription en ligne.\n\n"+
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"+
     "  VOTRE CODE D'INSCRIPTION\n\n"+
     "        "+lic.code+"\n\n"+
@@ -271,7 +271,7 @@ function sendLicenceMail(lic){
     "Secrétariat\n"+
  "Saint-Étienne Métropole Basket\n"+
  "—\n"+
- " ASMB · EST. 2022";
+ " "+clubLabel();
  var mailto="mailto:"+lic.email+"?subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
  window.location.href=mailto;
 }
@@ -489,7 +489,7 @@ function generateFactureHtml(lic){
   var p=lic.paiement||{};
   var f=lic.fiche||{};
   var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
-  return '<h1>Reçu de paiement — ASMB Basket</h1>'+
+  return '<h1>Reçu de paiement — '+clubLabel()+'</h1>'+
     '<div class="row"><span>Licencié(e)</span><b>'+authEsc(nom)+'</b></div>'+
     '<div class="row"><span>Code licence</span><b>'+authEsc(lic.code)+'</b></div>'+
     '<div class="row"><span>Catégorie</span><b>'+authEsc(lic.categorie||"-")+'</b></div>'+
@@ -520,14 +520,14 @@ function sendFactureLicenceMail(code){
   var p=lic.paiement;
   var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
   var destEmail=f.respEmail||f.emailLic||lic.email||"";
-  var subject="Reçu de paiement - Licence "+nom+" - ASMB Basket";
+  var subject="Reçu de paiement - Licence "+nom+" - "+clubLabel();
   var body="Bonjour,\n\nNous confirmons la bonne réception de votre paiement pour la licence de "+nom+".\n\n"+
     "Code licence : "+lic.code+"\n"+
     "Catégorie : "+(lic.categorie||"-")+"\n"+
     "Montant réglé : "+(p.montant||0).toFixed(2)+" €\n"+
     "Moyen de paiement : "+(p.moyen||"")+"\n"+
     "Date : "+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+"\n\n"+
-    "Merci de votre confiance,\nASMB Basket";
+    "Merci de votre confiance,\n"+clubLabel();
   var mailto="mailto:"+encodeURIComponent(destEmail)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
   window.location.href=mailto;
 }
@@ -706,7 +706,7 @@ function renderCodeEntry(){
       '<div style="font-size:40px;margin-bottom:12px"></div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Fiche d\'inscription</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code reçu par mail</div>'+
-      '<input id="code-input" type="text" placeholder="ASMB-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
+      '<input id="code-input" type="text" placeholder="'+clubCodePrefix()+'-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
       '<button id="valider-code-btn" onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Acceder a ma fiche</button>'+
     '</div>'+
   '</div>';
@@ -778,14 +778,14 @@ function renderLicenceChoice(lic){
     '<div style="position:absolute;top:12px;right:14px;font-size:28px;opacity:.15"></div>'+
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="background:#C0392B;color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">Compétition</div><div style="font-size:18px"></div></div>'+
     '<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px">Pour se dépasser</div>'+
-    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Rejoindre l\'ASMB en compétition : un engagement collectif ambitieux.</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Rejoindre le club en compétition : un engagement collectif ambitieux.</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px">'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Entraînements réguliers obligatoires</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Matchs officiels CD42 · Engagement saison complète</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Convocations obligatoires · Collectif avant tout</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Exigence · Respect · Depassement de soi</div>'+
     '</div>'+
-    '<div style="margin-top:14px;padding:10px 14px;background:rgba(192,57,43,.2);border-radius:var(--rx);border-left:3px solid #C0392B"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Representer l\'ASMB, c\'est porter les couleurs du club avec fierté et engagement."</div></div>'+
+    '<div style="margin-top:14px;padding:10px 14px;background:rgba(192,57,43,.2);border-radius:var(--rx);border-left:3px solid #C0392B"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Porter les couleurs du club avec fierté et engagement."</div></div>'+
     '<div style="margin-top:12px;text-align:right"><span style="font-size:12px;font-weight:700;color:#C0392B">Je choisis Compétition →</span></div>';
 
   // Card Loisir

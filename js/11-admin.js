@@ -957,7 +957,7 @@ function printNoteFrais(n){
     '.row b{color:#1A2E5A}'+
     'img{max-width:100%;margin-top:20px;border-radius:8px}'+
     '</style></head><body>'+
-    '<h1>Note de frais — ASMB Basket</h1>'+
+    '<h1>Note de frais — '+clubLabel()+'</h1>'+
     '<div class="row"><span>Demandeur</span><b>'+authEsc(n.demandeurNom||n.demandeurEmail||"")+'</b></div>'+
     '<div class="row"><span>Date</span><b>'+(n.date?new Date(n.date).toLocaleDateString("fr-FR"):"")+'</b></div>'+
     '<div class="row"><span>Motif</span><b>'+authEsc(n.motif||"")+'</b></div>'+

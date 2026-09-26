@@ -368,7 +368,7 @@ function buildClassement(){
         (isCoachOrDir?'<td></td>':'')+
       '</tr>';
     rows.forEach(function(r){
-      var isUs=r.equipe&&r.equipe.toUpperCase().indexOf("ASMB")>=0;
+      var isUs=isOurTeamName(r.equipe);
       html+='<tr style="border-bottom:1px solid var(--bdr);'+(isUs?"background:rgba(27,92,40,.08)":"")+'">'+
         '<td style="padding:8px 4px;font-size:12px;font-weight:800;color:var(--txt)">'+r.rang+'</td>'+
         '<td style="font-size:12px;font-weight:'+(isUs?"700":"400")+';color:var(--txt);white-space:nowrap">'+r.equipe+'</td>'+
@@ -388,7 +388,7 @@ function buildClassement(){
 
 async function showAddClassementRow(){
   if(!classementActiveTeamId){alert("Créez d\'abord une équipe");return;}
-  var equipe=await askPrompt("Nom de l'équipe", {placeholder:"Mettre ASMB dans le nom pour votre équipe", confirmText:"Suivant"});
+  var equipe=await askPrompt("Nom de l'équipe", {placeholder:"Mettre le nom du club pour votre équipe", confirmText:"Suivant"});
   if(!equipe)return;
   var rang=parseInt((await askPrompt("Position dans la poule", {defaultValue:"1", type:"number", confirmText:"Suivant"}))||"1",10);
   var points=parseInt((await askPrompt("Points", {defaultValue:"0", type:"number", confirmText:"Suivant"}))||"0",10);
@@ -568,7 +568,7 @@ function uploadGalleryPhoto(input){
   }).then(function(dataUrl){
     if(addBtn)addBtn.textContent="Envoi...";
     return window.fbAddDoc(window.fbCollection(window.fbDb,"gallery"),{
-      url:dataUrl,caption:"",uploadedBy:savedPseudo||"ASMB",ts:window.fbServerTimestamp()
+      url:dataUrl,caption:"",uploadedBy:savedPseudo||clubLabel("Membre"),ts:window.fbServerTimestamp()
     });
   }).then(function(){
     input.value="";
@@ -737,10 +737,10 @@ function loadDemoData(){
 function loadDemoDataConfirmed(){
 
   var teamDefs=[
-    {id:"demo-team-u13f",name:"U13 Filles ASMB (Demo)",cat:"U13"},
-    {id:"demo-team-u13g",name:"U13 Garcons ASMB (Demo)",cat:"U13"},
-    {id:"demo-team-seniorf",name:"Seniors Filles ASMB (Demo)",cat:"Senior"},
-    {id:"demo-team-seniorm",name:"Seniors Garcons ASMB (Demo)",cat:"Senior"}
+    {id:"demo-team-u13f",name:"U13 Filles (Demo)",cat:"U13"},
+    {id:"demo-team-u13g",name:"U13 Garcons (Demo)",cat:"U13"},
+    {id:"demo-team-seniorf",name:"Seniors Filles (Demo)",cat:"Senior"},
+    {id:"demo-team-seniorm",name:"Seniors Garcons (Demo)",cat:"Senior"}
   ];
 
   var prenomsF=["Lea","Chloe","Emma","Sarah","Manon","Julie","Camille","Ines","Anais","Clara"];
