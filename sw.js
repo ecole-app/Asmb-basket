@@ -51,9 +51,12 @@ self.addEventListener('install', function (event) {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      // addAll échoue si une ressource manque ; on précache une par une pour être tolérant
+      // addAll échoue si une ressource manque ; on précache une par une pour être tolérant.
+      // cache:'reload' contourne le cache HTTP du navigateur : sans ça, une nouvelle version
+      // peut se precacher avec les anciens fichiers encore valides cote HTTP.
       return Promise.all(PRECACHE.map(function (url) {
-        return cache.add(url).catch(function () { /* ignore une ressource absente */ });
+        return cache.add(new Request(url, { cache: 'reload' }))
+          .catch(function () { return cache.add(url).catch(function () { /* ressource absente */ }); });
       }));
     })
   );
