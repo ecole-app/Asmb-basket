@@ -32,8 +32,31 @@ service cloud.firestore {
     // pas suspendu" rendrait l'acces a un club supprime PLUS large qu'a un club
     // suspendu : ses membres garderaient leurs droits sur des donnees devenues
     // invisibles depuis la plateforme.
+    function clubStatus(clubId) {
+      return get(clubPath(clubId)).data.get('status', 'active');
+    }
+    // Le club doit exister ET etre actif. Un simple "n'existe pas donc pas
+    // suspendu" rendrait l'acces a un club supprime PLUS large qu'a un club
+    // suspendu. 'purging' bloque aussi : pendant l'effacement, les membres ne
+    // doivent pas continuer a ecrire dans des collections en cours de purge.
     function notSuspended(clubId) {
-      return exists(clubPath(clubId)) && get(clubPath(clubId)).data.status != 'suspended';
+      return exists(clubPath(clubId))
+        && !(clubStatus(clubId) in ['suspended', 'deleted', 'purging']);
+    }
+
+    // Fenetre de purge. Le super admin n'a aucun droit sur les donnees d'un
+    // club ; cette fenetre est la seule exception, et elle est bornee :
+    //  - le club doit porter le statut 'purging', que seul le super admin pose ;
+    //  - purgeUntil doit exister et n'etre pas encore echu, donc la fenetre se
+    //    referme d'elle-meme meme si la purge est interrompue ou oubliee ;
+    //  - elle ouvre lecture et suppression, jamais l'ecriture : on ne peut pas
+    //    modifier les donnees d'un club, seulement les lister et les effacer.
+    // Le club voit ce statut depuis son ecran de suspension.
+    function purgeWindow(clubId) {
+      return superAdmin()
+        && exists(clubPath(clubId))
+        && clubStatus(clubId) == 'purging'
+        && get(clubPath(clubId)).data.get('purgeUntil', request.time) > request.time;
     }
     function member(clubId) {
       return signedIn() && exists(userPath()) && me().get('clubId', null) == clubId && notSuspended(clubId);
@@ -186,6 +209,14 @@ service cloud.firestore {
       // ── Réglages du club ──
       match /app_data/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /reminders_sent/{id} { allow read: if readMember(clubId); allow write: if staff(clubId); }
+
+      // Purge : lecture et suppression sur TOUTES les sous-collections de ce
+      // club, uniquement pendant la fenetre ci-dessus. Un match recursif evite
+      // d'oublier une collection — une sous-collection ajoutee plus tard y sera
+      // couverte automatiquement.
+      match /{sousCollection=**} {
+        allow read, delete: if purgeWindow(clubId);
+      }
 
       // ── Fiches d'inscription déposées publiquement ──
       match /inscription_submissions/{id} {

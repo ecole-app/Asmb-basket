@@ -293,9 +293,9 @@ function loadClubsList(list){
 function renderClubCard(c, list){
   var card=gmCard();
   var suspended=c.status==="suspended";
-  var supprime=(c.status==="deleted");
+  var supprime=(c.status==="deleted"||c.status==="purging");
   var jr=joursRestants(c);
-  var etat=supprime?"supprime":(suspended?"suspendu":"actif");
+  var etat=(c.status==="purging")?"suppression en cours":(supprime?"supprime":(suspended?"suspendu":"actif"));
   var etatCol=(supprime||suspended)?"var(--red)":"var(--dkg)";
   var delai="";
   if(suspended && jr!==null){
@@ -320,7 +320,7 @@ function renderClubCard(c, list){
   // distincts valent mieux qu'un bouton definitif a cote des actions courantes.
   // Supprimer n'apparait qu'une fois le delai de regularisation ecoule :
   // le club doit avoir eu ses 7 jours pour reagir.
-  if(!own && suspended && delaiDepasse(c)){
+  if(!own && ((suspended && delaiDepasse(c)) || c.status==="purging")){
     row.appendChild(gmBtn("Supprimer","danger",function(){ deleteClubFlow(c, list); }));
   }
   row.appendChild(gmBtn(suspended?"Réactiver":"Suspendre", suspended?"soft":"danger", function(){
@@ -459,58 +459,124 @@ function revokeSupportGrant(code, clubId){
   }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
 }
 
-// ── SUPPRESSION D'UN CLUB (super admin) ────────────────────────
-// Limite assumee : le super admin n'a, par conception, aucun droit sur les
-// sous-collections d'un club (allow write: if staff(clubId)). Il ne peut donc
-// pas effacer leur contenu depuis le navigateur. Supprimer la fiche du club
-// coupe tout acces -- les regles exigent un club existant -- mais les documents
-// restent stockes, inaccessibles a tous, y compris a la plateforme.
-// Un effacement reel demande un mecanisme dedie, a choisir (voir README).
+// ── SUPPRESSION D'UN CLUB (super admin) ─────────────────────────────
+// Le super admin n'a, par conception, aucun droit sur les donnees d'un club.
+// L'effacement passe donc par une fenetre de purge bornee : le club est mis en
+// statut 'purging' avec une echeance courte, ce qui ouvre cote regles la
+// lecture et la suppression de ses sous-collections, et rien d'autre.
+// La fenetre se referme d'elle-meme a l'echeance, meme si la purge echoue.
+var GM_PURGE_MINUTES=30;
+// Sous-collections connues. Le match recursif des regles couvre aussi celles
+// qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
+var CLUB_SOUS_COLLECTIONS=["players","teams","events","evaluations","licences","checkins",
+ "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
+ "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions"];
+
+// "clubs" est une collection globale : le chemin passe brut, sans que le club
+// actif de la session ne se substitue a celui qu'on purge.
+function gmRefCol(clubId, name){ return window.fbCollection(window.fbDb,"clubs",clubId,name); }
+function gmRefDoc(clubId, name, id){ return window.fbDoc(window.fbDb,"clubs",clubId,name,id); }
+
+async function purgeParLots(refs){
+  for(var i=0;i<refs.length;i+=400){
+    var b=window.fbWriteBatch();
+    refs.slice(i,i+400).forEach(function(r){ b.delete(r); });
+    await b.commit();
+  }
+  return refs.length;
+}
+
+async function purgeSousCollection(clubId, name){
+  var snap=await window.fbGetDocs(gmRefCol(clubId,name));
+  var refs=[]; snap.forEach(function(d){ refs.push(gmRefDoc(clubId,name,d.id)); });
+  return await purgeParLots(refs);
+}
+
+// Les canaux portent leurs messages en sous-collection : a purger avant eux.
+async function purgeCanaux(clubId){
+  var snap=await window.fbGetDocs(gmRefCol(clubId,"channels"));
+  var chans=[]; snap.forEach(function(d){ chans.push(d.id); });
+  var msgs=0;
+  for(var c=0;c<chans.length;c++){
+    var ms=await window.fbGetDocs(window.fbCollection(window.fbDb,"clubs",clubId,"channels",chans[c],"messages"));
+    var refs=[];
+    ms.forEach(function(d){ refs.push(window.fbDoc(window.fbDb,"clubs",clubId,"channels",chans[c],"messages",d.id)); });
+    msgs+=await purgeParLots(refs);
+  }
+  await purgeParLots(chans.map(function(id){ return gmRefDoc(clubId,"channels",id); }));
+  return {canaux:chans.length, messages:msgs};
+}
+
+// Entrees des collections globales rattachees a ce club.
+async function purgeGlobalePourClub(clubId, coll){
+  var q=window.fbQuery(window.fbCollection(window.fbDb,coll), window.fbWhere("clubId","==",clubId));
+  var snap=await window.fbGetDocs(q);
+  var refs=[]; snap.forEach(function(d){ refs.push(window.fbDoc(window.fbDb,coll,d.id)); });
+  return await purgeParLots(refs);
+}
+
+async function compterMembres(clubId){
+  try{
+    var q=window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("clubId","==",clubId));
+    var snap=await window.fbGetDocs(q);
+    var n=0; snap.forEach(function(){ n++; });
+    return n;
+  }catch(e){ return -1; }
+}
+
 async function deleteClubFlow(c, list){
   if(!isSuperAdmin() || !c) return;
   if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas etre supprime."); return; }
-  if(c.status!=="suspended"){ askAlert("Suspendre le club avant de le supprimer."); return; }
-  if(!delaiDepasse(c)){
+  if(c.status!=="suspended" && c.status!=="purging"){ askAlert("Suspendre le club avant de le supprimer."); return; }
+  if(c.status==="suspended" && !delaiDepasse(c)){
     var j=joursRestants(c);
     askAlert("Delai de regularisation en cours"+(j!==null?" : "+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":""):"")+
       ".\n\nLa suppression ne sera possible qu'a son echeance.");
     return;
   }
-  var avert="Cette suppression est definitive.\n\n"+
-    "L'acces du club et de tous ses membres sera coupe immediatement.\n\n"+
-    "A savoir : les donnees du club restent stockees chez Firebase, inaccessibles a tous, y compris a la plateforme. "+
-    "Leur effacement reel demande un mecanisme dedie, pas encore en place.\n\n"+
+  var nb=await compterMembres(c.id);
+  var avert="Cette suppression est definitive et irreversible.\n\n"+
+    "Toutes les donnees du club seront effacees : joueurs, equipes, evenements, evaluations, licences, pointages, messages, comptabilite, inventaire, notes de frais, annuaire, sauvegardes.\n\n"+
+    (nb>0 ? nb+" compte(s) rattache(s) perdront l'acces. Leurs comptes de connexion sont a supprimer dans la console Firebase.\n\n" : "")+
     "Pour confirmer, saisir exactement le nom du club :\n"+(c.name||c.id);
   var saisi=await askPrompt(avert,{placeholder:c.name||c.id,confirmText:"Supprimer definitivement"});
   if(saisi===null) return;
   if(String(saisi).trim()!==String(c.name||c.id).trim()){ askAlert("Nom incorrect : suppression annulee."); return; }
 
-  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Suppression en cours\u2026</div>';
-  var invites=0;
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Suppression en cours…</div>';
+  var total=0, detail=[];
   try{
-    // Invitations en attente : seules entrees liees au club que le super admin
-    // peut reellement effacer. Les laisser permettrait de creer un compte sur
-    // un club disparu.
-    var q=window.fbQuery(window.fbCollection(window.fbDb,"club_invites"), window.fbWhere("clubId","==",c.id));
-    var snap=await window.fbGetDocs(q);
-    var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
-    for(var i=0;i<ids.length;i+=400){
-      var b=window.fbWriteBatch();
-      ids.slice(i,i+400).forEach(function(id){ b.delete(window.fbDoc(window.fbDb,"club_invites",id)); });
-      await b.commit();
-      invites+=Math.min(400,ids.length-i);
-    }
-  }catch(e){ console.log("purge invitations:", e&&e.code||e); }
+    // Ouverture de la fenetre : sans ce statut, les regles refusent tout acces.
+    await window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
+      status:"purging",
+      purgeUntil:new Date(Date.now()+GM_PURGE_MINUTES*60000)
+    });
 
-  try{
+    for(var i=0;i<CLUB_SOUS_COLLECTIONS.length;i++){
+      var n=await purgeSousCollection(c.id,CLUB_SOUS_COLLECTIONS[i]);
+      if(n){ total+=n; detail.push(CLUB_SOUS_COLLECTIONS[i]+" : "+n); }
+    }
+    var ch=await purgeCanaux(c.id);
+    if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
+
+    var globales=["club_invites","support_grants","phone_index","inscription_codes"];
+    for(var g=0;g<globales.length;g++){
+      var ng=await purgeGlobalePourClub(c.id,globales[g]);
+      if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }
+    }
+
+    // La fiche en dernier : tant qu'elle existe, la fenetre reste ouverte et la
+    // purge peut etre relancee la ou elle s'est arretee.
     await window.fbDeleteDoc(window.fbDoc(window.fbDb,"clubs",c.id));
     loadClubsList(list);
-    askAlert("Club supprime."+(invites?"\n\n"+invites+" invitation(s) en attente effacee(s).":"")+
-      "\n\nLes comptes de connexion restent a supprimer dans la console Firebase, "+
-      "et les donnees du club y restent stockees.");
+    askAlert("Club supprime.\n\n"+total+" document(s) effaces."+
+      (detail.length?"\n"+detail.join("\n"):"")+
+      (nb>0?"\n\n"+nb+" compte(s) de connexion restent a supprimer dans la console Firebase.":""));
   }catch(e){
     loadClubsList(list);
-    askAlert("Suppression impossible : "+((e&&e.code)||e));
+    askAlert("Purge interrompue : "+((e&&e.code)||e)+
+      "\n\n"+total+" document(s) deja effaces. Le club reste en statut 'purging' : relancer la suppression pour terminer."+
+      "\n\nLa fenetre d'acces se referme seule au bout de "+GM_PURGE_MINUTES+" minutes.");
   }
 }
 
@@ -542,7 +608,7 @@ function showClubSuspendu(club){
   var el=document.getElementById("club-suspendu-content");
   if(!el) return;
   club=club||window.CURRENT_CLUB||{};
-  var supprime=(club.status==="deleted");
+  var supprime=(club.status==="deleted"||club.status==="purging");
   var j=joursRestants(club);
   var ech=gmDate(club.graceUntil);
   el.innerHTML="";
@@ -558,7 +624,9 @@ function showClubSuspendu(club){
   var corps=document.createElement("div");
   corps.style.cssText="font-size:13px;color:var(--txt2);line-height:1.55";
   if(supprime){
-    corps.textContent="L'acces de "+(club.name||"votre club")+" a General Manager a ete supprime. Les donnees ne sont plus consultables depuis l'application.";
+    corps.textContent=(club.status==="purging")
+      ? "La suppression du compte de "+(club.name||"votre club")+" est en cours. Les donnees sont en train d'etre effacees."
+      : "L'acces de "+(club.name||"votre club")+" a General Manager a ete supprime. Les donnees ne sont plus consultables depuis l'application.";
   } else if(j===null){
     corps.textContent="L'acces de "+(club.name||"votre club")+" est suspendu. Contactez General Manager pour regulariser la situation.";
   } else if(j>0){
