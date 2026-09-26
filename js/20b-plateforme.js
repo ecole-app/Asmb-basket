@@ -306,6 +306,11 @@ function renderClubCard(c, list){
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
   if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }
+  // Suppression proposee seulement sur un club deja suspendu : deux gestes
+  // distincts valent mieux qu'un bouton definitif a cote des actions courantes.
+  if(!own && suspended){
+    row.appendChild(gmBtn("Supprimer","danger",function(){ deleteClubFlow(c, list); }));
+  }
   row.appendChild(gmBtn(suspended?"Réactiver":"Suspendre", suspended?"soft":"danger", function(){
     askConfirm(suspended?"Réactiver l'accès de ce club ?":"Suspendre ce club ? Ses membres ne pourront plus accéder à l'application.",
       {danger:!suspended, confirmText:suspended?"Réactiver":"Suspendre"}).then(function(ok){
@@ -446,4 +451,129 @@ function revokeSupportGrant(code, clubId){
     snap.forEach(function(d){ if(d.data().code===code) dels.push(window.fbDeleteDoc(window.fbDoc(window.fbDb,"clubs",clubId,"support_sessions",d.id))); });
     return Promise.all(dels);
   }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+
+// ── SUPPRESSION D'UN CLUB (super admin) ─────────────────────────────
+// Firestore ne supprime pas les sous-collections en cascade : effacer la seule
+// fiche du club laisserait toutes ses donnees stockees. On purge donc
+// explicitement, sous-collection par sous-collection, puis les entrees des
+// collections globales qui referencent ce club.
+// Les comptes utilisateurs ne sont PAS supprimes : leur compte d'authentification
+// ne peut pas etre efface depuis le navigateur. Ils sont comptes et signales,
+// et restent bloques par les regles, qui exigent un club existant.
+var CLUB_SOUS_COLLECTIONS=["players","teams","events","evaluations","licences","checkins",
+ "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
+ "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions"];
+
+function gmRefCol(clubId, name){
+  // "clubs" est une collection globale : le chemin passe donc brut, sans que le
+  // club actif de la session ne soit prefixe a la place de celui qu'on supprime.
+  return window.fbCollection(window.fbDb,"clubs",clubId,name);
+}
+function gmRefDoc(clubId, name, id){
+  return window.fbDoc(window.fbDb,"clubs",clubId,name,id);
+}
+
+// Supprime tous les documents d'une sous-collection, par lots.
+async function purgeSousCollection(clubId, name){
+  var snap=await window.fbGetDocs(gmRefCol(clubId,name));
+  var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
+  for(var i=0;i<ids.length;i+=400){
+    var b=window.fbWriteBatch();
+    ids.slice(i,i+400).forEach(function(id){ b.delete(gmRefDoc(clubId,name,id)); });
+    await b.commit();
+  }
+  return ids.length;
+}
+
+// Les canaux portent leurs messages en sous-collection : a purger avant eux.
+async function purgeCanaux(clubId){
+  var snap=await window.fbGetDocs(gmRefCol(clubId,"channels"));
+  var chans=[]; snap.forEach(function(d){ chans.push(d.id); });
+  var msgs=0;
+  for(var c=0;c<chans.length;c++){
+    var ms=await window.fbGetDocs(window.fbCollection(window.fbDb,"clubs",clubId,"channels",chans[c],"messages"));
+    var mids=[]; ms.forEach(function(d){ mids.push(d.id); });
+    for(var i=0;i<mids.length;i+=400){
+      var b=window.fbWriteBatch();
+      mids.slice(i,i+400).forEach(function(id){
+        b.delete(window.fbDoc(window.fbDb,"clubs",clubId,"channels",chans[c],"messages",id));
+      });
+      await b.commit();
+      msgs+=Math.min(400,mids.length-i);
+    }
+  }
+  for(var j=0;j<chans.length;j+=400){
+    var b2=window.fbWriteBatch();
+    chans.slice(j,j+400).forEach(function(id){ b2.delete(gmRefDoc(clubId,"channels",id)); });
+    await b2.commit();
+  }
+  return {canaux:chans.length, messages:msgs};
+}
+
+// Entrees des collections globales rattachees a ce club.
+async function purgeGlobalePourClub(clubId, coll){
+  var q=window.fbQuery(window.fbCollection(window.fbDb,coll), window.fbWhere("clubId","==",clubId));
+  var snap=await window.fbGetDocs(q);
+  var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
+  for(var i=0;i<ids.length;i+=400){
+    var b=window.fbWriteBatch();
+    ids.slice(i,i+400).forEach(function(id){ b.delete(window.fbDoc(window.fbDb,coll,id)); });
+    await b.commit();
+  }
+  return ids.length;
+}
+
+async function compterMembres(clubId){
+  try{
+    var q=window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("clubId","==",clubId));
+    var snap=await window.fbGetDocs(q);
+    var n=0; snap.forEach(function(){ n++; });
+    return n;
+  }catch(e){ return -1; }
+}
+
+async function deleteClubFlow(c, list){
+  if(!isSuperAdmin() || !c) return;
+  if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas etre supprime."); return; }
+  if(c.status!=="suspended"){
+    askAlert("Suspendre le club avant de le supprimer.\n\nCela laisse le temps de prevenir ses dirigeants, et evite une suppression faite par erreur.");
+    return;
+  }
+  var nb=await compterMembres(c.id);
+  var avert="Cette suppression est definitive et irreversible.\n\n"+
+    "Seront effacees : toutes les donnees du club (joueurs, equipes, evenements, evaluations, licences, pointages, messages, comptabilite, inventaire, notes de frais, annuaire, sauvegardes).\n\n"+
+    (nb>0 ? nb+" compte(s) rattache(s) a ce club perdront l'acces. Leurs comptes de connexion ne peuvent pas etre supprimes depuis ici : a faire dans la console Firebase.\n\n" : "")+
+    "Pour confirmer, saisir exactement le nom du club :\n"+(c.name||c.id);
+  var saisi=await askPrompt(avert,{placeholder:c.name||c.id,confirmText:"Supprimer definitivement"});
+  if(saisi===null) return;
+  if(String(saisi).trim()!==String(c.name||c.id).trim()){
+    askAlert("Nom incorrect : suppression annulee.");
+    return;
+  }
+  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Suppression en cours…</div>';
+  var total=0, detail=[];
+  try{
+    for(var i=0;i<CLUB_SOUS_COLLECTIONS.length;i++){
+      var name=CLUB_SOUS_COLLECTIONS[i];
+      var n=await purgeSousCollection(c.id,name);
+      if(n){ total+=n; detail.push(name+" : "+n); }
+    }
+    var ch=await purgeCanaux(c.id);
+    if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
+    var globales=["club_invites","support_grants","phone_index","inscription_codes"];
+    for(var g=0;g<globales.length;g++){
+      var ng=await purgeGlobalePourClub(c.id,globales[g]);
+      if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }
+    }
+    await window.fbDeleteDoc(window.fbDoc(window.fbDb,"clubs",c.id));
+    loadClubsList(list);
+    askAlert("Club supprime.\n\n"+total+" document(s) effaces."+
+      (detail.length?"\n"+detail.join("\n"):"")+
+      (nb>0?"\n\n"+nb+" compte(s) de connexion restent a supprimer dans la console Firebase.":""));
+  }catch(e){
+    loadClubsList(list);
+    askAlert("Suppression interrompue : "+((e&&e.code)||e)+
+      "\n\nUne partie des donnees a pu etre effacee. Relancer la suppression pour terminer.");
+  }
 }

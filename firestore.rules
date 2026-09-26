@@ -28,8 +28,12 @@ service cloud.firestore {
     function clubPath(clubId) { return /databases/$(database)/documents/clubs/$(clubId); }
 
     // Un club suspendu (abonnement) n'est plus accessible à ses membres.
+    // Le club doit exister ET ne pas etre suspendu. Un simple "n'existe pas donc
+    // pas suspendu" rendrait l'acces a un club supprime PLUS large qu'a un club
+    // suspendu : ses membres garderaient leurs droits sur des donnees devenues
+    // invisibles depuis la plateforme.
     function notSuspended(clubId) {
-      return !exists(clubPath(clubId)) || get(clubPath(clubId)).data.status != 'suspended';
+      return exists(clubPath(clubId)) && get(clubPath(clubId)).data.status != 'suspended';
     }
     function member(clubId) {
       return signedIn() && exists(userPath()) && me().get('clubId', null) == clubId && notSuspended(clubId);
