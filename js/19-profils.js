@@ -459,7 +459,7 @@ function refreshEventCounts(eventId){
       if(c.status==="present")pres++;
       else if(c.status==="absent"){abs++;notable.push(c);}
     });
-    var badges='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#27AE60;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+    var badges='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#D4AF37;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
       '<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
     if(countsEl)countsEl.innerHTML=badges;
     if(mCountsEl)mCountsEl.innerHTML=badges;
@@ -478,14 +478,14 @@ function refreshEventCounts(eventId){
 
 function checkinButtonsHtml(playerId,eventId){
   return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
-    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#27AE60;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
+    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#D4AF37;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
     '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
   '</div>';
 }
 
 function checkinBadgeHtml(playerId,eventId,status){
  var lbl={present:"✓ Présent",retard:"En retard",absent:"✕ Absent"};
- var col={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+ var col={present:"#D4AF37",retard:"#E8670A",absent:"#C0392B"};
  return '<div onclick="reopenCheckin(this,\''+playerId+'\',\''+eventId+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistré (toucher pour modifier)</div>';
 }
 
@@ -671,7 +671,7 @@ function switchProfile(){
   roles.forEach(function(r){
     var isCur=(r===current);
     var row=document.createElement("button");
-    row.style.cssText="width:100%;display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--rs);border:1.5px solid "+(isCur?"var(--grn)":"var(--bdr)")+";background:"+(isCur?"rgba(39,174,96,.08)":"var(--card)")+";cursor:pointer;text-align:left";
+    row.style.cssText="width:100%;display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--rs);border:1.5px solid "+(isCur?"var(--grn)":"var(--bdr)")+";background:"+(isCur?"rgba(212,175,55,.08)":"var(--card)")+";cursor:pointer;text-align:left";
     var av=document.createElement("div");
     av.style.cssText="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0";
     av.textContent=roleLabel(r).charAt(0);
@@ -730,7 +730,7 @@ function openTeamPicker(fromHome){
       div.dataset.teamid=t.id;
       div.style.cursor="pointer";
       div.onclick=function(){toggleTeamPick(div,t.id);};
-      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"#27AE60":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"#27AE60":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
+      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"#D4AF37":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"#D4AF37":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
       el.appendChild(div);
     });
   }
@@ -879,7 +879,7 @@ function openCoachTeamPicker(){
       div.className="cy-card";
       div.style.cursor="pointer";
       div.onclick=function(){toggleCoachTeam(t.id);openCoachTeamPicker();};
-      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"#27AE60":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"#27AE60":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
+      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"#D4AF37":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"#D4AF37":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
       el.appendChild(div);
     });
   }
@@ -935,7 +935,7 @@ function buildParentHome(){
   var myLic=getMyLicenceForTeam(activeTeam);
   var licBadge="";
   if(myLic){
-    var licColors={"validee":"#27AE60","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#6a9e72"};
+    var licColors={"validee":"#D4AF37","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#7a8caa"};
     var licLabels={"validee":"Licence validée","recue":"Fiche reçue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche a completer"};
     licBadge='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
       '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
@@ -989,7 +989,7 @@ function buildParentHome(){
     var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button>';
     var rdv=(nextEv.type==="match")?rdvTimeFor(nextEv):null;
     var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place a '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
-    var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(39,174,96,.1);color:#27AE60;font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
+    var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(212,175,55,.1);color:#D4AF37;font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
     var carB=(nextEv.type==="match")?('<button onclick="shareCovoiturage(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:11px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>'):'';
     evEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow)">'+
       '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;color:#fff;background:'+col+'">'+nextEv.type.toUpperCase()+'</span>'+
@@ -1010,7 +1010,7 @@ function buildParentHome(){
     lmEl.innerHTML="";
     lastMatches.forEach(function(m){
       var res=m.score.asmb>m.score.adv?"V":(m.score.asmb<m.score.adv?"D":"N");
-      var resCol=res==="V"?"#27AE60":(res==="D"?"#C0392B":"#E8670A");
+      var resCol=res==="V"?"#D4AF37":(res==="D"?"#C0392B":"#E8670A");
       var div=document.createElement("div");
       div.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow)";
       div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">ASMB '+m.score.asmb+' - '+m.score.adv+' '+m.score.adversaire+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+m.date+'</div></div>';
@@ -1025,7 +1025,7 @@ function buildParentHome(){
     statsEl.innerHTML='<div class="empty-state" style="padding:24px 20px"><div style="font-size:12px;color:var(--mut)">Pas d\'historique de données pour le moment</div></div>';
   } else {
     statsEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow);display:flex;align-items:center;justify-content:space-around;text-align:center">'+
-      '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
+      '<div><div style="font-size:22px;font-weight:900;color:#D4AF37">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
       '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
       '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>'+
       '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
@@ -1154,7 +1154,7 @@ function buildParentEquipe(){
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
-    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(212,175,55,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
@@ -1206,7 +1206,7 @@ function buildCoachEquipe(){
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non défini";
     var metaTxt=posteEligibleCoach?posteTxt:"";
-    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(39,174,96,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:rgba(212,175,55,.12);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
     var historyBtn='<button onclick="openPlayerHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
@@ -1269,7 +1269,7 @@ function buildPlayerHistoryScreen(){
   var pct=total?Math.round(present/total*100):0;
   var attEl=document.getElementById("ph2-attendance");
   attEl.innerHTML='<div style="display:flex;gap:8px;margin-bottom:'+(total?"10px":"0")+'">'+
-    '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(39,174,96,.12)"><div style="font-size:18px;font-weight:900;color:#27AE60">'+pct+'%</div><div style="font-size:9px;font-weight:600;color:#27AE60;text-transform:uppercase">Présence</div></div>'+
+    '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(212,175,55,.12)"><div style="font-size:18px;font-weight:900;color:#D4AF37">'+pct+'%</div><div style="font-size:9px;font-weight:600;color:#D4AF37;text-transform:uppercase">Présence</div></div>'+
     '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(0,0,0,.05)"><div style="font-size:18px;font-weight:900;color:var(--txt)">'+total+'</div><div style="font-size:9px;font-weight:600;color:var(--mut);text-transform:uppercase">Séances</div></div>'+
     '</div>'+
     (total?'<div style="text-align:center"><span onclick="showPresenceHistory(\''+p.id+'\')" style="font-size:11px;color:var(--dkg);font-weight:700;cursor:pointer">Voir le détail complet →</span></div>':'<div style="font-size:12px;color:var(--mut)">Aucune donnée pour le moment</div>');
@@ -1323,7 +1323,7 @@ function buildEvalAccordionRow(title,subLabel,total,maxTotal,criteria,scores,pre
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer";
   hdr.innerHTML='<span style="font-size:12.5px;font-weight:800;color:var(--txt)">'+title+'</span>'+
-    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#27AE60">'+total.toFixed(1)+' / '+maxTotal+'</span><span class="ph2-arrow" style="font-size:11px;color:var(--mut);transition:transform .18s">▾</span></div>';
+    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#D4AF37">'+total.toFixed(1)+' / '+maxTotal+'</span><span class="ph2-arrow" style="font-size:11px;color:var(--mut);transition:transform .18s">▾</span></div>';
   var detail=document.createElement("div");
   detail.style.cssText="display:none;padding:0 0 10px";
   var detailHtml=subLabel?('<div style="font-size:10.5px;color:var(--mut);margin-bottom:6px">'+subLabel+'</div>'):"";
@@ -1335,7 +1335,7 @@ function buildEvalAccordionRow(title,subLabel,total,maxTotal,criteria,scores,pre
     if(prevScores){
       var prevVal=prevScores[c]||0;
       var diff=val-prevVal;
-      if(diff>0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(39,174,96,.15);color:#27AE60">▲ +'+diff.toFixed(1)+'</span>';
+      if(diff>0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(212,175,55,.15);color:#D4AF37">▲ +'+diff.toFixed(1)+'</span>';
       else if(diff<0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(192,57,43,.12);color:#C0392B">▼ '+diff.toFixed(1)+'</span>';
       else trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(0,0,0,.06);color:var(--mut)">＝</span>';
     }

@@ -191,7 +191,7 @@ function buildLiveEval(){
     row.innerHTML='<div style="width:20px;font-size:13px;font-weight:900;color:'+(i===0?"#F5A623":"var(--mut)")+';text-align:center">'+(i+1)+'</div>'+
       '<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
       '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:13px;font-weight:900;color:#27AE60">'+totalFor(p.id).toFixed(1)+'</div>';
+      '<div style="font-size:13px;font-weight:900;color:#D4AF37">'+totalFor(p.id).toFixed(1)+'</div>';
     lb.appendChild(row);
   });
 
@@ -207,7 +207,7 @@ function buildLiveEval(){
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
     hdr.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
       '<div style="flex:1;font-size:13.5px;font-weight:800;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:13px;font-weight:900;color:#27AE60;background:rgba(39,174,96,.12);padding:3px 10px;border-radius:12px">'+totalFor(p.id).toFixed(1)+' pts</div>';
+      '<div style="font-size:13px;font-weight:900;color:#D4AF37;background:rgba(212,175,55,.12);padding:3px 10px;border-radius:12px">'+totalFor(p.id).toFixed(1)+' pts</div>';
     card.appendChild(hdr);
     criteria.forEach(function(c,ci){
       var row=document.createElement("div");

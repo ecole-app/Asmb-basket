@@ -64,7 +64,7 @@ function gmBtn(label, kind, onClick){
   b.textContent=label;
   var styles={
     primary:"background:var(--dkg);color:#fff",
-    soft:"background:rgba(39,174,96,.12);color:var(--dkg)",
+    soft:"background:rgba(212,175,55,.12);color:var(--dkg)",
     danger:"background:rgba(192,57,43,.1);color:var(--red)",
     ghost:"background:var(--bdr);color:var(--mut)"
   };

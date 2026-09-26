@@ -25,7 +25,7 @@ function sortLicenciesList(mode){
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr)";
     div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+'</div></div>'+
-      '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"#27AE60":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
+      '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"#D4AF37":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
     el.appendChild(div);
   });
 }
@@ -107,7 +107,7 @@ function showAssiduiteChart(){
   months.forEach(function(m){totalP+=byMonth[m.key].present;totalT+=byMonth[m.key].total;});
   var overallPct=totalT?Math.round(totalP/totalT*100):0;
 
-  var html='<div style="text-align:center;margin-bottom:20px"><div style="font-size:32px;font-weight:900;color:#27AE60">'+overallPct+'%</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Assiduité globale (6 derniers mois)</div></div>';
+  var html='<div style="text-align:center;margin-bottom:20px"><div style="font-size:32px;font-weight:900;color:#D4AF37">'+overallPct+'%</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Assiduité globale (6 derniers mois)</div></div>';
   html+='<div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 8px">';
   months.forEach(function(m){
     var d=byMonth[m.key];
@@ -115,7 +115,7 @@ function showAssiduiteChart(){
     var barH=d.total?Math.max(pct*1.3,4):4;
     html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">'+
       '<div style="font-size:10px;font-weight:700;color:var(--txt)">'+(d.total?pct+"%":"—")+'</div>'+
-      '<div style="width:100%;height:'+barH+'px;background:'+(d.total?"#27AE60":"var(--bdr)")+';border-radius:4px 4px 0 0"></div>'+
+      '<div style="width:100%;height:'+barH+'px;background:'+(d.total?"#D4AF37":"var(--bdr)")+';border-radius:4px 4px 0 0"></div>'+
       '<div style="font-size:9px;color:var(--mut);text-transform:capitalize">'+m.label+'</div>'+
     '</div>';
   });
@@ -161,7 +161,7 @@ function buildU13Home(){
     var progTxt=pr&&pr.total>0?" · "+pr.done+"/"+pr.total+" faites":"";
     var d=document.createElement("div");d.className="cy-card";
     d.onclick=function(){openCy(cy.id);};
-    d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"#27AE60":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"#27AE60":cy.c)+'">'+(allDone?"✓":cycleNum(cy))+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"#27AE60":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"#27AE60":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
+    d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"#D4AF37":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"#D4AF37":cy.c)+'">'+(allDone?"✓":cycleNum(cy))+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"#D4AF37":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"#D4AF37":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
     cl.appendChild(d);
   });
   if(canEditCycles()){
@@ -366,7 +366,7 @@ function buildCycle(cy){
     var done=isDone(cy.id,s.num);
     var d=document.createElement("div");d.className="sea-card";
     d.onclick=function(){openSea(cy.id,s.num);};
-    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#27AE60":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#27AE60":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#27AE60":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
+    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#D4AF37":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#D4AF37":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#D4AF37":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
     if(canEditCycles()){
       var editSea=document.createElement("button");
       editSea.textContent="Modifier";

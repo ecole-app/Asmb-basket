@@ -224,7 +224,7 @@ const CYCLES_U11=[
 ];
 
 const CYCLES=[
- {id:1,n:"Fondamentaux Individuels",sh:"Fondamentaux",p:"Sept. - mi-oct. 2026",s:10,c:"#27AE60",e:"",
+ {id:1,n:"Fondamentaux Individuels",sh:"Fondamentaux",p:"Sept. - mi-oct. 2026",s:10,c:"#D4AF37",e:"",
  objs:["Maitriser le dribble en deplacement","Passes precises : poitrine rebond une main","Acquerir le tir BEEF et le lay-up","Position défensive individuelle de base","Automatiser le pied-pivot"],
  seas:[
  {num:"1.1",t:"Prise en main et dribble",dur:"1h30",obj:"Evaluer le niveau et decouvrir le dribble",sits:[

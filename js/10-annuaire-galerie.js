@@ -88,7 +88,7 @@ function buildMatchList(){
           '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
           (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Meteo</button>':'')+
           (e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itineraire</a>':'')+
-          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'')+
+          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'')+
           '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
         '</div>';
       content.appendChild(card);
@@ -98,7 +98,7 @@ function buildMatchList(){
         snap.forEach(function(d2){var c=d2.data();if(c.eventId===e.id){if(c.status==="present")pres++;else if(c.status==="absent")abs++;}});
         var countsEl=document.getElementById("match-counts-"+e.id);
         if(countsEl){
-          countsEl.innerHTML='<span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#27AE60;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+          countsEl.innerHTML='<span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#D4AF37;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
             '<span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
         }
       });
@@ -210,12 +210,12 @@ function buildCalendrier(){
           var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
           var itinBtn=(e.type==="match"&&e.lieu)?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itineraire</a>':'';
           var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Meteo</button>':'';
-          var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
+          var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
           var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
             ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
-            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>')
-            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'');
+            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>')
+            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'');
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+eventTypeColor(e.type)+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0">'+
             '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+eventTypeLabel(e.type)+'</span>'+
@@ -245,7 +245,7 @@ function buildCalendrier(){
           else if(c.status==="absent"){abs++;notable.push(c);}
         });
         if(countsEl){
-          countsEl.innerHTML='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#27AE60;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
+          countsEl.innerHTML='<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#D4AF37;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+pres+'</span>'+
             '<span style="min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+abs+'</span>';
         }
         if(absEl){
@@ -374,7 +374,7 @@ function buildClassement(){
         '<td style="font-size:12px;font-weight:'+(isUs?"700":"400")+';color:var(--txt);white-space:nowrap">'+r.equipe+'</td>'+
         '<td style="text-align:center;font-size:12px;font-weight:800;color:var(--txt)">'+(r.points||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.joues||0)+'</td>'+
-        '<td style="text-align:center;color:#27AE60;font-weight:700">'+(r.victoires||0)+'</td>'+
+        '<td style="text-align:center;color:#D4AF37;font-weight:700">'+(r.victoires||0)+'</td>'+
         '<td style="text-align:center;color:#C0392B;font-weight:700">'+(r.defaites||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.pointsMarques||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.pointsEncaisses||0)+'</td>'+

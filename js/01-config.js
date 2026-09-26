@@ -11,7 +11,7 @@ function getCurrentSeason(){
 }
 
 const POLES=[
- {id:"formation",name:"Pôle Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1B5C28",ready:true,
+ {id:"formation",name:"Pôle Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1A2E5A",ready:true,
  about:"Structurer et developper la pratique du basket a tous les niveaux. Entraîneurs diplomes, suivi individualise, methodologie structuree.",
  items:["École de basket · Catégories jeunes","Accès au niveau compétition","Suivi individualise · Progression continue","Formation des educateurs en continu"]},
  {id:"elite",name:"Élite Academy",sub:"Accompagner les jeunes talents",desc:"Formation · Scolaire · Personnel",icon:"⭐",color:"#1a6b30",ready:true,
@@ -33,15 +33,15 @@ const POLES=[
 const ELITE_CATS=[
  {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#27AE60",ready:true}
+ {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true}
 ];
 const VACS=[
  {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
  {n:"Noel",d:"19 dec. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"},
  {n:"Hiver",d:"21 fev. - 9 mars 2026",imp:"4 séances",c:"#1A2E5A"},
- {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 séances",c:"#27AE60"}
+ {n:"Printemps",d:"25 avr. - 11 mai 2026",imp:"4 séances",c:"#D4AF37"}
 ];
-const KC=["#16A085","#8E44AD","#27AE60","#1A2E5A","#E8670A"];
+const KC=["#16A085","#8E44AD","#D4AF37","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";
 

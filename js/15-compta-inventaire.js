@@ -253,7 +253,7 @@ function buildInventaire(){
     minusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,-1);});
     var plusBtn=document.createElement("button");
     plusBtn.textContent="+ 1";
-    plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+    plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
     plusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,1);});
     adjRow.appendChild(minusBtn);adjRow.appendChild(plusBtn);
     card.appendChild(adjRow);

@@ -479,7 +479,7 @@ SIT_DUR["2.3-2"]=5500;SIT_ANIMS["2.3-2"]=function(ctx,t){if(!ctx)return;
  if(p3>0.4){var pp=(p3-.4)/.6;bx4=lp(d1x2,d2x2,eOut(pp));by4=lp(d1y2-14,d2y2-14,pp)-Math.sin(pp*Math.PI)*15;}
  bl(ctx,bx4,by4,9);
  pl(ctx,d1x2,d1y2,"D1","#C0392B",11);pl(ctx,d2x2,d2y2,"D2","#C0392B",11);pl(ctx,d3x2,d3y2,"D3","#C0392B",11);
- if(p3>0.3){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("CONTRE-ATTAQUE !",W/2,H/2+10);}
+ if(p3>0.3){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("CONTRE-ATTAQUE !",W/2,H/2+10);}
  }
  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Rebond défensif → Contre-attaque immediate",W/2,H-8);
 };SIT_ANIMS["2.3-2"].height=480;
@@ -487,7 +487,7 @@ SIT_DUR["2.3-2"]=5500;SIT_ANIMS["2.3-2"]=function(ctx,t){if(!ctx)return;
 // 2.3-3 : Match contre-attaque valorisee
 SIT_DUR["2.3-3"]=5000;SIT_ANIMS["2.3-3"]=function(ctx,t){if(!ctx)return;
  var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
- ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Panier en -5s = x2",W/2,H-8);
+ ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Panier en -5s = x2",W/2,H-8);
 };SIT_ANIMS["2.3-3"].height=260;
 
 // 3.1-2 : 1v1 avec tir - full court
@@ -545,7 +545,7 @@ SIT_DUR["3.2-1"]=4500;SIT_ANIMS["3.2-1"]=function(ctx,t){if(!ctx)return;
  for(var k=1;k<=4;k++){var tpast=Math.max(0,(t-0.15-delay-k*0.05)/0.75);var pastY=lp(startY,targetY,eOut(tpast));ctx.globalAlpha=Math.max(0,.15-k*.04);ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(px,pastY,10,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
  pl(ctx,px,py,"D","#C0392B",12);
  });
- if(t>0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Position défensive !",W/2,H/2+20);}
+ if(t>0.7){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("Position défensive !",W/2,H/2+20);}
  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Signal → Sprint retour en 3 secondes",W/2,H-8);
 };SIT_ANIMS["3.2-1"].height=480;
 
@@ -688,7 +688,7 @@ SIT_DUR["4.1-3"]=5500;SIT_ANIMS["4.1-3"]=function(ctx,t){if(!ctx)return;
  bl(ctx,lp(ap[bi].x,ap[bni].x,eOut(bp)),lp(ap[bi].y,ap[bni].y,eOut(bp))-Math.sin(bp*Math.PI)*7,7);
  dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});
  ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
- if(t>0.5&&t<0.7){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("BONUS si tir après coupe !",W/2,H/2-12);}
+ if(t>0.5&&t<0.7){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("BONUS si tir après coupe !",W/2,H/2-12);}
  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("3v3 · Décalage par coupe",W/2,H-8);
 };SIT_ANIMS["4.1-3"].height=260;
 
@@ -745,7 +745,7 @@ SIT_DUR["4.3-1"]=5500;SIT_ANIMS["4.3-1"]=function(ctx,t){if(!ctx)return;
  bl(ctx,lp(ap[bi].x,ap[bni].x,eOut(bp)),lp(ap[bi].y,ap[bni].y,eOut(bp))-Math.sin(bp*Math.PI)*6,7);
  dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});
  ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
- ctx.fillStyle=phase?"rgba(192,57,43,.7)":"rgba(39,174,96,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(phase?"→ D devient A !":"Attaque →",W/2,H/2-(phase?-18:18));
+ ctx.fillStyle=phase?"rgba(192,57,43,.7)":"rgba(212,175,55,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(phase?"→ D devient A !":"Attaque →",W/2,H/2-(phase?-18:18));
  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Transition instantanee après chaque panier",W/2,H-8);
 };SIT_ANIMS["4.3-1"].height=260;
 
@@ -804,7 +804,7 @@ SIT_DUR["5.1-2"]=5000;SIT_ANIMS["5.1-2"]=function(ctx,t){if(!ctx)return;
  ctx.strokeStyle="rgba(26,46,90,.3)";ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(recX,recY);ctx.lineTo(runX,runY);ctx.stroke();ctx.setLineDash([]);
  pl(ctx,mX,mY,"M","#E8670A",13);pl(ctx,runX,runY,"A","#1A2E5A",11);pl(ctx,p2x,p2y,"A","#1A2E5A",11);pl(ctx,p3x,p3y,"A","#1A2E5A",11);
  bl(ctx,lp(recX,runX,eOut(p2)),lp(recY,runY,p2)-13,9);
- if(p2>0.4){ctx.fillStyle="rgba(39,174,96,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("MONTEE RAPIDE !",W/2,H/2+25);}
+ if(p2>0.4){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("MONTEE RAPIDE !",W/2,H/2+25);}
  }
  ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Remise en jeu → Decrochage → Montee rapide",W/2,H-8);
 };SIT_ANIMS["5.1-2"].height=480;
@@ -849,7 +849,7 @@ SIT_DUR["5.2-2"]=5000;SIT_ANIMS["5.2-2"]=function(ctx,t){if(!ctx)return;
  ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(8,8,W-16,H-16,4);ctx.stroke();
  var stations=[
  {x:W/4,y:H/2-20,label:"LF",icon:"",color:"#E8670A"},
- {x:W/2,y:H/2-20,label:"Dribble",icon:"",color:"#27AE60"},
+ {x:W/2,y:H/2-20,label:"Dribble",icon:"",color:"#D4AF37"},
  {x:3*W/4,y:H/2-20,label:"Auto-eval",icon:"",color:"#8E44AD"},
  ];
  var active=Math.floor(t*3*1.5)%3;

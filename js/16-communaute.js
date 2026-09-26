@@ -488,7 +488,7 @@ function listenTyping(channelId){
     if(!descEl)return;
     if(typers.length){
       descEl.textContent=(typers.length===1?typers[0]+" ecrit...":typers.join(", ")+" ecrivent...");
-      descEl.style.color="#27AE60";
+      descEl.style.color="#D4AF37";
       descEl.style.fontStyle="italic";
     } else {
       descEl.textContent=baseDesc;
@@ -586,7 +586,7 @@ function listenMessages(channelId, prevLastRead){
           cvHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bdr)">'+
             '<span style="font-size:12px;color:var(--txt)">'+p.nom+'</span>'+
             '<div style="display:flex;gap:5px">'+
-              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#27AE60":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
+              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#D4AF37":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
               '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'absent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="absent"?"#C0392B":"rgba(0,0,0,.08)")+';color:'+(resp==="absent"?"#fff":"var(--mut)")+'">✕ Absent</span>'+
             '</div></div>';
         });
@@ -634,7 +634,7 @@ function listenMessages(channelId, prevLastRead){
         var users=reactions[em]||[];
         if(!users.length)return;
         var mine=users.indexOf(myPseudo)>=0;
-        reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"rgba(39,174,96,.22)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
+        reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"rgba(212,175,55,.22)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
       });
       reactHtml+='<span onclick="openReactionPicker(event,\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:12px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.06);color:var(--mut)">+</span>';
       if(window.asmbCoachMode){

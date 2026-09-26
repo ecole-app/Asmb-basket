@@ -4,8 +4,8 @@ var ADMIN_MODULES=[
  {id:"invitations",name:"Accès & invitations",sub:"Inviter coachs · Accès support",icon:"🔐",color:"#1A2E5A",scr:"admin"},
  {id:"parametres",name:"Paramètres",sub:"Notifications - Compte - Données",icon:"⚙",color:"#5a76aa",scr:"parametres"},
  {id:"communaute",name:"Communauté",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
- {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#27AE60",scr:"licences"},
- {id:"inscriptions",name:"Inscriptions",sub:"Fiches joueurs · Licences",icon:"📝",color:"#1B5C28",scr:"inscriptions"},
+ {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#D4AF37",scr:"licences"},
+ {id:"inscriptions",name:"Inscriptions",sub:"Fiches joueurs · Licences",icon:"📝",color:"#1A2E5A",scr:"inscriptions"},
  {id:"equipes",name:"Équipes",sub:"Composition · Staff · Maillots",icon:"👥",color:"#16A085",scr:"equipes"},
  {id:"planning",name:"Planning",sub:"Salles · Créneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
  {id:"documents",name:"Documents",sub:"Fichiers · Formulaires",icon:"📁",color:"#8E44AD",scr:"documents"},
@@ -17,7 +17,7 @@ var ADMIN_MODULES=[
  {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
-var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#27AE60","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
+var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#D4AF37","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
 var editingPlayerId=null;
 
@@ -237,7 +237,7 @@ function buildAdminHome(){
    ctrl.style.cssText="display:flex;justify-content:flex-end;padding:0 12px 10px";
    var hideBtn=document.createElement("button");
    hideBtn.textContent=isHidden?"Afficher":"Masquer";
-   hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(39,174,96,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
+   hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(212,175,55,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
    hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleHiddenAdminModule(m.id);});
    ctrl.appendChild(hideBtn);
    d.appendChild(ctrl);
@@ -599,7 +599,7 @@ function renderAvisList(list,items){
     btnRow.style.cssText="display:flex;gap:8px";
     var toggleBtn=document.createElement("button");
     toggleBtn.textContent=it.status==="traite"?"Marquer non traité":"Marquer traité";
-    toggleBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    toggleBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
     toggleBtn.addEventListener("click",function(){
       var newStatus=it.status==="traite"?"nouveau":"traite";
       window.fbUpdateDoc(window.fbDoc(window.fbDb,"feedback",it._id),{status:newStatus}).then(function(){
@@ -645,13 +645,13 @@ function renderPlayers(){
   el.innerHTML="";
   filtered.forEach(function(p){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
-    var col=CAT_COLORS[p.cat]||"#1B5C28";
+    var col=CAT_COLORS[p.cat]||"#1A2E5A";
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     var genreBadge=p.genre==="F"?'<span class="status-badge" style="background:rgba(142,68,173,.12);color:#8E44AD;margin-left:5px">F</span>':p.genre==="M"?'<span class="status-badge" style="background:rgba(22,160,133,.12);color:#16A085;margin-left:5px">M</span>':'';
     var d=document.createElement("div");d.className="player-card";
     var meta=p.cat+" · "+p.naissance+(p.poste?" - "+p.poste:"");
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
-    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
+    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
     btns+='<button onclick="editPlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
     btns+='<button onclick="deletePlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
@@ -788,7 +788,7 @@ function renderNotesFraisList(list,isDir){
     list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucune note de frais.</div>';
     return;
   }
-  var statutColors={soumise:"#E8670A",remboursee:"#27AE60",refusee:"#C0392B"};
+  var statutColors={soumise:"#E8670A",remboursee:"#D4AF37",refusee:"#C0392B"};
   var statutLabels={soumise:"Soumise",remboursee:"Remboursée",refusee:"Refusée"};
   notes.forEach(function(n){
     var card=document.createElement("div");
@@ -829,7 +829,7 @@ function renderNotesFraisList(list,isDir){
     if(isDir&&n.statut==="soumise"){
       var okBtn=document.createElement("button");
       okBtn.textContent="Marquer remboursée";
-      okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
+      okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
       okBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"remboursee",list,isDir);});
       var refBtn=document.createElement("button");
       refBtn.textContent="Refuser";
@@ -952,9 +952,9 @@ function printNoteFrais(n){
   var win=window.open("","_blank");
   var html='<html><head><title>Note de frais</title><style>'+
     'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2e1e}'+
-    'h1{font-size:20px;border-bottom:2px solid #1B5C28;padding-bottom:10px}'+
+    'h1{font-size:20px;border-bottom:2px solid #1A2E5A;padding-bottom:10px}'+
     '.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}'+
-    '.row b{color:#1B5C28}'+
+    '.row b{color:#1A2E5A}'+
     'img{max-width:100%;margin-top:20px;border-radius:8px}'+
     '</style></head><body>'+
     '<h1>Note de frais — ASMB Basket</h1>'+
@@ -1072,7 +1072,7 @@ function renderTeamReclassementList(list){
     });
     var catOnlyBtn=document.createElement("button");
     catOnlyBtn.textContent="Catégorie seule ("+entry.suggested+")";
-    catOnlyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    catOnlyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
     catOnlyBtn.addEventListener("click",function(){
       var teams=getTeams();
       var idx=teams.findIndex(function(x){return x.id===t.id;});

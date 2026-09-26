@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#080f09">
+<meta name="theme-color" content="#0a0f1a">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -36,15 +36,15 @@
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
 <div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">Mode hors-ligne · Vous consultez les dernieres données chargées</div>
-<div id="update-banner" style="display:none;background:#27AE60;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;align-items:center;justify-content:center;gap:10px">
+<div id="update-banner" style="display:none;background:#D4AF37;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;align-items:center;justify-content:center;gap:10px">
   <span>Nouvelle version disponible</span>
-  <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1B5C28;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre a jour</button>
+  <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1A2E5A;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre a jour</button>
 </div>
 <div id="join-req-banner" style="display:none;background:#1A2E5A;color:#fff;padding:12px 16px;flex-direction:column;gap:8px">
   <div style="font-size:12px;font-weight:700" id="join-req-text"></div>
   <div style="display:flex;gap:8px">
     <button onclick="showJoinReqFiche()" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Fiche</button>
-    <button onclick="acceptJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:#27AE60;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Accepter</button>
+    <button onclick="acceptJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:#D4AF37;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Accepter</button>
     <button onclick="rejectJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✕ Refuser</button>
   </div>
 </div>
@@ -115,7 +115,7 @@
 <div class="main" id="main-scroll">
   <div class="scr on" id="scr-portal">
     <div id="portal-countdown" style="display:none;padding:6px 16px;background:rgba(232,103,10,.1);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:600;color:#E8670A;text-align:center"></div>
-    <div class="hero" id="home-hero-portal" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-portal" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1A2E5A 0%, #142a4d 55%, #050b16 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="home-logo" style="flex-shrink:0"></div>
@@ -123,11 +123,11 @@
       </div>
       <div id="portal-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="portal-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
-        <div id="portal-next-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
+        <div id="portal-next-event-sub" style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
       </div>
       <div id="portal-no-event" style="display:none;position:relative;z-index:1">
         <div data-line1 style="font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase">Bienvenue</div>
-        <div data-line2 style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Étienne Métropole Basket</div>
+        <div data-line2 style="font-size:12px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px;text-transform:uppercase">Saint-Étienne Métropole Basket</div>
       </div>
     </div>
     <div class="sec">Chiffres clés</div>
@@ -994,7 +994,7 @@
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>
  <div style="display:flex;gap:10px;flex-wrap:wrap">
  <button onclick="showQrModal('app')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">QR Rejoindre l'app</button>
- <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
+ <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
  </div>
  </div>
  </div><div class="param-block" data-sec="notifications"><div class="sec">Notifications</div>
@@ -1074,14 +1074,14 @@
 
   <!-- ══════════════ ROLE SELECT ══════════════ -->
   <div class="scr" id="scr-role-select">
-    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1A2E5A 0%, #142a4d 55%, #050b16 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1">
         <div id="role-logo" style="flex-shrink:0"></div>
         <div>
           <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase;margin-bottom:6px">ASMB</div>
           <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px">Bienvenue</div>
-          <div style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px">QUI ETES-VOUS ?</div>
+          <div style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px">QUI ETES-VOUS ?</div>
         </div>
       </div>
     </div>
@@ -1200,7 +1200,7 @@
           <input type="checkbox" id="pp-dark" onchange="toggleThemeFromParams(this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
         </label>
         <div style="padding:14px">
-          <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,174,96,.1);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
+          <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(212,175,55,.1);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
           <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation reapparaitra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide a l'installation</button>
         </div>
       </div>
@@ -1247,7 +1247,7 @@
   </div>
 
   <div class="scr" id="scr-parent-home">
-    <div class="hero" id="home-hero-parent" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-parent" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1A2E5A 0%, #142a4d 55%, #050b16 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="parent-hero-logo" style="flex-shrink:0"></div>
@@ -1256,7 +1256,7 @@
       </div>
       <div id="parent-hero-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="parent-hero-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
-        <div id="parent-hero-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
+        <div id="parent-hero-event-sub" style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
       </div>
       <div id="parent-date" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>
@@ -1276,7 +1276,7 @@
  <div class="sec" style="padding:0 0 8px">Prochain événement</div>
  <div id="parent-next-event"></div>
  <div style="margin-top:10px">
- <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,174,96,.1);color:#27AE60;font-size:12px;font-weight:700;border:none;cursor:pointer"> Ajouter toute la saison a mon agenda</button>
+ <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(212,175,55,.1);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer"> Ajouter toute la saison a mon agenda</button>
  </div>
  <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
  <div id="parent-last-matches"></div>
@@ -1399,7 +1399,7 @@
 
   <!-- ══════════════ EQUIPE (coach) ══════════════ -->
   <div class="scr" id="scr-coach-equipe">
-    <div class="hero" id="home-hero-coach" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1B5C28 0%, #0d3016 55%, #050f07 100%)">
+    <div class="hero" id="home-hero-coach" style="padding:22px 18px;position:relative;overflow:hidden;background:radial-gradient(circle at 85% -10%, rgba(255,255,255,.06) 0%, transparent 45%), linear-gradient(155deg, #1A2E5A 0%, #142a4d 55%, #050b16 100%)">
       <div style="position:absolute;top:-40px;right:-50px;width:200px;height:200px;border-radius:50%;border:20px solid rgba(255,255,255,.05)"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:1">
         <div id="coach-eq-logo" style="flex-shrink:0"></div>
@@ -1408,7 +1408,7 @@
       </div>
       <div id="coach-next-event" style="display:none;flex-direction:column;position:relative;z-index:1">
         <div id="coach-next-event-title" style="font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px"></div>
-        <div id="coach-next-event-sub" style="font-size:13px;font-weight:700;color:#7FE89A;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
+        <div id="coach-next-event-sub" style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px;text-transform:uppercase"></div>
       </div>
       <div id="coach-eq-name" style="display:none;font-size:22px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;position:relative;z-index:1"></div>
     </div>

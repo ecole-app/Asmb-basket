@@ -148,7 +148,7 @@ function buildParametresLayout(){
       } else {
         var hideBtn=document.createElement("button");
         hideBtn.textContent=isHidden?"Afficher":"Masquer";
-        hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(39,174,96,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
+        hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(212,175,55,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
         hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleParamHidden(secId);});
         ctrl.appendChild(hideBtn);
       }

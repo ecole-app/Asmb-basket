@@ -127,7 +127,7 @@ function refreshCurrentScreen(){
  var pull=Math.min(dy*0.5,90);
  indicator.style.opacity=Math.min(pull/THRESHOLD,1);
  spinner.style.transform="translateY("+pull+"px) rotate("+(pull*3)+"deg)";
- if(pull>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor="#27AE60";}
+ if(pull>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor="#D4AF37";}
  else if(pull<THRESHOLD&&triggered){triggered=false;spinner.style.borderTopColor="var(--dkg)";}
  }
  },{passive:true});

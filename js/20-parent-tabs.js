@@ -22,7 +22,7 @@ function buildParentEvents(){
     if(e.presences&&Object.keys(e.presences).length){
       var pres=Object.values(e.presences).filter(function(v){return v==="present";}).length;
       var tot=Object.keys(e.presences).length;
-      presInfo='<div style="font-size:11px;color:#27AE60;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
+      presInfo='<div style="font-size:11px;color:#D4AF37;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
     }
     var convocInfo="";
     if(e.convocations&&e.convocations.length){
@@ -54,7 +54,7 @@ function buildParentStats(){
     html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:12px">';
     html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Bilan des présences</div>';
     html+='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center">';
-    html+='<div><div style="font-size:24px;font-weight:900;color:#27AE60">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>';
+    html+='<div><div style="font-size:24px;font-weight:900;color:#D4AF37">'+stats.pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>';
     html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';
     html+='<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+stats.present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>';
     html+='<div style="width:1px;height:40px;background:var(--bdr)"></div>';

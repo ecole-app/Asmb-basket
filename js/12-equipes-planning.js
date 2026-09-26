@@ -40,7 +40,7 @@ function renderPresenceHistory(){
 
   var sumEl=document.getElementById("ph-summary");
   sumEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;justify-content:space-around;text-align:center">'+
-    '<div><div style="font-size:22px;font-weight:900;color:#27AE60">'+pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
+    '<div><div style="font-size:22px;font-weight:900;color:#D4AF37">'+pct+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité</div></div>'+
     '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
     '<div><div style="font-size:22px;font-weight:900;color:var(--txt)">'+present+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Présences</div></div>'+
     '<div style="width:1px;height:36px;background:var(--bdr)"></div>'+
@@ -54,7 +54,7 @@ function renderPresenceHistory(){
     var isPresent=e.presences[phCurrentPlayerId]==="present";
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"#27AE60":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+eventTypeLabel(e.type)+'</div></div>';
+    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"#D4AF37":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+eventTypeLabel(e.type)+'</div></div>';
     listEl.appendChild(div);
   });
 
@@ -76,7 +76,7 @@ function renderPresenceHistory(){
  });
  if(!mine.length){selfEl.innerHTML="";return;}
  var statusLabels={present:"✓ Présent",retard:"Retard",absent:"✕ Absent"};
- var statusColors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+ var statusColors={present:"#D4AF37",retard:"#E8670A",absent:"#C0392B"};
  var html='<div class="sec" style="padding-left:0;margin-top:16px">Auto-declarations (horodatees)</div>';
         mine.forEach(function(c){
           var ts=c.ts&&c.ts.toDate?c.ts.toDate():null;
@@ -265,7 +265,7 @@ function buildTeams(){
   if(!teams.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune équipe</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Équipe</div></div>';return;}
   el.innerHTML="";
   teams.forEach(function(t){
-    var col=CAT_COLORS[t.cat]||"#1B5C28";
+    var col=CAT_COLORS[t.cat]||"#1A2E5A";
     var members=players.filter(function(p){return (t.members||[]).includes(p.id);});
     var plural=members.length>1?"s":"";
     var d=document.createElement("div");d.className="team-card";
@@ -309,7 +309,7 @@ function buildTeams(){
     // Bouton ajouter
     var addBtn=document.createElement("button");
     addBtn.textContent="+ Ajouter un joueur";
-    addBtn.style.cssText="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(39,174,96,.12);color:var(--dkg);font-size:11px;font-weight:700;border:1px solid rgba(39,174,96,.3);cursor:pointer;margin-right:8px";
+    addBtn.style.cssText="margin-top:10px;padding:7px 14px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:11px;font-weight:700;border:1px solid rgba(212,175,55,.3);cursor:pointer;margin-right:8px";
     (function(tid){addBtn.addEventListener("click",function(e){e.stopPropagation();openAddTeamMember(tid);});})(t.id);
 
     // Bouton supprimer
@@ -506,7 +506,7 @@ function buildPlanning(){
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
-    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:#27AE60;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
     var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">ASMB "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
     var scoreBtn=(e.type==="match")?("<button onclick=\"editScore('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(e.score?"Modifier score":"Ajouter score")+"</button>"):"";
     var convocCount=e.convocations?e.convocations.length:0;

@@ -21,7 +21,7 @@ function openPresences(eventId){
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
     div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
-        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#27AE60":"var(--bdr)")+';background:'+(state==="present"?"#27AE60":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
+        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#D4AF37":"var(--bdr)")+';background:'+(state==="present"?"#D4AF37":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
         '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
       '</div>';
  el.appendChild(div);
@@ -29,7 +29,7 @@ function openPresences(eventId){
  var badgeEl=document.getElementById("selfdecl-"+p.id);
  if(!badgeEl||!existing)return;
  var labels={present:"✓ auto",retard:"retard (auto)",absent:"✕ auto"};
- var colors={present:"#27AE60",retard:"#E8670A",absent:"#C0392B"};
+ var colors={present:"#D4AF37",retard:"#E8670A",absent:"#C0392B"};
  badgeEl.innerHTML='<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;color:#fff;background:'+colors[existing.status]+'">'+labels[existing.status]+'</span>';
     });
   });
@@ -42,7 +42,7 @@ function setPresenceState(btn){
   parent.querySelectorAll("button").forEach(function(b){
     var isThis=b===btn;
     var s=b.dataset.state;
-    var col=s==="present"?"#27AE60":"#C0392B";
+    var col=s==="present"?"#D4AF37":"#C0392B";
     b.style.background=isThis?col:"var(--bg)";
     b.style.color=isThis?"#fff":"var(--mut)";
     b.style.borderColor=isThis?col:"var(--bdr)";

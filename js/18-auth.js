@@ -65,14 +65,14 @@ function authLogoHtml(){
   if(hl && hl.innerHTML && hl.innerHTML.indexOf("img")>=0){
     return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+hl.innerHTML.replace(/width="\d+"/,'width="64"').replace(/height="\d+"/,'height="64"')+'</div>';
   }
-  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(127,232,154,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#7FE89A;letter-spacing:1px">ASMB</div>';
+  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(242,213,126,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#F2D57E;letter-spacing:1px">ASMB</div>';
 }
 
 function authHero(title, tag){
-  return '<div style="background:linear-gradient(160deg,#0d2b14,#1B5C28,#0d2b14);padding:30px 22px 26px;text-align:center">'
+  return '<div style="background:linear-gradient(160deg,#10203d,#1A2E5A,#10203d);padding:30px 22px 26px;text-align:center">'
     +'<div style="display:flex;justify-content:center;margin-bottom:12px">'+authLogoHtml()+'</div>'
     +'<div style="font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-.3px">'+authEsc(title)+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:#7FE89A;margin-top:7px;text-transform:uppercase;letter-spacing:.5px">'+authEsc(tag)+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#F2D57E;margin-top:7px;text-transform:uppercase;letter-spacing:.5px">'+authEsc(tag)+'</div>'
     +'</div>';
 }
 
@@ -131,7 +131,7 @@ function showAuth(step, data){
       +'</div>';
   } else if(step==="signup"){
     var chips="";
-    if(data.playerName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(39,174,96,.12);color:var(--dkg);border:1px solid rgba(39,174,96,.3)">'+authEsc(data.playerName)+'</span></div>'; }
+    if(data.playerName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);border:1px solid rgba(212,175,55,.3)">'+authEsc(data.playerName)+'</span></div>'; }
     h=authHero("Bienvenue","Numéro reconnu")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
       +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px">Ce numéro est rattaché au club.</p>'
