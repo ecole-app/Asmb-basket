@@ -225,11 +225,33 @@ function openPlateforme(){
   loadClubsList(list);
 }
 
+// Diagnostic affiché quand l'accès plateforme est demandé par un compte non reconnu.
+function gmDiagCard(){
+  var seen=(window.ASMB_USER&&window.ASMB_USER.uid)||"(aucun utilisateur chargé)";
+  var d=document.createElement("div");
+  d.style.cssText="margin:14px 12px;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.5";
+  d.innerHTML='<div style="font-weight:800;color:var(--txt);margin-bottom:8px">Accès plateforme refusé</div>'
+    +"Ce compte n'est pas reconnu comme super admin."
+    +'<div style="margin-top:10px"><b>UID du compte connecté :</b><br><code style="word-break:break-all">'+authEsc(seen)+'</code></div>'
+    +'<div style="margin-top:8px"><b>UID attendu :</b><br><code style="word-break:break-all">'+authEsc(BOOTSTRAP_DIRIGEANT_UID)+'</code></div>';
+  return d;
+}
+
 // Accueil du super admin : la plateforme, pas l'espace d'un club.
-function showPlateformeHome(){
-  if(!isSuperAdmin()) return;
+// opts.force : affiche l'écran même si le compte n'est pas super admin, avec le
+// diagnostic d'UID (accès manuel par ?plateforme, pour ne jamais rester bloqué).
+function showPlateformeHome(opts){
+  opts=opts||{};
   var el=document.getElementById("plateforme-content");
-  if(!el) return;
+  if(!el) return false;
+  if(!isSuperAdmin()){
+    if(!opts.force) return false;
+    el.innerHTML="";
+    el.appendChild(gmDiagCard());
+    stack=["plateforme"];
+    showScr("plateforme");
+    return false;
+  }
   el.innerHTML="";
   var intro=document.createElement("div");
   intro.style.cssText="margin:14px 12px 0;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.45";
@@ -245,6 +267,7 @@ function showPlateformeHome(){
   loadClubsList(list);
   stack=["plateforme"];
   showScr("plateforme");
+  return true;
 }
 
 // Le club d'origine est le seul à s'ouvrir directement : le super admin en est le dirigeant.

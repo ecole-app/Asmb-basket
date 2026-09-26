@@ -449,15 +449,24 @@ function finishAuthedUser(user, u, isUpdate){
   }
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
   // Super admin : l'accueil est la Plateforme (clubs), pas l'espace d'un club.
-  // Une mise à jour live de la fiche utilisateur ne doit pas ramener ici en cours de travail.
-  if(!isUpdate && !window.SUPPORT_MODE && typeof showPlateformeHome==="function" && isSuperAdmin()){
-    showPlateformeHome();
+  // Une mise à jour live de la fiche utilisateur ne doit pas ramener ici en cours
+  // de travail — sauf si on s'y trouve déjà, ou si ?plateforme force l'accès.
+  var forcePf=false;
+  try{ forcePf=new URLSearchParams(window.location.search).has("plateforme"); }catch(e){}
+  var onPf=(typeof stack!=="undefined" && stack.length && stack[stack.length-1]==="plateforme");
+  if(!window.SUPPORT_MODE && typeof showPlateformeHome==="function"
+     && (!isUpdate || forcePf || onPf) && (isSuperAdmin() || forcePf)){
+    // différé : passe après le routage synchrone d'initProfile(), qui sinon gagne
+    setTimeout(function(){ showPlateformeHome({force:forcePf}); },0);
   }
   try{
     var btn=document.getElementById("hdr-profile-btn");
     if(btn) btn.style.display=(roles.length>1)?"flex":"none";
     var setBtn=document.getElementById("hdr-settings-btn");
     if(setBtn) setBtn.style.display=(profile==="dirigeant")?"none":"flex";
+    // Retour à la plateforme, accessible depuis n'importe quel écran
+    var gmb=document.getElementById("hdr-gm-btn");
+    if(gmb) gmb.style.display=(isSuperAdmin() && !window.SUPPORT_MODE)?"flex":"none";
   }catch(e){}
 }
 
