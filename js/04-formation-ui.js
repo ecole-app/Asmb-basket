@@ -163,7 +163,7 @@ function buildU13Home(){
     if(canEditCycles()){
       var b=document.createElement("button");
       b.textContent="Modifier la zone et les dates";
-      b.style.cssText="width:calc(100% - 24px);margin:4px 12px 8px;padding:11px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer";
+      b.style.cssText="width:calc(100% - 24px);margin:4px 12px 8px;padding:11px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer";
       b.addEventListener("click",openVacancesEdit);
       vl.appendChild(b);
     }
@@ -181,7 +181,7 @@ function buildU13Home(){
   if(canEditCycles()){
     var addBtn=document.createElement("button");
     addBtn.textContent="+ Ajouter un cycle";
-    addBtn.style.cssText="width:calc(100% - 24px);margin:8px 12px 16px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer";
+    addBtn.style.cssText="width:calc(100% - 24px);margin:8px 12px 16px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
     addBtn.addEventListener("click",function(){openCycleEditModal(null);});
     cl.appendChild(addBtn);
   }
@@ -371,7 +371,7 @@ function openSeanceEditModal(cyId,seaNum){
 function openCy(id){curCy=findCycle(id);stack.push("cycle");buildCycle(curCy);showScr("cycle");}
 function buildCycle(cy){
   if(!cy)return;
-  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+cy.c+';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">'+cycleNum(cy)+'</div><div><div style="font-size:17px;font-weight:900;color:#fff">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' séances</div></div></div></div>';
+  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+cy.c+';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">'+cycleNum(cy)+'</div><div><div style="font-size:17px;font-weight:900;color:var(--txt)">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' séances</div></div></div></div>';
   document.getElementById("cyObjs").innerHTML='<div class="obj-bx">'+cy.objs.map(function(o){return '<div class="obj-it">'+o+'</div>';}).join("")+'</div>';
   var sl=document.getElementById("cySeances");sl.innerHTML="";
   var pr=cycleProgress(cy.id);
@@ -380,11 +380,11 @@ function buildCycle(cy){
     var done=isDone(cy.id,s.num);
     var d=document.createElement("div");d.className="sea-card";
     d.onclick=function(){openSea(cy.id,s.num);};
-    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#D4AF37":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#D4AF37":"#fff")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#D4AF37":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
+    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"#D4AF37":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"#D4AF37":"var(--txt)")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"#D4AF37":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
     if(canEditCycles()){
       var editSea=document.createElement("button");
       editSea.textContent="Modifier";
-      editSea.style.cssText="margin:0 0 0 auto;display:block;padding:5px 12px;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer";
+      editSea.style.cssText="margin:0 0 0 auto;display:block;padding:5px 12px;border-radius:14px;background:var(--bdr);color:var(--txt2);font-size:10px;font-weight:700;border:none;cursor:pointer";
       editSea.addEventListener("click",function(e){e.stopPropagation();openSeanceEditModal(cy.id,s.num);});
       d.appendChild(editSea);
     }
@@ -393,12 +393,12 @@ function buildCycle(cy){
   if(canEditCycles()){
     var addSea=document.createElement("button");
     addSea.textContent="+ Ajouter une séance";
-    addSea.style.cssText="width:100%;margin-top:10px;padding:12px;border-radius:var(--rs);background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.25);color:#fff;font-size:13px;font-weight:700;cursor:pointer";
+    addSea.style.cssText="width:100%;margin-top:10px;padding:12px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
     addSea.addEventListener("click",function(){openSeanceEditModal(cy.id,null);});
     sl.appendChild(addSea);
     var editCy=document.createElement("button");
     editCy.textContent="Modifier ce cycle";
-    editCy.style.cssText="width:100%;margin-top:8px;padding:11px;border-radius:var(--rs);background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer";
+    editCy.style.cssText="width:100%;margin-top:8px;padding:11px;border-radius:var(--rs);background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer";
     editCy.addEventListener("click",function(){openCycleEditModal(cy.id);});
     sl.appendChild(editCy);
   }
@@ -416,7 +416,7 @@ function buildSeance(cy,s){
   top.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:6px";
   var seaIdx=curCy.seas.findIndex(function(x){return x.num===s.num;})+1;
   top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+seaIdx+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
- var ttl=document.createElement("div");ttl.style.cssText="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px";ttl.textContent=s.t;
+ var ttl=document.createElement("div");ttl.style.cssText="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px";ttl.textContent=s.t;
  var obj=document.createElement("div");obj.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.4;margin-bottom:8px";obj.textContent=s.obj;
  var btn=document.createElement("button");
  btn.id="done-btn";btn.className="done-btn"+(done?" active":"");
