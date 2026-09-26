@@ -1,11 +1,23 @@
 /* ===== 05-animations.js — Moteur d'animation canvas des situations pedagogiques ===== */
 // ═══ ANIMATION ENGINE ════════════════════════════════════════════
 var SIT_ANIMS={},SIT_DUR={},sitAS={};
-function getSA(k){if(!sitAS[k])sitAS[k]={raf:null,running:false,startTs:null};return sitAS[k];}
-function injectSitAnim(key){
+function getSA(k){if(!sitAS[k])sitAS[k]={raf:null,running:false,startTs:null,anim:null};return sitAS[k];}
+// L'emplacement a l'ecran (domKey) et l'animation dessinee (animId) sont deux
+// choses distinctes : une situation peut porter n'importe quelle animation de la
+// bibliotheque. Sans second argument, les deux coincident — comportement d'origine.
+function saAnim(k){var a=getSA(k).anim;return a||k;}
+function saFn(k){return SIT_ANIMS[saAnim(k)];}
+function injectSitAnim(key,animId){
+ animId=animId||key;
+ var fn=SIT_ANIMS[animId];
+ if(!fn)return;
  var wrap=document.getElementById("anim-"+key);
  if(!wrap||wrap.dataset.built)return;wrap.dataset.built="1";
- var W=320,H=SIT_ANIMS[key].height||240;
+ // Une boucle laissee par un rendu precedent dessinerait par-dessus le nouveau canvas.
+ var prev=getSA(key);
+ if(prev.raf)cancelAnimationFrame(prev.raf);
+ prev.running=false;prev.startTs=null;prev.anim=animId;
+ var W=320,H=fn.height||240;
  var cv=document.createElement("canvas");cv.id="sc-"+key;cv.width=W;cv.height=H;cv.style.cssText="width:100%;height:auto;display:block;border-radius:8px";
  var ctrl=document.createElement("div");ctrl.style.cssText="display:flex;gap:6px;align-items:center;padding:6px 0";
  var playBtn=document.createElement("button");playBtn.id="sb-"+key;playBtn.className="abtn aplay";playBtn.textContent="▶ Lancer";playBtn.onclick=function(){sitToggle(key);};
@@ -13,7 +25,7 @@ function injectSitAnim(key){
  var spd=document.createElement("input");spd.type="range";spd.id="ss-"+key;spd.min="0.5";spd.max="2";spd.step="0.25";spd.value="1";spd.style.cssText="accent-color:var(--ltg);width:65px";
  ctrl.appendChild(playBtn);ctrl.appendChild(resetBtn);ctrl.appendChild(spd);
  wrap.appendChild(cv);wrap.appendChild(ctrl);
- setTimeout(function(){if(cv)SIT_ANIMS[key](cv.getContext("2d"),0);},40);
+ setTimeout(function(){if(cv)fn(cv.getContext("2d"),0);},40);
 }
 function sitToggle(key){
  var s=getSA(key),btn=document.getElementById("sb-"+key);if(!btn)return;
@@ -23,14 +35,14 @@ function sitToggle(key){
 function sitReset(key){
  var s=getSA(key);s.running=false;cancelAnimationFrame(s.raf);s.startTs=null;
  var btn=document.getElementById("sb-"+key);if(btn)btn.textContent="▶ Lancer";
- var cv=document.getElementById("sc-"+key);if(cv)SIT_ANIMS[key](cv.getContext("2d"),0);
+ var cv=document.getElementById("sc-"+key),f=saFn(key);if(cv&&f)f(cv.getContext("2d"),0);
 }
 function sitLoop(key,ts){
  var s=getSA(key);if(!s.running)return;
  if(!s.startTs)s.startTs=ts;
  var spd=parseFloat((document.getElementById("ss-"+key)||{value:"1"}).value);
- var t=Math.min((ts-s.startTs)*spd/SIT_DUR[key],1);
- var cv=document.getElementById("sc-"+key);if(cv)SIT_ANIMS[key](cv.getContext("2d"),t);
+ var t=Math.min((ts-s.startTs)*spd/(SIT_DUR[saAnim(key)]||5000),1);
+ var cv=document.getElementById("sc-"+key),f=saFn(key);if(cv&&f)f(cv.getContext("2d"),t);
  if(t<1){s.raf=requestAnimationFrame(function(ts2){sitLoop(key,ts2);});}
  else{s.running=false;var b=document.getElementById("sb-"+key);if(b)b.textContent="▶ Rejouer";}
 }

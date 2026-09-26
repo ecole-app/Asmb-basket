@@ -185,6 +185,13 @@ function buildU13Home(){
     addBtn.style.cssText="width:calc(100% - 24px);margin:8px 12px 16px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
     addBtn.addEventListener("click",function(){openCycleEditModal(null);});
     cl.appendChild(addBtn);
+    if(typeof openAnimPicker==="function"&&typeof animDisponibles==="function"){
+      var libBtn=document.createElement("button");
+      libBtn.textContent="Bibliotheque d'animations ("+animDisponibles().length+")";
+      libBtn.style.cssText="width:calc(100% - 24px);margin:0 12px 16px;padding:12px;border-radius:var(--rs);background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer";
+      libBtn.addEventListener("click",function(){openAnimPicker({browse:true});});
+      cl.appendChild(libBtn);
+    }
   }
 }
 // ── EDITION DES CYCLES ET SEANCES (reserve dirigeant) ───────────────
@@ -428,16 +435,35 @@ function buildSeance(cy,s){
  s.sits.forEach(function(sit,i){
  var ch=sit.ch&&sit.ch.startsWith("ok:")?'<div class="chok">✓ '+sit.ch.slice(3)+'</div>':"";
     var kws=sit.kws.map(function(k,j){return '<span class="kw" style="background:'+KC[j%KC.length]+'">'+k+'</span>';}).join("");
-    var animKey=s.num+"-"+(i+1);
-    var hasAnim=typeof SIT_ANIMS!=="undefined"&&SIT_ANIMS[animKey];
-    var animDiv=hasAnim?'<div style="margin:8px 0"><div class="lbl">Animation</div><div id="anim-'+animKey+'" style="background:var(--bg);border-radius:8px;overflow:hidden"></div></div>':"";
+    // L'emplacement a l'ecran reste positionnel (il doit etre unique dans la page),
+    // mais l'animation dessinee vient de la bibliotheque : une seance modifiee ou
+    // creee par le coach peut donc avoir une animation, ce qui etait impossible avant.
+    var domKey=s.num+"-"+(i+1);
+    var animId=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i):null;
+    var animDiv=animId?'<div style="margin:8px 0"><div class="lbl">Animation</div><div id="anim-'+domKey+'" style="background:var(--bg);border-radius:8px;overflow:hidden"></div></div>':"";
     var d=document.createElement("div");d.className="sit-card";
     d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+sit.ti+'</div><div class="sdur">'+sit.dur+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+sit.desc+'</div><div class="lbl">Organisation</div><div class="txt">'+sit.org+'</div>'+animDiv+'<div class="lbl">Axes evolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+a+'</div>';}).join("")+'</div><div class="lbl">Mots cles</div><div class="kws">'+kws+'</div></div>';
+    if(canEditCycles()&&typeof openAnimPicker==="function"){
+      var bar=document.createElement("div");
+      bar.style.cssText="padding:0 12px 12px";
+      var ab=document.createElement("button");
+      ab.textContent=animId?"Changer l'animation":"Ajouter une animation";
+      ab.style.cssText="width:100%;padding:9px;border-radius:14px;background:transparent;border:1px dashed var(--bdr);color:var(--txt2);font-size:11px;font-weight:700;cursor:pointer";
+      ab.addEventListener("click",function(){
+        openAnimPicker({catId:activeCatId,seaNum:s.num,sitIdx:i,current:animId,onDone:function(){buildSeance(cy,s);}});
+      });
+      bar.appendChild(ab);
+      d.appendChild(bar);
+    }
  sl.appendChild(d);
  });
  setTimeout(function(){
  if(typeof SIT_ANIMS==="undefined")return;
- s.sits.forEach(function(_,i){var key=s.num+"-"+(i+1);if(SIT_ANIMS[key])injectSitAnim(key);});
+ s.sits.forEach(function(_,i){
+   var dk=s.num+"-"+(i+1);
+   var aid=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i):null;
+   if(aid)injectSitAnim(dk,aid);
+ });
  },60);
 }
 

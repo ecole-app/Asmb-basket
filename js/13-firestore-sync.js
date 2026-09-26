@@ -105,6 +105,7 @@ function initFirestoreSync(){
     fsStartSync("inventaire","asmb_inventaire");
   }
   fetchCycleOverridesFromCloud();
+  if(typeof fetchAnimAttachmentsFromCloud==="function") fetchAnimAttachmentsFromCloud();
   if(window.fbGetDoc){
     window.fbGetDoc(window.fbDoc(window.fbDb,"app_data","season")).then(function(snap){
       if(snap && snap.exists() && snap.data().value){
