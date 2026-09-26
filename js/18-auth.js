@@ -383,6 +383,10 @@ function loadClubProfile(clubId){
 
 // Applique l'utilisateur authentifié : lit users/{uid}, amorce le dirigeant si besoin, puis route
 function applyAuthedUser(user){
+  // Indice local (non securitaire) pour le tout prochain chargement de page :
+  // evite d'afficher le portail d'un club au premier rendu pour ce compte,
+  // voir le tout debut de js/21-main.js.
+  try{ localStorage.setItem("gm_is_su", (user.uid===BOOTSTRAP_DIRIGEANT_UID)?"1":"0"); }catch(e){}
   if(window.__userDocUnsub){ try{window.__userDocUnsub();}catch(e){} }
   var firstLoad=true;
   var rattachementTente=false; // garde-fou : un seul essai par session, jamais de boucle si le serveur refuse

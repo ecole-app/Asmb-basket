@@ -19,11 +19,23 @@ function toggleTheme(){
  }
 }());
 
-buildPortal();
+// Le HTML affiche le portail (ASMB) par défaut au tout premier rendu, pour que
+// l'app paraisse instantanée sur un club normal. Mais pour le compte super
+// admin, dont l'écran normal est la Plateforme (pas le portail d'un club), ça
+// ferait flasher un club avant que l'authentification ne redirige : on saute
+// ce premier rendu quand un indice local (posé au login précédent) l'indique.
+// Purement un choix d'affichage, jamais de sécurité : le routage réel n'est
+// décidé qu'après confirmation Firebase, dans finishAuthedUser().
+if(localStorage.getItem("gm_is_su")==="1"){
+  var __scrPortal=document.getElementById("scr-portal");
+  if(__scrPortal) __scrPortal.classList.remove("on");
+} else {
+  buildPortal();
+}
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790417619";
+var APP_VERSION="1790418703";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
