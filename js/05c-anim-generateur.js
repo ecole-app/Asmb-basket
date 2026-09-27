@@ -146,7 +146,7 @@ function analyseSituation(sit,catId){
    // Ces scenes dessinent un terrain avec cercle, et pour la plupart des
    // defenseurs : annoncer le contraire rendrait la fiche incoherente.
    if(G_AVEC_PANIER.indexOf(type)>=0) sc.panier=true;
-   if(G_AVEC_DEF.indexOf(type)>=0) sc.def=true;
+   if(G_AVEC_DEF.indexOf(type)>=0 && !sansDef) sc.def=true;
    sc.type=type; sc.note=note; return sc;
  }
 
@@ -163,7 +163,7 @@ function analyseSituation(sit,catId){
  // opposition ni sur un match, ou le physique n'est qu'une consigne.
  if(!oppo && !estMatch
     && /echauffement|gainage|pliometr|proprioce|prevention|renforcement|musculation|\bmobilite\b|etirement|hygiene|nutrition|sommeil|recuperation|souplesse|tests? physiques?|retest|batterie de tests|\bnavettes?\b|\bdetente\b|fractionne|\bvma\b|stimulus|volume d entrainement|protocole|accroupissement|lever de bassin|\bfentes?\b|echelle de rythme|echelle d appuis/.test(full)
-    && !/\btirs?\b|lancers? francs?|slalom dribble|passes? au mur|creation de tir/.test(full))
+    && !/\btirs?\b|lancers? francs?|slalom dribble|passes? au mur|creation de tir|dribble|ballon en main|concours/.test(full))
    return set("athletique","Travail athletique");
 
  // Plusieurs ateliers tournants : choisir la scene de l'un d'eux ferait croire
@@ -264,7 +264,7 @@ function analyseSituation(sit,catId){
  if(/parcours|atelier|colonnes?|\bfiles?\b|vagues?|stations?|relais|navette|circuit|slalom/.test(ti))
    return set("circuit","Atelier");
  if(/lancers? francs?/.test(head)) return set("tir","Lancers francs");
- if(!sansBallon && /\btirs?\b|shoot|lay-?up|double pas|spot|finition|adresse|panier|beef|euro-?step|reverse/.test(head)) return set("tir","Travail de tir");
+ if(!sansBallon && /\btirs?\b|shoot|lay-?up|double pas|spot|finition|adresse|panier|beef|euro-?step|reverse|concours/.test(head)) return set("tir","Travail de tir");
  // Un cercle de parole n'est pas un exercice de passes : il faut un ballon.
  if(/cercle|ronde|demi-cercle|etoile/.test(og) && /ballon|passes?/.test(full))
    return set("cercle","Jeu en cercle");
