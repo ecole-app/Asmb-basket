@@ -95,7 +95,9 @@ function initFirestoreSync(){
   FS_SYNC_STARTED=true;
   fsStartSync("players","asmb_players");
   fsStartSync("teams","asmb_teams");
-  fsStartSync("licences","asmb_licences");
+  // Reserve au staff : ces fiches contiennent des donnees de sante et des
+  // photos de mineurs, elles n'ont pas a descendre sur l'appareil d'un parent.
+  if(typeof isStaffUser==="function" && isStaffUser()) fsStartSync("licences","asmb_licences");
   fsStartSync("events","asmb_events");
   fsStartSync("annuaire","asmb_annuaire");
   fsStartSync("notes_frais","asmb_notes_frais");

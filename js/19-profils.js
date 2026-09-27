@@ -279,15 +279,13 @@ function getLinkedPlayerForCheckin(){
   if(joueurIdentifiedPlayer)return joueurIdentifiedPlayer;
   if(localStorage.getItem("asmb_profile")==="parent"&&myPhone){
     var myP=myPhone.replace(/\s+/g,"");
-    var lics=getLicences();
-    var lic=lics.find(function(l){
-      if(!l.fiche)return false;
-      var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
-      return phones.indexOf(myP)>=0;
-    });
-    if(lic&&lic.fiche){
-      return getPlayers().find(function(p){return p.prenom===lic.fiche.prenom&&p.nom===lic.fiche.nom;})||null;
-    }
+    // Les numeros des responsables sont recopies sur la fiche joueur a la
+    // validation de la licence : inutile de parcourir les fiches de licence,
+    // qui contiennent bien plus que ce qu'il faut pour identifier son enfant.
+    return getPlayers().find(function(p){
+      return [p.contact,p.telEnfant,p.respTel,p.resp2Tel].filter(Boolean)
+        .map(function(x){return String(x).replace(/\s+/g,"");}).indexOf(myP)>=0;
+    })||null;
   }
   return null;
 }

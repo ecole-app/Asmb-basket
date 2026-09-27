@@ -159,7 +159,30 @@ var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#D4AF37",
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;
+// Rattrapage silencieux, une fois par session, depuis l'ecran des licences —
+// le seul ou le staff a les deux collections sous la main.
+// Les joueurs valides avant le cloisonnement des fiches n'ont pas les numeros
+// des responsables : sans eux, l'espace parent ne retrouverait plus l'enfant.
+var CONTACTS_RATTRAPES=false;
+function rattraperContactsJoueurs(){
+ if(CONTACTS_RATTRAPES) return;
+ if(typeof isStaffUser!=="function" || !isStaffUser()) return;
+ CONTACTS_RATTRAPES=true;
+ try{
+   var players=getPlayers(), lics=getLicences(), touches=0;
+   lics.forEach(function(l){
+     var f=l&&l.fiche; if(!f||(!f.respTel&&!f.resp2Tel)) return;
+     var p=players.find(function(x){ return x.prenom===f.prenom && x.nom===f.nom; });
+     if(!p) return;
+     if(!p.respTel && f.respTel){ p.respTel=f.respTel; touches++; }
+     if(!p.resp2Tel && f.resp2Tel){ p.resp2Tel=f.resp2Tel; touches++; }
+   });
+   if(touches) savePlayers(players);
+ }catch(e){}
+}
+
 function buildLicences(){
+ rattraperContactsJoueurs();
  var season=getCurrentSeason();
  var allLics=getLicences();
  var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison!==season;})
@@ -620,7 +643,7 @@ function validerLicence(){
     var players=getPlayers();
     var exists=players.find(function(p){return p.email===f.emailLic;});
     if(!exists){
-      players.push({id:Date.now().toString(),prenom:f.prenom,nom:f.nom,naissance:f.naissance,cat:lics[idx].categorie,poste:"---",licence:"ok",contact:f.telephone,notes:f.notes||""});
+      players.push({id:Date.now().toString(),prenom:f.prenom,nom:f.nom,naissance:f.naissance,cat:lics[idx].categorie,poste:"---",licence:"ok",contact:f.telephone,respTel:f.respTel||"",resp2Tel:f.resp2Tel||"",notes:f.notes||""});
       savePlayers(players);
     }
   }

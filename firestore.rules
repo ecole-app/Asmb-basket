@@ -174,7 +174,10 @@ service cloud.firestore {
       match /teams/{id}        { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
-      match /licences/{id}     { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      // Une fiche de licence contient l'adresse, les coordonnees des responsables
+      // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que
+      // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.
+      match /licences/{id}     { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
       match /checkins/{id}     { allow read: if readMember(clubId); allow write: if member(clubId); }
       match /joinRequests/{id} { allow read: if readMember(clubId); allow write: if member(clubId); }
 
