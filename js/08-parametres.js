@@ -290,7 +290,7 @@ function wireThemeAnimSettings(prefix){
       });
     });
     cityInp.addEventListener("change",function(){
-      taSaveSetting("city", cityInp.value.trim()||"Saint-Étienne");
+      taSaveSetting("city", cityInp.value.trim());
       localStorage.removeItem("asmb_theme_weather_cache"); // invalide le cache si la ville change
       livePreview();
     });

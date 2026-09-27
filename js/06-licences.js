@@ -269,9 +269,7 @@ function sendLicenceMail(lic){
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de probleme, contactez le club directement.\n\n"+
     "Secrétariat\n"+
- "Saint-Étienne Métropole Basket\n"+
- "—\n"+
- " "+clubLabel();
+ clubLabel();
  var mailto="mailto:"+lic.email+"?subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
  window.location.href=mailto;
 }

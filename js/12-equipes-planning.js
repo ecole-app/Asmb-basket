@@ -187,7 +187,7 @@ function exportPlayersPDF(){
   doc.text(clubLabel()+" - Liste des licenciés",14,16);
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
-  doc.text("Saint-Étienne Métropole Basket - Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
+  doc.text("Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
   if(currentCatFilter!=="all"){doc.text("Catégorie : "+currentCatFilter,14,27);}
 
   var headers=["Nom","Prénom","Catégorie","Type licence","N° licence","Statut"];
