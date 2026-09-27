@@ -166,8 +166,58 @@ function identifiantJoueur(){
   return genSecureCode(3,4).replace(/-/g,"").toLowerCase()+"@"+DOMAINE_JOUEUR;
 }
 
+// Contrat de sous-traitance RGPD (voir legal/contrat-sous-traitance.html) :
+// version condensee, affichee inline avant la creation du compte dirigeant.
+// Modifier l'un doit modifier l'autre.
+var DPA_TEXT_HTML=
+  '<p><b>Entre les soussignés</b><br>Le Responsable du traitement : le club identifié dans son espace « Paramètres » (nom du club, dirigeant signataire), ci-après « le Club ». Le Sous-traitant : Ahmed, éditeur de l\'application General Manager, ci-après « l\'Éditeur ».</p>'
+ +'<p><b>Article 1 — Objet</b><br>Le présent contrat définit les conditions dans lesquelles l\'Éditeur effectue, pour le compte du Club, les opérations de traitement de données à caractère personnel décrites ci-après, dans le cadre de la fourniture de l\'application General Manager.</p>'
+ +'<p><b>Article 2 — Description du traitement</b><br>Hébergement, stockage, mise à disposition et sauvegarde des données saisies par le Club (licences, planning, présences, communauté, comptabilité interne). Catégories de données : identité, date de naissance, coordonnées et adresse des licenciés et de leurs responsables légaux, certificat médical, photo (si autorisée), contenu des échanges internes. Personnes concernées : licenciés du Club (y compris mineurs), leurs responsables légaux, le personnel encadrant. Durée : pendant toute la durée d\'utilisation de l\'application par le Club.</p>'
+ +'<p><b>Article 3 — Obligations de l\'Éditeur</b></p>'
+ +'<ul style="margin:0 0 10px;padding-left:18px">'
+ +'<li>traiter les données uniquement sur instruction documentée du Club, et pour les seules finalités du présent contrat ;</li>'
+ +'<li>garantir la confidentialité des données : aucun accès aux données d\'un Club, sauf code d\'accès support temporaire (48h, lecture seule, révocable) que le Club génère et communique lui-même ;</li>'
+ +'<li>mettre en œuvre des mesures de sécurité adaptées (cloisonnement strict entre clubs, restriction d\'accès aux données sensibles, comptes créés uniquement par invitation) ;</li>'
+ +'<li>ne recourir à un sous-traitant ultérieur que dans les conditions de l\'article 4 ;</li>'
+ +'<li>notifier le Club dans les meilleurs délais après avoir pris connaissance d\'une violation de données le concernant ;</li>'
+ +'<li>assister le Club pour répondre aux demandes d\'exercice des droits des personnes concernées et pour ses obligations envers la CNIL ;</li>'
+ +'<li>supprimer ou restituer, au choix du Club, l\'intégralité des données à la fin de la relation contractuelle, sauf obligation légale de conservation.</li>'
+ +'</ul>'
+ +'<p><b>Article 4 — Sous-traitants ultérieurs</b><br>Le Club autorise de façon générale l\'Éditeur à recourir à Google Ireland Limited (Firebase — hébergement base de données et comptes) et GitHub, Inc. (hébergement du code). L\'Éditeur informera le Club de tout changement, permettant au Club de s\'y opposer.</p>'
+ +'<p><b>Article 5 — Obligations du Club</b><br>Fournir des instructions licites et documentées ; s\'assurer d\'avoir une base légale pour chaque donnée collectée (obligation fédérale, consentement pour la photo, etc.) ; répondre lui-même, en tant que responsable du traitement, aux demandes d\'exercice de droits de ses licenciés ; informer ses membres de cette répartition des responsabilités.</p>'
+ +'<p><b>Article 6 — Durée et fin du contrat</b><br>Le présent contrat s\'applique pendant toute la durée d\'utilisation de l\'application par le Club. Il prend fin automatiquement à la suppression du Club sur la plateforme, moment auquel l\'ensemble de ses données est irréversiblement supprimé.</p>'
+ +'<p style="text-align:center"><a href="legal/contrat-sous-traitance.html" target="_blank" style="color:var(--dkg);font-weight:700">Version complète (nouvel onglet)</a></p>';
+
+function renderInviteDirigeantContrat(el, code, inv){
+  el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"),"Dirigeant")
+    +'<div style="padding:16px 18px 22px;display:flex;flex-direction:column;flex:1">'
+    +'<p style="font-size:12.5px;color:var(--txt2);text-align:center;line-height:1.4;margin-bottom:10px">En activant '+authEsc(inv.clubName||"ce club")+', vous acceptez le contrat de sous-traitance RGPD ci-dessous. Faites défiler jusqu\'au bout pour continuer.</p>'
+    +'<div id="dpa-scroll" style="max-height:50vh;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+DPA_TEXT_HTML+'</div>'
+    +'<button id="dpa-accept-btn" disabled style="'+AUTH_BTN+';opacity:.4;cursor:not-allowed">Continuer (lisez jusqu\'en bas)</button>'
+    +'</div>';
+  var box=document.getElementById("dpa-scroll");
+  var btn=document.getElementById("dpa-accept-btn");
+  function checkScroll(){
+    if(box.scrollTop+box.clientHeight>=box.scrollHeight-8){
+      btn.disabled=false; btn.style.opacity="1"; btn.style.cursor="pointer";
+      btn.textContent="J'ai lu, j'accepte";
+    }
+  }
+  box.addEventListener("scroll",checkScroll);
+  checkScroll(); // contenu qui ne deborde pas (grand ecran) : deja "en bas"
+  btn.addEventListener("click",function(){
+    if(btn.disabled) return;
+    renderInviteCompteForm(el, code, inv);
+  });
+}
+
 function renderInviteForm(el, code, inv){
   if(inv.role==="joueur") return renderInviteJoueur(el, code, inv);
+  if(inv.role==="dirigeant") return renderInviteDirigeantContrat(el, code, inv);
+  renderInviteCompteForm(el, code, inv);
+}
+
+function renderInviteCompteForm(el, code, inv){
   var roleLbl=inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach");
   el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"), roleLbl)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
@@ -215,6 +265,9 @@ function acceptInvite(code, inv){
     b.set(window.fbDoc(window.fbDb,"users",cred.user.uid),{
       email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
       linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
+      // Preuve horodatee de l'acceptation du contrat de sous-traitance RGPD,
+      // lu (defilement force) juste avant cet ecran quand inv.role==="dirigeant".
+      dpaAcceptedAt:(inv.role==="dirigeant"?window.fbServerTimestamp():null),
       createdAt:window.fbServerTimestamp()
     });
     b.update(window.fbDoc(window.fbDb,"club_invites",code),{usedBy:cred.user.uid, usedAt:window.fbServerTimestamp()});
