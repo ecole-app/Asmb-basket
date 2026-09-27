@@ -697,7 +697,7 @@ function validerLicence(){
     var players=getPlayers();
     var exists=players.find(function(p){return p.email===f.emailLic;});
     if(!exists){
-      players.push({id:Date.now().toString(),prenom:f.prenom,nom:f.nom,naissance:f.naissance,cat:lics[idx].categorie,poste:"---",licence:"ok",contact:f.telephone,respTel:f.respTel||"",resp2Tel:f.resp2Tel||"",notes:f.notes||""});
+      players.push({id:Date.now().toString(),prenom:f.prenom,nom:f.nom,naissance:f.naissance,cat:lics[idx].categorie,poste:"---",licence:"ok",contact:f.telephone,respTel:f.respTel||"",resp2Tel:f.resp2Tel||"",notes:f.notes||"",photo:f.photo||null,photoAutorisee:f.photoAutorisee===true});
       savePlayers(players);
     }
   }
@@ -724,6 +724,12 @@ function showEditFiche(){
     '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2">'+(f.adresse||"")+'</textarea></div>'+
     '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ef-telephone" value="'+(f.telephone||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ef-emailLic" value="'+(f.emailLic||"")+'"></div>'+
+    '<div class="form-group" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px">'+
+      '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
+        '<input type="checkbox" id="ef-photoAutorisee" '+(f.photoAutorisee?"checked":"")+' style="width:18px;height:18px;margin-top:1px;accent-color:var(--dkg);flex-shrink:0">'+
+        '<span style="font-size:12px;color:var(--txt2);line-height:1.4">Photo visible par les autres familles du club</span>'+
+      '</label>'+
+    '</div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
     '<div class="form-group"><label class="form-label">Responsable legal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(f.respNom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Responsable legal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
@@ -752,7 +758,19 @@ function saveEditedFiche(){
   f.urgenceNom=document.getElementById("ef-urgenceNom").value.trim();
   f.urgenceTel=document.getElementById("ef-urgenceTel").value.trim();
   f.notes=document.getElementById("ef-notes").value.trim();
+  f.photoAutorisee=(document.getElementById("ef-photoAutorisee")||{}).checked===true;
   saveLicences(lics);
+  // La fiche joueur (et le trombinoscope public qui en derive) a sa propre
+  // copie de la photo/du consentement, fixee au moment de la validation :
+  // il faut la mettre a jour ici, sinon un changement d'avis sur la photo
+  // ne serait jamais visible cote roster.
+  var players=getPlayers();
+  var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+  if(p){
+    p.photo=f.photo||null;
+    p.photoAutorisee=f.photoAutorisee===true;
+    savePlayers(players);
+  }
   closeModal("modal-edit-fiche");
   renderLicenceDetail(lics[idx]);
   buildLicences();
@@ -905,6 +923,8 @@ function renderFicheForm(lic){
   licCurrentType=(lic&&lic.typeLicence)||null;
   var f=lic.fiche||{};
   ficheSurclassement=(f.surclassement===true);
+  fichePhotoAutorisee=(f.photoAutorisee===true);
+  fichePhoto=f.photo||"";
   el.innerHTML=
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
       '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;})||{code:licCurrentCode})" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
@@ -917,6 +937,10 @@ function renderFicheForm(lic){
         '<div id="photo-preview" style="width:90px;height:90px;border-radius:50%;background:var(--bdr);margin:0 auto 10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px">'+(f.photo?'<img src="'+f.photo+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div>'+
         '<button onclick="document.getElementById(\'photo-input\').click()" style="padding:8px 18px;border-radius:20px;background:var(--dkg);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer"> Ajouter une photo</button>'+
         '<input type="file" id="photo-input" accept="image/*" capture="user" style="display:none" onchange="handlePhoto(this)">'+
+        '<label style="display:flex;align-items:flex-start;gap:8px;text-align:left;margin-top:14px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);cursor:pointer">'+
+          '<input type="checkbox" id="f-photoAutorisee" onchange="togglePhotoAutorisee(this.checked)" '+(f.photoAutorisee?"checked":"")+' style="width:18px;height:18px;margin-top:1px;accent-color:var(--dkg);flex-shrink:0">'+
+          '<span style="font-size:11px;color:var(--txt2);line-height:1.4">J\'autorise cette photo à être visible par les autres familles du club (elle n\'est jamais visible sans cette case cochée).</span>'+
+        '</label>'+
       '</div>'+
       // Genre
       '<div class="form-group"><label class="form-label">Genre *</label>'+
@@ -1009,8 +1033,10 @@ var ficheGenre="";
 var ficheNeEtranger=false;
 var ficheSurclassement=false;
 var fichePhoto="";
+var fichePhotoAutorisee=false;
 var ficheCertificat="";
 
+function togglePhotoAutorisee(val){ fichePhotoAutorisee=val; }
 function toggleSurclassement(val){
   ficheSurclassement=val;
   updateCertBanner();
@@ -1139,6 +1165,7 @@ function soumettreFiche(){
     certMedecin:(document.getElementById("f-certMedecin")||{}).value||"",
     certificat:ficheCertificat||null,
     photo:fichePhoto||null,
+    photoAutorisee:fichePhotoAutorisee===true,
     soumisLe:new Date().toLocaleDateString("fr-FR")+" a "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),
   };
   var lics=getLicences();
@@ -1146,7 +1173,7 @@ function soumettreFiche(){
 
   function showSuccess(){
     var el=document.getElementById("insc-public-content");
-    if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:6px">Votre fiche a bien été transmise au club.</div><div style="font-size:12px;color:var(--mut);line-height:1.5;max-width:280px;margin:0 auto">Un responsable va la valider. Vous pourrez ensuite créer votre compte dans l\'application avec votre numéro de téléphone.</div></div>';
+    if(el)el.innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:56px;margin-bottom:16px">✅</div><div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:8px">Fiche envoyée !</div><div style="font-size:13px;color:var(--mut);margin-bottom:6px">Votre fiche a bien été transmise au club.</div><div style="font-size:12px;color:var(--mut);line-height:1.5;max-width:280px;margin:0 auto">Un responsable va la valider, puis vous envoiera un lien pour créer votre compte dans l\'application.</div></div>';
   }
 
   if(idx>=0 && isStaffUser()){

@@ -767,8 +767,20 @@ function savePlayer(){
   var nom=document.getElementById("fp-nom").value.trim();
   if(!prenom||!nom){alert("Prénom et nom obligatoires");return;}
   var players=getPlayers();
-  var data={id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,genre:document.getElementById("fp-genre").value,poste:document.getElementById("fp-poste").value,maillot:document.getElementById("fp-maillot").value,licence:document.getElementById("fp-licence").value,typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,contact:document.getElementById("fp-contact").value,telEnfant:document.getElementById("fp-telEnfant").value,notes:document.getElementById("fp-notes").value};
-  if(editingPlayerId){var idx=players.findIndex(function(p){return p.id===editingPlayerId;});if(idx>=0)players[idx]=data;}
+  var idx=editingPlayerId?players.findIndex(function(p){return p.id===editingPlayerId;}):-1;
+  // On part de la fiche existante (respTel, resp2Tel, photo, photoAutorisee,
+  // email...) : ce formulaire ne montre qu'un sous-ensemble des champs, il ne
+  // doit donc modifier que ceux-la, pas effacer le reste au passage.
+  var data=Object.assign({}, idx>=0?players[idx]:{}, {
+    id:editingPlayerId||Date.now().toString(),prenom:prenom,nom:nom,
+    naissance:document.getElementById("fp-naissance").value,cat:document.getElementById("fp-cat").value,
+    genre:document.getElementById("fp-genre").value,poste:document.getElementById("fp-poste").value,
+    maillot:document.getElementById("fp-maillot").value,licence:document.getElementById("fp-licence").value,
+    typeLicence:document.getElementById("fp-typeLicence").value,numLicence:document.getElementById("fp-numLicence").value,
+    contact:document.getElementById("fp-contact").value,telEnfant:document.getElementById("fp-telEnfant").value,
+    notes:document.getElementById("fp-notes").value
+  });
+  if(idx>=0) players[idx]=data;
   else players.push(data);
   savePlayers(players);
   closeModal("modal-player");
