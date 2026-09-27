@@ -313,6 +313,11 @@ function submitChangeEmail(modal){
 function authLogout(){
   window.fbSignOut(window.fbAuth).then(function(){
     localStorage.removeItem("asmb_profile");
+    // Sur un appareil partage, le prochain compte a se connecter (staff ou
+    // non) ne doit jamais retrouver en cache les donnees completes (fiches,
+    // licences) laissees par ce compte. La purge liee au changement de club
+    // ne suffit pas : ici le club reste le meme, seul le compte change.
+    if(typeof purgeClubLocalData==="function") purgeClubLocalData();
     try{ location.reload(); }catch(e){ showAuth("entry"); }
   });
 }
