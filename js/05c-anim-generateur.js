@@ -101,46 +101,111 @@ function analyseSituation(sit,catId){
    var eq=og.match(/equipes? de (\d)/);
    if(eq){ sc.natt=Math.min(5,+eq[1]); sc.ndef=sc.natt; }
  }
+ // Les effectifs sont aussi ecrits en toutes lettres : "4 attaquants font
+ // circuler, 4 defenseurs ajustent" decrit un 4c4 que "4c4" n'ecrit nulle part.
+ if(!sc.natt){ var ma=full.match(/(\d)\s*(?:attaquant|porteur|joueur)/); if(ma) sc.natt=Math.min(5,+ma[1]); }
+ if(!sc.ndef){ var md=full.match(/(\d)\s*defenseu/); if(md) sc.ndef=Math.min(5,+md[1]); }
  var oppo=!!(sc.natt&&sc.ndef);
- if(/tout le terrain|tout terrain|full court|terrain complet|sur la longueur|d un panier a l autre/.test(full)) sc.terr="full";
+ if(/tout le terrain|tout terrain|full court|terrain (complet|entier)|match complet|sur la longueur|toute la longueur|d un panier a l autre|d un cercle a l autre/.test(full)) sc.terr="full";
+ // L'organisation prime : elle decrit le dispositif reellement mis en place.
+ if(/demi-?terrain/.test(og) && !/puis (tout |le )?terrain|puis terrain complet/.test(og)) sc.terr="half";
+
+ // Un match, un tournoi, une prolongation : le texte decrit une opposition
+ // complete sans toujours ecrire "5c5". Sans cette lecture, ces situations
+ // tombaient dans l'atelier generique — un parcours de plots pour un match.
+ var estMatch=/\bmatchs?\b|tournoi|rencontre|phase de poules|\bfinales?\b|prolongation|plateau|jeu libre|opposition complete|periodes? de|scrimmage|observation (en direct|chiffree)|statistiques (defensives|offensives)/.test(head)
+   && !/feuille de match|bilan|analyse|avant match|apres match|preparation|temps morts?|plan de|entretiens?|objectifs|transmission|mise en place|retour au calme/.test(ti);
+
+ // Une negation doit l'emporter : "sans defense" contient le mot "defense",
+ // et le lire comme une presence de defenseur inverse le sens de l'exercice.
+ var sansDef=/sans (defense|defenseur|defenseuse|opposition|adversaire|gene)|non defendu|a vide|personne ne defend/.test(full);
+ // Un exercice annonce "sans ballon" ne doit pas etre illustre par un tir ni
+ // par un dribble : le schema montrerait exactement ce que le texte exclut.
+ var sansBallon=/sans ballon|sans balle/.test(full);
 
  // Ce que le texte annonce doit se retrouver a l'image. Un exercice qui finit
  // au panier dessine sur un parquet nu, sans cercle, se contredit a l'ecran :
  // ces deux drapeaux permettent aux scenes hors terrain de s'adapter.
  // "Cercle" designe le panier, sauf quand le groupe est dispose en cercle.
- var cercleTir=/\bcercle\b/.test(full) && !/en (demi-)?cercle|demi-cercle|cercle de \d|cercle de joueurs|en ronde/.test(full);
+ var cercleTir=/\bcercle\b/.test(full) && !/en (demi-)?cercle|demi-cercle|cercle central|cercle de \d|cercle de joueurs|en ronde/.test(full);
  sc.panier=/\btirs?\b|\btireu/.test(full)
-   || /panier|lay-?up|double pas|finition|\bfinir\b|shoot|adresse|lancer franc|arceau|planche|marquer|scorer|conclure|mi-distance|3 points/.test(full)
+   || /panier|lay-?up|double pas|finition|\bfinir\b|shoot|adresse|lancers? francs?|\blf\b|arceau|planche|marquer|scorer|conclure|mi-distance|3 points/.test(full)
    || cercleTir;
- sc.def=!!sc.ndef
-   || /defenseur|defensive|\bdefense\b|adversaire|genneur|passif|aidant|opposant|vis-a-vis|contestation|contester|kick-?out|ressortie|prise a deux|close ?out/.test(full)
-   || (/\baide\b/.test(full) && !/a l aide de/.test(full));
+ sc.def=!sansDef && (!!sc.ndef || estMatch
+   || /defenseur|defenseuse|defensive|\bdefense\b|defendre|adversaire|genneur|passif|aidant|opposant|vis-a-vis|contest|kick-?out|ressortie|prise a deux|close ?out/.test(full)
+   || (/\baide\b/.test(full) && !/a l aide de/.test(full)));
 
- function set(type,note){ sc.type=type; sc.note=note; return sc; }
+ // La transition et la presse se jouent d'un panier a l'autre : leur scene
+ // dessine un terrain complet, l'option doit dire la meme chose.
+ var G_AVEC_PANIER=["opposition","pnr","ecran","zone","presse","aide","interieur",
+   "rebond","transition","surnombre","duel","tir","passe"];
+ var G_AVEC_DEF=["opposition","pnr","ecran","zone","presse","aide","interieur",
+   "rebond","transition","surnombre","duel"];
+ function set(type,note){
+   if(type==="transition"||type==="presse") sc.terr="full";
+   // Ces scenes dessinent un terrain avec cercle, et pour la plupart des
+   // defenseurs : annoncer le contraire rendrait la fiche incoherente.
+   if(G_AVEC_PANIER.indexOf(type)>=0) sc.panier=true;
+   if(G_AVEC_DEF.indexOf(type)>=0) sc.def=true;
+   sc.type=type; sc.note=note; return sc;
+ }
 
  // Theorie : un tableau affiche est un tableau de marque, pas un tableau blanc.
- if(/\b(assis|video|debrief|reunion|entretien|questionnaire|plan de jeu|scouting|projet joueur|temps d echange|echange verbal)\b/.test(head)
-    || (/tableau|paperboard/.test(og) && !/affich|score|marque/.test(og)))
+ // Un match n'est jamais un temps d'echange, meme quand il suit un scenario.
+ if(!estMatch && (
+      /\b(assis|video|debrief|reunion|entretien|questionnaire|plan de jeu|scouting|projet joueur|temps d echange|echange verbal|parole|discussion|debat|ressenti)\b/.test(head)
+      || /retour collectif|retour croise|retour sur|definition des roles|constitution des equipes|bilan collectif|temps morts?|entretiens?|retour au calme/.test(head)
+      || (/tableau|paperboard/.test(og) && !/affich|score|marque/.test(og)))
+    && !/a vide|sur le terrain|repetent|repetition|mise en place/.test(full))
    return set("theorie","Temps d'echange");
 
- if(!oppo && /echauffement|gainage|pliometr|proprioce|prevention|renforcement|mobilite|etirement|hygiene|nutrition|sommeil|recuperation|souplesse/.test(head))
+ // Travail athletique : tests, prevention, renforcement. Jamais sur une
+ // opposition ni sur un match, ou le physique n'est qu'une consigne.
+ if(!oppo && !estMatch
+    && /echauffement|gainage|pliometr|proprioce|prevention|renforcement|musculation|\bmobilite\b|etirement|hygiene|nutrition|sommeil|recuperation|souplesse|tests? physiques?|retest|batterie de tests|\bnavettes?\b|\bdetente\b|fractionne|\bvma\b|stimulus|volume d entrainement|protocole|accroupissement|lever de bassin|\bfentes?\b|echelle de rythme|echelle d appuis/.test(full)
+    && !/\btirs?\b|lancers? francs?|slalom dribble|passes? au mur|creation de tir/.test(full))
    return set("athletique","Travail athletique");
 
+ // Plusieurs ateliers tournants : choisir la scene de l'un d'eux ferait croire
+ // que toute la situation porte sur ce seul theme.
+ if(/\d ateliers|ateliers tournants|ateliers (notes|identiques)|trois ateliers|quatre ateliers|atelier (exterieur|interieur)s?/.test(full))
+   return set("circuit","Ateliers tournants");
+ // Un travail d'appuis sans ballon se lit tout de suite, avant tout le reste.
+ if(sansBallon && /\bbeef\b|gestuelle|\bgeste\b|forme de tir|armer|face au coach|demonstration/.test(full))
+   return set("gestuelle","Travail du geste");
+ if(sansBallon && /appuis|rythme|pas chasse|glissade|placement|course|freinage|sprint|repli/.test(head))
+   return set("athletique","Travail sans ballon");
  // "Ecran retard" designe la sortie en ecran au rebond, pas un ecran d'attaque.
- if(/ecran retard/.test(full)) return set("rebond","Ecran retard au rebond");
+ if(/ecran[- ]retard/.test(full)) return set("rebond","Ecran retard au rebond");
+
+ // Superiorite ou inferiorite annoncee : le rapport de nombre est le sujet.
+ if(sc.natt&&sc.ndef&&sc.natt>sc.ndef&&/inferiorite|superiorite|surnombre|defense \dc\d|defendre a \d|a \d contre \d/.test(head))
+   return set("surnombre",sc.natt+"c"+sc.ndef+" · surnombre");
+
+ // Un match reste un match : seul un theme annonce dans le titre justifie de
+ // zoomer sur une action plutot que de montrer l'opposition complete.
+ var themeAuTitre=/ecran|pick|zone|presse|rebond|transition|contre-attaque|aide|poste|surnombre|inferiorite/.test(ti);
+ if(estMatch && /\bmatchs?\b|tournoi/.test(ti) && !themeAuTitre){
+   sc.natt=sc.natt||5; sc.ndef=sc.ndef||5;
+   return set("opposition","Match "+sc.natt+"c"+sc.ndef);
+ }
 
  if(!mini){
-   if(/pick and roll|pick-and-roll|ecran porteur|ecran sur porteur|ecran et roule|p&r/.test(full))
-     return set("pnr","Pick and roll");
-   if(/ecran|screen/.test(full))
+   // Le jeu a deux se nomme rarement "pick and roll" dans les seances : on y
+   // lit "jeu a deux", "short roll", "le poseur", "dessus ou dessous", "show".
+   if(/pick and roll|pick-and-roll|ecran porteur|ecran sur porteur|ecran et roule|p&r|jeu a deux|short roll|\broll\b|\bpop\b|poseur d ecran|le poseur|dessus.{0,25}dessous|dessous.{0,25}dessus|show et retour|\bshow\b|passer (en dessous|au-dessus|au dessus|dessus|dessous)|couvertures?|porteu(r|se) utilise|utilise l ecran|ressortie .{0,25}poseu|orienter le porteu|porteu(r|se) .{0,45}(ecran|accelere)|frotte l epaule|epaule contre epaule|passe .{0,20}qui roule/.test(full))
+     return set("pnr","Jeu a deux");
+   if(/ecran|screen|ancrage|pieds ancres|angle .{0,40}orienter/.test(full))
      return set("ecran","Ecran non porteur");
    // "Zone" designe aussi bien une aire de jeu qu'une defense. Seule la seconde
    // doit produire un schema de zone : l'aire delimitee n'a rien de defensif.
    var zoneAire=/zone (delimitee|reduite|offensive|arriere|avant|de marque|interdite|de reussite|de 5|de tir)|zones? de \d|dans la zone/.test(full);
-   var zoneDef=/(defense de zone|contre (une |la )?zone|face a une zone|mise en place d une zone|zone (simple|placee|2-3|3-2|1-3-1|1-2-2)|rebond en zone|la zone ne|alternance .{0,40}zone|\b2-3\b|\b3-2\b|\b1-3-1\b|\b1-2-2\b)/.test(full)
+   var zoneDef=/(defense de zone|contre (une |la )?zone|face a une zone|mise en place d une zone|zone (simple|placee|2-3|3-2|1-3-1|1-2-2)|rebond en zone|la zone ne|alternance .{0,40}zone|occuper les intervalles|intervalles? de la zone|\b2-3\b|\b3-2\b|\b1-3-1\b|\b1-2-2\b)/.test(full)
       || (/\bzone\b/.test(ti) && /defens|contre|match|alternance|rebond|intervalle|renversement|placee/.test(full));
    if(zoneDef && !zoneAire) return set("zone","Defense de zone");
-   if(/presse|pressing|tout terrain defensif/.test(full))
+   if(sc.ndef>=4 && !sc.natt && /position du ballon|selon le ballon|se deplacent selon|glissement/.test(full))
+     return set("zone","Placement collectif");
+   if(/presse|pressing|tout terrain defensif|piege a deux|\btrap\b|sortie (de|sous) piege|orientation et trap/.test(full))
      return set("presse","Presse tout terrain");
    // Le vocabulaire de l'aide defensive est plus large que le mot "aide" :
    // "un aidant", "kick-out", "ressortie" decrivent la meme chose, et ces
@@ -148,46 +213,75 @@ function analyseSituation(sit,catId){
    if(/aide et recup|aide defensive|rotation defensive|prise a deux|close ?out|flash defensif|kick-?out|ressortie|aidant/.test(full)
       || (/\baide\b/.test(full) && !/a l aide de/.test(full)))
      return set("aide","Aide et ressortie");
-   if(/poste bas|poste haut|jeu interieur|pivot bas|joueur interieur|\binterieurs\b|ailier fort|dos au panier/.test(full)
+   if(/poste bas|poste haut|jeu interieur|pivot bas|joueur interieur|\binterieurs\b|ailier fort|dos au panier|drop step|crochet/.test(full)
       && !/course interieure|ligne interieure|couloir interieur/.test(full))
      return set("interieur","Jeu interieur");
  }
 
- if(/rebond (defensif|offensif)|boxout|box ?out|prise de rebond|au rebond|contester le rebond|\brebonds?\b/.test(head)
-    && !/rebondi|rebondir/.test(head))
+ if(/rebond (defensif|offensif)|box[- ]?out|prise de rebond|au rebond|contester le rebond|\brebonds?\b/.test(head)
+    && !/rebondi|rebondir/.test(head)){
+   if(sc.terr==="full" && /transition|contre-attaque|contre attaque|relance/.test(full))
+     return set("transition","Rebond puis transition");
    return set("rebond","Rebond");
- if(/transition|contre-attaque|contre attaque|jeu rapide|remontee rapide|3 couloirs|trois couloirs|outlet|sprint retour|repli defensif|retour defensif/.test(full))
+ }
+ if(/transition|contre-attaque|contre attaque|jeu rapide|remontee rapide|3 couloirs|trois couloirs|outlet|sprint retour|repli defensif|retour defensif|changement de statut/.test(full))
    return set("transition","Transition");
  // Remise en jeu : une opposition placee, pas un atelier.
- if(/remise (en jeu|touche|ligne de fond|de la touche)|sortie de balle/.test(head))
+ if(/correction en situation|corrections? ciblees?|situations? rejouees?|reprise de situations/.test(head))
+   return set("opposition","Situations rejouees");
+ if(/remises? (en jeu|touche|ligne de fond|de la touche|sous le panier|de cote)|sortie de balle/.test(head))
    return set("opposition","Remise en jeu");
 
  if(sc.natt&&sc.ndef&&sc.natt>sc.ndef) return set("surnombre",sc.natt+"c"+sc.ndef+" · surnombre");
  if(sc.natt===1&&sc.ndef===1)          return set("duel","1c1");
  if(oppo)                              return set("opposition",sc.natt+"c"+sc.ndef);
+ // Un match sans effectif ecrit reste un match : 5c5 par defaut.
+ if(estMatch){ sc.natt=sc.natt||5; sc.ndef=sc.ndef||5; return set("opposition","Match "+sc.natt+"c"+sc.ndef); }
 
  // Circulation sans opposition (5c0, 4c0) : la balle tourne, personne ne defend.
- if(sc.natt&&!sc.ndef&&/\dc0|\dv0|sans defense|a vide/.test(full))
+ if(sc.natt&&!sc.ndef&&(sansDef||/\dc0|\dv0/.test(full)))
    return set("passe","Circulation sans opposition");
+ // Duel annonce sans chiffres : un defenseur nomme face a un attaquant.
+ if(/defenseur passif|defenseuse passive|contre un defenseur|contre une defenseuse|\bduels?\b|un contre un|face a face avec/.test(head)
+    && !/contest|\btirs?\b/.test(head))
+   return set("duel","Duel");
  // Jeux nommes du mini-basket, reconnaissables a leur seul titre.
- if(/epervier|beret|mouchoir|requin|demenageur|balles brulantes|feu rouge|chat perche|voleur|gendarme|douaniers/.test(ti))
+ if(/epervier|beret|mouchoir|requin|demenageur|balles brulantes|feu rouge|chat perche|voleur|gendarme|douaniers|course-poursuite/.test(ti))
    return set("jeu","Jeu collectif");
+ // Un passe-et-va reste une circulation de balle : le mot "circuit" dans le
+ // titre ne doit pas le transformer en slalom de plots.
+ if(/passe.{0,4}et.{0,4}(va|suit)|circulation|skip pass|coupes? et remplacement|circuit de passes|spacing|ecartement|cinq positions|flash au coude|catch.{0,4}and.{0,4}go/.test(head))
+   return set("passe","Circulation de balle");
+ // Appuis defensifs sans ballon : ni tir ni aide, un travail de deplacement.
+ if(/glissement|glissade|pas chasse|appuis defensifs|deux appuis/.test(head) && !oppo)
+   return set("athletique","Appuis defensifs");
+ // Deux joueurs dont un defend : un duel, pas un atelier ni une ronde de passes.
+ if(sc.def && !oppo && /binomes?|par deux|\bpar 2\b|trinomes?/.test(full)
+    && !/contest|\btirs?\b/.test(head))
+   return set("duel","Duel");
  // Un parcours reste un parcours meme s'il finit au panier : le titre tranche
  // avant le vocabulaire de tir, sinon tout atelier deviendrait un exercice de tir.
- if(/parcours|atelier|colonnes?|\bfiles?\b|vagues?|stations?|relais|navette|circuit|echelle|slalom/.test(ti))
+ if(/parcours|atelier|colonnes?|\bfiles?\b|vagues?|stations?|relais|navette|circuit|slalom/.test(ti))
    return set("circuit","Atelier");
- if(/lancer franc/.test(head)) return set("tir","Lancers francs");
- if(/\btirs?\b|shoot|lay-?up|double pas|spot|finition|adresse|panier|beef/.test(head)) return set("tir","Travail de tir");
- if(/cercle|ronde|demi-cercle|etoile/.test(og)) return set("cercle","Jeu en cercle");
+ if(/lancers? francs?/.test(head)) return set("tir","Lancers francs");
+ if(!sansBallon && /\btirs?\b|shoot|lay-?up|double pas|spot|finition|adresse|panier|beef|euro-?step|reverse/.test(head)) return set("tir","Travail de tir");
+ // Un cercle de parole n'est pas un exercice de passes : il faut un ballon.
+ if(/cercle|ronde|demi-cercle|etoile/.test(og) && /ballon|passes?/.test(full))
+   return set("cercle","Jeu en cercle");
  if(/colonnes?|\bfiles?\b|vagues?|stations?|plots?|atelier|parcours/.test(og)) return set("circuit","Atelier");
- if(/passe|renversement|triangle|reception|circulation/.test(head)) return set("passe","Circulation de balle");
+ if(/passe|renversement|triangle|reception|circulation|skip pass|coupes? et remplacement/.test(head)) return set("passe","Circulation de balle");
  if(/1 ballon (par joueur|chacun)|un ballon (par joueur|chacun)|ballon par joueur/.test(og))
    return set("dribble","Maniement de balle");
- if(/dribble|handle|maniement|conduite de balle|pivot|appuis|changement de main/.test(head))
+ if(!sansBallon && /dribble|handle|maniement|conduite de balle|pivot|appuis|changement de main/.test(head))
    return set("dribble","Maniement de balle");
- if(/glissement|pas chasse|defensi/.test(head)) return set("aide","Travail defensif");
- // Binomes : deux joueurs qui echangent, pas un atelier en colonne.
- if(/binomes?|par deux|\bpar 2\b|face a face|duos?/.test(og)) return set("passe","Travail par deux");
+ // Un travail d'appuis defensifs sans ballon n'est pas une aide defensive :
+ // l'aide met en scene une penetration et une ressortie, absentes ici.
+ if(/glissement|glissade|pas chasse|appuis defensifs/.test(head))
+   return (oppo||sc.panier)?set("aide","Travail defensif"):set("athletique","Appuis defensifs");
+ if(/defensi/.test(head)) return set("aide","Travail defensif");
+ // Binomes : seulement quand il s'agit bien d'echanger le ballon.
+ if(/binomes?|par deux|\bpar 2\b|face a face|duos?/.test(og) && /passe|reception|renversement|echange de balle/.test(full))
+   return set("passe","Travail par deux");
  if(/delimitee|equipes equilibrees|deux equipes|zones? de \d|\btag\b/.test(head))
    return set("jeu","Jeu sur aire delimitee");
  // Defaut selon l'age : un jeu en mini-basket, un atelier au-dela.
@@ -608,10 +702,31 @@ G_SCENES.jeu=function(ctx,t,sc,W,H){
  gLegend(ctx,W,H,sc.note+" · tout le groupe actif");
 };
 
-var G_DUREES={jeu:5500,pnr:6500,ecran:6000,zone:7000,presse:7000,aide:6500,interieur:6000,rebond:5500,
+// Travail du geste sans ballon, face au coach : ni echelle de rythme ni
+// trajectoire de tir, qui montreraient tous deux ce que le texte exclut.
+G_SCENES.gestuelle=function(ctx,t,sc,W,H){
+ pq(ctx,W,H);
+ ctx.strokeStyle="rgba(255,255,255,.45)";ctx.lineWidth=1.6;
+ ctx.beginPath();ctx.moveTo(24,H*0.62);ctx.lineTo(W-24,H*0.62);ctx.stroke();
+ pl(ctx,W/2,H*0.22,"C",G_NEU,13);
+ var ph=Math.sin(t*Math.PI*6);
+ for(var i=0;i<5;i++){
+   var x=34+i*((W-68)/4), y=H*0.62;
+   pl(ctx,x,y,"A",G_ATT,11);
+   // Bras leves en cadence : l'arme du geste, repris a l'identique par le groupe.
+   ctx.strokeStyle="rgba(255,255,255,.8)";ctx.lineWidth=2.2;ctx.lineCap="round";
+   ctx.beginPath();
+   ctx.moveTo(x-7,y-4);ctx.lineTo(x-9,y-14-ph*6);
+   ctx.moveTo(x+7,y-4);ctx.lineTo(x+9,y-14-ph*6);
+   ctx.stroke();
+ }
+ gLegend(ctx,W,H,sc.note+" · sans ballon");
+};
+
+var G_DUREES={gestuelle:4500,jeu:5500,pnr:6500,ecran:6000,zone:7000,presse:7000,aide:6500,interieur:6000,rebond:5500,
  transition:6000,surnombre:5500,duel:5000,tir:6000,passe:6000,dribble:5000,circuit:6000,
  cercle:6000,athletique:5000,theorie:5000,opposition:7000};
-var G_HAUTEURS={theorie:200,dribble:210,cercle:230,athletique:210,jeu:220};
+var G_HAUTEURS={gestuelle:210,theorie:200,dribble:210,cercle:230,athletique:210,jeu:220};
 
 // ── FABRIQUE ────────────────────────────────────────────────────────
 // L'animation est construite a la demande puis enregistree dans le moteur,
@@ -648,7 +763,7 @@ function genAnimFor(catId,seaNum,sitIdx,sit){
 // contenu pedagogique : verifierCoherenceSchemas().
 // Les scenes hors terrain (temps d'echange, travail athletique, jeu en cercle)
 // en sont exemptees : elles n'ont pas vocation a montrer un panier.
-var G_HORS_TERRAIN=["theorie","athletique","cercle"];
+var G_HORS_TERRAIN=["theorie","athletique","cercle","gestuelle"];
 var G_TRAITS={
  opposition:{panier:1,def:1}, pnr:{panier:1,def:1}, ecran:{panier:1,def:1},
  zone:{panier:1,def:1}, presse:{panier:1,def:1}, aide:{panier:1,def:1},
@@ -658,7 +773,8 @@ var G_TRAITS={
  circuit:{panier:function(sc){return !!sc.panier;},def:function(sc){return !!sc.def;}},
  dribble:{panier:function(sc){return !!sc.panier;},def:function(sc){return !!sc.def;}},
  jeu:{panier:function(sc){return !!sc.panier;},def:1}, // deux equipes opposees a l'image
- cercle:{panier:0,def:0}, athletique:{panier:0,def:0}, theorie:{panier:0,def:0}
+ cercle:{panier:0,def:0}, athletique:{panier:0,def:0}, theorie:{panier:0,def:0},
+ gestuelle:{panier:0,def:0}
 };
 function gTrait(type,cle,sc){
  var tr=G_TRAITS[type]; if(!tr) return false;
@@ -689,7 +805,7 @@ var G_ATTENDU=[
 ];
 // Les scenes generiques ne doivent illustrer aucun motif tactique : si l'une
 // d'elles entrait dans une liste ci-dessus, le controle perdrait son objet.
-var G_GENERIQUES=["circuit","jeu","dribble","passe","cercle","theorie","athletique"];
+var G_GENERIQUES=["circuit","jeu","dribble","passe","cercle","theorie","athletique","gestuelle"];
 function verifierArchetypes(){
  if(typeof ELITE_CATS==="undefined"||typeof getCyclesForCat!=="function") return [];
  var ecarts=[];
@@ -699,6 +815,11 @@ function verifierArchetypes(){
        (s.sits||[]).forEach(function(sit,i){
          var sc; try{ sc=analyseSituation(sit,cat.id); }catch(e){ return; }
          var t=gNorm((sit.ti||"")+" . "+(sit.org||"")+" . "+(sit.desc||""));
+         // Exception assumee : une situation faite de plusieurs ateliers tournants
+         // cite le vocabulaire de chacun d'eux. Dessiner la scene de l'un ferait
+         // croire que toute la situation porte sur ce seul theme ; l'atelier
+         // generique est ici la reponse juste, pas un defaut.
+         if(/\d ateliers|ateliers tournants|ateliers (notes|identiques)|trois ateliers|quatre ateliers|atelier (exterieur|interieur)s?/.test(t)) return;
          G_ATTENDU.forEach(function(r){
            if(r.mot.test(t) && r.ok.indexOf(sc.type)<0)
              ecarts.push(cat.id+" "+s.num+"."+(i+1)+" \""+(sit.ti||"")+"\" : texte "+r.mot.source.slice(0,28)+"... mais scene \""+sc.type+"\"");
