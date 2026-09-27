@@ -12,6 +12,33 @@ function clubLabel(fallback){
   return n || (fallback===undefined ? "Le club" : fallback);
 }
 
+// Logo du club. Il vit sur la fiche du club, pas dans le code : un fichier fige
+// afficherait le logo d'un club chez tous les autres.
+function clubLogo(){ return (window.CURRENT_CLUB && window.CURRENT_CLUB.logo) || null; }
+
+// Repli quand aucun logo n'a ete televerse : les initiales du club. Jamais le
+// logo d'un autre club, meme le temps du chargement.
+function clubInitiales(){
+  var n=clubLabel("");
+  if(!n) return "GM";
+  var mots=n.replace(/[^0-9A-Za-zÀ-ÿ]+/g," ").split(" ").filter(Boolean);
+  var vides=["de","du","des","la","le","les","et","d","l","aux","au"];
+  var utiles=mots.filter(function(m){ return vides.indexOf(m.toLowerCase())<0; });
+  if(!utiles.length) utiles=mots;
+  if(utiles.length===1) return utiles[0].slice(0,2).toUpperCase();
+  return (utiles[0].charAt(0)+utiles[1].charAt(0)).toUpperCase();
+}
+
+function clubLogoHtml(px){
+  px=px||44;
+  var r=Math.round(px*0.18);
+  var src=clubLogo();
+  if(src) return '<img src="'+src+'" alt="" style="width:'+px+'px;height:'+px+'px;object-fit:contain;display:block;border-radius:'+r+'px">';
+  return '<div style="width:'+px+'px;height:'+px+'px;border-radius:'+r+'px;background:linear-gradient(145deg,#1A2E5A,#10203d);'+
+    'display:flex;align-items:center;justify-content:center;font-size:'+Math.max(9,Math.round(px*0.36))+'px;'+
+    'font-weight:900;color:#F2D57E;letter-spacing:.5px">'+clubInitiales()+'</div>';
+}
+
 // Auteur affiche pour les messages automatiques ("Admin", "Convocation"...).
 function clubPseudo(prefix){
   var n=clubLabel("");

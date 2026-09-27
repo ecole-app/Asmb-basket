@@ -61,9 +61,10 @@ async function authContinue(){
 }
 
 function authLogoHtml(){
-  var hl=document.getElementById("home-logo");
-  if(hl && hl.innerHTML && hl.innerHTML.indexOf("img")>=0){
-    return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+hl.innerHTML.replace(/width="\d+"/,'width="64"').replace(/height="\d+"/,'height="64"')+'</div>';
+  // Avant connexion aucun club n'est charge : on retombe sur la marque General
+  // Manager, jamais sur le logo du dernier club affiche.
+  if(typeof clubLogo==="function" && clubLogo()){
+    return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+clubLogoHtml(64)+'</div>';
   }
   return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(242,213,126,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#F2D57E;letter-spacing:1px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></div>';
 }

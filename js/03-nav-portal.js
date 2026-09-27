@@ -64,10 +64,23 @@ function clubSubtitle(){ return (window.CURRENT_CLUB && window.CURRENT_CLUB.subt
 // Remplit les emplacements du nom du club (.js-club-name) et rafraîchit le
 // header. Appelé quand la fiche du club est chargée : elle arrive en asynchrone,
 // donc ces emplacements restent vides jusque-là plutôt que d'afficher un nom figé.
+// Tous les emplacements de logo de l'application, avec leur taille.
+var CLUB_LOGO_CIBLES=[["home-logo",44],["hlogo",38],["role-logo",90],
+  ["parent-hero-logo",44],["parent-eq-logo",80],["coach-eq-logo",44]];
+function applyClubLogo(){
+  try{
+    CLUB_LOGO_CIBLES.forEach(function(c){
+      var el=document.getElementById(c[0]);
+      if(el) el.innerHTML=clubLogoHtml(c[1]);
+    });
+  }catch(e){}
+}
+
 function applyClubLabels(){
   var n=clubTitle();
   try{
     document.querySelectorAll(".js-club-name").forEach(function(el){ el.textContent=n; });
+    applyClubLogo();
     if(typeof stack!=="undefined" && stack.length) updateHdr(stack[stack.length-1]);
   }catch(e){}
 }

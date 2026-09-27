@@ -1,6 +1,5 @@
 /* ===== 19-profils.js — Profils parent/coach/joueur, themes animes ===== */
 // ═══ SYSTEME PROFIL PARENT / COACH ═══════════════════════════════
-var ASMB_LOGO_B64_REF = null; // will reuse existing home-logo html via cloning
 
 // ═══ THEME ANIME (meteo du jour / saisonnier) ══════════════════════
 function taGetSettings(){
@@ -222,8 +221,7 @@ function initProfile(){
 function injectRoleLogo(){
   var el=document.getElementById("role-logo");
   if(!el)return;
-  var homeLogo=document.getElementById("home-logo");
-  if(homeLogo&&homeLogo.innerHTML){el.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="90"').replace(/height="175"/,'height="112"');}
+  el.innerHTML=clubLogoHtml(90);
 }
 
 async function chooseRole(role){
@@ -919,8 +917,7 @@ function buildParentHome(){
   var activeTeam=myTeams.find(function(t){return t.id===activeId;});
 
   var pLogoEl=document.getElementById("parent-hero-logo");
-  var pHomeLogo=document.getElementById("home-logo");
-  if(pLogoEl&&pHomeLogo&&pHomeLogo.innerHTML)pLogoEl.innerHTML=pHomeLogo.innerHTML;
+  if(pLogoEl)pLogoEl.innerHTML=clubLogoHtml(44);
   document.getElementById("parent-hero-team").textContent=(clubLabel("")?clubLabel()+" · ":"")+activeTeam.name;
   fillTodayHero("parent-hero-event","parent-date",activeTeam,null,"Aucun entraînement aujourd'hui");
 
@@ -1137,8 +1134,7 @@ function buildParentEquipe(){
   var team=teams.find(function(t){return t.id===activeId;});
   if(!team){document.getElementById("parent-eq-name").textContent="Aucune équipe";return;}
   var logoEl=document.getElementById("parent-eq-logo");
-  var homeLogo=document.getElementById("home-logo");
-  if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
+  if(logoEl)logoEl.innerHTML=clubLogoHtml(80);
   document.getElementById("parent-eq-name").textContent=team.name;
   document.getElementById("parent-eq-cat").textContent="Basket-ball · "+team.cat;
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
@@ -1185,8 +1181,7 @@ function buildCoachEquipe(){
   }
   if(!team){document.getElementById("coach-eq-name").textContent="Aucune équipe";return;}
   var logoEl=document.getElementById("coach-eq-logo");
-  var homeLogo=document.getElementById("home-logo");
-  if(logoEl&&homeLogo&&homeLogo.innerHTML){logoEl.innerHTML=homeLogo.innerHTML.replace(/width="140"/,'width="80"').replace(/height="175"/,'height="100"');}
+  if(logoEl)logoEl.innerHTML=clubLogoHtml(80);
   document.getElementById("coach-eq-cat").textContent=(clubLabel("")?clubLabel()+" · ":"")+team.cat;
   fillTodayHero("coach-next-event","coach-eq-name",team);
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});

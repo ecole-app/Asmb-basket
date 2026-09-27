@@ -29,6 +29,7 @@ function buildParametres(){
       : "Connexion en cours...";
   }
   buildClubStats();
+  majApercuLogo();
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
@@ -38,10 +39,87 @@ function buildParametres(){
   buildParametresLayout();
 }
 
+// ═══ LOGO DU CLUB ════════════════════════════════════════════════
+// L'application ne se sert pas de Firebase Storage : toutes ses images passent
+// par Firestore en base64. On garde ce mecanisme, avec une limite stricte —
+// un document Firestore ne peut pas depasser 1 Mo, logo compris.
+var CLUB_LOGO_PX=256;
+var CLUB_LOGO_OCTETS_MAX=400000;
+
+// Le logo est centre dans un carre transparent plutot que deforme ou recadre :
+// un ecusson de club est rarement carre, et l'etirer le rend meconnaissable.
+function compresserLogo(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var cote=Math.max(img.width,img.height)||1;
+        var ech=Math.min(1,CLUB_LOGO_PX/cote);
+        var w=Math.max(1,Math.round(img.width*ech)), h=Math.max(1,Math.round(img.height*ech));
+        var canvas=document.createElement("canvas");
+        canvas.width=CLUB_LOGO_PX;canvas.height=CLUB_LOGO_PX;
+        var ctx=canvas.getContext("2d");
+        ctx.drawImage(img,Math.round((CLUB_LOGO_PX-w)/2),Math.round((CLUB_LOGO_PX-h)/2),w,h);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror=function(){reject(new Error("Image illisible"));};
+      img.src=e.target.result;
+    };
+    reader.onerror=function(){reject(new Error("Lecture impossible"));};
+    reader.readAsDataURL(file);
+  });
+}
+
+function majApercuLogo(){
+  var ap=document.getElementById("club-logo-apercu");
+  if(ap && typeof clubLogoHtml==="function") ap.innerHTML=clubLogoHtml(64);
+  var etat=document.getElementById("club-logo-etat");
+  if(etat) etat.textContent=(typeof clubLogo==="function"&&clubLogo())
+    ? "Logo du club" : "Aucun logo : les initiales sont affichées";
+  var rm=document.getElementById("club-logo-retirer");
+  if(rm) rm.style.display=(typeof clubLogo==="function"&&clubLogo())?"block":"none";
+}
+
+function televerserLogoClub(input){
+  if(!input||!input.files||!input.files[0])return;
+  var file=input.files[0];
+  input.value="";
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  if(file.type.indexOf("image/")!==0){ askAlert("Choisissez un fichier image."); return; }
+  compresserLogo(file).then(function(dataUrl){
+    if(dataUrl.length>CLUB_LOGO_OCTETS_MAX){
+      askAlert("Logo trop lourd même après réduction. Un PNG au fond transparent, sans photo, passera sans problème.");
+      return null;
+    }
+    return window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{logo:dataUrl})
+      .then(function(){
+        if(window.CURRENT_CLUB) window.CURRENT_CLUB.logo=dataUrl;
+        if(typeof applyClubLogo==="function") applyClubLogo();
+        majApercuLogo();
+      });
+  }).catch(function(e){ askAlert("Erreur : "+((e&&(e.message||e.code))||e)); });
+}
+
+function retirerLogoClub(){
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc)return;
+  askConfirm("Retirer le logo du club ? Les initiales seront affichées à la place.",
+    {danger:true,confirmText:"Retirer"}).then(function(ok){
+    if(!ok)return;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{logo:null})
+      .then(function(){
+        if(window.CURRENT_CLUB) window.CURRENT_CLUB.logo=null;
+        if(typeof applyClubLogo==="function") applyClubLogo();
+        majApercuLogo();
+      }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+}
+
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Demonstration"
 };

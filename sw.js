@@ -16,7 +16,6 @@ const PRECACHE = [
   './manifest.json',
   './version.json',
   './css/style.css',
-  './img/logo.png',
   './favicon.ico',
   './icon-192.png',
   './icon-512.png',

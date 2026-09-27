@@ -994,6 +994,22 @@
  </label>
  </div>
  </div><div id="params-dirigeant-only">
+ <div class="param-block" data-sec="identite"><div class="sec">Identité du club</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+ <div id="club-logo-apercu" style="flex-shrink:0"></div>
+ <div style="min-width:0">
+ <div style="font-size:13px;font-weight:700;color:var(--txt)"><span class="js-club-name"></span></div>
+ <div id="club-logo-etat" style="font-size:11px;color:var(--mut);margin-top:3px"></div>
+ </div>
+ </div>
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Le logo apparaît sur l'accueil, l'en-tête et les espaces parents. Un PNG au fond transparent donne le meilleur rendu ; l'image est réduite automatiquement.</div>
+ <label style="display:block;width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;text-align:center;cursor:pointer">Choisir un logo
+ <input type="file" accept="image/*" onchange="televerserLogoClub(this)" style="display:none">
+ </label>
+ <button id="club-logo-retirer" onclick="retirerLogoClub()" style="display:none;width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;font-weight:700;border:none;cursor:pointer">Retirer le logo</button>
+ </div>
+ </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>

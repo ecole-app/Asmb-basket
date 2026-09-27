@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790470919";
+var APP_VERSION="1790471302";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -213,11 +213,10 @@ whenClubReady(function(){
   setTimeout(listenJoinRequestsGlobal,3500);
 });
 setInterval(function(){ if(window.CURRENT_CLUB_ID) backupToCloud(); },300000);
+// Le logo vient de la fiche du club, qui arrive en asynchrone : on pose les
+// initiales tout de suite, applyClubLabels() remplacera par le vrai logo.
 document.addEventListener("DOMContentLoaded",function(){
-  var home=document.getElementById("home-logo");
-  if(home)home.innerHTML='<img src="img/logo.png" style="width:44px;height:44px;object-fit:contain;display:block">';
-  var hd=document.getElementById("hlogo");
-  if(hd)hd.innerHTML='<img src="img/logo.png" style="width:38px;height:38px;object-fit:contain;display:block">';
+  if(typeof applyClubLogo==="function") applyClubLogo();
 });
 
 
