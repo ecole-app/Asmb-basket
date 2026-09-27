@@ -49,7 +49,11 @@ const PRECACHE = [
   './js/19-profils.js',
   './js/20-parent-tabs.js',
   './js/20b-plateforme.js',
-  './js/21-main.js'
+  './js/21-main.js',
+  './legal/mentions-legales.html',
+  './legal/confidentialite.html',
+  './legal/cgu.html',
+  './legal/contrat-sous-traitance.html'
 ];
 
 self.addEventListener('install', function (event) {
