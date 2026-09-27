@@ -158,8 +158,17 @@ function inviteError(el,msg){
   el.innerHTML=authHero("Invitation","General Manager")
     +'<div style="padding:22px 18px"><div style="background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:600;padding:14px;border-radius:var(--rs);text-align:center;line-height:1.45">'+authEsc(msg)+'</div></div>';
 }
+// Identifiant interne des comptes joueur. Le sous-domaine n'existe pas dans le
+// DNS : rien ne peut y etre delivre, et il ne le pourra jamais meme si une
+// adresse e-mail est un jour configuree sur le domaine principal.
+var DOMAINE_JOUEUR="joueur.generalmanagerapp.fr";
+function identifiantJoueur(){
+  return genSecureCode(3,4).replace(/-/g,"").toLowerCase()+"@"+DOMAINE_JOUEUR;
+}
+
 function renderInviteForm(el, code, inv){
-  var roleLbl=inv.role==="dirigeant"?"Dirigeant":"Coach";
+  if(inv.role==="joueur") return renderInviteJoueur(el, code, inv);
+  var roleLbl=inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach");
   el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"), roleLbl)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Vous êtes invité(e) comme <b>'+roleLbl.toLowerCase()+'</b>. Créez votre compte pour accéder au club.</p>'
@@ -173,10 +182,27 @@ function renderInviteForm(el, code, inv){
   authWirePassToggles();
   document.getElementById("invite-accept-btn").addEventListener("click",function(){ acceptInvite(code, inv); });
 }
+// L'enfant ne saisit qu'un mot de passe : aucune donnee de contact ne lui est
+// demandee, et le club n'en stocke donc aucune le concernant.
+function renderInviteJoueur(el, code, inv){
+  el.innerHTML=authHero(authEsc(inv.clubName||"Ton club"),"Espace joueur")
+    +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Ton parent t\'a ouvert un accès. Choisis un mot de passe : c\'est lui qui te servira à te connecter.</p>'
+    +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
+    +authPassField("auth-pass","6 caractères minimum")
+    +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+    +'<button id="invite-accept-btn" style="'+AUTH_BTN+'">Créer mon accès</button>'
+    +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e8edf5;border-radius:var(--rx)">Si tu oublies ton mot de passe, demande à ton parent : il peut t\'en ouvrir un nouveau.</p>'
+    +'</div>';
+  authWirePassToggles();
+  document.getElementById("invite-accept-btn").addEventListener("click",function(){ acceptInvite(code, inv); });
+}
+
 function acceptInvite(code, inv){
-  var email=((document.getElementById("auth-email")||{}).value||"").trim();
+  var estJoueur=(inv.role==="joueur");
+  var email=estJoueur?identifiantJoueur():((document.getElementById("auth-email")||{}).value||"").trim();
   var pass=(document.getElementById("auth-pass")||{}).value||"";
-  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
+  if(!estJoueur && email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
   if(pass.length<6){ authErr("Mot de passe : 6 caractères minimum"); return; }
   var btn=document.getElementById("invite-accept-btn");
   if(btn){ btn.disabled=true; btn.textContent="Création du compte…"; }
@@ -188,7 +214,8 @@ function acceptInvite(code, inv){
     var b=window.fbWriteBatch();
     b.set(window.fbDoc(window.fbDb,"users",cred.user.uid),{
       email:email, phone:"", roles:[inv.role], clubId:inv.clubId, inviteCode:code,
-      linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp()
+      linkedPlayerIds:(inv.playerId?[String(inv.playerId)]:[]), linkedTeamIds:[],
+      createdAt:window.fbServerTimestamp()
     });
     b.update(window.fbDoc(window.fbDb,"club_invites",code),{usedBy:cred.user.uid, usedAt:window.fbServerTimestamp()});
     return b.commit();

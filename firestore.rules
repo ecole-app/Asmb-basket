@@ -118,7 +118,7 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds']))
         || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
         || (superAdmin() && request.auth.uid == uid
             && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
@@ -129,10 +129,20 @@ service cloud.firestore {
     // ── Invitations (usage unique, expirent) ────────────────────────
     match /club_invites/{code} {
       allow get: if true;   // consultation par code uniquement (pas de listing public)
-      allow list: if superAdmin() || dirigeant(resource.data.clubId);
+      allow list: if superAdmin() || dirigeant(resource.data.clubId)
+        || (signedIn() && resource.data.createdBy == request.auth.uid);
       allow create: if request.resource.data.usedBy == null
         && (superAdmin()
-            || (dirigeant(request.resource.data.clubId) && request.resource.data.role in ['coach','dirigeant']));
+            || (dirigeant(request.resource.data.clubId)
+                && request.resource.data.role in ['coach','dirigeant','parent'])
+            // Un parent ouvre l'acces de SON enfant. C'est le club qui dit lesquels
+            // sont les siens, via le rattachement : le compte ne peut pas se
+            // l'attribuer lui-meme, et ne peut donc pas viser l'enfant d'un autre.
+            || (request.resource.data.role == 'joueur'
+                && member(request.resource.data.clubId)
+                && request.resource.data.createdBy == request.auth.uid
+                && request.resource.data.playerId in
+                     get(/databases/$(database)/documents/clubs/$(request.resource.data.clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', [])));
       // Consommation : uniquement par la personne qui crée son compte, dans la
       // même opération que la création de ce compte.
       allow update: if signedIn() && resource.data.usedBy == null
@@ -140,7 +150,8 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy','usedAt'])
         && request.resource.data.usedBy == request.auth.uid
         && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid));
-      allow delete: if superAdmin() || dirigeant(resource.data.clubId);
+      allow delete: if superAdmin() || dirigeant(resource.data.clubId)
+        || (signedIn() && resource.data.createdBy == request.auth.uid && resource.data.usedBy == null);
     }
 
     // ── Codes d'accès support (générés par le club) ─────────────────

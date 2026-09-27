@@ -110,8 +110,11 @@ function publierRattachements(){
   function lier(tel,playerId,licenceId){
     var t=String(tel||"").replace(/\s+/g,"");
     if(!t||playerId==null) return;
-    if(!entries[t]) entries[t]={joueurs:{}};
+    if(!entries[t]) entries[t]={joueurs:{},playerIds:[]};
     entries[t].joueurs[String(playerId)]=licenceId||"";
+    // Liste brute : c'est elle que la regle consulte pour verifier qu'un parent
+    // ouvre bien l'acces d'un de ses propres enfants.
+    if(entries[t].playerIds.indexOf(String(playerId))<0) entries[t].playerIds.push(String(playerId));
   }
   lics.forEach(function(l){
     var f=l&&l.fiche; if(!f) return;

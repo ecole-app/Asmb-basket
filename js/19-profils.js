@@ -187,6 +187,15 @@ function initProfile(){
     localStorage.removeItem("asmb_parent_active_team");
     profile=null;
   }
+  // Un compte ouvert par un parent pour son enfant ne choisit pas son role et
+  // n'a pas de numero a saisir : sa fiche est celle que le code portait.
+  var rolesCompte=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  if(rolesCompte.length===1 && rolesCompte[0]==="joueur"){
+    localStorage.setItem("asmb_profile","joueur");
+    ouvrirEspaceJoueurRattache(0);
+    return;
+  }
+
   if(!profile){
     ROOTS.push("role-select");
     stack=["role-select"];
@@ -253,6 +262,23 @@ async function chooseRole(role){
     buildBottomNav("parent");
     registerParentPhone();
   }
+}
+
+// Le trombinoscope arrive en asynchrone : on patiente le temps qu'il descende
+// plutot que d'afficher un ecran vide ou de renvoyer l'enfant vers un choix de
+// role qui ne le concerne pas.
+function ouvrirEspaceJoueurRattache(essai){
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  var fiche=getPlayers().find(function(p){ return ids.indexOf(String(p.id))>=0; });
+  if(fiche){
+    joueurIdentifiedPlayer=fiche;
+    stack=["joueur"];
+    showScr("joueur");
+    buildJoueurScreen(fiche);
+    return;
+  }
+  if(essai<20){ setTimeout(function(){ ouvrirEspaceJoueurRattache(essai+1); },400); return; }
+  alert("Ta fiche n'a pas pu etre chargee. Reessaie, ou demande a ton club.");
 }
 
 // ── ESPACE JOUEUR (auto-pointage) ──────────────────────────────────

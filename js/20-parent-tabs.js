@@ -146,7 +146,111 @@ function openParentSettings(){
   buildParentSettings();
 }
 
+// ═══ ACCES DE MON ENFANT ══════════════════════════════════════════
+// Pour un mineur, c'est au titulaire de l'autorite parentale d'ouvrir l'acces.
+// Le parent emet un code a usage unique ; l'enfant choisit un mot de passe et
+// ne fournit aucune donnee de contact.
+var CODES_ENFANTS={};
+
+function mesEnfants(){
+  var ids=[]; try{ ids=JSON.parse(localStorage.getItem("asmb_mes_joueurs")||"[]"); }catch(e){}
+  var r=(typeof getRoster==="function")?getRoster():[];
+  return r.filter(function(p){ return ids.indexOf(String(p.id))>=0; });
+}
+
+function buildAccesEnfants(){
+  var box=document.getElementById("acces-enfants");
+  if(!box) return;
+  var enfants=mesEnfants();
+  box.innerHTML="";
+  if(!enfants.length){
+    box.innerHTML='<div style="padding:14px;font-size:12px;color:var(--mut);line-height:1.45">Aucun enfant rattaché à ce compte. Le rattachement est fait par le club au moment de valider la licence.</div>';
+    return;
+  }
+  enfants.forEach(function(p){
+    var etat=CODES_ENFANTS[String(p.id)];
+    var row=document.createElement("div");
+    row.style.cssText="padding:14px;border-bottom:1px solid var(--bdr)";
+    var nom=document.createElement("div");
+    nom.style.cssText="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px";
+    nom.textContent=((p.prenom||"")+" "+(p.nom||"")).trim();
+    row.appendChild(nom);
+    if(etat && etat.usedBy){
+      var ok=document.createElement("div");
+      ok.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.45";
+      ok.textContent="Accès créé. Pour le fermer, demandez au club.";
+      row.appendChild(ok);
+    } else if(etat && etat.code){
+      var c=document.createElement("div");
+      c.style.cssText="font-family:monospace;font-size:16px;font-weight:800;letter-spacing:2px;color:var(--dkg);background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rx);padding:12px;text-align:center;margin-bottom:8px";
+      c.textContent=etat.code;
+      var aide=document.createElement("div");
+      aide.style.cssText="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:8px";
+      aide.textContent="À donner à votre enfant. Utilisable une seule fois, valable 7 jours.";
+      var ann=document.createElement("button");
+      ann.textContent="Annuler ce code";
+      ann.style.cssText="width:100%;padding:10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      ann.addEventListener("click",function(){ annulerAccesEnfant(p.id, etat.code); });
+      row.appendChild(c);row.appendChild(aide);row.appendChild(ann);
+    } else {
+      var b=document.createElement("button");
+      b.textContent="Créer l'accès de "+(p.prenom||"mon enfant");
+      b.style.cssText="width:100%;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer";
+      b.addEventListener("click",function(){ creerAccesEnfant(p); });
+      row.appendChild(b);
+    }
+    box.appendChild(row);
+  });
+}
+
+// Codes deja emis par ce compte : la regle n'autorise la lecture que des siens.
+function chargerCodesEnfants(){
+  if(!window.fbDb||!window.fbGetDocs||!window.fbQuery||!window.fbWhere) return;
+  if(!window.ASMB_USER||!window.ASMB_USER.uid) return;
+  var q=window.fbQuery(window.fbCollection(window.fbDb,"club_invites"),
+        window.fbWhere("createdBy","==",window.ASMB_USER.uid));
+  window.fbGetDocs(q).then(function(snap){
+    CODES_ENFANTS={};
+    snap.forEach(function(d){
+      var v=d.data();
+      if(v.role!=="joueur"||!v.playerId) return;
+      var exp=v.expiresAt&&v.expiresAt.toDate?v.expiresAt.toDate():null;
+      if(!v.usedBy && exp && exp<new Date()) return; // perime : on repropose la creation
+      CODES_ENFANTS[String(v.playerId)]={code:d.id,usedBy:v.usedBy||null};
+    });
+    buildAccesEnfants();
+  }).catch(function(){});
+}
+
+function creerAccesEnfant(p){
+  if(!window.fbSetDoc||!window.CURRENT_CLUB_ID){ askAlert("Connexion en cours, réessayez."); return; }
+  var code=genSecureCode(3,4);
+  window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code),{
+    clubId:window.CURRENT_CLUB_ID, clubName:(typeof clubLabel==="function"?clubLabel(""):""),
+    role:"joueur", playerId:String(p.id), usedBy:null,
+    createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp(),
+    expiresAt:new Date(Date.now()+7*86400000)
+  }).then(function(){
+    CODES_ENFANTS[String(p.id)]={code:code,usedBy:null};
+    buildAccesEnfants();
+  }).catch(function(e){
+    askAlert("Impossible de créer l'accès : "+((e&&e.code)||e));
+  });
+}
+
+function annulerAccesEnfant(playerId, code){
+  askConfirm("Annuler ce code ? Il ne pourra plus servir.",{danger:true,confirmText:"Annuler le code"}).then(function(ok){
+    if(!ok)return;
+    window.fbDeleteDoc(window.fbDoc(window.fbDb,"club_invites",code)).then(function(){
+      delete CODES_ENFANTS[String(playerId)];
+      buildAccesEnfants();
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+}
+
 function buildParentSettings(){
+  buildAccesEnfants();
+  chargerCodesEnfants();
   function setChk(id,key,def){var el=document.getElementById(id);if(el)el.checked=ppGet(key,def)==="on";}
   function setSel(id,key,def){var el=document.getElementById(id);if(el)el.value=ppGet(key,def);}
   setChk("pp-ics-alarm","asmb_ics_alarm","on");
