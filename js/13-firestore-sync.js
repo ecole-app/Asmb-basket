@@ -90,10 +90,27 @@ function refreshCurrentScreen(){
   }catch(e){ console.log("refresh:", e); }
 }
 
+// Un membre ne lit que son propre rattachement : la regle verifie que le numero
+// demande est bien celui de son compte.
+function chargerMesRattachements(){
+  var tel=(localStorage.getItem("asmb_phone")||"").replace(/\s+/g,"");
+  if(!tel||!window.fbGetDoc||!window.fbDoc) return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"rattachements",tel)).then(function(s){
+    var j=(s&&s.exists()&&s.data().joueurs)||{};
+    localStorage.setItem("asmb_mes_joueurs",JSON.stringify(Object.keys(j)));
+    refreshCurrentScreen();
+  }).catch(function(){});
+}
+
 function initFirestoreSync(){
   if(FS_SYNC_STARTED || !window.fbDb) return;
   FS_SYNC_STARTED=true;
-  fsStartSync("players","asmb_players");
+  // Le trombinoscope descend chez tout le monde ; la fiche complete, seulement
+  // chez le staff. Sans ce partage, un parent recevrait dates de naissance,
+  // telephones et notes de tous les enfants du club.
+  fsStartSync("roster","asmb_roster");
+  if(typeof isStaffUser==="function" && isStaffUser()) fsStartSync("players","asmb_players");
+  else chargerMesRattachements();
   fsStartSync("teams","asmb_teams");
   // Reserve au staff : ces fiches contiennent des donnees de sante et des
   // photos de mineurs, elles n'ont pas a descendre sur l'appareil d'un parent.

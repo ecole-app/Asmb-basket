@@ -19,7 +19,7 @@ function authLookupPhoneLocal(phone){
       var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
       if(phones.indexOf(np)>=0){
         var prenom=l.fiche.prenom||"", nom=l.fiche.nom||"";
-        return {found:true, phone:np, role:"parent", playerName:(prenom+" "+nom).trim(), playerIds:[l.id].filter(Boolean), teamIds:[l.fiche.equipe].filter(Boolean)};
+        return {found:true, phone:np, role:"parent", clubName:(typeof clubLabel==="function"?clubLabel(""):""), playerIds:[l.id].filter(Boolean), teamIds:[l.fiche.equipe].filter(Boolean)};
       }
     }
   }catch(e){ console.log("lookup licences:",e); }
@@ -34,7 +34,7 @@ function authLookupPhoneRemote(phone){
   return window.fbGetDoc(window.fbDoc(window.fbDb,"phone_index",np)).then(function(snap){
     if(snap && snap.exists()){
       var d=snap.data();
-      return {found:true, phone:np, role:d.role||"parent", playerName:d.playerName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[], clubId:d.clubId||null};
+      return {found:true, phone:np, role:d.role||"parent", clubName:d.clubName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[], clubId:d.clubId||null};
     }
     return {found:false, phone:np};
   }).catch(function(){ return {found:false, phone:np}; });
@@ -132,7 +132,7 @@ function showAuth(step, data){
       +'</div>';
   } else if(step==="signup"){
     var chips="";
-    if(data.playerName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);border:1px solid rgba(212,175,55,.3)">'+authEsc(data.playerName)+'</span></div>'; }
+    if(data.clubName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);border:1px solid rgba(212,175,55,.3)">'+authEsc(data.clubName)+'</span></div>'; }
     h=authHero("Bienvenue","Numéro reconnu")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
       +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px">Ce numéro est rattaché au club.</p>'

@@ -263,7 +263,7 @@ async function openJoueurCheckin(){
   var phone=await askPrompt("Ton numéro de téléphone", {defaultValue:saved, placeholder:"Celui donné au club", confirmText:"Valider"});
   if(!phone)return;
   phone=phone.trim().replace(/\s+/g,"");
-  var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
+  var player=resoudreFichePour(phone);
   if(!player){
     alert("Numéro non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
@@ -275,17 +275,32 @@ async function openJoueurCheckin(){
   buildJoueurScreen(player);
 }
 
+// Identifiants des fiches joueur rattachees au compte, poses par le club et
+// lisibles du seul interesse. Le staff, lui, a la fiche complete sous la main.
+function mesJoueursIds(){
+  try{ return JSON.parse(localStorage.getItem("asmb_mes_joueurs")||"[]"); }catch(e){ return []; }
+}
+function resoudreFichePour(phone){
+  var np=String(phone||"").replace(/\s+/g,"");
+  if(!np) return null;
+  var players=getPlayers();
+  // Staff : le numero de l'enfant figure sur la fiche complete.
+  var direct=players.find(function(p){
+    return p.telEnfant && String(p.telEnfant).replace(/\s+/g,"")===np;
+  });
+  if(direct) return direct;
+  // Membre : on ne resout que son propre numero, et via son rattachement.
+  var mien=(localStorage.getItem("asmb_phone")||"").replace(/\s+/g,"");
+  if(np!==mien) return null;
+  var ids=mesJoueursIds();
+  if(!ids.length) return null;
+  return players.find(function(p){ return ids.indexOf(String(p.id))>=0; })||null;
+}
+
 function getLinkedPlayerForCheckin(){
   if(joueurIdentifiedPlayer)return joueurIdentifiedPlayer;
   if(localStorage.getItem("asmb_profile")==="parent"&&myPhone){
-    var myP=myPhone.replace(/\s+/g,"");
-    // Les numeros des responsables sont recopies sur la fiche joueur a la
-    // validation de la licence : inutile de parcourir les fiches de licence,
-    // qui contiennent bien plus que ce qu'il faut pour identifier son enfant.
-    return getPlayers().find(function(p){
-      return [p.contact,p.telEnfant,p.respTel,p.resp2Tel].filter(Boolean)
-        .map(function(x){return String(x).replace(/\s+/g,"");}).indexOf(myP)>=0;
-    })||null;
+    return resoudreFichePour(myPhone);
   }
   return null;
 }

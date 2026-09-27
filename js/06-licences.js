@@ -11,12 +11,13 @@ function syncPhoneIndexFromLicences(lics){
   (lics||[]).forEach(function(l){
     if(!l||!l.fiche) return;
     var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
-    var prenom=l.fiche.prenom||"", nom=l.fiche.nom||"";
-    var playerName=(prenom+" "+nom).trim();
     var teamIds=[l.fiche.equipe].filter(Boolean);
     phones.forEach(function(p){
       if(!p) return;
-      if(!entries[p]) entries[p]={role:"parent",playerIds:[],playerName:playerName,teamIds:teamIds.slice(),clubId:window.CURRENT_CLUB_ID||null};
+      // Pas de nom d'enfant ici : cet index est lisible sans etre connecte, pour
+      // router un numero vers son club avant l'authentification. Le nom du club
+      // suffit a confirmer a la personne qu'elle a saisi le bon numero.
+      if(!entries[p]) entries[p]={role:"parent",playerIds:[],clubName:(typeof clubLabel==="function"?clubLabel(""):""),teamIds:teamIds.slice(),clubId:window.CURRENT_CLUB_ID||null};
       if(entries[p].playerIds.indexOf(l.id)<0) entries[p].playerIds.push(l.id);
     });
   });
@@ -91,7 +92,48 @@ function lookupInscriptionCode(code, attempt){
   }).catch(function(){ return {found:false, code:code}; });
 }
 
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);}
+function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);publierRattachements();}
+
+// Dit a chaque numero quelles fiches joueur le concernent. C'est ce qui remplace
+// la recherche d'autrefois, qui parcourait toutes les licences du club pour y
+// trouver son propre numero. Publie par le staff, lu par le seul interesse.
+var RATTACH_PREV={};
+function publierRattachements(){
+  if(!window.fbDb||!window.fbSetDoc||!window.CURRENT_CLUB_ID) return;
+  if(typeof isStaffUser!=="function" || !isStaffUser()) return;
+  var players=(typeof getPlayers==="function")?getPlayers():[];
+  // Sans la fiche complete on ne connait ni telEnfant ni les noms : ne rien
+  // publier vaut mieux que publier des rattachements incomplets.
+  if(!players.length || players.some(function(p){return p&&p._roster;})) return;
+  var lics=(typeof getLicences==="function")?getLicences():[];
+  var entries={};
+  function lier(tel,playerId,licenceId){
+    var t=String(tel||"").replace(/\s+/g,"");
+    if(!t||playerId==null) return;
+    if(!entries[t]) entries[t]={joueurs:{}};
+    entries[t].joueurs[String(playerId)]=licenceId||"";
+  }
+  lics.forEach(function(l){
+    var f=l&&l.fiche; if(!f) return;
+    var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+    if(!p) return;
+    [f.telephone,f.respTel,f.resp2Tel].forEach(function(t){ lier(t,p.id,l.id); });
+  });
+  players.forEach(function(p){ lier(p.telEnfant,p.id,""); });
+  Object.keys(entries).forEach(function(tel){
+    var s=JSON.stringify(entries[tel]);
+    if(RATTACH_PREV[tel]===s) return;
+    RATTACH_PREV[tel]=s;
+    window.fbSetDoc(window.fbDoc(window.fbDb,"rattachements",tel), entries[tel]).catch(function(){});
+  });
+  // Un numero qui disparait doit perdre son acces, pas le conserver par inertie.
+  Object.keys(RATTACH_PREV).forEach(function(tel){
+    if(!(tel in entries) && window.fbDeleteDoc){
+      delete RATTACH_PREV[tel];
+      window.fbDeleteDoc(window.fbDoc(window.fbDb,"rattachements",tel)).catch(function(){});
+    }
+  });
+}
 
 // ── GESTION DE SAISON (archivage annuel des licences) ──────────────
 // Saison "naturelle" deduite de la date du jour (nouvelle saison des debut juillet,
@@ -159,30 +201,19 @@ var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#D4AF37",
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;
-// Rattrapage silencieux, une fois par session, depuis l'ecran des licences —
-// le seul ou le staff a les deux collections sous la main.
-// Les joueurs valides avant le cloisonnement des fiches n'ont pas les numeros
-// des responsables : sans eux, l'espace parent ne retrouverait plus l'enfant.
-var CONTACTS_RATTRAPES=false;
-function rattraperContactsJoueurs(){
- if(CONTACTS_RATTRAPES) return;
- if(typeof isStaffUser!=="function" || !isStaffUser()) return;
- CONTACTS_RATTRAPES=true;
- try{
-   var players=getPlayers(), lics=getLicences(), touches=0;
-   lics.forEach(function(l){
-     var f=l&&l.fiche; if(!f||(!f.respTel&&!f.resp2Tel)) return;
-     var p=players.find(function(x){ return x.prenom===f.prenom && x.nom===f.nom; });
-     if(!p) return;
-     if(!p.respTel && f.respTel){ p.respTel=f.respTel; touches++; }
-     if(!p.resp2Tel && f.resp2Tel){ p.resp2Tel=f.resp2Tel; touches++; }
-   });
-   if(touches) savePlayers(players);
- }catch(e){}
+// Reconstruit les rattachements des licences validees avant leur mise en place,
+// une fois par session depuis l'ecran des licences : sans cela, ces familles ne
+// retrouveraient plus leur enfant.
+var RATTACH_RECONSTRUITS=false;
+function reconstruireRattachements(){
+  if(RATTACH_RECONSTRUITS) return;
+  if(typeof isStaffUser!=="function" || !isStaffUser()) return;
+  RATTACH_RECONSTRUITS=true;
+  try{ publierRattachements(); }catch(e){}
 }
 
 function buildLicences(){
- rattraperContactsJoueurs();
+ reconstruireRattachements();
  var season=getCurrentSeason();
  var allLics=getLicences();
  var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison!==season;})

@@ -623,8 +623,42 @@ function renderAvisList(list,items){
   });
 }
 
-function getPlayers(){try{return JSON.parse(localStorage.getItem("asmb_players")||"[]");}catch(e){return [];}}
-function savePlayers(p){localStorage.setItem("asmb_players",JSON.stringify(p));fsWriteCollection("players",p);}
+// Le staff dispose de la fiche complete ; les familles n'ont que le trombinoscope.
+// Les ecrans partages n'ont pas a savoir lequel des deux ils manipulent : ils
+// demandent getPlayers() et recoivent ce a quoi ils ont droit.
+function getRoster(){try{return JSON.parse(localStorage.getItem("asmb_roster")||"[]");}catch(e){return [];}}
+function getPlayers(){
+  try{
+    var full=JSON.parse(localStorage.getItem("asmb_players")||"[]");
+    if(full.length) return full;
+  }catch(e){}
+  return getRoster();
+}
+
+// Trombinoscope derive de la fiche complete : nom, prenom, categorie, poste,
+// maillot. La photo n'y figure que si le responsable l'a autorisee.
+function rosterDepuisJoueurs(players){
+  return (players||[]).filter(function(p){return p&&p.id!=null;}).map(function(p){
+    return {id:p.id,prenom:p.prenom||"",nom:p.nom||"",cat:p.cat||"",
+            poste:p.poste||"",maillot:p.maillot||"",
+            photo:p.photoAutorisee?(p.photo||null):null,_roster:true};
+  });
+}
+function savePlayers(p){
+  // Garde-fou : si le tableau vient du trombinoscope, l'ecrire ecraserait les
+  // fiches completes par des fiches vides. Cela n'arrive que si un ecran
+  // reserve au staff est atteint sans la synchronisation correspondante.
+  if((p||[]).some(function(x){return x&&x._roster;})){
+    console.warn("savePlayers refuse : donnees issues du trombinoscope");
+    return;
+  }
+  localStorage.setItem("asmb_players",JSON.stringify(p));
+  fsWriteCollection("players",p);
+  var r=rosterDepuisJoueurs(p);
+  localStorage.setItem("asmb_roster",JSON.stringify(r));
+  fsWriteCollection("roster",r);
+  if(typeof publierRattachements==="function") publierRattachements();
+}
 
 function filterCat(cat){
   currentCatFilter=cat;

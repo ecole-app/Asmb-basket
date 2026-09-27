@@ -170,7 +170,21 @@ service cloud.firestore {
       }
 
       // ── Données sportives ──
-      match /players/{id}      { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      // La fiche joueur complete porte la date de naissance, les telephones et
+      // les notes du staff : elle est reservee au staff. Ce que les familles ont
+      // besoin de voir (nom, prenom, categorie, photo si autorisee) vit dans
+      // "roster", derive de cette fiche a chaque enregistrement.
+      match /players/{id}      { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
+      match /roster/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
+
+      // Rattachement d'un numero a ses fiches joueur : un parent a ses enfants,
+      // un joueur a la sienne. L'identifiant du document est le numero lui-meme,
+      // et la regle verifie qu'il s'agit bien de celui du demandeur — personne
+      // ne peut donc parcourir les rattachements des autres.
+      match /rattachements/{tel} {
+        allow read:  if member(clubId) && me().get('phone','') == tel;
+        allow write: if staff(clubId);
+      }
       match /teams/{id}        { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
