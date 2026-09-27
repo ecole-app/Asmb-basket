@@ -224,7 +224,7 @@ function initProfile(){
     buildBottomNav("parent");
     var teams=getParentTeams();
     if(!teams.length){
-      openTeamPicker(false);
+      essaierAutoLinkParentPuisPicker(0);
     } else {
       stack=["parent-home"];
       showScr("parent-home");
@@ -595,45 +595,76 @@ function notifyPhoneSkipped(){
   });
 }
 
-function autoLinkParentToChannel(phone){
-  var lics=getLicences();
-  var lic=lics.find(function(l){
-    if(!l.fiche)return false;
-    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
-    return phones.indexOf(phone)>=0;
-  });
-  if(!lic||!lic.categorie){
-    pendingJoinRequestPhone=phone;
-    openTeamPicker(false);
+// Avant d'ouvrir le choix manuel d'equipe, on tente le rattachement auto
+// (roster + linkedPlayerIds) — le roster peut arriver un instant apres la
+// connexion (synchro Firestore), d'ou quelques essais avant d'abandonner.
+function essaierAutoLinkParentPuisPicker(essai){
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(!ids.length){ openTeamPicker(false); return; } // rien a rattacher automatiquement, pas la peine d'attendre
+  var teamNames=autoLinkParentTeams();
+  if(teamNames){
+    stack=["parent-home"];
+    showScr("parent-home");
+    buildParentHome();
     return;
   }
-  // Auto-selectionner l'équipe correspondant a la catégorie de l'enfant
-  var matchingTeams=getTeams().filter(function(t){return t.cat===lic.categorie;});
+  // linkedPlayerIds existe mais le roster n'est pas encore arrive (synchro
+  // Firestore en cours) : quelques essais avant d'abandonner.
+  if(essai<10){ setTimeout(function(){ essaierAutoLinkParentPuisPicker(essai+1); },300); return; }
+  openTeamPicker(false);
+}
+
+// Relie automatiquement le parent a l'equipe et au canal de CHAQUE enfant
+// rattache a son compte (roster + linkedPlayerIds). Ne depend plus des
+// licences (illisibles pour un parent depuis le cloisonnement des donnees) :
+// marche pareil pour un compte cree par invitation ou par l'ancien flux
+// telephone, et gere plusieurs enfants d'un coup.
+function autoLinkParentTeams(){
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(!ids.length) return false;
+  var roster=(typeof getRoster==="function")?getRoster():[];
+  var mine=roster.filter(function(p){return ids.indexOf(String(p.id))>=0;});
+  if(!mine.length) return false;
   var parentTeams=getParentTeams();
-  matchingTeams.forEach(function(t){if(parentTeams.indexOf(t.id)<0)parentTeams.push(t.id);});
-  saveParentTeamsList(parentTeams);
-
-  // Auto-ajout au canal correspondant
-  var childName=lic.fiche.prenom||"";
-  var label=childName+(lic.categorie?"-"+lic.categorie:"");
-  var channelId=findChannelForTeamText(lic.categorie);
-  if(window.fbReady){
-    window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
-      var chData=null;
-      snap.forEach(function(d){if(d.id===channelId)chData=d.data();});
-      var members=(chData&&chData.members)||[];
-      var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
-      if(!exists){
-        members.push({phone:phone,label:label});
-        window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{members:members},{merge:true});
-      }
+  var teamNames=[];
+  mine.forEach(function(p){
+    if(!p.cat) return;
+    var matchingTeams=getTeams().filter(function(t){return t.cat===p.cat;});
+    matchingTeams.forEach(function(t){
+      if(parentTeams.indexOf(t.id)<0){ parentTeams.push(t.id); teamNames.push(t.name); }
     });
+    var channelId=findChannelForTeamText(p.cat);
+    if(window.fbReady && channelId && myPhone){
+      var label=(p.prenom||"")+(p.cat?"-"+p.cat:"");
+      window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+        var chData=null;
+        snap.forEach(function(d){if(d.id===channelId)chData=d.data();});
+        var members=(chData&&chData.members)||[];
+        var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+        if(!exists){
+          members.push({phone:myPhone,label:label});
+          window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{members:members},{merge:true});
+        }
+      });
+    }
+  });
+  if(teamNames.length){
+    saveParentTeamsList(parentTeams);
+    return teamNames;
   }
+  return false;
+}
 
-  if(matchingTeams.length){
-    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'équipe "+matchingTeams[0].name+" et au canal correspondant.");
+// Conserve pour l'ancien parcours (role-select -> "Parent" -> numero saisi a
+// la main) : le rattachement se fait maintenant via roster/linkedPlayerIds,
+// plus par recherche du numero dans les licences.
+function autoLinkParentToChannel(phone){
+  var teamNames=autoLinkParentTeams();
+  if(teamNames){
+    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'équipe "+teamNames[0]+" et au canal correspondant.");
     saveParentTeams();
   } else {
+    pendingJoinRequestPhone=phone;
     openTeamPicker(false);
   }
 }
@@ -1076,18 +1107,20 @@ function buildParentHome(){
   }
 }
 
+// Un compte parent n'existe que si la licence d'au moins un de ses enfants a
+// deja ete validee (l'acces se cree depuis la fiche validee) : plus besoin de
+// lire la licence elle-meme pour savoir ou en est le dossier, la simple
+// presence de l'enfant au roster suffit a dire "validee". Les statuts
+// intermediaires (recue/en_cours/ouverte) ne concernent que des familles qui
+// n'ont pas encore de compte, donc jamais ce badge.
 function getMyLicenceForTeam(team){
-  if(!myPhone)return null;
-  var lics=getLicences();
-  return lics.find(function(l){
-    if(!l.fiche)return false;
-    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(p){return p.replace(/\s+/g,"");});
-    var myP=myPhone.replace(/\s+/g,"");
-    var phoneMatch=phones.indexOf(myP)>=0;
-    if(!phoneMatch)return false;
-    if(l.categorie&&team.cat&&l.categorie!==team.cat)return false;
-    return true;
-  })||null;
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(!ids.length) return null;
+  var roster=(typeof getRoster==="function")?getRoster():[];
+  var mine=roster.filter(function(p){return ids.indexOf(String(p.id))>=0;});
+  if(!mine.length) return null;
+  var match=(team&&team.cat)?mine.find(function(p){return p.cat===team.cat;}):mine[0];
+  return match?{statut:"validee"}:null;
 }
 
 async function signalerAbsence(eventId){
