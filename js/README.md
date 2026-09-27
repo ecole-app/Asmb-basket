@@ -82,8 +82,9 @@ Toutes les données d'un club vivent sous `clubs/{clubId}/...` dans Firestore.
 `fbCollection(window.fbDb, "players")` : ça cible `clubs/{clubId}/players`.
 Il est donc impossible d'oublier de cloisonner un nouvel appel.
 
-- **Collections globales** (non préfixées) : `users`, `clubs`, `phone_index`,
-  `inscription_codes`. Toute autre collection est une donnée de club.
+- **Collections globales** (non préfixées) : `users`, `clubs`,
+  `inscription_codes`, `club_invites`, `support_grants`. Toute autre
+  collection est une donnée de club.
 - **Sans club actif**, un accès à une donnée de club lève une erreur au lieu
   d'écrire au mauvais endroit (échec volontairement bruyant).
 - **Club actif** : défini à la connexion depuis `users/{uid}.clubId`
@@ -98,9 +99,13 @@ Il est donc impossible d'oublier de cloisonner un nouvel appel.
 - **Sécurité** : la vraie barrière est côté serveur, dans `firestore.rules`
   (à la racine du dépôt, à publier dans la console Firebase). Toute nouvelle
   collection doit y être ajoutée sous `match /clubs/{clubId}`.
-
-**Limite connue** : l'index téléphone (`phone_index`) a une entrée par numéro.
-Un même numéro inscrit dans deux clubs différents n'est rattaché qu'à un seul.
+- **Comptes** : parents et joueurs rejoignent uniquement par invitation
+  (`club_invites`), jamais par numéro de téléphone. Le dirigeant/coach génère
+  le code depuis la fiche licence (parent) ou le parent depuis son espace
+  (joueur) — voir `creerAccesParentDepuisLicence` (`06-licences.js`) et
+  `creerAccesEnfant` (`20-parent-tabs.js`). Le champ `phone` d'un compte
+  parent n'est plus qu'un contact recopié de la fiche : il ne sert plus à se
+  connecter ni n'est exposé publiquement (`phone_index` a été retiré).
 
 ## Niveaux d'accès (plateforme)
 

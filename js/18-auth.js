@@ -2,63 +2,7 @@
 // ═══ AUTHENTIFICATION (comptes réels e-mail/mot de passe) ═══════════
 var BOOTSTRAP_DIRIGEANT_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2"; // compte dirigeant bootstrap (console Firebase)
 var BOOTSTRAP_CLUB_ID = "asmb"; // club d'origine, rattaché au compte bootstrap
-var AUTH_STATE = {}; // état transitoire (numéro saisi, résultat lookup)
-
-function authNormPhone(p){ return (p||"").trim().replace(/\s+/g,""); }
-
 function authEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-// Cherche un numéro dans les données club (localStorage pour l'instant ; Firestore plus tard)
-function authLookupPhoneLocal(phone){
-  var np=authNormPhone(phone);
-  if(!np) return {found:false, phone:np};
-  try{
-    var lics=(typeof getLicences==="function")?getLicences():[];
-    for(var i=0;i<lics.length;i++){
-      var l=lics[i]; if(!l||!l.fiche) continue;
-      var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
-      if(phones.indexOf(np)>=0){
-        var prenom=l.fiche.prenom||"", nom=l.fiche.nom||"";
-        return {found:true, phone:np, role:"parent", clubName:(typeof clubLabel==="function"?clubLabel(""):""), playerIds:[l.id].filter(Boolean), teamIds:[l.fiche.equipe].filter(Boolean)};
-      }
-    }
-  }catch(e){ console.log("lookup licences:",e); }
-  return {found:false, phone:np};
-}
-
-// Repli Firestore (phone_index, lecture publique) : couvre le cas d'un appareil
-// qui n'a jamais eu de cache local synchronise (nouveau telephone).
-function authLookupPhoneRemote(phone){
-  var np=authNormPhone(phone);
-  if(!window.fbDb||!window.fbGetDoc) return Promise.resolve({found:false,phone:np});
-  return window.fbGetDoc(window.fbDoc(window.fbDb,"phone_index",np)).then(function(snap){
-    if(snap && snap.exists()){
-      var d=snap.data();
-      return {found:true, phone:np, role:d.role||"parent", clubName:d.clubName||"", playerIds:d.playerIds||[], teamIds:d.teamIds||[], clubId:d.clubId||null};
-    }
-    return {found:false, phone:np};
-  }).catch(function(){ return {found:false, phone:np}; });
-}
-
-// Multi-club : l'index Firestore fait foi (il connaît le club du numéro).
-// Le cache local n'est plus utilisé ici : sur un appareil partagé, il appartient au
-// dernier club consulté et pourrait rattacher un numéro au mauvais club.
-function authLookupPhone(phone){
-  return authLookupPhoneRemote(phone);
-}
-
-async function authContinue(){
-  var inp=document.getElementById("auth-phone");
-  var phone=authNormPhone(inp?inp.value:"");
-  if(phone.length<6){ alert("Numéro invalide"); return; }
-  AUTH_STATE.phone=phone;
-  var res=await authLookupPhone(phone);
-  AUTH_STATE.lookup=res;
-  if(!res.found){ showAuth("unknown"); return; }
-  // Pas de requête sur la collection users ici (protégée avant connexion).
-  // Si un compte existe déjà, createUser renverra email-already-in-use et on renvoie vers la connexion.
-  showAuth("signup",res);
-}
 
 function authLogoHtml(){
   // Avant connexion aucun club n'est charge : on retombe sur la marque General
@@ -118,32 +62,13 @@ function showAuth(step, data){
   stack=["auth"]; showScr("auth");
   var h="";
   if(step==="entry"){
-    var savedPhone=AUTH_STATE.phone||localStorage.getItem("asmb_phone")||"";
     h=authHero("General Manager","Espace du club")
       +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Saisir le numéro de téléphone pour accéder à l\'espace du club.</p>'
-      +'<label style="'+AUTH_LBL+'">Téléphone</label>'
-      +'<input id="auth-phone" type="tel" inputmode="tel" style="'+AUTH_INP+'" value="'+authEsc(savedPhone)+'" placeholder="06 12 34 56 78">'
-      +'<button style="'+AUTH_BTN+'" onclick="authContinue()">Continuer</button>'
-      +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:18px;cursor:pointer" onclick="showAuth(\'login\')">J\'ai déjà un compte</p>'
-      +'<p style="text-align:center;font-size:12px;color:var(--mut);font-weight:700;margin-top:12px;cursor:pointer;text-decoration:underline" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
+      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Application réservée aux membres du club.</p>'
+      +'<button style="'+AUTH_BTN+'" onclick="showAuth(\'login\')">Se connecter</button>'
+      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e8edf5;border-radius:var(--rx)">Pas encore de compte ? Le club vous envoie un lien d\'invitation pour le créer.</p>'
       +'<div style="flex:1"></div>'
-      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e8edf5;border-radius:var(--rx)">App réservée aux membres. Seuls les numéros déjà enregistrés par le club peuvent créer un compte.</p>'
-      +'</div>';
-  } else if(step==="signup"){
-    var chips="";
-    if(data.clubName){ chips='<div style="margin-top:10px"><span style="font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);border:1px solid rgba(212,175,55,.3)">'+authEsc(data.clubName)+'</span></div>'; }
-    h=authHero("Bienvenue","Numéro reconnu")
-      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px">Ce numéro est rattaché au club.</p>'
-      +chips
-      +'<label style="'+AUTH_LBL+'">E-mail (pour la connexion)</label>'
-      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
-      +'<label style="'+AUTH_LBL+'">Mot de passe (6 caractères min.)</label>'
-      +authPassField("auth-pass","••••••••")
-      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
-      +'<button style="'+AUTH_BTN+'" onclick="authDoSignup()">Créer le compte</button>'
-      +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
+      +'<p style="text-align:center;font-size:12px;color:var(--mut);font-weight:700;margin-top:12px;cursor:pointer;text-decoration:underline" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
       +'</div>';
   } else if(step==="login"){
     var savedEmail=data.email||localStorage.getItem("asmb_last_email")||"";
@@ -183,36 +108,6 @@ function authErr(msg){
   var e=document.getElementById("auth-err");
   if(e){ e.textContent=msg; e.style.display="block"; }
   else alert(msg);
-}
-
-
-function authDoSignup(){
-  var email=(document.getElementById("auth-email")||{}).value||"";
-  var pass=(document.getElementById("auth-pass")||{}).value||"";
-  email=email.trim();
-  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
-  if(pass.length<6){ authErr("Mot de passe : 6 caractères minimum"); return; }
-  var res=AUTH_STATE.lookup||{};
-  if(!res.clubId){ authErr("Ce numéro n'est rattaché à aucun club. Se rapprocher du club."); return; }
-  window.fbCreateUser(window.fbAuth, email, pass).then(function(cred){
-    var uid=cred.user.uid;
-    return window.fbSetDoc(window.fbDoc(window.fbDb,"users",uid), {
-      phone: AUTH_STATE.phone||"",
-      email: email,
-      roles: ["parent"],
-      clubId: res.clubId||null, // club du licencié, fourni par l'index téléphone
-      linkedPlayerIds: res.playerIds||[],
-      linkedTeamIds: res.teamIds||[],
-      createdAt: window.fbServerTimestamp()
-    });
-  }).catch(function(e){
-    var c=e&&e.code||"";
-    if(c==="auth/email-already-in-use") authErr("Cet e-mail a déjà un compte. Utiliser « J'ai déjà un compte ».");
-    else if(c==="auth/weak-password") authErr("Mot de passe trop faible (6 caractères min.)");
-    else if(c==="auth/invalid-email") authErr("E-mail invalide");
-    else authErr("Erreur : "+(c||e.message||"inconnue"));
-  });
-  // la suite (routage) est gérée par onAuthStateChanged
 }
 
 function authDoLogin(){

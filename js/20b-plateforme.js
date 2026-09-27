@@ -114,8 +114,8 @@ function showInviteResult(code, role, clubName){
   var s=gmSheet("Invitation créée");
   var info=document.createElement("div");
   info.style.cssText="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:12px";
-  info.textContent="Envoyez ce lien au "+(role==="dirigeant"?"dirigeant":"coach")+(clubName?" de "+clubName:"")
-    +". Il crée son compte en l'ouvrant. Valable 7 jours, utilisable une seule fois.";
+  info.textContent="Envoyez ce lien "+(role==="dirigeant"?"au dirigeant":role==="coach"?"au coach":role==="parent"?"au parent":"à la personne")+(clubName?" de "+clubName:"")
+    +". Il/elle crée son compte en l'ouvrant. Valable 7 jours, utilisable une seule fois.";
   var box=document.createElement("div");
   box.style.cssText="background:var(--card);border:1.5px dashed var(--bdr);border-radius:var(--rs);padding:12px;font-size:12px;word-break:break-all;color:var(--txt);font-family:monospace";
   box.textContent=link;
@@ -213,8 +213,8 @@ function acceptInvite(code, inv){
     // atomique : une invitation ne peut servir qu'une fois (vérifié par les règles).
     var b=window.fbWriteBatch();
     b.set(window.fbDoc(window.fbDb,"users",cred.user.uid),{
-      email:email, phone:"", roles:[inv.role], clubId:inv.clubId, inviteCode:code,
-      linkedPlayerIds:(inv.playerId?[String(inv.playerId)]:[]), linkedTeamIds:[],
+      email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
+      linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
       createdAt:window.fbServerTimestamp()
     });
     b.update(window.fbDoc(window.fbDb,"club_invites",code),{usedBy:cred.user.uid, usedAt:window.fbServerTimestamp()});

@@ -195,6 +195,12 @@ function initProfile(){
     ouvrirEspaceJoueurRattache(0);
     return;
   }
+  // Le role d'un compte "parent" est deja connu (celui de l'invitation) :
+  // pas besoin de lui faire choisir "Parent" a l'ecran role-select.
+  if(!profile && rolesCompte.length===1 && rolesCompte[0]==="parent"){
+    localStorage.setItem("asmb_profile","parent");
+    profile="parent";
+  }
 
   if(!profile){
     ROOTS.push("role-select");

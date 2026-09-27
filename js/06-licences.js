@@ -2,39 +2,6 @@
 // ═══ SYSTÈME LICENCES ════════════════════════════════════════════
 
 function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){return [];}}
-// ── PHONE_INDEX (lecture publique) : permet a un appareil neuf de retrouver
-// un numero deja connu du club sans etre encore connecte.
-var PHONE_INDEX_PREV={};
-function syncPhoneIndexFromLicences(lics){
-  if(!window.fbDb||!window.fbSetDoc||!window.CURRENT_CLUB_ID) return;
-  var entries={};
-  (lics||[]).forEach(function(l){
-    if(!l||!l.fiche) return;
-    var phones=[l.fiche.telephone,l.fiche.respTel,l.fiche.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
-    var teamIds=[l.fiche.equipe].filter(Boolean);
-    phones.forEach(function(p){
-      if(!p) return;
-      // Pas de nom d'enfant ici : cet index est lisible sans etre connecte, pour
-      // router un numero vers son club avant l'authentification. Le nom du club
-      // suffit a confirmer a la personne qu'elle a saisi le bon numero.
-      if(!entries[p]) entries[p]={role:"parent",playerIds:[],clubName:(typeof clubLabel==="function"?clubLabel(""):""),teamIds:teamIds.slice(),clubId:window.CURRENT_CLUB_ID||null};
-      if(entries[p].playerIds.indexOf(l.id)<0) entries[p].playerIds.push(l.id);
-    });
-  });
-  Object.keys(entries).forEach(function(phone){
-    var s=JSON.stringify(entries[phone]);
-    if(PHONE_INDEX_PREV[phone]!==s){
-      window.fbSetDoc(window.fbDoc(window.fbDb,"phone_index",phone), entries[phone]).catch(function(e){console.log("phone_index write",phone,e);});
-    }
-  });
-  Object.keys(PHONE_INDEX_PREV).forEach(function(phone){
-    if(!(phone in entries) && window.fbDeleteDoc){
-      window.fbDeleteDoc(window.fbDoc(window.fbDb,"phone_index",phone)).catch(function(){});
-    }
-  });
-  PHONE_INDEX_PREV={};
-  Object.keys(entries).forEach(function(p){PHONE_INDEX_PREV[p]=JSON.stringify(entries[p]);});
-}
 // ── INDEX DES CODES D'INSCRIPTION (lecture publique) ──────────────
 // Ne contient QUE : l'id interne de la licence + le type deja choisi.
 // Aucun nom, aucune adresse, aucun contact, aucun document. Sert uniquement
@@ -92,7 +59,7 @@ function lookupInscriptionCode(code, attempt){
   }).catch(function(){ return {found:false, code:code}; });
 }
 
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncPhoneIndexFromLicences(l);syncInscriptionCodes(l);publierRattachements();}
+function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();}
 
 // Dit a chaque numero quelles fiches joueur le concernent. C'est ce qui remplace
 // la recherche d'autrefois, qui parcourait toutes les licences du club pour y
@@ -136,6 +103,56 @@ function publierRattachements(){
       window.fbDeleteDoc(window.fbDoc(window.fbDb,"rattachements",tel)).catch(function(){});
     }
   });
+}
+
+// Memes numeros, memes enfants : reprend la logique de publierRattachements
+// pour trouver quelles fiches joueur repondent a un ou plusieurs numeros
+// (utile pour ouvrir l'acces parent avec, d'emblee, tous ses enfants du club).
+function playerIdsPourTelephones(tels){
+  var norm=(tels||[]).filter(Boolean).map(function(t){return String(t).replace(/\s+/g,"");});
+  if(!norm.length) return [];
+  var players=(typeof getPlayers==="function")?getPlayers():[];
+  var lics=(typeof getLicences==="function")?getLicences():[];
+  var ids={};
+  lics.forEach(function(l){
+    var f=l&&l.fiche; if(!f) return;
+    var lp=[f.telephone,f.respTel,f.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
+    if(!lp.some(function(x){return norm.indexOf(x)>=0;})) return;
+    var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+    if(p) ids[String(p.id)]=true;
+  });
+  players.forEach(function(p){
+    if(p.telEnfant && norm.indexOf(String(p.telEnfant).replace(/\s+/g,""))>=0) ids[String(p.id)]=true;
+  });
+  return Object.keys(ids);
+}
+
+// Le dirigeant/coach ouvre l'acces parent depuis la fiche licence : plus besoin
+// que le parent connaisse ou saisisse un numero de telephone pour creer son
+// compte, le club le fait a sa place au moment ou la licence est validee.
+function creerAccesParentDepuisLicence(code){
+  var lic=getLicences().find(function(l){return l.code===code;});
+  if(!lic||!lic.fiche){ askAlert("Fiche introuvable."); return; }
+  if(!window.fbSetDoc||!window.CURRENT_CLUB_ID){ askAlert("Connexion en cours, réessayez."); return; }
+  var f=lic.fiche;
+  var tels=[f.respTel,f.telephone,f.resp2Tel].filter(Boolean);
+  if(!tels.length){ askAlert("Aucun téléphone sur cette fiche : impossible de savoir à qui donner l'accès."); return; }
+  var playerIds=playerIdsPourTelephones(tels);
+  if(!playerIds.length){ askAlert("Fiche joueur introuvable : validez d'abord la licence."); return; }
+  var code2=genSecureCode(3,4);
+  window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code2),{
+    clubId:window.CURRENT_CLUB_ID, clubName:(typeof clubLabel==="function"?clubLabel(""):""),
+    role:"parent", playerIds:playerIds,
+    // Le contact reste celui deja fourni sur la fiche : le parent n'a rien a
+    // ressaisir, et le rattachement (mesEnfants, ajout d'un futur enfant)
+    // continue de fonctionner comme avant, sans que ce numero serve de
+    // moyen de connexion ni soit expose publiquement (phone_index retire).
+    tel:String(tels[0]).replace(/\s+/g,""), usedBy:null,
+    createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp(),
+    expiresAt:new Date(Date.now()+7*86400000)
+  }).then(function(){
+    showInviteResult(code2,"parent",(typeof clubLabel==="function"?clubLabel(""):""));
+  }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
 }
 
 // ── GESTION DE SAISON (archivage annuel des licences) ──────────────
@@ -438,6 +455,9 @@ function renderLicenceDetail(lic){
   if(lic.fiche){
     actions+='<button onclick="showEditFiche()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(26,46,90,.12);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Modifier la fiche (dirigeant)</button>';
     actions+='<button onclick="addLicenceAsBenevole(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
+  }
+  if(lic.statut==="validee"){
+    actions+='<button onclick="creerAccesParentDepuisLicence(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Créer l\'accès parent</button>';
   }
 
   el.innerHTML=
