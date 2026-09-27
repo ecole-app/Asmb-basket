@@ -12,9 +12,10 @@
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
-.hdr{background:linear-gradient(135deg,#050b16,#10203d);border-bottom:2px solid var(--ltg);padding:22px 18px;text-align:center}
+.hdr{position:relative;background:linear-gradient(135deg,#050b16,#10203d);border-bottom:2px solid var(--ltg);padding:22px 18px;text-align:center}
 .hdr .tag{color:#F2D57E;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .hdr h1{color:#fff;font-size:20px;margin:6px 0 0}
+.back-btn{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px}
 .wrap{max-width:720px;margin:0 auto;padding:24px 18px 60px}
 .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;font-size:12px}
 .nav a{color:var(--mut);text-decoration:none;padding:6px 12px;border-radius:20px;border:1px solid var(--bdr);background:var(--card)}
@@ -36,6 +37,7 @@ th{color:var(--txt);font-weight:700;width:180px}
 </head>
 <body>
 <div class="hdr">
+  <a href="../index.html" class="back-btn" aria-label="Retour à l'application">←</a>
   <div class="tag">General Manager</div>
   <h1>Contrat de sous-traitance</h1>
 </div>
