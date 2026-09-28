@@ -30,6 +30,8 @@ function buildParametres(){
   }
   buildClubStats();
   majApercuLogo();
+  var lpEl=document.getElementById("club-lien-paiement");
+  if(lpEl) lpEl.value=(window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || "";
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
@@ -116,10 +118,33 @@ function retirerLogoClub(){
   });
 }
 
+// ═══ PAIEMENT DES LICENCES (lien externe, ex. HelloAsso) ════════════
+// L'appli ne touche jamais aux fonds : chaque club garde son propre compte
+// HelloAsso (ou equivalent) et ses propres virements. On stocke seulement
+// le lien vers son formulaire, affiche ensuite comme bouton aux familles.
+function enregistrerLienPaiement(){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  var val=(document.getElementById("club-lien-paiement")||{}).value||"";
+  val=val.trim();
+  if(val && !/^https?:\/\//i.test(val)){ askAlert("Le lien doit commencer par http:// ou https://"); return; }
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{lienPaiement:val||null})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.lienPaiement=val||null;
+      askAlert(val?"Lien de paiement enregistré !":"Lien de paiement retiré.");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+
+// Utilise par la fiche licence (06-licences.js) pour afficher (ou non) le
+// bouton "Payer ma licence".
+function clubLienPaiement(){
+  return (window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || null;
+}
+
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",paiement:"Paiement des licences",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };

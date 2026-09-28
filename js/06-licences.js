@@ -457,8 +457,10 @@ function renderLicenceDetail(lic){
           '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:transparent;border:1px solid var(--bdr);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer">Modifier</button>'+
         '</div></div>';
     } else {
+      var lienPaieLic=(typeof clubLienPaiement==="function")?clubLienPaiement():null;
       paiementHtml='<div style="margin-top:12px;background:rgba(232,103,10,.08);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:14px">'+
         '<div style="font-size:13px;font-weight:800;color:#E8670A">⏳ Paiement non enregistré</div>'+
+        (lienPaieLic?'<div style="font-size:11px;color:var(--mut);margin-top:4px">La famille voit un bouton « Payer ma licence » sur son espace, pointant vers votre lien de paiement en ligne.</div>':'')+
         '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
         '</div>';
     }

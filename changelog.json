@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790587905",
+    "titre": "Mise à jour du 28 septembre (7)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouveau réglage « Paiement des licences » : renseignez le lien de votre formulaire HelloAsso (ou équivalent) — vous gardez la main sur votre compte et vos virements." },
+      { "roles": ["parent"], "texte": "Un bouton « Payer ma licence » apparaît sur votre espace tant que le club n'a pas enregistré votre paiement, si le club a activé un lien de paiement en ligne." }
+    ]
+  },
+  {
     "v": "1790587700",
     "titre": "Mise à jour du 28 septembre (6)",
     "points": [

@@ -1035,6 +1035,13 @@
  <button id="club-logo-retirer" onclick="retirerLogoClub()" style="display:none;width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;font-weight:700;border:none;cursor:pointer">Retirer le logo</button>
  </div>
  </div>
+ <div class="param-block" data-sec="paiement"><div class="sec">Paiement des licences</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Collez ici le lien de votre formulaire d'adhésion en ligne (HelloAsso, ou tout autre service de paiement associatif). Un bouton « Payer ma licence » apparaîtra alors sur la fiche licence de chaque famille. Vous gérez vous-même votre compte et vos virements sur leur plateforme — l'appli se contente d'afficher le lien.</div>
+ <div class="form-group"><label class="form-label">Lien de paiement</label><input class="form-input" id="club-lien-paiement" placeholder="https://www.helloasso.com/associations/..."></div>
+ <button onclick="enregistrerLienPaiement()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
+ </div>
+ </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>

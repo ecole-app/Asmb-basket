@@ -1010,10 +1010,18 @@ function buildParentHome(){
   if(myLic){
     var licColors={"validee":"#D4AF37","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#7a8caa"};
     var licLabels={"validee":"Licence validée","recue":"Fiche reçue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche à compléter"};
-    licBadge='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
+    // Si le club a renseigné un lien de paiement (HelloAsso...) et que le
+    // paiement de CETTE licence n'est pas encore enregistre par le dirigeant,
+    // le badge devient un lien direct vers ce formulaire -- le parent n'a
+    // pas a chercher ou le club encaisse ses cotisations.
+    var lienPaie=(typeof clubLienPaiement==="function")?clubLienPaiement():null;
+    var peutPayer=lienPaie && !myLic.paiement;
+    var tag=peutPayer?"a":"div";
+    var extraAttrs=peutPayer?(' href="'+lienPaie+'" target="_blank" rel="noopener"'):"";
+    licBadge='<'+tag+extraAttrs+' style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow);text-decoration:none;display:block">'+
       '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
-      '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(licLabels[myLic.statut]||"Licence")+'</div>'+
-    '</div>';
+      '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(peutPayer?"💳 Payer ma licence":(licLabels[myLic.statut]||"Licence"))+'</div>'+
+    '</'+tag+'>';
   }
   summaryEl.innerHTML='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:18px;font-weight:900;color:var(--dkg)">'+matchesPlayed+'</div>'+
