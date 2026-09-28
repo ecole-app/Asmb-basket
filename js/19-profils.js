@@ -694,10 +694,13 @@ function navToCoach(which){
 }
 
 function refreshHeaderProfileBtn(){
-  var prof=localStorage.getItem("asmb_profile")||"";
-  var isStaff=prof==="coach"||prof==="dirigeant";
+  // Le bouton doit rester visible tant que le compte a plusieurs profils
+  // possibles (dirigeant/coach/parent...), quel que soit celui affiché
+  // actuellement — sinon un dirigeant qui teste la vue "parent" se
+  // retrouve coincé sans moyen de revenir en arrière.
+  var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
   var pb=document.getElementById("hdr-profile-btn");
-  if(pb)pb.style.display=isStaff?"flex":"none";
+  if(pb)pb.style.display=(roles.length>=2)?"flex":"none";
 }
 
 function logoutUser(){

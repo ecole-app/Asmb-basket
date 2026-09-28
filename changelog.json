@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790619896",
+    "titre": "Mise à jour du 28 septembre (14)",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Correction : le bouton pour changer de profil (dirigeant/coach/parent) disparaissait une fois basculé en vue parent, ce qui bloquait le retour en dirigeant." }
+    ]
+  },
+  {
     "v": "1790619600",
     "titre": "Mise à jour du 28 septembre (13)",
     "points": [
