@@ -25,7 +25,7 @@ var EVENT_TYPE_LABELS={"match":"Match","entrainement":"Entraînement","tournoi":
 function eventTypeColor(type){ return EVENT_TYPE_COLORS[type]||"#8E44AD"; }
 function eventTypeLabel(type){ return EVENT_TYPE_LABELS[type]||(type?type.charAt(0).toUpperCase()+type.slice(1):"Événement"); }
 
-var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","team-picker","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","tutoriel","joueur","plateforme","club-suspendu"];
+var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","tutoriel","joueur","plateforme","club-suspendu"];
 
 function showScr(id){
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});

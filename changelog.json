@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790618812",
+    "titre": "Mise à jour du 28 septembre (11)",
+    "points": [
+      { "roles": ["coach", "parent"], "texte": "Correction : le bouton retour était masqué sur l'écran de sélection d'équipe (ex : « Modifier mon équipe » depuis les réglages coach), on ne pouvait plus revenir en arrière." }
+    ]
+  },
+  {
     "v": "1790618311",
     "titre": "Mise à jour du 28 septembre (10)",
     "points": [
