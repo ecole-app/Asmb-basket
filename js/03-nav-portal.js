@@ -307,6 +307,14 @@ function buildDashboard(){
       '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
   }
 
+  var homonymes=(typeof detecterHomonymes==="function")?detecterHomonymes():[];
+  if(homonymes.length){
+    var noms=homonymes.map(function(g){return g[0].prenom+" "+g[0].nom+" ("+g.length+")";}).join(", ");
+    html='<div onclick="showLicenciesList()" style="cursor:pointer;margin-bottom:10px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
+      '<div style="font-size:11.5px;font-weight:700;color:#E8670A">⚠️ '+homonymes.length+' homonyme'+(homonymes.length>1?"s":"")+' détecté'+(homonymes.length>1?"s":"")+' dans les licenciés</div>'+
+      '<div style="font-size:10.5px;color:var(--mut);margin-top:3px">'+noms+' — vérifiez que les rattachements (photo, téléphone, accès parent) correspondent à la bonne personne.</div></div>'+html;
+  }
+
   el.innerHTML=html;
 
   fillTodayHero("portal-next-event","portal-no-event",null);

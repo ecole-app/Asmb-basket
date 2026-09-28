@@ -11,6 +11,22 @@ function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences
 function normNomPrenom(s){
   return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().replace(/\s+/g," ").toLowerCase();
 }
+// Deux joueurs du club avec le meme nom/prenom (une fois normalises) sont
+// indiscernables pour le rattachement automatique licence <-> joueur (voir
+// normNomPrenom ci-dessus) : celui-ci prendra toujours le premier trouve.
+// Sert a avertir le dirigeant plutot qu'a laisser un rattachement silencieux
+// et potentiellement faux passer inapercu.
+function detecterHomonymes(){
+  var players=(typeof getPlayers==="function")?getPlayers():[];
+  var groupes={};
+  players.forEach(function(p){
+    var key=normNomPrenom(p.prenom)+"|"+normNomPrenom(p.nom);
+    if(!key.trim().replace(/\|/g,""))return;
+    if(!groupes[key])groupes[key]=[];
+    groupes[key].push(p);
+  });
+  return Object.keys(groupes).filter(function(k){return groupes[k].length>1;}).map(function(k){return groupes[k];});
+}
 // ── INDEX DES CODES D'INSCRIPTION (lecture publique) ──────────────
 // Ne contient QUE : l'id interne de la licence + le type deja choisi.
 // Aucun nom, aucune adresse, aucun contact, aucun document. Sert uniquement
