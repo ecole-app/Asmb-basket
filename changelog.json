@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790628294",
+    "titre": "Mise à jour du 28 septembre (16)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouvelle carte « Évolution de l'assiduité » sur le tableau de bord : courbe de présence par semaine (sur les vraies données enregistrées), dans le style cartes arrondies avec les couleurs du club." },
+      { "roles": ["dirigeant"], "texte": "La carte « Prochain événement » a désormais une icône, à la manière des applis de gestion de club." }
+    ]
+  },
+  {
     "v": "1790619994",
     "titre": "Mise à jour du 28 septembre (15)",
     "points": [

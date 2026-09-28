@@ -301,11 +301,16 @@ function buildDashboard(){
     var upcomingLabel=typeLabels[upcoming.type]||"Prochain événement";
     var upDateParts=upcoming.date.split("-");
     var upDateFr=upDateParts.length===3?(upDateParts[2]+"/"+upDateParts[1]+"/"+upDateParts[0]):upcoming.date;
-    html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
-      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+upcomingLabel+'</div>'+
-      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
+    html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;gap:12px">'+
+      '<div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--dkg),#2a4680);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+upcomingLabel+'</div>'+
+        '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
+        '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div></div>';
   }
+
+  html+=buildAssiduiteChartCard();
 
   var homonymes=(typeof detecterHomonymes==="function")?detecterHomonymes():[];
   if(homonymes.length){
@@ -318,6 +323,58 @@ function buildDashboard(){
   el.innerHTML=html;
 
   fillTodayHero("portal-next-event","portal-no-event",null);
+}
+
+// Carte "Évolution de l'assiduité" : % de présence par semaine sur les 8
+// dernières semaines, calculé à partir des vraies présences enregistrées
+// (jamais de données inventées : si moins de 2 semaines ont des données,
+// on affiche un état vide plutôt qu'un graphique trompeur).
+function assiduiteHebdo(nbSemaines){
+  var events=getEvents().filter(function(e){return e.presences&&Object.keys(e.presences).length;});
+  var now=new Date();
+  var jour=now.getDay()||7; // lundi=1 ... dimanche=7
+  var lundiCourant=new Date(now);lundiCourant.setDate(now.getDate()-jour+1);lundiCourant.setHours(0,0,0,0);
+  var semaines=[];
+  for(var i=nbSemaines-1;i>=0;i--){
+    var deb=new Date(lundiCourant);deb.setDate(lundiCourant.getDate()-i*7);
+    var fin=new Date(deb);fin.setDate(deb.getDate()+6);
+    var numSemaine=Math.ceil((((deb-new Date(deb.getFullYear(),0,1))/86400000)+new Date(deb.getFullYear(),0,1).getDay()+1)/7);
+    semaines.push({deb:deb,fin:fin,num:numSemaine,present:0,total:0});
+  }
+  events.forEach(function(e){
+    var ed=new Date(e.date+"T00:00:00");
+    semaines.forEach(function(s){
+      if(ed>=s.deb&&ed<=s.fin){
+        Object.keys(e.presences).forEach(function(k){s.total++;if(e.presences[k]==="present")s.present++;});
+      }
+    });
+  });
+  return semaines.map(function(s){return {num:s.num,pct:s.total?Math.round(s.present/s.total*100):null};});
+}
+
+function buildAssiduiteChartCard(){
+  var pts=assiduiteHebdo(8).filter(function(p){return p.pct!==null;});
+  var card='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:16px">'+
+    '<div style="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px">Évolution de l\'assiduité</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-bottom:10px">% de présence par semaine</div>';
+  if(pts.length<2){
+    card+='<div style="text-align:center;padding:18px 10px;font-size:11.5px;color:var(--mut);font-style:italic">Pas assez d\'historique pour tracer une courbe</div>';
+  } else {
+    var w=320,h=84,n=pts.length;
+    var coords=pts.map(function(p,i){return {x:n>1?(i/(n-1))*w:0,y:h-(p.pct/100*h)};});
+    var poly=coords.map(function(c){return c.x.toFixed(1)+","+c.y.toFixed(1);}).join(" ");
+    var area=poly+" "+w+","+h+" 0,"+h;
+    var last=coords[coords.length-1];
+    card+='<svg width="100%" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+
+      '<polygon points="'+area+'" fill="var(--dkg)" opacity=".08"/>'+
+      '<polyline points="'+poly+'" fill="none" stroke="var(--dkg)" stroke-width="2.5"/>'+
+      '<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="4.5" fill="#D4AF37"/>'+
+      '</svg>'+
+      '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-top:4px">'+
+      '<span>Sem. '+pts[0].num+'</span><span>Sem. '+pts[pts.length-1].num+'</span></div>';
+  }
+  card+='</div>';
+  return card;
 }
 
 function fillTodayHero(eventElId,noEventElId,teamFilter,fallbackLine1,fallbackLine2){
