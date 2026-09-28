@@ -65,7 +65,7 @@ function savePresences(){
   saveEvents(events);
   closeModal("modal-presence");
   buildPlanning();
-  askAlert("Présences enregistrées !");
+  showToast("Présences enregistrées !");
 }
 
 // ═══ BROADCAST EMAIL ═════════════════════════════════════════════

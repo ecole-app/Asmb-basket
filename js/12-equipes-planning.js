@@ -424,7 +424,21 @@ async function showAddTeam(){
   ensureTeamChannel(newTeam);
   buildTeams();buildAdminHome();
 }
-function deleteTeam(id){askConfirm("Supprimer cette équipe ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var teams=getTeams().filter(function(t){return t.id!==id;});saveTeams(teams);buildTeams();buildAdminHome();});}
+function deleteTeam(id){
+  askConfirm("Supprimer cette équipe ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var all=getTeams();
+    var removed=all.find(function(t){return t.id===id;});
+    var teams=all.filter(function(t){return t.id!==id;});
+    saveTeams(teams);buildTeams();buildAdminHome();
+    if(!removed)return;
+    showUndoToast("Équipe « "+(removed.name||"")+" » supprimée",function(){
+      var cur=getTeams();
+      cur.push(removed);
+      saveTeams(cur);buildTeams();buildAdminHome();
+    });
+  });
+}
 
 // ── PLANNING ─────────────────────────────────────────────────────
 function getEvents(){try{return JSON.parse(localStorage.getItem("asmb_events")||"[]");}catch(e){return [];}}

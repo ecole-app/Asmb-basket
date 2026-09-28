@@ -51,7 +51,7 @@ function setMatchFilter(cat){
 
 function buildMatchList(){
   var content=document.getElementById("match-list-content");
-  content.innerHTML='<div style="text-align:center;padding:30px;font-size:12px;color:var(--mut)">Chargement...</div>';
+  content.innerHTML=loadingHtml();
   fetchEventsFromCloud().then(function(events){
     var matches=events.filter(function(e){return e.type==="match"&&!e.cancelled;});
     if(matchFilterCat!=="all"){
@@ -510,7 +510,7 @@ function openGalerie(){
 function buildGalerie(){
   var el=document.getElementById("galerie-grid");if(!el)return;
   if(!window.fbReady){
-    el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;font-size:12px;color:var(--mut)">Chargement...</div>';
+    el.innerHTML=loadingHtml();
     window.addEventListener("fb-ready",function(){buildGalerie();},{once:true});
     return;
   }
@@ -862,7 +862,7 @@ function loadDemoEventsConfirmed(){
  });
 
  saveEvents(events);
- askAlert("Entraînements fictifs ajoutés pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
+ showToast("Entraînements fictifs ajoutés pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
  buildAdminHome();
 }
 
@@ -886,7 +886,7 @@ function clearDemoData(){
      if(allEvals[evId]){ delete allEvals[evId]; evalsChanged=true; }
    });
    if(evalsChanged) saveAllEvaluations(allEvals);
-   askAlert("Données de démo supprimées.");
+   showToast("Données de démo supprimées.");
    buildAdminHome();
  });
 }

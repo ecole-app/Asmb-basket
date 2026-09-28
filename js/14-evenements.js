@@ -284,12 +284,31 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
       text:msg,pseudo:clubPseudo("Admin"),ts:window.fbServerTimestamp()
     });
-    askAlert("Événement créé et annonce envoyée dans le canal !");
+    showToast("Événement créé et annonce envoyée dans le canal !");
   } else {
-    askAlert("Événement créé !");
+    showToast("Événement créé !");
   }
 }
-function deleteEvent(id){askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();});}
+function deleteEvent(id){
+  askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var all=getEvents();
+    var removed=all.find(function(e){return e.id===id;});
+    var events=all.filter(function(e){return e.id!==id;});
+    saveEvents(events);
+    buildPlanning();buildAdminHome();buildRealEventsList();
+    if(!removed)return;
+    // L'evenement reste supprime tout de suite (coherent avec le reste de
+    // l'appli), mais reste rattrapable une poignee de secondes : les erreurs
+    // de clic sont frequentes sur mobile et une suppression est definitive.
+    showUndoToast("Événement « "+(removed.titre||"")+" » supprimé",function(){
+      var cur=getEvents();
+      cur.push(removed);
+      saveEvents(cur);
+      buildPlanning();buildAdminHome();buildRealEventsList();
+    });
+  });
+}
 
 // ── ACCES AUTOMATIQUE AU CANAL POUR LES EQUIPES SELECTIONNEES (point 6) ──
 function grantEventChannelAccess(eventObj){
@@ -496,7 +515,7 @@ async function editEventDateTime(eventId){
       text:"<b>Créneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    askAlert("Créneau modifié, alerte envoyée dans le canal.");
+    showToast("Créneau modifié, alerte envoyée dans le canal.");
   }
 }
 async function editScore(eventId){
@@ -586,7 +605,7 @@ function saveConvocation(){
       type:"convocation",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventHeure:ev.heure||"",eventLieu:ev.lieu||"",
       players:convocPlayers,responses:{},pseudo:clubPseudo("Convocation"),ts:window.fbServerTimestamp()
     });
-    askAlert("Convocation envoyée dans le canal !");
+    showToast("Convocation envoyée dans le canal !");
   } else {
     askAlert("Convocation enregistrée (pas de connexion pour notifier)");
   }

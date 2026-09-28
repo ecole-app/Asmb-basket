@@ -402,7 +402,21 @@ function handleFiles(files){
     docs.push({id:Date.now().toString()+Math.random(),name:file.name,type:type,size:size,date:new Date().toLocaleDateString("fr-FR"),desc:"",category:pendingDocCategory});
   });
   saveDocs(docs);buildDocs();buildAdminHome();
-  askAlert(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
+  showToast(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
 }
-function deleteDoc(id){askConfirm("Supprimer ce document ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var docs=getDocs().filter(function(d){return d.id!==id;});saveDocs(docs);buildDocs();buildAdminHome();});}
+function deleteDoc(id){
+  askConfirm("Supprimer ce document ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+    if(!ok)return;
+    var all=getDocs();
+    var removed=all.find(function(d){return d.id===id;});
+    var docs=all.filter(function(d){return d.id!==id;});
+    saveDocs(docs);buildDocs();buildAdminHome();
+    if(!removed)return;
+    showUndoToast("Document « "+(removed.name||"")+" » supprimé",function(){
+      var cur=getDocs();
+      cur.push(removed);
+      saveDocs(cur);buildDocs();buildAdminHome();
+    });
+  });
+}
 

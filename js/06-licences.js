@@ -801,7 +801,7 @@ function saveEditedFiche(){
   closeModal("modal-edit-fiche");
   renderLicenceDetail(lics[idx]);
   buildLicences();
-  askAlert("Fiche mise à jour !");
+  showToast("Fiche mise à jour !");
 }
 
 function copyCode(code){

@@ -167,7 +167,7 @@ function buildCoachDashboard(el){
   var dp=upcoming.date.split("-");
   var dateFr=dp.length===3?(dp[2]+"/"+dp[1]+"/"+dp[0]):upcoming.date;
 
-  el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:12px;color:var(--mut)">Chargement des présences…</div></div>';
+  el.innerHTML=loadingHtml("Chargement des présences…");
 
   if(!window.fbReady){window.addEventListener("fb-ready",function(){buildCoachDashboard(el);},{once:true});return;}
 
@@ -231,7 +231,7 @@ function relancerSansReponse(eventId){
     var responded={};
     snap.forEach(function(d){var data=d.data();if(data.eventId===eventId)responded[data.playerId]=true;});
     var noResponse=players.filter(function(p){return !responded[p.id];});
-    if(!noResponse.length){askAlert("Tout le monde a répondu !");buildCoachDashboard();return;}
+    if(!noResponse.length){showToast("Tout le monde a répondu !");buildCoachDashboard();return;}
     var noms=noResponse.map(function(p){return p.prenom+" "+p.nom;}).join(", ");
     var channelId=findChannelForTeamText(ev.equipe);
     if(!channelId){askAlert("Aucun canal trouvé pour cette équipe");return;}
@@ -239,7 +239,7 @@ function relancerSansReponse(eventId){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       text:msg,pseudo:clubPseudo("Coach"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     }).then(function(){
-      askAlert("Relance envoyée dans le canal !");
+      showToast("Relance envoyée dans le canal !");
     }).catch(function(e){
       askAlert("La relance n'a pas pu être envoyée : "+((e&&e.code)||e));
     });

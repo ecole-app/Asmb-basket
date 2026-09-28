@@ -131,7 +131,7 @@ function enregistrerLienPaiement(){
   window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{lienPaiement:val||null})
     .then(function(){
       if(window.CURRENT_CLUB) window.CURRENT_CLUB.lienPaiement=val||null;
-      askAlert(val?"Lien de paiement enregistré !":"Lien de paiement retiré.");
+      showToast(val?"Lien de paiement enregistré !":"Lien de paiement retiré.");
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
 }
 

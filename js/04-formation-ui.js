@@ -4,6 +4,8 @@ var licenciesSortMode="nom";
 
 function showLicenciesList(){
   document.getElementById("modal-licencies-list").style.display="flex";
+  var searchEl=document.getElementById("licencies-search");
+  if(searchEl)searchEl.value="";
   sortLicenciesList("nom");
 }
 
@@ -12,6 +14,13 @@ function sortLicenciesList(mode){
   document.querySelectorAll("#modal-licencies-list .cat-filter").forEach(function(b){b.classList.remove("on");});
   document.getElementById("sortby-"+mode).classList.add("on");
   var players=getPlayers().slice();
+  var searchEl=document.getElementById("licencies-search");
+  var q=searchEl?normNomPrenom(searchEl.value):"";
+  if(q){
+    players=players.filter(function(p){
+      return (normNomPrenom(p.prenom)+" "+normNomPrenom(p.nom)).indexOf(q)>=0;
+    });
+  }
   players.sort(function(a,b){
     if(mode==="nom")return (a.nom||"").localeCompare(b.nom||"");
     if(mode==="naissance")return (a.naissance||"").localeCompare(b.naissance||"");
@@ -19,12 +28,12 @@ function sortLicenciesList(mode){
     return 0;
   });
   var el=document.getElementById("licencies-list-content");
-  if(!players.length){el.innerHTML='<div class="empty-state"><div>Aucun licencié</div></div>';return;}
+  if(!players.length){el.innerHTML='<div class="empty-state"><div>'+(q?"Aucun résultat":"Aucun licencié")+'</div></div>';return;}
   el.innerHTML="";
   players.forEach(function(p){
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+'</div></div>'+
+    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+'</div></div>'+
       '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"#D4AF37":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
     el.appendChild(div);
   });
@@ -508,7 +517,7 @@ async function openVacancesEdit(){
   }
   saveVacancesOverride(out);
   buildU13Home();
-  askAlert("Dates du club enregistrées.");
+  showToast("Dates du club enregistrées.");
 }
 
 // ── REGLEMENT DE LA CATEGORIE ───────────────────────────────────────
@@ -576,7 +585,7 @@ async function openReglementEdit(){
   all[activeCatId]=out;
   saveReglementOverrides(all);
   buildReglement();
-  askAlert("Règlement enregistré pour "+(cat.name||activeCatId)+".");
+  showToast("Règlement enregistré pour "+(cat.name||activeCatId)+".");
 }
 
 // Retour aux reperes nationaux pour la categorie affichee.

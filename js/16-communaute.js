@@ -217,7 +217,7 @@ async function deleteChannel(id,name){
  }
  // Supprime le canal lui-meme
  await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",id));
- askAlert("Canal supprimé");
+ showToast("Canal supprimé");
 }
 
 function openChannelDetail(ch){

@@ -1,5 +1,15 @@
 [
   {
+    "v": "1790588575",
+    "titre": "Mise à jour du 28 septembre (9)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Recherche par nom dans la liste des licenciés." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les confirmations anodines (présences enregistrées, message envoyé...) s'affichent maintenant en petit message discret au lieu d'une fenêtre à fermer." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les écrans de chargement affichent une petite animation au lieu d'un texte figé." },
+      { "roles": ["dirigeant"], "texte": "Supprimer un événement, un joueur, une équipe ou un document propose désormais quelques secondes pour annuler." }
+    ]
+  },
+  {
     "v": "1790588263",
     "titre": "Mise à jour du 28 septembre (8)",
     "points": [

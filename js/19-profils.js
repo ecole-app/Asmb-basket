@@ -416,7 +416,7 @@ function openJoueurSettings(){
 
 function buildJoueurScreen(player){
   var el=document.getElementById("joueur-content");
-  el.innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:13px;color:var(--mut)">Chargement...</div></div>';
+  el.innerHTML=loadingHtml();
 
   fetchEventsFromCloud().then(function(events){
     var todayStr=new Date().toISOString().slice(0,10);

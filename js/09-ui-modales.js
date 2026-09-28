@@ -113,6 +113,66 @@ function askAlert(message, opts){
 // Remplace l'alert() natif du navigateur par la modale maison (non bloquant, ne change pas le flux existant)
 window.alert = function(message){ askAlert(message); };
 
+// loadingHtml(label) : indicateur de chargement homogene (petit rond qui tourne),
+// a mettre a la place du texte "Chargement..." brut -- meme apparence partout
+// dans l'appli plutot qu'un texte statique qui donne l'impression que l'ecran
+// est fige.
+function loadingHtml(label){
+  return '<div style="text-align:center;padding:30px 10px"><div class="loader-spin"></div><div style="font-size:12px;color:var(--mut)">'+(label||"Chargement...")+'</div></div>';
+}
+
+// showToast(message) : petite confirmation qui disparait toute seule, pour les
+// actions anodines/reussies ("Enregistré !") qui n'ont pas besoin qu'on clique
+// OK pour continuer -- contrairement a askAlert(), reservee aux messages que
+// la personne doit lire et acquitter (erreurs, informations importantes).
+var TOAST_STACK_EL=null;
+function showToast(message){
+  if(!TOAST_STACK_EL){
+    TOAST_STACK_EL=document.createElement("div");
+    TOAST_STACK_EL.id="toast-stack";
+    TOAST_STACK_EL.style.cssText="position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:600;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px";
+    document.body.appendChild(TOAST_STACK_EL);
+  }
+  var t=document.createElement("div");
+  t.textContent=String(message);
+  t.style.cssText="background:rgba(20,20,20,.92);color:#fff;font-size:12.5px;font-weight:600;padding:11px 18px;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:min(90vw,360px);text-align:center;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s";
+  TOAST_STACK_EL.appendChild(t);
+  requestAnimationFrame(function(){ t.style.opacity="1"; t.style.transform="translateY(0)"; });
+  setTimeout(function(){
+    t.style.opacity="0"; t.style.transform="translateY(8px)";
+    setTimeout(function(){ t.remove(); },220);
+  },2400);
+}
+
+// showUndoToast(message, undoFn) : comme showToast, mais avec un bouton
+// "Annuler" et reste affiche un peu plus longtemps -- pour les suppressions,
+// ou une fausse manipulation (frequente sur mobile) doit rester rattrapable
+// quelques secondes sans passer par une boite de confirmation supplementaire.
+function showUndoToast(message,undoFn){
+  if(!TOAST_STACK_EL){
+    TOAST_STACK_EL=document.createElement("div");
+    TOAST_STACK_EL.id="toast-stack";
+    TOAST_STACK_EL.style.cssText="position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:600;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px";
+    document.body.appendChild(TOAST_STACK_EL);
+  }
+  var t=document.createElement("div");
+  t.style.cssText="background:rgba(20,20,20,.92);color:#fff;font-size:12.5px;font-weight:600;padding:9px 9px 9px 16px;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:min(90vw,360px);display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:auto";
+  var span=document.createElement("span");span.textContent=String(message);span.style.cssText="flex:1";
+  var btn=document.createElement("button");btn.textContent="Annuler";
+  btn.style.cssText="background:none;border:none;color:#F2D57E;font-size:12.5px;font-weight:800;cursor:pointer;padding:6px 8px;flex-shrink:0";
+  var done=false;
+  function dismiss(){
+    if(done)return; done=true;
+    t.style.opacity="0"; t.style.transform="translateY(8px)";
+    setTimeout(function(){ t.remove(); },220);
+  }
+  btn.addEventListener("click",function(){ if(done)return; done=true; if(undoFn)undoFn(); dismiss(); });
+  t.appendChild(span);t.appendChild(btn);
+  TOAST_STACK_EL.appendChild(t);
+  requestAnimationFrame(function(){ t.style.opacity="1"; t.style.transform="translateY(0)"; });
+  setTimeout(dismiss,5000);
+}
+
 function authConfirmLogout(){
   askConfirm("Se déconnecter de l'application ?", {title:"Déconnexion", confirmText:"Se déconnecter"}).then(function(ok){
     if(ok) authLogout();

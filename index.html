@@ -73,6 +73,7 @@
       <div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les licenciés</div>
       <button onclick="closeModal('modal-licencies-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
     </div>
+    <input id="licencies-search" type="search" placeholder="Rechercher un joueur..." oninput="sortLicenciesList(licenciesSortMode)" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box;margin-bottom:10px">
     <div style="display:flex;gap:6px;margin-bottom:12px">
       <button class="cat-filter on" onclick="sortLicenciesList('nom')" id="sortby-nom">Nom</button>
       <button class="cat-filter" onclick="sortLicenciesList('naissance')" id="sortby-naissance">Naissance</button>
@@ -626,7 +627,7 @@
     </div>
     <div class="sec">Canaux</div>
     <div id="channel-list" style="padding-bottom:80px">
-      <div class="empty-state"><div style="font-size:13px;font-weight:600">Chargement...</div></div>
+      <div style="text-align:center;padding:30px 10px"><div class="loader-spin"></div><div style="font-size:12px;color:var(--mut)">Chargement...</div></div>
     </div>
   </div>
 

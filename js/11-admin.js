@@ -1027,8 +1027,16 @@ function sendNoteFraisMail(n){
 function deletePlayer(id){
   askConfirm("Supprimer ce joueur ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    var players=getPlayers().filter(function(p){return p.id!==id;});
+    var all=getPlayers();
+    var removed=all.find(function(p){return p.id===id;});
+    var players=all.filter(function(p){return p.id!==id;});
     savePlayers(players);renderPlayers();buildAdminHome();
+    if(!removed)return;
+    showUndoToast("Joueur « "+(removed.prenom||"")+" "+(removed.nom||"")+" » supprimé",function(){
+      var cur=getPlayers();
+      cur.push(removed);
+      savePlayers(cur);renderPlayers();buildAdminHome();
+    });
   });
 }
 
