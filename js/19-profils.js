@@ -1271,6 +1271,7 @@ function quitterEquipeParent(){
     if(!ok)return;
     var ids=getParentTeams().filter(function(id){return id!==activeId;});
     saveParentTeamsList(ids);
+    notifierDepartEquipe(team);
     showToast("Vous avez quitté "+nom+".");
     if(ids.length){
       setActiveTeamId(ids[0]);
@@ -1280,6 +1281,20 @@ function quitterEquipeParent(){
       openTeamPicker();
     }
   });
+}
+
+// Prévient le coach et le dirigeant dans le canal de l'équipe : un simple
+// message, comme une relance ou une convocation, pour qu'ils le voient
+// là où ils regardent déjà (canal de l'équipe + espace admin).
+function notifierDepartEquipe(team){
+  if(!team || !window.fbReady) return;
+  var enfants=(typeof getParentChildren==="function")?getParentChildren():[];
+  var qui=enfants.length?("Le parent de "+enfants.map(function(p){return p.prenom+" "+p.nom;}).join(" et ")):"Un parent";
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",team.id,"messages"),{
+    text:qui+" ne suit plus l'équipe "+team.name+".",
+    pseudo:"Système",
+    ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+  }).catch(function(e){ console.log("notifierDepartEquipe:",e&&e.code); });
 }
 
 // ── COACH EQUIPE TAB (restreinte a sa seule équipe) ────────────────

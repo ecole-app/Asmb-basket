@@ -1,9 +1,10 @@
 [
   {
-    "v": "1790628724",
+    "v": "1790628783",
     "titre": "Mise à jour du 28 septembre (17)",
     "points": [
-      { "roles": ["parent"], "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant." }
+      { "roles": ["parent"], "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant." },
+      { "roles": ["dirigeant", "coach"], "texte": "Un message est posté dans le canal de l'équipe quand un parent quitte le suivi, pour que coach et dirigeant le voient." }
     ]
   },
   {
