@@ -1259,6 +1259,29 @@ function buildParentEquipe(){
   });
 }
 
+// Un parent peut suivre plusieurs équipes (asmb_parent_teams) ; "quitter"
+// ne touche jamais à l'effectif officiel (géré par le dirigeant), ça retire
+// juste l'équipe de la liste suivie par ce parent sur cet appareil.
+function quitterEquipeParent(){
+  var activeId=getActiveTeamId();
+  if(!activeId)return;
+  var team=getTeams().find(function(t){return t.id===activeId;});
+  var nom=team?team.name:"cette équipe";
+  askConfirm("Vous ne verrez plus les événements et messages de "+nom+". Vous pourrez la suivre à nouveau depuis « Mes équipes ».",{title:"Quitter "+nom+" ?",danger:true,confirmText:"Quitter"}).then(function(ok){
+    if(!ok)return;
+    var ids=getParentTeams().filter(function(id){return id!==activeId;});
+    saveParentTeamsList(ids);
+    showToast("Vous avez quitté "+nom+".");
+    if(ids.length){
+      setActiveTeamId(ids[0]);
+      navToParent("equipe");
+    } else {
+      localStorage.removeItem("asmb_parent_active_team");
+      openTeamPicker();
+    }
+  });
+}
+
 // ── COACH EQUIPE TAB (restreinte a sa seule équipe) ────────────────
 function buildCoachEquipe(){
   var myTeamIds=getCoachTeams();

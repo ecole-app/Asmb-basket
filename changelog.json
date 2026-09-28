@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790628724",
+    "titre": "Mise à jour du 28 septembre (17)",
+    "points": [
+      { "roles": ["parent"], "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant." }
+    ]
+  },
+  {
     "v": "1790628294",
     "titre": "Mise à jour du 28 septembre (16)",
     "points": [
