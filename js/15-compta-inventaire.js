@@ -140,8 +140,8 @@ function showAddComptaLine(editId){
 function saveComptaLine(){
   var date=document.getElementById("cl-date").value;
   var montant=parseFloat(document.getElementById("cl-montant").value);
-  if(!date){alert("Date obligatoire");return;}
-  if(!montant||montant<=0){alert("Montant invalide");return;}
+  if(!date){askAlert("Date obligatoire");return;}
+  if(!montant||montant<=0){askAlert("Montant invalide");return;}
   var lines=getComptabilite();
   var data={
     date:date, montant:montant, type:comptaCurrentType,
@@ -173,7 +173,7 @@ async function deleteComptaLine(){
 }
 function exportComptaCsv(){
   var lines=comptaFilteredList();
-  if(!lines.length){alert("Aucune ligne à exporter.");return;}
+  if(!lines.length){askAlert("Aucune ligne à exporter.");return;}
   var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Référence"];
   var rows=lines.map(function(l){
     return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",l.reference||""]
@@ -312,7 +312,7 @@ function showEditInvItem(id){
 }
 function saveInvItem(){
   var nom=document.getElementById("inv-nom").value.trim();
-  if(!nom){alert("Le nom de l'article est obligatoire");return;}
+  if(!nom){askAlert("Le nom de l'article est obligatoire");return;}
   var qte=parseInt(document.getElementById("inv-qte").value,10)||0;
   var seuilRaw=document.getElementById("inv-seuil").value;
   var data={
@@ -402,7 +402,7 @@ function handleFiles(files){
     docs.push({id:Date.now().toString()+Math.random(),name:file.name,type:type,size:size,date:new Date().toLocaleDateString("fr-FR"),desc:"",category:pendingDocCategory});
   });
   saveDocs(docs);buildDocs();buildAdminHome();
-  alert(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
+  askAlert(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
 }
 function deleteDoc(id){askConfirm("Supprimer ce document ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var docs=getDocs().filter(function(d){return d.id!==id;});saveDocs(docs);buildDocs();buildAdminHome();});}
 

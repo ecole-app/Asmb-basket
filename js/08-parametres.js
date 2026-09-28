@@ -408,8 +408,8 @@ function sendFeedback(prefix){
   prefix=prefix||"";
   var ta=document.getElementById(prefix+"feedback-text");
   var msg=(ta&&ta.value||"").trim();
-  if(!msg){ alert("Écrire un message avant d'envoyer."); return; }
-  if(!window.fbDb || !window.fbAddDoc){ alert("Connexion en cours, réessayer dans quelques secondes."); return; }
+  if(!msg){ askAlert("Écrire un message avant d'envoyer."); return; }
+  if(!window.fbDb || !window.fbAddDoc){ askAlert("Connexion en cours, réessayer dans quelques secondes."); return; }
   var btn=document.getElementById(prefix+"feedback-send-btn");
   if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
   var u=window.ASMB_USER||{};
@@ -422,7 +422,7 @@ function sendFeedback(prefix){
     var st=document.getElementById(prefix+"feedback-status");
     if(st){ st.style.display="block"; setTimeout(function(){st.style.display="none";},3000); }
   }).catch(function(e){
-    alert("Erreur d'envoi : "+((e&&e.code)||e));
+    askAlert("Erreur d'envoi : "+((e&&e.code)||e));
   }).finally(function(){
     if(btn){ btn.disabled=false; btn.textContent="Envoyer"; }
   });

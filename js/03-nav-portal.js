@@ -219,7 +219,7 @@ function buildCoachDashboard(el){
 }
 
 function relancerSansReponse(eventId){
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   var ev=getEvents().find(function(e){return e.id===eventId;});
   if(!ev)return;
   var teamId=getCoachTeam();
@@ -231,20 +231,20 @@ function relancerSansReponse(eventId){
     var responded={};
     snap.forEach(function(d){var data=d.data();if(data.eventId===eventId)responded[data.playerId]=true;});
     var noResponse=players.filter(function(p){return !responded[p.id];});
-    if(!noResponse.length){alert("Tout le monde a répondu !");buildCoachDashboard();return;}
+    if(!noResponse.length){askAlert("Tout le monde a répondu !");buildCoachDashboard();return;}
     var noms=noResponse.map(function(p){return p.prenom+" "+p.nom;}).join(", ");
     var channelId=findChannelForTeamText(ev.equipe);
-    if(!channelId){alert("Aucun canal trouvé pour cette équipe");return;}
+    if(!channelId){askAlert("Aucun canal trouvé pour cette équipe");return;}
     var msg="🔔 <b>Rappel de présence</b><br>Merci de confirmer votre présence à \""+ev.titre+"\" ("+ev.date+(ev.heure?" · "+ev.heure:"")+").<br>En attente de réponse : "+noms;
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       text:msg,pseudo:clubPseudo("Coach"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     }).then(function(){
-      alert("Relance envoyée dans le canal !");
+      askAlert("Relance envoyée dans le canal !");
     }).catch(function(e){
-      alert("La relance n'a pas pu être envoyée : "+((e&&e.code)||e));
+      askAlert("La relance n'a pas pu être envoyée : "+((e&&e.code)||e));
     });
   }).catch(function(e){
-    alert("Impossible de vérifier les réponses : "+((e&&e.code)||e));
+    askAlert("Impossible de vérifier les réponses : "+((e&&e.code)||e));
   });
 }
 

@@ -203,7 +203,7 @@ function isCustomCycle(cy){
   return (ov.custom||[]).some(function(c){return c.id==cy.id;});
 }
 function openCycleEditModal(cyId){
-  if(!canEditCycles()){alert("Réservé au dirigeant.");return;}
+  if(!canEditCycles()){askAlert("Réservé au dirigeant.");return;}
   var existing=cyId?findCycle(cyId):null;
   var modal=document.createElement("div");
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
@@ -231,7 +231,7 @@ function openCycleEditModal(cyId){
     var periode=document.getElementById("cyed-periode").value.trim();
     var couleur=document.getElementById("cyed-couleur").value;
     var objs=document.getElementById("cyed-objs").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
-    if(!nom){alert("Le nom du cycle est obligatoire");return;}
+    if(!nom){askAlert("Le nom du cycle est obligatoire");return;}
     var ov=getCycleOverrides();
     if(existing){
       if(isCustomCycle(existing)){
@@ -269,7 +269,7 @@ function openCycleEditModal(cyId){
   }
 }
 function openSeanceEditModal(cyId,seaNum){
-  if(!canEditCycles()){alert("Réservé au dirigeant.");return;}
+  if(!canEditCycles()){askAlert("Réservé au dirigeant.");return;}
   var cy=findCycle(cyId);
   if(!cy)return;
   var existing=seaNum?cy.seas.find(function(s){return s.num===seaNum;}):null;
@@ -302,7 +302,7 @@ function openSeanceEditModal(cyId,seaNum){
     var obj=document.getElementById("sed-obj").value.trim();
     var dur=document.getElementById("sed-dur").value.trim()||"1h30";
     var contenuEl=document.getElementById("sed-contenu");
-    if(!titre){alert("Le titre est obligatoire");return;}
+    if(!titre){askAlert("Le titre est obligatoire");return;}
     var ov=getCycleOverrides();
     var custom=isCustomCycle(cy);
     function applyToSeance(s){

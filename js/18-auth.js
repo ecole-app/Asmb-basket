@@ -107,7 +107,7 @@ function showAuth(step, data){
 function authErr(msg){
   var e=document.getElementById("auth-err");
   if(e){ e.textContent=msg; e.style.display="block"; }
-  else alert(msg);
+  else askAlert(msg);
 }
 
 function authDoLogin(){
@@ -143,7 +143,7 @@ function authDoReset(){
 // d'operation sensible : impossible de le faire "a la place de" quelqu'un.
 function openChangeEmailModal(){
   var user=window.fbAuth&&window.fbAuth.currentUser;
-  if(!user){alert("Vous devez être connecté.");return;}
+  if(!user){askAlert("Vous devez être connecté.");return;}
   var modal=document.createElement("div");
   modal.className="change-email-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
@@ -271,7 +271,7 @@ function loadClubProfile(clubId){
       var st=snap.data().status;
       if((st==="suspended"||st==="deleted") && !window.SUPPORT_MODE && !isSuperAdmin()){
         if(typeof showClubSuspendu==="function") showClubSuspendu(window.CURRENT_CLUB);
-        else { alert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }
+        else { askAlert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }
         return;
       }
     } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
@@ -312,19 +312,19 @@ function applyAuthedUser(user){
       var seed={ phone:"", email:user.email||"", roles:["dirigeant"], clubId:BOOTSTRAP_CLUB_ID, linkedPlayerIds:[], linkedTeamIds:[], createdAt:window.fbServerTimestamp() };
       window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid), seed).then(function(){ finishAuthedUser(user, seed); firstLoad=false; });
     } else if(firstLoad){
-      alert("Compte non rattaché à un club. Contacter un dirigeant.");
+      askAlert("Compte non rattaché à un club. Contacter un dirigeant.");
       window.fbSignOut(window.fbAuth);
       showAuth("entry");
     }
   }, function(err){
     console.log("applyAuthedUser:",err);
-    if(firstLoad){ alert("Erreur de connexion aux données. Réessayer."); firstLoad=false; }
+    if(firstLoad){ askAlert("Erreur de connexion aux données. Réessayer."); firstLoad=false; }
   });
 }
 
 function finishAuthedUser(user, u, isUpdate){
   if(!u.clubId){
-    alert("Compte non rattaché à un club. Contacter un dirigeant.");
+    askAlert("Compte non rattaché à un club. Contacter un dirigeant.");
     window.fbSignOut(window.fbAuth);
     showAuth("entry");
     return;

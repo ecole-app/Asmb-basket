@@ -128,7 +128,7 @@ function viewFicheModal(phone){
     return phones.indexOf(normPhone)>=0;
   });
   if(!matches.length){
-    alert("Aucune fiche trouvée pour ce numéro.");
+    askAlert("Aucune fiche trouvée pour ce numéro.");
     return;
   }
   var lic=matches[0];
@@ -182,13 +182,13 @@ function editChannelInfo(ch){
 }
 
 function createChannel(){
- if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+ if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
  var name=document.getElementById("ch-name").value.trim();
  var icon=document.getElementById("ch-icon").value.trim()||"";
  var desc=document.getElementById("ch-desc").value.trim();
  var teamId=(document.getElementById("ch-team")||{}).value||"";
  var clubWide=!!(document.getElementById("ch-clubwide")||{}).checked;
- if(!name){alert("Nom du canal obligatoire");return;}
+ if(!name){askAlert("Nom du canal obligatoire");return;}
  var savePromise;
  if(editingChannelId){
    savePromise=window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
@@ -207,7 +207,7 @@ function createChannel(){
 }
 
 async function deleteChannel(id,name){
- if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+ if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
  var ok=await askConfirm('Le canal "'+name+'" et tous ses messages seront définitivement supprimés.', {title:"Supprimer ce canal ?", confirmText:"Supprimer", danger:true});
  if(!ok)return;
  // Supprime tous les messages du canal
@@ -217,7 +217,7 @@ async function deleteChannel(id,name){
  }
  // Supprime le canal lui-meme
  await window.fbDeleteDoc(window.fbDoc(window.fbDb,"channels",id));
- alert("Canal supprimé");
+ askAlert("Canal supprimé");
 }
 
 function openChannelDetail(ch){
@@ -245,7 +245,7 @@ function renderMembers(ch){
 async function editMemberLabel(phone,currentLabel){
   var newLabel=await askPrompt("Nom d'identification", {defaultValue:currentLabel||"", placeholder:"ex: Lucas-U13", confirmText:"Enregistrer"});
   if(newLabel===null)return;
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
@@ -263,16 +263,16 @@ async function editMemberLabel(phone,currentLabel){
 }
 
 async function addMemberToChannel(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var input=document.getElementById("member-phone");
   var phone=input.value.trim().replace(/\s+/g,"");
-  if(!phone){alert("Entrez un numéro de téléphone");return;}
+  if(!phone){askAlert("Entrez un numéro de téléphone");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=(chData&&chData.members)||[];
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
-  if(exists){alert("Ce numéro est déjà membre");return;}
+  if(exists){askAlert("Ce numéro est déjà membre");return;}
   members.push({phone:phone,label:null});
   try{
     await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
@@ -284,7 +284,7 @@ async function addMemberToChannel(){
 }
 
 async function removeMemberFromChannel(phone){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var ok=await askConfirm("Révoquer l'accès de "+phone+" à ce canal ?", {title:"Révoquer l'accès", confirmText:"Révoquer", danger:true});
   if(!ok)return;
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
@@ -317,13 +317,13 @@ function showLicenceContactPicker(){
 }
 
 async function addMemberFromLicence(phone,label){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=(chData&&chData.members)||[];
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
-  if(exists){alert("Ce contact est déjà membre");return;}
+  if(exists){askAlert("Ce contact est déjà membre");return;}
   members.push({phone:phone,label:label});
   try{
     await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
@@ -453,7 +453,7 @@ async function openChannel(ch){
   if(members.length>0 && !isDirigeant){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
-    if(!isAuth){alert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
+    if(!isAuth){askAlert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
   }
   currentChannelId=ch.id;currentChannelData=ch;
   document.getElementById("chat-icon").textContent=ch.icon;
@@ -819,7 +819,7 @@ function togglePin(channelId,msgId){
   if(idx>=0){
     updated=current.slice();updated.splice(idx,1);
   } else {
-    if(current.length>=3){alert("Maximum 3 messages epingles. Retirez-en un d'abord.");return;}
+    if(current.length>=3){askAlert("Maximum 3 messages epingles. Retirez-en un d'abord.");return;}
     updated=current.concat([msgId]);
   }
   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",channelId),{pinnedMessageIds:updated},{merge:true});
@@ -839,7 +839,7 @@ function deleteMessage(channelId,msgId){
 }
 
 async function sendMsg(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var msgEl=document.getElementById("chat-msg");
   var pseudoEl=document.getElementById("chat-pseudo");
@@ -856,10 +856,10 @@ async function sendMsg(){
 
 async function sendMediaMessage(input){
   if(!input.files||!input.files[0])return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var file=input.files[0];
-  if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptées (pas de vidéo)");input.value="";return;}
+  if(file.type.indexOf("image")!==0){askAlert("Seules les photos sont acceptées (pas de vidéo)");input.value="";return;}
   var pseudoEl=document.getElementById("chat-pseudo");
   var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
   savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
@@ -873,29 +873,29 @@ async function sendMediaMessage(input){
       pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
   }).catch(function(err){
-    alert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
+    askAlert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
   });
 }
 
 // ── SONDAGES (style WhatsApp) ────────────────────────────────────
 function showPollCreator(){
-  if(!window.asmbCoachMode){alert("Seuls les coachs et dirigeants peuvent créer un sondage");return;}
+  if(!window.asmbCoachMode){askAlert("Seuls les coachs et dirigeants peuvent créer un sondage");return;}
   document.getElementById("poll-question").value="";
   for(var i=0;i<4;i++){document.getElementById("poll-opt-"+i).value="";}
   document.getElementById("modal-poll").style.display="flex";
 }
 
 function createPoll(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var question=document.getElementById("poll-question").value.trim();
-  if(!question){alert("Entrez une question");return;}
+  if(!question){askAlert("Entrez une question");return;}
   var options=[];
   for(var i=0;i<4;i++){
     var v=document.getElementById("poll-opt-"+i).value.trim();
     if(v)options.push({text:v,votes:[]});
   }
-  if(options.length<2){alert("Au moins 2 options sont necessaires");return;}
+  if(options.length<2){askAlert("Au moins 2 options sont necessaires");return;}
   var allowMultiple=document.getElementById("poll-multiple").checked;
   var deadline=document.getElementById("poll-deadline").value||null;
   var pseudo=(document.getElementById("chat-pseudo")||{}).value.trim()||"Anonyme";
@@ -917,7 +917,7 @@ async function votePoll(channelId,msgId,optionIndex){
     if(!msgData||!msgData.options)return;
     if(msgData.deadline){
       var today=new Date().toISOString().slice(0,10);
-      if(today>msgData.deadline){alert("Ce sondage est cloture");return;}
+      if(today>msgData.deadline){askAlert("Ce sondage est cloture");return;}
     }
     var allowMultiple=!!msgData.allowMultiple;
     var options=msgData.options.map(function(o,i){
@@ -973,7 +973,7 @@ async function respondConvocation(channelId,msgId,playerId,status){
 // des places (max = "places"). Meme mecanique de lecture-puis-ecriture que
 // les sondages -- acceptable ici pour la meme raison (faible frequentation).
 function showCarpoolCreator(){
-  if(!currentChannelId){alert("Ouvrez d'abord un canal");return;}
+  if(!currentChannelId){askAlert("Ouvrez d'abord un canal");return;}
   var sel=document.getElementById("carpool-event");
   var todayStr=new Date().toISOString().slice(0,10);
   var events=getEvents().filter(function(e){return e.date>=todayStr&&!e.cancelled;}).sort(function(a,b){return a.date>b.date?1:-1;});
@@ -990,12 +990,12 @@ function showCarpoolCreator(){
 }
 
 async function createCarpool(){
-  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var eventId=document.getElementById("carpool-event").value;
-  if(!eventId){alert("Sélectionnez un événement");return;}
+  if(!eventId){askAlert("Sélectionnez un événement");return;}
   var ev=getEvents().find(function(e){return e.id===eventId;});
-  if(!ev){alert("Événement introuvable");return;}
+  if(!ev){askAlert("Événement introuvable");return;}
   var places=parseInt(document.getElementById("carpool-places").value,10)||1;
   if(places<1)places=1;
   var depart=document.getElementById("carpool-depart").value.trim();
@@ -1024,7 +1024,7 @@ async function reserverCarpool(channelId,msgId){
     if(idx>=0){
       passagers.splice(idx,1);
     } else {
-      if(passagers.length>=(msgData.places||0)){alert("Complet, plus de place disponible.");return;}
+      if(passagers.length>=(msgData.places||0)){askAlert("Complet, plus de place disponible.");return;}
       passagers.push(pseudo);
     }
     window.fbUpdateDoc(msgRef,{passagers:passagers}).catch(function(e){

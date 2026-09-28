@@ -205,7 +205,7 @@ function applySeasonLabels(){
   if(heroEl) heroEl.textContent=(cn?cn+" · ":"")+"Saison "+season;
 }
 async function startNewSeason(){
-  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){askAlert("Réservé au dirigeant.");return;}
   var current=getCurrentSeason();
   var next=nextSeasonLabel(current);
   var lics=getLicences();
@@ -333,7 +333,7 @@ function closeNewLicence(){
 function createLicence(){
   var email=document.getElementById("lic-email").value.trim();
   var nom=document.getElementById("lic-nom-dest").value.trim();
-  if(!email){alert("Adresse mail obligatoire");return;}
+  if(!email){askAlert("Adresse mail obligatoire");return;}
   var code=genCode();
   var lic={
     id:Date.now().toString(),
@@ -550,8 +550,8 @@ function openPaiementLicenceModal(code){
   document.getElementById("pl-save").addEventListener("click",function(){
     var montant=parseFloat(document.getElementById("pl-montant").value);
     var date=document.getElementById("pl-date").value;
-    if(!montant||montant<=0){alert("Montant invalide");return;}
-    if(!date){alert("Date obligatoire");return;}
+    if(!montant||montant<=0){askAlert("Montant invalide");return;}
+    if(!date){askAlert("Date obligatoire");return;}
     savePaiementLicence(code,{
       moyen:selectedMoyen,montant:montant,date:date,
       reference:document.getElementById("pl-reference").value.trim()
@@ -637,15 +637,15 @@ function sendFactureLicenceMail(code){
 async function addLicenceAsBenevole(code){
   var lics=getLicences();
   var lic=lics.find(function(l){return l.code===code;});
-  if(!lic||!lic.fiche){alert("Fiche introuvable.");return;}
+  if(!lic||!lic.fiche){askAlert("Fiche introuvable.");return;}
   var f=lic.fiche;
   var contacts=getAnnuaire();
   var existing=contacts.find(function(c){return c.linkedLicenceCode===code;});
   if(existing){
-    if(existing.type==="benevole"){ alert("Déjà enregistré comme bénévole."); return; }
+    if(existing.type==="benevole"){ askAlert("Déjà enregistré comme bénévole."); return; }
     existing.type="benevole";
     saveAnnuaireList(contacts);
-    alert("Ajouté aux bénévoles.");
+    askAlert("Ajouté aux bénévoles.");
     return;
   }
   var nomComplet=((f.respNom||"").trim())||((f.prenom||"")+" "+(f.nom||"")).trim();
@@ -677,7 +677,7 @@ function setLicCat(cat){
 async function renewLicence(oldCode){
   var lics=getLicences();
   var old=lics.find(function(l){return l.code===oldCode;});
-  if(!old){alert("Fiche introuvable.");return;}
+  if(!old){askAlert("Fiche introuvable.");return;}
   var season=getCurrentSeason();
   var ok=await askConfirm("Une nouvelle fiche va être créée pour "+((old.fiche&&old.fiche.prenom)||"")+" "+((old.fiche&&old.fiche.nom)||"")+", saison "+season+", en recopiant les informations existantes (identité, contacts, adresse...). La catégorie sera recalculée selon son âge actuel.", {title:"Renouveler la licence", confirmText:"Renouveler"});
   if(!ok)return;
@@ -708,10 +708,10 @@ function validerLicence(){
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===currentLicCode;});
   if(idx<0)return;
-  if(!lics[idx].categorie){alert("Assignez une catégorie avant de valider");return;}
+  if(!lics[idx].categorie){askAlert("Assignez une catégorie avant de valider");return;}
   var f0=lics[idx].fiche||{};
   if(f0.surclassement && (!f0.certificat || !f0.certDate)){
-    alert("Surclassement coché sur cette fiche : le certificat médical (fichier + date) est obligatoire avant de valider.");
+    askAlert("Surclassement coché sur cette fiche : le certificat médical (fichier + date) est obligatoire avant de valider.");
     return;
   }
   lics[idx].statut="validee";
@@ -728,7 +728,7 @@ function validerLicence(){
       savePlayers(players);
     }
   }
-  alert("Licence validée ! Le joueur a été ajouté aux inscriptions.");
+  askAlert("Licence validée ! Le joueur a été ajouté aux inscriptions.");
 }
 
 function resendLicMail(){
@@ -801,12 +801,12 @@ function saveEditedFiche(){
   closeModal("modal-edit-fiche");
   renderLicenceDetail(lics[idx]);
   buildLicences();
-  alert("Fiche mise à jour !");
+  askAlert("Fiche mise à jour !");
 }
 
 function copyCode(code){
-  if(navigator.clipboard){navigator.clipboard.writeText(code).then(function(){alert("Code copié : "+code);});}
-  else{var t=document.createElement("textarea");t.value=code;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);alert("Code copié : "+code);}
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(function(){askAlert("Code copié : "+code);});}
+  else{var t=document.createElement("textarea");t.value=code;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);askAlert("Code copié : "+code);}
 }
 
 // ── CÔTÉ LICENCIÉ : FICHE PUBLIQUE ───────────────────────────────
@@ -842,15 +842,15 @@ function formatCodeInput(el){
 }
 async function validerCode(){
   var code=document.getElementById("code-input").value.trim().toUpperCase();
-  if(!code){alert("Entrez votre code");return;}
+  if(!code){askAlert("Entrez votre code");return;}
   var btn=document.getElementById("valider-code-btn");
   if(btn){btn.disabled=true;btn.textContent="Vérification...";}
   var res=await lookupInscriptionCode(code);
   if(btn){btn.disabled=false;btn.textContent="Accéder à ma fiche";}
-  if(!res.found){alert("Code invalide. Vérifiez votre mail.");return;}
+  if(!res.found){askAlert("Code invalide. Vérifiez votre mail.");return;}
   // Visiteur public (non connecté) : la fiche sera déposée dans le club du code.
   if(!window.CURRENT_CLUB_ID){
-    if(!res.clubId){alert("Ce code n'est rattaché à aucun club. Contactez le club.");return;}
+    if(!res.clubId){askAlert("Ce code n'est rattaché à aucun club. Contactez le club.");return;}
     window.CURRENT_CLUB_ID=res.clubId;
   }
   licCurrentCode=code;
@@ -1158,12 +1158,12 @@ function soumettreFiche(){
   var prenom=(document.getElementById("f-prenom")||{}).value||"";
   var nom=(document.getElementById("f-nom")||{}).value||"";
   var naissance=(document.getElementById("f-naissance")||{}).value||"";
-  if(!prenom||!nom||!naissance){alert("Prénom, nom et date de naissance sont obligatoires");return;}
-  if(!ficheGenre){alert("Sélectionnez votre genre");return;}
+  if(!prenom||!nom||!naissance){askAlert("Prénom, nom et date de naissance sont obligatoires");return;}
+  if(!ficheGenre){askAlert("Sélectionnez votre genre");return;}
   if(ficheSurclassement){
     var certDateVal=(document.getElementById("f-certDate")||{}).value||"";
     if(!ficheCertificat || !certDateVal){
-      alert("Surclassement coché : le certificat médical (fichier + date) est obligatoire pour valider la fiche.");
+      askAlert("Surclassement coché : le certificat médical (fichier + date) est obligatoire pour valider la fiche.");
       return;
     }
   }
@@ -1219,7 +1219,7 @@ function soumettreFiche(){
 
   // Appareil public : depot dans une collection dediee, en creation seule.
   // Le visiteur ne peut ni relire, ni lister, ni modifier quoi que ce soit.
-  if(!window.fbDb||!window.fbAddDoc){alert("Connexion en cours, réessayez dans quelques secondes.");return;}
+  if(!window.fbDb||!window.fbAddDoc){askAlert("Connexion en cours, réessayez dans quelques secondes.");return;}
   var btn=document.getElementById("fiche-submit-btn");
   if(btn){btn.disabled=true;btn.textContent="Envoi...";}
   window.fbAddDoc(window.fbCollection(window.fbDb,"inscription_submissions"),{
@@ -1232,7 +1232,7 @@ function soumettreFiche(){
     showSuccess();
   }).catch(function(e){
     if(btn){btn.disabled=false;btn.textContent="Envoyer ma fiche";}
-    alert("Erreur lors de l'envoi : "+((e&&e.code)||e)+"\nRéessayez ou contactez le club.");
+    askAlert("Erreur lors de l'envoi : "+((e&&e.code)||e)+"\nRéessayez ou contactez le club.");
   });
 }
 

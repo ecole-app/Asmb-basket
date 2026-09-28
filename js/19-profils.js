@@ -245,7 +245,7 @@ async function chooseRole(role){
     if(code===null)return;
     var validCode=localStorage.getItem("asmb_coach_code")||"ASMB2025";
     if(code.trim().toUpperCase()!==validCode.toUpperCase()){
-      alert("Code incorrect");
+      askAlert("Code incorrect");
       return;
     }
     localStorage.setItem("asmb_profile","dirigeant");
@@ -284,7 +284,7 @@ function ouvrirEspaceJoueurRattache(essai){
     return;
   }
   if(essai<20){ setTimeout(function(){ ouvrirEspaceJoueurRattache(essai+1); },400); return; }
-  alert("Ta fiche n'a pas pu être chargée. Réessaie, ou demande à ton club.");
+  askAlert("Ta fiche n'a pas pu être chargée. Réessaie, ou demande à ton club.");
 }
 
 // ── ESPACE JOUEUR (auto-pointage) ──────────────────────────────────
@@ -297,7 +297,7 @@ async function openJoueurCheckin(){
   phone=phone.trim().replace(/\s+/g,"");
   var player=resoudreFichePour(phone);
   if(!player){
-    alert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche.");
+    askAlert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
   }
   localStorage.setItem("asmb_joueur_phone",phone);
@@ -353,7 +353,7 @@ async function joueurChangePhone(){
   if(!phone) return;
   phone=phone.trim().replace(/\s+/g,"");
   var player=getPlayers().find(function(p){return p.telEnfant&&p.telEnfant.replace(/\s+/g,"")===phone;});
-  if(!player){ alert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche."); return; }
+  if(!player){ askAlert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche."); return; }
   localStorage.setItem("asmb_joueur_phone",phone);
   joueurIdentifiedPlayer=player;
   var m=document.querySelector(".joueur-settings-modal");
@@ -541,7 +541,7 @@ function reopenCheckin(el,playerId,eventId){
 }
 
 function joueurSelfCheckin(playerId,eventId,status){
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   var player=getPlayers().find(function(p){return p.id===playerId;});
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
@@ -570,7 +570,7 @@ function joueurSelfCheckin(playerId,eventId,status){
         text:msgTxt,pseudo:clubPseudo("Systeme"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
-  }).catch(function(){alert("Erreur, réessayez");});
+  }).catch(function(){askAlert("Erreur, réessayez");});
 }
 
 async function registerParentPhone(){
@@ -661,7 +661,7 @@ function autoLinkParentTeams(){
 function autoLinkParentToChannel(phone){
   var teamNames=autoLinkParentTeams();
   if(teamNames){
-    alert("Bienvenue ! Vous avez été rattaché automatiquement à l'équipe "+teamNames[0]+" et au canal correspondant.");
+    askAlert("Bienvenue ! Vous avez été rattaché automatiquement à l'équipe "+teamNames[0]+" et au canal correspondant.");
     saveParentTeams();
   } else {
     pendingJoinRequestPhone=phone;
@@ -825,7 +825,7 @@ var pendingJoinRequestPhone=null;
 
 function saveParentTeams(){
   var selected=getParentTeams();
-  if(!selected.length){alert("Sélectionnez au moins une équipe");return;}
+  if(!selected.length){askAlert("Sélectionnez au moins une équipe");return;}
   if(!getActiveTeamId()||selected.indexOf(getActiveTeamId())<0)setActiveTeamId(selected[0]);
   buildBottomNav("parent");
 
@@ -852,7 +852,7 @@ async function submitJoinRequest(phone,teamIds){
     phone:phone,childName:childName,teamIds:teamIds,teamNames:teamNames,
     status:"pending",ts:window.fbServerTimestamp()
   });
-  alert("Votre demande a été envoyée au coach. Vous aurez accès au canal de l'équipe une fois validée.");
+  askAlert("Votre demande a été envoyée au coach. Vous aurez accès au canal de l'équipe une fois validée.");
 }
 
 // ── TUTORIEL PARENT (premiere connexion) ────────────────────────────
@@ -963,7 +963,7 @@ function openCoachTeamPicker(){
 
 function confirmTeamPicker(){
   if(teamPickerContext==="coach"){
-    if(!getCoachTeams().length){alert("Sélectionnez au moins une équipe");return;}
+    if(!getCoachTeams().length){askAlert("Sélectionnez au moins une équipe");return;}
     buildBottomNav("coach");
     navToCoach("equipe");
   } else {
@@ -1133,7 +1133,7 @@ function getMyLicenceForTeam(team){
 
 async function signalerAbsence(eventId){
   if(!(await checkMyPhone()))return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   var events=getEvents();
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev)return;
@@ -1155,7 +1155,7 @@ async function signalerAbsence(eventId){
  status:"absent",ts:window.fbServerTimestamp(),source:"parent"
  });
  }
- alert("Absence signalée dans le canal de l'équipe.");
+ askAlert("Absence signalée dans le canal de l'équipe.");
   };
 
   if(linkedPlayer){
@@ -1163,7 +1163,7 @@ async function signalerAbsence(eventId){
     checkExistingCheckin(eventId,linkedPlayer.id).then(function(existing){
       if(existing){
         var labels={present:"présent(e)",retard:"en retard",absent:"absent(e)"};
-        alert(linkedPlayer.prenom+" s'est déjà déclaré(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
+        askAlert(linkedPlayer.prenom+" s'est déjà déclaré(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
         return;
       }
       proceed(linkedPlayer.prenom+" "+linkedPlayer.nom,linkedPlayer.id);
@@ -1240,7 +1240,7 @@ function buildParentEquipe(){
     div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
-      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCatégorie : "+team.cat);};
+      div.onclick=function(){askAlert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCatégorie : "+team.cat);};
     }
     el.appendChild(div);
   });
@@ -1319,7 +1319,7 @@ async function editPlayerLicence(playerId){
   p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
   savePlayers(players);
   buildCoachEquipe();
-  alert("Licence mise à jour.");
+  askAlert("Licence mise à jour.");
 }
 
 // ── HISTORIQUE JOUEUR (coach) : assiduite + evaluations mensuelles + stages ──

@@ -95,9 +95,9 @@ function renderPresenceHistory(){
 }
 
 function exportPlanningPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){askAlert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
   var events=getEvents().slice().sort(function(a,b){return a.date>b.date?1:-1;});
-  if(!events.length){alert("Aucun événement à exporter");return;}
+  if(!events.length){askAlert("Aucun événement à exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);doc.setTextColor(27,92,40);
@@ -155,7 +155,7 @@ function importPlayersCSV(input){
   reader.onload=function(e){
     var text=e.target.result;
     var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
-    if(lines.length<2){alert("Fichier CSV vide ou invalide");return;}
+    if(lines.length<2){askAlert("Fichier CSV vide ou invalide");return;}
     var headers=parseCsvLine(lines[0]).map(function(h){return h.trim().toLowerCase();});
     var idxNom=headers.indexOf("nom");
     var idxPrenom=headers.indexOf("prenom");
@@ -164,7 +164,7 @@ function importPlayersCSV(input){
     var idxNumLic=headers.indexOf("numlicence");
     var idxTypeLic=headers.indexOf("typelicence");
     if(idxNom<0||idxPrenom<0){
-      alert("Le fichier doit contenir au minimum les colonnes: nom,prénom (optionnel: naissance,catégorie,numlicence,typelicence)");
+      askAlert("Le fichier doit contenir au minimum les colonnes: nom,prénom (optionnel: naissance,catégorie,numlicence,typelicence)");
       return;
     }
     var players=getPlayers();
@@ -190,15 +190,15 @@ function importPlayersCSV(input){
     renderPlayers();
     buildAdminHome();
     input.value="";
-    alert(added+" joueur(s) importé(s) depuis le CSV !");
+    askAlert(added+" joueur(s) importé(s) depuis le CSV !");
   };
   reader.readAsText(file);
 }
 
 function exportPlayersPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){askAlert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
   var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
-  if(!players.length){alert("Aucun joueur à exporter");return;}
+  if(!players.length){askAlert("Aucun joueur à exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);
@@ -348,7 +348,7 @@ function openAddTeamMember(teamId){
   if(!team) return;
   var currentIds=team.members||[];
   var players=getPlayers().filter(function(p){return currentIds.indexOf(p.id)<0;});
-  if(!players.length){alert("Aucun joueur disponible à ajouter.");return;}
+  if(!players.length){askAlert("Aucun joueur disponible à ajouter.");return;}
   var modal=document.createElement("div");
   modal.className="team-member-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
@@ -388,7 +388,7 @@ function openAddTeamMember(teamId){
   addBtn.addEventListener("click",function(e){
     e.stopPropagation();
     var checked=[].slice.call(list.querySelectorAll("input[type=checkbox]:checked")).map(function(c){return c.value;});
-    if(!checked.length){alert("Aucun joueur sélectionné.");return;}
+    if(!checked.length){askAlert("Aucun joueur sélectionné.");return;}
     var teams=getTeams();
     var t=teams.find(function(x){return x.id===teamId;});
     if(!t) return;
@@ -505,9 +505,9 @@ function shiftPlanCal(delta){
 
 function showDayEvents(dateStr){
   var events=getEvents().filter(function(e){return e.date===dateStr;});
-  if(!events.length){alert("Aucun événement ce jour-là");return;}
+  if(!events.length){askAlert("Aucun événement ce jour-là");return;}
   var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" à "+e.heure:"");}).join("\n");
-  alert("Événements du "+dateStr+" :\n\n"+txt);
+  askAlert("Événements du "+dateStr+" :\n\n"+txt);
 }
 
 function buildPlanning(){

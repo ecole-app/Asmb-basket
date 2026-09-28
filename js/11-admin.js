@@ -291,8 +291,8 @@ function openAdminModule(id){
 
 // ── STEP 7 : ACCÈS COACH (attribution rôles/équipes par le dirigeant) ──
 function openAccesCoach(){
-  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
-  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){askAlert("Réservé au dirigeant.");return;}
+  if(!window.fbDb||!window.fbGetDocs){askAlert("Firestore indisponible.");return;}
   var modal=document.createElement("div");
   modal.className="acces-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
@@ -453,7 +453,7 @@ function renderAccesList(list,users,phoneToName){
         save.textContent="\u2713 Enregistré";
         sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
         setTimeout(function(){save.textContent="Enregistrer";},1500);
-      }).catch(function(err){save.textContent="Erreur";alert((err&&err.code)||err);});
+      }).catch(function(err){save.textContent="Erreur";askAlert((err&&err.code)||err);});
     });
     card.appendChild(save);
     list.appendChild(card);
@@ -462,8 +462,8 @@ function renderAccesList(list,users,phoneToName){
 
 // ── FICHES D'INSCRIPTION RECUES (deposees via le lien public) ──────
 function openFichesRecues(){
-  if(!isStaffUser()){alert("Réservé au staff.");return;}
-  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  if(!isStaffUser()){askAlert("Réservé au staff.");return;}
+  if(!window.fbDb||!window.fbGetDocs){askAlert("Firestore indisponible.");return;}
   var modal=document.createElement("div");
   modal.className="fiches-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
@@ -521,7 +521,7 @@ function renderFichesRecues(list,items){
     importBtn.addEventListener("click",function(){
       var lics=getLicences();
       var idx=lics.findIndex(function(l){return l.code===it.code;});
-      if(idx<0){alert("Aucune licence ne correspond au code "+it.code+".");return;}
+      if(idx<0){askAlert("Aucune licence ne correspond au code "+it.code+".");return;}
       lics[idx].fiche=it.fiche;
       lics[idx].statut="recue";
       if(it.typeLicence) lics[idx].typeLicence=it.typeLicence;
@@ -532,7 +532,7 @@ function renderFichesRecues(list,items){
       card.style.opacity=".55";
       importBtn.textContent="Réimporter";
       meta.textContent="Code "+(it.code||"?")+(f.naissance?(" · né(e) le "+f.naissance):"")+" · déjà importée";
-      alert("Fiche importée dans la licence "+it.code+".");
+      askAlert("Fiche importée dans la licence "+it.code+".");
     });
     var delBtn=document.createElement("button");
     delBtn.textContent="Supprimer";
@@ -551,8 +551,8 @@ function renderFichesRecues(list,items){
 
 // ── AVIS & SUGGESTIONS (retours des membres) ──────────────────────
 function openAvisModule(){
-  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
-  if(!window.fbDb||!window.fbGetDocs){alert("Firestore indisponible.");return;}
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){askAlert("Réservé au dirigeant.");return;}
+  if(!window.fbDb||!window.fbGetDocs){askAlert("Firestore indisponible.");return;}
   var modal=document.createElement("div");
   modal.className="avis-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
@@ -765,7 +765,7 @@ function renderPlayerForm(p){
 function savePlayer(){
   var prenom=document.getElementById("fp-prenom").value.trim();
   var nom=document.getElementById("fp-nom").value.trim();
-  if(!prenom||!nom){alert("Prénom et nom obligatoires");return;}
+  if(!prenom||!nom){askAlert("Prénom et nom obligatoires");return;}
   var players=getPlayers();
   var idx=editingPlayerId?players.findIndex(function(p){return p.id===editingPlayerId;}):-1;
   // On part de la fiche existante (respTel, resp2Tel, photo, photoAutorisee,
@@ -966,7 +966,7 @@ function handleNoteFraisPhoto(input){
     btn.textContent="📷 Changer la photo";btn.disabled=false;
   }).catch(function(){
     btn.textContent="📷 Prendre / choisir une photo";btn.disabled=false;
-    alert("Erreur lors du traitement de la photo.");
+    askAlert("Erreur lors du traitement de la photo.");
   });
 }
 function saveNoteFrais(modal,parentModal){
@@ -974,9 +974,9 @@ function saveNoteFrais(modal,parentModal){
   var montant=parseFloat(document.getElementById("nf-montant").value);
   var motif=document.getElementById("nf-motif").value.trim();
   var categorie=document.getElementById("nf-categorie").value.trim();
-  if(!date){alert("Date obligatoire");return;}
-  if(!montant||montant<=0){alert("Montant invalide");return;}
-  if(!motif){alert("Motif obligatoire");return;}
+  if(!date){askAlert("Date obligatoire");return;}
+  if(!montant||montant<=0){askAlert("Montant invalide");return;}
+  if(!motif){askAlert("Motif obligatoire");return;}
   var u=window.ASMB_USER||{};
   var notes=getNotesFrais();
   notes.push({

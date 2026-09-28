@@ -164,7 +164,7 @@ function toggleNotif(checked){
   if(checked&&"Notification" in window){
     Notification.requestPermission().then(function(perm){
       if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activées !"});}
-      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;alert("Permission refusée");}
+      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;askAlert("Permission refusée");}
     });
   } else {
     localStorage.setItem("asmb_notif","off");

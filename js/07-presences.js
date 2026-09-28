@@ -65,7 +65,7 @@ function savePresences(){
   saveEvents(events);
   closeModal("modal-presence");
   buildPlanning();
-  alert("Présences enregistrées !");
+  askAlert("Présences enregistrées !");
 }
 
 // ═══ BROADCAST EMAIL ═════════════════════════════════════════════
@@ -103,9 +103,9 @@ function sendBroadcast(){
   var sujet=document.getElementById("bc-sujet").value.trim();
   var message=document.getElementById("bc-message").value.trim();
   var signature=document.getElementById("bc-signature").value.trim();
-  if(!sujet||!message){alert("Objet et message obligatoires");return;}
+  if(!sujet||!message){askAlert("Objet et message obligatoires");return;}
   var emails=getAllContactEmails();
-  if(!emails.length){alert("Aucun contact email trouvé");return;}
+  if(!emails.length){askAlert("Aucun contact email trouvé");return;}
   localStorage.setItem("asmb_broadcast_signature",signature);
   var sigBlock=signature?(signature+"\n"+clubLabel()):("L'équipe "+clubLabel());
   var body="Bonjour,\n\n"+message+"\n\n"+sigBlock;

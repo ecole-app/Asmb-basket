@@ -167,7 +167,7 @@ function savePoleItem(){
   });
   // Check at least one field filled
   var filled=form.fields.some(function(f){return item[f.id];});
-  if(!filled){alert("Remplissez au moins un champ");return;}
+  if(!filled){askAlert("Remplissez au moins un champ");return;}
   var data=getPoleData(currentPoleId);
   data.push(item);
   savePoleData(currentPoleId,data);

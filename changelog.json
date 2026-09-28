@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790588263",
+    "titre": "Mise à jour du 28 septembre (8)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Toutes les fenêtres de confirmation et d'erreur utilisent maintenant le même style que le reste de l'application, au lieu des popups grises du navigateur." }
+    ]
+  },
+  {
     "v": "1790587905",
     "titre": "Mise à jour du 28 septembre (7)",
     "points": [

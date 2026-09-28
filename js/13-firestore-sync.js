@@ -137,8 +137,8 @@ function initFirestoreSync(){
 
 // ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
 function migrateToFirestore(){
-  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ alert("Réservé au dirigeant."); return; }
-  if(!window.fbDb || !window.fbSetDoc){ alert("Firestore non disponible."); return; }
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.fbDb || !window.fbSetDoc){ askAlert("Firestore non disponible."); return; }
   askConfirm("Sans risque : écrase les documents existants, peut être relancé.", {title:"Copier les données vers Firestore ?", confirmText:"Lancer"}).then(function(ok){
     if(!ok)return;
     migrateToFirestoreConfirmed();
@@ -318,7 +318,7 @@ function addEvalCriterion(){
 function saveEvalCriteriaFromModal(){
   var inputs=document.querySelectorAll("#eval-crit-list input");
   var criteria=Array.from(inputs).map(function(inp){return inp.value.trim();}).filter(Boolean);
-  if(!criteria.length){alert("Au moins un critère est requis");return;}
+  if(!criteria.length){askAlert("Au moins un critère est requis");return;}
   saveEvalCriteria(criteria);
   closeModal("modal-eval-criteria");
   buildLiveEval();

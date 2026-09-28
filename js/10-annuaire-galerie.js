@@ -387,7 +387,7 @@ function buildClassement(){
 }
 
 async function showAddClassementRow(){
-  if(!classementActiveTeamId){alert("Créez d\'abord une équipe");return;}
+  if(!classementActiveTeamId){askAlert("Créez d\'abord une équipe");return;}
   var equipe=await askPrompt("Nom de l'équipe", {placeholder:"Mettre le nom du club pour votre équipe", confirmText:"Suivant"});
   if(!equipe)return;
   var rang=parseInt((await askPrompt("Position dans la poule", {defaultValue:"1", type:"number", confirmText:"Suivant"}))||"1",10);
@@ -471,7 +471,7 @@ function showAddContact(){
 
 function saveContact(){
   var nom=document.getElementById("ct-nom").value.trim();
-  if(!nom){alert("Nom obligatoire");return;}
+  if(!nom){askAlert("Nom obligatoire");return;}
   var isBenevole=document.getElementById("ct-benevole").checked;
   var contacts=getAnnuaire();
   contacts.push({
@@ -556,7 +556,7 @@ function compressImageFile(file,maxWidth,quality){
 
 function uploadGalleryPhoto(input){
   if(!input.files||!input.files[0])return;
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   var file=input.files[0];
   var addBtn=document.getElementById("galerie-add-btn");
   if(addBtn){addBtn.textContent="Compression...";addBtn.disabled=true;}
@@ -575,7 +575,7 @@ function uploadGalleryPhoto(input){
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
   }).catch(function(err){
     if(addBtn){addBtn.textContent="+ Photo";addBtn.disabled=false;}
-    alert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
+    askAlert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
   });
 }
@@ -635,13 +635,13 @@ function backupToCloud(){
 }
 
 function restoreFromCloud(){
-  if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
+  if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   askConfirm("Ceci va remplacer toutes vos données locales par la dernière sauvegarde cloud.", {title:"Restaurer la sauvegarde ?", confirmText:"Restaurer"}).then(function(ok){
     if(!ok)return;
     window.fbGetDocs(window.fbCollection(window.fbDb,"backups")).then(function(snap){
       var found=null;
       snap.forEach(function(d){if(d.id==="latest")found=d.data();});
-      if(!found||!found.data){alert("Aucune sauvegarde cloud disponible");return;}
+      if(!found||!found.data){askAlert("Aucune sauvegarde cloud disponible");return;}
       var data=JSON.parse(found.data);
       localStorage.setItem("asmb_players",JSON.stringify(data.players||[]));
       localStorage.setItem("asmb_teams",JSON.stringify(data.teams||[]));
@@ -653,7 +653,7 @@ function restoreFromCloud(){
         localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
       });
       askAlert("Données restaurées depuis le cloud ! L'application va se recharger.").then(function(){location.reload();});
-    }).catch(function(){alert("Erreur lors de la restauration");});
+    }).catch(function(){askAlert("Erreur lors de la restauration");});
   });
 }
 
@@ -672,7 +672,7 @@ async function resetAllData(){
   var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club (y compris les canaux de discussion et leurs messages), dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRRÉVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
   var typed=await askPrompt("Pour confirmer la suppression définitive, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
-  if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
+  if(typed!=="SUPPRIMER"){ if(typed!==null) askAlert("Texte incorrect, rien n'a été supprimé."); return; }
 
   ["asmb_players","asmb_teams","asmb_events","asmb_docs","asmb_licences","asmb_evaluations","asmb_done"].forEach(function(k){localStorage.removeItem(k);});
   Object.keys(localStorage).filter(function(k){return k.startsWith("asmb_pole_")||k.startsWith("asmb_lastread_");}).forEach(function(k){localStorage.removeItem(k);});
@@ -716,12 +716,12 @@ async function resetAllData(){
 }
 
 async function resetComptabilite(){
-  if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
+  if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){askAlert("Réservé au dirigeant.");return;}
   var count=getComptabilite().length;
   var ok=await askConfirm("Ceci va supprimer les "+count+" ligne(s) de comptabilité (recettes et dépenses), dans le cloud partagé. Action définitive et IRRÉVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
   var typed=await askPrompt("Pour confirmer, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
-  if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
+  if(typed!=="SUPPRIMER"){ if(typed!==null) askAlert("Texte incorrect, rien n'a été supprimé."); return; }
 
   localStorage.removeItem("asmb_comptabilite");
   if(window.fbDb && window.fbGetDocs && window.fbDeleteDoc){
@@ -805,7 +805,7 @@ function loadDemoDataConfirmed(){
   });
   saveLicences(lics);
 
-  alert("Données de démo chargées ! 4 équipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Léa Martin) : 0600000000\n- \"Je suis Parent\" (parent de Léa) : 0700000000");
+  askAlert("Données de démo chargées ! 4 équipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Léa Martin) : 0600000000\n- \"Je suis Parent\" (parent de Léa) : 0700000000");
   buildAdminHome();
 }
 
@@ -819,7 +819,7 @@ function loadDemoEventsConfirmed(){
   var teams=getTeams();
   var demoTeams=teams.filter(function(t){return t.demo;});
   if(!demoTeams.length){
-    alert("Chargez d'abord les équipes de démo (bouton juste au-dessus).");
+    askAlert("Chargez d'abord les équipes de démo (bouton juste au-dessus).");
     return;
   }
 
@@ -862,7 +862,7 @@ function loadDemoEventsConfirmed(){
  });
 
  saveEvents(events);
- alert("Entraînements fictifs ajoutés pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
+ askAlert("Entraînements fictifs ajoutés pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
  buildAdminHome();
 }
 
@@ -886,7 +886,7 @@ function clearDemoData(){
      if(allEvals[evId]){ delete allEvals[evId]; evalsChanged=true; }
    });
    if(evalsChanged) saveAllEvaluations(allEvals);
-   alert("Données de démo supprimées.");
+   askAlert("Données de démo supprimées.");
    buildAdminHome();
  });
 }

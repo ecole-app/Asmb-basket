@@ -80,7 +80,7 @@ function saveCreneau(){
   var equipe=(document.getElementById("cr-equipe")||{}).value||"";
   var notes=(document.getElementById("cr-notes")||{}).value||"";
   var repeatVal=(document.getElementById("cr-repeat")||{}).value||"0";
-  if(!debut||!fin){alert("Horaires obligatoires");return;}
+  if(!debut||!fin){askAlert("Horaires obligatoires");return;}
   var events=getEvents();
   var firstDate=getNextDateForDayName(creneauJour);
   var occurrences;
@@ -107,7 +107,7 @@ function saveCreneau(){
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();buildRealEventsList();
-  if(occurrences>1)alert(occurrences+" créneaux créés (répétition hebdomadaire)");
+  if(occurrences>1)askAlert(occurrences+" créneaux créés (répétition hebdomadaire)");
 }
 
 var evExternes=[];
@@ -230,7 +230,7 @@ function renderEvExternes(){
 function addEvExterne(){
   var nom=document.getElementById("ev-ext-nom").value.trim();
   var contact=document.getElementById("ev-ext-contact").value.trim();
-  if(!nom){alert("Nom obligatoire");return;}
+  if(!nom){askAlert("Nom obligatoire");return;}
   evExternes.push({nom:nom,contact:contact});
   document.getElementById("ev-ext-nom").value="";
   document.getElementById("ev-ext-contact").value="";
@@ -249,7 +249,7 @@ function saveEventFull(){
   var realSelectedTeamIds=evSelectedTeams.filter(function(id){return id!=="__all__";});
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
   var canal=document.getElementById("ev-canal").value;
-  if(!titre||!date){alert("Titre et date obligatoires");return;}
+  if(!titre||!date){askAlert("Titre et date obligatoires");return;}
   var participantsClub=Array.from(document.querySelectorAll(".ev-player-cb:checked")).map(function(cb){return cb.value;});
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
@@ -270,7 +270,7 @@ function saveEventFull(){
   buildPlanning();buildAdminHome();buildRealEventsList();
   closeModal("modal-event-full");
   if(!isDirigeant){
-    alert("Événement soumis au dirigeant pour validation. Il apparaîtra dans le calendrier une fois approuvé.");
+    askAlert("Événement soumis au dirigeant pour validation. Il apparaîtra dans le calendrier une fois approuvé.");
     return;
   }
   if(eventObj.canalId && eventObj.canalAutoTeamIds.length){ grantEventChannelAccess(eventObj); }
@@ -284,9 +284,9 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
       text:msg,pseudo:clubPseudo("Admin"),ts:window.fbServerTimestamp()
     });
-    alert("Événement créé et annonce envoyée dans le canal !");
+    askAlert("Événement créé et annonce envoyée dans le canal !");
   } else {
-    alert("Événement créé !");
+    askAlert("Événement créé !");
   }
 }
 function deleteEvent(id){askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){if(!ok)return;var events=getEvents().filter(function(e){return e.id!==id;});saveEvents(events);buildPlanning();buildAdminHome();buildRealEventsList();});}
@@ -496,7 +496,7 @@ async function editEventDateTime(eventId){
       text:"<b>Créneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
-    alert("Créneau modifié, alerte envoyée dans le canal.");
+    askAlert("Créneau modifié, alerte envoyée dans le canal.");
   }
 }
 async function editScore(eventId){
@@ -572,7 +572,7 @@ function saveConvocation(){
   if(idx<0)return;
   var ev=events[idx];
   var checked=Array.from(document.querySelectorAll(".convoc-cb:checked")).map(function(cb){return cb.value;});
-  if(!checked.length){alert("Sélectionnez au moins un joueur");closeModal("modal-convocation");return;}
+  if(!checked.length){askAlert("Sélectionnez au moins un joueur");closeModal("modal-convocation");return;}
   ev.convocations=checked;
   saveEvents(events);
   buildPlanning();
@@ -586,9 +586,9 @@ function saveConvocation(){
       type:"convocation",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventHeure:ev.heure||"",eventLieu:ev.lieu||"",
       players:convocPlayers,responses:{},pseudo:clubPseudo("Convocation"),ts:window.fbServerTimestamp()
     });
-    alert("Convocation envoyée dans le canal !");
+    askAlert("Convocation envoyée dans le canal !");
   } else {
-    alert("Convocation enregistrée (pas de connexion pour notifier)");
+    askAlert("Convocation enregistrée (pas de connexion pour notifier)");
   }
 }
 
@@ -740,7 +740,7 @@ function eventToVEVENT(e){
 }
 
 function downloadIcs(filename,events){
-  if(!events.length){alert("Aucun événement a exporter");return;}
+  if(!events.length){askAlert("Aucun événement a exporter");return;}
   var body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+clubLabel()+"//FR","CALSCALE:GREGORIAN"]
     .concat(events.map(eventToVEVENT)).concat(["END:VCALENDAR"]).join("\r\n");
   var blob=new Blob([body],{type:"text/calendar;charset=utf-8"});
