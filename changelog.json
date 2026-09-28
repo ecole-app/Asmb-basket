@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790619994",
+    "titre": "Mise à jour du 28 septembre (15)",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Le bouton pour changer de profil apparaît maintenant aussi pour un dirigeant ou un coach qui est aussi parent d'un joueur licencié (même si « parent » n'a jamais été coché explicitement sur son compte) — il reste caché pour les comptes à un seul rôle." }
+    ]
+  },
+  {
     "v": "1790619896",
     "titre": "Mise à jour du 28 septembre (14)",
     "points": [

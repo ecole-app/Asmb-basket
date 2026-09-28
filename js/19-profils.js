@@ -693,14 +693,24 @@ function navToCoach(which){
   if(hbk)hbk.classList.remove("show");
 }
 
+// Rôles réellement disponibles pour ce compte : ceux attribués (roles) plus
+// "parent" si le compte a un enfant licencié rattaché (linkedPlayerIds),
+// même si "parent" n'a jamais été coché explicitement dans son profil.
+// Ça couvre le dirigeant ou le coach qui est aussi parent d'un joueur.
+function effectiveRoles(){
+  var roles=((window.ASMB_USER&&window.ASMB_USER.roles)||[]).slice();
+  var linked=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(linked.length && roles.indexOf("parent")<0) roles.push("parent");
+  return roles;
+}
+
 function refreshHeaderProfileBtn(){
-  // Le bouton doit rester visible tant que le compte a plusieurs profils
-  // possibles (dirigeant/coach/parent...), quel que soit celui affiché
-  // actuellement — sinon un dirigeant qui teste la vue "parent" se
-  // retrouve coincé sans moyen de revenir en arrière.
-  var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  // Le bouton ne s'affiche que pour un compte qui a réellement plusieurs
+  // profils possibles (dirigeant/coach/parent...), jamais pour un compte
+  // à rôle unique — sinon un dirigeant/coach qui teste ou consulte la vue
+  // parent de son propre enfant se retrouve coincé sans moyen de revenir.
   var pb=document.getElementById("hdr-profile-btn");
-  if(pb)pb.style.display=(roles.length>=2)?"flex":"none";
+  if(pb)pb.style.display=(effectiveRoles().length>=2)?"flex":"none";
 }
 
 function logoutUser(){
@@ -725,7 +735,7 @@ function openParametres(){
   showScr("parametres");
 }
 function switchProfile(){
-  var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  var roles=effectiveRoles();
   if(roles.length<2){ return; }
   var current=localStorage.getItem("asmb_profile");
   var modal=document.createElement("div");
