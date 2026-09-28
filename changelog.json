@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790587700",
+    "titre": "Mise à jour du 28 septembre (6)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau : proposez un covoiturage pour un match ou un entraînement depuis un canal de discussion (bouton 🚗), et réservez une place en un clic." }
+    ]
+  },
+  {
     "v": "1790586147",
     "titre": "Mise à jour du 28 septembre (5)",
     "points": [

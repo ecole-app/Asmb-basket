@@ -606,6 +606,25 @@ function listenMessages(channelId, prevLastRead){
         msgsEl.appendChild(wrap);
         return;
       }
+      if(msg.type==="carpool"){
+        var cpDiv=document.createElement("div");cpDiv.className="poll-bubble";
+        var passagers=msg.passagers||[];
+        var placesRestantes=(msg.places||0)-passagers.length;
+        var meIn=passagers.indexOf(savedPseudo||"moi")>=0;
+        var isFull=placesRestantes<=0&&!meIn;
+        var cpHtml='<div class="poll-q">🚗 Covoiturage</div>'+
+          '<div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:2px">'+msg.eventTitre+'</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+msg.eventDate+(msg.eventLieu?" · "+msg.eventLieu:"")+'</div>'+
+          '<div style="font-size:11.5px;color:var(--txt)">Conducteur·rice : <b>'+authEsc(msg.conducteur||"")+'</b></div>'+
+          (msg.depart?('<div style="font-size:11px;color:var(--mut);margin-top:2px">Départ : '+authEsc(msg.depart)+'</div>'):"")+
+          '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+(passagers.length?authEsc(passagers.join(", ")):"Personne pour l'instant")+'</div>'+
+          '<div onclick="reserverCarpool(\''+channelId+'\',\''+d.id+'\')" style="cursor:'+(isFull?"default":"pointer")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(meIn?"#1B5C28":(isFull?"rgba(0,0,0,.08)":"rgba(212,175,55,.15)"))+';color:'+(meIn?"#fff":(isFull?"var(--mut)":"#D4AF37"))+'">'+(meIn?"✓ Vous avez une place — annuler":(isFull?"Complet":"Réserver une place ("+placesRestantes+" restante"+(placesRestantes>1?"s":"")+")"))+'</div>'+
+          '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+time+'</div>';
+        cpDiv.innerHTML=cpHtml;
+        wrap.appendChild(cpDiv);
+        msgsEl.appendChild(wrap);
+        return;
+      }
       if(msg.type==="poll"){
         var pollDiv=document.createElement("div");pollDiv.className="poll-bubble";
         var myP=savedPseudo||"moi";
@@ -945,6 +964,74 @@ async function respondConvocation(channelId,msgId,playerId,status){
     });
   }).catch(function(e){
     askAlert("La réponse n'a pas pu être enregistrée : "+((e&&e.code)||e));
+  });
+}
+
+// ── COVOITURAGE ───────────────────────────────────────────────────
+// Un message de type "carpool" par trajet propose : n'importe qui dans le
+// canal (parent ou coach) peut le creer, et n'importe qui peut reserver une
+// des places (max = "places"). Meme mecanique de lecture-puis-ecriture que
+// les sondages -- acceptable ici pour la meme raison (faible frequentation).
+function showCarpoolCreator(){
+  if(!currentChannelId){alert("Ouvrez d'abord un canal");return;}
+  var sel=document.getElementById("carpool-event");
+  var todayStr=new Date().toISOString().slice(0,10);
+  var events=getEvents().filter(function(e){return e.date>=todayStr&&!e.cancelled;}).sort(function(a,b){return a.date>b.date?1:-1;});
+  // Priorite aux evenements de l'equipe de ce canal, mais on laisse le choix
+  // sur tous les evenements a venir (un canal general peut aussi organiser
+  // un covoiturage pour un tournoi multi-equipes).
+  sel.innerHTML=events.map(function(e){
+    return '<option value="'+e.id+'">'+e.titre+' · '+e.date+(e.lieu?" · "+e.lieu:"")+'</option>';
+  }).join("");
+  if(!events.length){sel.innerHTML='<option value="">Aucun événement à venir</option>';}
+  document.getElementById("carpool-places").value="3";
+  document.getElementById("carpool-depart").value="";
+  document.getElementById("modal-carpool").style.display="flex";
+}
+
+async function createCarpool(){
+  if(!window.fbReady){alert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  if(!(await checkMyPhone()))return;
+  var eventId=document.getElementById("carpool-event").value;
+  if(!eventId){alert("Sélectionnez un événement");return;}
+  var ev=getEvents().find(function(e){return e.id===eventId;});
+  if(!ev){alert("Événement introuvable");return;}
+  var places=parseInt(document.getElementById("carpool-places").value,10)||1;
+  if(places<1)places=1;
+  var depart=document.getElementById("carpool-depart").value.trim();
+  var pseudo=(document.getElementById("chat-pseudo")||{}).value.trim()||savedPseudo||"Anonyme";
+  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+    type:"carpool",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventLieu:ev.lieu||"",
+    conducteur:pseudo,places:places,depart:depart,passagers:[],pseudo:clubPseudo("Covoiturage"),ts:window.fbServerTimestamp()
+  }).catch(function(e){
+    askAlert("Le covoiturage n'a pas pu être publié : "+((e&&e.code)||e));
+  });
+  closeModal("modal-carpool");
+}
+
+async function reserverCarpool(channelId,msgId){
+  if(!window.fbReady)return;
+  if(!(await checkMyPhone()))return;
+  var pseudo=savedPseudo||"moi";
+  var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
+  window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
+    var msgData=null;
+    snap.forEach(function(d){if(d.id===msgId)msgData=d.data();});
+    if(!msgData)return;
+    var passagers=(msgData.passagers||[]).slice();
+    var idx=passagers.indexOf(pseudo);
+    if(idx>=0){
+      passagers.splice(idx,1);
+    } else {
+      if(passagers.length>=(msgData.places||0)){alert("Complet, plus de place disponible.");return;}
+      passagers.push(pseudo);
+    }
+    window.fbUpdateDoc(msgRef,{passagers:passagers}).catch(function(e){
+      askAlert("La réservation n'a pas pu être enregistrée : "+((e&&e.code)||e));
+    });
+  }).catch(function(e){
+    askAlert("La réservation n'a pas pu être enregistrée : "+((e&&e.code)||e));
   });
 }
 
