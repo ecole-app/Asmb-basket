@@ -76,6 +76,10 @@ Quand le changement est visible par un dirigeant/coach/parent (pas une correctio
 interne ou un ajout de contenu de formation), ajouter une entrée en tête de
 `changelog.json` (`{v, titre, points}`, phrases simples, sans jargon technique) :
 c'est ce que "Voir le contenu de la mise à jour" affiche depuis la bannière.
+Chaque point a un `roles` (`["dirigeant","coach","parent"]` etc.) : seuls les
+rôles concernés le voient (le profil actif vient de `asmb_profile`). Un point
+sans `roles` s'affiche à tout le monde. Un changement plateforme (super admin
+seul) n'a pas sa place ici — personne d'autre ne le verrait de toute façon.
 
 ## Multi-club
 

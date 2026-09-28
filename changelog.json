@@ -1,13 +1,12 @@
 [
   {
-    "v": "1790535842",
+    "v": "1790576570",
     "titre": "Mise à jour du 28 septembre",
     "points": [
-      "Un dirigeant qui active un nouveau club doit maintenant lire et accepter le contrat qui protège les données de ses licenciés, avant de créer son compte.",
-      "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application.",
-      "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé.",
-      "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord.",
-      "En cas de suppression d'un club sur la plateforme, ses données sont désormais réellement et intégralement effacées."
+      { "roles": ["dirigeant"], "texte": "En activant un nouveau club, vous devez maintenant lire et accepter le contrat qui protège les données de vos licenciés, avant de créer votre compte." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application." },
+      { "roles": ["dirigeant", "parent"], "texte": "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé." },
+      { "roles": ["dirigeant", "parent"], "texte": "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord." }
     ]
   }
 ]

@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790576317";
+var APP_VERSION="1790576570";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -69,23 +69,34 @@ setInterval(checkForUpdate,120000);
 // Alimente uniquement pour les changements visibles par un dirigeant/coach/
 // parent — pas un doublon du log Git, qui reste technique.
 function showChangelog(){
+  // Filtre par profil actif : un point sans "roles" (ou roles vide) est visible
+  // par tout le monde ; sinon seulement par les profils listes. Le super admin
+  // (plateforme) voit tout, sans filtre -- ces points ne le concernent pas
+  // directement mais rien ne doit lui etre cache.
+  var profil=localStorage.getItem("asmb_profile")||"";
+  var voitTout=(typeof isSuperAdmin==="function"&&isSuperAdmin());
   fetch("./changelog.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
     .then(function(list){
       var entry=(list&&list[0])||null;
       var s=gmSheet(entry&&entry.titre?entry.titre:"Derniere mise a jour");
-      if(!entry||!entry.points||!entry.points.length){
+      var points=((entry&&entry.points)||[]).filter(function(pt){
+        if(voitTout) return true;
+        if(typeof pt==="string") return true; // ancien format, sans roles
+        return !pt.roles || !pt.roles.length || pt.roles.indexOf(profil)>=0;
+      });
+      if(!points.length){
         var p=document.createElement("div");
         p.style.cssText="font-size:13px;color:var(--txt2)";
-        p.textContent="Details non disponibles pour cette mise a jour.";
+        p.textContent="Rien de nouveau ne vous concerne dans cette mise a jour.";
         s.body.appendChild(p);
         return;
       }
       var ul=document.createElement("ul");
       ul.style.cssText="margin:0;padding-left:20px;font-size:13.5px;color:var(--txt2);line-height:1.6";
-      entry.points.forEach(function(pt){
+      points.forEach(function(pt){
         var li=document.createElement("li");
-        li.textContent=pt;
+        li.textContent=(typeof pt==="string")?pt:pt.texte;
         li.style.marginBottom="6px";
         ul.appendChild(li);
       });
