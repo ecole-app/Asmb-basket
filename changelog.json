@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790618311",
+    "titre": "Mise à jour du 28 septembre (10)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Première touche de la nouvelle identité visuelle : cartes plus arrondies et accent violet/indigo (au lieu du doré/marine) pour les éléments communs à l'application (navigation, prochain événement)." }
+    ]
+  },
+  {
     "v": "1790588575",
     "titre": "Mise à jour du 28 septembre (9)",
     "points": [

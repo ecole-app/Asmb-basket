@@ -1,6 +1,6 @@
 /* ===== Styles principaux ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f1f4f9;--sf:#ffffff;--card:#ffffff;--bdr:#ccd6e8;--mut:#536178;--txt:#1a2438;--txt2:#3d4d6b;--grn:#D4AF37;--dkg:#1A2E5A;--ltg:#D4AF37;--red:#C0392B;--shadow:rgba(0,0,0,.10);--r:16px;--rs:12px;--rx:8px}
+:root{--bg:#f1f4f9;--sf:#ffffff;--card:#ffffff;--bdr:#ccd6e8;--mut:#536178;--txt:#1a2438;--txt2:#3d4d6b;--grn:#D4AF37;--dkg:#1A2E5A;--ltg:#D4AF37;--red:#C0392B;--shadow:rgba(0,0,0,.10);--r:20px;--rs:16px;--rx:12px;--acc1:#8B5CF6;--acc2:#4F46E5;--accg:linear-gradient(120deg,var(--acc2),var(--acc1))}
 [data-theme="dark"]{--bg:#0a0f1a;--sf:#101a2c;--card:#16213a;--bdr:#22314f;--mut:#7a8caa;--txt:#e4e8f2;--txt2:#b0bdd4;--ltg:#E9C46A;--shadow:rgba(0,0,0,.35)}
 html,body{height:100%;overflow:hidden}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);display:flex;flex-direction:column;transition:background .25s,color .25s}
@@ -18,7 +18,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .bnav{display:flex;background:var(--sf);border-top:1px solid var(--bdr);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));flex-shrink:0;box-shadow:0 -4px 20px var(--shadow)}
 .bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 2px 4px;border:none;background:none;color:var(--mut);font-size:8.5px;font-weight:600;text-transform:uppercase;transition:color .15s;white-space:nowrap;position:relative}
 .bni::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:0 0 3px 3px;background:var(--ltg);transition:width .18s}
-.bni.on{color:var(--ltg);font-weight:800}.bni.on::before{width:22px}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
+.bni.on{color:var(--acc1);font-weight:800}.bni.on::before{width:22px;background:var(--accg)}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
 .sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:16px 16px 8px}
 .hero{background:linear-gradient(160deg,#10203d,#1A2E5A,#10203d);padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
 [data-theme="dark"] .hero{background:linear-gradient(160deg,#060d1c,#0d1b33,#060d1c)}
