@@ -21,8 +21,8 @@ function openPresences(eventId){
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
     div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
-        '<button data-pid="'+p.id+'" data-state="present" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#D4AF37":"var(--bdr)")+';background:'+(state==="present"?"#D4AF37":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
-        '<button data-pid="'+p.id+'" data-state="absent" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
+        '<button data-pid="'+p.id+'" data-state="present" data-selected="'+(state==="present"?"1":"0")+'" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"#D4AF37":"var(--bdr)")+';background:'+(state==="present"?"#D4AF37":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
+        '<button data-pid="'+p.id+'" data-state="absent" data-selected="'+(state==="absent"?"1":"0")+'" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+
       '</div>';
  el.appendChild(div);
  checkExistingCheckin(eventId,p.id).then(function(existing){
@@ -46,8 +46,8 @@ function setPresenceState(btn){
     b.style.background=isThis?col:"var(--bg)";
     b.style.color=isThis?"#fff":"var(--mut)";
     b.style.borderColor=isThis?col:"var(--bdr)";
+    b.dataset.selected=isThis?"1":"0";
   });
-  btn.dataset.selected="1";
 }
 
 function savePresences(){
@@ -58,7 +58,7 @@ function savePresences(){
   document.querySelectorAll("#presence-list > div").forEach(function(row){
     var btns=row.querySelectorAll("button");
     btns.forEach(function(b){
-      if(b.style.color==="rgb(255, 255, 255)"){presences[b.dataset.pid]=b.dataset.state;}
+      if(b.dataset.selected==="1"){presences[b.dataset.pid]=b.dataset.state;}
     });
   });
   events[idx].presences=presences;
