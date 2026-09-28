@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790580708",
+    "titre": "Mise à jour du 28 septembre (2)",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Corrigé : créer un événement en cochant « Tout le club » faisait planter l'écran." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Correction de nombreuses fautes d'orthographe et d'accents dans l'application." }
+    ]
+  },
+  {
     "v": "1790576570",
     "titre": "Mise à jour du 28 septembre",
     "points": [

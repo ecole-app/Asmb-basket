@@ -189,10 +189,11 @@ function renderEvPlayers(){
   var teams=getTeams();
   var allClub=evSelectedTeams.indexOf("__all__")>=0;
   var players;
+  var selectedTeams=[];
   if(allClub){
     players=getPlayers();
   } else {
-    var selectedTeams=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;});
+    selectedTeams=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;});
     if(!selectedTeams.length){
       players=getPlayers();
     } else {
@@ -210,7 +211,7 @@ function renderEvPlayers(){
   players.forEach(function(p){
     var lbl=document.createElement("label");
     lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
-    var checkedAttr=selectedTeams.length?"checked":"";
+    var checkedAttr=(allClub||selectedTeams.length)?"checked":"";
     lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
     el.appendChild(lbl);
   });
