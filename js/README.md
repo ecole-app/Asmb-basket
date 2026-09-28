@@ -72,6 +72,11 @@ Site statique servi par GitHub Pages depuis la racine du dépôt. Aucune étape 
 Après un push, bump `version.json` (et `APP_VERSION` dans `21-main.js`) pour déclencher
 la bannière de mise à jour côté utilisateurs et purger l'ancien cache.
 
+Quand le changement est visible par un dirigeant/coach/parent (pas une correction
+interne ou un ajout de contenu de formation), ajouter une entrée en tête de
+`changelog.json` (`{v, titre, points}`, phrases simples, sans jargon technique) :
+c'est ce que "Voir le contenu de la mise à jour" affiche depuis la bannière.
+
 ## Multi-club
 
 Toutes les données d'un club vivent sous `clubs/{clubId}/...` dans Firestore.

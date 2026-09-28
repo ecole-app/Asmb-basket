@@ -1,0 +1,13 @@
+[
+  {
+    "v": "1790535842",
+    "titre": "Mise à jour du 28 septembre",
+    "points": [
+      "Un dirigeant qui active un nouveau club doit maintenant lire et accepter le contrat qui protège les données de ses licenciés, avant de créer son compte.",
+      "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application.",
+      "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé.",
+      "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord.",
+      "En cas de suppression d'un club sur la plateforme, ses données sont désormais réellement et intégralement effacées."
+    ]
+  }
+]

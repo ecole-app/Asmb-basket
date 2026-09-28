@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790535842";
+var APP_VERSION="1790576317";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -63,6 +63,38 @@ function applyUpdate(){
 }
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,120000);
+
+// ═══ CONTENU DE LA MISE A JOUR ═══════════════════════════════════
+// changelog.json : liste (plus recente en premier) de {v, titre, points}.
+// Alimente uniquement pour les changements visibles par un dirigeant/coach/
+// parent — pas un doublon du log Git, qui reste technique.
+function showChangelog(){
+  fetch("./changelog.json?t="+Date.now(),{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(list){
+      var entry=(list&&list[0])||null;
+      var s=gmSheet(entry&&entry.titre?entry.titre:"Derniere mise a jour");
+      if(!entry||!entry.points||!entry.points.length){
+        var p=document.createElement("div");
+        p.style.cssText="font-size:13px;color:var(--txt2)";
+        p.textContent="Details non disponibles pour cette mise a jour.";
+        s.body.appendChild(p);
+        return;
+      }
+      var ul=document.createElement("ul");
+      ul.style.cssText="margin:0;padding-left:20px;font-size:13.5px;color:var(--txt2);line-height:1.6";
+      entry.points.forEach(function(pt){
+        var li=document.createElement("li");
+        li.textContent=pt;
+        li.style.marginBottom="6px";
+        ul.appendChild(li);
+      });
+      s.body.appendChild(ul);
+    })
+    .catch(function(){
+      if(typeof askAlert==="function") askAlert("Impossible de charger le detail de la mise a jour.");
+    });
+}
 
 function checkTomorrowReminders(){
  if(!window.fbReady)return;
