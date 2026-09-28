@@ -283,7 +283,7 @@ function buildDashboard(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
 
   html+='<div onclick="showPendingLicences()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
-    '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"var(--acc1)":"var(--txt)")+'">'+licencesEnAttente+'</div>'+
+    '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"#D4AF37")+'">'+licencesEnAttente+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licences en attente</div></div>';
 
   html+='<div onclick="showTeamsList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
@@ -301,13 +301,10 @@ function buildDashboard(){
     var upcomingLabel=typeLabels[upcoming.type]||"Prochain événement";
     var upDateParts=upcoming.date.split("-");
     var upDateFr=upDateParts.length===3?(upDateParts[2]+"/"+upDateParts[1]+"/"+upDateParts[0]):upcoming.date;
-    html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;gap:12px">'+
-      '<div style="width:44px;height:44px;border-radius:14px;background:var(--accg);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
-        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+upcomingLabel+'</div>'+
-        '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
-        '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div></div>';
+    html+='<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
+      '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+upcomingLabel+'</div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>';
   }
 
   var homonymes=(typeof detecterHomonymes==="function")?detecterHomonymes():[];
