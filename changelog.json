@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790585654",
+    "titre": "Mise à jour du 28 septembre (4)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Le rapprochement entre une fiche licence et un joueur du club tolère maintenant les différences de majuscules/minuscules, d'accents et d'espaces dans le nom/prénom." }
+    ]
+  },
+  {
     "v": "1790582482",
     "titre": "Mise à jour du 28 septembre (3)",
     "points": [

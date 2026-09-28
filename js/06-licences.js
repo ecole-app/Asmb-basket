@@ -2,6 +2,15 @@
 // ═══ SYSTÈME LICENCES ════════════════════════════════════════════
 
 function getLicences(){try{return JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){return [];}}
+// Normalise un nom/prenom pour le rapprochement licence <-> joueur : insensible
+// a la casse, aux accents et aux espaces multiples/en trop. Reste une egalite
+// stricte apres normalisation (pas de recherche approchante/floue) : deux
+// personnes vraiment differentes ne matcheront toujours pas, seules les
+// variations de saisie ("Jean-Pierre" / "jean  pierre", "Émilie" / "Emilie")
+// sont desormais tolerees.
+function normNomPrenom(s){
+  return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().replace(/\s+/g," ").toLowerCase();
+}
 // ── INDEX DES CODES D'INSCRIPTION (lecture publique) ──────────────
 // Ne contient QUE : l'id interne de la licence + le type deja choisi.
 // Aucun nom, aucune adresse, aucun contact, aucun document. Sert uniquement
@@ -85,7 +94,7 @@ function publierRattachements(){
   }
   lics.forEach(function(l){
     var f=l&&l.fiche; if(!f) return;
-    var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+    var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
     if(!p) return;
     [f.telephone,f.respTel,f.resp2Tel].forEach(function(t){ lier(t,p.id,l.id); });
   });
@@ -118,7 +127,7 @@ function playerIdsPourTelephones(tels){
     var f=l&&l.fiche; if(!f) return;
     var lp=[f.telephone,f.respTel,f.resp2Tel].filter(Boolean).map(function(x){return x.replace(/\s+/g,"");});
     if(!lp.some(function(x){return norm.indexOf(x)>=0;})) return;
-    var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+    var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
     if(p) ids[String(p.id)]=true;
   });
   players.forEach(function(p){
@@ -765,7 +774,7 @@ function saveEditedFiche(){
   // il faut la mettre a jour ici, sinon un changement d'avis sur la photo
   // ne serait jamais visible cote roster.
   var players=getPlayers();
-  var p=players.find(function(x){return x.prenom===f.prenom&&x.nom===f.nom;});
+  var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
   if(p){
     p.photo=f.photo||null;
     p.photoAutorisee=f.photoAutorisee===true;
