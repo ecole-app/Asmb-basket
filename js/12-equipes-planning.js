@@ -129,6 +129,25 @@ function exportPlanningPDF(){
   doc.save(clubSlug()+"_planning_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
+// Découpe une ligne CSV en respectant les champs entre guillemets (donc les
+// virgules a l'interieur d'un nom, ex. "Dupont, junior", ne decalent plus les
+// colonnes suivantes). "" a l'interieur d'un champ = un guillemet litteral.
+function parseCsvLine(line){
+  var out=[],cur="",inQ=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(inQ){
+      if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else inQ=false; }
+      else cur+=c;
+    } else {
+      if(c==='"') inQ=true;
+      else if(c===','){ out.push(cur); cur=""; }
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
 function importPlayersCSV(input){
   if(!input.files||!input.files[0])return;
   var file=input.files[0];
@@ -137,7 +156,7 @@ function importPlayersCSV(input){
     var text=e.target.result;
     var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
     if(lines.length<2){alert("Fichier CSV vide ou invalide");return;}
-    var headers=lines[0].split(",").map(function(h){return h.trim().toLowerCase();});
+    var headers=parseCsvLine(lines[0]).map(function(h){return h.trim().toLowerCase();});
     var idxNom=headers.indexOf("nom");
     var idxPrenom=headers.indexOf("prenom");
     var idxNaissance=headers.indexOf("naissance");
@@ -151,7 +170,7 @@ function importPlayersCSV(input){
     var players=getPlayers();
     var added=0;
     lines.slice(1).forEach(function(line){
-      var cols=line.split(",").map(function(c){return c.trim();});
+      var cols=parseCsvLine(line).map(function(c){return c.trim();});
       var nom=cols[idxNom],prenom=cols[idxPrenom];
       if(!nom||!prenom)return;
       players.push({

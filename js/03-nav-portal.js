@@ -212,6 +212,9 @@ function buildCoachDashboard(el){
       '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">'+rows+'</div>'+
       relanceBtn+
     '</div>';
+  }).catch(function(e){
+    el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:13px;font-weight:600;color:#C0392B">Erreur de chargement des présences</div></div>';
+    console.log("buildCoachDashboard:",e);
   });
 }
 
@@ -237,7 +240,11 @@ function relancerSansReponse(eventId){
       text:msg,pseudo:clubPseudo("Coach"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     }).then(function(){
       alert("Relance envoyée dans le canal !");
+    }).catch(function(e){
+      alert("La relance n'a pas pu être envoyée : "+((e&&e.code)||e));
     });
+  }).catch(function(e){
+    alert("Impossible de vérifier les réponses : "+((e&&e.code)||e));
   });
 }
 

@@ -189,17 +189,19 @@ function createChannel(){
  var teamId=(document.getElementById("ch-team")||{}).value||"";
  var clubWide=!!(document.getElementById("ch-clubwide")||{}).checked;
  if(!name){alert("Nom du canal obligatoire");return;}
+ var savePromise;
  if(editingChannelId){
-   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
+   savePromise=window.fbSetDoc(window.fbDoc(window.fbDb,"channels",editingChannelId),{
      name:name,icon:icon,desc:desc,teamId:teamId,clubWide:clubWide
    },{merge:true});
    editingChannelId=null;
  }else{
    var id=name.toLowerCase().replace(/[^a-z0-9]/g,"-").replace(/-+/g,"-");
-   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
+   savePromise=window.fbSetDoc(window.fbDoc(window.fbDb,"channels",id),{
    id:id,name:name,icon:icon,desc:desc,members:[],teamId:teamId,clubWide:clubWide
    },{merge:true});
  }
+ savePromise.catch(function(e){ askAlert("Le canal n'a pas pu être enregistré : "+((e&&e.code)||e)); });
  closeModal("modal-channel");
  document.getElementById("ch-name").value="";document.getElementById("ch-desc").value="";
 }
@@ -253,7 +255,9 @@ async function editMemberLabel(phone,currentLabel){
     if(p===phone)return {phone:p,label:newLabel.trim()||null};
     return m;
   });
-  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:updated},{merge:true});
+  try{
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:updated},{merge:true});
+  }catch(e){ askAlert("Le nom n'a pas pu être enregistré : "+((e&&e.code)||e)); return; }
   chData.members=updated;
   renderMembers(chData);
 }
@@ -270,7 +274,9 @@ async function addMemberToChannel(){
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
   if(exists){alert("Ce numéro est déjà membre");return;}
   members.push({phone:phone,label:null});
-  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  try{
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  }catch(e){ askAlert("Le membre n'a pas pu être ajouté : "+((e&&e.code)||e)); return; }
   input.value="";
   chData.members=members;
   renderMembers(chData);
@@ -285,7 +291,9 @@ async function removeMemberFromChannel(phone){
   var chData=null;
   chDoc.forEach(function(d){if(d.id===currentAdminChannelId)chData=d.data();});
   var members=((chData&&chData.members)||[]).filter(function(m){return (typeof m==="string"?m:m.phone)!==phone;});
-  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  try{
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  }catch(e){ askAlert("L'accès n'a pas pu être révoqué : "+((e&&e.code)||e)); return; }
   chData.members=members;
   renderMembers(chData);
   buildAdminComm();
@@ -317,7 +325,9 @@ async function addMemberFromLicence(phone,label){
   var exists=members.some(function(m){return (typeof m==="string"?m:m.phone)===phone;});
   if(exists){alert("Ce contact est déjà membre");return;}
   members.push({phone:phone,label:label});
-  await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  try{
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"channels",currentAdminChannelId),{members:members},{merge:true});
+  }catch(e){ askAlert("Le contact n'a pas pu être ajouté : "+((e&&e.code)||e)); return; }
   chData.members=members;
   renderMembers(chData);
   buildAdminComm();
@@ -758,6 +768,8 @@ async function setReaction(channelId,msgId,emoji){
   if(!(await checkMyPhone()))return;
   var pseudo=savedPseudo||"moi";
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
+  // Lecture puis ecriture : fenetre de course possible si 2 clics simultanes,
+  // mais impact limite (reaction perso sur un message de chat) -- non critique.
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
     var reactions={};
     snap.forEach(function(d){if(d.id===msgId){reactions=JSON.parse(JSON.stringify(d.data().reactions||{}));}});
@@ -771,8 +783,12 @@ async function setReaction(channelId,msgId,emoji){
       reactions[emoji].push(pseudo);
     }
     window.fbUpdateDoc(msgRef,{reactions:reactions}).catch(function(){
-      window.fbSetDoc(msgRef,{reactions:reactions},{merge:true});
+      window.fbSetDoc(msgRef,{reactions:reactions},{merge:true}).catch(function(e){
+        askAlert("La réaction n'a pas pu être enregistrée : "+((e&&e.code)||e));
+      });
     });
+  }).catch(function(e){
+    askAlert("La réaction n'a pas pu être enregistrée : "+((e&&e.code)||e));
   });
 }
 
@@ -898,8 +914,12 @@ async function votePoll(channelId,msgId,optionIndex){
       return {text:o.text,votes:votes};
     });
     window.fbUpdateDoc(msgRef,{options:options}).catch(function(){
-      window.fbSetDoc(msgRef,{options:options},{merge:true});
+      window.fbSetDoc(msgRef,{options:options},{merge:true}).catch(function(e){
+        askAlert("Le vote n'a pas pu être enregistré : "+((e&&e.code)||e));
+      });
     });
+  }).catch(function(e){
+    askAlert("Le vote n'a pas pu être enregistré : "+((e&&e.code)||e));
   });
 }
 
@@ -907,16 +927,24 @@ async function respondConvocation(channelId,msgId,playerId,status){
   if(!window.fbReady)return;
   if(!(await checkMyPhone()))return;
   var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
+  // Lecture d'abord pour basculer "meme statut -> retrait", puis ecriture atomique
+  // d'un seul champ imbrique (responses.<playerId>) via dot-path : n'ecrase pas les
+  // reponses des autres joueurs meme si elles ont change entre la lecture et l'ecriture
+  // (contrairement a l'ancienne version qui reecrivait tout l'objet "responses").
   window.fbGetDocs(window.fbCollection(window.fbDb,"channels",channelId,"messages")).then(function(snap){
     var msgData=null;
     snap.forEach(function(d){if(d.id===msgId)msgData=d.data();});
     if(!msgData)return;
-    var responses=Object.assign({},msgData.responses||{});
-    responses[playerId]=(responses[playerId]===status)?null:status;
-    if(!responses[playerId])delete responses[playerId];
-    window.fbUpdateDoc(msgRef,{responses:responses}).catch(function(){
-      window.fbSetDoc(msgRef,{responses:responses},{merge:true});
+    var current=(msgData.responses||{})[playerId];
+    var next=(current===status)?null:status;
+    var field="responses."+playerId;
+    var update={};
+    update[field]=next||null;
+    window.fbUpdateDoc(msgRef,update).catch(function(e){
+      askAlert("La réponse n'a pas pu être enregistrée : "+((e&&e.code)||e));
     });
+  }).catch(function(e){
+    askAlert("La réponse n'a pas pu être enregistrée : "+((e&&e.code)||e));
   });
 }
 

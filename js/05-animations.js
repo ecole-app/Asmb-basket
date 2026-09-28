@@ -600,7 +600,7 @@ SIT_DUR["3.3-1"]=5000;SIT_ANIMS["3.3-1"]=function(ctx,t){if(!ctx)return;
  else if(ph<0.65){var pp=(ph-.4)/.25;dx=ax+12;dy=ay;
  if(pp>0.5){ctx.strokeStyle="rgba(192,57,43,.8)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(dx,dy-10);ctx.lineTo(dx-3,dy-32);ctx.stroke();ctx.fillStyle="rgba(192,57,43,.7)";ctx.font="bold 7px system-ui";ctx.textAlign="center";ctx.fillText("MAIN HAUTE",dx-8,dy-36);}
  }
- else{var pp2=(ph-.65)/.35;dx=lp(ax+12,ax+55,p=>pp2);dy=ay;}
+ else{var pp2=(ph-.65)/.35;dx=lp(ax+12,ax+55,pp2);dy=ay;}
  pl(ctx,ax,ay,"A","#1A2E5A",10);pl(ctx,dx||ax+12,dy||ay,"D","#C0392B",10);
  bl(ctx,ax,ay-13,6);
  });

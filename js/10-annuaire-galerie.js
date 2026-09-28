@@ -690,7 +690,13 @@ async function resetAllData(){
       }
     }catch(e){ console.log("reset channels:", e); }
 
-    var collections=["players","teams","events","licences","evaluations","phone_index","inscription_codes","inscription_submissions"];
+    // ATTENTION : "phone_index" et "inscription_codes" sont des collections GLOBALES
+    // (voir GLOBAL_COLLECTIONS dans firebase-init.js), pas cloisonnees par club au
+    // niveau du chemin Firestore. Les boucler ici comme les autres aurait supprime
+    // les inscription_codes de TOUS les clubs a chaque reinitialisation d'un seul
+    // club -- elles sont donc purgees a part, filtrees par clubId (comme le fait
+    // deja purgeGlobalePourClub() pour la suppression complete d'un club).
+    var collections=["players","teams","events","licences","evaluations","inscription_submissions","checkins","gallery","comptabilite","app_data","joinRequests","reminders_sent","backups","feedback"];
     for(var i=0;i<collections.length;i++){
       try{
         var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,collections[i]));
@@ -698,6 +704,10 @@ async function resetAllData(){
         snap.forEach(function(d){ dels.push(window.fbDeleteDoc(window.fbDoc(window.fbDb,collections[i],d.id))); });
         await Promise.all(dels);
       }catch(e){ console.log("reset "+collections[i]+":", e); }
+    }
+    if(typeof purgeGlobalePourClub==="function" && window.CURRENT_CLUB_ID){
+      try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"inscription_codes"); }
+      catch(e){ console.log("reset inscription_codes:", e); }
     }
   }
 

@@ -1,5 +1,15 @@
 [
   {
+    "v": "1790582482",
+    "titre": "Mise à jour du 28 septembre (3)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Corrigé : la réinitialisation des données d'un club pouvait affecter des données d'autres clubs. C'est maintenant totalement cloisonné." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les erreurs de connexion (réactions, votes, sondages, messages) affichent maintenant un message clair au lieu d'échouer silencieusement." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Corrigé un bug d'affichage dans les animations et dans les notifications de rappel d'événement." },
+      { "roles": ["dirigeant"], "texte": "L'import de joueurs par fichier CSV gère maintenant correctement les noms contenant une virgule." }
+    ]
+  },
+  {
     "v": "1790580708",
     "titre": "Mise à jour du 28 septembre (2)",
     "points": [

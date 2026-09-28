@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790581938";
+var APP_VERSION="1790582482";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -229,17 +229,23 @@ function checkEventReminders(){
  var events=getEvents();
  var now=new Date();
  var notified=JSON.parse(localStorage.getItem("asmb_reminded")||"{}");
+ var todayStr=now.toISOString().slice(0,10);
+ var demain=new Date(now);demain.setDate(demain.getDate()+1);
+ var tomorrowStr=demain.toISOString().slice(0,10);
  events.forEach(function(e){
- if(!localStorage.getItem("asmb_notif")==="on")return;
  var typeKey=e.type==="match"?"match":(e.type==="entrainement"?"entrainement":"evenement");
  if(localStorage.getItem("asmb_notif_"+typeKey)==="off")return;
  var evDate=new Date(e.date+(e.heure?" "+e.heure.replace("h",":"):" 00:00"));
  var diffH=(evDate-now)/3600000;
- // Fenetre de rappel : entre 20h et 24h avant (vérifié a chaque ouverture de l'app)
+ // Fenetre large (jusqu'a 24h avant) car l'app n'est pas forcement rouverte
+ // dans un creneau precis -- mieux vaut prevenir un peu en avance que jamais.
+ // Le libelle "Demain"/"Aujourd'hui" est calcule a part : un evenement ajouté
+ // seulement 3h avant, par exemple, est bien "aujourd'hui", pas "demain".
     if(diffH>0&&diffH<=24&&!notified[e.id]){
+      var jour=(e.date===tomorrowStr)?"Demain":(e.date===todayStr?"Aujourd'hui":"Bientôt");
       try{
         var icon=e.type==="match"?"":(e.type==="entrainement"?"":"");
-        new Notification(icon+" "+clubLabel()+" - "+e.titre,{body:"Demain"+(e.heure?" à "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
+        new Notification(icon+" "+clubLabel()+" - "+e.titre,{body:jour+(e.heure?" à "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
         notified[e.id]=true;
         localStorage.setItem("asmb_reminded",JSON.stringify(notified));
       }catch(err){}
