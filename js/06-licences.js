@@ -290,7 +290,7 @@ function buildLicences(){
     var nom=lic.fiche?(lic.fiche.prenom+" "+lic.fiche.nom):"Fiche en attente";
     var daysSince=(Date.now()-lic.createdAt)/86400000;
     var needsRelance=lic.statut==="envoyee"&&daysSince>=5;
-    var relanceBadge=needsRelance?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Relance recommandee</span>':"";
+    var relanceBadge=needsRelance?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Relance recommandée</span>':"";
     div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+lic.code+'</b>'+(lic.email?' · '+lic.email:'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+st.label+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+lic.ouvertLe+'</span>':'')+relanceBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
@@ -329,19 +329,19 @@ function sendLicenceMail(lic){
   var appUrl="https://ecole-app.github.io/Asmb-basket/?inscription=1";
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
-    clubLabel()+" vous invite a completer votre fiche d'inscription en ligne.\n\n"+
+    clubLabel()+" vous invite à compléter votre fiche d'inscription en ligne.\n\n"+
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"+
     "  VOTRE CODE D'INSCRIPTION\n\n"+
     "        "+lic.code+"\n\n"+
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"+
-    "Comment proceder :\n"+
+    "Comment procéder :\n"+
     "1. Ouvrez ce lien : "+appUrl+"\n"+
     "2. Appuyez sur l'onglet « Inscription »\n"+
     "3. Entrez votre code ci-dessus\n"+
     "4. Remplissez et validez votre fiche\n\n"+
-    "Astuce : vous pouvez aussi ajouter cette page a votre ecran d'accueil pour un acces rapide.\n\n"+
+    "Astuce : vous pouvez aussi ajouter cette page à votre écran d'accueil pour un accès rapide.\n\n"+
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
-    "En cas de probleme, contactez le club directement.\n\n"+
+    "En cas de problème, contactez le club directement.\n\n"+
     "Secrétariat\n"+
  clubLabel();
  var mailto="mailto:"+lic.email+"?subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(body);
@@ -397,12 +397,12 @@ function renderLicenceDetail(lic){
  ["Genre",f.genre==="F"?"Féminin":"Masculin"],
  ["Prénom",f.prenom],["Nom",f.nom],
  ["Date de naissance",f.naissance],
- ["Ne(e) a l etranger",f.neEtranger?"Oui - "+(f.villeNaiss||"?")+", "+(f.paysNaiss||"?"):"Non"],["Adresse",f.adresse],
+ ["Né(e) à l'étranger",f.neEtranger?"Oui - "+(f.villeNaiss||"?")+", "+(f.paysNaiss||"?"):"Non"],["Adresse",f.adresse],
  ["Téléphone",f.telephone],["Email",f.emailLic],
- ["Responsable legal 1",f.respNom+(f.respLien?" ("+f.respLien+")":"")],
+ ["Responsable légal 1",f.respNom+(f.respLien?" ("+f.respLien+")":"")],
  ["Tel resp. 1",f.respTel],
  ["Email resp. 1",f.respEmail],
- ["Responsable legal 2",f.resp2Nom+(f.resp2Lien?" ("+f.resp2Lien+")":"")],
+ ["Responsable légal 2",f.resp2Nom+(f.resp2Lien?" ("+f.resp2Lien+")":"")],
  ["Tel resp. 2",f.resp2Tel],
  ["Email resp. 2",f.resp2Email],
  ["Contact urgence",f.urgenceNom+(f.urgenceTel?" · "+f.urgenceTel:"")],
@@ -701,7 +701,7 @@ function validerLicence(){
       savePlayers(players);
     }
   }
-  alert("Licence validée ! Le joueur a ete ajouté aux inscriptions.");
+  alert("Licence validée ! Le joueur a été ajouté aux inscriptions.");
 }
 
 function resendLicMail(){
@@ -731,13 +731,13 @@ function showEditFiche(){
       '</label>'+
     '</div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable legal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(f.respNom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable legal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable legal 1 - Email</label><input class="form-input" id="ef-respEmail" value="'+(f.respEmail||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(f.respNom||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Email</label><input class="form-input" id="ef-respEmail" value="'+(f.respEmail||"")+'"></div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
     '<div class="form-group"><label class="form-label">Contact urgence - Nom</label><input class="form-input" id="ef-urgenceNom" value="'+(f.urgenceNom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Contact urgence - Téléphone</label><input class="form-input" id="ef-urgenceTel" value="'+(f.urgenceTel||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Notes / Informations medicales</label><textarea class="form-input" id="ef-notes" rows="3">'+(f.notes||"")+'</textarea></div>';
+    '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="ef-notes" rows="3">'+(f.notes||"")+'</textarea></div>';
   document.getElementById("modal-edit-fiche").style.display="flex";
 }
 
@@ -774,12 +774,12 @@ function saveEditedFiche(){
   closeModal("modal-edit-fiche");
   renderLicenceDetail(lics[idx]);
   buildLicences();
-  alert("Fiche mise a jour !");
+  alert("Fiche mise à jour !");
 }
 
 function copyCode(code){
-  if(navigator.clipboard){navigator.clipboard.writeText(code).then(function(){alert("Code copie : "+code);});}
-  else{var t=document.createElement("textarea");t.value=code;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);alert("Code copie : "+code);}
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(function(){alert("Code copié : "+code);});}
+  else{var t=document.createElement("textarea");t.value=code;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);alert("Code copié : "+code);}
 }
 
 // ── CÔTÉ LICENCIÉ : FICHE PUBLIQUE ───────────────────────────────
@@ -800,7 +800,7 @@ function renderCodeEntry(){
       '<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Fiche d\'inscription</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code reçu par mail</div>'+
       '<input id="code-input" type="text" placeholder="'+clubCodePrefix()+'-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
-      '<button id="valider-code-btn" onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Acceder a ma fiche</button>'+
+      '<button id="valider-code-btn" onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Accéder à ma fiche</button>'+
     '</div>'+
   '</div>';
 }
@@ -819,7 +819,7 @@ async function validerCode(){
   var btn=document.getElementById("valider-code-btn");
   if(btn){btn.disabled=true;btn.textContent="Vérification...";}
   var res=await lookupInscriptionCode(code);
-  if(btn){btn.disabled=false;btn.textContent="Acceder a ma fiche";}
+  if(btn){btn.disabled=false;btn.textContent="Accéder à ma fiche";}
   if(!res.found){alert("Code invalide. Vérifiez votre mail.");return;}
   // Visiteur public (non connecté) : la fiche sera déposée dans le club du code.
   if(!window.CURRENT_CLUB_ID){
@@ -876,7 +876,7 @@ function renderLicenceChoice(lic){
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Entraînements réguliers obligatoires</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Matchs officiels CD42 · Engagement saison complète</div>'+
       '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Convocations obligatoires · Collectif avant tout</div>'+
-      '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Exigence · Respect · Depassement de soi</div>'+
+      '<div style="font-size:11px;color:rgba(255,100,100,.9)"> Exigence · Respect · Dépassement de soi</div>'+
     '</div>'+
     '<div style="margin-top:14px;padding:10px 14px;background:rgba(192,57,43,.2);border-radius:var(--rx);border-left:3px solid #C0392B"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Porter les couleurs du club avec fierté et engagement."</div></div>'+
     '<div style="margin-top:12px;text-align:right"><span style="font-size:12px;font-weight:700;color:#C0392B">Je choisis Compétition →</span></div>';
@@ -890,12 +890,12 @@ function renderLicenceChoice(lic){
     '<div style="position:absolute;top:12px;right:14px;font-size:28px;opacity:.15"></div>'+
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="background:#D4AF37;color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">Loisir</div><div style="font-size:18px"></div></div>'+
     '<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px">Pour le plaisir du jeu</div>'+
-    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Joue, progresse et partage de bons moments sans pression. Accessible a tous.</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Joue, progresse et partage de bons moments sans pression. Accessible à tous.</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px">'+
-      '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Viens quand tu peux, a ton rythme</div>'+
+      '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Viens quand tu peux, à ton rythme</div>'+
       '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Aucune obligation de match ou compétition</div>'+
       '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Progresser dans la bonne humeur</div>'+
-      '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Ouvert a tous les niveaux · Debutants bienvenus</div>'+
+      '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Ouvert à tous les niveaux · Débutants bienvenus</div>'+
     '</div>'+
     '<div style="margin-top:14px;padding:10px 14px;background:rgba(212,175,55,.15);border-radius:var(--rx);border-left:3px solid #D4AF37"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Le basket pour se faire plaisir, bouger, rencontrer des gens et partager une passion."</div></div>'+
     '<div style="margin-top:12px;text-align:right"><span style="font-size:12px;font-weight:700;color:#D4AF37">Je choisis Loisir →</span></div>';
@@ -952,7 +952,7 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prénom"></div>'+
       '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(f.nom||'')+'" placeholder="Nom de famille"></div>'+
       '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'"></div>'+
-      '<div class="form-group"><label class="form-label">Ne(e) a l\'etranger ?</label>'+
+      '<div class="form-group"><label class="form-label">Né(e) à l\'étranger ?</label>'+
         '<div style="display:flex;gap:10px">'+
           '<button type="button" id="btn-etr-non" onclick="selectEtranger(false)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--bdr)":"var(--dkg)")+';background:'+(f.neEtranger?"var(--bg)":"var(--dkg)")+';color:'+(f.neEtranger?"var(--mut)":"#fff")+';cursor:pointer">Non</button>'+
           '<button type="button" id="btn-etr-oui" onclick="selectEtranger(true)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--dkg)":"var(--bdr)")+';background:'+(f.neEtranger?"var(--dkg)":"var(--bg)")+';color:'+(f.neEtranger?"#fff":"var(--mut)")+';cursor:pointer">Oui</button>'+
@@ -966,16 +966,16 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="email@..."></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
-      '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Responsable legal</div>'+
+      '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Responsable légal</div>'+
       '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(f.respNom||'')+'" placeholder="Prénom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
+      '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
       '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(f.respEmail||'')+'" placeholder="email@..."></div>'+
       '<div style="margin:4px 0 16px" id="resp2-toggle-wrap">'+
         (f.resp2Nom ?
-          '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable legal 2</div>'+
+          '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable légal 2</div>'+
           '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(f.resp2Nom||'')+'" placeholder="Prénom Nom"></div>'+
-          '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
+          '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
           '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="06..."></div>'+
           '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(f.resp2Email||'')+'" placeholder="email@..."></div>'+
           '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>'
@@ -986,7 +986,7 @@ function renderFicheForm(lic){
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Contact en cas d\'urgence</div>'+
       '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prénom Nom"></div>'+
       '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
-      '<div class="form-group"><label class="form-label">Notes / Informations medicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div class="form-group" style="background:rgba(232,103,10,.06);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
         '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
@@ -996,12 +996,12 @@ function renderFicheForm(lic){
         '</label>'+
       '</div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
-      '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Certificat medical</div>'+
+      '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Certificat médical</div>'+
       '<div id="cert-banner" style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px">'+
-        '<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat medical de non contre-indication a la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>'+
+        '<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat médical de non contre-indication à la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>'+
       '</div>'+
       '<div class="form-group">'+
-        '<label class="form-label">Telecharger le certificat (PDF ou photo)</label>'+
+        '<label class="form-label">Télécharger le certificat (PDF ou photo)</label>'+
         '<div id="cert-preview" style="margin-bottom:8px"></div>'+
         '<button type="button" id="cert-btn" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--card);border:1.5px dashed var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px"></span> Ajouter le certificat</button>'+
         '<input type="file" id="cert-input" accept="image/*,application/pdf" style="display:none" onchange="handleCertificat(this)">'+
@@ -1011,7 +1011,7 @@ function renderFicheForm(lic){
         '<input class="form-input" id="f-certDate" type="date" value="'+(f.certDate||'')+'">'+
       '</div>'+
       '<div class="form-group">'+
-        '<label class="form-label">Medecin / Établissement</label>'+
+        '<label class="form-label">Médecin / Établissement</label>'+
         '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="Dr ...">'+
       '</div>'+
       '<button id="fiche-submit-btn" onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px"> Valider ma fiche</button>'+
@@ -1051,7 +1051,7 @@ function updateCertBanner(){
   } else {
     box.style.background="rgba(212,175,55,.08)";
     box.style.borderColor="rgba(212,175,55,.25)";
-    box.innerHTML='<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat medical de non contre-indication a la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>';
+    box.innerHTML='<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat médical de non contre-indication à la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>';
   }
 }
 
@@ -1060,9 +1060,9 @@ function addResp2(){
   var wrap=document.getElementById("resp2-toggle-wrap");
   if(!wrap)return;
   wrap.innerHTML=
-    '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable legal 2</div>'+
+    '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable légal 2</div>'+
     '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" placeholder="Prénom Nom"></div>'+
-    '<div class="form-group"><label class="form-label">Lien de parente</label><input class="form-input" id="f-resp2Lien" placeholder="Pere, Mere, Tuteur..."></div>'+
+    '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" placeholder="Pere, Mere, Tuteur..."></div>'+
     '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" placeholder="06..."></div>'+
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" placeholder="email@..."></div>'+
     '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>';

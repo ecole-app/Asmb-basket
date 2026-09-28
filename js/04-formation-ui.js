@@ -19,7 +19,7 @@ function sortLicenciesList(mode){
     return 0;
   });
   var el=document.getElementById("licencies-list-content");
-  if(!players.length){el.innerHTML='<div class="empty-state"><div>Aucun licencie</div></div>';return;}
+  if(!players.length){el.innerHTML='<div class="empty-state"><div>Aucun licencié</div></div>';return;}
   el.innerHTML="";
   players.forEach(function(p){
     var div=document.createElement("div");
@@ -79,7 +79,7 @@ function showTeamRoster(teamId){
   players.forEach(function(p){
     html+='<div style="padding:10px 4px;border-bottom:1px solid var(--bdr)">'+
       '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Ne(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Compétition":"Loisir")+')</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Né(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Compétition":"Loisir")+')</div>'+
     '</div>';
   });
   el.innerHTML=html;
@@ -152,7 +152,7 @@ function buildU13Home(){
     infos.forEach(function(t){var s=document.createElement("span");s.className="chip";s.textContent=t;chips.appendChild(s);});
   }
   var ttl=document.getElementById("u13title");
-  if(ttl)ttl.textContent=cat.title||cat.name||"Categorie";
+  if(ttl)ttl.textContent=cat.title||cat.name||"Catégorie";
   // Reconstruit a chaque affichage : la zone ou les dates du club peuvent changer.
   var vsec=document.getElementById("vacSec");
   if(vsec)vsec.textContent="Vacances zone "+getClubZone()+(getVacancesOverride()?" (dates du club)":"");
@@ -187,7 +187,7 @@ function buildU13Home(){
     cl.appendChild(addBtn);
     if(typeof openAnimPicker==="function"&&typeof animDisponibles==="function"){
       var libBtn=document.createElement("button");
-      libBtn.textContent="Bibliotheque d'animations ("+animDisponibles().length+")";
+      libBtn.textContent="Bibliothèque d'animations ("+animDisponibles().length+")";
       libBtn.style.cssText="width:calc(100% - 24px);margin:0 12px 16px;padding:12px;border-radius:var(--rs);background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer";
       libBtn.addEventListener("click",function(){openAnimPicker({browse:true});});
       cl.appendChild(libBtn);
@@ -286,7 +286,7 @@ function openSeanceEditModal(cyId,seaNum){
       '<button id="sed-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
     '</div>'+
     '<div class="form-group"><label class="form-label">Titre</label><input class="form-input" id="sed-titre" value="'+(existing?authEsc(existing.t):"")+'" placeholder="Ex: Dribble et changement de main"></div>'+
-    '<div class="form-group"><label class="form-label">Objectif</label><input class="form-input" id="sed-obj" value="'+(existing?authEsc(existing.obj):"")+'" placeholder="Ex: Progresser dans la maitrise du dribble"></div>'+
+    '<div class="form-group"><label class="form-label">Objectif</label><input class="form-input" id="sed-obj" value="'+(existing?authEsc(existing.obj):"")+'" placeholder="Ex: Progresser dans la maîtrise du dribble"></div>'+
     '<div class="form-group"><label class="form-label">Durée</label><input class="form-input" id="sed-dur" value="'+(existing?authEsc(existing.dur):"1h30")+'" placeholder="1h30"></div>'+
     (existing&&!existingContent&&existing.sits&&existing.sits.length
       ? '<div style="font-size:11px;color:var(--mut);background:#e8edf5;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4">Cette séance contient '+existing.sits.length+' situation(s) détaillée(s) du contenu d\'origine. Elles sont conservées telles quelles.</div>'
@@ -442,13 +442,13 @@ function buildSeance(cy,s){
     var animId=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i,sit):null;
     var animDiv=animId?'<div style="margin:8px 0"><div class="lbl">Animation</div><div id="anim-'+domKey+'" style="background:var(--bg);border-radius:8px;overflow:hidden"></div></div>':"";
     var d=document.createElement("div");d.className="sit-card";
-    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+sit.ti+'</div><div class="sdur">'+sit.dur+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+sit.desc+'</div><div class="lbl">Organisation</div><div class="txt">'+sit.org+'</div>'+animDiv+'<div class="lbl">Axes evolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+a+'</div>';}).join("")+'</div><div class="lbl">Mots cles</div><div class="kws">'+kws+'</div></div>';
+    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+sit.ti+'</div><div class="sdur">'+sit.dur+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+sit.desc+'</div><div class="lbl">Organisation</div><div class="txt">'+sit.org+'</div>'+animDiv+'<div class="lbl">Axes évolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+a+'</div>';}).join("")+'</div><div class="lbl">Mots clés</div><div class="kws">'+kws+'</div></div>';
     if(canEditCycles()&&typeof openAnimPicker==="function"){
       var bar=document.createElement("div");
       bar.style.cssText="padding:0 12px 12px";
       var genere=(typeof estAnimGeneree==="function")&&estAnimGeneree(animId);
       var ab=document.createElement("button");
-      ab.textContent=genere?"Remplacer le schema genere":(animId?"Changer l'animation":"Ajouter une animation");
+      ab.textContent=genere?"Remplacer le schéma généré":(animId?"Changer l'animation":"Ajouter une animation");
       ab.style.cssText="width:100%;padding:9px;border-radius:14px;background:transparent;border:1px dashed var(--bdr);color:var(--txt2);font-size:11px;font-weight:700;cursor:pointer";
       ab.addEventListener("click",function(){
         openAnimPicker({catId:activeCatId,seaNum:s.num,sitIdx:i,
@@ -478,7 +478,7 @@ async function openVacancesEdit(){
   if(!canEditCycles()) return;
   var zones=["A","B","C"];
   var cur=getClubZone();
-  var z=await askPrompt("Zone academique du club (A, B ou C) \u2014 actuelle : "+cur,
+  var z=await askPrompt("Zone acad\u00e9mique du club (A, B ou C) \u2014 actuelle : "+cur,
     {defaultValue:cur,confirmText:"Suivant"});
   if(z===null) return;
   z=String(z).trim().toUpperCase();
@@ -488,12 +488,12 @@ async function openVacancesEdit(){
   }
   if(window.CURRENT_CLUB) window.CURRENT_CLUB.zone=z;
 
-  var perso=await askConfirm("Utiliser les dates officielles de la zone "+z+" ?\n\nRepondre Non pour saisir vos propres dates.",
+  var perso=await askConfirm("Utiliser les dates officielles de la zone "+z+" ?\n\nRépondre Non pour saisir vos propres dates.",
     {confirmText:"Dates officielles",cancelText:"Mes dates"});
   if(perso){
     saveVacancesOverride(null);
     buildU13Home();
-    askAlert("Zone "+z+" appliquee avec les dates officielles.");
+    askAlert("Zone "+z+" appliquée avec les dates officielles.");
     return;
   }
   var base=getVacances().slice();
@@ -502,13 +502,13 @@ async function openVacancesEdit(){
     var v=base[i];
     var d=await askPrompt(v.n+" \u2014 dates",{defaultValue:v.d,confirmText:"Suivant"});
     if(d===null) return;
-    var imp=await askPrompt(v.n+" \u2014 seances impactees",{defaultValue:v.imp,confirmText:i===base.length-1?"Enregistrer":"Suivant"});
+    var imp=await askPrompt(v.n+" \u2014 s\u00e9ances impact\u00e9es",{defaultValue:v.imp,confirmText:i===base.length-1?"Enregistrer":"Suivant"});
     if(imp===null) return;
     out.push({n:v.n,d:String(d).trim()||v.d,imp:String(imp).trim()||v.imp,c:v.c});
   }
   saveVacancesOverride(out);
   buildU13Home();
-  askAlert("Dates du club enregistrees.");
+  askAlert("Dates du club enregistrées.");
 }
 
 // ── REGLEMENT DE LA CATEGORIE ───────────────────────────────────────
@@ -521,7 +521,7 @@ function buildReglement(){
   if(!el) return;
   var dep=getClubDepartement();
   var amenage=reglementEstAmenage(activeCatId);
-  if(sec) sec.textContent="Reglement"+(dep?" \u00b7 "+dep:"")+(amenage?" (amenage par le club)":" (reperes nationaux)");
+  if(sec) sec.textContent="R\u00e8glement"+(dep?" \u00b7 "+dep:"")+(amenage?" (am\u00e9nag\u00e9 par le club)":" (rep\u00e8res nationaux)");
   var r=getReglement(activeCatId);
   el.innerHTML="";
   var card=document.createElement("div");
@@ -539,12 +539,12 @@ function buildReglement(){
   if(!dep){
     var warn=document.createElement("div");
     warn.style.cssText="margin:0 12px 10px;padding:10px 14px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);font-size:11.5px;color:var(--txt2);line-height:1.45";
-    warn.textContent="Departement non renseigne : les valeurs affichees sont les reperes nationaux. Les comites departementaux les amenagent souvent, verifier votre reglement.";
+    warn.textContent="Département non renseigné : les valeurs affichées sont les repères nationaux. Les comités départementaux les aménagent souvent, vérifier votre règlement.";
     el.appendChild(warn);
   }
   if(canEditCycles()){
     var b=document.createElement("button");
-    b.textContent="Modifier le reglement de cette categorie";
+    b.textContent="Modifier le règlement de cette catégorie";
     b.style.cssText="width:calc(100% - 24px);margin:4px 12px 8px;padding:11px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer";
     b.addEventListener("click",openReglementEdit);
     el.appendChild(b);
@@ -553,7 +553,7 @@ function buildReglement(){
 
 async function openReglementEdit(){
   if(!canEditCycles()) return;
-  var dep=await askPrompt("Departement du club (numero ou nom)",
+  var dep=await askPrompt("Département du club (numéro ou nom)",
     {defaultValue:getClubDepartement(),placeholder:"Ex : 42 ou Loire",confirmText:"Suivant"});
   if(dep===null) return;
   dep=String(dep).trim();
@@ -576,7 +576,7 @@ async function openReglementEdit(){
   all[activeCatId]=out;
   saveReglementOverrides(all);
   buildReglement();
-  askAlert("Reglement enregistre pour "+(cat.name||activeCatId)+".");
+  askAlert("Règlement enregistré pour "+(cat.name||activeCatId)+".");
 }
 
 // Retour aux reperes nationaux pour la categorie affichee.

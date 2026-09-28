@@ -35,7 +35,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790577674";
+var APP_VERSION="1790580354";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -79,7 +79,7 @@ function showChangelog(){
     .then(function(r){return r.json();})
     .then(function(list){
       var entry=(list&&list[0])||null;
-      var s=gmSheet(entry&&entry.titre?entry.titre:"Derniere mise a jour");
+      var s=gmSheet(entry&&entry.titre?entry.titre:"Dernière mise à jour");
       var points=((entry&&entry.points)||[]).filter(function(pt){
         if(voitTout) return true;
         if(typeof pt==="string") return true; // ancien format, sans roles
@@ -88,7 +88,7 @@ function showChangelog(){
       if(!points.length){
         var p=document.createElement("div");
         p.style.cssText="font-size:13px;color:var(--txt2)";
-        p.textContent="Rien de nouveau ne vous concerne dans cette mise a jour.";
+        p.textContent="Rien de nouveau ne vous concerne dans cette mise à jour.";
         s.body.appendChild(p);
         return;
       }
@@ -103,7 +103,7 @@ function showChangelog(){
       s.body.appendChild(ul);
     })
     .catch(function(){
-      if(typeof askAlert==="function") askAlert("Impossible de charger le detail de la mise a jour.");
+      if(typeof askAlert==="function") askAlert("Impossible de charger le détail de la mise à jour.");
     });
 }
 
@@ -125,7 +125,7 @@ function checkTomorrowReminders(){
  window.fbSetDoc(window.fbDoc(window.fbDb,"reminders_sent",key),{eventId:m.id,date:tomorrowStr,ts:window.fbServerTimestamp()}).then(function(){
  var channelId=findChannelForTeamText(m.equipe);
  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
- text:" <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" a "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
+ text:" <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" à "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
  pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
  });
  }).catch(function(){});
@@ -239,7 +239,7 @@ function checkEventReminders(){
     if(diffH>0&&diffH<=24&&!notified[e.id]){
       try{
         var icon=e.type==="match"?"":(e.type==="entrainement"?"":"");
-        new Notification(icon+" "+clubLabel()+" - "+e.titre,{body:"Demain"+(e.heure?" a "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
+        new Notification(icon+" "+clubLabel()+" - "+e.titre,{body:"Demain"+(e.heure?" à "+e.heure:"")+(e.lieu?" · "+e.lieu:""),tag:"asmb-reminder-"+e.id});
         notified[e.id]=true;
         localStorage.setItem("asmb_reminded",JSON.stringify(notified));
       }catch(err){}

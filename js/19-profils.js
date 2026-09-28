@@ -284,7 +284,7 @@ function ouvrirEspaceJoueurRattache(essai){
     return;
   }
   if(essai<20){ setTimeout(function(){ ouvrirEspaceJoueurRattache(essai+1); },400); return; }
-  alert("Ta fiche n'a pas pu etre chargee. Reessaie, ou demande a ton club.");
+  alert("Ta fiche n'a pas pu être chargée. Réessaie, ou demande à ton club.");
 }
 
 // ── ESPACE JOUEUR (auto-pointage) ──────────────────────────────────
@@ -297,7 +297,7 @@ async function openJoueurCheckin(){
   phone=phone.trim().replace(/\s+/g,"");
   var player=resoudreFichePour(phone);
   if(!player){
-    alert("Numéro non reconnu. Demande a ton coach ou dirigeant de l'ajouter dans ta fiche.");
+    alert("Numéro non reconnu. Demande à ton coach ou dirigeant de l'ajouter dans ta fiche.");
     return;
   }
   localStorage.setItem("asmb_joueur_phone",phone);
@@ -429,7 +429,7 @@ function buildJoueurScreen(player){
     });
 
     var html='<div style="text-align:center;margin-bottom:24px;position:relative">'+
-      '<button onclick="openJoueurSettings()" aria-label="Parametres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>'+
+      '<button onclick="openJoueurSettings()" aria-label="Paramètres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>'+
       '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+player.prenom[0]+player.nom[0]+'</div>'+
       '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+player.prenom+' '+player.nom+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
@@ -564,8 +564,8 @@ function joueurSelfCheckin(playerId,eventId,status){
     if((status==="absent"||status==="retard")&&ev){
       var channelId=findChannelForTeamText(ev.equipe||player.cat);
       var msgTxt=status==="absent"?
-        ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) absent(e) a \""+ev.titre+"\""):
-        ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) en retard a \""+ev.titre+"\"");
+        ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) absent(e) à \""+ev.titre+"\""):
+        ("<b>"+player.prenom+" "+player.nom+"</b> s'est déclaré(e) en retard à \""+ev.titre+"\"");
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
         text:msgTxt,pseudo:clubPseudo("Systeme"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
@@ -590,7 +590,7 @@ async function registerParentPhone(){
 function notifyPhoneSkipped(){
   if(!window.fbReady)return;
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels","general","messages"),{
-    text:"Un parent a rejoint l'application sans renseigner son numéro de téléphone. Il n'a pas encore accès a la communaute.",
+    text:"Un parent a rejoint l'application sans renseigner son numéro de téléphone. Il n'a pas encore accès à la communauté.",
     pseudo:clubPseudo("Systeme"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
   });
 }
@@ -661,7 +661,7 @@ function autoLinkParentTeams(){
 function autoLinkParentToChannel(phone){
   var teamNames=autoLinkParentTeams();
   if(teamNames){
-    alert("Bienvenue ! Vous avez ete rattache automatiquement a l'équipe "+teamNames[0]+" et au canal correspondant.");
+    alert("Bienvenue ! Vous avez été rattaché automatiquement à l'équipe "+teamNames[0]+" et au canal correspondant.");
     saveParentTeams();
   } else {
     pendingJoinRequestPhone=phone;
@@ -852,7 +852,7 @@ async function submitJoinRequest(phone,teamIds){
     phone:phone,childName:childName,teamIds:teamIds,teamNames:teamNames,
     status:"pending",ts:window.fbServerTimestamp()
   });
-  alert("Votre demande a ete envoyée au coach. Vous aurez accès au canal de l'équipe une fois validée.");
+  alert("Votre demande a été envoyée au coach. Vous aurez accès au canal de l'équipe une fois validée.");
 }
 
 // ── TUTORIEL PARENT (premiere connexion) ────────────────────────────
@@ -861,8 +861,8 @@ var TUTO_STEPS=[
   {icon:"",titre:"Bienvenue !",texte:"Retrouvez ici tout ce qui concerne l'équipe de votre enfant : prochains matchs, entraînements et résultats."},
   {icon:"",titre:"Onglet Équipe",texte:"Consultez la composition de l'équipe, les postes et numéros de maillot de chaque joueur."},
   {icon:"",titre:"Onglet Stats",texte:"Suivez le bilan de présence et l'assiduité de l'équipe au fil de la saison."},
-  {icon:"",titre:"Onglet Événement",texte:"Retrouvez tous les matchs et entraînements a venir, avec les convocations du coach."},
-  {icon:"",titre:"Communauté",texte:"Echangez avec les autres familles et le club dans les canaux de discussion dedies."}
+  {icon:"",titre:"Onglet Événement",texte:"Retrouvez tous les matchs et entraînements à venir, avec les convocations du coach."},
+  {icon:"",titre:"Communauté",texte:"Échangez avec les autres familles et le club dans les canaux de discussion dédiés."}
 ];
 
 function showTutoriel(){
@@ -937,8 +937,8 @@ function setCoachTeam(id){
 function openCoachTeamPicker(){
   teamPickerContext="coach";
   document.getElementById("tp-icon").textContent="";
-  document.getElementById("tp-title").textContent="Quelle(s) équipe(s) entrainez-vous ?";
-  document.getElementById("tp-sub").textContent="Selectionnez une ou plusieurs équipes, puis validez";
+  document.getElementById("tp-title").textContent="Quelle(s) équipe(s) entraînez-vous ?";
+  document.getElementById("tp-sub").textContent="Sélectionnez une ou plusieurs équipes, puis validez";
   var teams=getTeams();
   var current=getCoachTeam();
   var el=document.getElementById("team-picker-list");
@@ -1009,7 +1009,7 @@ function buildParentHome(){
   var licBadge="";
   if(myLic){
     var licColors={"validee":"#D4AF37","recue":"#8E44AD","en_cours":"#1A2E5A","ouverte":"#E8670A","envoyee":"#7a8caa"};
-    var licLabels={"validee":"Licence validée","recue":"Fiche reçue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche a completer"};
+    var licLabels={"validee":"Licence validée","recue":"Fiche reçue","en_cours":"Fiche en cours","ouverte":"Fiche ouverte","envoyee":"Fiche à compléter"};
     licBadge='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
       '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(licLabels[myLic.statut]||"Licence")+'</div>'+
@@ -1017,7 +1017,7 @@ function buildParentHome(){
   }
   summaryEl.innerHTML='<div style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:18px;font-weight:900;color:var(--dkg)">'+matchesPlayed+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joue'+(matchesPlayed>1?"s":"")+'</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joué'+(matchesPlayed>1?"s":"")+'</div>'+
   '</div>'+licBadge;
 
   // Chips : enfants (avatar) si rattachés, sinon équipes
@@ -1053,15 +1053,15 @@ function buildParentHome(){
   maybeShowPwaHint();
   var evEl=document.getElementById("parent-next-event");
   if(!nextEv){
-    evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div style="font-size:13px;font-weight:600">Aucun événement a venir</div></div>';
+    evEl.innerHTML='<div class="empty-state" style="padding:30px 20px"><div style="font-size:13px;font-weight:600">Aucun événement à venir</div></div>';
   } else {
     var col=eventTypeColor(nextEv.type);
     var dateObj=new Date(nextEv.date);
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
-    var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none"> Itineraire</a>'):"";
+    var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none"> Itinéraire</a>'):"";
     var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button>';
     var rdv=(nextEv.type==="match")?rdvTimeFor(nextEv):null;
-    var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place a '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
+    var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place à '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
     var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(212,175,55,.1);color:#D4AF37;font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
     var carB=(nextEv.type==="match")?('<button onclick="shareCovoiturage(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:11px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>'):'';
     evEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow)">'+
@@ -1154,8 +1154,8 @@ async function signalerAbsence(eventId){
     // Verifier si un pointage existe déjà pour cet enfant sur cet événement
     checkExistingCheckin(eventId,linkedPlayer.id).then(function(existing){
       if(existing){
-        var labels={present:"present(e)",retard:"en retard",absent:"absent(e)"};
-        alert(linkedPlayer.prenom+" s'est déjà declare(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
+        var labels={present:"présent(e)",retard:"en retard",absent:"absent(e)"};
+        alert(linkedPlayer.prenom+" s'est déjà déclaré(e) "+(labels[existing.status]||existing.status)+" pour cet événement. Pas besoin de le refaire.");
         return;
       }
       proceed(linkedPlayer.prenom+" "+linkedPlayer.nom,linkedPlayer.id);
@@ -1232,7 +1232,7 @@ function buildParentEquipe(){
     div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
-      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCategorie : "+team.cat);};
+      div.onclick=function(){alert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCatégorie : "+team.cat);};
     }
     el.appendChild(div);
   });
@@ -1311,7 +1311,7 @@ async function editPlayerLicence(playerId){
   p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";
   savePlayers(players);
   buildCoachEquipe();
-  alert("Licence mise a jour.");
+  alert("Licence mise à jour.");
 }
 
 // ── HISTORIQUE JOUEUR (coach) : assiduite + evaluations mensuelles + stages ──

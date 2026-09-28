@@ -121,7 +121,7 @@ var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
   identite:"Identité du club",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
-  communication:"Communication",donnees:"Données",demo:"Demonstration"
+  communication:"Communication",donnees:"Données",demo:"Démonstration"
 };
 function getParamsOrder(){try{return JSON.parse(localStorage.getItem("asmb_params_order")||"[]");}catch(e){return [];}}
 function saveParamsOrder(o){localStorage.setItem("asmb_params_order",JSON.stringify(o));}
@@ -383,8 +383,8 @@ function sendFeedback(prefix){
   prefix=prefix||"";
   var ta=document.getElementById(prefix+"feedback-text");
   var msg=(ta&&ta.value||"").trim();
-  if(!msg){ alert("Ecrire un message avant d'envoyer."); return; }
-  if(!window.fbDb || !window.fbAddDoc){ alert("Connexion en cours, reessayer dans quelques secondes."); return; }
+  if(!msg){ alert("Écrire un message avant d'envoyer."); return; }
+  if(!window.fbDb || !window.fbAddDoc){ alert("Connexion en cours, réessayer dans quelques secondes."); return; }
   var btn=document.getElementById(prefix+"feedback-send-btn");
   if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
   var u=window.ASMB_USER||{};

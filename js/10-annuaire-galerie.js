@@ -86,9 +86,9 @@ function buildMatchList(){
           '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+
           '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(e.heure||"?")+(e.lieu?" · "+e.lieu:"")+'</div>'+
           '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
-          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Meteo</button>':'')+
-          (e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itineraire</a>':'')+
-          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'')+
+          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'')+
+          (e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itinéraire</a>':'')+
+          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'')+
           '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
         '</div>';
       content.appendChild(card);
@@ -208,14 +208,14 @@ function buildCalendrier(){
         dayEvents.forEach(function(e){
           var isMatch=e.type==="match";
           var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
-          var itinBtn=(e.type==="match"&&e.lieu)?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itineraire</a>':'';
-          var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Meteo</button>':'';
+          var itinBtn=(e.type==="match"&&e.lieu)?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itinéraire</a>':'';
+          var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'';
           var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
           var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
             ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
-            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>')
-            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Presences</button>'):'');
+            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>')
+            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'');
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+eventTypeColor(e.type)+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0">'+
             '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+eventTypeLabel(e.type)+'</span>'+
@@ -352,13 +352,13 @@ function buildClassement(){
     rows=rows.slice().sort(function(a,b){return (a.rang||99)-(b.rang||99);});
     var el=document.getElementById("classement-content");
     if(!rows.length){
-      el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Classement non renseigne</div>'+(isCoachOrDir?'<div style="font-size:11px;margin-top:6px">Touchez + Ligne pour ajouter les equipes de la poule</div>':'')+'</div>';
+      el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Classement non renseigné</div>'+(isCoachOrDir?'<div style="font-size:11px;margin-top:6px">Touchez + Ligne pour ajouter les équipes de la poule</div>':'')+'</div>';
       return;
     }
     var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">'+
       '<tr style="color:var(--mut);text-transform:uppercase;border-bottom:2px solid var(--bdr)">'+
         '<td style="padding:8px 4px;font-weight:700">Pos</td>'+
-        '<td style="font-weight:700">Equipe</td>'+
+        '<td style="font-weight:700">Équipe</td>'+
         '<td style="text-align:center;font-weight:700">Pts</td>'+
         '<td style="text-align:center;font-weight:700">J</td>'+
         '<td style="text-align:center;font-weight:700">G</td>'+
@@ -549,7 +549,7 @@ function compressImageFile(file,maxWidth,quality){
       img.onerror=function(){reject(new Error("Image invalide"));};
       img.src=e.target.result;
     };
-    reader.onerror=function(){reject(new Error("Lecture fichier echouee"));};
+    reader.onerror=function(){reject(new Error("Lecture du fichier échouée"));};
     reader.readAsDataURL(file);
   });
 }
@@ -669,7 +669,7 @@ async function resetAllData(){
       counts="Actuellement dans le cloud : "+p.size+" joueur(s), "+t.size+" équipe(s), "+e.size+" événement(s), "+l.size+" licence(s), "+ch.size+" canal/canaux de discussion.\n\n";
     }catch(err){}
   }
-  var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club (y compris les canaux de discussion et leurs messages), dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
+  var ok=await askConfirm(counts+"Ceci va supprimer TOUTES ces données du club (y compris les canaux de discussion et leurs messages), dans le cloud partagé, pour tout le monde. Vos préférences personnelles (thème, numéro, notifications) sont conservées. Action définitive et IRRÉVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
   var typed=await askPrompt("Pour confirmer la suppression définitive, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
   if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
@@ -708,7 +708,7 @@ async function resetAllData(){
 async function resetComptabilite(){
   if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){alert("Réservé au dirigeant.");return;}
   var count=getComptabilite().length;
-  var ok=await askConfirm("Ceci va supprimer les "+count+" ligne(s) de comptabilité (recettes et dépenses), dans le cloud partagé. Action définitive et IRREVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
+  var ok=await askConfirm("Ceci va supprimer les "+count+" ligne(s) de comptabilité (recettes et dépenses), dans le cloud partagé. Action définitive et IRRÉVERSIBLE.", {title:"Attention — action destructive", confirmText:"Continuer", danger:true});
   if(!ok)return;
   var typed=await askPrompt("Pour confirmer, taper SUPPRIMER en majuscules", {placeholder:"SUPPRIMER", confirmText:"Vérifier"});
   if(typed!=="SUPPRIMER"){ if(typed!==null) alert("Texte incorrect, rien n'a été supprimé."); return; }
@@ -737,16 +737,16 @@ function loadDemoData(){
 function loadDemoDataConfirmed(){
 
   var teamDefs=[
-    {id:"demo-team-u13f",name:"U13 Filles (Demo)",cat:"U13"},
-    {id:"demo-team-u13g",name:"U13 Garcons (Demo)",cat:"U13"},
-    {id:"demo-team-seniorf",name:"Seniors Filles (Demo)",cat:"Senior"},
-    {id:"demo-team-seniorm",name:"Seniors Garcons (Demo)",cat:"Senior"}
+    {id:"demo-team-u13f",name:"U13 Filles (Démo)",cat:"U13"},
+    {id:"demo-team-u13g",name:"U13 Garçons (Démo)",cat:"U13"},
+    {id:"demo-team-seniorf",name:"Seniors Filles (Démo)",cat:"Senior"},
+    {id:"demo-team-seniorm",name:"Seniors Garçons (Démo)",cat:"Senior"}
   ];
 
-  var prenomsF=["Lea","Chloe","Emma","Sarah","Manon","Julie","Camille","Ines","Anais","Clara"];
+  var prenomsF=["Léa","Chloé","Emma","Sarah","Manon","Julie","Camille","Inès","Anaïs","Clara"];
   var prenomsM=["Nathan","Enzo","Rayan","Mathis","Lucas","Adam","Karim","Thomas","Yanis","Hugo"];
-  var noms=["Martin","Bernard","Dubois","Petit","Girard","Fontaine","Lefevre","Robin","Faure","Blanc"];
-  var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot"];
+  var noms=["Martin","Bernard","Dubois","Petit","Girard","Fontaine","Lefèvre","Robin","Faure","Blanc"];
+  var postes=["Meneur","Arrière","Ailier","Ailier Fort","Pivot"];
 
   var players=getPlayers();
   var teams=getTeams();
@@ -783,11 +783,11 @@ function loadDemoDataConfirmed(){
   // Upsert : toujours remise a jour (ne pas se fier a une ancienne version incomplete)
   var lics=getLicences().filter(function(l){return l.code!=="DEMO01";});
   lics.push({
-    code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Lea",
+    code:"DEMO01",email:"parent.demo@test.fr",nomDest:"Parent de Léa",
     statut:"validee",createdAt:Date.now(),ouvertLe:new Date().toLocaleDateString("fr-FR"),
     categorie:"U13",
     fiche:{
-      prenom:"Lea",nom:"Martin",naissance:"2013-01-01",
+      prenom:"Léa",nom:"Martin",naissance:"2013-01-01",
       telephone:"",respTel:"0700000000",resp2Tel:"",
       adresse:"",emailLic:"parent.demo@test.fr",respNom:"Parent Demo",
       urgenceNom:"",urgenceTel:"",notes:"Fiche demo"
@@ -795,7 +795,7 @@ function loadDemoDataConfirmed(){
   });
   saveLicences(lics);
 
-  alert("Données de demo chargées ! 4 équipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Lea Martin) : 0600000000\n- \"Je suis Parent\" (parent de Lea) : 0700000000");
+  alert("Données de démo chargées ! 4 équipes de 10 joueurs chacune.\n\nPour tester :\n- \"Je suis Joueur\" (Léa Martin) : 0600000000\n- \"Je suis Parent\" (parent de Léa) : 0700000000");
   buildAdminHome();
 }
 
@@ -809,7 +809,7 @@ function loadDemoEventsConfirmed(){
   var teams=getTeams();
   var demoTeams=teams.filter(function(t){return t.demo;});
   if(!demoTeams.length){
-    alert("Chargez d'abord les equipes de demo (bouton juste au-dessus).");
+    alert("Chargez d'abord les équipes de démo (bouton juste au-dessus).");
     return;
   }
 
@@ -842,7 +842,7 @@ function loadDemoEventsConfirmed(){
  saturday.setDate(nextMonday.getDate()+5);
  events.push({
  id:"demo-evt-match-"+Date.now(),
- titre:demoTeams[0].name+" vs ASVEL Villeurbanne (Demo)",
+ titre:demoTeams[0].name+" vs ASVEL Villeurbanne (Démo)",
  type:"match",
  date:saturday.toISOString().slice(0,10),
  heure:"15h00",
@@ -852,12 +852,12 @@ function loadDemoEventsConfirmed(){
  });
 
  saveEvents(events);
- alert("Entraînements fictifs ajoutes pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
+ alert("Entraînements fictifs ajoutés pour la semaine du "+nextMonday.toLocaleDateString("fr-FR")+".");
  buildAdminHome();
 }
 
 function clearDemoData(){
- askConfirm("Supprimer uniquement les données de démonstration (équipes/joueurs/événements/licences/évaluations marquées Demo) ?", {title:"Supprimer les données démo", confirmText:"Supprimer", danger:true}).then(function(ok){
+ askConfirm("Supprimer uniquement les données de démonstration (équipes/joueurs/événements/licences/évaluations marquées Démo) ?", {title:"Supprimer les données démo", confirmText:"Supprimer", danger:true}).then(function(ok){
    if(!ok)return;
    var teams=getTeams().filter(function(t){return !t.demo;});
    saveTeams(teams);

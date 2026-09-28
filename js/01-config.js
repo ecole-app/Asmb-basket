@@ -115,23 +115,23 @@ function isPoleActive(poleId){
 // c'est au club de la renseigner depuis son propre reglement departemental.
 const REGLEMENT_CHAMPS=[
  {k:"format",   n:"Format de jeu"},
- {k:"periodes", n:"Periodes"},
+ {k:"periodes", n:"Périodes"},
  {k:"ballon",   n:"Ballon"},
  {k:"panier",   n:"Hauteur de panier"},
- {k:"defense",  n:"Defense"},
- {k:"trois",    n:"Tir a 3 points"},
+ {k:"defense",  n:"Défense"},
+ {k:"trois",    n:"Tir à 3 points"},
  {k:"tempsJeu", n:"Temps de jeu"},
  {k:"feuille",  n:"Feuille de marque"}
 ];
 const REGLEMENT_FFBB={
- u7:  {format:"Composition libre",   periodes:"Ateliers et rencontres de 4 a 6 min", ballon:"Tous types sauf T6 et T7", panier:"2,60 m maximum", defense:"Individuelle", trois:"Non autorise", tempsJeu:"Repartition equitable", feuille:"Selon comite"},
- u9:  {format:"3x3 ou 4x4",          periodes:"6 x 4 min",  ballon:"T4 ou T5", panier:"2,60 m", defense:"Individuelle", trois:"Non autorise", tempsJeu:"Repartition equitable", feuille:"Selon comite"},
- u11: {format:"4x4 et/ou 5x5",       periodes:"8 x 4 min",  ballon:"T5",       panier:"2,60 m", defense:"Individuelle", trois:"Selon preconisations", tempsJeu:"50% minimum preconise", feuille:"Selon comite"},
- u13: {format:"5x5",                 periodes:"Selon comite", ballon:"T6",     panier:"3,05 m", defense:"Selon comite", trois:"Selon comite", tempsJeu:"Selon comite", feuille:"Selon comite"},
- u15: {format:"5x5",                 periodes:"Selon comite", ballon:"T7 (M) / T6 (F)", panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
- u17m:{format:"5x5",                 periodes:"Selon comite", ballon:"T7",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
- u18f:{format:"5x5",                 periodes:"Selon comite", ballon:"T6",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"},
- u21m:{format:"5x5",                 periodes:"Selon comite", ballon:"T7",     panier:"3,05 m", defense:"Selon comite", trois:"Autorise", tempsJeu:"Selon comite", feuille:"Selon comite"}
+ u7:  {format:"Composition libre",   periodes:"Ateliers et rencontres de 4 à 6 min", ballon:"Tous types sauf T6 et T7", panier:"2,60 m maximum", defense:"Individuelle", trois:"Non autorisé", tempsJeu:"Répartition équitable", feuille:"Selon comité"},
+ u9:  {format:"3x3 ou 4x4",          periodes:"6 x 4 min",  ballon:"T4 ou T5", panier:"2,60 m", defense:"Individuelle", trois:"Non autorisé", tempsJeu:"Répartition équitable", feuille:"Selon comité"},
+ u11: {format:"4x4 et/ou 5x5",       periodes:"8 x 4 min",  ballon:"T5",       panier:"2,60 m", defense:"Individuelle", trois:"Selon préconisations", tempsJeu:"50% minimum préconisé", feuille:"Selon comité"},
+ u13: {format:"5x5",                 periodes:"Selon comité", ballon:"T6",     panier:"3,05 m", defense:"Selon comité", trois:"Selon comité", tempsJeu:"Selon comité", feuille:"Selon comité"},
+ u15: {format:"5x5",                 periodes:"Selon comité", ballon:"T7 (M) / T6 (F)", panier:"3,05 m", defense:"Selon comité", trois:"Autorisé", tempsJeu:"Selon comité", feuille:"Selon comité"},
+ u17m:{format:"5x5",                 periodes:"Selon comité", ballon:"T7",     panier:"3,05 m", defense:"Selon comité", trois:"Autorisé", tempsJeu:"Selon comité", feuille:"Selon comité"},
+ u18f:{format:"5x5",                 periodes:"Selon comité", ballon:"T6",     panier:"3,05 m", defense:"Selon comité", trois:"Autorisé", tempsJeu:"Selon comité", feuille:"Selon comité"},
+ u21m:{format:"5x5",                 periodes:"Selon comité", ballon:"T7",     panier:"3,05 m", defense:"Selon comité", trois:"Autorisé", tempsJeu:"Selon comité", feuille:"Selon comité"}
 };
 
 // Departement du club, saisi librement (numero ou nom) : sert d'intitule,
@@ -187,33 +187,33 @@ function getCurrentSeason(){
 
 const POLES=[
  {id:"formation",name:"Pôle Formation",sub:"Planification des entraînements",desc:"Cycles · Séances · Animations",icon:"📋",color:"#1A2E5A",ready:true,
- about:"Structurer et developper la pratique du basket a tous les niveaux. Entraîneurs diplomes, suivi individualise, methodologie structuree.",
- items:["École de basket · Catégories jeunes","Accès au niveau compétition","Suivi individualise · Progression continue","Formation des educateurs en continu"]},
+ about:"Structurer et développer la pratique du basket à tous les niveaux. Entraîneurs diplômés, suivi individualisé, méthodologie structurée.",
+ items:["École de basket · Catégories jeunes","Accès au niveau compétition","Suivi individualisé · Progression continue","Formation des éducateurs en continu"]},
  {id:"elite",name:"Élite Academy",sub:"Accompagner les jeunes talents",desc:"Formation · Scolaire · Personnel",icon:"⭐",color:"#1a6b30",ready:true,
  about:"Accompagner les jeunes joueurs dans leur progression sportive, scolaire et personnelle. Plus qu'une formation sportive, une école de la vie.",
- items:["Entraînements adaptes aux academiciens","Développement technique tactique et physique","Aide aux devoirs et suivi scolaire","Apprentissage de l'autonomie et responsabilité"]},
- {id:"competition",name:"Compétition 5x5",sub:"Le coeur du projet sportif",desc:"Compétitions · Entraînements · Équipes",icon:"🏆",color:"#C0392B",ready:true,
+ items:["Entraînements adaptés aux académiciens","Développement technique tactique et physique","Aide aux devoirs et suivi scolaire","Apprentissage de l'autonomie et responsabilité"]},
+ {id:"competition",name:"Compétition 5x5",sub:"Le cœur du projet sportif",desc:"Compétitions · Entraînements · Équipes",icon:"🏆",color:"#C0392B",ready:true,
  about:"Le basket 5x5 structure notre projet sportif. De l'initiation aux seniors, chaque joueur progresse dans un cadre exigeant et bienveillant.",
- items:["Championnats locaux et regionaux","Développement des équipes par catégorie","Encadrement de qualité · Educateurs formes","Esprit d'équipe · Respect · Engagement"]},
+ items:["Championnats locaux et régionaux","Développement des équipes par catégorie","Encadrement de qualité · Éducateurs formés","Esprit d'équipe · Respect · Engagement"]},
  {id:"3x3",name:"3x3",sub:"Rapide · Urbain · Accessible",desc:"Compétitions · Événements · Détection",icon:"🏀",color:"#E8670A",ready:true,
- about:"Le 3x3 est une pratique dynamique qui complète notre projet. Plus rapide, plus libre, il permet a chacun de s'exprimer dans un format moderne.",
- items:["Compétitions 3x3 · Tournois locaux","Détection et formation des talents","Événements et animations urbaines","Mixite et inclusion favorisees"]},
- {id:"evenement",name:"Événements",sub:"Des rendez-vous qui nous rassemblent",desc:"Tournois · Soirees · Journees club",icon:"🎉",color:"#8E44AD",ready:true,
- about:"Le club organise des événements tout au long de la saison pour faire vivre notre passion, creer du lien et faire rayonner notre territoire.",
- items:["Creation de tournois 3x3 et 5x5","Soirees et journees club","Echanges inter-clubs · Tournoi international","Journees formation et arbitrage"]},
- {id:"basketpourtous",name:"Basket Pour Tous",sub:"Un club où chacun trouve sa place",desc:"Basket santé · Loisir · Inclusif · Adapte",icon:"🤝",color:"#16A085",ready:true,
- about:"Le basket accessible a toutes et tous, sans distinction. Des séances adaptees, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
- items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapte","Tous ages · Tous niveaux · Debutants bienvenus","Séances adaptees et bienveillantes"]}
+ about:"Le 3x3 est une pratique dynamique qui complète notre projet. Plus rapide, plus libre, il permet à chacun de s'exprimer dans un format moderne.",
+ items:["Compétitions 3x3 · Tournois locaux","Détection et formation des talents","Événements et animations urbaines","Mixité et inclusion favorisées"]},
+ {id:"evenement",name:"Événements",sub:"Des rendez-vous qui nous rassemblent",desc:"Tournois · Soirées · Journées club",icon:"🎉",color:"#8E44AD",ready:true,
+ about:"Le club organise des événements tout au long de la saison pour faire vivre notre passion, créer du lien et faire rayonner notre territoire.",
+ items:["Création de tournois 3x3 et 5x5","Soirées et journées club","Échanges inter-clubs · Tournoi international","Journées formation et arbitrage"]},
+ {id:"basketpourtous",name:"Basket Pour Tous",sub:"Un club où chacun trouve sa place",desc:"Basket santé · Loisir · Inclusif · Adapté",icon:"🤝",color:"#16A085",ready:true,
+ about:"Le basket accessible à toutes et tous, sans distinction. Des séances adaptées, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
+ items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapté","Tous âges · Tous niveaux · Débutants bienvenus","Séances adaptées et bienveillantes"]}
 ];
 // Chaque categorie porte son titre et ses chips : ajouter une categorie ne
 // demande plus de toucher au code d'ouverture (openCat etait une liste blanche).
 const ELITE_CATS=[
- {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Decouverte",icon:"",color:"#E8670A",ready:true,
-  title:"U9 Decouverte",chips:["1 séance / semaine","1h30 par séance","Decouverte FFBB"]},
+ {id:"u9",name:"U9",desc:"3 cycles · 16 séances · Découverte",icon:"",color:"#E8670A",ready:true,
+  title:"U9 Découverte",chips:["1 séance / semaine","1h30 par séance","Découverte FFBB"]},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true,
   title:"U11 Mini-basket",chips:["2 séances / semaine","1h30 par séance","Mini-basket FFBB"]},
- {id:"u13",name:"U13 (Filles et Garcons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true,
-  title:"U13 Filles et Garcons",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
+ {id:"u13",name:"U13 (Filles et Garçons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true,
+  title:"U13 Filles et Garçons",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
  {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true,
   title:"U15",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
  {id:"u17m",name:"U17 Masculins",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#8E44AD",ready:true,
@@ -229,17 +229,17 @@ const ELITE_CATS=[
 // surcharger n'importe quelle date (calendrier propre, stage, etc.).
 const VAC_COMMUNES=[
  {n:"Toussaint",d:"17 oct. - 2 nov. 2026",imp:"4 séances",c:"#E8670A"},
- {n:"Noel",d:"19 dec. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"}
+ {n:"Noël",d:"19 déc. 2026 - 4 janv. 2027",imp:"5 séances",c:"#8E44AD"}
 ];
 const VACS_BY_ZONE={
  A:VAC_COMMUNES.concat([
-  {n:"Hiver",d:"13 fev. - 1 mars 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Hiver",d:"13 févr. - 1 mars 2027",imp:"4 séances",c:"#1A2E5A"},
   {n:"Printemps",d:"10 avr. - 26 avr. 2027",imp:"4 séances",c:"#D4AF37"}]),
  B:VAC_COMMUNES.concat([
-  {n:"Hiver",d:"20 fev. - 8 mars 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Hiver",d:"20 févr. - 8 mars 2027",imp:"4 séances",c:"#1A2E5A"},
   {n:"Printemps",d:"17 avr. - 3 mai 2027",imp:"4 séances",c:"#D4AF37"}]),
  C:VAC_COMMUNES.concat([
-  {n:"Hiver",d:"6 fev. - 22 fev. 2027",imp:"4 séances",c:"#1A2E5A"},
+  {n:"Hiver",d:"6 févr. - 22 févr. 2027",imp:"4 séances",c:"#1A2E5A"},
   {n:"Printemps",d:"3 avr. - 19 avr. 2027",imp:"4 séances",c:"#D4AF37"}])
 };
 

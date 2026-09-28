@@ -128,7 +128,7 @@ function viewFicheModal(phone){
     return phones.indexOf(normPhone)>=0;
   });
   if(!matches.length){
-    alert("Aucune fiche trouvee pour ce numéro.");
+    alert("Aucune fiche trouvée pour ce numéro.");
     return;
   }
   var lic=matches[0];
@@ -145,7 +145,7 @@ function viewFicheModal(phone){
     if(!r[1])return;
     html+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">'+r[0]+'</div><div style="font-size:13px;color:var(--txt);margin-top:2px">'+r[1]+'</div></div>';
   });
-  document.getElementById("fiche-view-content").innerHTML=html||'<div style="font-size:12px;color:var(--mut)">Fiche incomplete</div>';
+  document.getElementById("fiche-view-content").innerHTML=html||'<div style="font-size:12px;color:var(--mut)">Fiche incomplète</div>';
  document.getElementById("modal-fiche-view").style.display="flex";
 }
 
@@ -295,7 +295,7 @@ async function removeMemberFromChannel(phone){
 function showLicenceContactPicker(){
   var contacts=getLicencedContacts();
   var el=document.getElementById("lic-picker-list");
-  if(!contacts.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun contact disponible</div><div style="font-size:11px;margin-top:4px">Les licences validees avec téléphone apparaitront ici</div></div>';}
+  if(!contacts.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun contact disponible</div><div style="font-size:11px;margin-top:4px">Les licences validées avec téléphone apparaîtront ici</div></div>';}
   else{
     el.innerHTML="";
     contacts.forEach(function(c){
@@ -487,7 +487,7 @@ function listenTyping(channelId){
     });
     if(!descEl)return;
     if(typers.length){
-      descEl.textContent=(typers.length===1?typers[0]+" ecrit...":typers.join(", ")+" ecrivent...");
+      descEl.textContent=(typers.length===1?typers[0]+" écrit...":typers.join(", ")+" écrivent...");
       descEl.style.color="#D4AF37";
       descEl.style.fontStyle="italic";
     } else {
@@ -610,7 +610,7 @@ function listenMessages(channelId, prevLastRead){
           var checkbox=msg.allowMultiple?(votedByMe?" ":" "):(votedByMe?" ":" ");
           pollHtml+='<div class="poll-opt'+(votedByMe?" voted":"")+'" onclick="'+(isClosed?"":"votePoll(\'"+channelId+"\',\'"+d.id+"\',"+oi+")")+'" style="'+(isClosed?"cursor:default;opacity:.7":"")+'"><div class="poll-opt-fill" style="width:'+pct+'%"></div><div class="poll-opt-content"><span>'+checkbox+o.text+'</span><span style="color:var(--mut);font-size:10px">'+pct+'% ('+votes+')</span></div></div>';
         });
-        pollHtml+='<div style="font-size:10px;color:var(--mut);margin-top:4px">'+totalVotes+' vote'+(totalVotes>1?"s":"")+' · '+time+(msg.deadline?' · '+(isClosed?"Cloture le "+msg.deadline:"Jusqu au "+msg.deadline):"")+'</div>';
+        pollHtml+='<div style="font-size:10px;color:var(--mut);margin-top:4px">'+totalVotes+' vote'+(totalVotes>1?"s":"")+' · '+time+(msg.deadline?' · '+(isClosed?"Clôture le "+msg.deadline:"Jusqu'au "+msg.deadline):"")+'</div>';
         pollDiv.innerHTML=pollHtml;
         wrap.appendChild(pollDiv);
         msgsEl.appendChild(wrap);
@@ -824,7 +824,7 @@ async function sendMediaMessage(input){
   if(!window.fbReady){alert("Connexion en cours, patientez et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var file=input.files[0];
-  if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptees (pas de video)");input.value="";return;}
+  if(file.type.indexOf("image")!==0){alert("Seules les photos sont acceptées (pas de vidéo)");input.value="";return;}
   var pseudoEl=document.getElementById("chat-pseudo");
   var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
   savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
@@ -845,7 +845,7 @@ async function sendMediaMessage(input){
 
 // ── SONDAGES (style WhatsApp) ────────────────────────────────────
 function showPollCreator(){
-  if(!window.asmbCoachMode){alert("Seuls les coachs et dirigeants peuvent creer un sondage");return;}
+  if(!window.asmbCoachMode){alert("Seuls les coachs et dirigeants peuvent créer un sondage");return;}
   document.getElementById("poll-question").value="";
   for(var i=0;i<4;i++){document.getElementById("poll-opt-"+i).value="";}
   document.getElementById("modal-poll").style.display="flex";

@@ -258,8 +258,8 @@ function getAdminCount(id){
   if(id==="invitations")return "Staff et support";
   if(id==="licences"){var l=getLicences();return l.length+" fiche"+(l.length>1?"s":"");}
   if(id==="inscriptions"){var p=getPlayers();return p.length+" joueur"+(p.length>1?"s":"");}
-  if(id==="equipes"){var t=getTeams();return t.length+" equipe"+(t.length>1?"s":"");}
-  if(id==="planning"){var e=getEvents();return e.length+" evenement"+(e.length>1?"s":"");}
+  if(id==="equipes"){var t=getTeams();return t.length+" équipe"+(t.length>1?"s":"");}
+  if(id==="planning"){var e=getEvents();return e.length+" événement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
   if(id==="comptabilite"){var c=getComptabilite();return c.length+" ligne"+(c.length>1?"s":"");}
   if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
@@ -744,12 +744,12 @@ function wirePlayerCatAutofill(){
 function renderPlayerForm(p){
   var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
     var cats=CATS_ALL.map(function(c){return '<option value="'+c+'"'+(p&&p.cat===c?' selected':'')+'>'+c+'</option>';}).join("");
-  var postes=["Meneur","Arriere","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
-  var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencie</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
+  var postes=["Meneur","Arrière","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
+  var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencié</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
   document.getElementById("player-form").innerHTML=
     '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prénom"></div>'+
     '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="fp-nom" value="'+(p?p.nom:'')+'" placeholder="Nom de famille"></div>'+
-    '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigne</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigné</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entraînements)"></div>'+

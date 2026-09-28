@@ -22,15 +22,15 @@ function buildParentEvents(){
     if(e.presences&&Object.keys(e.presences).length){
       var pres=Object.values(e.presences).filter(function(v){return v==="present";}).length;
       var tot=Object.keys(e.presences).length;
-      presInfo='<div style="font-size:11px;color:#D4AF37;margin-top:4px">✓ '+pres+"/"+tot+' presents</div>';
+      presInfo='<div style="font-size:11px;color:#D4AF37;margin-top:4px">✓ '+pres+"/"+tot+' présents</div>';
     }
     var convocInfo="";
     if(e.convocations&&e.convocations.length){
       var convPlayers=getPlayers();
       var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prenom:null;}).filter(Boolean);
-      convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">Convoques : '+noms.join(", ")+'</div>';
+      convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">Convoqués : '+noms.join(", ")+'</div>';
     }
-    var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">ANNULE</div>':"";
+    var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">ANNULÉ</div>':"";
     div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+col+'">'+eventTypeLabel(e.type)+'</span><span style="font-size:11px;color:var(--mut)">'+e.date+(e.heure?" · "+e.heure:"")+'</span></div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+(e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+e.lieu+'</div>':"")+cancelledInfo+convocInfo+presInfo;
     el.appendChild(div);
   });
@@ -65,7 +65,7 @@ function buildParentStats(){
     html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:0 2px 12px var(--shadow)">';
     html+='<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Taux d\'assiduité</div>';
     html+='<div class="prog-bar" style="height:10px"><div class="prog-fill" style="width:'+stats.pct+'%"></div></div>';
-    html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">'+stats.present+' présences sur '+stats.total+' séances enregistrees</div>';
+    html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">'+stats.present+' présences sur '+stats.total+' séances enregistrées</div>';
     html+='</div>';
   }
 
@@ -98,7 +98,7 @@ function buildBottomNav(profile){
     nav.innerHTML=
       '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
-      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Competition</button>'+
+      '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Compétition</button>'+
       '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
   } else {

@@ -19,51 +19,51 @@ var ANIM_LEGACY_CAT="u13";
 // Chaque entree porte le nom de la situation pour laquelle elle a ete dessinee,
 // et des themes qui permettent de la retrouver hors de son contexte d'origine.
 var ANIM_LIB=[
- {id:"1.1-1",n:"Circuit de dribble slalom",tags:["Dribble","Motricite"]},
+ {id:"1.1-1",n:"Circuit de dribble slalom",tags:["Dribble","Motricité"]},
  {id:"1.1-2",n:"Jeu du requin",tags:["Dribble","Duel"]},
  {id:"1.1-3",n:"Tir libre - Bombe",tags:["Tir"]},
- {id:"1.2-1",n:"Dribble miroir",tags:["Dribble","Reactivite"]},
- {id:"1.2-2",n:"Navettes dribble",tags:["Dribble","Athletique"]},
- {id:"1.2-3",n:"1c1 attaque defense",tags:["Duel","Dribble","Defense"]},
+ {id:"1.2-1",n:"Dribble miroir",tags:["Dribble","Réactivité"]},
+ {id:"1.2-2",n:"Navettes dribble",tags:["Dribble","Athlétique"]},
+ {id:"1.2-3",n:"1c1 attaque défense",tags:["Duel","Dribble","Défense"]},
  {id:"1.3-1",n:"Mur de passes",tags:["Passe"]},
- {id:"1.3-2",n:"Triangles - passe et deplacement",tags:["Passe","Demarquage"]},
- {id:"1.3-3",n:"2c0 - montee collective",tags:["Passe","Transition"]},
+ {id:"1.3-2",n:"Triangles - passe et déplacement",tags:["Passe","Démarquage"]},
+ {id:"1.3-3",n:"2c0 - montée collective",tags:["Passe","Transition"]},
  {id:"1.4-1",n:"BEEF sans ballon",tags:["Tir"]},
  {id:"1.4-2",n:"5 spots de tir",tags:["Tir"]},
- {id:"1.4-3",n:"Lay-up droit puis gauche",tags:["Tir","Motricite"]},
- {id:"1.5-1",n:"Glissades defensives",tags:["Defense","Athletique"]},
+ {id:"1.4-3",n:"Lay-up droit puis gauche",tags:["Tir","Motricité"]},
+ {id:"1.5-1",n:"Glissades défensives",tags:["Défense","Athlétique"]},
  {id:"1.5-2",n:"Pivot",tags:["Fondamentaux"]},
- {id:"1.5-3",n:"3v3 defense individuelle",tags:["Defense","Opposition"]},
- {id:"2.1-1",n:"Passe-et-va",tags:["Passe","Jeu a deux"]},
+ {id:"1.5-3",n:"3v3 défense individuelle",tags:["Défense","Opposition"]},
+ {id:"2.1-1",n:"Passe-et-va",tags:["Passe","Jeu à deux"]},
  {id:"2.1-2",n:"Surnombre 2v1",tags:["Surnombre","Transition"]},
  {id:"2.1-3",n:"3v2 demi-terrain",tags:["Surnombre","Jeu collectif"]},
- {id:"2.2-1",n:"Tag et demarquage",tags:["Demarquage","Motricite"]},
- {id:"2.2-2",n:"3v3 sans dribble",tags:["Jeu collectif","Demarquage","Opposition"]},
+ {id:"2.2-1",n:"Tag et démarquage",tags:["Démarquage","Motricité"]},
+ {id:"2.2-2",n:"3v3 sans dribble",tags:["Jeu collectif","Démarquage","Opposition"]},
  {id:"2.2-3",n:"Match 4v4",tags:["Opposition"]},
- {id:"2.3-1",n:"Remontee en 3 couloirs",tags:["Transition","Jeu collectif"]},
- {id:"2.3-2",n:"Rebond defensif et contre-attaque",tags:["Rebond","Transition"]},
- {id:"2.3-3",n:"Match : contre-attaque valorisee",tags:["Transition","Opposition"]},
- {id:"3.1-1",n:"1v1 tout terrain",tags:["Defense","Duel"]},
- {id:"3.1-2",n:"1v1 avec tir",tags:["Defense","Duel","Tir"]},
- {id:"3.1-3",n:"Boxout et rebond 2v2",tags:["Rebond","Defense"]},
- {id:"3.2-1",n:"Sprint retour",tags:["Defense","Transition","Athletique"]},
- {id:"3.2-2",n:"Transition defensive 3v3",tags:["Defense","Transition"]},
- {id:"3.2-3",n:"Match - retour obligatoire",tags:["Defense","Opposition"]},
- {id:"3.3-1",n:"Contest de tir",tags:["Defense"]},
- {id:"3.3-2",n:"Defense sur poste bas",tags:["Defense","Postes"]},
- {id:"3.3-3",n:"Match 5v5 evaluation defensive",tags:["Opposition","Defense"]},
- {id:"4.1-1",n:"Fixation-passe",tags:["Jeu a deux","Passe"]},
- {id:"4.1-2",n:"Jeu interieur-exterieur",tags:["Postes","Jeu collectif"]},
- {id:"4.1-3",n:"3v3 decalage par deplacement",tags:["Jeu collectif","Demarquage"]},
+ {id:"2.3-1",n:"Remontée en 3 couloirs",tags:["Transition","Jeu collectif"]},
+ {id:"2.3-2",n:"Rebond défensif et contre-attaque",tags:["Rebond","Transition"]},
+ {id:"2.3-3",n:"Match : contre-attaque valorisée",tags:["Transition","Opposition"]},
+ {id:"3.1-1",n:"1v1 tout terrain",tags:["Défense","Duel"]},
+ {id:"3.1-2",n:"1v1 avec tir",tags:["Défense","Duel","Tir"]},
+ {id:"3.1-3",n:"Boxout et rebond 2v2",tags:["Rebond","Défense"]},
+ {id:"3.2-1",n:"Sprint retour",tags:["Défense","Transition","Athlétique"]},
+ {id:"3.2-2",n:"Transition défensive 3v3",tags:["Défense","Transition"]},
+ {id:"3.2-3",n:"Match - retour obligatoire",tags:["Défense","Opposition"]},
+ {id:"3.3-1",n:"Contest de tir",tags:["Défense"]},
+ {id:"3.3-2",n:"Défense sur poste bas",tags:["Défense","Postes"]},
+ {id:"3.3-3",n:"Match 5v5 évaluation défensive",tags:["Opposition","Défense"]},
+ {id:"4.1-1",n:"Fixation-passe",tags:["Jeu à deux","Passe"]},
+ {id:"4.1-2",n:"Jeu intérieur-extérieur",tags:["Postes","Jeu collectif"]},
+ {id:"4.1-3",n:"3v3 décalage par déplacement",tags:["Jeu collectif","Démarquage"]},
  {id:"4.2-1",n:"Les 5 postes",tags:["Postes","Jeu collectif"]},
- {id:"4.2-2",n:"4v4 avec roles",tags:["Jeu collectif","Opposition"]},
- {id:"4.2-3",n:"5v5 pression tout terrain",tags:["Defense","Opposition","Transition"]},
+ {id:"4.2-2",n:"4v4 avec rôles",tags:["Jeu collectif","Opposition"]},
+ {id:"4.2-3",n:"5v5 pression tout terrain",tags:["Défense","Opposition","Transition"]},
  {id:"4.3-1",n:"3v3 transition en alternance",tags:["Transition","Opposition"]},
- {id:"4.3-2",n:"Signal de transition",tags:["Transition","Reactivite"]},
- {id:"4.3-3",n:"Match 5v5 evaluation",tags:["Opposition"]},
- {id:"5.1-1",n:"Derniere action - 10 secondes",tags:["Fin de match","Opposition"]},
+ {id:"4.3-2",n:"Signal de transition",tags:["Transition","Réactivité"]},
+ {id:"4.3-3",n:"Match 5v5 évaluation",tags:["Opposition"]},
+ {id:"5.1-1",n:"Dernière action - 10 secondes",tags:["Fin de match","Opposition"]},
  {id:"5.1-2",n:"Remise en jeu rapide",tags:["Fin de match","Transition"]},
- {id:"5.1-3",n:"Communication a voix haute",tags:["Fin de match","Jeu collectif"]},
+ {id:"5.1-3",n:"Communication à voix haute",tags:["Fin de match","Jeu collectif"]},
  {id:"5.2-1",n:"Tournoi 3v3 FIBA",tags:["Opposition","3x3"]},
  {id:"5.2-2",n:"Bilan individuel par stations",tags:["Bilan"]}
 ];
@@ -205,7 +205,7 @@ function openAnimPicker(opts){
  head.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px";
  var titre=document.createElement("div");
  titre.style.cssText="font-size:15px;font-weight:800;color:var(--txt)";
- titre.textContent=browse?"Bibliotheque d'animations":"Choisir une animation";
+ titre.textContent=browse?"Bibliothèque d'animations":"Choisir une animation";
  var close=document.createElement("button");
  close.style.cssText="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)";
  close.textContent="✕";
@@ -216,13 +216,13 @@ function openAnimPicker(opts){
  var sous=document.createElement("div");
  sous.style.cssText="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px";
  sous.textContent=browse
-   ? "Ces animations peuvent etre rattachees a n'importe quelle situation, dans n'importe quelle categorie."
-   : "L'animation choisie reste attachee a cette situation, meme si la seance est modifiee plus tard.";
+   ? "Ces animations peuvent être rattachées à n'importe quelle situation, dans n'importe quelle catégorie."
+   : "L'animation choisie reste attachée à cette situation, même si la séance est modifiée plus tard.";
  inner.appendChild(sous);
 
  var rech=document.createElement("input");
  rech.className="form-input";
- rech.setAttribute("placeholder","Rechercher (dribble, tir, defense...)");
+ rech.setAttribute("placeholder","Rechercher (dribble, tir, défense...)");
  rech.style.cssText="margin-bottom:10px";
  inner.appendChild(rech);
 

@@ -61,7 +61,7 @@ function renderPresenceHistory(){
   // Auto-declarations (historique horodate, pour litiges)
   var selfEl=document.getElementById("ph-self-declared");
   if(selfEl){
-    selfEl.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Chargement des auto-declarations...</div>';
+    selfEl.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Chargement des auto-déclarations...</div>';
  if(window.fbReady){
  window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
  var mine=[];
@@ -77,13 +77,13 @@ function renderPresenceHistory(){
  if(!mine.length){selfEl.innerHTML="";return;}
  var statusLabels={present:"✓ Présent",retard:"Retard",absent:"✕ Absent"};
  var statusColors={present:"#D4AF37",retard:"#E8670A",absent:"#C0392B"};
- var html='<div class="sec" style="padding-left:0;margin-top:16px">Auto-declarations (horodatees)</div>';
+ var html='<div class="sec" style="padding-left:0;margin-top:16px">Auto-déclarations (horodatées)</div>';
         mine.forEach(function(c){
           var ts=c.ts&&c.ts.toDate?c.ts.toDate():null;
           var tsStr=ts?ts.toLocaleString("fr-FR"):"?";
           html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)">'+
             '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;color:#fff;background:'+(statusColors[c.status]||"#8E44AD")+'">'+(statusLabels[c.status]||c.status)+'</span>'+
-            '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+(c.eventTitre||"?")+'</div><div style="font-size:10px;color:var(--mut)">Declare le '+tsStr+'</div></div>'+
+            '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+(c.eventTitre||"?")+'</div><div style="font-size:10px;color:var(--mut)">Déclaré le '+tsStr+'</div></div>'+
           '</div>';
         });
         selfEl.innerHTML=html;
@@ -95,9 +95,9 @@ function renderPresenceHistory(){
 }
 
 function exportPlanningPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, réessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){alert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
   var events=getEvents().slice().sort(function(a,b){return a.date>b.date?1:-1;});
-  if(!events.length){alert("Aucun événement a exporter");return;}
+  if(!events.length){alert("Aucun événement à exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);doc.setTextColor(27,92,40);
@@ -171,15 +171,15 @@ function importPlayersCSV(input){
     renderPlayers();
     buildAdminHome();
     input.value="";
-    alert(added+" joueur(s) importe(s) depuis le CSV !");
+    alert(added+" joueur(s) importé(s) depuis le CSV !");
   };
   reader.readAsText(file);
 }
 
 function exportPlayersPDF(){
-  if(typeof window.jspdf==="undefined"){alert("Chargement du generateur PDF, réessayez dans quelques secondes");return;}
+  if(typeof window.jspdf==="undefined"){alert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
   var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
-  if(!players.length){alert("Aucun joueur a exporter");return;}
+  if(!players.length){alert("Aucun joueur à exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);
@@ -205,7 +205,7 @@ function exportPlayersPDF(){
     if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
     var typeLic=p.typeLicence==="competition"?"Compétition":"Loisir";
     var numLic=p.numLicence||"0C";
-    var statut=p.licence==="ok"?"Licencie":(p.licence==="attente"?"En attente":"Sans licence");
+    var statut=p.licence==="ok"?"Licencié":(p.licence==="attente"?"En attente":"Sans licence");
     doc.text((p.nom||"").substring(0,18),colX[0],y);
     doc.text((p.prenom||"").substring(0,18),colX[1],y);
     doc.text(p.cat||"",colX[2],y);
@@ -216,7 +216,7 @@ function exportPlayersPDF(){
   });
   doc.setFontSize(8);
   doc.setTextColor(150,150,150);
-  doc.text("Total : "+players.length+" licencie(s)",14,y+6);
+  doc.text("Total : "+players.length+" licencié(s)",14,y+6);
 
   doc.save(clubSlug()+"_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
 }
@@ -445,7 +445,7 @@ function togglePlanningView(){
 function renderPlanningCalendar(){
   var el=document.getElementById("planning-calendar");if(!el)return;
   var events=getEvents();
-  var monthNames=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Décembre"];
+  var monthNames=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
   var firstDay=new Date(planCalYear,planCalMonth,1);
   var startOffset=(firstDay.getDay()+6)%7; // lundi=0
   var daysInMonth=new Date(planCalYear,planCalMonth+1,0).getDate();
@@ -486,8 +486,8 @@ function shiftPlanCal(delta){
 
 function showDayEvents(dateStr){
   var events=getEvents().filter(function(e){return e.date===dateStr;});
-  if(!events.length){alert("Aucun événement ce jour-la");return;}
-  var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" a "+e.heure:"");}).join("\n");
+  if(!events.length){alert("Aucun événement ce jour-là");return;}
+  var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" à "+e.heure:"");}).join("\n");
   alert("Événements du "+dateStr+" :\n\n"+txt);
 }
 
@@ -506,16 +506,16 @@ function buildPlanning(){
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
-    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gérer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
     var scoreDisplay=e.score?("<div style=\"font-size:12px;font-weight:800;color:var(--txt);margin-top:6px\">"+clubLabel()+" "+e.score.asmb+" - "+e.score.adv+" "+(e.score.adversaire||"Adversaire")+"</div>"):"";
     var scoreBtn=(e.type==="match")?("<button onclick=\"editScore('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(e.score?"Modifier score":"Ajouter score")+"</button>"):"";
     var convocCount=e.convocations?e.convocations.length:0;
     var convocBtn=(e.type==="match")?("<button onclick=\"showConvocation('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Convocation"+(convocCount?" ("+convocCount+")":"")+"</button>"):"";
-    var weatherBtn=(e.type==="match"&&e.lieu)?("<button onclick=\"showWeather('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Meteo</button>"):"";
+    var weatherBtn=(e.type==="match"&&e.lieu)?("<button onclick=\"showWeather('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Météo</button>"):"";
     var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
     var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
     var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Annuler</button>";
-    var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\"> EVENEMENT ANNULÉ</div>":"";
+    var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\"> ÉVÉNEMENT ANNULÉ</div>":"";
     d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+convocBtn+weatherBtn+evalBtn+editTimeBtn+cancelBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });

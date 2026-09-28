@@ -168,7 +168,7 @@ SIT_DUR["1.2-1"]=4500;SIT_ANIMS["1.2-1"]=function(ctx,t){if(!ctx)return;
  var td=Math.max(0,t-0.08),ax=W/2+Math.sin(td*Math.PI*2)*55,ay=H-72-Math.sin(td*Math.PI*3+1)*15;
  pl(ctx,bx,by,"B","#16A085",13);bl(ctx,bx,by-15,7);
  pl(ctx,ax,ay,"A","#1A2E5A",13);bl(ctx,ax,ay-15,7);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("B mene · A imite en miroir",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("B mène · A imite en miroir",W/2,H-8);
 };SIT_ANIMS["1.2-1"].height=200;
 
 SIT_DUR["1.2-2"]=5000;SIT_ANIMS["1.2-2"]=function(ctx,t){if(!ctx)return;
@@ -221,7 +221,7 @@ SIT_DUR["1.3-2"]=5500;SIT_ANIMS["1.3-2"]=function(ctx,t){if(!ctx)return;
  if(bp<0.8){ctx.strokeStyle="rgba(232,103,10,.5)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pos[bi].x,pos[bi].y);ctx.lineTo(bx,by);ctx.stroke();}
  ["A","B","C"].forEach(function(l,i){pl(ctx,pos[i].x,pos[i].y,l,"#1A2E5A",13);});
  bl(ctx,bx,by,7);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("A→B→C→A · Passe puis deplacement",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("A→B→C→A · Passe puis déplacement",W/2,H-8);
 };SIT_ANIMS["1.3-2"].height=220;
 
 SIT_DUR["1.3-3"]=5000;SIT_ANIMS["1.3-3"]=function(ctx,t){if(!ctx)return;
@@ -236,7 +236,7 @@ SIT_DUR["1.3-3"]=5000;SIT_ANIMS["1.3-3"]=function(ctx,t){if(!ctx)return;
  else if(t<0.85){var p3=(t-.65)/.2;a1x=W/2+18;a1y=80;a2x=lp(W/2-14,W/2,p3);a2y=lp(80,44,eOut(p3));bx=lp(a2x+4,W/2,eOut(p3));by=lp(a2y,27,eOut(p3));}
  else{a1x=W/2+18;a1y=80;a2x=W/2;a2y=44;bx=W/2;by=27;}
  bl(ctx,bx,by,7);pl(ctx,a1x,a1y,"A1","#1A2E5A",12);pl(ctx,a2x,a2y,"A2","#1A2E5A",12);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Passes sans dribble · montee collective",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Passes sans dribble · montée collective",W/2,H-8);
 };SIT_ANIMS["1.3-3"].height=260;
 
 SIT_DUR["1.4-1"]=4000;SIT_ANIMS["1.4-1"]=function(ctx,t){if(!ctx)return;
@@ -285,7 +285,7 @@ SIT_DUR["1.4-3"]=5500;SIT_ANIMS["1.4-3"]=function(ctx,t){if(!ctx)return;
  for(var k=1;k<=3;k++){var tp=Math.max(0,ct-k*0.06);ctx.globalAlpha=Math.max(0,.12-k*.04);ctx.fillStyle="#1A2E5A";ctx.beginPath();ctx.arc(lp(startX,W/2+side*18,eOut(tp/0.55)),lp(startY,72,eOut(tp/0.55)),10,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
  for(var m=1;m<=2;m++){pl(ctx,startX-side*m*22,startY,"A","#1A2E5A",9,0.5);}
  pl(ctx,W/2-side*18,44,"R","#16A085",10);bl(ctx,bx,by,8);pl(ctx,ax,ay,"A","#1A2E5A");
- ctx.fillStyle="rgba(255,165,0,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(isRight?"Cote DROIT":"Cote GAUCHE",W/2,H-8);
+ ctx.fillStyle="rgba(255,165,0,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(isRight?"Côté DROIT":"Côté GAUCHE",W/2,H-8);
 };SIT_ANIMS["1.4-3"].height=270;
 
 SIT_DUR["1.5-1"]=4500;SIT_ANIMS["1.5-1"]=function(ctx,t){if(!ctx)return;
@@ -314,7 +314,7 @@ SIT_DUR["1.5-2"]=4500;SIT_ANIMS["1.5-2"]=function(ctx,t){if(!ctx)return;
  ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pos[0],pos[1]);ctx.lineTo(pos[0]+Math.cos(a)*22,pos[1]+Math.sin(a)*22);ctx.stroke();
  bl(ctx,pos[0]+Math.cos(a)*14,pos[1]+Math.sin(a)*14,6);
  });
- ctx.fillStyle="rgba(255,165,0,.6)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("Pied pivot ancre · Corps qui tourne",W/2,H-8);
+ ctx.fillStyle="rgba(255,165,0,.6)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("Pied pivot ancré · Corps qui tourne",W/2,H-8);
 };SIT_ANIMS["1.5-2"].height=200;
 
 SIT_DUR["1.5-3"]=5500;SIT_ANIMS["1.5-3"]=function(ctx,t){if(!ctx)return;
@@ -345,7 +345,7 @@ SIT_DUR["2.1-1"]=5500;SIT_ANIMS["2.1-1"]=function(ctx,t){if(!ctx)return;
  else{var p3=(t-.72)/.28;ax=lp(W/2-16,W/2-10,p3);ay=lp(62,34,eOut(p3));bx2=W/2+55;by2=H/2+10;ballx=lp(W/2+55,W/2-13,eOut(p3));bally=lp(H/2+10,34,eOut(p3));if(p3>0.65){var pp=(p3-.65)/.35;ballx=lp(W/2-13,W/2,eOut(pp));bally=lp(34,27,ease(pp))-Math.sin(pp*Math.PI)*15;}}
  pl(ctx,W/2+18,44,"C","#16A085",10);bl(ctx,ballx,bally,8);pl(ctx,bx2,by2,"B","#1A2E5A",13);pl(ctx,ax,ay,"A","#1A2E5A",13);
  ctx.fillStyle="rgba(232,103,10,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";
- ctx.fillText(["Depart","Passe A→B","A coupe","Passe retour + Lay-up"][t<0.22?0:t<0.45?1:t<0.72?2:3],W/2,H-8);
+ ctx.fillText(["Départ","Passe A→B","A coupe","Passe retour + Lay-up"][t<0.22?0:t<0.45?1:t<0.72?2:3],W/2,H-8);
 };SIT_ANIMS["2.1-1"].height=270;
 
 SIT_DUR["2.1-2"]=5500;SIT_ANIMS["2.1-2"]=function(ctx,t){if(!ctx)return;
@@ -360,7 +360,7 @@ SIT_DUR["2.1-2"]=5500;SIT_ANIMS["2.1-2"]=function(ctx,t){if(!ctx)return;
  else if(t<0.72){var p3=(t-.5)/.22;a1x=W/2-35;a1y=H/2+5;a2x=lp(W/2+55,W/2+38,eOut(p3));a2y=lp(H/2+30,H/2+10,eOut(p3));dx=W/2-20;dy=H/2+25;bx2=lp(W/2-35,W/2+38,eOut(p3));by2=lp(H/2+5,H/2+10,p3)-Math.sin(p3*Math.PI)*10;if(p3>0.3){ctx.fillStyle="rgba(255,255,255,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("PASSE !",W/2,H/2-8);}}
  else{var p4=(t-.72)/.28;a1x=W/2-35;a1y=H/2+5;a2x=lp(W/2+38,W/2+25,p4);a2y=lp(H/2+10,65,eOut(p4));dx=W/2-20;dy=H/2+25;bx2=lp(W/2+38,W/2,eOut(p4));by2=lp(H/2+10,27,ease(p4))-Math.sin(p4*Math.PI)*18;}
  bl(ctx,bx2,by2,8);pl(ctx,dx,dy,"D","#C0392B");pl(ctx,a2x,a2y,"A2","#1A2E5A",12);pl(ctx,a1x,a1y,"A1","#1A2E5A",12);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Surnombre 2v1 · Decision rapide",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Surnombre 2v1 · Décision rapide",W/2,H-8);
 };SIT_ANIMS["2.1-2"].height=270;
 
 // C1 1v1 full court pour la defense
@@ -413,7 +413,7 @@ SIT_DUR["2.2-1"]=5000;SIT_ANIMS["2.2-1"]=function(ctx,t){if(!ctx)return;
  var ap=AT.map(function(a,i){return{x:cl(a.bx+Math.sin(t*Math.PI*2*a.vx+i*1.4)*55,64,W-64),y:cl(a.by+Math.cos(t*Math.PI*2*a.vy+i*1.2)*45,34,H-34)};});
  ap.forEach(function(a){bl(ctx,a.x,a.y-12,6);pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
  pl(ctx,req.x,req.y,"R","#C0392B",13);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("R=Requin (foulard) · A=se demarquent",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("R=Requin (foulard) · A=se démarquent",W/2,H-8);
 };SIT_ANIMS["2.2-1"].height=240;
 
 // 2.2-2 : 3v3 sans dribble
@@ -461,7 +461,7 @@ SIT_DUR["2.3-1"]=5500;SIT_ANIMS["2.3-1"]=function(ctx,t){if(!ctx)return;
  var bx2=lp(mX,targX,eOut(passT)),by2=lp(mY,targY,passT)-Math.sin(passT*Math.PI)*20;
  if(passT<1)bl(ctx,bx2,by2,8);
  }
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("M=Meneuse · A=Ailieres · 3 couloirs",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("M=Meneuse · A=Ailières · 3 couloirs",W/2,H-8);
 };SIT_ANIMS["2.3-1"].height=480;
 
 // 2.3-2 : Rebond defensif + contre-attaque
@@ -493,7 +493,7 @@ SIT_DUR["2.3-2"]=5500;SIT_ANIMS["2.3-2"]=function(ctx,t){if(!ctx)return;
  pl(ctx,d1x2,d1y2,"D1","#C0392B",11);pl(ctx,d2x2,d2y2,"D2","#C0392B",11);pl(ctx,d3x2,d3y2,"D3","#C0392B",11);
  if(p3>0.3){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 9px system-ui";ctx.textAlign="center";ctx.fillText("CONTRE-ATTAQUE !",W/2,H/2+10);}
  }
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Rebond défensif → Contre-attaque immediate",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Rebond défensif → Contre-attaque immédiate",W/2,H-8);
 };SIT_ANIMS["2.3-2"].height=480;
 
 // 2.3-3 : Match contre-attaque valorisee
@@ -655,7 +655,7 @@ SIT_DUR["4.1-1"]=5500;SIT_ANIMS["4.1-1"]=function(ctx,t){if(!ctx)return;
  pl(ctx,dx||W/2-18,dy||H/2+35,"D","#C0392B");
  pl(ctx,cx2,cy2,"B","#1A2E5A",12);
  pl(ctx,ax||W/2-75,ay||H/2+8,"A","#1A2E5A");
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("A fixe D → Passe a B demarquee",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("A fixe D → Passe à B démarquée",W/2,H-8);
 };SIT_ANIMS["4.1-1"].height=270;
 
 // 4.1-2 : Jeu interieur-exterieur
@@ -682,7 +682,7 @@ SIT_DUR["4.1-2"]=5500;SIT_ANIMS["4.1-2"]=function(ctx,t){if(!ctx)return;
  }
  pl(ctx,postX,postY,"P","#8E44AD",13);
  pl(ctx,extX,extY,"E","#16A085",11);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("P=Poste · E=Exterieure qui coupe",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("P=Poste · E=Extérieure qui coupe",W/2,H-8);
 };SIT_ANIMS["4.1-2"].height=270;
 
 // 4.1-3 : 3v3 decalage par coupe
@@ -727,13 +727,13 @@ SIT_DUR["4.2-1"]=6000;SIT_ANIMS["4.2-1"]=function(ctx,t){if(!ctx)return;
  });
  var from=postes[active],to=postes[(active+1)%5];
  ctx.strokeStyle="rgba(255,255,255,.3)";ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.setLineDash([]);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("5 postes · Roles et deplacements",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("5 postes · Rôles et déplacements",W/2,H-8);
 };SIT_ANIMS["4.2-1"].height=270;
 
 // 4.2-2 : 4v4 avec roles
 SIT_DUR["4.2-2"]=5000;SIT_ANIMS["4.2-2"]=function(ctx,t){if(!ctx)return;
  var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("4v4 · Chaque joueuse a un role",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("4v4 · Chaque joueuse a un rôle",W/2,H-8);
 };SIT_ANIMS["4.2-2"].height=260;
 
 // 4.2-3 : 5v5 pression full court
@@ -758,7 +758,7 @@ SIT_DUR["4.3-1"]=5500;SIT_ANIMS["4.3-1"]=function(ctx,t){if(!ctx)return;
  dp.forEach(function(d){pl(ctx,d.x,d.y,"D","#C0392B",11);});
  ap.forEach(function(a){pl(ctx,a.x,a.y,"A","#1A2E5A",11);});
  ctx.fillStyle=phase?"rgba(192,57,43,.7)":"rgba(212,175,55,.7)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText(phase?"→ D devient A !":"Attaque →",W/2,H/2-(phase?-18:18));
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Transition instantanee après chaque panier",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Transition instantanée après chaque panier",W/2,H-8);
 };SIT_ANIMS["4.3-1"].height=260;
 
 // 4.3-2 : Signal de transition
@@ -771,7 +771,7 @@ SIT_DUR["4.3-2"]=5000;SIT_ANIMS["4.3-2"]=function(ctx,t){if(!ctx)return;
 // 4.3-3 : Match 5v5 evaluation
 SIT_DUR["4.3-3"]=5000;SIT_ANIMS["4.3-3"]=function(ctx,t){if(!ctx)return;
  var W=320,H=260;ctx.clearRect(0,0,W,H);gMatch(ctx,t,W,H,false);
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 5v5 · Transitions notees par coach",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Match 5v5 · Transitions notées par coach",W/2,H-8);
 };SIT_ANIMS["4.3-3"].height=260;
 
 // 5.1-1 : Derniere action 10 secondes
@@ -818,7 +818,7 @@ SIT_DUR["5.1-2"]=5000;SIT_ANIMS["5.1-2"]=function(ctx,t){if(!ctx)return;
  bl(ctx,lp(recX,runX,eOut(p2)),lp(recY,runY,p2)-13,9);
  if(p2>0.4){ctx.fillStyle="rgba(212,175,55,.8)";ctx.font="bold 8px system-ui";ctx.textAlign="center";ctx.fillText("MONTEE RAPIDE !",W/2,H/2+25);}
  }
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Remise en jeu → Decrochage → Montee rapide",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Remise en jeu → Décrochage → Montée rapide",W/2,H-8);
 };SIT_ANIMS["5.1-2"].height=480;
 
 // 5.1-3 : Communication a voix haute
@@ -852,7 +852,7 @@ SIT_DUR["5.2-1"]=5000;SIT_ANIMS["5.2-1"]=function(ctx,t){if(!ctx)return;
  var rDT=[{bx:W/2+68,by:H/2-15},{bx:W/2+65,by:H/2+18},{bx:W/2+75,by:H/2+2}];
  rAT.forEach(function(a,i){pl(ctx,cl(a.bx+Math.sin(t*Math.PI*2*.7+i)*18,W/2+8,W-58),cl(a.by+Math.cos(t*Math.PI*2*.5+i)*14,20,H-20),"A","#16A085",10);});
  rDT.forEach(function(d,i){pl(ctx,cl(d.bx+Math.sin(t*Math.PI*2*.5+i)*15,W/2+8,W-58),cl(d.by+Math.cos(t*Math.PI*2*.7+i)*12,20,H-20),"D","#8E44AD",10);});
- ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Tournoi 3v3 · 2 terrains simultanement",W/2,H-8);
+ ctx.fillStyle="rgba(255,255,255,.35)";ctx.font="8px system-ui";ctx.textAlign="center";ctx.fillText("Tournoi 3v3 · 2 terrains simultanément",W/2,H-8);
 };SIT_ANIMS["5.2-1"].height=260;
 
 // 5.2-2 : Bilan individuel stations
@@ -862,7 +862,7 @@ SIT_DUR["5.2-2"]=5000;SIT_ANIMS["5.2-2"]=function(ctx,t){if(!ctx)return;
  var stations=[
  {x:W/4,y:H/2-20,label:"LF",icon:"",color:"#E8670A"},
  {x:W/2,y:H/2-20,label:"Dribble",icon:"",color:"#D4AF37"},
- {x:3*W/4,y:H/2-20,label:"Auto-eval",icon:"",color:"#8E44AD"},
+ {x:3*W/4,y:H/2-20,label:"Auto-éval",icon:"",color:"#8E44AD"},
  ];
  var active=Math.floor(t*3*1.5)%3;
  stations.forEach(function(s,i){

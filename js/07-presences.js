@@ -65,7 +65,7 @@ function savePresences(){
   saveEvents(events);
   closeModal("modal-presence");
   buildPlanning();
-  alert("Présences enregistrees !");
+  alert("Présences enregistrées !");
 }
 
 // ═══ BROADCAST EMAIL ═════════════════════════════════════════════
@@ -84,7 +84,7 @@ function getAllContactEmails(){
 
 function showBroadcast(){
   var emails=getAllContactEmails();
-  document.getElementById("broadcast-count").textContent=emails.length+" destinataire"+(emails.length>1?"s":"")+" trouve"+(emails.length>1?"s":"")+" dans les inscriptions";
+  document.getElementById("broadcast-count").textContent=emails.length+" destinataire"+(emails.length>1?"s":"")+" trouvé"+(emails.length>1?"s":"")+" dans les inscriptions";
   document.getElementById("bc-sujet").value="";
   document.getElementById("bc-message").value="";
   document.getElementById("bc-signature").value=localStorage.getItem("asmb_broadcast_signature")||"";
@@ -105,7 +105,7 @@ function sendBroadcast(){
   var signature=document.getElementById("bc-signature").value.trim();
   if(!sujet||!message){alert("Objet et message obligatoires");return;}
   var emails=getAllContactEmails();
-  if(!emails.length){alert("Aucun contact email trouve");return;}
+  if(!emails.length){alert("Aucun contact email trouvé");return;}
   localStorage.setItem("asmb_broadcast_signature",signature);
   var sigBlock=signature?(signature+"\n"+clubLabel()):("L'équipe "+clubLabel());
   var body="Bonjour,\n\n"+message+"\n\n"+sigBlock;

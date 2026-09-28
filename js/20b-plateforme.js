@@ -375,12 +375,12 @@ function renderClubCard(c, list){
   var suspended=c.status==="suspended";
   var supprime=(c.status==="deleted"||c.status==="purging");
   var jr=joursRestants(c);
-  var etat=(c.status==="purging")?"suppression en cours":(supprime?"supprime":(suspended?"suspendu":"actif"));
+  var etat=(c.status==="purging")?"suppression en cours":(supprime?"supprimé":(suspended?"suspendu":"actif"));
   var etatCol=(supprime||suspended)?"var(--red)":"var(--dkg)";
   var delai="";
   if(suspended && jr!==null){
-    delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour regulariser</span>'
-                 : ' \u00b7 <span style="color:var(--red)">delai depasse</span>';
+    delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour r\u00e9gulariser</span>'
+                 : ' \u00b7 <span style="color:var(--red)">d\u00e9lai d\u00e9pass\u00e9</span>';
   }
   card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
     +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.sport||"")+' \u00b7 '+authEsc(c.id)
@@ -606,22 +606,22 @@ async function compterMembres(clubId){
 
 async function deleteClubFlow(c, list){
   if(!isSuperAdmin() || !c) return;
-  if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas etre supprime."); return; }
+  if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas être supprimé."); return; }
   if(c.status!=="suspended" && c.status!=="purging"){ askAlert("Suspendre le club avant de le supprimer."); return; }
   if(c.status==="suspended" && !delaiDepasse(c)){
     var j=joursRestants(c);
-    askAlert("Delai de regularisation en cours"+(j!==null?" : "+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":""):"")+
-      ".\n\nLa suppression ne sera possible qu'a son echeance.");
+    askAlert("Délai de régularisation en cours"+(j!==null?" : "+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":""):"")+
+      ".\n\nLa suppression ne sera possible qu'à son échéance.");
     return;
   }
   var nb=await compterMembres(c.id);
-  var avert="Cette suppression est definitive et irreversible.\n\n"+
-    "Toutes les donnees du club seront effacees : joueurs, equipes, evenements, evaluations, licences, pointages, messages, comptabilite, inventaire, notes de frais, annuaire, sauvegardes.\n\n"+
-    (nb>0 ? nb+" compte(s) rattache(s) perdront l'acces. Leurs comptes de connexion sont a supprimer dans la console Firebase.\n\n" : "")+
+  var avert="Cette suppression est définitive et irréversible.\n\n"+
+    "Toutes les données du club seront effacées : joueurs, équipes, événements, évaluations, licences, pointages, messages, comptabilité, inventaire, notes de frais, annuaire, sauvegardes.\n\n"+
+    (nb>0 ? nb+" compte(s) rattaché(s) perdront l'accès. Leurs comptes de connexion sont à supprimer dans la console Firebase.\n\n" : "")+
     "Pour confirmer, saisir exactement le nom du club :\n"+(c.name||c.id);
-  var saisi=await askPrompt(avert,{placeholder:c.name||c.id,confirmText:"Supprimer definitivement"});
+  var saisi=await askPrompt(avert,{placeholder:c.name||c.id,confirmText:"Supprimer définitivement"});
   if(saisi===null) return;
-  if(String(saisi).trim()!==String(c.name||c.id).trim()){ askAlert("Nom incorrect : suppression annulee."); return; }
+  if(String(saisi).trim()!==String(c.name||c.id).trim()){ askAlert("Nom incorrect : suppression annulée."); return; }
 
   list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Suppression en cours…</div>';
   var total=0, detail=[];
@@ -649,13 +649,13 @@ async function deleteClubFlow(c, list){
     // purge peut etre relancee la ou elle s'est arretee.
     await window.fbDeleteDoc(window.fbDoc(window.fbDb,"clubs",c.id));
     loadClubsList(list);
-    askAlert("Club supprime.\n\n"+total+" document(s) effaces."+
+    askAlert("Club supprimé.\n\n"+total+" document(s) effacés."+
       (detail.length?"\n"+detail.join("\n"):"")+
-      (nb>0?"\n\n"+nb+" compte(s) de connexion restent a supprimer dans la console Firebase.":""));
+      (nb>0?"\n\n"+nb+" compte(s) de connexion restent à supprimer dans la console Firebase.":""));
   }catch(e){
     loadClubsList(list);
     askAlert("Purge interrompue : "+((e&&e.code)||e)+
-      "\n\n"+total+" document(s) deja effaces. Le club reste en statut 'purging' : relancer la suppression pour terminer."+
+      "\n\n"+total+" document(s) déjà effacés. Le club reste en statut 'purging' : relancer la suppression pour terminer."+
       "\n\nLa fenetre d'acces se referme seule au bout de "+GM_PURGE_MINUTES+" minutes.");
   }
 }
@@ -698,25 +698,25 @@ function showClubSuspendu(club){
 
   var titre=document.createElement("div");
   titre.style.cssText="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:8px";
-  titre.textContent=supprime?"Acces supprime":"Acces suspendu";
+  titre.textContent=supprime?"Accès supprimé":"Accès suspendu";
   box.appendChild(titre);
 
   var corps=document.createElement("div");
   corps.style.cssText="font-size:13px;color:var(--txt2);line-height:1.55";
   if(supprime){
     corps.textContent=(club.status==="purging")
-      ? "La suppression du compte de "+(club.name||"votre club")+" est en cours. Les donnees sont en train d'etre effacees."
-      : "L'acces de "+(club.name||"votre club")+" a General Manager a ete supprime. Les donnees ne sont plus consultables depuis l'application.";
+      ? "La suppression du compte de "+(club.name||"votre club")+" est en cours. Les données sont en train d'être effacées."
+      : "L'accès de "+(club.name||"votre club")+" à General Manager a été supprimé. Les données ne sont plus consultables depuis l'application.";
   } else if(j===null){
-    corps.textContent="L'acces de "+(club.name||"votre club")+" est suspendu. Contactez General Manager pour regulariser la situation.";
+    corps.textContent="L'accès de "+(club.name||"votre club")+" est suspendu. Contactez General Manager pour régulariser la situation.";
   } else if(j>0){
-    corps.textContent="L'acces de "+(club.name||"votre club")+" est suspendu. Vous disposez de "+j+" jour"+(j>1?"s":"")+
-      " pour regulariser la situation"+(ech?", soit jusqu'au "+ech.toLocaleDateString("fr-FR"):"")+
-      ". Passe ce delai, le compte du club et ses donnees pourront etre supprimes definitivement.";
+    corps.textContent="L'accès de "+(club.name||"votre club")+" est suspendu. Vous disposez de "+j+" jour"+(j>1?"s":"")+
+      " pour régulariser la situation"+(ech?", soit jusqu'au "+ech.toLocaleDateString("fr-FR"):"")+
+      ". Passé ce délai, le compte du club et ses données pourront être supprimés définitivement.";
   } else {
-    corps.textContent="L'acces de "+(club.name||"votre club")+" est suspendu et le delai de regularisation est depasse"+
+    corps.textContent="L'accès de "+(club.name||"votre club")+" est suspendu et le délai de régularisation est dépassé"+
       (ech?" depuis le "+ech.toLocaleDateString("fr-FR"):"")+
-      ". Le compte peut etre supprime definitivement a tout moment. Contactez General Manager sans tarder.";
+      ". Le compte peut être supprimé définitivement à tout moment. Contactez General Manager sans tarder.";
   }
   box.appendChild(corps);
 
@@ -739,7 +739,7 @@ function showClubSuspendu(club){
   el.appendChild(box);
 
   var out=document.createElement("button");
-  out.textContent="Se deconnecter";
+  out.textContent="Se déconnecter";
   out.style.cssText="width:calc(100% - 24px);margin:0 12px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px solid var(--bdr);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
   out.addEventListener("click",function(){ window.fbSignOut(window.fbAuth); showAuth("entry"); });
   el.appendChild(out);
@@ -755,7 +755,7 @@ async function suspendreClub(c, list){
   var motif=await askPrompt("Motif communique au club (facultatif)",
     {defaultValue:c.suspendMotif||"",placeholder:"Ex : cotisation non reglee",confirmText:"Suivant"});
   if(motif===null) return;
-  var ok=await askConfirm("Suspendre "+(c.name||c.id)+" ?\n\nSes membres ne pourront plus acceder a leurs donnees. Ils verront le motif et disposeront de "+GM_DELAI_REGUL_JOURS+" jours pour regulariser avant que la suppression ne devienne possible.",
+  var ok=await askConfirm("Suspendre "+(c.name||c.id)+" ?\n\nSes membres ne pourront plus accéder à leurs données. Ils verront le motif et disposeront de "+GM_DELAI_REGUL_JOURS+" jours pour régulariser avant que la suppression ne devienne possible.",
     {danger:true,confirmText:"Suspendre"});
   if(!ok) return;
   var now=new Date();
@@ -770,7 +770,7 @@ async function suspendreClub(c, list){
 
 // Reactivation : le delai est efface, le club repart sans compte a rebours.
 function reactiverClub(c, list){
-  askConfirm("Reactiver l'acces de "+(c.name||c.id)+" ?",{confirmText:"Reactiver"}).then(function(ok){
+  askConfirm("Réactiver l'accès de "+(c.name||c.id)+" ?",{confirmText:"Réactiver"}).then(function(ok){
     if(!ok) return;
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
       status:"active", suspendedAt:null, graceUntil:null, suspendMotif:null

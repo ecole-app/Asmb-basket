@@ -143,7 +143,7 @@ function buildClubStats(){
   var html='<div style="display:flex;align-items:center;justify-content:space-around;text-align:center;margin-bottom:16px">'+
     '<div><div style="font-size:24px;font-weight:900;color:var(--dkg)">'+players.length+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés total</div></div>'+
     '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
-    '<div><div style="font-size:24px;font-weight:900;color:#D4AF37">'+licencies+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licences validees</div></div>'+
+    '<div><div style="font-size:24px;font-weight:900;color:#D4AF37">'+licencies+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Licences validées</div></div>'+
     '<div style="width:1px;height:38px;background:var(--bdr)"></div>'+
     '<div><div style="font-size:24px;font-weight:900;color:var(--txt)">'+avgPresence+'%</div><div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité moyenne</div></div>'+
   '</div>';
@@ -163,7 +163,7 @@ function buildClubStats(){
 function toggleNotif(checked){
   if(checked&&"Notification" in window){
     Notification.requestPermission().then(function(perm){
-      if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activees !"});}
+      if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activées !"});}
       else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;alert("Permission refusée");}
     });
   } else {

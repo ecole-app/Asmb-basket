@@ -107,7 +107,7 @@ function saveCreneau(){
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();buildRealEventsList();
-  if(occurrences>1)alert(occurrences+" créneaux crees (repetition hebdomadaire)");
+  if(occurrences>1)alert(occurrences+" créneaux créés (répétition hebdomadaire)");
 }
 
 var evExternes=[];
@@ -144,7 +144,7 @@ function showAddEvent(){
 function renderEvTeamChecks(){
   var el=document.getElementById("ev-teams-checks");if(!el)return;
   var teams=getTeams();
-  if(!teams.length){el.innerHTML='<div style="font-size:11px;color:var(--mut)">Aucune équipe creee - Admin > Équipes</div>';return;}
+  if(!teams.length){el.innerHTML='<div style="font-size:11px;color:var(--mut)">Aucune équipe créée - Admin > Équipes</div>';return;}
   el.innerHTML="";
   var noneBtn=document.createElement("button");
   noneBtn.type="button";
@@ -205,7 +205,7 @@ function renderEvPlayers(){
       players=getPlayers().filter(function(p){return allowedIds.indexOf(p.id)>=0||allowedCats.indexOf(p.cat)>=0;});
     }
   }
-  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur concerne</div>';return;}
+  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur concerné</div>';return;}
   el.innerHTML="";
   players.forEach(function(p){
     var lbl=document.createElement("label");
@@ -217,7 +217,7 @@ function renderEvPlayers(){
 }
 function renderEvExternes(){
   var el=document.getElementById("ev-externes-list");if(!el)return;
-  if(!evExternes.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:4px 0">Aucun invite externe</div>';return;}
+  if(!evExternes.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:4px 0">Aucun invité externe</div>';return;}
   el.innerHTML="";
   evExternes.forEach(function(ex,i){
     var div=document.createElement("div");
@@ -452,7 +452,7 @@ function cancelEvent(eventId){
     if(window.fbReady){
       var channelId=findChannelForTeamText(ev.equipe);
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-        text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" a "+ev.heure:"")+" est annulé.",
+        text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" à "+ev.heure:"")+" est annulé.",
         pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
@@ -488,7 +488,7 @@ async function editEventDateTime(eventId){
   if(changed&&window.fbReady){
     var channelId=findChannelForTeamText(ev.equipe);
     var changesTxt=[];
-    if(newDate!==oldDate||newHeure!==oldHeure)changesTxt.push("nouveau rendez-vous le "+ev.date+(ev.heure?" a "+ev.heure:""));
+    if(newDate!==oldDate||newHeure!==oldHeure)changesTxt.push("nouveau rendez-vous le "+ev.date+(ev.heure?" à "+ev.heure:""));
     if(newEquipe!==oldEquipe)changesTxt.push("équipe : "+ev.equipe);
     if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
@@ -617,8 +617,8 @@ function weatherIconHtml(code){
 }
 
 function weatherLabel(code){
-  if(code===0)return "Ciel degage";
-  if(code===1)return "Plutot ensoleille";
+  if(code===0)return "Ciel dégagé";
+  if(code===1)return "Plutôt ensoleillé";
   if(code===2)return "Partiellement nuageux";
   if(code===3)return "Couvert";
   if(code>=45&&code<=48)return "Brouillard";
@@ -653,8 +653,8 @@ function checkWeatherAlerts(){
             localStorage.setItem("asmb_weather_alerted",JSON.stringify(alerted));
             var channelId=findChannelForTeamText(ev.equipe);
             window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-              text:"<b>Alerte meteo</b><br>"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" a "+ev.heure:"")+" · "+ev.lieu,
-              pseudo:clubPseudo("Alerte Meteo"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+              text:"<b>Alerte météo</b><br>"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" à "+ev.heure:"")+" · "+ev.lieu,
+              pseudo:clubPseudo("Alerte Météo"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
             });
           });
       })
@@ -682,7 +682,7 @@ function maybeShowPwaHint(){
   if(txt){
     txt.textContent=isIos
       ? "Sur iPhone : touchez le bouton Partager puis \"Sur l\'écran d\'accueil\"."
-      : "Ajoutez "+clubLabel()+" a votre écran d\'accueil pour un accès direct, sans passer par le navigateur.";
+      : "Ajoutez "+clubLabel()+" à votre écran d\'accueil pour un accès direct, sans passer par le navigateur.";
   }
   var b=document.getElementById("pwa-install-btn");
   if(b)b.style.display=deferredPwaPrompt?"inline-block":"none";
@@ -820,7 +820,7 @@ function buildMatchday(eventId){
   var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   var rdv=rdvTimeFor(ev);
   var mapsBtn=ev.lieu?'<button onclick="window.open(\'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(ev.lieu)+'\',\'_blank\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(26,46,90,.1);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer">🧭 Itineraire</button>':'';
-  var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+ev.id+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Meteo</button>':'';
+  var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+ev.id+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Météo</button>':'';
 
   el.innerHTML=
     '<div style="padding:22px 18px;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.22) 0%, transparent 50%), linear-gradient(160deg,#1A2E5A 0%,#142a4d 60%,#050b16 100%);color:#fff">'+
@@ -871,7 +871,7 @@ function renderMatchdayPlayers(ev){
       countsEl.innerHTML=
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#D4AF37"><div style="font-size:26px;font-weight:900">'+pres+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Presents</div></div>'+
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#C0392B"><div style="font-size:26px;font-weight:900">'+abs+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Absents</div></div>'+
-        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a93a4"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans reponse</div></div>';
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a93a4"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans réponse</div></div>';
     }
     listEl.innerHTML=rows||'<div style="font-size:12px;color:var(--mut);padding:10px">Aucun joueur convoqué.</div>';
   }).catch(function(){
@@ -899,9 +899,9 @@ function shareCovoiturage(eventId){
   var rdv=rdvTimeFor(e);
   var lignes=[" "+e.titre];
   if(e.equipe)lignes.push(e.equipe);
-  lignes.push(jour+(e.heure?" a "+e.heure:""));
+  lignes.push(jour+(e.heure?" à "+e.heure:""));
   if(e.lieu)lignes.push("📍 "+e.lieu);
-  if(rdv)lignes.push("RDV sur place a "+rdv.txt+" ("+rdv.mins+" min avant)");
+  if(rdv)lignes.push("RDV sur place à "+rdv.txt+" ("+rdv.mins+" min avant)");
   lignes.push("");
   lignes.push("Qui peut emmener / ramener des joueurs ?");
   var txt=lignes.join("\n");
@@ -930,19 +930,19 @@ function showWeather(eventId){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev||!ev.lieu)return;
   var el=document.getElementById("weather-content");
-  el.innerHTML='<div style="font-size:12px;color:var(--mut)">Recherche de la meteo pour "'+ev.lieu+'"...</div>';
+  el.innerHTML='<div style="font-size:12px;color:var(--mut)">Recherche de la météo pour "'+ev.lieu+'"...</div>';
   document.getElementById("modal-weather").style.display="flex";
 
   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(ev.lieu+", France"))
     .then(function(r){return r.json();})
     .then(function(geo){
-      if(!geo||!geo.length){el.innerHTML='<div style="font-size:12px;color:var(--mut)">Lieu introuvable pour la meteo. Vérifiez l\'adresse renseignee.</div>';return;}
+      if(!geo||!geo.length){el.innerHTML='<div style="font-size:12px;color:var(--mut)">Lieu introuvable pour la météo. Vérifiez l\'adresse renseignée.</div>';return;}
       var lat=geo[0].lat,lon=geo[0].lon;
       return fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date="+ev.date+"&end_date="+ev.date)
         .then(function(r2){return r2.json();})
         .then(function(w){
           if(!w.daily||!w.daily.weathercode||!w.daily.weathercode.length){
-            el.innerHTML='<div style="font-size:12px;color:var(--mut)">Previsions non disponibles pour cette date (trop lointaine ou passée).</div>';
+            el.innerHTML='<div style="font-size:12px;color:var(--mut)">Prévisions non disponibles pour cette date (trop lointaine ou passée).</div>';
             return;
           }
           var code=w.daily.weathercode[0];
@@ -955,7 +955,7 @@ function showWeather(eventId){
         });
     })
     .catch(function(){
-      el.innerHTML='<div style="font-size:12px;color:var(--mut)">Impossible de recuperer la meteo (vérifiez votre connexion).</div>';
+      el.innerHTML='<div style="font-size:12px;color:var(--mut)">Impossible de récupérer la météo (vérifiez votre connexion).</div>';
     });
 }
 

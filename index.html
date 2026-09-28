@@ -38,11 +38,11 @@
   <button class="theme-btn" id="hdr-settings-btn" onclick="openParametres()" title="Paramètres">&#9881;</button>
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
-<div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">Mode hors-ligne · Vous consultez les dernieres données chargées</div>
+<div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">Mode hors-ligne · Vous consultez les dernières données chargées</div>
 <div id="update-banner" style="display:none;background:#D4AF37;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;flex-direction:column;align-items:center;justify-content:center;gap:6px">
   <div style="display:flex;align-items:center;justify-content:center;gap:10px">
     <span>Nouvelle version disponible</span>
-    <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1A2E5A;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre a jour</button>
+    <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1A2E5A;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre à jour</button>
   </div>
   <div onclick="(typeof showChangelog==='function')?showChangelog():applyUpdate()" style="font-size:10.5px;font-weight:700;text-decoration:underline;cursor:pointer;opacity:.9">Voir le contenu de la mise à jour</div>
 </div>
@@ -59,7 +59,7 @@
 <div id="modal-fiche-view" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
   <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:15px;font-weight:800;color:var(--txt)">Fiche du licencie</div>
+      <div style="font-size:15px;font-weight:800;color:var(--txt)">Fiche du licencié</div>
       <button onclick="closeModal('modal-fiche-view')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
     </div>
     <div id="fiche-view-content"></div>
@@ -157,12 +157,12 @@
   </div>
   <div class="scr" id="scr-u13home">
     <div class="hero" style="padding:16px 16px 14px">
-      <div id="u13title" style="font-size:18px;font-weight:900;color:#fff">U13 Filles et Garcons</div>
+      <div id="u13title" style="font-size:18px;font-weight:900;color:#fff">U13 Filles et Garçons</div>
       <div id="u13chips" style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
     </div>
     <div class="sec" id="vacSec">Vacances</div>
     <div id="vacList"></div>
-    <div class="sec" id="regSec">Reglement</div>
+    <div class="sec" id="regSec">Règlement</div>
     <div id="regList"></div>
     <div class="sec">Cycles de la saison</div>
     <div id="cyList" style="padding-bottom:16px"></div>
@@ -171,7 +171,7 @@
     <div id="cyHdr"></div>
     <div class="sec">Objectifs</div>
     <div id="cyObjs"></div>
-    <div class="sec">Seances</div>
+    <div class="sec">Séances</div>
     <div id="cySeances" style="padding-bottom:16px"></div>
   </div>
   <div class="scr" id="scr-seance">
@@ -194,7 +194,7 @@
         <div id="login-err" style="color:var(--red);font-size:12px;text-align:center;margin-top:10px;display:none">Mot de passe incorrect</div>
       </div>
       <div style="text-align:center;margin-top:20px">
-        <div style="font-size:11px;color:var(--mut)">Mode demo — connexion libre</div>
+        <div style="font-size:11px;color:var(--mut)">Mode démo — connexion libre</div>
         <button onclick="enterAdmin()" style="margin-top:8px;padding:8px 20px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Continuer sans mot de passe</button>
       </div>
     </div>
@@ -342,7 +342,7 @@
         <!-- Notes -->
         <div class="form-group">
           <label class="form-label">Notes (optionnel)</label>
-          <input class="form-input" id="cr-notes" placeholder="Informations supplementaires...">
+          <input class="form-input" id="cr-notes" placeholder="Informations supplémentaires...">
         </div>
         <!-- Repetition -->
         <div class="form-group">
@@ -352,7 +352,7 @@
             <option value="4">4 semaines</option>
             <option value="8">8 semaines</option>
             <option value="12">12 semaines</option>
-            <option value="season">Toute la saison (mi-aout a fin juin)</option>
+            <option value="season">Toute la saison (mi-août à fin juin)</option>
           </select>
         </div>
         <div style="display:flex;gap:8px;margin-top:4px">
@@ -421,13 +421,13 @@
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvelle fiche</div>
           <button onclick="closeNewLicence()" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
         </div>
-        <div class="form-group"><label class="form-label">Email du licencie *</label><input class="form-input" id="lic-email" type="email" placeholder="prenom.nom@mail.com"></div>
+        <div class="form-group"><label class="form-label">Email du licencié *</label><input class="form-input" id="lic-email" type="email" placeholder="prenom.nom@mail.com"></div>
         <div class="form-group"><label class="form-label">Nom (optionnel)</label><input class="form-input" id="lic-nom-dest" placeholder="Pour personnaliser le mail"></div>
         <div id="lic-mail-tip" style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--mut);margin-bottom:12px;line-height:1.4">
           <span style="flex:1">💡 Pour un logo dans vos mails, configurez une signature avec logo dans les réglages de votre appli mail (Gmail, Mail iOS...) — elle s'ajoutera automatiquement.</span>
           <button onclick="dismissMailTip('lic-mail-tip','asmb_tip_lic_mail_dismissed')" style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:10px;color:var(--mut);line-height:1;padding:0">✕</button>
         </div>
-        <button onclick="createLicence()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Generer le code et envoyer</button>
+        <button onclick="createLicence()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Générer le code et envoyer</button>
       </div>
     </div>
   </div>
@@ -574,7 +574,7 @@
   <!-- ═══ EVENEMENTS ═══ -->
   <div class="scr" id="scr-pole-evenement">
     <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Evénements</div><div style="font-size:11px;color:var(--mut)" id="evenement-count">0 événement</div></div>
+      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Événements</div><div style="font-size:11px;color:var(--mut)" id="evenement-count">0 événement</div></div>
     </div>
     <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
       <button onclick="showAddEvent()" style="padding:8px 16px;border-radius:20px;background:var(--dkg);border:1.5px solid var(--dkg);color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Nouvel événement</button>
@@ -840,7 +840,7 @@
   <div id="modal-weather" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:var(--txt)">Meteo du match</div>
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Météo du match</div>
         <button onclick="closeModal('modal-weather')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div id="weather-content" style="text-align:center;padding:20px 0"></div>
@@ -866,7 +866,7 @@
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouvel événement</div>
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
-      <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noel"></div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noël"></div>
       <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="formation">Formation (arbitre, table de marque...)</option><option value="autre" selected>Autre</option></select></div>
       <div class="form-group" id="ev-eval-option" style="display:none">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
@@ -875,15 +875,15 @@
         </label>
       </div>
       <div style="display:flex;gap:12px">
-        <div class="form-group" style="flex:1"><label class="form-label">Date de debut *</label><input class="form-input" id="ev-date" type="date"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Date de début *</label><input class="form-input" id="ev-date" type="date"></div>
         <div class="form-group" style="flex:1"><label class="form-label">Date de fin</label><input class="form-input" id="ev-date-fin" type="date"></div>
       </div>
       <div class="form-group"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder="14h00"></div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder="Gymnase..."></div>
-      <div class="form-group"><label class="form-label">Équipes concernees</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box"></div></div>
+      <div class="form-group"><label class="form-label">Équipes concernées</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box"></div></div>
 
       <div style="background:var(--bdr);height:1px;margin:16px 0"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Participants concernes</div>
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Participants concernés</div>
       <div id="ev-players-list" style="max-height:160px;overflow-y:auto;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;margin-bottom:14px"></div>
 
       <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Invites externes</div>
@@ -997,7 +997,7 @@
  </div><div class="param-block" data-sec="apparence"><div class="sec">Apparence</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">
- <div><div style="font-size:13px;font-weight:700;color:var(--txt)"> Mode sombre</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Theme fonce pour les salles peu eclairees</div></div>
+ <div><div style="font-size:13px;font-weight:700;color:var(--txt)"> Mode sombre</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Thème foncé pour les salles peu éclairées</div></div>
  <input type="checkbox" id="gp-dark" onchange="toggleTheme()" style="width:44px;height:24px;accent-color:var(--dkg)">
  </label>
  </div>
@@ -1020,7 +1020,7 @@
  </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
- <div style="font-size:12px;color:var(--mut);margin-bottom:12px">A afficher au gymnase ou a partager : les familles scannent pour acceder directement.</div>
+ <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>
  <div style="display:flex;gap:10px;flex-wrap:wrap">
  <button onclick="showQrModal('app')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">QR Rejoindre l'app</button>
  <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
@@ -1057,11 +1057,11 @@
  </div><div class="param-block" data-sec="donnees"><div class="sec">Données</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="exportData()">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Exporter les données</div>
- <div style="font-size:11px;color:var(--mut);margin-top:2px">Telecharger un fichier de sauvegarde</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px">Télécharger un fichier de sauvegarde</div>
  </div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Sauvegarde automatique</div>
- <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos données sont sauvegardees automatiquement dans le cloud</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px" id="backup-status">Vos données sont sauvegardées automatiquement dans le cloud</div>
  <button onclick="restoreFromCloud()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Restaurer depuis le cloud</button>
  </div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
@@ -1076,9 +1076,9 @@
  <button onclick="migrateToFirestore()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Lancer la migration</button>
  <div id="migration-status" style="font-size:11px;color:var(--mut);margin-top:10px;line-height:1.5"></div>
  </div>
- </div><div class="param-block" data-sec="demo"><div class="sec">Demonstration</div>
+ </div><div class="param-block" data-sec="demo"><div class="sec">Démonstration</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
- <div style="font-size:13px;font-weight:700;color:var(--txt)"> Charger des données de demo</div>
+ <div style="font-size:13px;font-weight:700;color:var(--txt)"> Charger des données de démo</div>
  <div style="font-size:11px;color:var(--mut);margin-top:2px">4 équipes + 40 joueurs fictifs pour tester l'app</div>
     </div>
     <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoEvents()">
@@ -1086,8 +1086,8 @@
       <div style="font-size:11px;color:var(--mut);margin-top:2px">4 entraînements + 1 match samedi, pour tester le calendrier</div>
     </div>
     <div style="margin:0 12px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="clearDemoData()">
-      <div style="font-size:13px;font-weight:700;color:var(--txt)">Vider les données de demo</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprimé équipes/joueurs/événements de test</div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">Vider les données de démo</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime les équipes/joueurs/événements de test</div>
     </div>
     </div><div id="params-custom-list"></div><div class="sec">Zone dangereuse</div>
     <div style="margin:0 12px 12px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
@@ -1110,7 +1110,7 @@
         <div>
           <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.55);text-transform:uppercase;margin-bottom:6px" class="js-club-name"></div>
           <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.05;text-transform:uppercase;letter-spacing:-.5px">Bienvenue</div>
-          <div style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px">QUI ETES-VOUS ?</div>
+          <div style="font-size:13px;font-weight:700;color:#F2D57E;margin-top:6px;letter-spacing:.5px">QUI ÊTES-VOUS ?</div>
         </div>
       </div>
     </div>
@@ -1122,7 +1122,7 @@
       </div>
       <div onclick="chooseRole('joueur')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
         <div style="width:52px;height:52px;border-radius:50%;background:#E8670A;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🏃</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Joueur/Joueuse</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Me pointer présent a l'entraînement</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Joueur/Joueuse</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Me pointer présent à l'entraînement</div></div>
         <span style="color:var(--mut);font-size:18px">›</span>
       </div>
       <div onclick="chooseRole('coach')" style="cursor:pointer;margin-bottom:14px;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
@@ -1132,7 +1132,7 @@
  </div>
  <div onclick="chooseRole('dirigeant')" style="cursor:pointer;background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 12px var(--shadow)">
  <div style="width:52px;height:52px;border-radius:50%;background:#1A2E5A;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:#fff">🎓</div>
- <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Accès complet a la gestion du club</div></div>
+ <div style="flex:1"><div style="font-size:15px;font-weight:800;color:var(--txt)">Je suis Dirigeant</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Accès complet à la gestion du club</div></div>
  <span style="color:var(--mut);font-size:18px">›</span>
  </div>
  </div>
@@ -1201,16 +1201,16 @@
         </div>
         <div style="padding:14px">
           <div style="font-size:13px;font-weight:700;color:var(--txt)">Heure de rendez-vous avant match</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:2px">Utilise pour l'agenda et le covoiturage</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px">Utilisé pour l'agenda et le covoiturage</div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">A domicile</div>
+              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">À domicile</div>
               <select id="pp-rdv-home" onchange="savePPVal('asmb_rdv_home',this.value)" class="form-input">
                 <option value="30">30 min</option><option value="45">45 min</option><option value="60">1h</option>
               </select>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">A l'exterieur</div>
+              <div style="font-size:10px;color:var(--mut);margin-bottom:4px">À l'extérieur</div>
               <select id="pp-rdv-away" onchange="savePPVal('asmb_rdv_away',this.value)" class="form-input">
                 <option value="45">45 min</option><option value="60">1h</option><option value="90">1h30</option>
               </select>
@@ -1244,7 +1244,7 @@
         </label>
         <div style="padding:14px">
           <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(212,175,55,.1);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
-          <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation reapparaitra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide a l'installation</button>
+          <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation réapparaîtra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide à l'installation</button>
         </div>
       </div>
 
@@ -1331,7 +1331,7 @@
  <div class="sec" style="padding:16px 0 8px">Bilan de présence</div>
  <div id="parent-stats"></div>
  <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
- <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Gerer mes équipes</button>
+ <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Gérer mes équipes</button>
  <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Annuaire du club</button>
  <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Galerie photos</button>
  <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Calendrier</button>
@@ -1420,7 +1420,7 @@
  <button onclick="closeModal('modal-contact')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
  </div>
  <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ct-nom" placeholder="Prénom Nom"></div>
- <div class="form-group"><label class="form-label">Role / Fonction</label><input class="form-input" id="ct-role" placeholder="Ex: President, Tresoriere, Responsable U13..."></div>
+ <div class="form-group"><label class="form-label">Rôle / Fonction</label><input class="form-input" id="ct-role" placeholder="Ex: Président, Trésorière, Responsable U13..."></div>
  <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ct-tel" type="tel" placeholder="06..."></div>
  <div class="form-group"><label class="form-label">Email (optionnel)</label><input class="form-input" id="ct-email" type="email" placeholder="email@..."></div>
  <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;font-weight:600;color:var(--txt);cursor:pointer">
