@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790675282",
+    "titre": "Nouveau look de l'application",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau look pour l'application : cartes plus arrondies, couleurs plus modernes." }
+    ]
+  },
+  {
     "v": "1790667688",
     "titre": "Mise à jour du 29 septembre (5)",
     "points": [
