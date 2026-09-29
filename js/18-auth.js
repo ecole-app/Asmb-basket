@@ -223,7 +223,7 @@ function authLogout(){
 // pour qu'aucune donnée en cache d'un club ne puisse être renvoyée dans un autre.
 var DEVICE_PREF_PREFIXES = ["asmb_theme","asmb_notif","asmb_last_email","asmb_pwa_hint",
   "asmb_tuto_done","asmb_tip_","asmb_params_","asmb_admin_module_","asmb_joueur_phone",
-  "asmb_phone","asmb_pseudo","asmb_archive_days","gm_"];
+  "asmb_phone","asmb_pseudo","asmb_archive_days","asmb_notif_sound","asmb_text_size","gm_"];
 
 function purgeClubLocalData(){
   var toRemove=[];
@@ -335,7 +335,7 @@ function finishAuthedUser(user, u, isUpdate){
               : roles.indexOf("parent")>=0 ? "parent"
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
-  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[] };
+  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], badge:u.badge||"" };
   // Mode support : le super admin consulte un club qui lui a donné un code d'accès
   var activeClub=u.clubId;
   var sup=(typeof getSupportSession==="function")?getSupportSession():null;

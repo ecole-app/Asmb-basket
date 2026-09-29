@@ -235,9 +235,51 @@ function toggleNotif(checked,elId){
 function openCommSettings(){
   var t=document.getElementById("cs-notif-toggle");
   if(t)t.checked=localStorage.getItem("asmb_notif")==="on";
+  var s=document.getElementById("cs-notif-sound");
+  if(s)s.checked=localStorage.getItem("asmb_notif_sound")==="on";
   var a=document.getElementById("cs-archive-days");
   if(a)a.value=localStorage.getItem("asmb_archive_days")||"0";
+  var ts=document.getElementById("cs-text-size");
+  if(ts)ts.value=localStorage.getItem("asmb_text_size")||"normal";
+  var p=document.getElementById("cs-pseudo");
+  if(p){
+    p.value=(typeof savedPseudo!=="undefined"?savedPseudo:localStorage.getItem("asmb_pseudo"))||"";
+    p.oninput=function(){ if(p.value.length>20)p.value=p.value.substring(0,20); };
+    p.onblur=function(){ saveCommPseudo(p.value); };
+  }
   var m=document.getElementById("modal-comm-settings");
   if(m)m.style.display="flex";
 }
+
+function saveCommPseudo(v){
+  v=String(v||"").trim().substring(0,20);
+  if(!v)return;
+  if(typeof savedPseudo!=="undefined")savedPseudo=v;
+  localStorage.setItem("asmb_pseudo",v);
+}
+
+// Petit "ding" de notification, généré en direct (pas de fichier audio à charger).
+function playNotifSound(){
+  try{
+    var Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx)return;
+    var ctx=new Ctx();
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.type="sine";o.frequency.value=880;
+    g.gain.setValueAtTime(.15,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);
+    o.connect(g);g.connect(ctx.destination);
+    o.start();o.stop(ctx.currentTime+.35);
+    o.onended=function(){ctx.close();};
+  }catch(e){}
+}
+
+// Taille du texte des messages : ajoute/retire une classe sur le conteneur du chat.
+function applyChatTextSize(size){
+  size=size||localStorage.getItem("asmb_text_size")||"normal";
+  localStorage.setItem("asmb_text_size",size);
+  var el=document.getElementById("chat-messages");
+  if(el)el.classList.toggle("text-lg",size==="large");
+}
+document.addEventListener("DOMContentLoaded",function(){ applyChatTextSize(); });
 

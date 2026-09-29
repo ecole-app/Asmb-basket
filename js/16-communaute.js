@@ -383,7 +383,20 @@ var currentChannelData=null;
 var chatUnsubscribe=null;
 var typingUnsubscribe=null;
 var typingDebounce=null;
-var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
+var savedPseudo=(localStorage.getItem("asmb_pseudo")||"").substring(0,20);
+// Pseudo à utiliser pour envoyer un message : le pseudo choisi dans les paramètres
+// (édité une fois pour toutes, plus de champ à retaper à chaque message).
+function myChatPseudo(){ return savedPseudo||"Anonyme"; }
+// Identité technique jointe à chaque nouveau message : sert à résoudre la vraie
+// identité et le badge de rôle au clic (voir openSenderIdentityModal), sans
+// obliger à retaper quoi que ce soit.
+function mySenderMeta(){
+  return {
+    senderUid:(window.ASMB_USER&&window.ASMB_USER.uid)||null,
+    senderPhone:myPhone||null,
+    badge:(typeof getMyBadgeSnapshot==="function")?getMyBadgeSnapshot():null
+  };
+}
 var replyingTo=null; // {id,pseudo,text} le message auquel on repond, ou null
 var channelKnownPseudos=[]; // pseudos vus dans le canal ouvert, pour l'autocomplete @mention
 var renderedMsgs={}; // d.id -> message brut du dernier rendu, pour repondre/modifier sans tout re-echapper dans un onclick
@@ -567,8 +580,6 @@ async function openChannel(ch){
   document.getElementById("chat-icon").textContent=ch.icon;
   document.getElementById("chat-name").textContent=ch.name;
   document.getElementById("chat-desc").textContent=ch.desc;
-  var pseudo=document.getElementById("chat-pseudo");
-  if(pseudo)pseudo.value=savedPseudo;
   var pollBtn=document.getElementById("poll-btn");
   if(pollBtn)pollBtn.style.display=window.asmbCoachMode?"flex":"none";
   // Reinitialise recherche / reponse en cours / autocomplete d'un canal a l'autre
@@ -647,6 +658,7 @@ function listenMessages(channelId, prevLastRead){
               var ch=currentChannelData;
               var title=(ch?ch.icon+" "+ch.name:clubLabel())+" - "+m.pseudo+(mentioned?" vous a mentionné":"");
               new Notification(title,{body:(m.text||"📎 Pièce jointe").replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
+              if(localStorage.getItem("asmb_notif_sound")==="on" && typeof playNotifSound==="function") playNotifSound();
             }catch(e){}
           }
         }
@@ -705,7 +717,13 @@ function listenMessages(channelId, prevLastRead){
       }
       var wrap=document.createElement("div");wrap.className="msg-wrap "+(isOut?"out":"in");
       var time=ts.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
-      if(!isOut){var psd=document.createElement("div");psd.className="msg-pseudo";psd.textContent=msg.pseudo;wrap.appendChild(psd);}
+      if(!isOut){
+        var psd=document.createElement("div");psd.className="msg-pseudo";psd.style.cursor="pointer";
+        var badgeHtml=(msg.badge&&msg.badge.label)?('<span style="font-weight:800">'+(msg.badge.emoji||"")+' '+authEsc(msg.badge.label)+'</span> · '):"";
+        psd.innerHTML=badgeHtml+authEsc(msg.pseudo||"");
+        psd.onclick=(function(m){return function(){openSenderIdentityModal(m);};})(msg);
+        wrap.appendChild(psd);
+      }
       if(msg.type==="media"){
         var mediaWrap=document.createElement("div");
         if(msg.mediaType==="pdf"){
@@ -1000,14 +1018,12 @@ async function sendMsg(){
   if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var msgEl=document.getElementById("chat-msg");
-  var pseudoEl=document.getElementById("chat-pseudo");
-  if(!msgEl||!pseudoEl)return;
+  if(!msgEl)return;
   var text=msgEl.value.trim();
-  var pseudo=pseudoEl.value.trim()||"Anonyme";
   if(!text)return;
-  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
+  var pseudo=myChatPseudo();
   msgEl.value="";
-  var payload={text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]};
+  var payload=Object.assign({text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]},mySenderMeta());
   if(replyingTo)payload.replyTo={id:replyingTo.id,pseudo:replyingTo.pseudo,text:replyingTo.text};
   cancelReply();
   var mentionList=document.getElementById("chat-mention-list");
@@ -1023,18 +1039,16 @@ async function sendMediaMessage(input){
   var isPdf=file.type==="application/pdf";
   var isImage=file.type.indexOf("image")===0;
   if(!isPdf&&!isImage){askAlert("Seules les photos et les PDF sont acceptés");input.value="";return;}
-  var pseudoEl=document.getElementById("chat-pseudo");
-  var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
-  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
+  var pseudo=myChatPseudo();
   input.value="";
   if(isPdf){
     if(file.size>700*1024){askAlert("Ce PDF est trop volumineux (700 Ko max). Compressez-le puis réessayez.");return;}
     var reader=new FileReader();
     reader.onload=function(){
-      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),Object.assign({
         type:"media",mediaUrl:reader.result,mediaType:"pdf",fileName:file.name,
         pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
-      });
+      },mySenderMeta()));
     };
     reader.onerror=function(){askAlert("Erreur lors de la lecture du fichier.");};
     reader.readAsDataURL(file);
@@ -1044,10 +1058,10 @@ async function sendMediaMessage(input){
     if(dataUrl.length>900000)return compressImageFile(file,600,0.4);
     return dataUrl;
   }).then(function(dataUrl){
-    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),Object.assign({
       type:"media",mediaUrl:dataUrl,mediaType:"image",
       pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
-    });
+    },mySenderMeta()));
   }).catch(function(err){
     askAlert("Erreur lors de l'envoi de la photo. Réessayez avec une image plus petite.");
     console.error(err);
@@ -1074,11 +1088,10 @@ function createPoll(){
   if(options.length<2){askAlert("Au moins 2 options sont necessaires");return;}
   var allowMultiple=document.getElementById("poll-multiple").checked;
   var deadline=document.getElementById("poll-deadline").value||null;
-  var pseudo=(document.getElementById("chat-pseudo")||{}).value.trim()||"Anonyme";
-  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
-  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+  var pseudo=myChatPseudo();
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),Object.assign({
     type:"poll",question:question,options:options,allowMultiple:allowMultiple,deadline:deadline,pseudo:pseudo,ts:window.fbServerTimestamp()
-  });
+  },mySenderMeta()));
   closeModal("modal-poll");
 }
 
@@ -1175,12 +1188,11 @@ async function createCarpool(){
   var places=parseInt(document.getElementById("carpool-places").value,10)||1;
   if(places<1)places=1;
   var depart=document.getElementById("carpool-depart").value.trim();
-  var pseudo=(document.getElementById("chat-pseudo")||{}).value.trim()||savedPseudo||"Anonyme";
-  savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
-  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+  var pseudo=myChatPseudo();
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),Object.assign({
     type:"carpool",eventId:ev.id,eventTitre:ev.titre,eventDate:ev.date,eventLieu:ev.lieu||"",
     conducteur:pseudo,places:places,depart:depart,passagers:[],pseudo:clubPseudo("Covoiturage"),ts:window.fbServerTimestamp()
-  }).catch(function(e){
+  },mySenderMeta())).catch(function(e){
     askAlert("Le covoiturage n'a pas pu être publié : "+((e&&e.code)||e));
   });
   closeModal("modal-carpool");

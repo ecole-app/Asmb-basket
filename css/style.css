@@ -112,6 +112,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 
 /* ── CHAT ── */
 .msg-bubble{max-width:78%;padding:9px 13px;border-radius:18px;font-size:13px;line-height:1.45;position:relative;word-break:break-word}
+#chat-messages.text-lg .msg-bubble{font-size:16px;line-height:1.5}
+#chat-messages.text-lg .msg-pseudo{font-size:12px}
 .poll-bubble{max-width:85%;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--bdr);box-shadow:0 2px 8px var(--shadow)}
 .poll-q{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .poll-opt{position:relative;margin-bottom:8px;cursor:pointer;border-radius:8px;overflow:hidden;background:var(--bg);border:1px solid var(--bdr)}

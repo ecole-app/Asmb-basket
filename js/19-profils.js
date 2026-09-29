@@ -704,6 +704,117 @@ function effectiveRoles(){
   return roles;
 }
 
+// ── BADGES DE RÔLE (Communauté) ────────────────────────────────────
+// Liste fixe de libellés que le dirigeant peut octroyer à n'importe quel
+// compte (y compris le sien), en plus du badge par défaut lié au rôle.
+var BADGE_TYPES={
+  dirigeant:{label:"Dirigeant",emoji:"🛡️",color:"var(--ltg)"},
+  coach:{label:"Coach",emoji:"🎯",color:"var(--dkg)"},
+  tresorier:{label:"Trésorier",emoji:"💰",color:"var(--ltg)"},
+  secretaire:{label:"Secrétaire",emoji:"🗂️",color:"var(--ltg)"},
+  benevole:{label:"Bénévole",emoji:"🤝",color:"var(--mut)"},
+  arbitre:{label:"Arbitre",emoji:"🟨",color:"var(--dkg)"}
+};
+// Badge par défaut si le dirigeant n'a rien attribué explicitement : dérivé du rôle.
+function defaultBadgeCodeForRoles(roles){
+  roles=roles||[];
+  if(roles.indexOf("dirigeant")>=0) return "dirigeant";
+  if(roles.indexOf("coach")>=0) return "coach";
+  return "";
+}
+// Badge de MON compte, à joindre (en instantané) à chaque message que j'envoie.
+function getMyBadgeSnapshot(){
+  var u=window.ASMB_USER;
+  var code=(u&&u.badge)||defaultBadgeCodeForRoles(u&&u.roles);
+  var b=BADGE_TYPES[code];
+  return b?{code:code,label:b.label,emoji:b.emoji}:null;
+}
+// Résout la vraie identité (nom/prénom + équipe) derrière un numéro de téléphone,
+// en croisant les fiches de licence du club (licencié lui-même, ou responsable/parent).
+function resolveIdentityForPhone(phone){
+  phone=(phone||"").replace(/\s+/g,"");
+  if(!phone) return null;
+  var licences=(typeof getLicences==="function")?getLicences():[];
+  var players=(typeof getPlayers==="function")?getPlayers():[];
+  function teamNameFor(f){
+    var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
+    if(!p) return "";
+    var t=(typeof getTeamForPlayer==="function")?getTeamForPlayer(p.id):null;
+    return t?t.name:"";
+  }
+  var own=null,asResp=null;
+  licences.forEach(function(l){
+    if(!l||!l.fiche) return;
+    var f=l.fiche;
+    var t=(f.telephone||"").replace(/\s+/g,"");
+    var r1=(f.respTel||"").replace(/\s+/g,"");
+    var r2=(f.resp2Tel||"").replace(/\s+/g,"");
+    if(!own && t && t===phone) own=f;
+    if(!asResp && ((r1&&r1===phone)||(r2&&r2===phone))) asResp=f;
+  });
+  if(own) return {nom:((own.prenom||"")+" "+(own.nom||"")).trim(),detail:teamNameFor(own)};
+  if(asResp){
+    var enfant=((asResp.prenom||"")+" "+(asResp.nom||"")).trim();
+    var nom=asResp.respNom||"";
+    var team=teamNameFor(asResp);
+    return {nom:nom||("Parent"+(enfant?" de "+enfant:"")),detail:(nom?"Parent de "+enfant:"")+(team?(nom?" · ":"")+team:"")};
+  }
+  return null;
+}
+// Modale (clic sur un pseudo dans le chat) : vraies infos + édition du badge si dirigeant.
+function openSenderIdentityModal(msg){
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--sf);border-radius:var(--r);padding:22px;width:100%;max-width:320px;text-align:center";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  var ident=resolveIdentityForPhone(msg.senderPhone);
+  var initiales=((ident&&ident.nom)||msg.pseudo||"?").trim().split(/\s+/).map(function(w){return w[0];}).join("").substring(0,2).toUpperCase();
+  var html='<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 12px">'+initiales+'</div>';
+  html+='<div style="font-size:16px;font-weight:800;color:var(--txt)">'+authEsc((ident&&ident.nom)||msg.pseudo||"?")+'</div>';
+  if(ident&&ident.detail)html+='<div style="font-size:12px;color:var(--mut);margin-top:3px">'+authEsc(ident.detail)+'</div>';
+  if(!ident)html+='<div style="font-size:11px;color:var(--mut);margin-top:6px">Identité non disponible (ancien message ou compte introuvable)</div>';
+  html+='<div style="font-size:11px;color:var(--mut);margin-top:8px">Pseudo affiché : '+authEsc(msg.pseudo||"")+'</div>';
+  inner.innerHTML=html;
+  var isDirigeant=(window.ASMB_USER&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0);
+  if(isDirigeant && msg.senderUid){
+    var badgeWrap=document.createElement("div");
+    badgeWrap.style.cssText="margin-top:16px;padding-top:14px;border-top:1px solid var(--bdr);text-align:left";
+    var lbl=document.createElement("div");
+    lbl.style.cssText="font-size:11px;font-weight:700;color:var(--mut);margin-bottom:6px";
+    lbl.textContent="Libellé (badge)";
+    var sel=document.createElement("select");
+    sel.className="form-input";
+    sel.innerHTML='<option value="">Aucun / par défaut</option>'+Object.keys(BADGE_TYPES).map(function(k){return '<option value="'+k+'">'+BADGE_TYPES[k].emoji+' '+BADGE_TYPES[k].label+'</option>';}).join("");
+    sel.value=msg.senderUid?"":""; // rempli en asynchrone ci-dessous une fois le compte lu
+    if(window.fbGetDoc&&window.fbDb){
+      window.fbGetDoc(window.fbDoc(window.fbDb,"users",msg.senderUid)).then(function(snap){
+        if(snap.exists())sel.value=snap.data().badge||"";
+      }).catch(function(){});
+    }
+    var saveBtn=document.createElement("button");
+    saveBtn.textContent="Enregistrer";
+    saveBtn.style.cssText="width:100%;margin-top:10px;padding:10px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer";
+    saveBtn.addEventListener("click",function(){
+      saveBtn.textContent="…";
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",msg.senderUid),{badge:sel.value||""}).then(function(){
+        saveBtn.textContent="✓ Enregistré";
+        setTimeout(function(){modal.remove();},700);
+      }).catch(function(e){saveBtn.textContent="Erreur";askAlert((e&&e.code)||e);});
+    });
+    badgeWrap.appendChild(lbl);badgeWrap.appendChild(sel);badgeWrap.appendChild(saveBtn);
+    inner.appendChild(badgeWrap);
+  }
+  var closeBtn=document.createElement("button");
+  closeBtn.textContent="Fermer";
+  closeBtn.style.cssText="width:100%;margin-top:14px;padding:10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer";
+  closeBtn.addEventListener("click",function(){modal.remove();});
+  inner.appendChild(closeBtn);
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+}
+
 function refreshHeaderProfileBtn(){
   // Le bouton ne s'affiche que pour un compte qui a réellement plusieurs
   // profils possibles (dirigeant/coach/parent...), jamais pour un compte

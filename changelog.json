@@ -1,5 +1,15 @@
 [
   {
+    "v": "1790667278",
+    "titre": "Mise à jour du 29 septembre (3)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le pseudo dans le chat se choisit maintenant une fois pour toutes dans Paramètres · Communauté (limité à 20 caractères), au lieu de le retaper à chaque message." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Cliquer sur le nom de l'auteur d'un message ouvre une fiche avec ses vraies infos (nom, prénom, équipe), en plus du pseudo affiché." },
+      { "roles": ["dirigeant"], "texte": "Depuis cette fiche, possibilité d'attribuer un libellé (Dirigeant, Coach, Trésorier, Secrétaire, Bénévole, Arbitre...) à n'importe quel membre, y compris soi-même. Le libellé s'affiche à côté du pseudo dans les messages suivants." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveaux réglages dans Paramètres · Communauté : son de notification, et taille du texte des messages (normal/grand)." }
+    ]
+  },
+  {
     "v": "1790665631",
     "titre": "Mise à jour du 29 septembre (2)",
     "points": [
