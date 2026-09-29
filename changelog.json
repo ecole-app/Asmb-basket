@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790667688",
+    "titre": "Mise à jour du 29 septembre (5)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le badge « Arbitre » utilise maintenant l'icône main qui repousse (🫷) — pas d'emoji sifflet dans le standard actuel." }
+    ]
+  },
+  {
     "v": "1790667432",
     "titre": "Mise à jour du 29 septembre (4)",
     "points": [

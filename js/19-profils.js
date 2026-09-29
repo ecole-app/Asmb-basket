@@ -713,7 +713,7 @@ var BADGE_TYPES={
   tresorier:{label:"Trésorier",emoji:"💰",color:"var(--ltg)"},
   secretaire:{label:"Secrétaire",emoji:"🗂️",color:"var(--ltg)"},
   benevole:{label:"Bénévole",emoji:"🤝",color:"var(--mut)"},
-  arbitre:{label:"Arbitre",emoji:"🔔",color:"var(--dkg)"},
+  arbitre:{label:"Arbitre",emoji:"🫷",color:"var(--dkg)"},
   otm:{label:"OTM",emoji:"💻",color:"var(--dkg)"}
 };
 // Badge par défaut si le dirigeant n'a rien attribué explicitement : dérivé du rôle.
