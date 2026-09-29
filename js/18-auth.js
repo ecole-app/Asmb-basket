@@ -223,7 +223,7 @@ function authLogout(){
 // pour qu'aucune donnée en cache d'un club ne puisse être renvoyée dans un autre.
 var DEVICE_PREF_PREFIXES = ["asmb_theme","asmb_notif","asmb_last_email","asmb_pwa_hint",
   "asmb_tuto_done","asmb_tip_","asmb_params_","asmb_admin_module_","asmb_joueur_phone",
-  "asmb_phone","asmb_pseudo","gm_"];
+  "asmb_phone","asmb_pseudo","asmb_archive_days","gm_"];
 
 function purgeClubLocalData(){
   var toRemove=[];

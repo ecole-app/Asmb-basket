@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790665631",
+    "titre": "Mise à jour du 29 septembre (2)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton ⚙️ sur l'écran Communauté : un panneau de paramètres simplifié (autoriser les notifications, archiver les vieux messages) s'ouvre en fenêtre plutôt qu'un nouvel écran." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Option pour masquer automatiquement les messages de plus de 30 ou 90 jours à l'ouverture d'un canal (rien n'est supprimé, un bouton permet de tout réafficher)." }
+    ]
+  },
+  {
     "v": "1790659880",
     "titre": "Mise à jour du 29 septembre",
     "points": [

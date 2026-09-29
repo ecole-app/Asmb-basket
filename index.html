@@ -620,10 +620,11 @@
   <div class="scr" id="scr-communaute">
     <div class="hero" style="padding:16px 16px 14px;text-align:left;display:flex;align-items:center;gap:12px">
       <div style="font-size:28px"></div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div style="font-size:18px;font-weight:900;color:#fff">Communauté</div>
         <div style="font-size:11px;color:rgba(255,255,255,.6)">Messagerie</div>
       </div>
+      <button onclick="openCommSettings()" title="Paramètres" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:17px;cursor:pointer;flex-shrink:0">⚙️</button>
     </div>
     <div class="sec">Canaux</div>
     <div id="channel-list" style="padding-bottom:80px">
@@ -782,6 +783,29 @@
     </div>
     <div class="sec">Canaux</div>
     <div id="admcomm-list" style="padding:8px 0 80px"></div>
+  </div>
+
+  <!-- ═══ MODAL PARAMÈTRES COMMUNAUTÉ ═══ -->
+  <div id="modal-comm-settings" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:800;color:var(--txt)">Paramètres · Communauté</div>
+        <button onclick="closeModal('modal-comm-settings')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+      </div>
+      <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr);cursor:pointer">
+        <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Autoriser les notifications</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Reçois une alerte quand un message arrive</div></div>
+        <input type="checkbox" id="cs-notif-toggle" onchange="toggleNotif(this.checked,'cs-notif-toggle')" style="width:44px;height:24px;accent-color:var(--dkg);flex-shrink:0">
+      </label>
+      <div style="padding:14px 0">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">Archiver les vieux messages</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:2px;margin-bottom:10px">Masque les messages anciens à l'ouverture d'un canal pour l'alléger (rien n'est supprimé, tu peux toujours les afficher).</div>
+        <select id="cs-archive-days" class="form-input" onchange="localStorage.setItem('asmb_archive_days',this.value)">
+          <option value="0">Jamais</option>
+          <option value="30">Après 30 jours</option>
+          <option value="90">Après 90 jours</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ MODAL NOUVEAU CANAL ═══ -->

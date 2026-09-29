@@ -387,6 +387,7 @@ var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
 var replyingTo=null; // {id,pseudo,text} le message auquel on repond, ou null
 var channelKnownPseudos=[]; // pseudos vus dans le canal ouvert, pour l'autocomplete @mention
 var renderedMsgs={}; // d.id -> message brut du dernier rendu, pour repondre/modifier sans tout re-echapper dans un onclick
+var chatShowArchived=false; // si true, affiche aussi les messages plus vieux que le seuil d'archivage pour le canal ouvert
 
 function setReplyTo(msgId){
   var m=renderedMsgs[msgId];if(!m)return;
@@ -572,6 +573,7 @@ async function openChannel(ch){
   if(pollBtn)pollBtn.style.display=window.asmbCoachMode?"flex":"none";
   // Reinitialise recherche / reponse en cours / autocomplete d'un canal a l'autre
   channelKnownPseudos=[];
+  chatShowArchived=false;
   cancelReply();
   var searchBar=document.getElementById("chat-search-bar"),searchInput=document.getElementById("chat-search-input");
   if(searchBar)searchBar.style.display="none";
@@ -674,10 +676,17 @@ function listenMessages(channelId, prevLastRead){
     var bannerEl=null;
     var msgIndex=-1;
     renderedMsgs={};
+    var archiveDays=parseInt(localStorage.getItem("asmb_archive_days")||"0",10);
+    var archiveCutoff=archiveDays>0?(Date.now()-archiveDays*86400000):0;
+    var hiddenArchivedCount=0;
     snap.forEach(function(d){
       msgIndex++;
       var msg=d.data();
       renderedMsgs[d.id]=msg;
+      if(archiveCutoff && !chatShowArchived && pinnedIds.indexOf(d.id)<0){
+        var msgTsVal=msg.ts&&msg.ts.toDate?msg.ts.toDate().getTime():0;
+        if(msgTsVal && msgTsVal<archiveCutoff){ hiddenArchivedCount++; return; }
+      }
       if(msgIndex===bannerIndex){
         bannerEl=document.createElement("div");
         bannerEl.className="unread-divider";
@@ -826,6 +835,13 @@ function listenMessages(channelId, prevLastRead){
       wrap.appendChild(bubble);
       msgsEl.appendChild(wrap);
     });
+    if(hiddenArchivedCount>0){
+      var archBanner=document.createElement("div");
+      archBanner.style.cssText="text-align:center;margin:6px 0 14px";
+      archBanner.innerHTML='<span style="display:inline-block;padding:7px 16px;border-radius:14px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer">🗄 Afficher '+hiddenArchivedCount+' message'+(hiddenArchivedCount>1?"s":"")+' archivé'+(hiddenArchivedCount>1?"s":"")+'</span>';
+      archBanner.onclick=function(){ chatShowArchived=true; listenMessages(channelId,prevLastRead); };
+      msgsEl.insertBefore(archBanner,msgsEl.firstChild);
+    }
     var pinEl=document.getElementById("chat-pinned");
     if(pinEl){
       if(pinnedMsgs.length){

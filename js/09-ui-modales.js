@@ -220,14 +220,24 @@ function buildClubStats(){
   el.innerHTML=html;
 }
 
-function toggleNotif(checked){
+function toggleNotif(checked,elId){
+  elId=elId||"notif-toggle";
   if(checked&&"Notification" in window){
     Notification.requestPermission().then(function(perm){
       if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activées !"});}
-      else{localStorage.setItem("asmb_notif","off");document.getElementById("notif-toggle").checked=false;askAlert("Permission refusée");}
+      else{localStorage.setItem("asmb_notif","off");var el=document.getElementById(elId);if(el)el.checked=false;askAlert("Permission refusée");}
     });
   } else {
     localStorage.setItem("asmb_notif","off");
   }
+}
+
+function openCommSettings(){
+  var t=document.getElementById("cs-notif-toggle");
+  if(t)t.checked=localStorage.getItem("asmb_notif")==="on";
+  var a=document.getElementById("cs-archive-days");
+  if(a)a.value=localStorage.getItem("asmb_archive_days")||"0";
+  var m=document.getElementById("modal-comm-settings");
+  if(m)m.style.display="flex";
 }
 
