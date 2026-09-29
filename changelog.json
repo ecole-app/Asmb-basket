@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790697980",
+    "titre": "Correction : le mode sombre ne fonctionnait plus avec les nouveaux thèmes",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Depuis l'ajout des thèmes visuels, activer le mode sombre n'avait plus d'effet une fois un autre thème que Moderne choisi (Classique, Épuré, Feuille de match, Carnet illustré, Éditorial ont maintenant leur propre version sombre). Bento Glass reste identique quel que soit le mode : c'est déjà un thème sombre par nature." }
+    ]
+  },
+  {
     "v": "1790697643",
     "titre": "Bannières d'accueil désormais adaptées au thème choisi",
     "points": [
