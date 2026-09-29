@@ -1,5 +1,16 @@
 [
   {
+    "v": "1790683836",
+    "titre": "Comptabilité complète pour le club",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Les catégories de recettes/dépenses sont maintenant une liste fixe adaptée à un club sportif (Cotisations/Licences, Subventions, Sponsors, Buvette, Dons... / Affiliation FFBB, Location salle, Matériel, Déplacements, Arbitrage/Formations, Assurances, Frais admin...) au lieu d'un texte libre." },
+      { "roles": ["dirigeant"], "texte": "Chaque ligne comptable peut avoir un justificatif joint (photo ou PDF du reçu, 700 Ko max)." },
+      { "roles": ["dirigeant"], "texte": "Nouvelle case « Pointé » sur chaque ligne pour le rapprochement bancaire, avec un solde pointé affiché en plus du solde total, et un filtre pointé/non pointé." },
+      { "roles": ["dirigeant"], "texte": "Nouveau bouton « Budget » : définissez un montant prévisionnel par catégorie pour l'année et suivez le réalisé en face." },
+      { "roles": ["dirigeant"], "texte": "Nouveau bouton « Bilan AG » : rapport financier de l'année (recettes et dépenses par catégorie, résultat net) prêt à imprimer ou exporter en PDF pour l'Assemblée Générale." }
+    ]
+  },
+  {
     "v": "1790675282",
     "titre": "Nouveau look de l'application",
     "points": [

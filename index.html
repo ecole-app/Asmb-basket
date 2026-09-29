@@ -470,13 +470,48 @@
         </div>
         <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="cl-date" type="date"></div>
         <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="cl-montant" type="number" step="0.01" placeholder="0.00"></div>
-        <div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="cl-categorie" list="compta-cat-list" placeholder="Ex: Séance, Cotisation, Materiel..."><datalist id="compta-cat-list"></datalist></div>
+        <div class="form-group"><label class="form-label">Catégorie</label><select class="form-input" id="cl-categorie"></select></div>
         <div class="form-group"><label class="form-label">Motif du paiement</label><input class="form-input" id="cl-motif" list="compta-motif-list" placeholder="Ex: Cotisation annuelle"><datalist id="compta-motif-list"></datalist></div>
         <div class="form-group"><label class="form-label">Tiers / Membre</label><input class="form-input" id="cl-tiers" list="compta-tiers-list" placeholder="Nom du membre ou du tiers"><datalist id="compta-tiers-list"></datalist></div>
         <div class="form-group"><label class="form-label">Moyen de paiement</label><select class="form-input" id="cl-moyen"><option value="Espèces">Espèces</option><option value="Chèque">Chèque</option><option value="Virement">Virement</option><option value="CB">CB</option><option value="Autre">Autre</option></select></div>
         <div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="cl-reference" placeholder="Note libre"></div>
+        <div class="form-group">
+          <label class="form-label">Justificatif (photo ou PDF, 700 Ko max)</label>
+          <input type="file" id="cl-justif-file" accept="image/*,application/pdf" onchange="comptaJustifPick(this)" style="display:none">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button type="button" onclick="document.getElementById('cl-justif-file').click()" style="flex:1;padding:10px;border-radius:var(--rx);border:1.5px dashed var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;text-align:left" id="cl-justif-preview">Aucun justificatif joint</button>
+            <button type="button" onclick="comptaJustifClear()" style="padding:10px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;border:none;cursor:pointer">✕</button>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px 2px;font-size:12px;color:var(--txt);cursor:pointer">
+          <input type="checkbox" id="cl-pointe" style="width:17px;height:17px"> Pointé (rapproché avec le relevé bancaire)
+        </label>
         <button id="compta-save-btn" onclick="saveComptaLine()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
         <button id="compta-delete-btn" onclick="deleteComptaLine()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cette ligne</button>
+      </div>
+    </div>
+
+    <!-- Modal budget prévisionnel -->
+    <div id="modal-budget-prev" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)">Budget prévisionnel</div>
+          <button onclick="closeModal('modal-budget-prev')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div id="modal-budget-body"></div>
+        <button onclick="saveBudgetPrevForm()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer le budget</button>
+      </div>
+    </div>
+
+    <!-- Modal bilan annuel / AG -->
+    <div id="modal-bilan-annuel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)">Bilan financier</div>
+          <button onclick="closeModal('modal-bilan-annuel')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div id="modal-bilan-body"></div>
+        <button onclick="printBilanAnnuel()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:14px">🖨 Imprimer / PDF</button>
       </div>
     </div>
   </div>

@@ -7,7 +7,18 @@ function saveDocs(d){localStorage.setItem("asmb_docs",JSON.stringify(d));}
 function getComptabilite(){try{return JSON.parse(localStorage.getItem("asmb_comptabilite")||"[]");}catch(e){return [];}}
 function saveComptabilite(c){localStorage.setItem("asmb_comptabilite",JSON.stringify(c));fsWriteCollection("comptabilite",c);}
 
-var COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:""};
+// Taxonomie fixe des catégories (club sportif loi 1901)
+var COMPTA_CATS={
+  recette:["Cotisations/Licences","Subventions","Sponsors/Partenaires","Buvette/Événements","Dons","Autre"],
+  depense:["Affiliation/Licences fédérales","Location salle","Matériel","Déplacements","Arbitrage/Formations","Assurances","Frais administratifs","Autre"]
+};
+
+// ── Budget prévisionnel ──────────────────────────────────────────
+function getBudgetPrev(){try{return JSON.parse(localStorage.getItem("asmb_budget_prev")||"{}");}catch(e){return {};}}
+function saveBudgetPrev(b){localStorage.setItem("asmb_budget_prev",JSON.stringify(b));fsWriteCollection("budgetPrev",[Object.assign({id:"budget"},b)]);}
+function comptaCurrentYear(){return new Date().getFullYear().toString();}
+
+var COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:""};
 var comptaEditId=null;
 
 function comptaFilteredList(){
@@ -17,6 +28,8 @@ function comptaFilteredList(){
     if(COMPTA_FILTERS.au && (l.date||"") > COMPTA_FILTERS.au) return false;
     if(COMPTA_FILTERS.categorie && l.categorie!==COMPTA_FILTERS.categorie) return false;
     if(COMPTA_FILTERS.moyen && l.moyen!==COMPTA_FILTERS.moyen) return false;
+    if(COMPTA_FILTERS.pointe==="oui" && !l.pointe) return false;
+    if(COMPTA_FILTERS.pointe==="non" && l.pointe) return false;
     return true;
   });
 }
@@ -32,8 +45,7 @@ function buildComptabilite(){
 
   // Filtres
   var fEl=document.getElementById("compta-filters");
-  var cats=[].concat.apply([],[getComptabilite().map(function(l){return l.categorie;})]).filter(Boolean);
-  var uniqCats=cats.filter(function(c,i){return cats.indexOf(c)===i;});
+  var uniqCats=COMPTA_CATS.recette.concat(COMPTA_CATS.depense).filter(function(c,i,a){return a.indexOf(c)===i;});
   fEl.innerHTML="";
   var duInp=document.createElement("input");duInp.type="date";duInp.value=COMPTA_FILTERS.du;
   duInp.style.cssText="flex:1;min-width:120px;padding:8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;background:var(--bg);color:var(--txt)";
@@ -49,12 +61,16 @@ function buildComptabilite(){
   moyenSel.style.cssText=catSel.style.cssText;
   moyenSel.innerHTML='<option value="">Tout moyen</option>'+["Espèces","Chèque","Virement","CB","Autre"].map(function(m){return '<option value="'+m+'"'+(COMPTA_FILTERS.moyen===m?" selected":"")+'>'+m+'</option>';}).join("");
   moyenSel.addEventListener("change",function(){COMPTA_FILTERS.moyen=moyenSel.value;buildComptabilite();});
-  fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);
-  if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen){
+  var pointeSel=document.createElement("select");
+  pointeSel.style.cssText=catSel.style.cssText;
+  pointeSel.innerHTML='<option value="">Pointé ou non</option><option value="oui"'+(COMPTA_FILTERS.pointe==="oui"?" selected":"")+'>✓ Pointées</option><option value="non"'+(COMPTA_FILTERS.pointe==="non"?" selected":"")+'>Non pointées</option>';
+  pointeSel.addEventListener("change",function(){COMPTA_FILTERS.pointe=pointeSel.value;buildComptabilite();});
+  fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);fEl.appendChild(pointeSel);
+  if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen||COMPTA_FILTERS.pointe){
     var clearBtn=document.createElement("button");
     clearBtn.textContent="Réinitialiser";
     clearBtn.style.cssText="padding:8px 12px;border-radius:8px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer";
-    clearBtn.addEventListener("click",function(){COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:""};buildComptabilite();});
+    clearBtn.addEventListener("click",function(){COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:""};buildComptabilite();});
     fEl.appendChild(clearBtn);
   }
 
@@ -71,15 +87,24 @@ function buildComptabilite(){
 
   // Liste + totaux
   var filtered=comptaFilteredList();
-  var totalRecette=0,totalDepense=0;
+  var totalRecette=0,totalDepense=0,soldePointe=0;
   filtered.forEach(function(l){
-    if(l.type==="depense") totalDepense+=(l.montant||0); else totalRecette+=(l.montant||0);
+    var m=l.montant||0;
+    if(l.type==="depense"){totalDepense+=m; if(l.pointe) soldePointe-=m;}
+    else {totalRecette+=m; if(l.pointe) soldePointe+=m;}
   });
   var totEl=document.getElementById("compta-totals");
   totEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;display:flex;justify-content:space-between;font-size:12px">'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Recettes</div><div style="color:var(--grn);font-weight:800;font-size:15px">'+totalRecette.toFixed(2)+' €</div></div>'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Dépenses</div><div style="color:var(--red);font-weight:800;font-size:15px">'+totalDepense.toFixed(2)+' €</div></div>'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Solde</div><div style="color:var(--dkg);font-weight:800;font-size:15px">'+(totalRecette-totalDepense).toFixed(2)+' €</div></div>'+
+  '</div>'+
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rs);font-size:11px;color:var(--mut)">'+
+    '<span>🏦 Solde pointé (rapproché banque) : <b style="color:var(--txt)">'+soldePointe.toFixed(2)+' €</b></span>'+
+    '<span style="display:flex;gap:6px">'+
+      '<button onclick="openBudgetPrev()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📊 Budget</button>'+
+      '<button onclick="openBilanAnnuel()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📄 Bilan AG</button>'+
+    '</span>'+
   '</div>';
 
   var listEl=document.getElementById("compta-list");
@@ -93,7 +118,7 @@ function buildComptabilite(){
     top.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px";
     var left=document.createElement("div");left.style.cssText="flex:1;min-width:0";
     var dateSpan=document.createElement("div");dateSpan.style.cssText="font-size:11px;color:var(--mut)";
-    dateSpan.textContent=(l.date?new Date(l.date).toLocaleDateString("fr-FR"):"")+(l.categorie?" · "+l.categorie:"");
+    dateSpan.textContent=(l.date?new Date(l.date).toLocaleDateString("fr-FR"):"")+(l.categorie?" · "+l.categorie:"")+(l.pointe?" · ✓ pointé":"")+(l.justificatif?" · 📎":"");
     var motifDiv=document.createElement("div");motifDiv.style.cssText="font-size:13px;font-weight:700;color:var(--txt);margin-top:2px";
     motifDiv.textContent=l.motif||"(sans motif)";
     var tiersDiv=document.createElement("div");tiersDiv.style.cssText="font-size:11px;color:var(--txt2);margin-top:2px";
@@ -109,6 +134,7 @@ function buildComptabilite(){
 }
 
 var comptaCurrentType="recette";
+var comptaJustifDataUrl=null;
 function setComptaType(type){
   comptaCurrentType=type;
   var rB=document.getElementById("compta-type-recette"), dB=document.getElementById("compta-type-depense");
@@ -118,6 +144,32 @@ function setComptaType(type){
   dB.style.background=type==="depense"?"var(--red)":"var(--card)";
   dB.style.color=type==="depense"?"#fff":"var(--mut)";
   dB.style.borderColor=type==="depense"?"var(--red)":"var(--bdr)";
+  var catSel=document.getElementById("cl-categorie");
+  if(catSel){
+    var prev=catSel.getAttribute("data-keep")||catSel.value;
+    catSel.innerHTML=COMPTA_CATS[type].map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
+    if(prev && COMPTA_CATS[type].indexOf(prev)>=0) catSel.value=prev;
+    catSel.removeAttribute("data-keep");
+  }
+}
+function comptaJustifPick(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var isPdf=file.type==="application/pdf", isImage=file.type.indexOf("image")===0;
+  if(!isPdf&&!isImage){askAlert("Seules les photos et les PDF sont acceptés");input.value="";return;}
+  if(file.size>700*1024){askAlert("Fichier trop volumineux (700 Ko max).");input.value="";return;}
+  var reader=new FileReader();
+  reader.onload=function(){
+    comptaJustifDataUrl=reader.result;
+    var prev=document.getElementById("cl-justif-preview");
+    if(prev) prev.textContent="📎 "+file.name+" (joint)";
+  };
+  reader.readAsDataURL(file);
+}
+function comptaJustifClear(){
+  comptaJustifDataUrl=null;
+  var f=document.getElementById("cl-justif-file"); if(f) f.value="";
+  var prev=document.getElementById("cl-justif-preview"); if(prev) prev.textContent="Aucun justificatif joint";
 }
 function showAddComptaLine(editId){
   comptaEditId=editId||null;
@@ -126,15 +178,20 @@ function showAddComptaLine(editId){
   document.getElementById("compta-modal-title").textContent=existing?"Modifier la ligne":"Nouvelle ligne";
   document.getElementById("cl-date").value=existing?existing.date:new Date().toISOString().slice(0,10);
   document.getElementById("cl-montant").value=existing?existing.montant:"";
-  document.getElementById("cl-categorie").value=existing?existing.categorie||"":"";
+  var catSelEl=document.getElementById("cl-categorie");
+  if(catSelEl && existing) catSelEl.setAttribute("data-keep",existing.categorie||"");
   document.getElementById("cl-motif").value=existing?existing.motif||"":"";
   document.getElementById("cl-tiers").value=existing?existing.tiers||"":"";
   document.getElementById("cl-moyen").value=existing?existing.moyen||"Espèces":"Espèces";
   document.getElementById("cl-reference").value=existing?existing.reference||"":"";
+  document.getElementById("cl-pointe").checked=!!(existing&&existing.pointe);
+  comptaJustifDataUrl=existing?(existing.justificatif||null):null;
+  var justifPrev=document.getElementById("cl-justif-preview");
+  if(justifPrev) justifPrev.textContent=comptaJustifDataUrl?"📎 Justificatif joint":"Aucun justificatif joint";
+  var justifFile=document.getElementById("cl-justif-file"); if(justifFile) justifFile.value="";
   setComptaType(existing?existing.type:"recette");
   var delBtn=document.getElementById("compta-delete-btn");
   if(delBtn) delBtn.style.display=existing?"block":"none";
-  buildComptabilite(); // rafraichit les datalists de suggestion
   document.getElementById("modal-compta-line").style.display="flex";
 }
 function saveComptaLine(){
@@ -145,11 +202,13 @@ function saveComptaLine(){
   var lines=getComptabilite();
   var data={
     date:date, montant:montant, type:comptaCurrentType,
-    categorie:document.getElementById("cl-categorie").value.trim(),
+    categorie:document.getElementById("cl-categorie").value,
     motif:document.getElementById("cl-motif").value.trim(),
     tiers:document.getElementById("cl-tiers").value.trim(),
     moyen:document.getElementById("cl-moyen").value,
-    reference:document.getElementById("cl-reference").value.trim()
+    reference:document.getElementById("cl-reference").value.trim(),
+    pointe:document.getElementById("cl-pointe").checked,
+    justificatif:comptaJustifDataUrl||null
   };
   if(comptaEditId){
     var idx=lines.findIndex(function(l){return l.id===comptaEditId;});
@@ -174,9 +233,9 @@ async function deleteComptaLine(){
 function exportComptaCsv(){
   var lines=comptaFilteredList();
   if(!lines.length){askAlert("Aucune ligne à exporter.");return;}
-  var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Référence"];
+  var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Référence","Pointé","Justificatif"];
   var rows=lines.map(function(l){
-    return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",l.reference||""]
+    return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",l.reference||"",l.pointe?"Oui":"Non",l.justificatif?"Oui":"Non"]
       .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(";");
   });
   var csv=header.join(";")+"\n"+rows.join("\n");
@@ -186,6 +245,91 @@ function exportComptaCsv(){
   a.href=url;a.download="comptabilite-asmb-"+taTodayStr().replace(/\//g,"-")+".csv";
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+// ── BUDGET PREVISIONNEL ──────────────────────────────────────────
+function openBudgetPrev(){
+  var year=comptaCurrentYear();
+  var budget=getBudgetPrev();
+  var yearBudget=budget[year]||{};
+  var all=getComptabilite().filter(function(l){return (l.date||"").indexOf(year)===0;});
+  var realise={};
+  all.forEach(function(l){
+    var key=l.type+"|"+(l.categorie||"Autre");
+    realise[key]=(realise[key]||0)+(l.montant||0);
+  });
+  var body=document.getElementById("modal-budget-body");
+  var html='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">Budget prévisionnel '+year+' — comparez le prévu au réalisé de l\'année en cours.</div>';
+  ["recette","depense"].forEach(function(type){
+    html+='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:12px 0 6px">'+(type==="recette"?"Recettes":"Dépenses")+'</div>';
+    COMPTA_CATS[type].forEach(function(cat){
+      var prevu=yearBudget[type+"|"+cat]||0;
+      var reel=realise[type+"|"+cat]||0;
+      var pct=prevu>0?Math.min(100,Math.round(reel/prevu*100)):(reel>0?100:0);
+      var over=prevu>0 && reel>prevu;
+      html+='<div style="margin-bottom:10px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt);margin-bottom:3px">'+
+          '<span>'+cat+'</span>'+
+          '<span style="display:flex;align-items:center;gap:6px">'+
+            '<input type="number" step="1" value="'+(prevu||"")+'" placeholder="0" data-budget-key="'+type+'|'+cat+'" style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
+            '<span style="color:var(--mut);font-size:10px">prévu</span>'+
+          '</span>'+
+        '</div>'+
+        '<div style="height:6px;border-radius:4px;background:var(--bdr);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(over?"var(--red)":"var(--grn)")+'"></div></div>'+
+        '<div style="font-size:10px;color:var(--mut);margin-top:2px">Réalisé : '+reel.toFixed(2)+' €'+(prevu>0?" / "+prevu.toFixed(2)+" € prévu":"")+'</div>'+
+      '</div>';
+    });
+  });
+  body.innerHTML=html;
+  document.getElementById("modal-budget-prev").style.display="flex";
+}
+function saveBudgetPrevForm(){
+  var year=comptaCurrentYear();
+  var budget=getBudgetPrev();
+  var yearBudget={};
+  document.querySelectorAll('[data-budget-key]').forEach(function(inp){
+    var v=parseFloat(inp.value);
+    if(v>0) yearBudget[inp.getAttribute("data-budget-key")]=v;
+  });
+  budget[year]=yearBudget;
+  saveBudgetPrev(budget);
+  closeModal("modal-budget-prev");
+  buildComptabilite();
+}
+
+// ── BILAN ANNUEL / RAPPORT AG ────────────────────────────────────
+function openBilanAnnuel(){
+  var year=comptaCurrentYear();
+  var lines=getComptabilite().filter(function(l){return (l.date||"").indexOf(year)===0;});
+  var byCat={recette:{},depense:{}};
+  var totR=0,totD=0;
+  lines.forEach(function(l){
+    var cat=l.categorie||"Autre";
+    byCat[l.type===("depense")?"depense":"recette"][cat]=(byCat[l.type==="depense"?"depense":"recette"][cat]||0)+(l.montant||0);
+    if(l.type==="depense") totD+=(l.montant||0); else totR+=(l.montant||0);
+  });
+  var html='<div style="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px">Bilan financier '+year+'</div>'+
+    '<div style="font-size:11px;color:var(--mut);margin-bottom:14px">À présenter en Assemblée Générale</div>';
+  html+='<div style="font-size:12px;font-weight:800;color:var(--grn);margin:10px 0 6px">Recettes</div>';
+  Object.keys(byCat.recette).sort().forEach(function(c){
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+c+'</span><span style="font-weight:700">'+byCat.recette[c].toFixed(2)+' €</span></div>';
+  });
+  html+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--grn);padding:6px 0">Total recettes<span>'+totR.toFixed(2)+' €</span></div>';
+  html+='<div style="font-size:12px;font-weight:800;color:var(--red);margin:14px 0 6px">Dépenses</div>';
+  Object.keys(byCat.depense).sort().forEach(function(c){
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+c+'</span><span style="font-weight:700">'+byCat.depense[c].toFixed(2)+' €</span></div>';
+  });
+  html+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--red);padding:6px 0">Total dépenses<span>'+totD.toFixed(2)+' €</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--dkg);padding:12px 0;margin-top:8px;border-top:2px solid var(--bdr)">Résultat net '+year+'<span>'+(totR-totD).toFixed(2)+' €</span></div>';
+  document.getElementById("modal-bilan-body").innerHTML=html;
+  document.getElementById("modal-bilan-annuel").style.display="flex";
+}
+function printBilanAnnuel(){
+  var content=document.getElementById("modal-bilan-body").innerHTML;
+  var w=window.open("","_blank");
+  w.document.write('<html><head><title>Bilan financier</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}div{box-sizing:border-box}</style></head><body>'+content+'</body></html>');
+  w.document.close();
+  w.print();
 }
 
 // ── INVENTAIRE BUVETTE ET MATERIEL (point 11) ───────────────────────
