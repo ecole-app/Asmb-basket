@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790697380",
+    "titre": "6 thèmes visuels en plus du thème par défaut",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau réglage « Thème visuel » dans Paramètres · Apparence : Classique (doré/marine d'origine), Épuré (minimal), Bento Glass (fond violet, navigation sur le côté), Feuille de match (look carnet, onglets en haut), Carnet illustré (pastel, navigation flottante) et Éditorial (bloc couleur, navigation en pilule)." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Chaque thème change vraiment l'habillage complet (couleurs, formes des cartes, position de la navigation), pas juste une couleur d'accent." }
+    ]
+  },
+  {
     "v": "1790683836",
     "titre": "Comptabilité complète pour le club",
     "points": [

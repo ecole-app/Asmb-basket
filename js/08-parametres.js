@@ -15,6 +15,7 @@ function buildParametres(){
   }
   var gd=document.getElementById("gp-dark");
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
+  buildVisualThemePicker();
   var toggle=document.getElementById("notif-toggle");
   if(toggle)toggle.checked=localStorage.getItem("asmb_notif")==="on";
   ["messages","match","entrainement","evenement"].forEach(function(t){

@@ -7,8 +7,51 @@ function toggleTheme(){
   var gd=document.getElementById("gp-dark");if(gd)gd.checked=!dark;
 }
 
+// ═══ Thème visuel (ensemble complet : couleurs + formes + nav) ════
+var VISUAL_THEMES={
+  moderne:{label:"Moderne",emoji:"🟣",desc:"Le thème par défaut de l'appli"},
+  classique:{label:"Classique",emoji:"🟡",desc:"Doré/marine, habillage d'origine"},
+  epure:{label:"Épuré",emoji:"⬜",desc:"Minimal, lignes fines, sans ombre"},
+  bento:{label:"Bento Glass",emoji:"🟪",desc:"Fond violet, cartes en verre, nav sur le côté"},
+  feuille:{label:"Feuille de match",emoji:"🟠",desc:"Look carnet/scoresheet, onglets en haut"},
+  carnet:{label:"Carnet illustré",emoji:"🌸",desc:"Pastel, cartes rondes, nav flottante"},
+  editorial:{label:"Éditorial",emoji:"🟧",desc:"Bloc couleur, gros chiffres, nav en pilule"}
+};
+function applyVisualTheme(t){
+  if(!VISUAL_THEMES[t]) t="moderne";
+  if(t==="moderne") document.documentElement.removeAttribute("data-visual-theme");
+  else document.documentElement.setAttribute("data-visual-theme",t);
+  localStorage.setItem("asmb_visual_theme",t);
+  document.querySelectorAll(".vt-swatch").forEach(function(el){
+    el.classList.toggle("on",el.getAttribute("data-vt")===t);
+  });
+}
+function buildVisualThemePicker(){
+  var box=document.getElementById("vt-picker");
+  if(!box) return;
+  var current=localStorage.getItem("asmb_visual_theme")||"moderne";
+  box.innerHTML="";
+  box.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px";
+  Object.keys(VISUAL_THEMES).forEach(function(key){
+    var th=VISUAL_THEMES[key];
+    var sw=document.createElement("div");
+    sw.className="vt-swatch"+(key===current?" on":"");
+    sw.setAttribute("data-vt",key);
+    sw.style.cssText="padding:10px;border-radius:12px;border:2px solid "+(key===current?"var(--dkg)":"var(--bdr)")+";background:var(--bg);cursor:pointer;display:flex;flex-direction:column;gap:2px";
+    sw.innerHTML='<div style="font-size:18px">'+th.emoji+'</div><div style="font-size:12px;font-weight:700;color:var(--txt)">'+th.label+'</div><div style="font-size:10px;color:var(--mut);line-height:1.3">'+th.desc+'</div>';
+    sw.onclick=function(){
+      applyVisualTheme(key);
+      box.querySelectorAll(".vt-swatch").forEach(function(el){
+        el.style.borderColor=el.getAttribute("data-vt")===key?"var(--dkg)":"var(--bdr)";
+      });
+    };
+    box.appendChild(sw);
+  });
+}
+
 // ═══ INIT ════════════════════════════════════════════════════════
 (function(){var t=localStorage.getItem("asmb_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}());
+(function(){var vt=localStorage.getItem("asmb_visual_theme");if(vt&&vt!=="moderne"&&VISUAL_THEMES[vt]){document.documentElement.setAttribute("data-visual-theme",vt);}}());
 
 // Demo : injecter une fiche de test si aucune n'existe
 (function(){
@@ -35,7 +78,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790683836";
+var APP_VERSION="1790697380";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
