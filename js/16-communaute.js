@@ -384,6 +384,113 @@ var chatUnsubscribe=null;
 var typingUnsubscribe=null;
 var typingDebounce=null;
 var savedPseudo=localStorage.getItem("asmb_pseudo")||"";
+var replyingTo=null; // {id,pseudo,text} le message auquel on repond, ou null
+var channelKnownPseudos=[]; // pseudos vus dans le canal ouvert, pour l'autocomplete @mention
+var renderedMsgs={}; // d.id -> message brut du dernier rendu, pour repondre/modifier sans tout re-echapper dans un onclick
+
+function setReplyTo(msgId){
+  var m=renderedMsgs[msgId];if(!m)return;
+  replyingTo={id:msgId,pseudo:m.pseudo||"?",text:(m.text||"").replace(/<[^>]*>/g,"").slice(0,80)};
+  var bar=document.getElementById("chat-reply-bar");
+  document.getElementById("chat-reply-pseudo").textContent="Réponse à "+replyingTo.pseudo;
+  document.getElementById("chat-reply-text").textContent=replyingTo.text;
+  if(bar)bar.style.display="flex";
+  var input=document.getElementById("chat-msg");if(input)input.focus();
+}
+function cancelReply(){
+  replyingTo=null;
+  var bar=document.getElementById("chat-reply-bar");
+  if(bar)bar.style.display="none";
+}
+function scrollToMsg(msgId){
+  var el=document.getElementById("msgel-"+msgId);
+  if(!el)return;
+  el.scrollIntoView({block:"center",behavior:"smooth"});
+  el.style.transition="background .3s";
+  var prevBg=el.style.background;
+  el.style.background="rgba(212,175,55,.25)";
+  setTimeout(function(){el.style.background=prevBg;},900);
+}
+async function editMessage(channelId,msgId){
+  var m=renderedMsgs[msgId];if(!m)return;
+  var current=(m.text||"").replace(/<[^>]*>/g,"");
+  var newText=await askPrompt("Modifier le message",{defaultValue:current,confirmText:"Enregistrer"});
+  if(newText===null)return;
+  newText=newText.trim();
+  if(!newText||newText===current)return;
+  if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
+  var msgRef=window.fbDoc(window.fbDb,"channels",channelId,"messages",msgId);
+  window.fbUpdateDoc(msgRef,{text:newText,edited:true}).catch(function(e){
+    askAlert("Le message n'a pas pu être modifié : "+((e&&e.code)||e));
+  });
+}
+
+// ── RECHERCHE DANS LE CANAL (filtre cote client, deja tout charge) ──
+function toggleChatSearch(){
+  var bar=document.getElementById("chat-search-bar");
+  if(!bar)return;
+  var show=bar.style.display==="none";
+  bar.style.display=show?"block":"none";
+  if(show){document.getElementById("chat-search-input").focus();}
+  else{document.getElementById("chat-search-input").value="";filterChatMessages("");}
+}
+function filterChatMessages(term){
+  var msgsEl=document.getElementById("chat-messages");if(!msgsEl)return;
+  term=(term||"").trim().toLowerCase();
+  var rows=msgsEl.querySelectorAll(".msg-wrap, .msg-day, .unread-divider");
+  rows.forEach(function(row){
+    if(!term){row.style.display="";return;}
+    var txt=row.textContent.toLowerCase();
+    row.style.display=txt.indexOf(term)>=0?"":"none";
+  });
+}
+
+// ── MENTIONS (@Pseudo) ───────────────────────────────────────────
+function handleMentionInput(inputEl){
+  var val=inputEl.value;
+  var caret=inputEl.selectionStart||val.length;
+  var uptoCaret=val.slice(0,caret);
+  var m=uptoCaret.match(/@([A-Za-zÀ-ÿ0-9_-]*)$/);
+  var list=document.getElementById("chat-mention-list");
+  if(!m||!list){if(list)list.style.display="none";return;}
+  var partial=m[1].toLowerCase();
+  var matches=channelKnownPseudos.filter(function(p){return p.toLowerCase().indexOf(partial)===0 && p!==(savedPseudo||"");});
+  if(!matches.length){list.style.display="none";return;}
+  list.innerHTML=matches.slice(0,6).map(function(p){
+    return '<div onclick="insertMention(\''+p.replace(/'/g,"")+'\')" style="padding:10px 14px;font-size:13px;color:var(--txt);cursor:pointer;border-bottom:1px solid var(--bdr)">@'+authEsc(p)+'</div>';
+  }).join("");
+  list.style.display="block";
+  list.dataset.matchLen=m[0].length;
+}
+function insertMention(pseudo){
+  var inputEl=document.getElementById("chat-msg");
+  var list=document.getElementById("chat-mention-list");
+  if(!inputEl||!list)return;
+  var caret=inputEl.selectionStart||inputEl.value.length;
+  var matchLen=parseInt(list.dataset.matchLen||"0",10);
+  var before=inputEl.value.slice(0,caret-matchLen);
+  var after=inputEl.value.slice(caret);
+  inputEl.value=before+"@"+pseudo+" "+after;
+  list.style.display="none";
+  inputEl.focus();
+}
+
+function getMutedChannels(){try{return JSON.parse(localStorage.getItem("asmb_muted_channels")||"[]");}catch(e){return [];}}
+function isChannelMuted(channelId){return getMutedChannels().indexOf(channelId)>=0;}
+function toggleChannelMute(){
+  if(!currentChannelId)return;
+  var muted=getMutedChannels();
+  var idx=muted.indexOf(currentChannelId);
+  if(idx>=0){muted.splice(idx,1);showToast("Notifications réactivées pour ce canal");}
+  else{muted.push(currentChannelId);showToast("Notifications coupées pour ce canal");}
+  localStorage.setItem("asmb_muted_channels",JSON.stringify(muted));
+  updateMuteBtn();
+}
+function updateMuteBtn(){
+  var b=document.getElementById("chat-mute-btn");
+  if(!b||!currentChannelId)return;
+  b.textContent=isChannelMuted(currentChannelId)?"🔕":"🔔";
+}
 
 // Un canal est visible pour un coach si : il est explicitement marqué "public" (clubWide),
 // ou lié à une équipe que ce coach entraîne. Sinon (pas taggé), il reste masqué par défaut.
@@ -463,6 +570,13 @@ async function openChannel(ch){
   if(pseudo)pseudo.value=savedPseudo;
   var pollBtn=document.getElementById("poll-btn");
   if(pollBtn)pollBtn.style.display=window.asmbCoachMode?"flex":"none";
+  // Reinitialise recherche / reponse en cours / autocomplete d'un canal a l'autre
+  channelKnownPseudos=[];
+  cancelReply();
+  var searchBar=document.getElementById("chat-search-bar"),searchInput=document.getElementById("chat-search-input");
+  if(searchBar)searchBar.style.display="none";
+  if(searchInput)searchInput.value="";
+  updateMuteBtn();
   stack.push("chat");
   showScr("chat");
   // On capture le seuil "dernier lu" AVANT de le mettre a jour, pour savoir
@@ -518,15 +632,19 @@ function listenMessages(channelId, prevLastRead){
   var isFirstLoad=true;
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels",channelId,"messages"),window.fbOrderBy("ts"));
   chatUnsubscribe=window.fbOnSnapshot(q,function(snap){
-    // Notification locale sur nouveaux messages (app ouverte uniquement)
+    // Notification locale sur nouveaux messages (app ouverte uniquement).
+    // Un canal coupé (toggleChannelMute) n'en montre plus, SAUF si on y est mentionné.
+    var myPseudoForMention=(savedPseudo||"moi").toLowerCase();
     if(!isFirstLoad&&localStorage.getItem("asmb_notif")==="on"&&localStorage.getItem("asmb_notif_messages")!=="off"&&"Notification" in window&&Notification.permission==="granted"){
       snap.docChanges().forEach(function(change){
         if(change.type==="added"){
           var m=change.doc.data();
-          if(m.pseudo!==(savedPseudo||"moi")){
+          var mentioned=m.text&&m.text.toLowerCase().indexOf("@"+myPseudoForMention)>=0;
+          if(m.pseudo!==(savedPseudo||"moi") && (mentioned || !isChannelMuted(channelId))){
             try{
               var ch=currentChannelData;
-              new Notification((ch?ch.icon+" "+ch.name:clubLabel())+" - "+m.pseudo,{body:m.text.replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
+              var title=(ch?ch.icon+" "+ch.name:clubLabel())+" - "+m.pseudo+(mentioned?" vous a mentionné":"");
+              new Notification(title,{body:(m.text||"📎 Pièce jointe").replace(/<[^>]*>/g,"").substring(0,100),tag:"asmb-msg"});
             }catch(e){}
           }
         }
@@ -539,6 +657,10 @@ function listenMessages(channelId, prevLastRead){
     var pinnedIds=(currentChannelData&&currentChannelData.pinnedMessageIds)||[];
     var pinnedMsgs=[];
     var allMsgs=[];snap.forEach(function(d){allMsgs.push(d.data());});
+    // Pseudos vus dans ce canal : sert a l'autocomplete @mention
+    var seenPseudos=[];
+    allMsgs.forEach(function(m){if(m.pseudo&&seenPseudos.indexOf(m.pseudo)<0)seenPseudos.push(m.pseudo);});
+    channelKnownPseudos=seenPseudos;
     // Repere "Nouveaux messages" : uniquement si on avait deja lu ce canal avant (pas la toute premiere visite),
     // et qu'il y a au moins un message plus ancien ET un message plus recent que ce seuil.
     var bannerIndex=-1;
@@ -551,9 +673,11 @@ function listenMessages(channelId, prevLastRead){
     }
     var bannerEl=null;
     var msgIndex=-1;
+    renderedMsgs={};
     snap.forEach(function(d){
       msgIndex++;
       var msg=d.data();
+      renderedMsgs[d.id]=msg;
       if(msgIndex===bannerIndex){
         bannerEl=document.createElement("div");
         bannerEl.className="unread-divider";
@@ -575,10 +699,17 @@ function listenMessages(channelId, prevLastRead){
       if(!isOut){var psd=document.createElement("div");psd.className="msg-pseudo";psd.textContent=msg.pseudo;wrap.appendChild(psd);}
       if(msg.type==="media"){
         var mediaWrap=document.createElement("div");
-        mediaWrap.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow)";
-        if(msg.mediaType==="video"){
+        if(msg.mediaType==="pdf"){
+          mediaWrap.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow);background:var(--card);border:1px solid var(--bdr)";
+          mediaWrap.innerHTML='<a href="'+msg.mediaUrl+'" download="'+authEsc(msg.fileName||"document.pdf")+'" style="display:flex;align-items:center;gap:10px;padding:12px;text-decoration:none">'+
+            '<div style="width:36px;height:36px;border-radius:10px;background:rgba(192,57,43,.1);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📄</div>'+
+            '<div style="flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(msg.fileName||"Document.pdf")+'</div></a>'+
+            '<div style="padding:0 12px 8px;font-size:9px;color:var(--mut)">'+time+'</div>';
+        } else if(msg.mediaType==="video"){
+          mediaWrap.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow)";
           mediaWrap.innerHTML='<video src="'+msg.mediaUrl+'" controls style="width:100%;display:block;max-height:300px;background:#000"></video><div style="padding:4px 10px;font-size:9px;color:var(--mut);background:var(--card)">'+time+'</div>';
         } else {
+          mediaWrap.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow)";
           mediaWrap.innerHTML='<img src="'+msg.mediaUrl+'" onclick="viewChatMedia(\''+msg.mediaUrl+'\')" style="width:100%;display:block;max-height:320px;object-fit:cover;cursor:pointer"><div style="padding:4px 10px;font-size:9px;color:var(--mut);background:var(--card)">'+time+'</div>';
         }
         wrap.appendChild(mediaWrap);
@@ -666,13 +797,18 @@ function listenMessages(channelId, prevLastRead){
         reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"rgba(212,175,55,.22)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
       });
       reactHtml+='<span onclick="openReactionPicker(event,\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:12px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.06);color:var(--mut)">+</span>';
+      reactHtml+='<span onclick="setReplyTo(\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">↩ Répondre</span>';
       if(window.asmbCoachMode){
         reactHtml+='<span onclick="togglePin(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">'+(pinnedIds.indexOf(d.id)>=0?"Retirer":"Epingler")+'</span>';
+      }
+      if(isOut){
+        reactHtml+='<span onclick="editMessage(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">Modifier</span>';
       }
       if(canDelete){
         reactHtml+='<span onclick="deleteMessage(\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(192,57,43,.12);color:var(--red)"></span>';
       }
       reactHtml+='</div>';
+      bubble.setAttribute("id","msgel-"+d.id);
       bubble.setAttribute("onmousedown","startLongPress(event,'"+channelId+"','"+d.id+"')");
       bubble.setAttribute("onmouseup","cancelLongPress()");
       bubble.setAttribute("onmouseleave","cancelLongPress()");
@@ -680,7 +816,13 @@ function listenMessages(channelId, prevLastRead){
       bubble.setAttribute("ontouchend","cancelLongPress()");
       bubble.setAttribute("ontouchmove","cancelLongPress()");
       bubble.setAttribute("oncontextmenu","event.preventDefault();openReactionPicker(event,'"+channelId+"','"+d.id+"');return false;");
-      bubble.innerHTML=msg.text+'<div class="msg-time">'+time+'</div>'+reactHtml;
+      var replyHtml="";
+      if(msg.replyTo){
+        replyHtml='<div onclick="scrollToMsg(\''+msg.replyTo.id+'\')" style="cursor:pointer;border-left:3px solid rgba(120,120,120,.5);padding:4px 8px;margin-bottom:6px;font-size:11px;opacity:.85;border-radius:4px;background:rgba(0,0,0,.07)"><b>'+authEsc(msg.replyTo.pseudo)+'</b><br>'+authEsc(msg.replyTo.text)+'</div>';
+      }
+      var displayText=String(msg.text||"").replace(/@([A-Za-zÀ-ÿ0-9_-]+)/g,'<span style="font-weight:800">@$1</span>');
+      var editedTag=msg.edited?' <span style="opacity:.6;font-style:italic;font-size:10px">(modifié)</span>':"";
+      bubble.innerHTML=replyHtml+displayText+editedTag+'<div class="msg-time">'+time+'</div>'+reactHtml;
       wrap.appendChild(bubble);
       msgsEl.appendChild(wrap);
     });
@@ -849,9 +991,12 @@ async function sendMsg(){
   if(!text)return;
   savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
   msgEl.value="";
-  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
-    text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
-  });
+  var payload={text:text,pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]};
+  if(replyingTo)payload.replyTo={id:replyingTo.id,pseudo:replyingTo.pseudo,text:replyingTo.text};
+  cancelReply();
+  var mentionList=document.getElementById("chat-mention-list");
+  if(mentionList)mentionList.style.display="none";
+  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),payload);
 }
 
 async function sendMediaMessage(input){
@@ -859,11 +1004,26 @@ async function sendMediaMessage(input){
   if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var file=input.files[0];
-  if(file.type.indexOf("image")!==0){askAlert("Seules les photos sont acceptées (pas de vidéo)");input.value="";return;}
+  var isPdf=file.type==="application/pdf";
+  var isImage=file.type.indexOf("image")===0;
+  if(!isPdf&&!isImage){askAlert("Seules les photos et les PDF sont acceptés");input.value="";return;}
   var pseudoEl=document.getElementById("chat-pseudo");
   var pseudo=(pseudoEl&&pseudoEl.value.trim())||savedPseudo||"Anonyme";
   savedPseudo=pseudo;localStorage.setItem("asmb_pseudo",pseudo);
   input.value="";
+  if(isPdf){
+    if(file.size>700*1024){askAlert("Ce PDF est trop volumineux (700 Ko max). Compressez-le puis réessayez.");return;}
+    var reader=new FileReader();
+    reader.onload=function(){
+      window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),{
+        type:"media",mediaUrl:reader.result,mediaType:"pdf",fileName:file.name,
+        pseudo:pseudo,ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+      });
+    };
+    reader.onerror=function(){askAlert("Erreur lors de la lecture du fichier.");};
+    reader.readAsDataURL(file);
+    return;
+  }
   compressImageFile(file,900,0.55).then(function(dataUrl){
     if(dataUrl.length>900000)return compressImageFile(file,600,0.4);
     return dataUrl;

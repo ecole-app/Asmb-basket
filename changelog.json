@@ -1,5 +1,17 @@
 [
   {
+    "v": "1790659880",
+    "titre": "Mise à jour du 29 septembre",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Dans un canal de discussion : possibilité de répondre à un message précis (il s'affiche en citation, cliquable pour le retrouver)." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Mentionnez quelqu'un avec « @ » : une liste s'affiche pour choisir la personne, et elle reçoit une notification même si elle a coupé les notifications du canal." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Possibilité de modifier ses propres messages après envoi (repère « modifié »)." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton 🔍 pour rechercher dans les messages d'un canal." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton 🔔 pour couper les notifications d'un canal précis, sans toucher aux autres." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le partage de fichiers dans un canal accepte maintenant les PDF (en plus des photos), jusqu'à 700 Ko." }
+    ]
+  },
+  {
     "v": "1790628783",
     "titre": "Mise à jour du 28 septembre (17)",
     "points": [
