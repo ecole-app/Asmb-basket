@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790697643",
+    "titre": "Bannières d'accueil désormais adaptées au thème choisi",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les grandes bannières (accueil, jour de match) suivaient toujours le dégradé doré/marine même en changeant de thème visuel — elles utilisent maintenant la couleur du thème choisi, comme le reste de l'appli." }
+    ]
+  },
+  {
     "v": "1790697380",
     "titre": "6 thèmes visuels en plus du thème par défaut",
     "points": [

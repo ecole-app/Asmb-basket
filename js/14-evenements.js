@@ -805,7 +805,7 @@ function matchdayBannerHtml(ev,mini){
       '<div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.85;text-transform:uppercase">Jour de match</div><div style="font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ev.titre+'</div></div>'+
       '<div style="font-size:20px">›</div></div>';
   }
-  return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), linear-gradient(160deg,#1A2E5A 0%,#142a4d 60%,#050b16 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
+  return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), var(--hdrgrad);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
     '<div style="font-size:64px;margin-bottom:14px">🏀</div>'+
     '<div style="display:inline-block;margin:0 auto 16px;background:var(--red);font-size:11px;font-weight:800;padding:5px 16px;border-radius:20px;letter-spacing:1px">JOUR DE MATCH</div>'+
     '<div style="font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px">'+ev.titre+'</div>'+
@@ -843,7 +843,7 @@ function buildMatchday(eventId){
   var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+ev.id+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Météo</button>':'';
 
   el.innerHTML=
-    '<div style="padding:22px 18px;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.22) 0%, transparent 50%), linear-gradient(160deg,#1A2E5A 0%,#142a4d 60%,#050b16 100%);color:#fff">'+
+    '<div style="padding:22px 18px;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.22) 0%, transparent 50%), var(--hdrgrad);color:#fff">'+
       '<div style="display:inline-block;background:var(--red);font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:.5px">MATCH</div>'+
       '<div style="font-size:22px;font-weight:900;line-height:1.15;margin-top:12px">'+ev.titre+'</div>'+
       '<div style="font-size:13px;opacity:.85;margin-top:8px">'+jour+(ev.heure?" · "+ev.heure:"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+
