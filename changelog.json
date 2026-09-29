@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790700112",
+    "titre": "Barre de navigation élargissable (thèmes Bento Glass et Carnet illustré)",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Sur les thèmes où la navigation est sur le côté (Bento Glass, Carnet illustré), un appui long dessus l'élargit pour afficher le nom de chaque onglet en plus de l'icône. Un autre appui long la remet en version compacte. Le choix est mémorisé." }
+    ]
+  },
+  {
     "v": "1790697980",
     "titre": "Correction : le mode sombre ne fonctionnait plus avec les nouveaux thèmes",
     "points": [

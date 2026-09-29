@@ -49,6 +49,56 @@ function buildVisualThemePicker(){
   });
 }
 
+// ═══ Barre de navigation en rail (Bento Glass, Carnet illustré) : ═
+// appui long dessus pour l'élargir/réduire (icônes seules <-> icônes + libellés)
+function toggleBnavExpanded(){
+  var bnav=document.getElementById("bnav-main");
+  if(!bnav) return;
+  var exp=bnav.classList.toggle("expanded");
+  document.documentElement.classList.toggle("bnav-expanded",exp);
+  localStorage.setItem("asmb_bnav_expanded",exp?"on":"off");
+  if(navigator.vibrate) navigator.vibrate(12);
+}
+(function(){
+  var bnav=document.getElementById("bnav-main");
+  if(!bnav) return;
+  if(localStorage.getItem("asmb_bnav_expanded")==="on"){
+    bnav.classList.add("expanded");
+    document.documentElement.classList.add("bnav-expanded");
+  }
+  var LONG_PRESS_MS=480, MOVE_TOL=10;
+  var pressTimer=null, longPressed=false, sx=0, sy=0;
+  function isRailTheme(){
+    var vt=document.documentElement.getAttribute("data-visual-theme");
+    return vt==="bento"||vt==="carnet";
+  }
+  function down(e){
+    if(!isRailTheme()) return;
+    longPressed=false;
+    var pt=e.touches?e.touches[0]:e;
+    sx=pt.clientX; sy=pt.clientY;
+    pressTimer=setTimeout(function(){ longPressed=true; toggleBnavExpanded(); },LONG_PRESS_MS);
+  }
+  function move(e){
+    if(!pressTimer) return;
+    var pt=e.touches?e.touches[0]:e;
+    if(Math.abs(pt.clientX-sx)>MOVE_TOL||Math.abs(pt.clientY-sy)>MOVE_TOL){clearTimeout(pressTimer);pressTimer=null;}
+  }
+  function up(){ if(pressTimer){clearTimeout(pressTimer);pressTimer=null;} }
+  function clickCapture(e){
+    if(longPressed){ e.preventDefault(); e.stopPropagation(); longPressed=false; }
+  }
+  bnav.addEventListener("mousedown",down);
+  bnav.addEventListener("touchstart",down,{passive:true});
+  bnav.addEventListener("mousemove",move);
+  bnav.addEventListener("touchmove",move,{passive:true});
+  bnav.addEventListener("mouseup",up);
+  bnav.addEventListener("mouseleave",up);
+  bnav.addEventListener("touchend",up);
+  bnav.addEventListener("touchcancel",up);
+  bnav.addEventListener("click",clickCapture,true);
+}());
+
 // ═══ INIT ════════════════════════════════════════════════════════
 (function(){var t=localStorage.getItem("asmb_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}());
 (function(){var vt=localStorage.getItem("asmb_visual_theme");if(vt&&vt!=="moderne"&&VISUAL_THEMES[vt]){document.documentElement.setAttribute("data-visual-theme",vt);}}());
@@ -78,7 +128,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790697980";
+var APP_VERSION="1790700112";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
