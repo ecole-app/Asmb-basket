@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790667432",
+    "titre": "Mise à jour du 29 septembre (4)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouveau libellé « OTM » (officiel table de marque) dans la liste des badges." },
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le badge « Arbitre » a désormais l'icône d'un sifflet." }
+    ]
+  },
+  {
     "v": "1790667278",
     "titre": "Mise à jour du 29 septembre (3)",
     "points": [
