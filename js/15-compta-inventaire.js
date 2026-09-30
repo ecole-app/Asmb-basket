@@ -489,21 +489,33 @@ function openBuvetteAccessSettings(){
   gmSection(s.body,"Caisse buvette en ligne",
     "Un bénévole peut encaisser les ventes depuis "+BUVETTE_SITE_URL+" (téléphone ou tablette). "+
     "La caisse est reliée en temps réel à l'inventaire buvette et à la comptabilité : chaque vente "+
-    "met à jour le stock et crée la ligne comptable automatiquement. Générez un code, valable "+
-    "jusqu'à ce soir, et transmettez-le au bénévole avec le lien du site.");
+    "met à jour le stock et crée la ligne comptable automatiquement. Deux façons de donner l'accès, "+
+    "selon comment votre club fonctionne :");
   var grants=document.createElement("div");
-  s.body.appendChild(grants);
-  s.body.appendChild(gmBtn("Générer un code (valable aujourd'hui)","primary",function(){
+  function createBuvetteCode(fin,label){
     var code=genSecureCode(1,5);
-    var fin=new Date();fin.setHours(23,59,59,999);
     window.fbSetDoc(window.fbDoc(window.fbDb,"buvette_codes",code),{
       clubId:clubId,clubName:clubName,createdBy:(window.ASMB_USER&&window.ASMB_USER.uid)||null,
       createdAt:window.fbServerTimestamp(),expiresAt:fin
     }).then(function(){
-      askAlert("Code d'accès caisse buvette :\n\n"+code+"\n\nValable jusqu'à ce soir 23h59.\n\nTransmettez-le au bénévole avec le lien : "+BUVETTE_SITE_URL);
+      askAlert("Code d'accès caisse buvette :\n\n"+code+"\n\n"+label+"\n\nTransmettez-le au bénévole avec le lien : "+BUVETTE_SITE_URL);
       loadBuvetteGrants(grants,clubId);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  }
+  var row=gmRow(s.body);
+  row.appendChild(gmBtn("Code du jour","primary",function(){
+    var fin=new Date();fin.setHours(23,59,59,999);
+    createBuvetteCode(fin,"Valable jusqu'à ce soir 23h59.");
   }));
+  row.appendChild(gmBtn("Code permanent","soft",function(){
+    var fin=new Date();fin.setFullYear(fin.getFullYear()+10);
+    createBuvetteCode(fin,"Permanent (jusqu'à révocation) — pratique si ce sont toujours les mêmes bénévoles qui tiennent la buvette : pas besoin d'en redemander un à chaque fois.");
+  }));
+  var hint=document.createElement("div");
+  hint.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin:10px 0";
+  hint.textContent="Le code du jour convient si des bénévoles différents tiennent la buvette selon les dates. Le code permanent convient si ce sont toujours les mêmes — il reste valable tant que vous ne le révoquez pas ci-dessous.";
+  s.body.appendChild(hint);
+  s.body.appendChild(grants);
   loadBuvetteGrants(grants,clubId);
 }
 function loadBuvetteGrants(el,clubId){
@@ -521,8 +533,10 @@ function loadBuvetteGrants(el,clubId){
       }
       active.forEach(function(g){
         var card=gmCard();
+        var dt=g.exp&&g.exp.toDate?g.exp.toDate():(g.exp instanceof Date?g.exp:null);
+        var estPermanent=dt && (dt-now)>365*86400000; // plus d'un an = code "permanent"
         card.innerHTML='<div style="font-family:monospace;font-size:17px;font-weight:800;color:var(--txt);letter-spacing:1px">'+authEsc(g.code)+'</div>'
-          +'<div style="font-size:11px;color:var(--mut);margin-top:2px">Expire le '+gmFmtDate(g.exp)+'</div>';
+          +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(estPermanent?"Permanent (jusqu'à révocation)":"Expire le "+gmFmtDate(g.exp))+'</div>';
         gmRow(card).appendChild(gmBtn("Révoquer","danger",function(){
           window.fbDeleteDoc(window.fbDoc(window.fbDb,"buvette_codes",g.code)).then(function(){ loadBuvetteGrants(el,clubId); })
             .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });

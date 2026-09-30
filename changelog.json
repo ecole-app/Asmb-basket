@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790793064",
+    "titre": "Code buvette permanent, pour les clubs qui gardent les mêmes bénévoles",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Dans Accès caisse buvette, deux choix maintenant : « Code du jour » (comme avant, pratique quand ça change selon les dates) ou « Code permanent » (valable jusqu'à révocation — utile si ce sont toujours les mêmes personnes qui tiennent la buvette, pas besoin d'en redemander un à chaque fois)." }
+    ]
+  },
+  {
     "v": "1790792489",
     "titre": "La caisse buvette demande le nom du bénévole",
     "points": [

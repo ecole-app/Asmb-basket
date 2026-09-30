@@ -101,7 +101,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     <input id="gate-code" type="text" inputmode="text" maxlength="9" placeholder="Code">
     <div id="gate-error"></div>
     <button id="gate-btn">Ouvrir la caisse</button>
-    <div class="gate-hint">Le code est valable pour la journée. Demandez-en un nouveau si besoin.</div>
+    <div class="gate-hint">Le code est fourni par le dirigeant ou un membre du bureau. Demandez-en un nouveau s'il ne fonctionne plus.</div>
   </div>
 </div>
 
@@ -255,7 +255,11 @@ function startApp(){
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('app-club-name').textContent = session.clubName;
   document.getElementById('app-benevole').textContent = 'Bénévole : ' + session.benevole;
-  document.getElementById('app-exp').textContent = 'Session valable jusqu\'à ' + fmtHM(new Date(session.validUntil));
+  const expDate = new Date(session.validUntil);
+  const estPermanent = (expDate - new Date()) > 365 * 86400000;
+  document.getElementById('app-exp').textContent = estPermanent
+    ? 'Accès permanent'
+    : 'Session valable jusqu\'à ' + fmtHM(expDate);
   listenInventaire();
   renderProc();
 }
