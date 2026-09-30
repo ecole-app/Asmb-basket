@@ -10,7 +10,7 @@ function saveComptabilite(c){localStorage.setItem("asmb_comptabilite",JSON.strin
 // Taxonomie fixe des catégories (club sportif loi 1901)
 var COMPTA_CATS={
   recette:["Cotisations/Licences","Subventions","Sponsors/Partenaires","Buvette/Événements","Dons","Autre"],
-  depense:["Affiliation/Licences fédérales","Location salle","Matériel","Déplacements","Arbitrage/Formations","Assurances","Frais administratifs","Autre"]
+  depense:["Affiliation/Licences fédérales","Location salle","Matériel","Achats buvette","Déplacements","Arbitrage/Formations","Assurances","Frais administratifs","Autre"]
 };
 
 // ── Budget prévisionnel ──────────────────────────────────────────
@@ -193,6 +193,17 @@ function showAddComptaLine(editId){
   var delBtn=document.getElementById("compta-delete-btn");
   if(delBtn) delBtn.style.display=existing?"block":"none";
   document.getElementById("modal-compta-line").style.display="flex";
+}
+// Crée une ligne comptable directement depuis un mouvement de stock (buvette)
+function addComptaLineFromStock(type,categorie,montant,motif,reference){
+  var lines=getComptabilite();
+  lines.push({
+    id:Date.now().toString()+Math.random().toString(36).slice(2,6),
+    date:new Date().toISOString().slice(0,10),
+    montant:montant,type:type,categorie:categorie,motif:motif,tiers:"",
+    moyen:"Espèces",reference:reference||"Buvette",pointe:false,justificatif:null
+  });
+  saveComptabilite(lines);
 }
 function saveComptaLine(){
   var date=document.getElementById("cl-date").value;
@@ -391,18 +402,61 @@ function buildInventaire(){
     card.appendChild(top);
     var adjRow=document.createElement("div");
     adjRow.style.cssText="display:flex;gap:8px;margin-top:10px";
-    var minusBtn=document.createElement("button");
-    minusBtn.textContent="− 1";
-    minusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer";
-    minusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,-1);});
-    var plusBtn=document.createElement("button");
-    plusBtn.textContent="+ 1";
-    plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
-    plusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,1);});
-    adjRow.appendChild(minusBtn);adjRow.appendChild(plusBtn);
+    if(it.categorie==="buvette"){
+      var achatBtn=document.createElement("button");
+      achatBtn.textContent="↓ Achat";
+      achatBtn.title="Entrée de stock (achat) — crée une dépense en comptabilité";
+      achatBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      achatBtn.addEventListener("click",function(e){e.stopPropagation();stockMovement(it.id,"achat");});
+      var venteBtn=document.createElement("button");
+      venteBtn.textContent="↑ Vente";
+      venteBtn.title="Sortie de stock (vente) — crée une recette en comptabilité";
+      venteBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      venteBtn.addEventListener("click",function(e){e.stopPropagation();stockMovement(it.id,"vente");});
+      adjRow.appendChild(achatBtn);adjRow.appendChild(venteBtn);
+    }else{
+      var minusBtn=document.createElement("button");
+      minusBtn.textContent="− 1";
+      minusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      minusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,-1);});
+      var plusBtn=document.createElement("button");
+      plusBtn.textContent="+ 1";
+      plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      plusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,1);});
+      adjRow.appendChild(minusBtn);adjRow.appendChild(plusBtn);
+    }
     card.appendChild(adjRow);
     list.appendChild(card);
   });
+}
+function stockMovement(id,sens){
+  var items=getInventaire();
+  var idx=items.findIndex(function(x){return x.id===id;});
+  if(idx<0)return;
+  var it=items[idx];
+  var qStr=window.prompt((sens==="achat"?"Quantité achetée":"Quantité vendue")+" ("+(it.unite||"unité")+") :","1");
+  if(qStr===null)return;
+  var qte=parseFloat(qStr.replace(",","."));
+  if(!qte||qte<=0){showToast("Quantité invalide");return;}
+  var prixUnit=sens==="achat"?it.prixAchat:it.prixVente;
+  var montantDefault=prixUnit!=null?Math.round(prixUnit*qte*100)/100:0;
+  var mStr=window.prompt("Montant "+(sens==="achat"?"dépensé":"encaissé")+" (€) :",montantDefault.toFixed(2));
+  if(mStr===null)return;
+  var montant=parseFloat(mStr.replace(",","."));
+  if(!montant||montant<=0){showToast("Montant invalide");return;}
+  var newQte=Number(it.qte||0)+(sens==="achat"?qte:-qte);
+  if(newQte<0)newQte=0;
+  items[idx].qte=newQte;
+  saveInventaire(items);
+  addComptaLineFromStock(
+    sens==="achat"?"depense":"recette",
+    sens==="achat"?"Achats buvette":"Buvette/Événements",
+    montant,
+    (sens==="achat"?"Achat ":"Vente ")+(it.nom||"article"),
+    "Buvette"
+  );
+  showToast(sens==="achat"?"Achat enregistré + ligne comptable créée":"Vente enregistrée + ligne comptable créée");
+  buildInventaire();
 }
 function adjustInvQte(id,delta){
   var items=getInventaire();
@@ -424,6 +478,8 @@ function setInvItemCat(cat){
   bM.style.background=cat==="materiel"?"var(--dkg)":"var(--card)";
   bM.style.color=cat==="materiel"?"#fff":"var(--mut)";
   bM.style.borderColor=cat==="materiel"?"var(--dkg)":"var(--bdr)";
+  var prixBlock=document.getElementById("inv-prix-block");
+  if(prixBlock) prixBlock.style.display=cat==="buvette"?"block":"none";
 }
 var invEditCat="buvette";
 function showAddInvItem(){
@@ -433,6 +489,8 @@ function showAddInvItem(){
   document.getElementById("inv-qte").value="0";
   document.getElementById("inv-unite").value="";
   document.getElementById("inv-seuil").value="";
+  document.getElementById("inv-prix-achat").value="";
+  document.getElementById("inv-prix-vente").value="";
   document.getElementById("inv-emplacement").value="";
   document.getElementById("inv-notes").value="";
   document.getElementById("inv-delete-btn").style.display="none";
@@ -448,6 +506,8 @@ function showEditInvItem(id){
   document.getElementById("inv-qte").value=it.qte!=null?it.qte:0;
   document.getElementById("inv-unite").value=it.unite||"";
   document.getElementById("inv-seuil").value=it.seuil!=null?it.seuil:"";
+  document.getElementById("inv-prix-achat").value=it.prixAchat!=null?it.prixAchat:"";
+  document.getElementById("inv-prix-vente").value=it.prixVente!=null?it.prixVente:"";
   document.getElementById("inv-emplacement").value=it.emplacement||"";
   document.getElementById("inv-notes").value=it.notes||"";
   document.getElementById("inv-delete-btn").style.display="block";
@@ -459,10 +519,14 @@ function saveInvItem(){
   if(!nom){askAlert("Le nom de l'article est obligatoire");return;}
   var qte=parseInt(document.getElementById("inv-qte").value,10)||0;
   var seuilRaw=document.getElementById("inv-seuil").value;
+  var prixAchatRaw=document.getElementById("inv-prix-achat").value;
+  var prixVenteRaw=document.getElementById("inv-prix-vente").value;
   var data={
     nom:nom,categorie:invEditCat,qte:qte,
     unite:document.getElementById("inv-unite").value.trim(),
     seuil:seuilRaw!==""?parseInt(seuilRaw,10):null,
+    prixAchat:prixAchatRaw!==""?parseFloat(prixAchatRaw):null,
+    prixVente:prixVenteRaw!==""?parseFloat(prixVenteRaw):null,
     emplacement:document.getElementById("inv-emplacement").value.trim(),
     notes:document.getElementById("inv-notes").value.trim()
   };

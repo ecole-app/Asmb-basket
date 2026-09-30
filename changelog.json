@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790769837",
+    "titre": "Lien direct entre la buvette et la comptabilité",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Chaque article de buvette peut avoir un prix d'achat et un prix de vente. Sur la fiche de l'article, les boutons + 1 / − 1 sont remplacés par « ↓ Achat » et « ↑ Vente » : ils mettent à jour le stock et créent automatiquement la ligne correspondante en comptabilité (dépense « Achats buvette » ou recette « Buvette/Événements »), montant et quantité pré-remplis mais modifiables. Les articles de matériel gardent les boutons + 1 / − 1 classiques." }
+    ]
+  },
+  {
     "v": "1790700112",
     "titre": "Barre de navigation élargissable (thèmes Bento Glass et Carnet illustré)",
     "points": [
