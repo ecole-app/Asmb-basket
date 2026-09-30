@@ -402,7 +402,6 @@ function openAddTeamMember(teamId){
   modal.appendChild(inner);
   document.body.appendChild(modal);
 }
-function confirmAddTeamMembers(){}
 function removeTeamMember(teamId,playerId){
   var teams=getTeams();
   var team=teams.find(function(t){return t.id===teamId;});

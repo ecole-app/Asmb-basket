@@ -690,11 +690,11 @@ async function resetAllData(){
       }
     }catch(e){ console.log("reset channels:", e); }
 
-    // ATTENTION : "phone_index" et "inscription_codes" sont des collections GLOBALES
-    // (voir GLOBAL_COLLECTIONS dans firebase-init.js), pas cloisonnees par club au
-    // niveau du chemin Firestore. Les boucler ici comme les autres aurait supprime
+    // ATTENTION : "inscription_codes" est une collection GLOBALE (voir
+    // GLOBAL_COLLECTIONS dans firebase-init.js), pas cloisonnee par club au
+    // niveau du chemin Firestore. La boucler ici comme les autres aurait supprime
     // les inscription_codes de TOUS les clubs a chaque reinitialisation d'un seul
-    // club -- elles sont donc purgees a part, filtrees par clubId (comme le fait
+    // club -- elle est donc purgee a part, filtree par clubId (comme le fait
     // deja purgeGlobalePourClub() pour la suppression complete d'un club).
     var collections=["players","teams","events","licences","evaluations","inscription_submissions","checkins","gallery","comptabilite","app_data","joinRequests","reminders_sent","backups","feedback"];
     for(var i=0;i<collections.length;i++){

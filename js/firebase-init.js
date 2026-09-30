@@ -66,10 +66,11 @@ window.fbWriteBatch = function(){ return writeBatch(db); };
 // d'entrée fbCollection/fbDoc préfixent eux-mêmes le chemin quand la collection
 // demandée appartient à un club. Oublier un appel est donc impossible.
 //
-// Collections GLOBALES (hors club) : users, clubs, phone_index, inscription_codes,
-// club_invites (invitations), support_grants (codes d'accès support).
+// Collections GLOBALES (hors club) : users, clubs, inscription_codes,
+// club_invites (invitations), support_grants (codes d'accès support),
+// buvette_codes (codes d'accès caisse buvette).
 // Toute autre collection est traitée comme donnée de club.
-const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes","club_invites","support_grants","buvette_codes"]);
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","inscription_codes","club_invites","support_grants","buvette_codes"]);
 
 function requireClubId(coll){
   const id = window.CURRENT_CLUB_ID;

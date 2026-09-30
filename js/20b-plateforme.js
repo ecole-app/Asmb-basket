@@ -639,7 +639,7 @@ async function deleteClubFlow(c, list){
     var ch=await purgeCanaux(c.id);
     if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
 
-    var globales=["club_invites","support_grants","phone_index","inscription_codes"];
+    var globales=["club_invites","support_grants","inscription_codes","buvette_codes"];
     for(var g=0;g<globales.length;g++){
       var ng=await purgeGlobalePourClub(c.id,globales[g]);
       if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }
