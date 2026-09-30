@@ -82,7 +82,7 @@ service cloud.firestore {
     }
 
     // Code d'accès caisse buvette (généré par le dirigeant, valable une journée) :
-    // le site externe asmb-buvette n'a aucun compte, donc aucune connexion. Le
+    // la caisse buvette (generalmanagerapp.fr/buvette) n'a aucun compte, donc aucune connexion. Le
     // code est la seule barrière — il doit exister pour ce club et n'être pas
     // encore expiré.
     function buvetteCodeValid(clubId, code) {
@@ -245,7 +245,7 @@ service cloud.firestore {
       }
 
       // ── Gestion (données sensibles) ──
-      // Caisse buvette (site externe asmb-buvette, sans connexion) : le
+      // Caisse buvette (generalmanagerapp.fr/buvette, sans connexion) : le
       // bénévole qui a un code du jour valide peut UNIQUEMENT décrémenter/
       // incrémenter le stock d'un article buvette (jamais son prix, son nom,
       // ni un article matériel) et UNIQUEMENT créer une recette "Buvette/

@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790780888",
+    "titre": "La caisse buvette passe sur generalmanagerapp.fr",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec \"asmb\" dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse." }
+    ]
+  },
+  {
     "v": "1790780467",
     "titre": "Caisse buvette en ligne (asmb-buvette), reliée en temps réel",
     "points": [

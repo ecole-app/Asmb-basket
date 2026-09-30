@@ -479,7 +479,7 @@ function adjustInvQte(id,delta){
 // côté site ; côté serveur, les règles Firestore limitent en plus ce que ce
 // code permet (décrémenter le stock buvette, créer une recette buvette —
 // jamais toucher aux prix, au matériel ou à une ligne existante).
-var BUVETTE_SITE_URL="https://ecole-app.github.io/asmb-buvette/";
+var BUVETTE_SITE_URL="https://generalmanagerapp.fr/buvette/";
 function openBuvetteAccessSettings(){
   if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ askAlert("Réservé au dirigeant."); return; }
   var clubId=window.CURRENT_CLUB_ID;

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Caisse buvette — General Manager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#f6f7fb;--sf:#ffffff;--card:#ffffff;--bdr:#e8e9f0;--mut:#8a8ea3;
+  --txt:#14141f;--txt2:#3a3a4a;--dkg:#5b5bf0;--grn:#16b378;--red:#c0392b;
+  --r:24px;--rs:20px;--rx:16px;--shadow:0 2px 14px rgba(20,20,31,.08);
+  --hdrgrad:linear-gradient(135deg,#5b5bf0,#7c6bf5 55%,#a17bf7);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overscroll-behavior:none;padding-bottom:24px}
+.hidden{display:none!important}
+
+/* ===== GATE (saisie du code) ===== */
+#gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--hdrgrad)}
+.gate-card{background:var(--sf);border-radius:var(--r);padding:28px 24px;width:100%;max-width:340px;box-shadow:0 12px 40px rgba(0,0,0,.25);text-align:center}
+.gate-emoji{font-size:34px;margin-bottom:6px}
+.gate-title{font-size:18px;font-weight:800;color:var(--txt)}
+.gate-sub{font-size:12.5px;color:var(--mut);margin-top:4px;line-height:1.4}
+#gate-code{width:100%;margin-top:18px;padding:14px;font-size:22px;font-weight:800;letter-spacing:3px;text-align:center;text-transform:uppercase;border:2px solid var(--bdr);border-radius:var(--rs);outline:none;font-family:'DM Sans',sans-serif;color:var(--txt)}
+#gate-code:focus{border-color:var(--dkg)}
+#gate-error{font-size:12px;color:var(--red);margin-top:10px;min-height:16px;font-weight:600}
+#gate-btn{width:100%;margin-top:12px;padding:14px;font-size:14px;font-weight:800;border:none;border-radius:var(--rx);background:var(--dkg);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif}
+#gate-btn:disabled{opacity:.5}
+.gate-hint{font-size:11px;color:var(--mut);margin-top:16px}
+
+/* ===== APP ===== */
+#app-top{background:var(--hdrgrad);color:#fff;padding:14px 16px 12px;position:sticky;top:0;z-index:50}
+#app-top .row1{display:flex;justify-content:space-between;align-items:center}
+#app-top h1{font-size:16px;font-weight:800}
+#app-top .exp{font-size:10.5px;opacity:.85;margin-top:1px}
+#logout-btn{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:11px;font-weight:700;padding:7px 12px;border-radius:14px;cursor:pointer}
+
+.tab-bar{display:flex;background:var(--sf);border-bottom:1px solid var(--bdr);position:sticky;top:64px;z-index:40;box-shadow:var(--shadow)}
+.tab-btn{flex:1;padding:11px 4px;font-size:12.5px;font-weight:700;color:var(--mut);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent}
+.tab-btn.active{color:var(--dkg);border-bottom-color:var(--dkg)}
+
+.panel{display:none;padding:12px}
+.panel.active{display:block}
+
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+
+/* CAISSE */
+.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.prod-btn{padding:12px 10px;border-radius:var(--rs);border:2px solid var(--bdr);background:var(--sf);cursor:pointer;text-align:left;transition:transform .1s}
+.prod-btn:active{transform:scale(.96);border-color:var(--dkg)}
+.prod-btn:disabled{opacity:.4;cursor:not-allowed}
+.prod-name{font-size:12.5px;font-weight:700;color:var(--txt);line-height:1.3}
+.prod-price{font-size:16px;font-weight:800;margin-top:3px;color:var(--dkg)}
+.prod-stock{font-size:10px;color:var(--mut);margin-top:2px}
+.prod-stock.low{color:#E8670A;font-weight:700}
+.empty-msg{font-size:12px;color:var(--mut);text-align:center;padding:24px 12px;grid-column:1/-1}
+
+.panier-wrap{background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:10px}
+.panier-title{font-size:12px;font-weight:800;color:var(--txt);margin-bottom:6px;display:flex;justify-content:space-between}
+.panier-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:13px}
+.panier-item:last-child{border-bottom:none}
+.panier-qty{background:rgba(91,91,240,.12);color:var(--dkg);font-weight:800;font-size:11px;padding:2px 7px;border-radius:6px}
+.panier-price{font-weight:700;color:var(--dkg)}
+.panier-remove{background:none;border:none;color:var(--red);font-size:17px;cursor:pointer;padding:0 6px}
+.panier-total{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1.5px solid var(--bdr)}
+.panier-total-val{font-size:22px;font-weight:800;color:var(--dkg)}
+.panier-vide{font-size:12px;color:var(--mut);text-align:center;padding:6px 0}
+
+.pay-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay-btn{padding:14px;font-size:13.5px;font-weight:800;border:none;border-radius:var(--rx);cursor:pointer;font-family:'DM Sans',sans-serif}
+.pay-btn:disabled{opacity:.4}
+.pay-esp{background:var(--grn);color:#fff}
+.pay-cb{background:var(--dkg);color:#fff}
+.sale-ok{font-size:12.5px;font-weight:700;color:var(--grn);text-align:center;margin-top:8px;min-height:16px}
+
+/* PROCEDURE */
+.proc-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.proc-item:last-child{border-bottom:none}
+.proc-num{font-size:12px;font-weight:800;color:var(--dkg);flex-shrink:0;min-width:18px}
+.proc-text{flex:1;font-size:13px;line-height:1.4}
+.proc-del{background:none;border:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 4px}
+.proc-add-row{display:flex;gap:8px;margin-top:10px}
+.proc-add-row input{flex:1;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;outline:none}
+.proc-add-row input:focus{border-color:var(--dkg)}
+.proc-add-btn{padding:0 16px;font-size:15px;font-weight:800;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;cursor:pointer}
+.sec-title{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<!-- ═══ CODE D'ACCÈS ═══ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-emoji">🥤</div>
+    <div class="gate-title">Caisse buvette</div>
+    <div class="gate-sub">Entrez le code fourni par le dirigeant ou un membre du bureau pour ouvrir la caisse de votre club.</div>
+    <input id="gate-code" type="text" inputmode="text" maxlength="9" placeholder="Code">
+    <div id="gate-error"></div>
+    <button id="gate-btn">Ouvrir la caisse</button>
+    <div class="gate-hint">Le code est valable pour la journée. Demandez-en un nouveau si besoin.</div>
+  </div>
+</div>
+
+<!-- ═══ APPLICATION ═══ -->
+<div id="app" class="hidden">
+  <div id="app-top">
+    <div class="row1">
+      <div>
+        <h1 id="app-club-name">Club</h1>
+        <div class="exp" id="app-exp"></div>
+      </div>
+      <button id="logout-btn">Changer de code</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="caisse">🧾 Caisse</button>
+    <button class="tab-btn" data-tab="procedure">✅ Procédure</button>
+  </div>
+
+  <!-- CAISSE -->
+  <div class="panel active" id="panel-caisse">
+    <div id="prod-grid" class="prod-grid"></div>
+    <div class="panier-wrap">
+      <div class="panier-title"><span>🛒 Panier</span><span id="panier-count"></span></div>
+      <div id="panier-items"></div>
+      <div class="panier-total">
+        <span style="font-size:13px;font-weight:700">Total à payer</span>
+        <span class="panier-total-val" id="panier-total">0.00 €</span>
+      </div>
+    </div>
+    <div class="pay-btns">
+      <button class="pay-btn pay-esp" id="btn-esp">💵 Espèces</button>
+      <button class="pay-btn pay-cb" id="btn-cb">💳 CB</button>
+    </div>
+    <div class="sale-ok" id="sale-ok"></div>
+  </div>
+
+  <!-- PROCEDURE -->
+  <div class="panel" id="panel-procedure">
+    <div class="card">
+      <div class="sec-title">À faire à l'allumage de la tablette</div>
+      <div id="proc-list"></div>
+      <div class="proc-add-row">
+        <input type="text" id="inp-proc" placeholder="Ajouter une étape...">
+        <button class="proc-add-btn" id="proc-add-btn">+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
+  authDomain: "asmb-app.firebaseapp.com",
+  projectId: "asmb-app",
+  storageBucket: "asmb-app.firebasestorage.app",
+  messagingSenderId: "786817375628",
+  appId: "1:786817375628:web:3db013af1adab9e8ab8aa9"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+const K_SESSION = 'asmb_buvette_session';
+const K_PROC = 'asmb_buvette_procedure';
+const DEFAULT_PROC = [
+  { id: 'd1', text: "Vérifier le fond de caisse (compter et noter le montant de départ)" },
+  { id: 'd2', text: "S'identifier auprès du dirigeant : nom et prénom du bénévole" }
+];
+
+let session = null;       // { code, clubId, clubName, validUntil }
+let items = [];           // articles buvette live (Firestore)
+let panier = [];          // { id, name, price, qty, stock }
+let unsubInventaire = null;
+
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtHM(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+/* ===== SESSION / CODE GATE ===== */
+function loadSession(){
+  try{
+    const s = JSON.parse(localStorage.getItem(K_SESSION) || 'null');
+    if(s && new Date(s.validUntil) > new Date()) return s;
+  }catch(e){}
+  return null;
+}
+function saveSession(s){ localStorage.setItem(K_SESSION, JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem(K_SESSION); }
+
+async function tryCode(codeRaw){
+  const code = (codeRaw||'').trim().toUpperCase();
+  const errEl = document.getElementById('gate-error');
+  const btn = document.getElementById('gate-btn');
+  errEl.textContent = '';
+  if(!code){ errEl.textContent = 'Entrez un code.'; return; }
+  btn.disabled = true; btn.textContent = 'Vérification...';
+  try{
+    const snap = await getDoc(doc(db, 'buvette_codes', code));
+    if(!snap.exists()){ errEl.textContent = 'Code invalide.'; return; }
+    const data = snap.data();
+    const exp = data.expiresAt && data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt);
+    if(exp < new Date()){ errEl.textContent = 'Ce code a expiré. Demandez-en un nouveau au dirigeant.'; return; }
+    session = { code, clubId: data.clubId, clubName: data.clubName || 'Club', validUntil: exp.toISOString() };
+    saveSession(session);
+    startApp();
+  }catch(e){
+    errEl.textContent = 'Erreur de connexion. Réessayez.';
+    console.log(e);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Ouvrir la caisse';
+  }
+}
+
+document.getElementById('gate-btn').addEventListener('click', () => tryCode(document.getElementById('gate-code').value));
+document.getElementById('gate-code').addEventListener('keydown', e => { if(e.key === 'Enter') tryCode(e.target.value); });
+document.getElementById('logout-btn').addEventListener('click', () => {
+  if(!confirm('Fermer la session de caisse ?')) return;
+  clearSession();
+  if(unsubInventaire){ unsubInventaire(); unsubInventaire = null; }
+  session = null; panier = [];
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('gate').classList.remove('hidden');
+  document.getElementById('gate-code').value = '';
+});
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('panel-' + b.dataset.tab).classList.add('active');
+    if(b.dataset.tab === 'procedure') renderProc();
+  });
+});
+
+/* ===== APP START ===== */
+function startApp(){
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('app-club-name').textContent = session.clubName;
+  document.getElementById('app-exp').textContent = 'Session valable jusqu\'à ' + fmtHM(new Date(session.validUntil));
+  listenInventaire();
+  renderProc();
+}
+
+/* ===== CAISSE — catalogue live depuis l'inventaire buvette ===== */
+function listenInventaire(){
+  if(unsubInventaire) unsubInventaire();
+  const q = query(collection(db, 'clubs', session.clubId, 'inventaire'), where('categorie', '==', 'buvette'));
+  unsubInventaire = onSnapshot(q, snap => {
+    items = [];
+    snap.forEach(d => items.push(Object.assign({ id: d.id }, d.data())));
+    items.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
+    // le panier suit le stock live (retire ce qui a disparu, borne aux quantités restantes)
+    panier = panier.filter(p => items.some(it => it.id === p.id));
+    panier.forEach(p => { const it = items.find(x => x.id === p.id); if(it) p.stock = Number(it.qte || 0); if(p.qty > p.stock) p.qty = p.stock; });
+    panier = panier.filter(p => p.qty > 0);
+    buildProdGrid();
+    renderPanier();
+  }, err => {
+    document.getElementById('prod-grid').innerHTML = '<div class="empty-msg">Connexion impossible. Vérifiez votre réseau.</div>';
+    console.log(err);
+  });
+}
+function buildProdGrid(){
+  const el = document.getElementById('prod-grid');
+  const vendables = items.filter(it => it.prixVente != null && it.prixVente > 0);
+  if(!vendables.length){ el.innerHTML = '<div class="empty-msg">Aucun article buvette avec un prix de vente. Demandez au dirigeant d\'en renseigner dans l\'inventaire.</div>'; return; }
+  el.innerHTML = '';
+  vendables.forEach(it => {
+    const qte = Number(it.qte || 0);
+    const inCart = panier.find(p => p.id === it.id);
+    const remaining = qte - (inCart ? inCart.qty : 0);
+    const btn = document.createElement('button');
+    btn.className = 'prod-btn';
+    btn.disabled = remaining <= 0;
+    btn.innerHTML = '<div class="prod-name">' + esc(it.nom || '') + '</div>' +
+      '<div class="prod-price">' + Number(it.prixVente).toFixed(2) + ' €</div>' +
+      '<div class="prod-stock' + (remaining <= 3 ? ' low' : '') + '">' + remaining + ' en stock</div>';
+    btn.addEventListener('click', () => addToCart(it.id));
+    el.appendChild(btn);
+  });
+}
+function esc(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function addToCart(id){
+  const it = items.find(x => x.id === id); if(!it) return;
+  const stock = Number(it.qte || 0);
+  const line = panier.find(p => p.id === id);
+  if(line){ if(line.qty < stock) line.qty++; }
+  else if(stock > 0) panier.push({ id: it.id, name: it.nom, price: Number(it.prixVente || 0), qty: 1, stock });
+  renderPanier(); buildProdGrid();
+}
+function removeFromCart(id){
+  const line = panier.find(p => p.id === id); if(!line) return;
+  line.qty--; if(line.qty <= 0) panier = panier.filter(p => p.id !== id);
+  renderPanier(); buildProdGrid();
+}
+function getTotal(){ return Math.round(panier.reduce((s, p) => s + p.price * p.qty, 0) * 100) / 100; }
+function renderPanier(){
+  const total = getTotal();
+  const count = panier.reduce((s, p) => s + p.qty, 0);
+  document.getElementById('panier-count').textContent = count ? count + ' article' + (count > 1 ? 's' : '') : '';
+  const box = document.getElementById('panier-items');
+  if(!panier.length){ box.innerHTML = '<div class="panier-vide">Panier vide</div>'; }
+  else{
+    box.innerHTML = '';
+    panier.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'panier-item';
+      row.innerHTML = '<div><span class="panier-qty">' + p.qty + '×</span> ' + esc(p.name) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px"><span class="panier-price">' + (p.price * p.qty).toFixed(2) + ' €</span></div>';
+      const rm = document.createElement('button');
+      rm.className = 'panier-remove'; rm.textContent = '−';
+      rm.addEventListener('click', () => removeFromCart(p.id));
+      row.lastChild.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
+  document.getElementById('panier-total').textContent = total.toFixed(2) + ' €';
+  document.getElementById('btn-esp').disabled = total <= 0;
+  document.getElementById('btn-cb').disabled = total <= 0;
+}
+
+/* ===== ENCAISSEMENT — écrit directement dans l'inventaire + la comptabilité du club ===== */
+async function encaisser(mode){
+  const total = getTotal(); if(total <= 0 || !panier.length) return;
+  document.getElementById('btn-esp').disabled = true;
+  document.getElementById('btn-cb').disabled = true;
+  try{
+    const batch = writeBatch(db);
+    panier.forEach(p => {
+      const it = items.find(x => x.id === p.id);
+      const newQte = Math.max(0, Number((it && it.qte) || 0) - p.qty);
+      batch.update(doc(db, 'clubs', session.clubId, 'inventaire', p.id), { qte: newQte, viaCode: session.code });
+    });
+    const detail = panier.map(p => p.qty + '× ' + p.name).join(', ');
+    const ligneId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+    batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
+      id: ligneId, date: todayISO(), montant: total, type: 'recette', categorie: 'Buvette/Événements',
+      motif: 'Vente caisse buvette en ligne : ' + detail, tiers: '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
+      reference: 'Caisse buvette en ligne', pointe: false, justificatif: null, viaCode: session.code
+    });
+    await batch.commit();
+    document.getElementById('sale-ok').textContent = '✓ Vente encaissée : ' + total.toFixed(2) + ' €';
+    setTimeout(() => { document.getElementById('sale-ok').textContent = ''; }, 4000);
+    panier = [];
+    renderPanier();
+  }catch(e){
+    alert('Erreur lors de l\'encaissement : ' + ((e && e.code) || e) + '\nRéessayez — le stock n\'a pas été modifié si ça a échoué.');
+    console.log(e);
+    renderPanier();
+  }
+}
+document.getElementById('btn-esp').addEventListener('click', () => encaisser('especes'));
+document.getElementById('btn-cb').addEventListener('click', () => encaisser('cb'));
+
+/* ===== PROCÉDURE (locale à l'appareil, checklist du bénévole) ===== */
+function getProc(){ try{ const v = localStorage.getItem(K_PROC); return v === null ? DEFAULT_PROC.slice() : JSON.parse(v); }catch(e){ return DEFAULT_PROC.slice(); } }
+function saveProc(p){ localStorage.setItem(K_PROC, JSON.stringify(p)); }
+function renderProc(){
+  const list = getProc();
+  const el = document.getElementById('proc-list');
+  if(!list.length){ el.innerHTML = '<div class="empty-msg">Aucune étape pour l\'instant.</div>'; return; }
+  el.innerHTML = '';
+  list.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'proc-item';
+    row.innerHTML = '<span class="proc-num">' + (i + 1) + '.</span><span class="proc-text">' + esc(p.text) + '</span>';
+    const del = document.createElement('button');
+    del.className = 'proc-del'; del.textContent = '✕';
+    del.addEventListener('click', () => { saveProc(getProc().filter(x => x.id !== p.id)); renderProc(); });
+    row.appendChild(del);
+    el.appendChild(row);
+  });
+}
+document.getElementById('proc-add-btn').addEventListener('click', () => {
+  const inp = document.getElementById('inp-proc');
+  const text = inp.value.trim(); if(!text) return;
+  const list = getProc(); list.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), text });
+  saveProc(list); inp.value = ''; renderProc();
+});
+
+/* ===== INIT ===== */
+(function init(){
+  const s = loadSession();
+  if(s){ session = s; startApp(); }
+})();
+</script>
+</body>
+</html>
