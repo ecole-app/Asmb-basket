@@ -13,13 +13,25 @@ var COMPTA_CATS={
   depense:["Affiliation/Licences fédérales","Location salle","Matériel","Achats buvette","Déplacements","Arbitrage/Formations","Assurances","Frais administratifs","Autre"]
 };
 
+// Comptes/caisses (pour distinguer où est physiquement l'argent)
+var COMPTA_COMPTES=["Banque","Caisse espèces","Caisse buvette","Autre"];
+// Suggestion raisonnable du compte à partir du moyen de paiement (l'utilisateur peut toujours changer)
+function compteParDefaut(moyen){
+  if(moyen==="Espèces") return "Caisse espèces";
+  if(moyen==="CB"||moyen==="Virement"||moyen==="Chèque") return "Banque";
+  return "Autre";
+}
+
 // ── Budget prévisionnel ──────────────────────────────────────────
 function getBudgetPrev(){try{return JSON.parse(localStorage.getItem("asmb_budget_prev")||"{}");}catch(e){return {};}}
 function saveBudgetPrev(b){localStorage.setItem("asmb_budget_prev",JSON.stringify(b));fsWriteCollection("budgetPrev",[Object.assign({id:"budget"},b)]);}
 function comptaCurrentYear(){return new Date().getFullYear().toString();}
 
-var COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:""};
+var COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:"",compte:""};
 var comptaEditId=null;
+
+// Le compte d'une ligne ancienne (créée avant l'ajout de ce champ) se déduit de son moyen de paiement
+function comptaLigneCompte(l){ return l.compte||compteParDefaut(l.moyen); }
 
 function comptaFilteredList(){
   var lines=getComptabilite().slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
@@ -28,6 +40,7 @@ function comptaFilteredList(){
     if(COMPTA_FILTERS.au && (l.date||"") > COMPTA_FILTERS.au) return false;
     if(COMPTA_FILTERS.categorie && l.categorie!==COMPTA_FILTERS.categorie) return false;
     if(COMPTA_FILTERS.moyen && l.moyen!==COMPTA_FILTERS.moyen) return false;
+    if(COMPTA_FILTERS.compte && comptaLigneCompte(l)!==COMPTA_FILTERS.compte) return false;
     if(COMPTA_FILTERS.pointe==="oui" && !l.pointe) return false;
     if(COMPTA_FILTERS.pointe==="non" && l.pointe) return false;
     return true;
@@ -65,12 +78,16 @@ function buildComptabilite(){
   pointeSel.style.cssText=catSel.style.cssText;
   pointeSel.innerHTML='<option value="">Pointé ou non</option><option value="oui"'+(COMPTA_FILTERS.pointe==="oui"?" selected":"")+'>✓ Pointées</option><option value="non"'+(COMPTA_FILTERS.pointe==="non"?" selected":"")+'>Non pointées</option>';
   pointeSel.addEventListener("change",function(){COMPTA_FILTERS.pointe=pointeSel.value;buildComptabilite();});
-  fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);fEl.appendChild(pointeSel);
-  if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen||COMPTA_FILTERS.pointe){
+  var compteSel=document.createElement("select");
+  compteSel.style.cssText=catSel.style.cssText;
+  compteSel.innerHTML='<option value="">Tout compte</option>'+COMPTA_COMPTES.map(function(c){return '<option value="'+c+'"'+(COMPTA_FILTERS.compte===c?" selected":"")+'>'+c+'</option>';}).join("");
+  compteSel.addEventListener("change",function(){COMPTA_FILTERS.compte=compteSel.value;buildComptabilite();});
+  fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);fEl.appendChild(compteSel);fEl.appendChild(pointeSel);
+  if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen||COMPTA_FILTERS.pointe||COMPTA_FILTERS.compte){
     var clearBtn=document.createElement("button");
     clearBtn.textContent="Réinitialiser";
     clearBtn.style.cssText="padding:8px 12px;border-radius:8px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer";
-    clearBtn.addEventListener("click",function(){COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:""};buildComptabilite();});
+    clearBtn.addEventListener("click",function(){COMPTA_FILTERS={du:"",au:"",categorie:"",moyen:"",pointe:"",compte:""};buildComptabilite();});
     fEl.appendChild(clearBtn);
   }
 
@@ -93,11 +110,25 @@ function buildComptabilite(){
     if(l.type==="depense"){totalDepense+=m; if(l.pointe) soldePointe-=m;}
     else {totalRecette+=m; if(l.pointe) soldePointe+=m;}
   });
+  var soldesComptes={};
+  COMPTA_COMPTES.forEach(function(c){soldesComptes[c]=0;});
+  filtered.forEach(function(l){
+    var c=comptaLigneCompte(l);
+    if(soldesComptes[c]==null) soldesComptes[c]=0;
+    soldesComptes[c]+=(l.type==="depense"?-1:1)*(l.montant||0);
+  });
   var totEl=document.getElementById("compta-totals");
   totEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;display:flex;justify-content:space-between;font-size:12px">'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Recettes</div><div style="color:var(--grn);font-weight:800;font-size:15px">'+totalRecette.toFixed(2)+' €</div></div>'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Dépenses</div><div style="color:var(--red);font-weight:800;font-size:15px">'+totalDepense.toFixed(2)+' €</div></div>'+
     '<div><div style="color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase">Solde</div><div style="color:var(--dkg);font-weight:800;font-size:15px">'+(totalRecette-totalDepense).toFixed(2)+' €</div></div>'+
+  '</div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+    Object.keys(soldesComptes).map(function(c){
+      return '<div style="flex:1;min-width:100px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 10px">'+
+        '<div style="color:var(--mut);font-size:9.5px;font-weight:700;text-transform:uppercase">'+c+'</div>'+
+        '<div style="color:var(--txt);font-weight:800;font-size:13px">'+soldesComptes[c].toFixed(2)+' €</div></div>';
+    }).join("")+
   '</div>'+
   '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rs);font-size:11px;color:var(--mut)">'+
     '<span>🏦 Solde pointé (rapproché banque) : <b style="color:var(--txt)">'+soldePointe.toFixed(2)+' €</b></span>'+
@@ -122,7 +153,7 @@ function buildComptabilite(){
     var motifDiv=document.createElement("div");motifDiv.style.cssText="font-size:13px;font-weight:700;color:var(--txt);margin-top:2px";
     motifDiv.textContent=l.motif||"(sans motif)";
     var tiersDiv=document.createElement("div");tiersDiv.style.cssText="font-size:11px;color:var(--txt2);margin-top:2px";
-    tiersDiv.textContent=[l.tiers,l.moyen].filter(Boolean).join(" · ");
+    tiersDiv.textContent=[l.tiers,l.moyen,comptaLigneCompte(l)].filter(Boolean).join(" · ");
     left.appendChild(dateSpan);left.appendChild(motifDiv);left.appendChild(tiersDiv);
     var montantDiv=document.createElement("div");
     montantDiv.style.cssText="font-size:15px;font-weight:800;flex-shrink:0;color:"+(l.type==="depense"?"var(--red)":"var(--grn)");
@@ -182,7 +213,20 @@ function showAddComptaLine(editId){
   if(catSelEl && existing) catSelEl.setAttribute("data-keep",existing.categorie||"");
   document.getElementById("cl-motif").value=existing?existing.motif||"":"";
   document.getElementById("cl-tiers").value=existing?existing.tiers||"":"";
-  document.getElementById("cl-moyen").value=existing?existing.moyen||"Espèces":"Espèces";
+  var moyenSelEl=document.getElementById("cl-moyen");
+  moyenSelEl.value=existing?existing.moyen||"Espèces":"Espèces";
+  var compteSelEl=document.getElementById("cl-compte");
+  if(compteSelEl){
+    compteSelEl.innerHTML=COMPTA_COMPTES.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
+    compteSelEl.value=existing?comptaLigneCompte(existing):compteParDefaut("Espèces");
+    // Pour une nouvelle ligne, changer le moyen de paiement met à jour la suggestion de compte
+    if(!existing && moyenSelEl && !moyenSelEl.dataset.compteWired){
+      moyenSelEl.dataset.compteWired="1";
+      moyenSelEl.addEventListener("change",function(){
+        if(!comptaEditId) compteSelEl.value=compteParDefaut(moyenSelEl.value);
+      });
+    }
+  }
   document.getElementById("cl-reference").value=existing?existing.reference||"":"";
   document.getElementById("cl-pointe").checked=!!(existing&&existing.pointe);
   comptaJustifDataUrl=existing?(existing.justificatif||null):null;
@@ -201,7 +245,7 @@ function addComptaLineFromStock(type,categorie,montant,motif,reference){
     id:Date.now().toString()+Math.random().toString(36).slice(2,6),
     date:new Date().toISOString().slice(0,10),
     montant:montant,type:type,categorie:categorie,motif:motif,tiers:"",
-    moyen:"Espèces",reference:reference||"Buvette",pointe:false,justificatif:null
+    moyen:"Espèces",compte:"Caisse buvette",reference:reference||"Buvette",pointe:false,justificatif:null
   });
   saveComptabilite(lines);
 }
@@ -217,6 +261,7 @@ function saveComptaLine(){
     motif:document.getElementById("cl-motif").value.trim(),
     tiers:document.getElementById("cl-tiers").value.trim(),
     moyen:document.getElementById("cl-moyen").value,
+    compte:document.getElementById("cl-compte").value,
     reference:document.getElementById("cl-reference").value.trim(),
     pointe:document.getElementById("cl-pointe").checked,
     justificatif:comptaJustifDataUrl||null
@@ -244,9 +289,9 @@ async function deleteComptaLine(){
 function exportComptaCsv(){
   var lines=comptaFilteredList();
   if(!lines.length){askAlert("Aucune ligne à exporter.");return;}
-  var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Référence","Pointé","Justificatif"];
+  var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Compte","Référence","Pointé","Justificatif"];
   var rows=lines.map(function(l){
-    return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",l.reference||"",l.pointe?"Oui":"Non",l.justificatif?"Oui":"Non"]
+    return [l.date,l.type==="depense"?"Dépense":"Recette",(l.montant||0).toFixed(2),l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",comptaLigneCompte(l),l.reference||"",l.pointe?"Oui":"Non",l.justificatif?"Oui":"Non"]
       .map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(";");
   });
   var csv=header.join(";")+"\n"+rows.join("\n");

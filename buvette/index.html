@@ -359,6 +359,7 @@ async function encaisser(mode){
     batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
       id: ligneId, date: todayISO(), montant: total, type: 'recette', categorie: 'Buvette/Événements',
       motif: 'Vente caisse buvette en ligne : ' + detail, tiers: session.benevole || '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
+      compte: mode === 'especes' ? 'Caisse buvette' : 'Banque',
       reference: 'Caisse buvette en ligne', pointe: false, justificatif: null, viaCode: session.code
     });
     await batch.commit();

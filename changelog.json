@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790794713",
+    "titre": "Comptabilité : plusieurs comptes / caisses au lieu d'un seul solde",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Chaque ligne comptable peut maintenant être rattachée à un compte (Banque, Caisse espèces, Caisse buvette, Autre). Un filtre par compte et un solde détaillé par compte apparaissent en haut de la Comptabilité. Les anciennes lignes sont classées automatiquement selon leur moyen de paiement, rien à corriger à la main. Les ventes de la caisse buvette en ligne et les mouvements de stock buvette sont désormais affectés au bon compte tout seuls." }
+    ]
+  },
+  {
     "v": "1790793064",
     "titre": "Code buvette permanent, pour les clubs qui gardent les mêmes bénévoles",
     "points": [
