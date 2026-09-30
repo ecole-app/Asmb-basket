@@ -22,7 +22,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .gate-emoji{font-size:34px;margin-bottom:6px}
 .gate-title{font-size:18px;font-weight:800;color:var(--txt)}
 .gate-sub{font-size:12.5px;color:var(--mut);margin-top:4px;line-height:1.4}
-#gate-code{width:100%;margin-top:18px;padding:14px;font-size:22px;font-weight:800;letter-spacing:3px;text-align:center;text-transform:uppercase;border:2px solid var(--bdr);border-radius:var(--rs);outline:none;font-family:'DM Sans',sans-serif;color:var(--txt)}
+#gate-name{width:100%;margin-top:18px;padding:13px 14px;font-size:15px;font-weight:600;text-align:center;border:2px solid var(--bdr);border-radius:var(--rs);outline:none;font-family:'DM Sans',sans-serif;color:var(--txt)}
+#gate-name:focus{border-color:var(--dkg)}
+#gate-code{width:100%;margin-top:10px;padding:14px;font-size:22px;font-weight:800;letter-spacing:3px;text-align:center;text-transform:uppercase;border:2px solid var(--bdr);border-radius:var(--rs);outline:none;font-family:'DM Sans',sans-serif;color:var(--txt)}
 #gate-code:focus{border-color:var(--dkg)}
 #gate-error{font-size:12px;color:var(--red);margin-top:10px;min-height:16px;font-weight:600}
 #gate-btn{width:100%;margin-top:12px;padding:14px;font-size:14px;font-weight:800;border:none;border-radius:var(--rx);background:var(--dkg);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif}
@@ -94,7 +96,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
   <div class="gate-card">
     <div class="gate-emoji">🥤</div>
     <div class="gate-title">Caisse buvette</div>
-    <div class="gate-sub">Entrez le code fourni par le dirigeant ou un membre du bureau pour ouvrir la caisse de votre club.</div>
+    <div class="gate-sub">Entrez votre nom et le code fourni par le dirigeant ou un membre du bureau pour ouvrir la caisse de votre club.</div>
+    <input id="gate-name" type="text" maxlength="60" placeholder="Nom et prénom" autocomplete="name">
     <input id="gate-code" type="text" inputmode="text" maxlength="9" placeholder="Code">
     <div id="gate-error"></div>
     <button id="gate-btn">Ouvrir la caisse</button>
@@ -108,6 +111,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     <div class="row1">
       <div>
         <h1 id="app-club-name">Club</h1>
+        <div class="exp" id="app-benevole"></div>
         <div class="exp" id="app-exp"></div>
       </div>
       <button id="logout-btn">Changer de code</button>
@@ -170,11 +174,10 @@ const db = getFirestore(fbApp);
 const K_SESSION = 'asmb_buvette_session';
 const K_PROC = 'asmb_buvette_procedure';
 const DEFAULT_PROC = [
-  { id: 'd1', text: "Vérifier le fond de caisse (compter et noter le montant de départ)" },
-  { id: 'd2', text: "S'identifier auprès du dirigeant : nom et prénom du bénévole" }
+  { id: 'd1', text: "Vérifier le fond de caisse (compter et noter le montant de départ)" }
 ];
 
-let session = null;       // { code, clubId, clubName, validUntil }
+let session = null;       // { code, clubId, clubName, validUntil, benevole }
 let items = [];           // articles buvette live (Firestore)
 let panier = [];          // { id, name, price, qty, stock }
 let unsubInventaire = null;
@@ -186,19 +189,23 @@ function fmtHM(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getM
 function loadSession(){
   try{
     const s = JSON.parse(localStorage.getItem(K_SESSION) || 'null');
-    if(s && new Date(s.validUntil) > new Date()) return s;
+    if(s && s.benevole && new Date(s.validUntil) > new Date()) return s;
   }catch(e){}
   return null;
 }
 function saveSession(s){ localStorage.setItem(K_SESSION, JSON.stringify(s)); }
 function clearSession(){ localStorage.removeItem(K_SESSION); }
 
-async function tryCode(codeRaw){
-  const code = (codeRaw||'').trim().toUpperCase();
+async function tryCode(){
+  const nameEl = document.getElementById('gate-name');
+  const codeEl = document.getElementById('gate-code');
+  const benevole = (nameEl.value || '').trim();
+  const code = (codeEl.value || '').trim().toUpperCase();
   const errEl = document.getElementById('gate-error');
   const btn = document.getElementById('gate-btn');
   errEl.textContent = '';
-  if(!code){ errEl.textContent = 'Entrez un code.'; return; }
+  if(!benevole){ errEl.textContent = 'Entrez votre nom et prénom.'; nameEl.focus(); return; }
+  if(!code){ errEl.textContent = 'Entrez un code.'; codeEl.focus(); return; }
   btn.disabled = true; btn.textContent = 'Vérification...';
   try{
     const snap = await getDoc(doc(db, 'buvette_codes', code));
@@ -206,7 +213,7 @@ async function tryCode(codeRaw){
     const data = snap.data();
     const exp = data.expiresAt && data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt);
     if(exp < new Date()){ errEl.textContent = 'Ce code a expiré. Demandez-en un nouveau au dirigeant.'; return; }
-    session = { code, clubId: data.clubId, clubName: data.clubName || 'Club', validUntil: exp.toISOString() };
+    session = { code, clubId: data.clubId, clubName: data.clubName || 'Club', validUntil: exp.toISOString(), benevole };
     saveSession(session);
     startApp();
   }catch(e){
@@ -217,8 +224,9 @@ async function tryCode(codeRaw){
   }
 }
 
-document.getElementById('gate-btn').addEventListener('click', () => tryCode(document.getElementById('gate-code').value));
-document.getElementById('gate-code').addEventListener('keydown', e => { if(e.key === 'Enter') tryCode(e.target.value); });
+document.getElementById('gate-btn').addEventListener('click', tryCode);
+document.getElementById('gate-name').addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('gate-code').focus(); });
+document.getElementById('gate-code').addEventListener('keydown', e => { if(e.key === 'Enter') tryCode(); });
 document.getElementById('logout-btn').addEventListener('click', () => {
   if(!confirm('Fermer la session de caisse ?')) return;
   clearSession();
@@ -227,6 +235,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   document.getElementById('app').classList.add('hidden');
   document.getElementById('gate').classList.remove('hidden');
   document.getElementById('gate-code').value = '';
+  document.getElementById('gate-name').value = '';
 });
 
 /* ===== TABS ===== */
@@ -245,6 +254,7 @@ function startApp(){
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('app-club-name').textContent = session.clubName;
+  document.getElementById('app-benevole').textContent = 'Bénévole : ' + session.benevole;
   document.getElementById('app-exp').textContent = 'Session valable jusqu\'à ' + fmtHM(new Date(session.validUntil));
   listenInventaire();
   renderProc();
@@ -344,7 +354,7 @@ async function encaisser(mode){
     const ligneId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
     batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
       id: ligneId, date: todayISO(), montant: total, type: 'recette', categorie: 'Buvette/Événements',
-      motif: 'Vente caisse buvette en ligne : ' + detail, tiers: '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
+      motif: 'Vente caisse buvette en ligne : ' + detail, tiers: session.benevole || '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
       reference: 'Caisse buvette en ligne', pointe: false, justificatif: null, viaCode: session.code
     });
     await batch.commit();
