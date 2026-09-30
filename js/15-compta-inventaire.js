@@ -366,6 +366,11 @@ function invFilteredList(){
 function buildInventaire(){
   var all=getInventaire();
   document.getElementById("inv-count").textContent=all.length+" article"+(all.length>1?"s":"");
+  var accessBtn=document.getElementById("inv-btn-buvette-access");
+  if(accessBtn){
+    var isDir=window.ASMB_USER&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
+    accessBtn.style.display=(isDir&&invActiveTab==="buvette")?"inline-block":"none";
+  }
   var lowStock=all.filter(function(it){return it.seuil!=null && it.seuil!=="" && Number(it.qte)<Number(it.seuil);});
   var banner=document.getElementById("inv-alert-banner");
   if(banner){
@@ -468,6 +473,65 @@ function adjustInvQte(id,delta){
   saveInventaire(items);
   buildInventaire();
 }
+// ═══ ACCÈS CAISSE BUVETTE EN LIGNE (site externe asmb-buvette) ═════════
+// Un bénévole encaisse depuis ce site, sans compte : un code court généré
+// ici (valable jusqu'à ce soir) le relie à ce club. Le code protège l'accès
+// côté site ; côté serveur, les règles Firestore limitent en plus ce que ce
+// code permet (décrémenter le stock buvette, créer une recette buvette —
+// jamais toucher aux prix, au matériel ou à une ligne existante).
+var BUVETTE_SITE_URL="https://ecole-app.github.io/asmb-buvette/";
+function openBuvetteAccessSettings(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ askAlert("Réservé au dirigeant."); return; }
+  var clubId=window.CURRENT_CLUB_ID;
+  if(!clubId) return;
+  var clubName=(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"";
+  var s=gmSheet("Accès caisse buvette");
+  gmSection(s.body,"Caisse buvette en ligne",
+    "Un bénévole peut encaisser les ventes depuis "+BUVETTE_SITE_URL+" (téléphone ou tablette). "+
+    "La caisse est reliée en temps réel à l'inventaire buvette et à la comptabilité : chaque vente "+
+    "met à jour le stock et crée la ligne comptable automatiquement. Générez un code, valable "+
+    "jusqu'à ce soir, et transmettez-le au bénévole avec le lien du site.");
+  var grants=document.createElement("div");
+  s.body.appendChild(grants);
+  s.body.appendChild(gmBtn("Générer un code (valable aujourd'hui)","primary",function(){
+    var code=genSecureCode(1,5);
+    var fin=new Date();fin.setHours(23,59,59,999);
+    window.fbSetDoc(window.fbDoc(window.fbDb,"buvette_codes",code),{
+      clubId:clubId,clubName:clubName,createdBy:(window.ASMB_USER&&window.ASMB_USER.uid)||null,
+      createdAt:window.fbServerTimestamp(),expiresAt:fin
+    }).then(function(){
+      askAlert("Code d'accès caisse buvette :\n\n"+code+"\n\nValable jusqu'à ce soir 23h59.\n\nTransmettez-le au bénévole avec le lien : "+BUVETTE_SITE_URL);
+      loadBuvetteGrants(grants,clubId);
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  }));
+  loadBuvetteGrants(grants,clubId);
+}
+function loadBuvetteGrants(el,clubId){
+  el.innerHTML="";
+  window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"buvette_codes"),window.fbWhere("clubId","==",clubId)))
+    .then(function(snap){
+      var now=new Date(),active=[];
+      snap.forEach(function(d){
+        var data=d.data(),e=data.expiresAt,dt=e&&e.toDate?e.toDate():(e instanceof Date?e:null);
+        if(!dt||dt>now) active.push({code:d.id,exp:e});
+      });
+      if(!active.length){
+        el.innerHTML='<div style="font-size:12px;color:var(--mut);margin-bottom:10px">Aucun code actif pour l\'instant.</div>';
+        return;
+      }
+      active.forEach(function(g){
+        var card=gmCard();
+        card.innerHTML='<div style="font-family:monospace;font-size:17px;font-weight:800;color:var(--txt);letter-spacing:1px">'+authEsc(g.code)+'</div>'
+          +'<div style="font-size:11px;color:var(--mut);margin-top:2px">Expire le '+gmFmtDate(g.exp)+'</div>';
+        gmRow(card).appendChild(gmBtn("Révoquer","danger",function(){
+          window.fbDeleteDoc(window.fbDoc(window.fbDb,"buvette_codes",g.code)).then(function(){ loadBuvetteGrants(el,clubId); })
+            .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+        }));
+        el.appendChild(card);
+      });
+    }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+}
+
 var invEditId=null;
 function setInvItemCat(cat){
   invEditCat=cat;

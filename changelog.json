@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790780467",
+    "titre": "Caisse buvette en ligne (asmb-buvette), reliée en temps réel",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Dans Inventaire → onglet Buvette, le bouton « 🔑 Accès caisse » génère un code court valable jusqu'à ce soir. Transmis à un bénévole, il ouvre la caisse en ligne (site séparé) sur son téléphone ou une tablette, sans qu'il ait besoin d'un compte. Chaque vente qu'il encaisse décrémente le stock et crée automatiquement la ligne comptable correspondante, visible immédiatement dans la Comptabilité du club." }
+    ]
+  },
+  {
     "v": "1790769837",
     "titre": "Lien direct entre la buvette et la comptabilité",
     "points": [

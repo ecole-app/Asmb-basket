@@ -12,7 +12,7 @@ rules_version = '2';
 //
 //  Toutes les données d'un club vivent sous clubs/{clubId}/... .
 //  Collections globales : users, clubs, inscription_codes, club_invites,
-//  support_grants.
+//  support_grants, buvette_codes.
 // ═══════════════════════════════════════════════════════════════════
 
 service cloud.firestore {
@@ -79,6 +79,17 @@ service cloud.firestore {
 
     function changes(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    // Code d'accès caisse buvette (généré par le dirigeant, valable une journée) :
+    // le site externe asmb-buvette n'a aucun compte, donc aucune connexion. Le
+    // code est la seule barrière — il doit exister pour ce club et n'être pas
+    // encore expiré.
+    function buvetteCodeValid(clubId, code) {
+      return code is string && code != ''
+        && exists(/databases/$(database)/documents/buvette_codes/$(code))
+        && get(/databases/$(database)/documents/buvette_codes/$(code)).data.clubId == clubId
+        && get(/databases/$(database)/documents/buvette_codes/$(code)).data.expiresAt > request.time;
     }
 
     // Invitation valide pour ce club et ce rôle (non utilisée, non expirée)
@@ -160,6 +171,14 @@ service cloud.firestore {
       allow delete: if dirigeant(resource.data.clubId);  // révocation
     }
 
+    // ── Codes d'accès caisse buvette (générés par le club) ───────────
+    match /buvette_codes/{code} {
+      allow get: if true;                                 // le site caisse buvette n'a pas de connexion : le code protège l'accès
+      allow list: if dirigeant(resource.data.clubId);      // le club voit ses codes actifs pour les révoquer
+      allow create: if dirigeant(request.resource.data.clubId);
+      allow delete: if dirigeant(resource.data.clubId);    // révocation
+    }
+
     // ── Clubs ───────────────────────────────────────────────────────
     match /clubs/{clubId} {
       allow read: if member(clubId) || superAdmin();
@@ -226,8 +245,28 @@ service cloud.firestore {
       }
 
       // ── Gestion (données sensibles) ──
-      match /comptabilite/{id} { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
-      match /inventaire/{id}   { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
+      // Caisse buvette (site externe asmb-buvette, sans connexion) : le
+      // bénévole qui a un code du jour valide peut UNIQUEMENT décrémenter/
+      // incrémenter le stock d'un article buvette (jamais son prix, son nom,
+      // ni un article matériel) et UNIQUEMENT créer une recette "Buvette/
+      // Événements" positive (jamais modifier ou supprimer une ligne
+      // existante). Le catalogue buvette (nom/prix/stock, pas le matériel)
+      // est lisible sans connexion : c'est un menu, rien de sensible.
+      match /comptabilite/{id} {
+        allow read: if readDirigeant(clubId);
+        allow write: if dirigeant(clubId);
+        allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
+          && request.resource.data.type == 'recette'
+          && request.resource.data.categorie == 'Buvette/Événements'
+          && request.resource.data.montant is number && request.resource.data.montant > 0;
+      }
+      match /inventaire/{id} {
+        allow read: if readDirigeant(clubId) || resource.data.get('categorie', null) == 'buvette';
+        allow write: if dirigeant(clubId);
+        allow update: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
+          && resource.data.categorie == 'buvette'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['qte','viaCode']);
+      }
       match /backups/{id}      { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
       match /notes_frais/{id}  { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
       match /annuaire/{id}     { allow read: if readStaff(clubId);     allow write: if staff(clubId); }

@@ -69,7 +69,7 @@ window.fbWriteBatch = function(){ return writeBatch(db); };
 // Collections GLOBALES (hors club) : users, clubs, phone_index, inscription_codes,
 // club_invites (invitations), support_grants (codes d'accès support).
 // Toute autre collection est traitée comme donnée de club.
-const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes","club_invites","support_grants"]);
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","phone_index","inscription_codes","club_invites","support_grants","buvette_codes"]);
 
 function requireClubId(coll){
   const id = window.CURRENT_CLUB_ID;
