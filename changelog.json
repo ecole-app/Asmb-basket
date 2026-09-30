@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790782485",
+    "titre": "Le doré n'est plus figé : tous les écrans suivent le thème choisi",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Licences, profils, admin, annuaire, équipes, animations, communauté... une centaine d'endroits gardaient encore la touche dorée d'origine même sur un autre thème que Classique. Ils suivent maintenant la couleur d'accent du thème actif, comme le reste de l'appli." }
+    ]
+  },
+  {
     "v": "1790780888",
     "titre": "La caisse buvette passe sur generalmanagerapp.fr",
     "points": [

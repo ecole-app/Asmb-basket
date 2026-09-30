@@ -239,10 +239,10 @@ var STATUTS=[
  {id:"ouverte",label:"Ouverte",icon:"",color:"#E8670A"},
  {id:"en_cours",label:"En cours",icon:"",color:"#1A2E5A"},
  {id:"recue",label:"Reçue",icon:"",color:"#8E44AD"},
- {id:"validee",label:"Validée",icon:"",color:"#D4AF37"},
+ {id:"validee",label:"Validée",icon:"",color:"var(--ltg)"},
 ];
 var CATS_LIC=["U7","U9","U11","U13","U15","U18","U21","Senior"];
-var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#D4AF37","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
+var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;
@@ -291,7 +291,7 @@ function buildLicences(){
       chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validees vs en attente</div>';
       catKeys.forEach(function(cat){
         var c=byCat[cat];
-        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:#D4AF37;font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
+        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
       });
       chtml+='</div>';
       counterEl.innerHTML=chtml;
@@ -448,7 +448,7 @@ function renderLicenceDetail(lic){
   if(lic.fiche){
     if(lic.paiement){
       var p=lic.paiement;
-      paiementHtml='<div style="margin-top:12px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.3);border-radius:var(--rs);padding:14px">'+
+      paiementHtml='<div style="margin-top:12px;background:color-mix(in srgb, var(--ltg) 8%, transparent);border:1px solid color-mix(in srgb, var(--ltg) 30%, transparent);border-radius:var(--rs);padding:14px">'+
         '<div style="font-size:13px;font-weight:800;color:var(--dkg)">✓ Paiement reçu</div>'+
         '<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+p.moyen+' · '+(p.montant||0).toFixed(2)+' € · '+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+'</div>'+
         '<div style="display:flex;gap:8px;margin-top:10px">'+
@@ -493,7 +493,7 @@ function renderLicenceDetail(lic){
       '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Code</div>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
         '<div style="font-size:18px;font-weight:900;color:var(--txt);font-family:monospace;letter-spacing:2px">'+lic.code+'</div>'+
-        (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#D4AF37")+'">'+( lic.typeLicence==="competition"?" Compétition":" Loisir")+'</div>':'')+
+        (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"var(--ltg)")+'">'+( lic.typeLicence==="competition"?" Compétition":" Loisir")+'</div>':'')+
         '<button onclick="copyCode(\''+lic.code+'\')" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:600;border:none;cursor:pointer">Copier</button>'+
       '</div>'+
       (lic.email?'<div style="font-size:11px;color:var(--mut);margin-top:4px">'+lic.email+'</div>':'')+
@@ -518,7 +518,7 @@ function openPaiementLicenceModal(code){
   var moyens=["Espèces","Chèque","Virement","CB"];
   var moyenBtns=moyens.map(function(m){
     var sel=(p.moyen||"Espèces")===m;
-    return '<button type="button" class="pl-moyen-btn" data-moyen="'+m+'" style="flex:1;padding:10px 6px;border-radius:var(--rx);border:2px solid '+(sel?"var(--grn)":"var(--bdr)")+';background:'+(sel?"rgba(212,175,55,.1)":"var(--card)")+';color:'+(sel?"var(--dkg)":"var(--mut)")+';font-size:11px;font-weight:700;cursor:pointer">'+m+'</button>';
+    return '<button type="button" class="pl-moyen-btn" data-moyen="'+m+'" style="flex:1;padding:10px 6px;border-radius:var(--rx);border:2px solid '+(sel?"var(--grn)":"var(--bdr)")+';background:'+(sel?"color-mix(in srgb, var(--ltg) 10%, transparent)":"var(--card)")+';color:'+(sel?"var(--dkg)":"var(--mut)")+';font-size:11px;font-weight:700;cursor:pointer">'+m+'</button>';
   }).join("");
   inner.innerHTML=
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
@@ -541,7 +541,7 @@ function openPaiementLicenceModal(code){
       Array.prototype.forEach.call(document.querySelectorAll(".pl-moyen-btn"),function(b){
         var sel=b.dataset.moyen===selectedMoyen;
         b.style.borderColor=sel?"var(--grn)":"var(--bdr)";
-        b.style.background=sel?"rgba(212,175,55,.1)":"var(--card)";
+        b.style.background=sel?"color-mix(in srgb, var(--ltg) 10%, transparent)":"var(--card)";
         b.style.color=sel?"var(--dkg)":"var(--mut)";
       });
     });
@@ -910,12 +910,12 @@ function renderLicenceChoice(lic){
 
   // Card Loisir
   var cardLoisir=document.createElement("div");
-  cardLoisir.style.cssText="cursor:pointer;background:linear-gradient(135deg,#0a1220,#142a4d);border:2px solid #D4AF37;border-radius:var(--r);padding:20px;position:relative;overflow:hidden";
+  cardLoisir.style.cssText="cursor:pointer;background:linear-gradient(135deg,#0a1220,#142a4d);border:2px solid var(--ltg);border-radius:var(--r);padding:20px;position:relative;overflow:hidden";
   cardLoisir.dataset.type="loisir";
   cardLoisir.onclick=function(){choisirLicence(this.dataset.type);};
   cardLoisir.innerHTML=
     '<div style="position:absolute;top:12px;right:14px;font-size:28px;opacity:.15"></div>'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="background:#D4AF37;color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">Loisir</div><div style="font-size:18px"></div></div>'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="background:var(--ltg);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">Loisir</div><div style="font-size:18px"></div></div>'+
     '<div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:8px">Pour le plaisir du jeu</div>'+
     '<div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:12px">Joue, progresse et partage de bons moments sans pression. Accessible à tous.</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px">'+
@@ -924,8 +924,8 @@ function renderLicenceChoice(lic){
       '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Progresser dans la bonne humeur</div>'+
       '<div style="font-size:11px;color:rgba(80,200,120,.9)">✓ Ouvert à tous les niveaux · Débutants bienvenus</div>'+
     '</div>'+
-    '<div style="margin-top:14px;padding:10px 14px;background:rgba(212,175,55,.15);border-radius:var(--rx);border-left:3px solid #D4AF37"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Le basket pour se faire plaisir, bouger, rencontrer des gens et partager une passion."</div></div>'+
-    '<div style="margin-top:12px;text-align:right"><span style="font-size:12px;font-weight:700;color:#D4AF37">Je choisis Loisir →</span></div>';
+    '<div style="margin-top:14px;padding:10px 14px;background:color-mix(in srgb, var(--ltg) 15%, transparent);border-radius:var(--rx);border-left:3px solid var(--ltg)"><div style="font-size:11px;font-style:italic;color:rgba(255,255,255,.8)">"Le basket pour se faire plaisir, bouger, rencontrer des gens et partager une passion."</div></div>'+
+    '<div style="margin-top:12px;text-align:right"><span style="font-size:12px;font-weight:700;color:var(--ltg)">Je choisis Loisir →</span></div>';
 
   wrap.appendChild(cardComp);
   wrap.appendChild(cardLoisir);
@@ -956,7 +956,7 @@ function renderFicheForm(lic){
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
       '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;})||{code:licCurrentCode})" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
       '<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--txt)">Ma fiche</div><div style="font-size:10px;color:var(--mut)">'+lic.code+'</div></div>'+
-      (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"#D4AF37")+'">'+( lic.typeLicence==="competition"?"Compétition":"Loisir")+'</div>':'')+
+      (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"var(--ltg)")+'">'+( lic.typeLicence==="competition"?"Compétition":"Loisir")+'</div>':'')+
     '</div>'+
     '<div style="padding:16px;padding-bottom:80px">'+
       // Photo
@@ -1024,7 +1024,7 @@ function renderFicheForm(lic){
       '</div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Certificat médical</div>'+
-      '<div id="cert-banner" style="background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.25);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px">'+
+      '<div id="cert-banner" style="background:color-mix(in srgb, var(--ltg) 8%, transparent);border:1px solid color-mix(in srgb, var(--ltg) 25%, transparent);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px">'+
         '<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat médical de non contre-indication à la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>'+
       '</div>'+
       '<div class="form-group">'+
@@ -1076,8 +1076,8 @@ function updateCertBanner(){
     box.style.borderColor="rgba(192,57,43,.3)";
     box.innerHTML='<div style="font-size:11px;color:var(--red);line-height:1.5;font-weight:700">Surclassement coché : le certificat médical est obligatoire pour valider la fiche.</div>';
   } else {
-    box.style.background="rgba(212,175,55,.08)";
-    box.style.borderColor="rgba(212,175,55,.25)";
+    box.style.background="color-mix(in srgb, var(--ltg) 8%, transparent)";
+    box.style.borderColor="color-mix(in srgb, var(--ltg) 25%, transparent)";
     box.innerHTML='<div style="font-size:11px;color:var(--txt2);line-height:1.5">Un certificat médical de non contre-indication à la pratique sportive est obligatoire pour valider votre licence. Il doit dater de moins d&#39;un an.</div>';
   }
 }

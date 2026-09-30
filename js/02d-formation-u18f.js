@@ -98,7 +98,7 @@ const CYCLES_U18F=[
  {ti:"Match applique",dur:"40 min",desc:"5c5 ou chaque joueuse doit tenter au moins un geste travaille dans le cycle.",org:"Tout terrain.",axes:["Comptabiliser les tentatives","Valoriser l'essai même rate"],kws:["Oser","Transférer","Jouer","Progresser"],ch:null}]}
  ]},
 
- {id:503,n:"Jeu collectif, écrans et lecture",sh:"Collectif",p:"Janv. - mi-fév.",s:9,c:"#D4AF37",e:"",
+ {id:503,n:"Jeu collectif, écrans et lecture",sh:"Collectif",p:"Janv. - mi-fév.",s:9,c:"var(--ltg)",e:"",
  objs:["Respecter le spacing et le timing","Poser et utiliser un écran porteur","Enchaîner roll, pop et ressortie","Punir chaque aide défensive","Décider vite dans un espace reduit"],
  seas:[
  {num:"503.1",t:"Spacing et circulation",dur:"1h45",obj:"Occuper le terrain à bonne distance",sits:[

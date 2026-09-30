@@ -4,7 +4,7 @@ var ADMIN_MODULES=[
  {id:"invitations",name:"Accès & invitations",sub:"Inviter coachs · Accès support",icon:"🔐",color:"#1A2E5A",scr:"admin"},
  {id:"parametres",name:"Paramètres",sub:"Notifications - Compte - Données",icon:"⚙",color:"#5a76aa",scr:"parametres"},
  {id:"communaute",name:"Communauté",sub:"Canaux · Membres · Discussions",icon:"💬",color:"#16A085",scr:"admin-comm"},
- {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"#D4AF37",scr:"licences"},
+ {id:"licences",name:"Licences",sub:"Envoi · Suivi · Validation",icon:"📋",color:"var(--ltg)",scr:"licences"},
  {id:"inscriptions",name:"Inscriptions",sub:"Fiches joueurs · Licences",icon:"📝",color:"#1A2E5A",scr:"inscriptions"},
  {id:"equipes",name:"Équipes",sub:"Composition · Staff · Maillots",icon:"👥",color:"#16A085",scr:"equipes"},
  {id:"planning",name:"Planning",sub:"Salles · Créneaux · Matchs",icon:"📅",color:"#1A2E5A",scr:"planning"},
@@ -17,7 +17,7 @@ var ADMIN_MODULES=[
  {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
-var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"#D4AF37","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
+var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
 var editingPlayerId=null;
 
@@ -237,7 +237,7 @@ function buildAdminHome(){
    ctrl.style.cssText="display:flex;justify-content:flex-end;padding:0 12px 10px";
    var hideBtn=document.createElement("button");
    hideBtn.textContent=isHidden?"Afficher":"Masquer";
-   hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"rgba(212,175,55,.15)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
+   hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"color-mix(in srgb, var(--ltg) 15%, transparent)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
    hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleHiddenAdminModule(m.id);});
    ctrl.appendChild(hideBtn);
    d.appendChild(ctrl);
@@ -599,7 +599,7 @@ function renderAvisList(list,items){
     btnRow.style.cssText="display:flex;gap:8px";
     var toggleBtn=document.createElement("button");
     toggleBtn.textContent=it.status==="traite"?"Marquer non traité":"Marquer traité";
-    toggleBtn.style.cssText="padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    toggleBtn.style.cssText="padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
     toggleBtn.addEventListener("click",function(){
       var newStatus=it.status==="traite"?"nouveau":"traite";
       window.fbUpdateDoc(window.fbDoc(window.fbDb,"feedback",it._id),{status:newStatus}).then(function(){
@@ -685,7 +685,7 @@ function renderPlayers(){
     var d=document.createElement("div");d.className="player-card";
     var meta=p.cat+" · "+p.naissance+(p.poste?" - "+p.poste:"");
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
-    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
+    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
     btns+='<button onclick="editPlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
     btns+='<button onclick="deletePlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
@@ -834,7 +834,7 @@ function renderNotesFraisList(list,isDir){
     list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucune note de frais.</div>';
     return;
   }
-  var statutColors={soumise:"#E8670A",remboursee:"#D4AF37",refusee:"#C0392B"};
+  var statutColors={soumise:"#E8670A",remboursee:"var(--ltg)",refusee:"#C0392B"};
   var statutLabels={soumise:"Soumise",remboursee:"Remboursée",refusee:"Refusée"};
   notes.forEach(function(n){
     var card=document.createElement("div");
@@ -875,7 +875,7 @@ function renderNotesFraisList(list,isDir){
     if(isDir&&n.statut==="soumise"){
       var okBtn=document.createElement("button");
       okBtn.textContent="Marquer remboursée";
-      okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
+      okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
       okBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"remboursee",list,isDir);});
       var refBtn=document.createElement("button");
       refBtn.textContent="Refuser";
@@ -1126,7 +1126,7 @@ function renderTeamReclassementList(list){
     });
     var catOnlyBtn=document.createElement("button");
     catOnlyBtn.textContent="Catégorie seule ("+entry.suggested+")";
-    catOnlyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    catOnlyBtn.style.cssText="padding:7px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:11px;font-weight:700;border:none;cursor:pointer";
     catOnlyBtn.addEventListener("click",function(){
       var teams=getTeams();
       var idx=teams.findIndex(function(x){return x.id===t.id;});

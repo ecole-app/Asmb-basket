@@ -189,8 +189,8 @@ function buildCoachDashboard(el){
       var st=statusByPlayer[p.id];
       var lbl=st==="present"?"Présent(e)":(st==="absent"?"Absent(e)":(st==="retard"?"En retard":"Sans réponse"));
       var cls=st==="present"?"st-ok":(st==="absent"||st==="retard"?"st-no":"st-wait");
-      var colBg=st==="present"?"rgba(212,175,55,.12)":(st==="absent"||st==="retard"?"rgba(192,57,43,.12)":"rgba(232,103,10,.12)");
-      var colTxt=st==="present"?"#D4AF37":(st==="absent"||st==="retard"?"#C0392B":"#E8670A");
+      var colBg=st==="present"?"color-mix(in srgb, var(--ltg) 12%, transparent)":(st==="absent"||st==="retard"?"rgba(192,57,43,.12)":"rgba(232,103,10,.12)");
+      var colTxt=st==="present"?"var(--ltg)":(st==="absent"||st==="retard"?"#C0392B":"#E8670A");
       var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
       return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rx);background:var(--bg)">'+
         '<div style="width:32px;height:32px;border-radius:50%;background:var(--dkg);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
@@ -205,7 +205,7 @@ function buildCoachDashboard(el){
       '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+upcoming.titre+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+dateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div>'+
       '<div style="display:flex;gap:8px;margin-top:12px">'+
-        '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:rgba(212,175,55,.12);color:#D4AF37"><b style="display:block;font-size:18px">'+present.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Présents</span></div>'+
+        '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg)"><b style="display:block;font-size:18px">'+present.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Présents</span></div>'+
         '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:rgba(192,57,43,.12);color:#C0392B"><b style="display:block;font-size:18px">'+absent.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Absents</span></div>'+
         '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:rgba(232,103,10,.12);color:#E8670A"><b style="display:block;font-size:18px">'+noResponse.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Sans réponse</span></div>'+
       '</div>'+
@@ -283,7 +283,7 @@ function buildDashboard(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
 
   html+='<div onclick="showPendingLicences()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
-    '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"#D4AF37")+'">'+licencesEnAttente+'</div>'+
+    '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"var(--ltg)")+'">'+licencesEnAttente+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licences en attente</div></div>';
 
   html+='<div onclick="showTeamsList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
@@ -368,7 +368,7 @@ function buildAssiduiteChartCard(){
     card+='<svg width="100%" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+
       '<polygon points="'+area+'" fill="var(--dkg)" opacity=".08"/>'+
       '<polyline points="'+poly+'" fill="none" stroke="var(--dkg)" stroke-width="2.5"/>'+
-      '<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="4.5" fill="#D4AF37"/>'+
+      '<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="4.5" fill="var(--ltg)"/>'+
       '</svg>'+
       '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-top:4px">'+
       '<span>Sem. '+pts[0].num+'</span><span>Sem. '+pts[pts.length-1].num+'</span></div>';

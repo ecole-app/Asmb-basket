@@ -128,7 +128,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1790780888";
+var APP_VERSION="1790782485";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -279,7 +279,7 @@ function refreshCurrentScreen(){
  var pull=Math.min(dy*0.5,90);
  indicator.style.opacity=Math.min(pull/THRESHOLD,1);
  spinner.style.transform="translateY("+pull+"px) rotate("+(pull*3)+"deg)";
- if(pull>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor="#D4AF37";}
+ if(pull>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor="var(--ltg)";}
  else if(pull<THRESHOLD&&triggered){triggered=false;spinner.style.borderTopColor="var(--dkg)";}
  }
  },{passive:true});

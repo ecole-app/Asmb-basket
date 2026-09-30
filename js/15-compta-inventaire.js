@@ -416,7 +416,7 @@ function buildInventaire(){
       var venteBtn=document.createElement("button");
       venteBtn.textContent="↑ Vente";
       venteBtn.title="Sortie de stock (vente) — crée une recette en comptabilité";
-      venteBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      venteBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
       venteBtn.addEventListener("click",function(e){e.stopPropagation();stockMovement(it.id,"vente");});
       adjRow.appendChild(achatBtn);adjRow.appendChild(venteBtn);
     }else{
@@ -426,7 +426,7 @@ function buildInventaire(){
       minusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,-1);});
       var plusBtn=document.createElement("button");
       plusBtn.textContent="+ 1";
-      plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
+      plusBtn.style.cssText="flex:1;padding:8px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:12px;font-weight:700;border:none;cursor:pointer";
       plusBtn.addEventListener("click",function(e){e.stopPropagation();adjustInvQte(it.id,1);});
       adjRow.appendChild(minusBtn);adjRow.appendChild(plusBtn);
     }

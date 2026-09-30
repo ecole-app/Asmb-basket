@@ -25,7 +25,7 @@ function buildRealEventsList(){
     var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
-    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:rgba(212,175,55,.12);color:#D4AF37;font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
     var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
     var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
@@ -880,7 +880,7 @@ function renderMatchdayPlayers(ev){
       var st=status[p.id];
       if(st==="present")pres++;else if(st==="absent")abs++;else none++;
       var initials=((p.prenom||"?")[0]+(p.nom||"?")[0]).toUpperCase();
-      var badge=st==="present"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:rgba(212,175,55,.15);color:#D4AF37">Present</span>':
+      var badge=st==="present"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 15%, transparent);color:var(--ltg)">Present</span>':
                 st==="absent"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B">Absent</span>':
                 '<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:var(--bdr);color:var(--mut)">—</span>';
       rows+='<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px">'+
@@ -889,7 +889,7 @@ function renderMatchdayPlayers(ev){
     });
     if(countsEl){
       countsEl.innerHTML=
-        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#D4AF37"><div style="font-size:26px;font-weight:900">'+pres+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Presents</div></div>'+
+        '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:var(--ltg)"><div style="font-size:26px;font-weight:900">'+pres+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Presents</div></div>'+
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#C0392B"><div style="font-size:26px;font-weight:900">'+abs+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Absents</div></div>'+
         '<div style="flex:1;border-radius:var(--rs);padding:14px;text-align:center;color:#fff;background:#8a93a4"><div style="font-size:26px;font-weight:900">'+none+'</div><div style="font-size:10px;font-weight:700;text-transform:uppercase">Sans réponse</div></div>';
     }

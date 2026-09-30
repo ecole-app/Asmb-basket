@@ -37,7 +37,7 @@ function gArrow(ctx,x1,y1,x2,y2,col,dash){
 // Trait epais perpendiculaire : convention des schemas de basket pour un ecran.
 function gScreen(ctx,x,y,ang,col){
  ctx.save();ctx.translate(x,y);ctx.rotate(ang||0);
- ctx.strokeStyle=col||"#D4AF37";ctx.lineWidth=3.5;ctx.lineCap="round";
+ ctx.strokeStyle=col||"var(--ltg)";ctx.lineWidth=3.5;ctx.lineCap="round";
  ctx.beginPath();ctx.moveTo(-11,0);ctx.lineTo(11,0);ctx.stroke();ctx.restore();
 }
 function gCone(ctx,x,y){
@@ -330,7 +330,7 @@ G_SCENES.pnr=function(ctx,t,sc,W,H){
  pl(ctx,rx,ry,"5",G_NEU,12);
  pl(ctx,hx,hy,"1",G_ATT,12);
  bl(ctx,hx-13,hy-8,7);
- if(t3>0) gArrow(ctx,scr.x,scr.y,roll.x,roll.y,"#D4AF37");
+ if(t3>0) gArrow(ctx,scr.x,scr.y,roll.x,roll.y,"var(--ltg)");
  if(t2>0&&t3<1) gArrow(ctx,p1.x,p1.y,scr.x-26,scr.y-16,"rgba(255,255,255,.7)");
  gLegend(ctx,W,H,t3>0?"3 · le poseur plonge au panier":(t2>0?"2 · le porteur utilise l'écran":"1 · pose de l'écran"));
 };
@@ -410,7 +410,7 @@ G_SCENES.aide=function(ctx,t,sc,W,H){
  if(t3>0) pl(ctx,cx,cy,"D",G_DEF,11);
  pl(ctx,kick.x,kick.y,"2",G_ATT,12);
  pl(ctx,px,py,"1",G_ATT,12);
- if(t2>0&&t3<1) gArrow(ctx,W/2-56,H*0.42,pen.x-22,pen.y+6,"#D4AF37");
+ if(t2>0&&t3<1) gArrow(ctx,W/2-56,H*0.42,pen.x-22,pen.y+6,"var(--ltg)");
  if(t3>0){
    gArrow(ctx,pen.x,pen.y,kick.x,kick.y,"rgba(255,255,255,.65)",true);
    bl(ctx,lp(pen.x,kick.x,ease(t3)),lp(pen.y,kick.y,ease(t3))-12,7);
@@ -434,7 +434,7 @@ G_SCENES.interieur=function(ctx,t,sc,W,H){
    bl(ctx,lp(ext.x,pxx,ease(t2)),lp(ext.y,pyy,ease(t2))-12,7);
  } else if(t2>=1) bl(ctx,fx-14,fy-8,7);
  else bl(ctx,ext.x-13,ext.y-8,7);
- if(t3>0) gArrow(ctx,poste.x,poste.y,fin.x,fin.y,"#D4AF37");
+ if(t3>0) gArrow(ctx,poste.x,poste.y,fin.x,fin.y,"var(--ltg)");
  gLegend(ctx,W,H,t3>0?"3 · finition dos au panier":(t2>0?"2 · passe au poste":"1 · appel de balle"));
 };
 
@@ -666,7 +666,7 @@ G_SCENES.theorie=function(ctx,t,sc,W,H){
  var lignes=4;
  for(var i=0;i<lignes;i++){
    var on=t>(i+1)/(lignes+1.6);
-   ctx.fillStyle=on?"rgba(212,175,55,.85)":"rgba(255,255,255,.14)";
+   ctx.fillStyle=on?"color-mix(in srgb, var(--ltg) 85%, transparent)":"rgba(255,255,255,.14)";
    var w=(W-110)*(i===lignes-1?0.55:(0.9-i*0.1));
    ctx.beginPath();ctx.roundRect(54,34+i*((H*0.42-34)/lignes),w,6,3);ctx.fill();
  }

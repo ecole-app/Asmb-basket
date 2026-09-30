@@ -39,7 +39,7 @@
   <div id="hlogo" style="flex-shrink:0"></div>
 </header>
 <div id="offline-banner" style="display:none;background:#E8670A;color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 12px">Mode hors-ligne · Vous consultez les dernières données chargées</div>
-<div id="update-banner" style="display:none;background:#D4AF37;color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+<div id="update-banner" style="display:none;background:var(--ltg);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:9px 12px;flex-direction:column;align-items:center;justify-content:center;gap:6px">
   <div style="display:flex;align-items:center;justify-content:center;gap:10px">
     <span>Nouvelle version disponible</span>
     <button onclick="applyUpdate()" style="padding:5px 14px;border-radius:20px;background:#fff;color:#1A2E5A;font-size:11px;font-weight:800;border:none;cursor:pointer">Mettre à jour</button>
@@ -50,7 +50,7 @@
   <div style="font-size:12px;font-weight:700" id="join-req-text"></div>
   <div style="display:flex;gap:8px">
     <button onclick="showJoinReqFiche()" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Fiche</button>
-    <button onclick="acceptJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:#D4AF37;color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Accepter</button>
+    <button onclick="acceptJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:var(--ltg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✓ Accepter</button>
     <button onclick="rejectJoinRequest(currentJoinReqId)" style="flex:1;padding:7px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">✕ Refuser</button>
   </div>
 </div>
@@ -1150,7 +1150,7 @@
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>
  <div style="display:flex;gap:10px;flex-wrap:wrap">
  <button onclick="showQrModal('app')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">QR Rejoindre l'app</button>
- <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:rgba(212,175,55,.12);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
+ <button onclick="showQrModal('inscription')" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:12px;font-weight:700;border:none;cursor:pointer">QR S'inscrire</button>
  </div>
  </div>
  </div><div class="param-block" data-sec="notifications"><div class="sec">Notifications</div>
@@ -1370,7 +1370,7 @@
           <input type="checkbox" id="pp-dark" onchange="toggleThemeFromParams(this.checked)" style="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0">
         </label>
         <div style="padding:14px">
-          <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(212,175,55,.1);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
+          <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
           <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation réapparaîtra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide à l'installation</button>
         </div>
       </div>
@@ -1451,7 +1451,7 @@
  <div class="sec" style="padding:0 0 8px">Prochain événement</div>
  <div id="parent-next-event"></div>
  <div style="margin-top:10px">
- <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(212,175,55,.1);color:#D4AF37;font-size:12px;font-weight:700;border:none;cursor:pointer"> Ajouter toute la saison a mon agenda</button>
+ <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:12px;font-weight:700;border:none;cursor:pointer"> Ajouter toute la saison a mon agenda</button>
  </div>
  <div class="sec" style="padding:16px 0 8px">Derniers matchs</div>
  <div id="parent-last-matches"></div>

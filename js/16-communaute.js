@@ -422,7 +422,7 @@ function scrollToMsg(msgId){
   el.scrollIntoView({block:"center",behavior:"smooth"});
   el.style.transition="background .3s";
   var prevBg=el.style.background;
-  el.style.background="rgba(212,175,55,.25)";
+  el.style.background="color-mix(in srgb, var(--ltg) 25%, transparent)";
   setTimeout(function(){el.style.background=prevBg;},900);
 }
 async function editMessage(channelId,msgId){
@@ -625,7 +625,7 @@ function listenTyping(channelId){
     if(!descEl)return;
     if(typers.length){
       descEl.textContent=(typers.length===1?typers[0]+" écrit...":typers.join(", ")+" écrivent...");
-      descEl.style.color="#D4AF37";
+      descEl.style.color="var(--ltg)";
       descEl.style.fontStyle="italic";
     } else {
       descEl.textContent=baseDesc;
@@ -754,7 +754,7 @@ function listenMessages(channelId, prevLastRead){
           cvHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bdr)">'+
             '<span style="font-size:12px;color:var(--txt)">'+p.nom+'</span>'+
             '<div style="display:flex;gap:5px">'+
-              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"#D4AF37":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
+              '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'present\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="present"?"var(--ltg)":"rgba(0,0,0,.08)")+';color:'+(resp==="present"?"#fff":"var(--mut)")+'">✓ Présent</span>'+
               '<span onclick="respondConvocation(\''+channelId+'\',\''+d.id+'\',\''+p.id+'\',\'absent\')" style="cursor:pointer;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;background:'+(resp==="absent"?"#C0392B":"rgba(0,0,0,.08)")+';color:'+(resp==="absent"?"#fff":"var(--mut)")+'">✕ Absent</span>'+
             '</div></div>';
         });
@@ -776,7 +776,7 @@ function listenMessages(channelId, prevLastRead){
           '<div style="font-size:11.5px;color:var(--txt)">Conducteur·rice : <b>'+authEsc(msg.conducteur||"")+'</b></div>'+
           (msg.depart?('<div style="font-size:11px;color:var(--mut);margin-top:2px">Départ : '+authEsc(msg.depart)+'</div>'):"")+
           '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+(passagers.length?authEsc(passagers.join(", ")):"Personne pour l'instant")+'</div>'+
-          '<div onclick="reserverCarpool(\''+channelId+'\',\''+d.id+'\')" style="cursor:'+(isFull?"default":"pointer")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(meIn?"#1B5C28":(isFull?"rgba(0,0,0,.08)":"rgba(212,175,55,.15)"))+';color:'+(meIn?"#fff":(isFull?"var(--mut)":"#D4AF37"))+'">'+(meIn?"✓ Vous avez une place — annuler":(isFull?"Complet":"Réserver une place ("+placesRestantes+" restante"+(placesRestantes>1?"s":"")+")"))+'</div>'+
+          '<div onclick="reserverCarpool(\''+channelId+'\',\''+d.id+'\')" style="cursor:'+(isFull?"default":"pointer")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(meIn?"#1B5C28":(isFull?"rgba(0,0,0,.08)":"color-mix(in srgb, var(--ltg) 15%, transparent)"))+';color:'+(meIn?"#fff":(isFull?"var(--mut)":"var(--ltg)"))+'">'+(meIn?"✓ Vous avez une place — annuler":(isFull?"Complet":"Réserver une place ("+placesRestantes+" restante"+(placesRestantes>1?"s":"")+")"))+'</div>'+
           '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+time+'</div>';
         cpDiv.innerHTML=cpHtml;
         wrap.appendChild(cpDiv);
@@ -821,7 +821,7 @@ function listenMessages(channelId, prevLastRead){
         var users=reactions[em]||[];
         if(!users.length)return;
         var mine=users.indexOf(myPseudo)>=0;
-        reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"rgba(212,175,55,.22)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
+        reactHtml+='<span onclick="setReaction(\''+channelId+'\',\''+d.id+'\',\''+em+'\')" style="cursor:pointer;font-size:12px;padding:2px 8px;border-radius:12px;background:'+(mine?"color-mix(in srgb, var(--ltg) 22%, transparent)":"rgba(0,0,0,.08)")+'">'+em+' '+users.length+'</span>';
       });
       reactHtml+='<span onclick="openReactionPicker(event,\''+channelId+'\',\''+d.id+'\')" style="cursor:pointer;font-size:12px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.06);color:var(--mut)">+</span>';
       reactHtml+='<span onclick="setReplyTo(\''+d.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:12px;background:rgba(0,0,0,.08)">↩ Répondre</span>';

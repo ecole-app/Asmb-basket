@@ -212,7 +212,7 @@ const ELITE_CATS=[
   title:"U9 Découverte",chips:["1 séance / semaine","1h30 par séance","Découverte FFBB"]},
  {id:"u11",name:"U11",desc:"3 cycles · 15 séances · Mini-basket",icon:"",color:"#16A085",ready:true,
   title:"U11 Mini-basket",chips:["2 séances / semaine","1h30 par séance","Mini-basket FFBB"]},
- {id:"u13",name:"U13 (Filles et Garçons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"#D4AF37",ready:true,
+ {id:"u13",name:"U13 (Filles et Garçons)",desc:"5 cycles · 47 séances · "+getCurrentSeason(),icon:"",color:"var(--ltg)",ready:true,
   title:"U13 Filles et Garçons",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
  {id:"u15",name:"U15",desc:"5 cycles · 45 séances · "+getCurrentSeason(),icon:"",color:"#C0392B",ready:true,
   title:"U15",chips:["2 séances / semaine","1h30 par séance"],zoneChip:true},
@@ -234,13 +234,13 @@ const VAC_COMMUNES=[
 const VACS_BY_ZONE={
  A:VAC_COMMUNES.concat([
   {n:"Hiver",d:"13 févr. - 1 mars 2027",imp:"4 séances",c:"#1A2E5A"},
-  {n:"Printemps",d:"10 avr. - 26 avr. 2027",imp:"4 séances",c:"#D4AF37"}]),
+  {n:"Printemps",d:"10 avr. - 26 avr. 2027",imp:"4 séances",c:"var(--ltg)"}]),
  B:VAC_COMMUNES.concat([
   {n:"Hiver",d:"20 févr. - 8 mars 2027",imp:"4 séances",c:"#1A2E5A"},
-  {n:"Printemps",d:"17 avr. - 3 mai 2027",imp:"4 séances",c:"#D4AF37"}]),
+  {n:"Printemps",d:"17 avr. - 3 mai 2027",imp:"4 séances",c:"var(--ltg)"}]),
  C:VAC_COMMUNES.concat([
   {n:"Hiver",d:"6 févr. - 22 févr. 2027",imp:"4 séances",c:"#1A2E5A"},
-  {n:"Printemps",d:"3 avr. - 19 avr. 2027",imp:"4 séances",c:"#D4AF37"}])
+  {n:"Printemps",d:"3 avr. - 19 avr. 2027",imp:"4 séances",c:"var(--ltg)"}])
 };
 
 // Zone du club (A par defaut). Saint-Etienne est en zone A.
@@ -266,7 +266,7 @@ function getVacances(){
   if(c && c.length) return c;
   return VACS_BY_ZONE[getClubZone()];
 }
-const KC=["#16A085","#8E44AD","#D4AF37","#1A2E5A","#E8670A"];
+const KC=["#16A085","#8E44AD","var(--ltg)","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";
 
