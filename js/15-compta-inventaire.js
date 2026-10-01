@@ -132,7 +132,8 @@ function buildComptabilite(){
   '</div>'+
   '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rs);font-size:11px;color:var(--mut)">'+
     '<span>🏦 Solde pointé (rapproché banque) : <b style="color:var(--txt)">'+soldePointe.toFixed(2)+' €</b></span>'+
-    '<span style="display:flex;gap:6px">'+
+    '<span style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<button onclick="openComptaDashboard()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📈 Graphiques</button>'+
       '<button onclick="openBudgetPrev()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📊 Budget</button>'+
       '<button onclick="openBilanAnnuel()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📄 Bilan AG</button>'+
     '</span>'+
@@ -386,6 +387,90 @@ function printBilanAnnuel(){
   w.document.write('<html><head><title>Bilan financier</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}div{box-sizing:border-box}</style></head><body>'+content+'</body></html>');
   w.document.close();
   w.print();
+}
+
+// ── GRAPHIQUES / TABLEAU DE BORD COMPTA ─────────────────────────────
+// Petits graphiques en barres faits en CSS pur (pas de librairie externe,
+// fonctionne offline, suit automatiquement le thème clair/sombre).
+function gmBarChartVertical(dataObj, color){
+  var entries=Object.keys(dataObj).map(function(k){return {label:k, value:dataObj[k]};});
+  var max=Math.max.apply(null, entries.map(function(e){return e.value;}).concat([0.01]));
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;align-items:flex-end;gap:4px;height:110px;padding:8px 2px 0;overflow-x:auto";
+  entries.forEach(function(e){
+    var col=document.createElement("div");
+    col.style.cssText="flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%";
+    var bar=document.createElement("div");
+    var h=Math.max(2,Math.round((e.value/max)*80));
+    bar.style.cssText="width:100%;max-width:26px;border-radius:4px 4px 0 0;background:"+color+";height:"+h+"px";
+    bar.title=e.label+" : "+e.value.toFixed(2)+" €";
+    var lbl=document.createElement("div");
+    lbl.style.cssText="font-size:8.5px;color:var(--mut);margin-top:4px;white-space:nowrap";
+    lbl.textContent=e.label;
+    col.appendChild(bar);col.appendChild(lbl);
+    wrap.appendChild(col);
+  });
+  return wrap;
+}
+function gmBarListHorizontal(dataObj, color){
+  var entries=Object.keys(dataObj).map(function(k){return {label:k, value:dataObj[k]};}).sort(function(a,b){return b.value-a.value;});
+  var max=Math.max.apply(null, entries.map(function(e){return e.value;}).concat([0.01]));
+  var wrap=document.createElement("div");
+  if(!entries.length){
+    wrap.innerHTML='<div style="font-size:11px;color:var(--mut)">Aucune donnée</div>';
+    return wrap;
+  }
+  entries.forEach(function(e){
+    var row=document.createElement("div");
+    row.style.cssText="margin-bottom:8px";
+    var top=document.createElement("div");
+    top.style.cssText="display:flex;justify-content:space-between;font-size:11px;color:var(--txt);margin-bottom:3px;gap:8px";
+    top.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.label+'</span><b style="flex-shrink:0">'+e.value.toFixed(2)+' €</b>';
+    var track=document.createElement("div");
+    track.style.cssText="height:7px;background:var(--bdr);border-radius:4px;overflow:hidden";
+    var fill=document.createElement("div");
+    var w=Math.max(2,Math.round((e.value/max)*100));
+    fill.style.cssText="height:100%;width:"+w+"%;background:"+color+";border-radius:4px";
+    track.appendChild(fill);
+    row.appendChild(top);row.appendChild(track);
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+function openComptaDashboard(){
+  var all=getComptabilite();
+  if(!all.length){askAlert("Aucune ligne comptable pour le moment.");return;}
+  var s=gmSheet("📈 Tableau de bord");
+
+  var byMonthRecette={}, byMonthDepense={};
+  all.forEach(function(l){
+    var mois=(l.date||"").slice(0,7); if(!mois) return;
+    if(l.type==="depense") byMonthDepense[mois]=(byMonthDepense[mois]||0)+(l.montant||0);
+    else byMonthRecette[mois]=(byMonthRecette[mois]||0)+(l.montant||0);
+  });
+  var allMonths=Object.keys(Object.assign({},byMonthRecette,byMonthDepense)).sort();
+  var last12=allMonths.slice(-12);
+  var dispRecette={}, dispDepense={};
+  last12.forEach(function(m){
+    var lbl=m.slice(5,7)+"/"+m.slice(2,4);
+    dispRecette[lbl]=byMonthRecette[m]||0;
+    dispDepense[lbl]=byMonthDepense[m]||0;
+  });
+  gmSection(s.body,"Recettes par mois","Les 12 derniers mois avec des lignes enregistrées.");
+  s.body.appendChild(gmBarChartVertical(dispRecette,"var(--grn)"));
+  gmSection(s.body,"Dépenses par mois");
+  s.body.appendChild(gmBarChartVertical(dispDepense,"var(--red)"));
+
+  var catDepense={}, catRecette={};
+  all.forEach(function(l){
+    var c=l.categorie||"Autre";
+    if(l.type==="depense") catDepense[c]=(catDepense[c]||0)+(l.montant||0);
+    else catRecette[c]=(catRecette[c]||0)+(l.montant||0);
+  });
+  gmSection(s.body,"Dépenses par catégorie","Toutes périodes confondues.");
+  s.body.appendChild(gmBarListHorizontal(catDepense,"var(--red)"));
+  gmSection(s.body,"Recettes par catégorie");
+  s.body.appendChild(gmBarListHorizontal(catRecette,"var(--grn)"));
 }
 
 // ── INVENTAIRE BUVETTE ET MATERIEL (point 11) ───────────────────────

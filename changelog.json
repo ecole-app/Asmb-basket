@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790827761",
+    "titre": "Comptabilité : un tableau de bord avec des graphiques",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouveau bouton « 📈 Graphiques » en haut de la Comptabilité : recettes et dépenses mois par mois sur les 12 derniers mois, et répartition par catégorie (Cotisations, Buvette, Matériel...). De quoi repérer d'un coup d'œil où va l'argent du club." }
+    ]
+  },
+  {
     "v": "1790794713",
     "titre": "Comptabilité : plusieurs comptes / caisses au lieu d'un seul solde",
     "points": [
