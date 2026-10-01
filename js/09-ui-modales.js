@@ -220,15 +220,23 @@ function buildClubStats(){
   el.innerHTML=html;
 }
 
+// Pilote à la fois la notif navigateur "app ouverte" (asmb_notif, lue dans
+// 16-communaute.js/21-main.js) et le véritable abonnement push (22-push.js,
+// fonctionne même app fermée). Les deux s'activent/se désactivent ensemble :
+// pas de sens à promettre des notifs qui ne marchent que si le tel est sorti.
 function toggleNotif(checked,elId){
   elId=elId||"notif-toggle";
-  if(checked&&"Notification" in window){
-    Notification.requestPermission().then(function(perm){
-      if(perm==="granted"){localStorage.setItem("asmb_notif","on");new Notification("ASMB",{body:"Notifications activées !"});}
-      else{localStorage.setItem("asmb_notif","off");var el=document.getElementById(elId);if(el)el.checked=false;askAlert("Permission refusée");}
+  if(checked){
+    if(typeof enablePushNotifications!=="function"){ localStorage.setItem("asmb_notif","on"); return; }
+    enablePushNotifications().then(function(){
+      var el=document.getElementById(elId);
+      var ok=(typeof pushStatus==="function")&&pushStatus()==="granted";
+      localStorage.setItem("asmb_notif",ok?"on":"off");
+      if(el)el.checked=ok;
     });
   } else {
     localStorage.setItem("asmb_notif","off");
+    if(typeof disablePushNotifications==="function") disablePushNotifications();
   }
 }
 

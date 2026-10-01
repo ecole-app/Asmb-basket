@@ -17,7 +17,7 @@ function buildParametres(){
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
   buildVisualThemePicker();
   var toggle=document.getElementById("notif-toggle");
-  if(toggle)toggle.checked=localStorage.getItem("asmb_notif")==="on";
+  if(toggle)toggle.checked=(typeof pushStatus==="function")?pushStatus()==="granted":localStorage.getItem("asmb_notif")==="on";
   ["messages","match","entrainement","evenement"].forEach(function(t){
     var tg=document.getElementById("notif-"+t+"-toggle");
     if(tg)tg.checked=localStorage.getItem("asmb_notif_"+t)!=="off";

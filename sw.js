@@ -50,6 +50,7 @@ const PRECACHE = [
   './js/20-parent-tabs.js',
   './js/20b-plateforme.js',
   './js/21-main.js',
+  './js/22-push.js',
   './legal/mentions-legales.html',
   './legal/confidentialite.html',
   './legal/cgu.html',
@@ -130,6 +131,33 @@ self.addEventListener('fetch', function (event) {
         }
         return res;
       }).catch(function () { return hit; });
+    })
+  );
+});
+
+// ═══ PUSH : réception + clic sur la notif (voir js/22-push.js) ═══════════
+self.addEventListener('push', function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) {}
+  var title = data.title || 'Nouveau message';
+  var options = {
+    body: data.body || '',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    data: { url: data.url || './' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) return list[i].focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });

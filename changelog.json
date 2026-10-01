@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790890089",
+    "titre": "Vraies notifications push pour les nouveaux messages",
+    "points": [
+      { "roles": ["dirigeant","coach","bureau","parent","joueur"], "texte": "Le bouton « Autoriser les notifications » dans Paramètres active maintenant un vrai abonnement push : un nouveau message dans Communauté peut notifier même app fermée. (Nécessite l'activation finale côté dirigeant technique — voir PUSH_SETUP.md ; reste inactif tant que ce n'est pas branché.)" }
+    ]
+  },
+  {
     "v": "1790883392",
     "titre": "Nettoyage : retrait de l'ancien outil de migration Firestore",
     "points": [

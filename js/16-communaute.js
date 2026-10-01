@@ -1029,6 +1029,7 @@ async function sendMsg(){
   var mentionList=document.getElementById("chat-mention-list");
   if(mentionList)mentionList.style.display="none";
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),payload);
+  if(typeof notifyChannelPush==="function") notifyChannelPush(currentChannelId,text,(window.ASMB_USER&&window.ASMB_USER.uid)||null);
 }
 
 async function sendMediaMessage(input){

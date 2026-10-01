@@ -294,6 +294,13 @@ service cloud.firestore {
       match /app_data/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /reminders_sent/{id} { allow read: if readMember(clubId); allow write: if staff(clubId); }
 
+      // Abonnements push (js/22-push.js) : un membre ne gère que son propre
+      // abonnement (id = son uid). Jamais lu côté client — seule la fonction
+      // Vercel les lit, avec la clé Admin qui ignore ces règles.
+      match /push_subscriptions/{uid} {
+        allow read, write: if member(clubId) && signedIn() && request.auth.uid==uid;
+      }
+
       // Purge : lecture et suppression sur TOUTES les sous-collections de ce
       // club, uniquement pendant la fenetre ci-dessus. Un match recursif evite
       // d'oublier une collection — une sous-collection ajoutee plus tard y sera

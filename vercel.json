@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "functions": {
+    "api/send-push.js": { "maxDuration": 10 }
+  }
+}
