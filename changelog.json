@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790842268",
+    "titre": "Accès bureau : l'onglet se nomme « Gestion »",
+    "points": [
+      { "roles": ["coach"], "texte": "L'onglet qui apparaît quand le dirigeant t'accorde un accès bureau s'appelle maintenant « Gestion » (plus clair que « Admin », qui donnait l'impression d'un accès total)." }
+    ]
+  },
+  {
     "v": "1790836654",
     "titre": "Accès bureau : tous les modules admin, module par module",
     "points": [

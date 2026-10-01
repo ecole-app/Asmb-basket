@@ -106,7 +106,7 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Compétition</button>'+
       '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
-      (hasBureauAccess?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>':'');
+      (hasBureauAccess?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Gestion</button>':'');
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
