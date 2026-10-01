@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790830815",
+    "titre": "Correction : l'écran Documents ne s'ouvrait pas au premier clic",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "Bug corrigé : cliquer sur « Documents » depuis l'admin ne faisait rien la première fois, et ressortait ensuite au mauvais moment avec le bouton Retour. L'écran s'ouvre maintenant normalement dès le premier clic." }
+    ]
+  },
+  {
     "v": "1790829838",
     "titre": "Nouvel écran d'entrée dans l'appli",
     "points": [

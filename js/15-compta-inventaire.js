@@ -763,6 +763,10 @@ function deleteInvItem(){
 var pendingDocCategory="autre";
 var DOC_CAT_LABELS={"reglement":"Règlement","autorisation":"Autorisation","formulaire":"Formulaire","autre":"Autre"};
 var DOC_CAT_COLORS={"reglement":"#1A2E5A","autorisation":"#C0392B","formulaire":"#16A085","autre":"#8E44AD"};
+// Jamais initialisée avant ce correctif : le tout premier clic sur "Documents"
+// plantait buildDocs() (ReferenceError), laissait "documents" empilé dans la
+// navigation sans jamais afficher l'écran, et il ressortait plus tard via "Retour".
+var currentDocCatFilter="all";
 
 function filterDocCat(cat){
   currentDocCatFilter=cat;
