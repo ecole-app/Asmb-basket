@@ -41,8 +41,12 @@ var BUREAU_GROUPS=[
 var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inventaire"]},secretaire:{label:"Secrétaire",autoCheck:[]}};
 function hasModulePermission(id){
   if(!window.ASMB_USER) return false;
-  if((window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0) return true;
+  var roles=window.ASMB_USER.roles||[];
+  if(roles.indexOf("dirigeant")>=0) return true;
   if(BUREAU_GRANTABLE.indexOf(id)<0) return false;
+  // Réservé aux comptes coach ou "bureau" — jamais un simple parent (même si
+  // un champ permissions traînait par erreur sur son compte, voir firestore.rules).
+  if(roles.indexOf("coach")<0 && roles.indexOf("bureau")<0) return false;
   var perms=window.ASMB_USER.permissions||{};
   return !!perms[id];
 }
@@ -505,17 +509,35 @@ function renderAccesList(list,users,phoneToName){
     var teamBox=document.createElement("div");
     var roleWrap=document.createElement("div");
     roleWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px";
-    ["dirigeant","coach","parent"].forEach(function(r){
+    ["dirigeant","coach","bureau","parent"].forEach(function(r){
       var chip=document.createElement("button");
       function paint(){var on=state.roles.indexOf(r)>=0;chip.style.cssText="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--grn)":"var(--bdr)")+";background:"+(on?"var(--grn)":"transparent")+";color:"+(on?"#fff":"var(--mut)");}
       chip.textContent=roleLabel(r);paint();
-      chip.addEventListener("click",function(e){e.stopPropagation();var i=state.roles.indexOf(r);if(i>=0)state.roles.splice(i,1);else state.roles.push(r);paint();teamBox.style.display=(state.roles.indexOf("coach")>=0)?"block":"none";updateSuggestion();});
+      chip.addEventListener("click",function(e){
+        e.stopPropagation();
+        var i=state.roles.indexOf(r);
+        if(i>=0)state.roles.splice(i,1);else state.roles.push(r);
+        paint();
+        teamBox.style.display=(state.roles.indexOf("coach")>=0)?"block":"none";
+        updateBureauVisibility();
+        updateSuggestion();
+      });
       roleWrap.appendChild(chip);
     });
     card.appendChild(roleWrap);
-    // ── Bloc "Accès bureau" : regroupe titre + permissions + suggestion ──────
+    // ── Bloc "Accès bureau" : regroupe titre + permissions + suggestion.
+    // Réservé aux comptes coach et/ou "bureau" — jamais à un simple parent,
+    // qui a son propre espace restreint (voir aussi hasModulePermission et
+    // firestore.rules : même un parent avec un vieux champ permissions ne
+    // pourrait rien en faire côté serveur). ──
+    var bureauEligible=function(){return state.roles.indexOf("coach")>=0||state.roles.indexOf("bureau")>=0;};
+    var bureauNote=document.createElement("div");
+    bureauNote.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px;display:"+(bureauEligible()?"none":"block");
+    bureauNote.textContent="Cochez Coach ou Membre du bureau pour pouvoir donner un accès (Comptabilité, Licences…) à ce compte.";
+    card.appendChild(bureauNote);
     var bureauBox=document.createElement("div");
-    bureauBox.style.cssText="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rx);padding:12px;margin-bottom:10px";
+    bureauBox.style.cssText="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rx);padding:12px;margin-bottom:10px;display:"+(bureauEligible()?"block":"none");
+    function updateBureauVisibility(){ var ok=bureauEligible(); bureauBox.style.display=ok?"block":"none"; bureauNote.style.display=ok?"none":"block"; }
     var bureauHead=document.createElement("div");
     bureauHead.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px";
     var bureauTitle=document.createElement("div");

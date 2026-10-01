@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790843103",
+    "titre": "Nouveau rôle « Membre du bureau »",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Un parent ne peut plus recevoir d'accès bureau (Comptabilité, Licences…), même par erreur : ce bloc n'apparaît que pour un compte Coach ou « Membre du bureau ». Nouveau bouton « Inviter un membre du bureau » dans Accès & invitations, pour quelqu'un qui aide à la gestion sans entraîner d'équipe." },
+      { "roles": ["coach","parent"], "texte": "Nouveau profil « Membre du bureau » disponible à la connexion pour les comptes concernés : sans équipe, avec uniquement Communauté et ce que le dirigeant a coché." }
+    ]
+  },
+  {
     "v": "1790842533",
     "titre": "Accès coach : le titre (trésorier/secrétaire) se transfère immédiatement",
     "points": [

@@ -195,6 +195,12 @@ function initProfile(){
     ouvrirEspaceJoueurRattache(0);
     return;
   }
+  // Un compte "bureau" pur (pas coach, pas dirigeant) n'a qu'une seule porte
+  // d'entrée possible : inutile de lui faire choisir son rôle.
+  if(!profile && rolesCompte.length===1 && rolesCompte[0]==="bureau"){
+    localStorage.setItem("asmb_profile","bureau");
+    profile="bureau";
+  }
   // Le role d'un compte "parent" est deja connu (celui de l'invitation) :
   // pas besoin de lui faire choisir "Parent" a l'ecran role-select.
   if(!profile && rolesCompte.length===1 && rolesCompte[0]==="parent"){
@@ -220,6 +226,9 @@ function initProfile(){
     } else {
       navToCoach("equipe");
     }
+  } else if(profile==="bureau"){
+    buildBottomNav("bureau");
+    navToCoach("communaute");
   } else {
     buildBottomNav("parent");
     var teams=getParentTeams();
@@ -263,6 +272,10 @@ async function chooseRole(role){
     }
   } else if(role==="joueur"){
     openJoueurCheckin();
+  } else if(role==="bureau"){
+    localStorage.setItem("asmb_profile","bureau");
+    buildBottomNav("bureau");
+    navToCoach("communaute");
   } else {
     localStorage.setItem("asmb_profile","parent");
     buildBottomNav("parent");
@@ -843,7 +856,7 @@ function logoutUser(){
 }
 
 function roleLabel(r){
-  return {dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur"}[r]||r;
+  return {dirigeant:"Dirigeant",coach:"Coach",bureau:"Membre du bureau",parent:"Parent",joueur:"Joueur"}[r]||r;
 }
 function openParametres(){
   var profile=localStorage.getItem("asmb_profile");

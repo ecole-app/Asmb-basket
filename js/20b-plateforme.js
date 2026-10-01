@@ -115,11 +115,13 @@ function createClubInvite(clubId, clubName, role, grantedPermissions){
 // voir dans l'admin, dès la création de son compte. (Même liste/logique que
 // la case à cocher de "Accès coach", qui permet de revenir dessus ensuite
 // pour un compte déjà créé.)
-function openBureauPermissionPicker(onConfirm){
-  var s=gmSheet("Accès bureau pour ce coach");
+function openBureauPermissionPicker(onConfirm, role){
+  var s=gmSheet(role==="bureau"?"Accès pour ce membre du bureau":"Accès bureau pour ce coach");
   var intro=document.createElement("div");
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
-  intro.textContent="Cochez ce que cette personne pourra voir dans l'admin, en plus de son accès sportif (Équipe, Formation, Compétition, Événements) qui reste toujours disponible. Vous pourrez revenir dessus à tout moment depuis « Accès coach ».";
+  intro.textContent=role==="bureau"
+    ? "Cochez ce que cette personne pourra voir dans « Gestion ». Un membre du bureau n'a aucune équipe à gérer : seul ce qui est coché lui sera visible. Vous pourrez revenir dessus à tout moment depuis « Accès coach »."
+    : "Cochez ce que cette personne pourra voir en plus, dans « Gestion », en plus de son accès sportif (Équipe, Formation, Compétition, Événements) qui reste toujours disponible. Vous pourrez revenir dessus à tout moment depuis « Accès coach ».";
   s.body.appendChild(intro);
   var perms={};
   BUREAU_GROUPS.forEach(function(group){
@@ -521,13 +523,19 @@ function openClubAccessSettings(){
 
   gmSection(s.body,"Inviter un membre du staff","Génère un lien à usage unique (7 jours). La personne crée son compte en l'ouvrant et arrive directement dans votre club.");
   var row=gmRow(s.body);
-  ["coach","dirigeant"].forEach(function(role){
-    row.appendChild(gmBtn(role==="coach"?"Inviter un coach / bureau":"Inviter un dirigeant", role==="coach"?"primary":"soft", function(){
-      if(role==="coach"){
+  // "coach" et "bureau" passent tous les deux par la modale de cases à cocher :
+  // un coach garde en plus son accès sportif fixe, un membre du bureau n'a que
+  // ce qui est coché (pas d'équipe à gérer). Jamais pour "parent" : un parent
+  // ne peut pas recevoir ces accès, même si le dirigeant le voulait (voir
+  // hasModulePermission et firestore.rules).
+  [["coach","Inviter un coach","primary"],["bureau","Inviter un membre du bureau","soft"],["dirigeant","Inviter un dirigeant","soft"]].forEach(function(def){
+    var role=def[0], label=def[1], kind=def[2];
+    row.appendChild(gmBtn(label, kind, function(){
+      if(role==="coach"||role==="bureau"){
         openBureauPermissionPicker(function(perms){
           createClubInvite(clubId, clubName, role, perms).then(function(code){ showInviteResult(code, role, clubName); })
             .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
-        });
+        }, role);
       } else {
         createClubInvite(clubId, clubName, role).then(function(code){ showInviteResult(code, role, clubName); })
           .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });

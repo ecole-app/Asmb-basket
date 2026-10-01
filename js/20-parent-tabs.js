@@ -107,6 +107,14 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
       '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
       (hasBureauAccess?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Gestion</button>':'');
+  } else if(profile==="bureau"){
+    // Membre du bureau : pas d'équipe, pas d'accès sportif fixe — uniquement
+    // Communauté (toujours là) et "Gestion" si au moins une case est cochée.
+    var hasBureauAccess2=typeof BUREAU_GRANTABLE!=="undefined" && typeof hasModulePermission==="function"
+      && BUREAU_GRANTABLE.some(function(id){return hasModulePermission(id);});
+    nav.innerHTML=
+      '<button class="bni on" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
+      (hasBureauAccess2?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Gestion</button>':'');
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
