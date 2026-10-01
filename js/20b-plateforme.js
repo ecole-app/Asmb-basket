@@ -405,9 +405,14 @@ function loadClubsList(list){
     var clubs=[];
     snap.forEach(function(d){ clubs.push(Object.assign({id:d.id}, d.data())); });
     clubs.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
-    list.innerHTML="";
-    if(!clubs.length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Aucun club.</div>'; return; }
-    clubs.forEach(function(c){ list.appendChild(renderClubCard(c, list)); });
+    var paint=function(){
+      list.innerHTML="";
+      if(!clubs.length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Aucun club.</div>'; return; }
+      clubs.forEach(function(c){ list.appendChild(renderClubCard(c, list)); });
+    };
+    // Pas de cron côté serveur : on vérifie les essais expirés à chaque
+    // ouverture de cet écran par le super admin, pas en continu.
+    expirerEssaisPerimes(clubs).then(function(){ paint(); });
   }).catch(function(e){
     list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Erreur : '+((e&&e.code)||e)+'</div>';
   });
@@ -435,6 +440,10 @@ function renderClubCard(c, list){
   if(suspended && jr!==null){
     delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour r\u00e9gulariser</span>'
                  : ' \u00b7 <span style="color:var(--red)">d\u00e9lai d\u00e9pass\u00e9</span>';
+  }
+  if(!suspended && !supprime && c.plan==="trial"){
+    var je=joursEssaiRestants(c);
+    if(je!==null) delai=' \u00b7 <span style="color:#E8670A">essai : '+je+' j restant'+(je===1?'':'s')+'</span>';
   }
   card.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">'
     +plateformeClubLogoHtml(c,40)
@@ -464,6 +473,10 @@ function renderClubCard(c, list){
   }));
   return card;
 }
+// Durée de l'essai gratuit à la création d'un club. Passé ce délai, le club
+// se suspend tout seul (voir expirerEssaisPerimes) avec le même mécanisme et
+// le même délai de régularisation de 7 jours qu'une suspension manuelle.
+var GM_TRIAL_JOURS=30;
 async function createClubFlow(list){
   var name=await askPrompt("Nom du club",{placeholder:"Ex : BC Saint-Chamond",confirmText:"Suivant"});
   if(!name||!name.trim()) return;
@@ -474,6 +487,7 @@ async function createClubFlow(list){
   try{
     await window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",id),{
       name:name, sport:(sport||"basket").trim().toLowerCase(), status:"active", plan:"trial",
+      trialEndsAt:new Date(Date.now()+GM_TRIAL_JOURS*86400000),
       codePrefix:clubCodePrefixFrom(name), poles:BASE_POLES.slice(),
       createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp()
     });
@@ -750,6 +764,33 @@ function joursRestants(club){
 function delaiDepasse(club){
   var j=joursRestants(club);
   return j!==null && j<=0;
+}
+// Jours restants d'essai gratuit (différent de joursRestants, qui compte le
+// délai de régularisation APRÈS suspension). Négatif si l'essai est passé.
+function joursEssaiRestants(club){
+  var d=gmDate(club&&club.trialEndsAt);
+  if(!d) return null;
+  return Math.ceil((d.getTime()-Date.now())/86400000);
+}
+// Pas de backend planifié (site statique) : l'expiration des essais se
+// vérifie à chaque ouverture de la Plateforme plutôt qu'automatiquement en
+// continu. Un club encore en "trial" dont trialEndsAt est dépassé est
+// suspendu exactement comme une suspension manuelle (même délai de 7 jours
+// avant suppression possible), avec un motif explicite.
+function expirerEssaisPerimes(clubs){
+  var expires=clubs.filter(function(c){
+    return c.plan==="trial" && c.status==="active" && joursEssaiRestants(c)!==null && joursEssaiRestants(c)<=0;
+  });
+  if(!expires.length) return Promise.resolve(0);
+  var now=new Date();
+  return Promise.all(expires.map(function(c){
+    c.status="suspended"; c.suspendedAt=now;
+    c.graceUntil=new Date(now.getTime()+GM_DELAI_REGUL_JOURS*86400000);
+    c.suspendMotif="Essai gratuit de "+GM_TRIAL_JOURS+" jours terminé.";
+    return window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
+      status:"suspended", suspendedAt:now, graceUntil:c.graceUntil, suspendMotif:c.suspendMotif
+    }).catch(function(){});
+  })).then(function(){ return expires.length; });
 }
 
 // Ecran vu par un club suspendu ou supprime.

@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790881872",
+    "titre": "Club d'essai : expiration automatique après 30 jours",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Tout club créé depuis la Plateforme démarre maintenant avec un essai gratuit de 30 jours, affiché sous forme de compte à rebours sur sa fiche. Passé ce délai, le club se suspend automatiquement (avec les mêmes 7 jours de régularisation qu'une suspension manuelle) — pratique pour envoyer un accès test limité à un dirigeant sans avoir à suspendre soi-même." }
+    ]
+  },
+  {
     "v": "1790843536",
     "titre": "Plateforme : plus de logo d'un club sur l'écran de tous les clubs",
     "points": [
