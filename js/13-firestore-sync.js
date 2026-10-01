@@ -135,46 +135,6 @@ function initFirestoreSync(){
   }
 }
 
-// ═══ STEP 2 : MIGRATION localStorage → Firestore (collections) ═══════
-function migrateToFirestore(){
-  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ askAlert("Réservé au dirigeant."); return; }
-  if(!window.fbDb || !window.fbSetDoc){ askAlert("Firestore non disponible."); return; }
-  askConfirm("Sans risque : écrase les documents existants, peut être relancé.", {title:"Copier les données vers Firestore ?", confirmText:"Lancer"}).then(function(ok){
-    if(!ok)return;
-    migrateToFirestoreConfirmed();
-  });
-}
-function migrateToFirestoreConfirmed(){
-  var statusEl=document.getElementById("migration-status");
-  function log(msg){ if(statusEl){ statusEl.innerHTML=msg; } }
-  log("Migration en cours...");
-  var tasks=[], counts={players:0,teams:0,events:0,licences:0,evaluations:0}, errors=[];
-  function push(coll,id,data,key){
-    if(id==null||id==="") return;
-    tasks.push(
-      window.fbSetDoc(window.fbDoc(window.fbDb,coll,String(id)),data)
-        .then(function(){ counts[key]++; })
-        .catch(function(e){ errors.push(coll+"/"+id+" ("+((e&&e.code)||(e&&e.message)||"err")+")"); })
-    );
-  }
-  try{
-    getPlayers().forEach(function(p){ if(p) push("players",p.id,p,"players"); });
-    getTeams().forEach(function(t){ if(t) push("teams",t.id,t,"teams"); });
-    getEvents().forEach(function(e){ if(e) push("events",e.id,e,"events"); });
-    getLicences().forEach(function(l){ if(l) push("licences",l.id,l,"licences"); });
-    var evals=getAllEvaluations();
-    Object.keys(evals).forEach(function(evId){ push("evaluations",evId,{scores:evals[evId]},"evaluations"); });
-  }catch(err){ log("Erreur préparation : "+err.message); return; }
-  if(!tasks.length){ log("Aucune donnée locale à migrer."); return; }
-  Promise.all(tasks).then(function(){
-    var msg="✔ Terminé : "+counts.players+" joueurs · "+counts.teams+" équipes · "+counts.events+" événements · "+counts.licences+" licences · "+counts.evaluations+" évals.";
-    if(errors.length){ msg+="<br><span style=\"color:#C0392B\">"+errors.length+" échec(s) : "+errors.slice(0,4).join(" | ")+(errors.length>4?"…":"")+"</span>"; }
-    log(msg);
-    syncPhoneIndexFromLicences(getLicences());
-    syncInscriptionCodes(getLicences());
-  });
-}
-
 function openLiveEval(eventId){
   currentEvalEventId=eventId;
   stack.push("live-eval");showScr("live-eval");

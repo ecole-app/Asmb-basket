@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790883392",
+    "titre": "Nettoyage : retrait de l'ancien outil de migration Firestore",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Le bloc « Migration vers Firestore » dans Paramètres datait d'avant le passage 100% cloud et ne servait plus à rien. Retiré." }
+    ]
+  },
+  {
     "v": "1790882235",
     "titre": "Essai gratuit : rappel, prolongation et passage en payant",
     "points": [
