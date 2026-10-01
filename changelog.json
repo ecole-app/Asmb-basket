@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790882235",
+    "titre": "Essai gratuit : rappel, prolongation et passage en payant",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Rappel automatique dans les 3 derniers jours de l'essai gratuit, pour ne pas être suspendu par surprise." },
+      { "roles": ["dirigeant"], "texte": "Depuis la Plateforme, deux nouveaux boutons sur un club en essai : « Passer en payant » (arrête le compte à rebours) et « Prolonger l'essai » (ajoute des jours)." }
+    ]
+  },
+  {
     "v": "1790881872",
     "titre": "Club d'essai : expiration automatique après 30 jours",
     "points": [

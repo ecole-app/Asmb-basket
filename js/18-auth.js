@@ -294,6 +294,24 @@ function loadClubProfile(clubId){
         else { askAlert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }
         return;
       }
+      // Rappel au dirigeant quand l'essai gratuit arrive à échéance (3 derniers
+      // jours) : un seul rappel par jour, pour ne pas matraquer à chaque ouverture.
+      if(st==="active" && snap.data().plan==="trial" && !window.SUPPORT_MODE && !isSuperAdmin()
+         && (window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0
+         && typeof joursEssaiRestants==="function"){
+        var je=joursEssaiRestants(window.CURRENT_CLUB);
+        if(je!==null && je>=0 && je<=3){
+          var dayKey="gm_trial_remind_"+clubId+"_"+(new Date().toDateString());
+          if(!localStorage.getItem(dayKey)){
+            localStorage.setItem(dayKey,"1");
+            setTimeout(function(){
+              askAlert(je===0
+                ? "Votre essai gratuit se termine aujourd'hui. Contactez-nous pour passer en club actif et garder l'accès."
+                : "Votre essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+". Contactez-nous pour passer en club actif et garder l'accès.");
+            },800);
+          }
+        }
+      }
     } else if(window.ASMB_USER && window.ASMB_USER.uid===BOOTSTRAP_DIRIGEANT_UID && clubId===BOOTSTRAP_CLUB_ID){
       // Premier démarrage multi-club : création de la fiche du club d'origine
       var club={ name:"ASMB Basket", sport:"basket", codePrefix:"ASMB", ownerUid:BOOTSTRAP_DIRIGEANT_UID,

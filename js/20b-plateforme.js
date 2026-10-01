@@ -461,6 +461,10 @@ function renderClubCard(c, list){
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
   if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }
+  if(!own && !supprime && c.plan==="trial"){
+    row.appendChild(gmBtn("Passer en payant","soft",function(){ passerEnPayant(c, list); }));
+    row.appendChild(gmBtn("Prolonger l'essai","soft",function(){ prolongerEssai(c, list); }));
+  }
   // Suppression proposee seulement sur un club deja suspendu : deux gestes
   // distincts valent mieux qu'un bouton definitif a cote des actions courantes.
   // Supprimer n'apparait qu'une fois le delai de regularisation ecoule :
@@ -791,6 +795,29 @@ function expirerEssaisPerimes(clubs){
       status:"suspended", suspendedAt:now, graceUntil:c.graceUntil, suspendMotif:c.suspendMotif
     }).catch(function(){});
   })).then(function(){ return expires.length; });
+}
+// Sort un club du suivi d'essai : plus de compte à rebours, plus de suspension
+// automatique. trialEndsAt est laissé tel quel (inutile une fois plan!=="trial").
+function passerEnPayant(c, list){
+  askConfirm("Passer "+(c.name||c.id)+" en club payant ? L'essai gratuit ne sera plus suivi.",{confirmText:"Confirmer"}).then(function(ok){
+    if(!ok) return;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:"paid"}).then(function(){
+      loadClubsList(list);
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+}
+// Prolonge l'essai d'un club à partir d'aujourd'hui (et non de l'ancienne
+// échéance) : un club déjà expiré repart bien pour N jours pleins, pas N jours
+// comptés depuis une date passée.
+function prolongerEssai(c, list){
+  askPrompt("Prolonger l'essai de combien de jours ?",{defaultValue:"15",confirmText:"Prolonger"}).then(function(v){
+    var n=parseInt(v,10);
+    if(!v || !n || n<=0) return;
+    var until=new Date(Date.now()+n*86400000);
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{trialEndsAt:until}).then(function(){
+      loadClubsList(list);
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
 }
 
 // Ecran vu par un club suspendu ou supprime.
