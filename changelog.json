@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790842533",
+    "titre": "Accès coach : le titre (trésorier/secrétaire) se transfère immédiatement",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Cliquer sur Trésorier ou Secrétaire pour quelqu'un l'enregistre tout de suite (plus besoin d'appuyer sur Enregistrer). Si le titre est déjà pris, une confirmation propose de le transférer directement de l'ancien détenteur au nouveau, sans étape intermédiaire." }
+    ]
+  },
+  {
     "v": "1790842268",
     "titre": "Accès bureau : l'onglet se nomme « Gestion »",
     "points": [

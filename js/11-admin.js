@@ -446,6 +446,43 @@ function renderAccesList(list,users,phoneToName){
   list.innerHTML="";
   if(!users.length){list.innerHTML='<div style="color:var(--mut);padding:24px;text-align:center">Aucun compte enregistré</div>';return;}
   var teams=getTeams();
+  // Le titre (trésorier/secrétaire) est exclusif et s'écrit tout de suite,
+  // à part des autres champs (qui eux restent en brouillon jusqu'à "Enregistrer").
+  // Sans ça, deux cartes pouvaient se contredire : décocher le titre de l'un
+  // sans sauvegarder bloquait toujours l'autre, puisque la vérification se
+  // basait sur un tableau "users" jamais mis à jour avant un clic sur Enregistrer.
+  // Ici, le changement est écrit en base immédiatement (et transfère le titre
+  // de l'ancien détenteur au nouveau dans la même opération), puis les DEUX
+  // cartes concernées sont repeintes tout de suite.
+  var titreRegistry={}; // _uid -> {repaint:fn}
+  function nameFor(ou){ return phoneToName[(ou.phone||"").replace(/\s+/g,"")]||ou.email||ou.phone||"ce compte"; }
+  function setTitreImmediate(u, val, onDone){
+    var holder=val?users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;}):null;
+    var go=function(){
+      var batch=window.fbWriteBatch?window.fbWriteBatch():null;
+      var writes;
+      if(batch){
+        if(holder) batch.update(window.fbDoc(window.fbDb,"users",holder._uid),{titre:null});
+        batch.update(window.fbDoc(window.fbDb,"users",u._uid),{titre:val});
+        writes=batch.commit();
+      } else {
+        writes=Promise.all([
+          holder?window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",holder._uid),{titre:null}):Promise.resolve(),
+          window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{titre:val})
+        ]);
+      }
+      writes.then(function(){
+        if(holder){ holder.titre=null; var hr=titreRegistry[holder._uid]; if(hr) hr.repaint(); }
+        u.titre=val;
+        onDone(true);
+      }).catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); onDone(false); });
+    };
+    if(holder){
+      askConfirm("Retirer le titre de "+BUREAU_TITRES[val].label+" à "+nameFor(holder)+" pour le donner à "+nameFor(u)+" ?",{confirmText:"Transférer"}).then(function(ok){
+        if(ok) go(); else onDone(false);
+      });
+    } else go();
+  }
   users.forEach(function(u){
     var card=document.createElement("div");
     card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:10px";
@@ -517,24 +554,23 @@ function renderAccesList(list,users,phoneToName){
       chip.addEventListener("click",function(e){
         e.stopPropagation();
         var val=key==="aucun"?null:key;
-        if(val){
-          var conflict=users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;});
-          if(conflict){
-            var conflictName=phoneToName[(conflict.phone||"").replace(/\s+/g,"")]||conflict.email||conflict.phone||"un autre compte";
-            askAlert(BUREAU_TITRES[val].label+" est déjà attribué à "+conflictName+". Retirez-lui ce titre d'abord.");
-            return;
+        if(val===state.titre) return;
+        titreWrap.style.opacity=".6";titreWrap.style.pointerEvents="none";
+        setTitreImmediate(u,val,function(ok){
+          titreWrap.style.opacity="";titreWrap.style.pointerEvents="";
+          if(!ok) return;
+          state.titre=val;
+          if(val && BUREAU_TITRES[val].autoCheck){
+            BUREAU_TITRES[val].autoCheck.forEach(function(id){state.permissions[id]=true;});
+            paintPerms();
           }
-        }
-        state.titre=val;
-        if(val && BUREAU_TITRES[val].autoCheck){
-          BUREAU_TITRES[val].autoCheck.forEach(function(id){state.permissions[id]=true;});
-          paintPerms();
-        }
-        paintTitre();updateSuggestion();
+          paintTitre();updateSuggestion();
+        });
       });
       titreWrap.appendChild(chip);
     });
     paintTitre();
+    titreRegistry[u._uid]={repaint:function(){state.titre=u.titre;paintTitre();updateSuggestion();}};
     bureauBox.appendChild(titreWrap);
     // ── Cases à cocher, module par module. Seules Comptabilité et Inventaire
     // sont vraiment bloquées côté règles Firestore pour un non-dirigeant ;
@@ -586,21 +622,15 @@ function renderAccesList(list,users,phoneToName){
     save.style.cssText="padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
     save.addEventListener("click",function(e){
       e.stopPropagation();
-      if(state.titre){
-        var conflict2=users.find(function(ou){return ou._uid!==u._uid && ou.titre===state.titre;});
-        if(conflict2){
-          var conflictName2=phoneToName[(conflict2.phone||"").replace(/\s+/g,"")]||conflict2.email||conflict2.phone||"un autre compte";
-          askAlert(BUREAU_TITRES[state.titre].label+" est déjà attribué à "+conflictName2+". Retirez-lui ce titre d'abord.");
-          return;
-        }
-      }
+      // Le titre se sauvegarde déjà tout seul (voir setTitreImmediate) : on ne
+      // renvoie ici que roles/équipes/cases, qui restent en brouillon jusqu'au clic.
       save.textContent="…";
-      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions,titre:state.titre}).then(function(){
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions}).then(function(){
         return syncCoachChannels(u,state.teams);
       }).then(function(){
         save.textContent="\u2713 Enregistré";
         sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
-        u.titre=state.titre;u.permissions=Object.assign({},state.permissions);
+        u.permissions=Object.assign({},state.permissions);
         setTimeout(function(){save.textContent="Enregistrer";},1500);
       }).catch(function(err){save.textContent="Erreur";askAlert((err&&err.code)||err);});
     });
