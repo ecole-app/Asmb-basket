@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790843536",
+    "titre": "Plateforme : plus de logo d'un club sur l'écran de tous les clubs",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui de votre propre club (ASMB), ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom." }
+    ]
+  },
+  {
     "v": "1790843103",
     "titre": "Nouveau rôle « Membre du bureau »",
     "points": [

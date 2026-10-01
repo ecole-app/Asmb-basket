@@ -412,6 +412,18 @@ function loadClubsList(list){
     list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Erreur : '+((e&&e.code)||e)+'</div>';
   });
 }
+// Logo d'un club dans la liste Plateforme. Indépendant de window.CURRENT_CLUB
+// (contrairement à clubLogoHtml) puisqu'on liste potentiellement plusieurs
+// clubs à la fois : chacun doit montrer SON logo, pas celui du club "maison".
+function plateformeClubLogoHtml(c, px){
+  px=px||40;
+  var r=Math.round(px*0.22);
+  if(c.logo) return '<img src="'+authEsc(c.logo)+'" alt="" style="width:'+px+'px;height:'+px+'px;object-fit:contain;display:block;border-radius:'+r+'px;flex-shrink:0;background:#fff">';
+  var n=(c.name||c.id||"").trim();
+  var mots=n.replace(/[^0-9A-Za-zÀ-ÿ]+/g," ").split(" ").filter(Boolean);
+  var init=mots.length>=2?(mots[0].charAt(0)+mots[1].charAt(0)):(n.slice(0,2)||"?");
+  return '<div style="width:'+px+'px;height:'+px+'px;border-radius:'+r+'px;background:linear-gradient(145deg,#1A2E5A,#10203d);display:flex;align-items:center;justify-content:center;font-size:'+Math.max(9,Math.round(px*0.4))+'px;font-weight:800;color:#fff;flex-shrink:0">'+authEsc(init.toUpperCase())+'</div>';
+}
 function renderClubCard(c, list){
   var card=gmCard();
   var suspended=c.status==="suspended";
@@ -424,9 +436,11 @@ function renderClubCard(c, list){
     delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour r\u00e9gulariser</span>'
                  : ' \u00b7 <span style="color:var(--red)">d\u00e9lai d\u00e9pass\u00e9</span>';
   }
-  card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
+  card.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">'
+    +plateformeClubLogoHtml(c,40)
+    +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
     +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.sport||"")+' \u00b7 '+authEsc(c.id)
-    +' \u00b7 <b style="color:'+etatCol+'">'+etat+'</b>'+delai+'</div>'
+    +' \u00b7 <b style="color:'+etatCol+'">'+etat+'</b>'+delai+'</div></div></div>'
     +(c.suspendMotif?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic">'+authEsc(c.suspendMotif)+'</div>':'');
   var row=gmRow(card);
   var own=(c.id===BOOTSTRAP_CLUB_ID);
