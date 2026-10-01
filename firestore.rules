@@ -182,17 +182,20 @@ service cloud.firestore {
     // ── Codes d'accès support (générés par le club) ─────────────────
     match /support_grants/{code} {
       allow get: if superAdmin();                        // uniquement si on connaît le code
-      allow list: if dirigeant(resource.data.clubId);    // le club voit ses codes actifs
+      allow list: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);    // le club voit ses codes actifs
       allow create: if dirigeant(request.resource.data.clubId);
-      allow delete: if dirigeant(resource.data.clubId);  // révocation
+      // Révocation normale par le dirigeant, OU purge du club par le super admin
+      // (deleteClubFlow) : sans purgeWindow, dirigeant(clubId) redevient faux dès
+      // que le club passe en "purging", et la purge de ces codes échouait.
+      allow delete: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
     // ── Codes d'accès caisse buvette (générés par le club) ───────────
     match /buvette_codes/{code} {
       allow get: if true;                                 // le site caisse buvette n'a pas de connexion : le code protège l'accès
-      allow list: if dirigeant(resource.data.clubId);      // le club voit ses codes actifs pour les révoquer
+      allow list: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);      // le club voit ses codes actifs pour les révoquer
       allow create: if dirigeant(request.resource.data.clubId);
-      allow delete: if dirigeant(resource.data.clubId);    // révocation
+      allow delete: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);    // révocation, ou purge du club
     }
 
     // ── Clubs ───────────────────────────────────────────────────────
@@ -316,7 +319,10 @@ service cloud.firestore {
       allow read: if true;
       allow create: if staff(request.resource.data.clubId);
       allow update: if staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId;
-      allow delete: if staff(resource.data.clubId);
+      // staff(clubId) redevient faux dès que le club passe en "purging" : sans
+      // purgeWindow, la purge de ces codes par le super admin (deleteClubFlow)
+      // échouait, exactement comme pour support_grants/buvette_codes ci-dessus.
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
     // Tout le reste (dont les anciennes collections à la racine) : refusé.
