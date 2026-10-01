@@ -48,9 +48,9 @@ function comptaFilteredList(){
 }
 
 function buildComptabilite(){
-  if(!isStaffUser() || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){
+  if(!hasModulePermission("comptabilite")){
     var listElNo=document.getElementById("compta-list");
-    if(listElNo) listElNo.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Réservé au dirigeant</div></div>';
+    if(listElNo) listElNo.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Accès non autorisé</div></div>';
     return;
   }
   var all=getComptabilite();

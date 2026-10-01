@@ -1,5 +1,13 @@
 [
   {
+    "v": "1790832270",
+    "titre": "Accès bureau : comptabilité et inventaire réservés par le dirigeant",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Dans « Accès coach », chaque compte a maintenant un titre (Trésorier / Secrétaire, un seul par club) et des cases à cocher pour donner l'accès à la Comptabilité et à l'Inventaire buvette. Choisir un titre pré-coche les cases utiles, mais c'est bien ce qui est coché qui donne l'accès. Une étiquette en haut suggère le rôle (Coach, Membre du bureau...) selon ce qui est coché." },
+      { "roles": ["coach"], "texte": "Si le dirigeant t'accorde l'accès à la Comptabilité ou à l'Inventaire, ces écrans apparaissent dans ton admin en plus de ton accès sportif habituel, qui ne change pas." }
+    ]
+  },
+  {
     "v": "1790830815",
     "titre": "Correction : l'écran Documents ne s'ouvrait pas au premier clic",
     "points": [

@@ -16,6 +16,38 @@ var ADMIN_MODULES=[
  {id:"notesfrais",name:"Notes de frais",sub:"Dépenses des coachs/bénévoles",icon:"🧾",color:"#E8670A",scr:"admin"},
  {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
+
+// ── Accès "bureau" accordés individuellement (hors dirigeant/coach) ──────
+// Seuls ces modules ont une vraie barrière côté règles Firestore : un compte
+// qui n'est pas dirigeant ne peut lire/écrire comptabilite ou inventaire que
+// si son document "users/{uid}" porte permissions.<id>=true. Les autres
+// écrans admin (Licences, Équipes, Planning, Documents...) restent réservés
+// au dirigeant pour l'instant — ouvrir des cases pour eux nécessiterait de
+// revoir les règles correspondantes (aujourd'hui ouvertes à tout coach).
+var BUREAU_GRANTABLE=["comptabilite","inventaire"];
+var BUREAU_GRANTABLE_LABELS={comptabilite:"Comptabilité",inventaire:"Inventaire (buvette/matériel)"};
+// Titres exclusifs (un seul par club à la fois) : ils ne font que pré-cocher
+// des cases pour gagner du temps — l'accès réel reste celui des cases.
+var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inventaire"]},secretaire:{label:"Secrétaire",autoCheck:[]}};
+function hasModulePermission(id){
+  if(!window.ASMB_USER) return false;
+  if((window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0) return true;
+  if(BUREAU_GRANTABLE.indexOf(id)<0) return false;
+  var perms=window.ASMB_USER.permissions||{};
+  return !!perms[id];
+}
+// Petite étiquette indicative (non stockée) suggérant un intitulé de rôle
+// selon ce qui est coché, pour guider le dirigeant pendant qu'il configure
+// un accès — purement informatif, n'affecte rien.
+function suggestBureauRoleLabel(roles,perms){
+  var isCoach=(roles||[]).indexOf("coach")>=0;
+  var bureau=BUREAU_GRANTABLE.some(function(id){return perms&&perms[id];});
+  if(isCoach&&bureau) return "Coach + bureau";
+  if(isCoach) return "Coach";
+  if(bureau) return "Membre du bureau";
+  return "";
+}
+
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
@@ -222,7 +254,11 @@ function buildAdminHome(){
    }
    cleanupExpiredEventChannelAccess();
  }
+ var isDirHome=window.ASMB_USER&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
+ var editToggle=document.getElementById("admin-edit-toggle");
+ if(editToggle) editToggle.style.display=isDirHome?"":"none";
  getOrderedAdminModules().forEach(function(m,i,arr){
+ if(!hasModulePermission(m.id)) return; // accès "bureau" non accordé : carte masquée
  var hidden=getHiddenAdminModules();
  var isHidden=hidden.indexOf(m.id)>=0;
  if(isHidden && !ADMIN_EDIT_MODE) return;
@@ -271,6 +307,7 @@ function getAdminCount(id){
 function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
+  if(!hasModulePermission(id)){askAlert("Accès non autorisé.");return;}
   if(id==="acces"){openAccesCoach();return;}
   if(id==="invitations"){openClubAccessSettings();return;}
   if(id==="avis"){openAvisModule();return;}
@@ -414,7 +451,7 @@ function renderAccesList(list,users,phoneToName){
     sub.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
     sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
     card.appendChild(sub);
-    var state={roles:(u.roles||[]).slice(),teams:(u.linkedTeamIds||[]).slice()};
+    var state={roles:(u.roles||[]).slice(),teams:(u.linkedTeamIds||[]).slice(),titre:u.titre||null,permissions:Object.assign({},u.permissions||{})};
     var teamBox=document.createElement("div");
     var roleWrap=document.createElement("div");
     roleWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px";
@@ -422,10 +459,83 @@ function renderAccesList(list,users,phoneToName){
       var chip=document.createElement("button");
       function paint(){var on=state.roles.indexOf(r)>=0;chip.style.cssText="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--grn)":"var(--bdr)")+";background:"+(on?"var(--grn)":"transparent")+";color:"+(on?"#fff":"var(--mut)");}
       chip.textContent=roleLabel(r);paint();
-      chip.addEventListener("click",function(e){e.stopPropagation();var i=state.roles.indexOf(r);if(i>=0)state.roles.splice(i,1);else state.roles.push(r);paint();teamBox.style.display=(state.roles.indexOf("coach")>=0)?"block":"none";});
+      chip.addEventListener("click",function(e){e.stopPropagation();var i=state.roles.indexOf(r);if(i>=0)state.roles.splice(i,1);else state.roles.push(r);paint();teamBox.style.display=(state.roles.indexOf("coach")>=0)?"block":"none";updateSuggestion();});
       roleWrap.appendChild(chip);
     });
     card.appendChild(roleWrap);
+    // ── Suggestion de rôle (dynamique selon cases cochées) ──────
+    var suggestLbl=document.createElement("div");
+    suggestLbl.style.cssText="font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--dkg);background:var(--ltg);display:inline-block;padding:3px 9px;border-radius:10px;margin-bottom:8px";
+    function updateSuggestion(){
+      var s=suggestBureauRoleLabel(state.roles,state.permissions);
+      if(s){suggestLbl.textContent=s;suggestLbl.style.display="inline-block";}
+      else suggestLbl.style.display="none";
+    }
+    card.appendChild(suggestLbl);
+    // ── Titre exclusif (trésorier / secrétaire) ──────
+    var titreWrap=document.createElement("div");
+    titreWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px";
+    var titreTl=document.createElement("div");
+    titreTl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
+    titreTl.textContent="Titre (un seul par club)";
+    card.appendChild(titreTl);
+    var titreChips={};
+    function paintTitre(){
+      Object.keys(titreChips).forEach(function(key){
+        var on=state.titre===(key==="aucun"?null:key);
+        titreChips[key].style.cssText="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"transparent")+";color:"+(on?"#fff":"var(--mut)");
+      });
+    }
+    [["aucun","Aucun"]].concat(Object.keys(BUREAU_TITRES).map(function(k){return [k,BUREAU_TITRES[k].label];})).forEach(function(pair){
+      var key=pair[0],label=pair[1];
+      var chip=document.createElement("button");
+      chip.textContent=label;
+      titreChips[key]=chip;
+      chip.addEventListener("click",function(e){
+        e.stopPropagation();
+        var val=key==="aucun"?null:key;
+        if(val){
+          var conflict=users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;});
+          if(conflict){
+            var conflictName=phoneToName[(conflict.phone||"").replace(/\s+/g,"")]||conflict.email||conflict.phone||"un autre compte";
+            askAlert(BUREAU_TITRES[val].label+" est déjà attribué à "+conflictName+". Retirez-lui ce titre d'abord.");
+            return;
+          }
+        }
+        state.titre=val;
+        if(val && BUREAU_TITRES[val].autoCheck){
+          BUREAU_TITRES[val].autoCheck.forEach(function(id){state.permissions[id]=true;});
+          paintPerms();
+        }
+        paintTitre();updateSuggestion();
+      });
+      titreWrap.appendChild(chip);
+    });
+    paintTitre();
+    card.appendChild(titreWrap);
+    // ── Accès bureau (cases à cocher, modules réellement protégés) ──────
+    var permWrap=document.createElement("div");
+    permWrap.style.cssText="margin-bottom:10px";
+    var permTl=document.createElement("div");
+    permTl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
+    permTl.textContent="Accès bureau";
+    permWrap.appendChild(permTl);
+    var permChecks={};
+    function paintPerms(){
+      BUREAU_GRANTABLE.forEach(function(id){if(permChecks[id])permChecks[id].checked=!!state.permissions[id];});
+    }
+    BUREAU_GRANTABLE.forEach(function(id){
+      var lbl=document.createElement("label");
+      lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--txt);cursor:pointer";
+      var chk=document.createElement("input");chk.type="checkbox";chk.checked=!!state.permissions[id];
+      chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
+      permChecks[id]=chk;
+      chk.addEventListener("change",function(){state.permissions[id]=chk.checked;updateSuggestion();});
+      lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
+      permWrap.appendChild(lbl);
+    });
+    card.appendChild(permWrap);
+    updateSuggestion();
     teamBox.style.cssText="margin-bottom:10px;display:"+((state.roles.indexOf("coach")>=0)?"block":"none");
     var tl=document.createElement("div");
     tl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
@@ -446,12 +556,22 @@ function renderAccesList(list,users,phoneToName){
     save.textContent="Enregistrer";
     save.style.cssText="padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer";
     save.addEventListener("click",function(e){
-      e.stopPropagation();save.textContent="…";
-      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams}).then(function(){
+      e.stopPropagation();
+      if(state.titre){
+        var conflict2=users.find(function(ou){return ou._uid!==u._uid && ou.titre===state.titre;});
+        if(conflict2){
+          var conflictName2=phoneToName[(conflict2.phone||"").replace(/\s+/g,"")]||conflict2.email||conflict2.phone||"un autre compte";
+          askAlert(BUREAU_TITRES[state.titre].label+" est déjà attribué à "+conflictName2+". Retirez-lui ce titre d'abord.");
+          return;
+        }
+      }
+      save.textContent="…";
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions,titre:state.titre}).then(function(){
         return syncCoachChannels(u,state.teams);
       }).then(function(){
         save.textContent="\u2713 Enregistré";
         sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
+        u.titre=state.titre;u.permissions=Object.assign({},state.permissions);
         setTimeout(function(){save.textContent="Enregistrer";},1500);
       }).catch(function(err){save.textContent="Erreur";askAlert((err&&err.code)||err);});
     });

@@ -64,6 +64,12 @@ service cloud.firestore {
     function hasRole(r) { return me().get('roles', []).hasAny([r]); }
     function staff(clubId)     { return member(clubId) && (hasRole('dirigeant') || hasRole('coach')); }
     function dirigeant(clubId) { return member(clubId) && hasRole('dirigeant'); }
+    // Accès "bureau" accordé individuellement par le dirigeant (ex. trésorier) à
+    // un module précis, en dehors du dirigeant/coach classique. N'importe quel
+    // membre du club (y compris un parent) peut en bénéficier : c'est le champ
+    // permissions.<id>=true sur son propre compte, posé par le dirigeant, qui
+    // décide — jamais le compte lui-même (voir la règle update de /users/{uid}).
+    function hasPermission(clubId, id) { return member(clubId) && me().get('permissions', {}).get(id, false) == true; }
 
     // Accès support : le super admin lit un club UNIQUEMENT s'il a ouvert une
     // session avec un code encore valide, que le club n'a pas révoqué.
@@ -127,7 +133,7 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre']))
         || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
         || (superAdmin() && request.auth.uid == uid
             && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
@@ -253,16 +259,16 @@ service cloud.firestore {
       // existante). Le catalogue buvette (nom/prix/stock, pas le matériel)
       // est lisible sans connexion : c'est un menu, rien de sensible.
       match /comptabilite/{id} {
-        allow read: if readDirigeant(clubId);
-        allow write: if dirigeant(clubId);
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'comptabilite');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'comptabilite');
         allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
           && request.resource.data.type == 'recette'
           && request.resource.data.categorie == 'Buvette/Événements'
           && request.resource.data.montant is number && request.resource.data.montant > 0;
       }
       match /inventaire/{id} {
-        allow read: if readDirigeant(clubId) || resource.data.get('categorie', null) == 'buvette';
-        allow write: if dirigeant(clubId);
+        allow read: if readDirigeant(clubId) || resource.data.get('categorie', null) == 'buvette' || hasPermission(clubId, 'inventaire');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'inventaire');
         allow update: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
           && resource.data.categorie == 'buvette'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['qte','viaCode']);
