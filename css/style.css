@@ -240,6 +240,9 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 .admin-card.editing,.param-block.editing{border:1.5px dashed var(--bdr)}
 .press-dragging{z-index:500!important;box-shadow:0 8px 24px rgba(0,0,0,.3)!important;opacity:.96;touch-action:none}
 
+/* ── Écran d'entrée / connexion (marque General Manager, hors thèmes club) ── */
+.auth-field:focus{border-color:#F0A732!important;box-shadow:0 0 0 3px rgba(240,167,50,.18)}
+
 /* ===== Styles complementaires (1) ===== */
 '+
     'body{font-family:system-ui,-apple-system,sans-serif;padding:30px;color:#1a2438}'+

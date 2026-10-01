@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790829838",
+    "titre": "Nouvel écran d'entrée dans l'appli",
+    "points": [
+      { "roles": ["dirigeant", "coach", "parent"], "texte": "L'écran de connexion (et mot de passe oublié) a été redessiné : fond encre avec le nom General Manager, un seul accent ambre pour le bouton. Aucun changement dans la façon de se connecter, juste l'habillage." }
+    ]
+  },
+  {
     "v": "1790827761",
     "titre": "Comptabilité : un tableau de bord avec des graphiques",
     "points": [

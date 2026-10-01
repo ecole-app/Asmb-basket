@@ -4,35 +4,52 @@ var BOOTSTRAP_DIRIGEANT_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2"; // compte dirigean
 var BOOTSTRAP_CLUB_ID = "asmb"; // club d'origine, rattaché au compte bootstrap
 function authEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+// ── Identité visuelle de l'écran d'entrée ────────────────────────────
+// Avant connexion aucun club n'est charge : cet écran porte la marque
+// General Manager elle-même (jamais le logo d'un club), donc il ne suit
+// pas les thèmes visuels des clubs — ses couleurs sont fixes à dessein.
+var AUTH_INK='#10201A';      // encre profonde (terrain la nuit)
+var AUTH_AMBER='#F0A732';    // le seul accent, utilisé une fois (action)
+var AUTH_CHALK='#F7F4EC';    // craie — fond du bas de l'écran
+var AUTH_CHALKMUT='#B9C2BA'; // texte secondaire sur fond encre
+var AUTH_INKTXT='#182720';   // texte principal sur fond craie
+var AUTH_MUTTXT='#6E7B73';   // texte secondaire sur fond craie
+var AUTH_DISPLAY="font-family:'Oswald',system-ui,sans-serif";
+
 function authLogoHtml(){
-  // Avant connexion aucun club n'est charge : on retombe sur la marque General
-  // Manager, jamais sur le logo du dernier club affiche.
   if(typeof clubLogo==="function" && clubLogo()){
-    return '<div style="width:64px;height:64px;border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+clubLogoHtml(64)+'</div>';
+    return '<div style="width:56px;height:56px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+clubLogoHtml(56)+'</div>';
   }
-  return '<div style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,.12);border:1.5px solid rgba(242,213,126,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#F2D57E;letter-spacing:1px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></div>';
+  return "";
 }
 
+// Arc de rond central très discret : référence au terrain sans être
+// un pictogramme de sport précis (l'appli est multi-sport).
+var AUTH_ARC='<svg width="340" height="340" viewBox="0 0 340 340" style="position:absolute;top:-90px;right:-110px;opacity:.1;pointer-events:none" aria-hidden="true"><circle cx="170" cy="170" r="130" fill="none" stroke="'+AUTH_CHALK+'" stroke-width="1.5"/><line x1="170" y1="40" x2="170" y2="300" stroke="'+AUTH_CHALK+'" stroke-width="1.5"/></svg>';
+
 function authHero(title, tag){
-  return '<div style="background:linear-gradient(160deg,#10203d,#1A2E5A,#10203d);padding:30px 22px 26px;text-align:center">'
-    +'<div style="display:flex;justify-content:center;margin-bottom:12px">'+authLogoHtml()+'</div>'
-    +'<div style="font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-.3px">'+authEsc(title)+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:#F2D57E;margin-top:7px;text-transform:uppercase;letter-spacing:.5px">'+authEsc(tag)+'</div>'
+  var logo=authLogoHtml();
+  return '<div style="position:relative;overflow:hidden;background:'+AUTH_INK+';padding:38px 24px 30px;text-align:center">'
+    +AUTH_ARC
+    +(logo?'<div style="display:flex;justify-content:center;margin-bottom:14px;position:relative">'+logo+'</div>':'')
+    +'<div style="position:relative;'+AUTH_DISPLAY+';font-size:28px;font-weight:600;color:'+AUTH_CHALK+';text-transform:uppercase;letter-spacing:.5px;line-height:1.1">'+authEsc(title)+'</div>'
+    +'<div style="position:relative;width:28px;height:2px;background:'+AUTH_AMBER+';margin:12px auto 10px"></div>'
+    +'<div style="position:relative;font-size:13px;color:'+AUTH_CHALKMUT+'">'+authEsc(tag)+'</div>'
     +'</div>';
 }
 
-var AUTH_LBL='font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--dkg);display:block;margin:14px 2px 6px';
-var AUTH_INP='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:15px;background:#fff;color:var(--txt);outline:none;-webkit-appearance:none';
-var AUTH_BTN='width:100%;padding:15px;border:none;border-radius:var(--rs);background:var(--grn);color:#fff;font-size:15px;font-weight:800;margin-top:22px;cursor:pointer';
-var AUTH_BTN2='width:100%;padding:14px;border:1.5px solid var(--bdr);border-radius:var(--rs);background:transparent;color:var(--dkg);font-size:14px;font-weight:800;margin-top:10px;cursor:pointer';
+var AUTH_LBL='font-size:12.5px;font-weight:600;color:'+AUTH_MUTTXT+';display:block;margin:16px 2px 6px';
+var AUTH_INP='width:100%;padding:14px;border:1.5px solid #e1ddd0;border-radius:10px;font-size:15px;background:'+AUTH_CHALK+';color:'+AUTH_INKTXT+';outline:none;-webkit-appearance:none';
+var AUTH_BTN='width:100%;padding:15px;border:none;border-radius:10px;background:'+AUTH_AMBER+';color:'+AUTH_INK+';font-size:15px;font-weight:700;margin-top:24px;cursor:pointer';
+var AUTH_BTN2='width:100%;padding:13px;border:none;border-radius:10px;background:transparent;color:'+AUTH_MUTTXT+';font-size:13.5px;font-weight:600;margin-top:8px;cursor:pointer';
 
 var AUTH_EYE_OPEN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var AUTH_EYE_CLOSED='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.94M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 
 function authPassField(id, placeholder){
   return '<div style="position:relative">'
-    +'<input id="'+id+'" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
-    +'<button type="button" class="auth-eye-btn" data-target="'+id+'" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
+    +'<input id="'+id+'" class="auth-field" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
+    +'<button type="button" class="auth-eye-btn" data-target="'+id+'" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:'+AUTH_MUTTXT+';display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
     +'</div>';
 }
 
@@ -60,42 +77,45 @@ function showAuth(step, data){
   var el=document.getElementById("auth-content");
   if(!el) return;
   stack=["auth"]; showScr("auth");
+  el.style.background=AUTH_CHALK;
   var h="";
   if(step==="entry"){
     h=authHero("General Manager","Espace du club")
-      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:6px;line-height:1.45">Application réservée aux membres du club.</p>'
+      +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
+      +'<p style="font-size:13.5px;color:'+AUTH_MUTTXT+';text-align:center;line-height:1.5">Application réservée aux membres du club.</p>'
       +'<button style="'+AUTH_BTN+'" onclick="showAuth(\'login\')">Se connecter</button>'
-      +'<p style="font-size:11px;color:var(--mut);line-height:1.5;margin-top:16px;padding:12px;background:#e8edf5;border-radius:var(--rx)">Pas encore de compte ? Le club vous envoie un lien d\'invitation pour le créer.</p>'
+      +'<p style="font-size:12px;color:'+AUTH_MUTTXT+';line-height:1.55;margin-top:18px;padding:13px 14px;border:1.5px solid #e1ddd0;border-radius:10px">Pas encore de compte ? Le club vous envoie un lien d\'invitation pour le créer.</p>'
       +'<div style="flex:1"></div>'
-      +'<p style="text-align:center;font-size:12px;color:var(--mut);font-weight:700;margin-top:12px;cursor:pointer;text-decoration:underline" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
+      +'<div style="border-top:1px solid #e1ddd0;margin:18px 0 0;padding-top:16px;text-align:center">'
+      +'<p style="font-size:12.5px;color:'+AUTH_MUTTXT+';font-weight:600;cursor:pointer" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
+      +'</div>'
       +'</div>';
   } else if(step==="login"){
     var savedEmail=data.email||localStorage.getItem("asmb_last_email")||"";
     h=authHero("Connexion","Espace du club")
-      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+      +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
-      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="prenom@email.fr">'
+      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="prenom@email.fr">'
       +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
       +authPassField("auth-pass","••••••••")
-      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+      +'<div id="auth-err" style="display:none;color:#C0392B;font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoLogin()">Se connecter</button>'
-      +'<p style="text-align:center;font-size:13px;color:var(--grn);font-weight:800;margin-top:16px;cursor:pointer" onclick="showAuth(\'reset\')">Mot de passe oublié ?</p>'
+      +'<p style="text-align:center;font-size:13px;color:'+AUTH_INKTXT+';font-weight:600;margin-top:18px;cursor:pointer" onclick="showAuth(\'reset\')">Mot de passe oublié ?</p>'
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Retour</button>'
       +'</div>';
   } else if(step==="unknown"){
     h=authHero("Numéro inconnu","Pas enregistré au club")
-      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-      +'<div style="background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:600;padding:14px;border-radius:var(--rs);text-align:center;line-height:1.45">Ce numéro n\'est pas reconnu. Se rapprocher du club pour l\'ajouter, puis réessayer.</div>'
+      +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
+      +'<div style="background:rgba(192,57,43,.08);color:#C0392B;font-size:13px;font-weight:600;padding:14px;border-radius:10px;text-align:center;line-height:1.5">Ce numéro n\'est pas reconnu. Se rapprocher du club pour l\'ajouter, puis réessayer.</div>'
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'entry\')">Réessayer avec un autre numéro</button>'
       +'</div>';
   } else if(step==="reset"){
     h=authHero("Réinitialiser","Nouveau mot de passe")
-      +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-      +'<p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:4px;line-height:1.45">Saisir l\'e-mail : un lien de réinitialisation sera envoyé.</p>'
+      +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
+      +'<p style="font-size:13.5px;color:'+AUTH_MUTTXT+';text-align:center;line-height:1.5">Saisir l\'e-mail : un lien de réinitialisation sera envoyé.</p>'
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
-      +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
-      +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
+      +'<div id="auth-err" style="display:none;color:#C0392B;font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoReset()">Envoyer le lien</button>'
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'login\')">Retour</button>'
       +'</div>';
