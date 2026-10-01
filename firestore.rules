@@ -120,7 +120,12 @@ service cloud.firestore {
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.inviteCode is string
         && inviteValid(request.resource.data.inviteCode, request.resource.data.clubId, request.resource.data.roles)
-        && getAfter(invitePath(request.resource.data.inviteCode)).data.usedBy == request.auth.uid;
+        && getAfter(invitePath(request.resource.data.inviteCode)).data.usedBy == request.auth.uid
+        // La personne qui accepte un lien ne choisit pas ses propres accès :
+        // permissions/titre doivent être exactement ceux posés par le dirigeant
+        // sur l'invitation elle-même (grantedPermissions), jamais autre chose.
+        && request.resource.data.get('permissions', {}) == get(invitePath(request.resource.data.inviteCode)).data.get('grantedPermissions', {})
+        && request.resource.data.get('titre', null) == null;
       // c) Compte d'origine du super admin : recréation à l'identique du seed
       //    posé par applyAuthedUser() (même après suppression), jamais avec un
       //    autre club ou un autre rôle — sinon la restriction de l'update

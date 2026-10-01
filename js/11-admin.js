@@ -17,15 +17,25 @@ var ADMIN_MODULES=[
  {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
 
-// ── Accès "bureau" accordés individuellement (hors dirigeant/coach) ──────
-// Seuls ces modules ont une vraie barrière côté règles Firestore : un compte
-// qui n'est pas dirigeant ne peut lire/écrire comptabilite ou inventaire que
-// si son document "users/{uid}" porte permissions.<id>=true. Les autres
-// écrans admin (Licences, Équipes, Planning, Documents...) restent réservés
-// au dirigeant pour l'instant — ouvrir des cases pour eux nécessiterait de
-// revoir les règles correspondantes (aujourd'hui ouvertes à tout coach).
-var BUREAU_GRANTABLE=["comptabilite","inventaire"];
-var BUREAU_GRANTABLE_LABELS={comptabilite:"Comptabilité",inventaire:"Inventaire (buvette/matériel)"};
+// ── Accès "bureau" accordés individuellement (hors dirigeant) ──────────
+// Le dirigeant coche, module par module, ce qu'un coach/membre du bureau
+// peut voir dans l'admin. IMPORTANT : seuls comptabilite et inventaire ont
+// une vraie barrière côté règles Firestore (users/{uid}.permissions.<id>
+// vérifié par firestore.rules). Pour tous les autres modules listés ici,
+// la case ne fait que montrer/cacher la carte dans l'appli — ce sont déjà
+// des collections ouvertes à tout coach côté règles (staff(clubId)), donc
+// cocher/décocher ne change aucune barrière serveur pour eux. Étendre la
+// vraie protection à d'autres modules demande de revoir firestore.rules.
+var BUREAU_EXCLUDED=["invitations","acces","parametres"]; // toujours dirigeant-only, jamais une case
+var BUREAU_GRANTABLE=ADMIN_MODULES.filter(function(m){return BUREAU_EXCLUDED.indexOf(m.id)<0;}).map(function(m){return m.id;});
+var BUREAU_GRANTABLE_LABELS={};
+ADMIN_MODULES.forEach(function(m){BUREAU_GRANTABLE_LABELS[m.id]=m.name;});
+// Regroupement purement visuel (modale "Accès bureau") + utilisé par la
+// suggestion de rôle ci-dessous.
+var BUREAU_GROUPS=[
+  {label:"Sportif",ids:["equipes","planning","inscriptions"]},
+  {label:"Administratif",ids:["licences","documents","communaute","avis","fiches","comptabilite","notesfrais","inventaire"]}
+];
 // Titres exclusifs (un seul par club à la fois) : ils ne font que pré-cocher
 // des cases pour gagner du temps — l'accès réel reste celui des cases.
 var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inventaire"]},secretaire:{label:"Secrétaire",autoCheck:[]}};
@@ -41,10 +51,13 @@ function hasModulePermission(id){
 // un accès — purement informatif, n'affecte rien.
 function suggestBureauRoleLabel(roles,perms){
   var isCoach=(roles||[]).indexOf("coach")>=0;
-  var bureau=BUREAU_GRANTABLE.some(function(id){return perms&&perms[id];});
-  if(isCoach&&bureau) return "Coach + bureau";
-  if(isCoach) return "Coach";
-  if(bureau) return "Membre du bureau";
+  var sportIds=BUREAU_GROUPS[0].ids, adminIds=BUREAU_GROUPS[1].ids;
+  var sportChecked=sportIds.some(function(id){return perms&&perms[id];});
+  var bureauChecked=adminIds.some(function(id){return perms&&perms[id];});
+  var coachish=isCoach||sportChecked;
+  if(coachish&&bureauChecked) return "Coach + bureau";
+  if(coachish) return "Coach";
+  if(bureauChecked) return "Membre du bureau";
   return "";
 }
 
@@ -523,27 +536,33 @@ function renderAccesList(list,users,phoneToName){
     });
     paintTitre();
     bureauBox.appendChild(titreWrap);
-    // ── Cases à cocher (modules réellement protégés côté règles) ──────
-    var permTl=document.createElement("div");
-    permTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px";
-    permTl.textContent="Modules accessibles";
-    bureauBox.appendChild(permTl);
-    var permWrap=document.createElement("div");
+    // ── Cases à cocher, module par module. Seules Comptabilité et Inventaire
+    // sont vraiment bloquées côté règles Firestore pour un non-dirigeant ;
+    // les autres cases pilotent uniquement ce qui s'affiche dans l'appli. ──
     var permChecks={};
     function paintPerms(){
       BUREAU_GRANTABLE.forEach(function(id){if(permChecks[id])permChecks[id].checked=!!state.permissions[id];});
     }
-    BUREAU_GRANTABLE.forEach(function(id){
-      var lbl=document.createElement("label");
-      lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--txt);cursor:pointer";
-      var chk=document.createElement("input");chk.type="checkbox";chk.checked=!!state.permissions[id];
-      chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
-      permChecks[id]=chk;
-      chk.addEventListener("change",function(){state.permissions[id]=chk.checked;updateSuggestion();});
-      lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
-      permWrap.appendChild(lbl);
+    BUREAU_GROUPS.forEach(function(group){
+      var ids=group.ids.filter(function(id){return BUREAU_GRANTABLE.indexOf(id)>=0;});
+      if(!ids.length) return;
+      var permTl=document.createElement("div");
+      permTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin:10px 0 6px";
+      permTl.textContent=group.label;
+      bureauBox.appendChild(permTl);
+      var permWrap=document.createElement("div");
+      ids.forEach(function(id){
+        var lbl=document.createElement("label");
+        lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--txt);cursor:pointer";
+        var chk=document.createElement("input");chk.type="checkbox";chk.checked=!!state.permissions[id];
+        chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
+        permChecks[id]=chk;
+        chk.addEventListener("change",function(){state.permissions[id]=chk.checked;updateSuggestion();});
+        lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
+        permWrap.appendChild(lbl);
+      });
+      bureauBox.appendChild(permWrap);
     });
-    bureauBox.appendChild(permWrap);
     card.appendChild(bureauBox);
     updateSuggestion();
     teamBox.style.cssText="margin-bottom:10px;display:"+((state.roles.indexOf("coach")>=0)?"block":"none");

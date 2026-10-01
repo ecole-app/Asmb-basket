@@ -689,6 +689,12 @@ function navToCoach(which){
   } else if(which==="communaute"){
     var b5=document.getElementById("bni-c-communaute");if(b5)b5.classList.add("on");
     stack=["communaute"];showScr("communaute");buildCommunaute();
+  } else if(which==="admin"){
+    // Accès bureau accordé par le dirigeant (cases cochées dans "Accès coach") :
+    // ouvre le même écran Admin, mais buildAdminHome() n'y affiche que les
+    // modules pour lesquels hasModulePermission() renvoie vrai pour ce compte.
+    var b6=document.getElementById("bni-c-admin");if(b6)b6.classList.add("on");
+    stack=["admin"];showScr("admin");buildAdminHome();
   }
   if(hbk)hbk.classList.remove("show");
 }

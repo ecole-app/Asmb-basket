@@ -98,13 +98,49 @@ function gmRow(parent){
 }
 
 // ═══ INVITATIONS (usage unique, 7 jours) ══════════════════════════════
-function createClubInvite(clubId, clubName, role){
+function createClubInvite(clubId, clubName, role, grantedPermissions){
   var code=genSecureCode(3,4);
   return window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code),{
     clubId:clubId, clubName:clubName||"", role:role, usedBy:null,
+    // Choisi par le dirigeant au moment de la création du lien (voir
+    // openBureauPermissionPicker) ; copié sur le compte à la création dans
+    // acceptInvite(). Jamais modifiable par la personne qui accepte le lien.
+    grantedPermissions:grantedPermissions||{},
     createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp(),
     expiresAt:new Date(Date.now()+7*86400000)
   }).then(function(){ return code; });
+}
+// Modale "Accès bureau" affichée AVANT de générer le lien d'invitation d'un
+// coach : le dirigeant coche module par module ce que la personne pourra
+// voir dans l'admin, dès la création de son compte. (Même liste/logique que
+// la case à cocher de "Accès coach", qui permet de revenir dessus ensuite
+// pour un compte déjà créé.)
+function openBureauPermissionPicker(onConfirm){
+  var s=gmSheet("Accès bureau pour ce coach");
+  var intro=document.createElement("div");
+  intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
+  intro.textContent="Cochez ce que cette personne pourra voir dans l'admin, en plus de son accès sportif (Équipe, Formation, Compétition, Événements) qui reste toujours disponible. Vous pourrez revenir dessus à tout moment depuis « Accès coach ».";
+  s.body.appendChild(intro);
+  var perms={};
+  BUREAU_GROUPS.forEach(function(group){
+    var ids=group.ids.filter(function(id){return BUREAU_GRANTABLE.indexOf(id)>=0;});
+    if(!ids.length) return;
+    gmSection(s.body,group.label);
+    ids.forEach(function(id){
+      var lbl=document.createElement("label");
+      lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--txt);cursor:pointer";
+      var chk=document.createElement("input");chk.type="checkbox";
+      chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
+      chk.addEventListener("change",function(){perms[id]=chk.checked;});
+      lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
+      s.body.appendChild(lbl);
+    });
+  });
+  var row=gmRow(s.body);
+  row.appendChild(gmBtn("Créer le lien d'invitation","primary",function(){
+    s.modal.remove();
+    onConfirm(perms);
+  }));
 }
 function inviteLink(code){
   return location.origin+location.pathname+"?invite="+encodeURIComponent(code);
@@ -264,6 +300,10 @@ function acceptInvite(code, inv){
     var b=window.fbWriteBatch();
     b.set(window.fbDoc(window.fbDb,"users",cred.user.uid),{
       email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
+      // Choisi par le dirigeant à la création du lien (openBureauPermissionPicker),
+      // lu depuis l'invitation elle-même : la personne qui accepte ne peut pas
+      // modifier ce qu'elle reçoit.
+      permissions:(inv.grantedPermissions||{}), titre:null,
       linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
       // Preuve horodatee de l'acceptation du contrat de sous-traitance RGPD,
       // lu (defilement force) juste avant cet ecran quand inv.role==="dirigeant".
@@ -482,9 +522,16 @@ function openClubAccessSettings(){
   gmSection(s.body,"Inviter un membre du staff","Génère un lien à usage unique (7 jours). La personne crée son compte en l'ouvrant et arrive directement dans votre club.");
   var row=gmRow(s.body);
   ["coach","dirigeant"].forEach(function(role){
-    row.appendChild(gmBtn(role==="coach"?"Inviter un coach":"Inviter un dirigeant", role==="coach"?"primary":"soft", function(){
-      createClubInvite(clubId, clubName, role).then(function(code){ showInviteResult(code, role, clubName); })
-        .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+    row.appendChild(gmBtn(role==="coach"?"Inviter un coach / bureau":"Inviter un dirigeant", role==="coach"?"primary":"soft", function(){
+      if(role==="coach"){
+        openBureauPermissionPicker(function(perms){
+          createClubInvite(clubId, clubName, role, perms).then(function(code){ showInviteResult(code, role, clubName); })
+            .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+        });
+      } else {
+        createClubInvite(clubId, clubName, role).then(function(code){ showInviteResult(code, role, clubName); })
+          .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+      }
     }));
   });
 

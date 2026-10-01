@@ -95,12 +95,18 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-inscription" onclick="navTo(\'inscription\')"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>'+
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
   } else if(profile==="coach"){
+    // "Admin" n'apparaît que si le dirigeant a coché au moins un accès bureau
+    // pour ce compte (Accès coach) — l'accès sportif fixe du coach, lui, ne
+    // bouge jamais, cases ou pas.
+    var hasBureauAccess=typeof BUREAU_GRANTABLE!=="undefined" && typeof hasModulePermission==="function"
+      && BUREAU_GRANTABLE.some(function(id){return hasModulePermission(id);});
     nav.innerHTML=
       '<button class="bni on" id="bni-c-equipe" onclick="navToCoach(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-c-formation" onclick="navToCoach(\'formation\')"><span class="bni-ic">'+NAV_ICONS.formation+'</span>Formation</button>'+
       '<button class="bni" id="bni-c-competition" onclick="navToCoach(\'competition\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Compétition</button>'+
       '<button class="bni" id="bni-c-evenements" onclick="navToCoach(\'evenements\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événements</button>'+
-      '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
+      '<button class="bni" id="bni-c-communaute" onclick="navToCoach(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
+      (hasBureauAccess?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>':'');
   } else {
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+

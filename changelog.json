@@ -1,5 +1,14 @@
 [
   {
+    "v": "1790836654",
+    "titre": "Accès bureau : tous les modules admin, module par module",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "La case à cocher ne se limite plus à Comptabilité/Inventaire : au moment où vous créez le lien d'invitation d'un coach, une modale « Accès bureau » liste tous les modules admin (Licences, Équipes, Planning, Documents, Communauté, Avis, Fiches reçues, Comptabilité, Notes de frais, Inventaire). Vous cochez ce que la personne pourra voir dès la création de son compte. Vous pouvez aussi revenir dessus à tout moment pour un compte existant depuis « Accès coach »." },
+      { "roles": ["dirigeant"], "texte": "À noter : seules Comptabilité et Inventaire sont aussi bloquées côté serveur si elles sont décochées. Pour les autres modules, la case pilote ce qui s'affiche dans l'appli mais pas (encore) l'accès aux données en cas d'accès direct à la base - à faire dans une passe séparée si besoin." },
+      { "roles": ["coach"], "texte": "Si le dirigeant t'accorde au moins un accès bureau, un onglet « Admin » apparaît dans ta barre de navigation, en plus de tes onglets sportifs habituels qui ne changent pas." }
+    ]
+  },
+  {
     "v": "1790835973",
     "titre": "Accès bureau : retouche visuelle",
     "points": [
