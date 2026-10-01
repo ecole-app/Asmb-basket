@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790835973",
+    "titre": "Accès bureau : retouche visuelle",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Dans « Accès coach », le titre, les cases d'accès et l'étiquette de suggestion de rôle sont maintenant regroupés dans un encart dédié, plus lisible qu'avant." }
+    ]
+  },
+  {
     "v": "1790832270",
     "titre": "Accès bureau : comptabilité et inventaire réservés par le dirigeant",
     "points": [

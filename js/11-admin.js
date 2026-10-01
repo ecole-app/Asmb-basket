@@ -463,22 +463,32 @@ function renderAccesList(list,users,phoneToName){
       roleWrap.appendChild(chip);
     });
     card.appendChild(roleWrap);
+    // ── Bloc "Accès bureau" : regroupe titre + permissions + suggestion ──────
+    var bureauBox=document.createElement("div");
+    bureauBox.style.cssText="background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rx);padding:12px;margin-bottom:10px";
+    var bureauHead=document.createElement("div");
+    bureauHead.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px";
+    var bureauTitle=document.createElement("div");
+    bureauTitle.style.cssText="font-size:11px;font-weight:800;color:var(--txt)";
+    bureauTitle.textContent="Accès bureau";
+    bureauHead.appendChild(bureauTitle);
     // ── Suggestion de rôle (dynamique selon cases cochées) ──────
     var suggestLbl=document.createElement("div");
-    suggestLbl.style.cssText="font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--dkg);background:var(--ltg);display:inline-block;padding:3px 9px;border-radius:10px;margin-bottom:8px";
+    suggestLbl.style.cssText="font-size:10px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--dkg);display:inline-block;padding:4px 10px;border-radius:10px;white-space:nowrap";
     function updateSuggestion(){
       var s=suggestBureauRoleLabel(state.roles,state.permissions);
       if(s){suggestLbl.textContent=s;suggestLbl.style.display="inline-block";}
       else suggestLbl.style.display="none";
     }
-    card.appendChild(suggestLbl);
+    bureauHead.appendChild(suggestLbl);
+    bureauBox.appendChild(bureauHead);
     // ── Titre exclusif (trésorier / secrétaire) ──────
-    var titreWrap=document.createElement("div");
-    titreWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px";
     var titreTl=document.createElement("div");
-    titreTl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
+    titreTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px";
     titreTl.textContent="Titre (un seul par club)";
-    card.appendChild(titreTl);
+    bureauBox.appendChild(titreTl);
+    var titreWrap=document.createElement("div");
+    titreWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px";
     var titreChips={};
     function paintTitre(){
       Object.keys(titreChips).forEach(function(key){
@@ -512,14 +522,13 @@ function renderAccesList(list,users,phoneToName){
       titreWrap.appendChild(chip);
     });
     paintTitre();
-    card.appendChild(titreWrap);
-    // ── Accès bureau (cases à cocher, modules réellement protégés) ──────
-    var permWrap=document.createElement("div");
-    permWrap.style.cssText="margin-bottom:10px";
+    bureauBox.appendChild(titreWrap);
+    // ── Cases à cocher (modules réellement protégés côté règles) ──────
     var permTl=document.createElement("div");
-    permTl.style.cssText="font-size:10px;font-weight:700;color:var(--ltg);text-transform:uppercase;margin-bottom:4px";
-    permTl.textContent="Accès bureau";
-    permWrap.appendChild(permTl);
+    permTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px";
+    permTl.textContent="Modules accessibles";
+    bureauBox.appendChild(permTl);
+    var permWrap=document.createElement("div");
     var permChecks={};
     function paintPerms(){
       BUREAU_GRANTABLE.forEach(function(id){if(permChecks[id])permChecks[id].checked=!!state.permissions[id];});
@@ -534,7 +543,8 @@ function renderAccesList(list,users,phoneToName){
       lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
       permWrap.appendChild(lbl);
     });
-    card.appendChild(permWrap);
+    bureauBox.appendChild(permWrap);
+    card.appendChild(bureauBox);
     updateSuggestion();
     teamBox.style.cssText="margin-bottom:10px;display:"+((state.roles.indexOf("coach")>=0)?"block":"none");
     var tl=document.createElement("div");
