@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790928265",
+    "titre": "Correctif sécurité : audit complet anti-XSS",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Sweep complet de l'app après la correction d'hier sur Communauté : fiche d'inscription publique (gros morceau — nom, adresse, contacts, photo, certificat), noms de joueurs, titres d'événements, canaux, documents, contacts annuaire, lignes comptables, séances de formation éditées par un coach, et plus — tout passe maintenant par l'échappement HTML déjà utilisé ailleurs. Aucune action requise." }
+    ]
+  },
+  {
     "v": "1790927580",
     "titre": "Correctif sécurité : messages/sondages Communauté non échappés",
     "points": [

@@ -310,13 +310,15 @@ function buildLicences(){
     var div=document.createElement("div");
     div.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);box-shadow:0 2px 8px var(--shadow);overflow:hidden;cursor:pointer";
     div.onclick=function(){openLicenceDetail(lic.code);};
-    var catBadge=lic.categorie?'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(CAT_COLS_LIC[lic.categorie]||"#1A2E5A")+'">'+lic.categorie+'</span>':'';
-    var photoHtml=lic.fiche&&lic.fiche.photo?'<img src="'+lic.fiche.photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"></div>';
-    var nom=lic.fiche?(lic.fiche.prenom+" "+lic.fiche.nom):"Fiche en attente";
+    var catBadge=lic.categorie?'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(CAT_COLS_LIC[lic.categorie]||"#1A2E5A")+'">'+authEsc(lic.categorie)+'</span>':'';
+    // authEsc() sur la photo (attribut src) : une fiche d'inscription publique
+    // (formulaire non authentifié) peut contenir n'importe quoi dans ce champ.
+    var photoHtml=lic.fiche&&lic.fiche.photo?'<img src="'+authEsc(lic.fiche.photo)+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"></div>';
+    var nom=lic.fiche?authEsc(lic.fiche.prenom+" "+lic.fiche.nom):"Fiche en attente";
     var daysSince=(Date.now()-lic.createdAt)/86400000;
     var needsRelance=lic.statut==="envoyee"&&daysSince>=5;
     var relanceBadge=needsRelance?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Relance recommandée</span>':"";
-    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+lic.code+'</b>'+(lic.email?' · '+lic.email:'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+st.label+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+lic.ouvertLe+'</span>':'')+relanceBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
+    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
 }
@@ -435,10 +437,13 @@ function renderLicenceDetail(lic){
  ["Certificat medical",f.certDate?(f.certMedecin?" Dr "+f.certMedecin+" · ":"")+f.certDate+(f.certificat?" ✓ Fichier joint":""):"Non fourni"],
  ].filter(function(r){return r[1];});
  ficheHtml='<div style="margin-top:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden">';
-    if(f.photo)ficheHtml+='<div style="text-align:center;padding:16px;border-bottom:1px solid var(--bdr)"><img src="'+f.photo+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover"></div>';
-    if(f.certificat){var isImg=f.certificat.startsWith("data:image");ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px"><span style="font-size:16px"></span><div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--mut)">Certificat medical</div><div style="font-size:11px;color:var(--ltg)">✓ Fichier joint</div></div>'+(isImg?'<a href="'+f.certificat+'" target="_blank" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:10px;font-weight:600;text-decoration:none">Voir</a>':'')+'</div>';}
+    // authEsc() partout ici : cette fiche vient d'un formulaire PUBLIC sans
+    // compte (inscription_codes) — n'importe qui avec le lien du club peut
+    // soumettre ces champs, y compris photo/certificat en attribut src/href.
+    if(f.photo)ficheHtml+='<div style="text-align:center;padding:16px;border-bottom:1px solid var(--bdr)"><img src="'+authEsc(f.photo)+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover"></div>';
+    if(f.certificat){var isImg=f.certificat.startsWith("data:image");ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px"><span style="font-size:16px"></span><div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--mut)">Certificat medical</div><div style="font-size:11px;color:var(--ltg)">✓ Fichier joint</div></div>'+(isImg?'<a href="'+authEsc(f.certificat)+'" target="_blank" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:10px;font-weight:600;text-decoration:none">Voir</a>':'')+'</div>';}
     rows.forEach(function(r){
-      ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--mut);width:120px;flex-shrink:0">'+r[0]+'</span><span style="font-size:12px;color:var(--txt)">'+r[1]+'</span></div>';
+      ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--mut);width:120px;flex-shrink:0">'+r[0]+'</span><span style="font-size:12px;color:var(--txt)">'+authEsc(String(r[1]))+'</span></div>';
     });
     ficheHtml+='</div>';
   }
@@ -492,12 +497,12 @@ function renderLicenceDetail(lic){
     '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:12px">'+
       '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Code</div>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
-        '<div style="font-size:18px;font-weight:900;color:var(--txt);font-family:monospace;letter-spacing:2px">'+lic.code+'</div>'+
+        '<div style="font-size:18px;font-weight:900;color:var(--txt);font-family:monospace;letter-spacing:2px">'+authEsc(lic.code)+'</div>'+
         (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"var(--ltg)")+'">'+( lic.typeLicence==="competition"?" Compétition":" Loisir")+'</div>':'')+
         '<button onclick="copyCode(\''+lic.code+'\')" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:600;border:none;cursor:pointer">Copier</button>'+
       '</div>'+
-      (lic.email?'<div style="font-size:11px;color:var(--mut);margin-top:4px">'+lic.email+'</div>':'')+
-      (lic.ouvertLe?'<div style="font-size:11px;color:#E8670A;margin-top:4px">Ouvert le '+lic.ouvertLe+'</div>':'')+
+      (lic.email?'<div style="font-size:11px;color:var(--mut);margin-top:4px">'+authEsc(lic.email)+'</div>':'')+
+      (lic.ouvertLe?'<div style="font-size:11px;color:#E8670A;margin-top:4px">Ouvert le '+authEsc(lic.ouvertLe)+'</div>':'')+
     '</div>'+
     '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Catégorie</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">'+catSel+'</div>'+
@@ -1140,7 +1145,7 @@ function handleCertificat(input){
     var prev=document.getElementById("cert-preview");
     if(!prev)return;
     if(isPdf){
-      prev.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rx)"><span style="font-size:20px"></span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+file.name+'</div><div style="font-size:10px;color:var(--mut)">PDF · '+(file.size/1024).toFixed(0)+'Ko</div></div><button onclick="removeCertificat()" style="padding:4px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button></div>';
+      prev.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rx)"><span style="font-size:20px"></span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(file.name)+'</div><div style="font-size:10px;color:var(--mut)">PDF · '+(file.size/1024).toFixed(0)+'Ko</div></div><button onclick="removeCertificat()" style="padding:4px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button></div>';
     } else {
       prev.innerHTML='<div style="position:relative;display:inline-block"><img src="'+e.target.result+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:var(--rx);display:block"><button onclick="removeCertificat()" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;border:none;cursor:pointer">✕</button></div>';
     }

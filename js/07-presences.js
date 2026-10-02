@@ -19,7 +19,7 @@ function openPresences(eventId){
     var state=presences[p.id]||"present";
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px";
-    div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+p.prenom+' '+p.nom+'<span id="selfdecl-'+p.id+'"></span></div>'+
+    div.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:6px">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'<span id="selfdecl-'+p.id+'"></span></div>'+
       '<div style="display:flex;gap:6px">'+
         '<button data-pid="'+p.id+'" data-state="present" data-selected="'+(state==="present"?"1":"0")+'" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="present"?"var(--ltg)":"var(--bdr)")+';background:'+(state==="present"?"var(--ltg)":"var(--bg)")+';color:'+(state==="present"?"#fff":"var(--mut)")+';cursor:pointer">✓ Présent</button>'+
         '<button data-pid="'+p.id+'" data-state="absent" data-selected="'+(state==="absent"?"1":"0")+'" onclick="setPresenceState(this)" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid '+(state==="absent"?"#C0392B":"var(--bdr)")+';background:'+(state==="absent"?"#C0392B":"var(--bg)")+';color:'+(state==="absent"?"#fff":"var(--mut)")+';cursor:pointer">✕ Absent</button>'+

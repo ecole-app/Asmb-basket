@@ -450,10 +450,10 @@ function buildAnnuaire(){
     var div=document.createElement("div");
     div.className="player-card";
     var delBtn=window.asmbCoachMode?('<button onclick="deleteContact(\''+c.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0">✕</button>'):"";
-    var telLink=c.tel?('<a href="tel:'+c.tel+'" style="font-size:11px;color:var(--ltg);text-decoration:none">'+c.tel+'</a>'):"";
+    var telLink=c.tel?('<a href="tel:'+authEsc(c.tel)+'" style="font-size:11px;color:var(--ltg);text-decoration:none">'+authEsc(c.tel)+'</a>'):"";
     var benBadge=c.type==="benevole"?'<span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;background:rgba(232,103,10,.12);color:#E8670A;font-size:9px;font-weight:800;text-transform:uppercase">Bénévole</span>':"";
-    var dispoLine=(c.type==="benevole"&&c.dispo)?('<div style="font-size:11px;color:var(--mut);margin-top:2px">'+c.dispo+'</div>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+c.nom+benBadge+'</div><div class="player-meta">'+(c.role||"")+'</div>'+(telLink?'<div style="margin-top:3px">'+telLink+'</div>':"")+dispoLine+'</div>'+delBtn;
+    var dispoLine=(c.type==="benevole"&&c.dispo)?('<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.dispo)+'</div>'):"";
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+authEsc(initials)+'</div><div class="player-info"><div class="player-name">'+authEsc(c.nom)+benBadge+'</div><div class="player-meta">'+authEsc(c.role||"")+'</div>'+(telLink?'<div style="margin-top:3px">'+telLink+'</div>':"")+dispoLine+'</div>'+delBtn;
     el.appendChild(div);
   });
 }

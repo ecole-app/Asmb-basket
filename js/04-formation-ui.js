@@ -69,7 +69,7 @@ function showTeamsList(){
       var div=document.createElement("div");
       div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--bdr);cursor:pointer";
       div.onclick=function(){showTeamRoster(t.id);};
-      div.innerHTML='<div><div style="font-size:14px;font-weight:700;color:var(--txt)">'+t.name+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+t.cat+' · '+count+' joueur'+(count>1?"s":"")+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
+      div.innerHTML='<div><div style="font-size:14px;font-weight:700;color:var(--txt)">'+authEsc(t.name)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(t.cat)+' · '+count+' joueur'+(count>1?"s":"")+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
       el.appendChild(div);
     });
   }
@@ -442,8 +442,8 @@ function buildSeance(cy,s){
  hdr.appendChild(top);hdr.appendChild(ttl);hdr.appendChild(obj);hdr.appendChild(btn);
  var sl=document.getElementById("seaSits");sl.innerHTML="";
  s.sits.forEach(function(sit,i){
- var ch=sit.ch&&sit.ch.startsWith("ok:")?'<div class="chok">✓ '+sit.ch.slice(3)+'</div>':"";
-    var kws=sit.kws.map(function(k,j){return '<span class="kw" style="background:'+KC[j%KC.length]+'">'+k+'</span>';}).join("");
+ var ch=sit.ch&&sit.ch.startsWith("ok:")?'<div class="chok">✓ '+authEsc(sit.ch.slice(3))+'</div>':"";
+    var kws=sit.kws.map(function(k,j){return '<span class="kw" style="background:'+KC[j%KC.length]+'">'+authEsc(k)+'</span>';}).join("");
     // L'emplacement a l'ecran reste positionnel (il doit etre unique dans la page),
     // mais l'animation dessinee vient de la bibliotheque : une seance modifiee ou
     // creee par le coach peut donc avoir une animation, ce qui etait impossible avant.
@@ -451,7 +451,10 @@ function buildSeance(cy,s){
     var animId=(typeof resolveAnimForSit==="function")?resolveAnimForSit(activeCatId,s.num,i,sit):null;
     var animDiv=animId?'<div style="margin:8px 0"><div class="lbl">Animation</div><div id="anim-'+domKey+'" style="background:var(--bg);border-radius:8px;overflow:hidden"></div></div>':"";
     var d=document.createElement("div");d.className="sit-card";
-    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+sit.ti+'</div><div class="sdur">'+sit.dur+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+sit.desc+'</div><div class="lbl">Organisation</div><div class="txt">'+sit.org+'</div>'+animDiv+'<div class="lbl">Axes évolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+a+'</div>';}).join("")+'</div><div class="lbl">Mots clés</div><div class="kws">'+kws+'</div></div>';
+    // authEsc() sur tout le contenu de sit.* : ces situations peuvent être
+    // éditées par un coach (voir getCycleOverrides/02-formation-cycles.js),
+    // donc pas un simple texte développeur figé.
+    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+authEsc(sit.ti)+'</div><div class="sdur">'+authEsc(sit.dur)+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+authEsc(sit.desc)+'</div><div class="lbl">Organisation</div><div class="txt">'+authEsc(sit.org)+'</div>'+animDiv+'<div class="lbl">Axes évolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+authEsc(a)+'</div>';}).join("")+'</div><div class="lbl">Mots clés</div><div class="kws">'+kws+'</div></div>';
     if(canEditCycles()&&typeof openAnimPicker==="function"){
       var bar=document.createElement("div");
       bar.style.cssText="padding:0 12px 12px";

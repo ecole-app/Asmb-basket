@@ -222,7 +222,7 @@ async function deleteChannel(id,name){
 
 function openChannelDetail(ch){
  currentAdminChannelId=ch.id;
- document.getElementById("chdet-hdr").innerHTML='<div style="display:flex;align-items:center;gap:10px"><div style="font-size:22px">'+ch.icon+'</div><div><div style="font-size:15px;font-weight:800;color:var(--txt)">'+ch.name+'</div><div style="font-size:11px;color:var(--mut)">'+ch.desc+'</div></div></div>';
+ document.getElementById("chdet-hdr").innerHTML='<div style="display:flex;align-items:center;gap:10px"><div style="font-size:22px">'+authEsc(ch.icon||"")+'</div><div><div style="font-size:15px;font-weight:800;color:var(--txt)">'+authEsc(ch.name)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(ch.desc||"")+'</div></div></div>';
   stack.push("channel-detail");
   showScr("channel-detail");
   renderMembers(ch);
@@ -309,7 +309,7 @@ function showLicenceContactPicker(){
     contacts.forEach(function(c){
       var div=document.createElement("div");div.className="member-card";div.style.cursor="pointer";
       div.onclick=function(){addMemberFromLicence(c.phone,c.label);};
-      div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+c.label+'</div><div style="font-size:11px;color:var(--mut)">'+c.phone+'</div></div><span style="color:var(--ltg);font-size:18px">+</span>';
+      div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(c.label)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(c.phone)+'</div></div><span style="color:var(--ltg);font-size:18px">+</span>';
       el.appendChild(div);
     });
   }
@@ -562,7 +562,7 @@ function renderChannelList(channels){
     }
     var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)"> Membre</span>':'<span style="font-size:10px;color:var(--red)"> Prive</span>'):'';
     var unreadBadge='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
-    div.innerHTML=unreadBadge+'<div class="ch-icon">'+ch.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+ch.name+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+ch.desc+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
+    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ch.name)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
     el.appendChild(div);
   });
   checkUnreadBadges();

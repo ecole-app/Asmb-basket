@@ -425,7 +425,7 @@ function gmBarListHorizontal(dataObj, color){
     row.style.cssText="margin-bottom:8px";
     var top=document.createElement("div");
     top.style.cssText="display:flex;justify-content:space-between;font-size:11px;color:var(--txt);margin-bottom:3px;gap:8px";
-    top.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.label+'</span><b style="flex-shrink:0">'+e.value.toFixed(2)+' €</b>';
+    top.innerHTML='<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(e.label)+'</span><b style="flex-shrink:0">'+e.value.toFixed(2)+' €</b>';
     var track=document.createElement("div");
     track.style.cssText="height:7px;background:var(--bdr);border-radius:4px;overflow:hidden";
     var fill=document.createElement("div");
@@ -532,7 +532,7 @@ function buildInventaire(){
       '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(it.emplacement?authEsc(it.emplacement):"")+(low?'<span style="color:#E8670A;font-weight:700"> · Stock bas</span>':"")+'</div>';
     var qteBox=document.createElement("div");
     qteBox.style.cssText="text-align:right;flex-shrink:0";
-    qteBox.innerHTML='<div style="font-size:16px;font-weight:800;color:'+(low?"#E8670A":"var(--txt)")+'">'+it.qte+'</div><div style="font-size:9px;color:var(--mut)">'+(it.unite||"")+'</div>';
+    qteBox.innerHTML='<div style="font-size:16px;font-weight:800;color:'+(low?"#E8670A":"var(--txt)")+'">'+authEsc(String(it.qte))+'</div><div style="font-size:9px;color:var(--mut)">'+authEsc(it.unite||"")+'</div>';
     top.appendChild(left);top.appendChild(qteBox);
     card.appendChild(top);
     var adjRow=document.createElement("div");
@@ -794,7 +794,7 @@ function buildDocs(){
     var div=document.createElement("div");div.className="doc-card";
     var catBadge="<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;background:"+(DOC_CAT_COLORS[cat]||"#8E44AD")+"\">"+(DOC_CAT_LABELS[cat]||"Autre")+"</span>";
     var docDel="<button onclick=\"deleteDoc('"+d.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0\">✕</button>";
-    div.innerHTML="<div class=\"doc-icon\">"+icon+"</div><div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+d.name+"</div><div style=\"font-size:11px;color:var(--mut);margin-top:2px\">"+d.size+" · "+d.date+"</div><div style=\"margin-top:4px\">"+catBadge+"</div></div>"+docDel;
+    div.innerHTML="<div class=\"doc-icon\">"+icon+"</div><div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+authEsc(d.name)+"</div><div style=\"font-size:11px;color:var(--mut);margin-top:2px\">"+authEsc(d.size)+" · "+authEsc(d.date)+"</div><div style=\"margin-top:4px\">"+catBadge+"</div></div>"+docDel;
     el.appendChild(div);
   });
 }

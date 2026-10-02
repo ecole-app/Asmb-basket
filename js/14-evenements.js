@@ -22,14 +22,14 @@ function buildRealEventsList(){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
     var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
-    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+e.lieu+"</div>":"";
-    var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+e.equipe+"</div>":"";
+    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>":"";
+    var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+authEsc(e.equipe)+"</div>":"";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
     var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
     var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
     var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+eventTypeLabel(e.type)+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+e.titre+"</div>"+evLieu+evEquipe+presBtn+evalBtn+editTimeBtn+"</div>"+delBtn+"</div>";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+eventTypeLabel(e.type)+"</span><span style=\"font-size:11px;color:var(--mut)\">"+authEsc(evDate)+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+authEsc(e.titre)+"</div>"+evLieu+evEquipe+presBtn+evalBtn+editTimeBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
 }
@@ -212,7 +212,7 @@ function renderEvPlayers(){
     var lbl=document.createElement("label");
     lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
     var checkedAttr=(allClub||selectedTeams.length)?"checked":"";
-    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
+    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>';
     el.appendChild(lbl);
   });
 }
@@ -223,7 +223,7 @@ function renderEvExternes(){
   evExternes.forEach(function(ex,i){
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--txt)";
-    div.innerHTML='<span style="flex:1">'+ex.nom+(ex.contact?" · "+ex.contact:"")+'</span><button onclick="removeEvExterne('+i+')" style="padding:3px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button>';
+    div.innerHTML='<span style="flex:1">'+authEsc(ex.nom)+(ex.contact?" · "+authEsc(ex.contact):"")+'</span><button onclick="removeEvExterne('+i+')" style="padding:3px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button>';
     el.appendChild(div);
   });
 }
@@ -552,7 +552,7 @@ function showConvocation(eventId){
       var isChecked=convoked.indexOf(p.id)>=0;
       var lbl=document.createElement("label");
       lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
-      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+p.prenom+' '+p.nom+' <span style="color:var(--mut);font-size:10px">('+p.cat+')</span>';
+      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>';
       el.appendChild(lbl);
     });
   }

@@ -163,7 +163,7 @@ function buildCoachDashboard(el){
   }).sort(function(a,b){return a.date>b.date?1:-1;})[0];
 
   if(!upcoming){
-    el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:13px;font-weight:600">Aucun événement à venir pour '+team.name+'</div></div>';
+    el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:13px;font-weight:600">Aucun événement à venir pour '+authEsc(team.name)+'</div></div>';
     return;
   }
 

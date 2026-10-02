@@ -480,8 +480,8 @@ function buildJoueurScreen(player){
         } else {
           actionHtml='<div style="margin-top:12px"><button onclick="signalerAbsence(\''+ev.id+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:12px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button></div>';
         }
-        card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+ev.titre+'</div>'+
-          '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+(ev.heure||"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+actionHtml;
+        card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(ev.titre)+'</div>'+
+          '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+authEsc(ev.heure||"")+(ev.lieu?" · "+authEsc(ev.lieu):"")+'</div>'+actionHtml;
         el.appendChild(card);
       });
     });
@@ -948,7 +948,7 @@ function openTeamPicker(fromHome){
       div.dataset.teamid=t.id;
       div.style.cursor="pointer";
       div.onclick=function(){toggleTeamPick(div,t.id);};
-      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"var(--ltg)":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"var(--ltg)":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
+      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"var(--ltg)":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"var(--ltg)":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+authEsc(t.name)+'</div><div class="cy-pr">'+authEsc(t.cat)+'</div></div>';
       el.appendChild(div);
     });
   }
@@ -1097,7 +1097,7 @@ function openCoachTeamPicker(){
       div.className="cy-card";
       div.style.cursor="pointer";
       div.onclick=function(){toggleCoachTeam(t.id);openCoachTeamPicker();};
-      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"var(--ltg)":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"var(--ltg)":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+t.name+'</div><div class="cy-pr">'+t.cat+'</div></div>';
+      div.innerHTML='<div class="cy-bar" style="background:'+(isSel?"var(--ltg)":"var(--bdr)")+'"></div><div class="cy-em" style="background:'+(isSel?"var(--ltg)":"var(--dkg)")+'">'+(isSel?"✓":"")+'</div><div class="cy-inf"><div class="cy-nm">'+authEsc(t.name)+'</div><div class="cy-pr">'+authEsc(t.cat)+'</div></div>';
       el.appendChild(div);
     });
   }
@@ -1381,7 +1381,7 @@ function buildParentEquipe(){
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
       div.onclick=function(){askAlert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCatégorie : "+team.cat);};
@@ -1473,7 +1473,7 @@ function buildCoachEquipe(){
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
     var historyBtn='<button onclick="openPlayerHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+maillotBadge+'</div><div class="player-meta">'+metaTxt+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
+    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
     el.appendChild(div);
   });
 }

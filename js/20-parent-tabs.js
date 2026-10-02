@@ -28,10 +28,10 @@ function buildParentEvents(){
     if(e.convocations&&e.convocations.length){
       var convPlayers=getPlayers();
       var noms=e.convocations.map(function(id){var p=convPlayers.find(function(x){return x.id===id;});return p?p.prenom:null;}).filter(Boolean);
-      convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">Convoqués : '+noms.join(", ")+'</div>';
+      convocInfo='<div style="font-size:11px;color:#1A2E5A;margin-top:4px">Convoqués : '+authEsc(noms.join(", "))+'</div>';
     }
     var cancelledInfo=e.cancelled?'<div style="font-size:11px;font-weight:800;color:#C0392B;margin-top:4px">ANNULÉ</div>':"";
-    div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+col+'">'+eventTypeLabel(e.type)+'</span><span style="font-size:11px;color:var(--mut)">'+e.date+(e.heure?" · "+e.heure:"")+'</span></div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+(e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+e.lieu+'</div>':"")+cancelledInfo+convocInfo+presInfo;
+    div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+col+'">'+eventTypeLabel(e.type)+'</span><span style="font-size:11px;color:var(--mut)">'+authEsc(e.date)+(e.heure?" · "+authEsc(e.heure):"")+'</span></div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(e.titre)+'</div>'+(e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+authEsc(e.lieu)+'</div>':"")+cancelledInfo+convocInfo+presInfo;
     el.appendChild(div);
   });
 }

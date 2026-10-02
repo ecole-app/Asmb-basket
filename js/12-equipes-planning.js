@@ -54,7 +54,7 @@ function renderPresenceHistory(){
     var isPresent=e.presences[phCurrentPlayerId]==="present";
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"var(--ltg)":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut)">'+e.date+' · '+eventTypeLabel(e.type)+'</div></div>';
+    div.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:'+(isPresent?"var(--ltg)":"#C0392B")+';color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(isPresent?"✓":"✕")+'</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--txt)">'+authEsc(e.titre)+'</div><div style="font-size:10px;color:var(--mut)">'+authEsc(e.date)+' · '+eventTypeLabel(e.type)+'</div></div>';
     listEl.appendChild(div);
   });
 
