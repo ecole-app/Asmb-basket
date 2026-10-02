@@ -1,7 +1,8 @@
 /* ===== 14-evenements.js — Evenements, creneaux, convocations, meteo du match ===== */
 // ── CRENEAUX ─────────────────────────────────────────────────────
 var creneauType="entrainement";
-var creneauJour="Lundi";
+var creneauJours=[];
+var creneauJourData={};
 
 // ── LISTE EVENEMENTS REELS DANS L'ONGLET "ÉVÉNEMENT" (coach + dirigeant) ──
 function buildRealEventsList(){
@@ -36,7 +37,12 @@ function buildRealEventsList(){
 
 function showAddCreneau(){
   creneauType="entrainement";
-  creneauJour="Lundi";
+  creneauJours=[];
+  creneauJourData={};
+  document.querySelectorAll(".jour-btn").forEach(function(b){
+    b.style.background="var(--bg)";b.style.color="var(--mut)";b.style.borderColor="var(--bdr)";
+  });
+  renderJourFields();
   document.getElementById("modal-creneau").style.display="flex";
 }
 
@@ -54,12 +60,58 @@ function selectCreneauType(type){
   });
 }
 
-function selectJour(btn,jour){
-  creneauJour=jour;
-  document.querySelectorAll(".jour-btn").forEach(function(b){
-    b.style.background="var(--bg)";b.style.color="var(--mut)";b.style.borderColor="var(--bdr)";
+var JOURS_ORDRE=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+
+function toggleJour(btn,jour){
+  // sauve les valeurs saisies pour les jours déjà affichés avant de reconstruire
+  saveJourFieldsToCache();
+  var idx=creneauJours.indexOf(jour);
+  if(idx>=0){
+    creneauJours.splice(idx,1);
+    btn.style.background="var(--bg)";btn.style.color="var(--mut)";btn.style.borderColor="var(--bdr)";
+  } else {
+    creneauJours.push(jour);
+    btn.style.background="var(--dkg)";btn.style.color="#fff";btn.style.borderColor="var(--dkg)";
+  }
+  renderJourFields();
+}
+
+function saveJourFieldsToCache(){
+  creneauJours.forEach(function(j){
+    var dEl=document.getElementById("cr-debut-"+j);
+    var fEl=document.getElementById("cr-fin-"+j);
+    var sEl=document.getElementById("cr-salle-"+j);
+    if(dEl||fEl||sEl){
+      creneauJourData[j]={
+        debut:dEl?dEl.value:(creneauJourData[j]||{}).debut,
+        fin:fEl?fEl.value:(creneauJourData[j]||{}).fin,
+        salle:sEl?sEl.value:(creneauJourData[j]||{}).salle
+      };
+    }
   });
-  btn.style.background="var(--dkg)";btn.style.color="#fff";btn.style.borderColor="var(--dkg)";
+}
+
+function renderJourFields(){
+  var box=document.getElementById("jour-fields");if(!box)return;
+  if(!creneauJours.length){
+    box.innerHTML='<div style="font-size:12px;color:var(--mut);padding:8px 0">Choisissez un ou plusieurs jours ci-dessus pour définir leurs horaires.</div>';
+    return;
+  }
+  var ordered=JOURS_ORDRE.filter(function(j){return creneauJours.indexOf(j)>=0;});
+  box.innerHTML=ordered.map(function(j){
+    var data=creneauJourData[j]||{};
+    var debut=data.debut||"18:00";
+    var fin=data.fin||"20:00";
+    var salle=data.salle||"";
+    return '<div style="border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--bg)">'
+      +'<div style="font-size:12px;font-weight:700;margin-bottom:8px">'+j+'</div>'
+      +'<div style="display:flex;gap:12px">'
+        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Début</label><input class="form-input" id="cr-debut-'+j+'" type="time" value="'+debut+'"></div>'
+        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Fin</label><input class="form-input" id="cr-fin-'+j+'" type="time" value="'+fin+'"></div>'
+      +'</div>'
+      +'<div class="form-group" style="margin-bottom:0"><label class="form-label">Salle / Lieu</label><input class="form-input" id="cr-salle-'+j+'" placeholder="Ex: Gymnase Jean Moulin" value="'+authEsc(salle)+'"></div>'
+    +'</div>';
+  }).join("");
 }
 
 function getNextDateForDayName(dayName){
@@ -74,40 +126,55 @@ function getNextDateForDayName(dayName){
 }
 
 function saveCreneau(){
-  var debut=(document.getElementById("cr-debut")||{}).value||"";
-  var fin=(document.getElementById("cr-fin")||{}).value||"";
-  var salle=(document.getElementById("cr-salle")||{}).value||"";
+  if(!creneauJours.length){askAlert("Choisissez au moins un jour");return;}
+  saveJourFieldsToCache();
   var equipe=(document.getElementById("cr-equipe")||{}).value||"";
   var notes=(document.getElementById("cr-notes")||{}).value||"";
   var repeatVal=(document.getElementById("cr-repeat")||{}).value||"0";
-  if(!debut||!fin){askAlert("Horaires obligatoires");return;}
+
+  // valide que chaque jour sélectionné a bien ses horaires
+  for(var k=0;k<creneauJours.length;k++){
+    var jd=creneauJourData[creneauJours[k]]||{};
+    if(!jd.debut||!jd.fin){askAlert("Horaires obligatoires pour "+creneauJours[k]);return;}
+  }
+
   var events=getEvents();
-  var firstDate=getNextDateForDayName(creneauJour);
-  var occurrences;
-  if(repeatVal==="season"){
-    var endOfSeason=new Date(firstDate.getFullYear()+(firstDate.getMonth()<7?0:1),5,30);
-    occurrences=Math.max(1,Math.ceil((endOfSeason-firstDate)/(7*24*60*60*1000))+1);
-  } else {
-    var repeatWeeks=parseInt(repeatVal||"0",10);
-    occurrences=repeatWeeks>0?repeatWeeks:1;
-  }
-  for(var i=0;i<occurrences;i++){
-    var d=new Date(firstDate);
-    d.setDate(d.getDate()+i*7);
-    events.push({
-      id:Date.now().toString()+"-"+i,
-      titre:(creneauType==="match"?"Match":"Entraînement")+(equipe?" · "+equipe:""),
-      type:creneauType,
-      date:d.toISOString().slice(0,10),
-      heure:debut+" - "+fin,
-      lieu:salle,equipe:equipe,notes:notes,
-      recurrent:(repeatVal!=="0")
-    });
-  }
+  var totalOccurrences=0;
+  var idSeed=Date.now();
+
+  creneauJours.forEach(function(jour){
+    var jd=creneauJourData[jour]||{};
+    var debut=jd.debut,fin=jd.fin,salle=jd.salle||"";
+    var firstDateStr=getNextDateForDayName(jour);
+    var firstDate=new Date(firstDateStr);
+    var occurrences;
+    if(repeatVal==="season"){
+      var endOfSeason=new Date(firstDate.getFullYear()+(firstDate.getMonth()<7?0:1),5,30);
+      occurrences=Math.max(1,Math.ceil((endOfSeason-firstDate)/(7*24*60*60*1000))+1);
+    } else {
+      var repeatWeeks=parseInt(repeatVal||"0",10);
+      occurrences=repeatWeeks>0?repeatWeeks:1;
+    }
+    for(var i=0;i<occurrences;i++){
+      var d=new Date(firstDate);
+      d.setDate(d.getDate()+i*7);
+      events.push({
+        id:idSeed.toString()+"-"+jour+"-"+i,
+        titre:(creneauType==="match"?"Match":"Entraînement")+(equipe?" · "+equipe:""),
+        type:creneauType,
+        date:d.toISOString().slice(0,10),
+        heure:debut+" - "+fin,
+        lieu:salle,equipe:equipe,notes:notes,
+        recurrent:(repeatVal!=="0")
+      });
+    }
+    totalOccurrences+=occurrences;
+  });
+
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();buildRealEventsList();
-  if(occurrences>1)askAlert(occurrences+" créneaux créés (répétition hebdomadaire)");
+  if(totalOccurrences>1)askAlert(totalOccurrences+" créneaux créés sur "+creneauJours.length+" jour(s)");
 }
 
 var evExternes=[];

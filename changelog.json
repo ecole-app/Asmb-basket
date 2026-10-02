@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790928548",
+    "titre": "Planning : plusieurs entraînements par semaine pour une même équipe",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Dans « Nouveau créneau », tous les jours de la semaine sont maintenant sélectionnables en même temps (plus besoin d'en créer un à chaque fois). Chaque jour coché a son propre horaire et sa propre salle/lieu, pour les équipes qui s'entraînent par exemple le mardi ET le jeudi dans des gymnases différents." }
+    ]
+  },
+  {
     "v": "1790928265",
     "titre": "Correctif sécurité : audit complet anti-XSS",
     "points": [

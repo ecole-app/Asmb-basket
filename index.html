@@ -309,35 +309,22 @@
             <button id="type-match" onclick="selectCreneauType('match')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Match</button>
           </div>
         </div>
-        <!-- Jour -->
+        <!-- Jour : plusieurs jours possibles (une équipe peut s'entraîner 2x/semaine ou plus) -->
         <div class="form-group">
-          <label class="form-label">Jour de la semaine</label>
+          <label class="form-label">Jour(s) de la semaine</label>
           <div style="display:flex;gap:6px;flex-wrap:wrap" id="jour-selector">
-            <button class="jour-btn on" onclick="selectJour(this,'Lundi')" data-jour="Lundi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--dkg);background:var(--dkg);color:#fff;cursor:pointer">Lun</button>
-            <button class="jour-btn" onclick="selectJour(this,'Mardi')" data-jour="Mardi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Mar</button>
-            <button class="jour-btn" onclick="selectJour(this,'Mercredi')" data-jour="Mercredi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Mer</button>
-            <button class="jour-btn" onclick="selectJour(this,'Jeudi')" data-jour="Jeudi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Jeu</button>
-            <button class="jour-btn" onclick="selectJour(this,'Vendredi')" data-jour="Vendredi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Ven</button>
-            <button class="jour-btn" onclick="selectJour(this,'Samedi')" data-jour="Samedi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Sam</button>
-            <button class="jour-btn" onclick="selectJour(this,'Dimanche')" data-jour="Dimanche" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Dim</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Lundi')" data-jour="Lundi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Lun</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Mardi')" data-jour="Mardi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Mar</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Mercredi')" data-jour="Mercredi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Mer</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Jeudi')" data-jour="Jeudi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Jeu</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Vendredi')" data-jour="Vendredi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Ven</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Samedi')" data-jour="Samedi" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Sam</button>
+            <button class="jour-btn" onclick="toggleJour(this,'Dimanche')" data-jour="Dimanche" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--bdr);background:var(--bg);color:var(--mut);cursor:pointer">Dim</button>
           </div>
+          <div style="font-size:11px;color:var(--mut);margin-top:6px">Sélectionnez un ou plusieurs jours — chacun aura son propre horaire et sa propre salle.</div>
         </div>
-        <!-- Heures -->
-        <div style="display:flex;gap:12px">
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Début</label>
-            <input class="form-input" id="cr-debut" type="time" value="18:00">
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Fin</label>
-            <input class="form-input" id="cr-fin" type="time" value="20:00">
-          </div>
-        </div>
-        <!-- Salle -->
-        <div class="form-group">
-          <label class="form-label">Salle / Lieu</label>
-          <input class="form-input" id="cr-salle" placeholder="Ex: Gymnase Jean Moulin">
-        </div>
+        <!-- Un bloc horaire/salle par jour coché, injecté par renderJourFields() -->
+        <div id="jour-fields"></div>
         <!-- Equipe -->
         <div class="form-group">
           <label class="form-label">Équipe</label>
