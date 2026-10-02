@@ -1,5 +1,12 @@
 [
   {
+    "v": "1790927580",
+    "titre": "Correctif sécurité : messages/sondages Communauté non échappés",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Un message, un message épinglé ou un sondage (question/options) pouvait contenir du code HTML exécuté chez tous les autres membres du canal, au lieu de s'afficher comme du texte. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs dans l'app. Aucune action requise." }
+    ]
+  },
+  {
     "v": "1790927441",
     "titre": "Notifications push : tout reste dans Firebase",
     "points": [

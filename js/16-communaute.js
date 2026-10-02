@@ -789,13 +789,15 @@ function listenMessages(channelId, prevLastRead){
         var totalVotes=0;
         (msg.options||[]).forEach(function(o){totalVotes+=(o.votes||[]).length;});
         var isClosed=msg.deadline&&(new Date().toISOString().slice(0,10)>msg.deadline);
-        var pollHtml='<div class="poll-q">'+msg.question+(msg.allowMultiple?' <span style="font-size:9px;color:var(--mut);font-weight:600">(choix multiple)</span>':"")+'</div>';
+        // authEsc() : question et options d'un sondage viennent de celui qui l'a
+        // créé (n'importe quel membre), pareil risque que displayText plus haut.
+        var pollHtml='<div class="poll-q">'+authEsc(msg.question||"")+(msg.allowMultiple?' <span style="font-size:9px;color:var(--mut);font-weight:600">(choix multiple)</span>':"")+'</div>';
         (msg.options||[]).forEach(function(o,oi){
           var votes=(o.votes||[]).length;
           var pct=totalVotes?Math.round(votes/totalVotes*100):0;
           var votedByMe=(o.votes||[]).indexOf(myP)>=0;
           var checkbox=msg.allowMultiple?(votedByMe?" ":" "):(votedByMe?" ":" ");
-          pollHtml+='<div class="poll-opt'+(votedByMe?" voted":"")+'" onclick="'+(isClosed?"":"votePoll(\'"+channelId+"\',\'"+d.id+"\',"+oi+")")+'" style="'+(isClosed?"cursor:default;opacity:.7":"")+'"><div class="poll-opt-fill" style="width:'+pct+'%"></div><div class="poll-opt-content"><span>'+checkbox+o.text+'</span><span style="color:var(--mut);font-size:10px">'+pct+'% ('+votes+')</span></div></div>';
+          pollHtml+='<div class="poll-opt'+(votedByMe?" voted":"")+'" onclick="'+(isClosed?"":"votePoll(\'"+channelId+"\',\'"+d.id+"\',"+oi+")")+'" style="'+(isClosed?"cursor:default;opacity:.7":"")+'"><div class="poll-opt-fill" style="width:'+pct+'%"></div><div class="poll-opt-content"><span>'+checkbox+authEsc(o.text||"")+'</span><span style="color:var(--mut);font-size:10px">'+pct+'% ('+votes+')</span></div></div>';
         });
         pollHtml+='<div style="font-size:10px;color:var(--mut);margin-top:4px">'+totalVotes+' vote'+(totalVotes>1?"s":"")+' · '+time+(msg.deadline?' · '+(isClosed?"Clôture le "+msg.deadline:"Jusqu'au "+msg.deadline):"")+'</div>';
         pollDiv.innerHTML=pollHtml;
@@ -847,7 +849,10 @@ function listenMessages(channelId, prevLastRead){
       if(msg.replyTo){
         replyHtml='<div onclick="scrollToMsg(\''+msg.replyTo.id+'\')" style="cursor:pointer;border-left:3px solid rgba(120,120,120,.5);padding:4px 8px;margin-bottom:6px;font-size:11px;opacity:.85;border-radius:4px;background:rgba(0,0,0,.07)"><b>'+authEsc(msg.replyTo.pseudo)+'</b><br>'+authEsc(msg.replyTo.text)+'</div>';
       }
-      var displayText=String(msg.text||"").replace(/@([A-Za-zÀ-ÿ0-9_-]+)/g,'<span style="font-weight:800">@$1</span>');
+      // authEsc() d'abord : msg.text vient d'un membre quelconque (parent, joueur...)
+      // et part en innerHTML plus bas. Sans échappement, un message du style
+      // <img src=x onerror=...> s'exécuterait chez tous les autres membres du canal.
+      var displayText=authEsc(String(msg.text||"")).replace(/@([A-Za-zÀ-ÿ0-9_-]+)/g,'<span style="font-weight:800">@$1</span>');
       var editedTag=msg.edited?' <span style="opacity:.6;font-style:italic;font-size:10px">(modifié)</span>':"";
       bubble.innerHTML=replyHtml+displayText+editedTag+'<div class="msg-time">'+time+'</div>'+reactHtml;
       wrap.appendChild(bubble);
@@ -865,7 +870,7 @@ function listenMessages(channelId, prevLastRead){
       if(pinnedMsgs.length){
         pinEl.style.display="flex";
         pinEl.innerHTML=pinnedMsgs.map(function(pm){
-          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+pm.text+'</span>'+(window.asmbCoachMode?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(pm.text)+'</span>'+(window.asmbCoachMode?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
         }).join("");
       } else{pinEl.style.display="none";pinEl.innerHTML="";}
     }
