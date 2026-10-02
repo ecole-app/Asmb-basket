@@ -3,6 +3,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -110,5 +111,19 @@ window.fbInitClubChannels = async function(clubId){
     }
   }catch(e){ console.log("Init canaux club:", e&&e.code||e); }
 };
+
+// ═══ NOTIFICATIONS PUSH (Firebase Cloud Messaging) — voir js/22-push.js ═══
+// isSupported() : false sur Safari/iOS < 16.4, navigation privée Firefox, etc.
+// On ne tente getMessaging() que si c'est supporté pour éviter une exception
+// qui casserait l'initialisation Firebase pour tout le reste de l'app.
+fbMsgIsSupported().then(function(ok){
+  if(!ok) return;
+  var messaging=getMessaging(fbApp);
+  window.fbMessaging=messaging;
+  window.fbMsgGetToken=function(swReg,vapidKey){
+    return fbMsgGetToken(messaging,{vapidKey:vapidKey,serviceWorkerRegistration:swReg});
+  };
+  window.fbMsgDeleteToken=function(){ return fbMsgDeleteToken(messaging); };
+}).catch(function(e){ console.log("FCM isSupported:",e); });
 
 window.dispatchEvent(new Event("fb-ready"));

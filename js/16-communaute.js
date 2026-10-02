@@ -1028,8 +1028,9 @@ async function sendMsg(){
   cancelReply();
   var mentionList=document.getElementById("chat-mention-list");
   if(mentionList)mentionList.style.display="none";
+  // La notif push part automatiquement (Cloud Function déclenchée par l'écriture
+  // Firestore ci-dessous, voir functions/index.js) — rien à appeler ici.
   window.fbAddDoc(window.fbCollection(window.fbDb,"channels",currentChannelId,"messages"),payload);
-  if(typeof notifyChannelPush==="function") notifyChannelPush(currentChannelId,text,(window.ASMB_USER&&window.ASMB_USER.uid)||null);
 }
 
 async function sendMediaMessage(input){

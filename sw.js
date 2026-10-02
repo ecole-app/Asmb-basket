@@ -10,6 +10,47 @@
 const VERSION = new URL(self.location).searchParams.get('v') || 'base';
 const CACHE_NAME = 'asmb-' + VERSION;
 
+// ═══ NOTIFICATIONS PUSH (Firebase Cloud Messaging) ═══════════════════════
+// Ce service worker (déjà enregistré pour le mode hors-ligne) sert aussi à
+// recevoir les push : on y importe le SDK compat FCM, qui s'abonne lui-même
+// à l'événement 'push' et affiche la notif via onBackgroundMessage. Pas besoin
+// d'un fichier firebase-messaging-sw.js séparé ni d'un listener 'push' manuel.
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+firebase.initializeApp({
+  apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
+  authDomain: "asmb-app.firebaseapp.com",
+  projectId: "asmb-app",
+  storageBucket: "asmb-app.firebasestorage.app",
+  messagingSenderId: "786817375628",
+  appId: "1:786817375628:web:3db013af1adab9e8ab8aa9"
+});
+try{
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage(function(payload){
+    var n = (payload && payload.notification) || {};
+    self.registration.showNotification(n.title || 'Nouveau message', {
+      body: n.body || '',
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      data: { url: (payload.data && payload.data.url) || './' }
+    });
+  });
+}catch(e){ /* FCM non supporté sur ce navigateur : le reste du SW fonctionne quand même */ }
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) return list[i].focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
+
 const PRECACHE = [
   './',
   './index.html',
@@ -131,33 +172,6 @@ self.addEventListener('fetch', function (event) {
         }
         return res;
       }).catch(function () { return hit; });
-    })
-  );
-});
-
-// ═══ PUSH : réception + clic sur la notif (voir js/22-push.js) ═══════════
-self.addEventListener('push', function (event) {
-  var data = {};
-  try { data = event.data ? event.data.json() : {}; } catch (e) {}
-  var title = data.title || 'Nouveau message';
-  var options = {
-    body: data.body || '',
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    data: { url: data.url || './' }
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', function (event) {
-  event.notification.close();
-  var url = (event.notification.data && event.notification.data.url) || './';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
-      for (var i = 0; i < list.length; i++) {
-        if ('focus' in list[i]) return list[i].focus();
-      }
-      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });
