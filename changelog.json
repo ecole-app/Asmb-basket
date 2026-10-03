@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791015301",
+    "titre": "Correctif sécurité : liste des joueurs (Inscriptions) non échappée",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Oubliée lors du sweep précédent : la liste des joueurs dans Admin > Inscriptions (prénom, nom, catégorie, naissance, poste) s'affichait sans échappement HTML, et l'identifiant du joueur était injecté directement dans les boutons Historique/Modifier/Suppr. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs. Aucune action requise." }
+    ]
+  },
+  {
     "v": "1790928548",
     "titre": "Planning : plusieurs entraînements par semaine pour une même équipe",
     "points": [

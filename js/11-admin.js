@@ -884,13 +884,14 @@ function renderPlayers(){
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     var genreBadge=p.genre==="F"?'<span class="status-badge" style="background:rgba(142,68,173,.12);color:#8E44AD;margin-left:5px">F</span>':p.genre==="M"?'<span class="status-badge" style="background:rgba(22,160,133,.12);color:#16A085;margin-left:5px">M</span>':'';
     var d=document.createElement("div");d.className="player-card";
-    var meta=p.cat+" · "+p.naissance+(p.poste?" - "+p.poste:"");
+    var meta=authEsc(p.cat||"")+" · "+authEsc(p.naissance||"")+(p.poste?" - "+authEsc(p.poste):"");
+    var safeId=authEsc(String(p.id||""));
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
-    btns+='<button onclick="showPresenceHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
-    btns+='<button onclick="editPlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
-    btns+='<button onclick="deletePlayer(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
+    btns+='<button onclick="showPresenceHistory(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
+    btns+='<button onclick="editPlayer(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
+    btns+='<button onclick="deletePlayer(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
-      +'<div class="player-info"><div class="player-name">'+p.prenom+" "+p.nom+'</div>'
+      +'<div class="player-info"><div class="player-name">'+authEsc(p.prenom||"")+" "+authEsc(p.nom||"")+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
       +'<div style="margin-top:4px">'+status+genreBadge+'</div></div>'+btns;
     el.appendChild(d);
