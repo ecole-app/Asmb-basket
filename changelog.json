@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791111014",
+    "titre": "Sponsors : génération de factures numérotées",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Facturation (sponsors/partenaires) : renseignez l'adresse et le SIRET (facultatif) du club. Par défaut, pas de TVA (franchise en base, art. 293 B du CGI) — une case permet de l'activer avec un taux si votre club y est assujetti. Depuis la fiche d'un sponsor, bouton « Générer une facture » : désignation + montant HT, numérotation automatique et continue (FAC-00001, FAC-00002...), PDF prêt à envoyer. L'accès suit la même délégation que Sponsors (comptable/bureau autorisé peut aussi facturer)." }
+    ]
+  },
+  {
     "v": "1791094170",
     "titre": "Nouveau module : Sponsors & Partenaires",
     "points": [

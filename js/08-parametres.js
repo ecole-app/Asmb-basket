@@ -34,6 +34,7 @@ function buildParametres(){
   var lpEl=document.getElementById("club-lien-paiement");
   if(lpEl) lpEl.value=(window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || "";
   remplirFormCerfa();
+  remplirFormFacturation();
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
@@ -184,10 +185,49 @@ function clubCerfaInfos(){
   return c;
 }
 
+// ═══ FACTURATION (sponsors/partenaires) ═══════════════════════════
+// Identité légale (adresse/SIRET/TVA) : dirigeant uniquement, stockée sur
+// clubs/{clubId}.facturation comme le CERFA. Le compteur de numérotation,
+// lui, doit pouvoir être incrémenté par un trésorier/bureau délégué sur
+// Sponsors — il vit donc à part, dans clubs/{clubId}/facturation_compteur,
+// une collection avec sa propre règle hasPermission(clubId,'sponsors')
+// (voir firestore.rules et reserverNumeroFacture() dans 17-sponsors.js).
+function remplirFormFacturation(){
+  var f=(window.CURRENT_CLUB && window.CURRENT_CLUB.facturation)||{};
+  var adrEl=document.getElementById("fact-adresse"); if(adrEl)adrEl.value=f.adresse||"";
+  var siretEl=document.getElementById("fact-siret"); if(siretEl)siretEl.value=f.siret||"";
+  var tvaEl=document.getElementById("fact-tva-active"); if(tvaEl)tvaEl.checked=!!f.tvaActive;
+  var tauxBox=document.getElementById("fact-tva-taux-box"); if(tauxBox)tauxBox.style.display=f.tvaActive?"block":"none";
+  var tauxEl=document.getElementById("fact-tva-taux"); if(tauxEl)tauxEl.value=(f.tvaTaux!=null?f.tvaTaux:20);
+  if(typeof remplirProchainNumeroFacture==="function") remplirProchainNumeroFacture();
+}
+function enregistrerInfosFacturation(){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  var fact={
+    adresse:((document.getElementById("fact-adresse")||{}).value||"").trim(),
+    siret:((document.getElementById("fact-siret")||{}).value||"").trim(),
+    tvaActive:!!(document.getElementById("fact-tva-active")||{}).checked,
+    tvaTaux:parseFloat((document.getElementById("fact-tva-taux")||{}).value)||20
+  };
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{facturation:fact})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.facturation=fact;
+      showToast("Informations de facturation enregistrées !");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+// Utilisé par 17-sponsors.js : renvoie les infos de facturation si
+// l'adresse (minimum légal) est renseignée, sinon null (bloque la génération).
+function clubFacturationInfos(){
+  var f=(window.CURRENT_CLUB && window.CURRENT_CLUB.facturation)||null;
+  if(!f||!f.adresse) return null;
+  return f;
+}
+
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };

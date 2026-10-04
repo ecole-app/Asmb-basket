@@ -644,7 +644,27 @@
         </div>
         <div class="form-group"><label class="form-label">Notes (optionnel)</label><textarea class="form-input" id="sp-notes" rows="3"></textarea></div>
         <button id="sp-save-btn" onclick="saveSponsor()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="sp-facture-btn" onclick="openFactureModal()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">🧾 Générer une facture</button>
         <button id="sp-delete-btn" onclick="deleteSponsor()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer ce sponsor</button>
+      </div>
+    </div>
+
+    <div id="modal-facture" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)">Facture</div>
+          <button onclick="closeModal('modal-facture')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div id="facture-blocked-box" style="display:none">
+          <div style="font-size:13px;color:var(--txt);line-height:1.5;margin-bottom:14px">L'adresse du club n'est pas encore renseignée dans Paramètres > Facturation. C'est nécessaire pour générer une facture valide.</div>
+          <button onclick="closeModal('modal-facture');closeModal('modal-sponsor');navTo('parametres')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Compléter les informations du club</button>
+        </div>
+        <div id="facture-form-box" style="display:none">
+          <div class="form-group"><label class="form-label">Désignation de la prestation</label><textarea class="form-input" id="fact-designation" rows="2" placeholder="Ex: Visibilité publicitaire — panneau terrain + logo maillots, saison 2026-2027"></textarea></div>
+          <div class="form-group"><label class="form-label">Montant HT (€)</label><input class="form-input" id="fact-montant-ht" type="number" step="0.01" placeholder="0.00" oninput="updateFactureApercu()"></div>
+          <div id="facture-apercu" style="font-size:12px;color:var(--mut);margin-bottom:14px"></div>
+          <button onclick="genererFacturePdf()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Télécharger le PDF</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1240,6 +1260,22 @@
  <div class="form-group" style="flex:1"><label class="form-label">Date de déclaration</label><input class="form-input" id="cerfa-date-declaration" type="date"></div>
  </div>
  <button onclick="enregistrerInfosCerfa()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
+ </div>
+ </div>
+ <div class="param-block" data-sec="facturation"><div class="sec">Facturation (sponsors/partenaires)</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Permet de générer des factures numérotées pour vos sponsors/partenaires, depuis leur fiche. Par défaut les clubs amateurs ne facturent pas de TVA (franchise en base, art. 293 B du CGI) — à activer seulement si votre club y est effectivement assujetti.</div>
+ <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="fact-adresse" placeholder="12 rue des Sports, 42000 Saint-Étienne"></div>
+ <div class="form-group"><label class="form-label">N° SIRET (optionnel)</label><input class="form-input" id="fact-siret" placeholder="Laisser vide si vous n'en avez pas"></div>
+ <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+ <input type="checkbox" id="fact-tva-active" onchange="document.getElementById('fact-tva-taux-box').style.display=this.checked?'block':'none'" style="width:44px;height:24px;accent-color:var(--dkg)">
+ <label class="form-label" style="margin:0" for="fact-tva-active">Mon club facture de la TVA</label>
+ </div>
+ <div id="fact-tva-taux-box" style="display:none">
+ <div class="form-group"><label class="form-label">Taux de TVA (%)</label><input class="form-input" id="fact-tva-taux" type="number" step="0.1" value="20"></div>
+ </div>
+ <div style="font-size:11px;color:var(--mut);margin-bottom:10px">Prochain numéro de facture : <b id="fact-prochain-numero" style="color:var(--txt)">FAC-00001</b></div>
+ <button onclick="enregistrerInfosFacturation()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>

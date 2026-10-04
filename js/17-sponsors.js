@@ -90,6 +90,7 @@ function showAddSponsor(){
   document.getElementById("sp-logo-file").value="";
   document.getElementById("sp-doc-file").value="";
   var delBtn=document.getElementById("sp-delete-btn"); if(delBtn) delBtn.style.display="none";
+  var factBtn=document.getElementById("sp-facture-btn"); if(factBtn) factBtn.style.display="none";
   var histBox=document.getElementById("sp-historique"); if(histBox) histBox.style.display="none";
   document.getElementById("modal-sponsor").style.display="flex";
 }
@@ -141,6 +142,7 @@ function showEditSponsor(id){
   document.getElementById("sp-logo-file").value="";
   document.getElementById("sp-doc-file").value="";
   var delBtn=document.getElementById("sp-delete-btn"); if(delBtn) delBtn.style.display="block";
+  var factBtn=document.getElementById("sp-facture-btn"); if(factBtn) factBtn.style.display="block";
   renderSponsorHistorique(s.nom);
   document.getElementById("modal-sponsor").style.display="flex";
 }
@@ -212,5 +214,136 @@ function deleteSponsor(){
     saveSponsors(list);
     closeModal("modal-sponsor");
     buildSponsors();
+  });
+}
+
+// ═══ FACTURE (sponsors/partenaires) ═══════════════════════════════
+// Infos légales (adresse/SIRET/TVA) : clubFacturationInfos() dans
+// 08-parametres.js. Le compteur de numérotation vit à part, dans
+// clubs/{clubId}/facturation_compteur/compteur — une collection dédiée
+// avec sa propre règle hasPermission(clubId,'sponsors'), pour qu'un
+// trésorier/bureau délégué puisse générer des factures sans avoir le
+// droit (réservé au dirigeant) de modifier la fiche du club elle-même.
+var SP_FACT_COUNTER=null; // valeur en cache une fois chargée depuis Firestore
+function loadFactureCounter(cb){
+  if(SP_FACT_COUNTER!=null){ cb(); return; }
+  if(!window.fbGetDoc || !window.fbDb){ SP_FACT_COUNTER=1; cb(); return; }
+  window.fbGetDoc(window.fbDoc(window.fbDb,"facturation_compteur","compteur")).then(function(snap){
+    SP_FACT_COUNTER=(snap.exists() && snap.data().prochainNumero) || 1;
+    cb();
+  }).catch(function(){ SP_FACT_COUNTER=1; cb(); });
+}
+function remplirProchainNumeroFacture(){
+  var numEl=document.getElementById("fact-prochain-numero");
+  if(!numEl) return;
+  loadFactureCounter(function(){ numEl.textContent="FAC-"+String(SP_FACT_COUNTER).padStart(5,"0"); });
+}
+// Réserve le prochain numéro et l'incrémente (lecture-puis-écriture simple,
+// pas de transaction : risque de collision négligeable vu le volume d'un
+// club amateur). cb reçoit le numéro formaté, ex. "FAC-00001".
+function reserverNumeroFacture(cb){
+  loadFactureCounter(function(){
+    var numero=SP_FACT_COUNTER;
+    SP_FACT_COUNTER=numero+1;
+    if(window.fbDb && window.fbSetDoc){
+      window.fbSetDoc(window.fbDoc(window.fbDb,"facturation_compteur","compteur"),{prochainNumero:SP_FACT_COUNTER})
+        .catch(function(e){ console.log("maj numéro facture:",(e&&e.code)||e); });
+    }
+    cb("FAC-"+String(numero).padStart(5,"0"));
+  });
+}
+
+function openFactureModal(){
+  if(!sponsorEditId){askAlert("Enregistrez d'abord le sponsor avant de générer une facture.");return;}
+  var factInfos=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
+  var blockedBox=document.getElementById("facture-blocked-box");
+  var formBox=document.getElementById("facture-form-box");
+  if(!factInfos){
+    if(blockedBox)blockedBox.style.display="block";
+    if(formBox)formBox.style.display="none";
+  } else {
+    if(blockedBox)blockedBox.style.display="none";
+    if(formBox)formBox.style.display="block";
+    document.getElementById("fact-designation").value="";
+    document.getElementById("fact-montant-ht").value="";
+    updateFactureApercu();
+    loadFactureCounter(function(){}); // préchauffe le cache pour que le clic sur "Télécharger" soit instantané
+  }
+  document.getElementById("modal-facture").style.display="flex";
+}
+function updateFactureApercu(){
+  var apercuEl=document.getElementById("facture-apercu"); if(!apercuEl) return;
+  var factInfos=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
+  var ht=parseFloat((document.getElementById("fact-montant-ht")||{}).value)||0;
+  if(!ht){ apercuEl.textContent=""; return; }
+  if(factInfos && factInfos.tvaActive){
+    var taux=factInfos.tvaTaux||20;
+    var tva=ht*taux/100;
+    apercuEl.textContent="TVA ("+taux+"%) : "+tva.toFixed(2)+" € — Total TTC : "+(ht+tva).toFixed(2)+" €";
+  } else {
+    apercuEl.textContent="TVA non applicable, article 293 B du CGI — Total : "+ht.toFixed(2)+" €";
+  }
+}
+
+function genererFacturePdf(){
+  if(typeof window.jspdf==="undefined"){askAlert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
+  var factInfos=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
+  if(!factInfos){askAlert("Informations de facturation manquantes.");return;}
+  var s=getSponsors().find(function(x){return x.id===sponsorEditId;});
+  if(!s){askAlert("Sponsor introuvable.");return;}
+  var designation=((document.getElementById("fact-designation")||{}).value||"").trim();
+  var montantHt=parseFloat((document.getElementById("fact-montant-ht")||{}).value);
+  if(!designation){askAlert("La désignation de la prestation est obligatoire");return;}
+  if(!montantHt||montantHt<=0){askAlert("Montant invalide");return;}
+
+  var tvaActive=!!factInfos.tvaActive;
+  var tauxTva=factInfos.tvaTaux||20;
+  var montantTva=tvaActive?montantHt*tauxTva/100:0;
+  var montantTtc=montantHt+montantTva;
+
+  reserverNumeroFacture(function(numero){
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF();
+    var y=20;
+
+    doc.setFontSize(16);doc.setTextColor(27,92,40);
+    doc.text("FACTURE "+numero,14,y);y+=6;
+    doc.setFontSize(9);doc.setTextColor(100,100,100);
+    doc.text("Date : "+new Date().toLocaleDateString("fr-FR"),14,y);y+=14;
+
+    doc.setFontSize(10);doc.setTextColor(30,30,30);
+    doc.setFont(undefined,"bold");doc.text("Émetteur",14,y);doc.setFont(undefined,"normal");y+=6;
+    doc.text(clubLabel(),14,y);y+=5;
+    doc.text(factInfos.adresse,14,y,{maxWidth:182});y+=5;
+    if(factInfos.siret){doc.text("SIRET : "+factInfos.siret,14,y);y+=5;}
+    y+=6;
+
+    doc.setFont(undefined,"bold");doc.text("Client",14,y);doc.setFont(undefined,"normal");y+=6;
+    doc.text(s.nom||"",14,y,{maxWidth:182});y+=5;
+    if(s.contactNom){doc.text("Contact : "+s.contactNom,14,y,{maxWidth:182});y+=5;}
+    y+=8;
+
+    doc.setFont(undefined,"bold");doc.text("Désignation",14,y);doc.setFont(undefined,"normal");y+=6;
+    var designationLines=doc.splitTextToSize(designation,182);
+    doc.text(designationLines,14,y);
+    y+=designationLines.length*5+6;
+
+    doc.text("Montant HT : "+montantHt.toFixed(2)+" €",14,y);y+=6;
+    if(tvaActive){
+      doc.text("TVA ("+tauxTva+"%) : "+montantTva.toFixed(2)+" €",14,y);y+=6;
+      doc.setFont(undefined,"bold");doc.text("Total TTC : "+montantTtc.toFixed(2)+" €",14,y);doc.setFont(undefined,"normal");y+=10;
+    } else {
+      doc.setFont(undefined,"bold");doc.text("Total : "+montantHt.toFixed(2)+" €",14,y);doc.setFont(undefined,"normal");y+=6;
+      doc.setFontSize(9);doc.text("TVA non applicable, article 293 B du Code général des impôts.",14,y,{maxWidth:182});y+=10;
+      doc.setFontSize(10);
+    }
+
+    y+=8;
+    doc.setFontSize(9);doc.setTextColor(80,80,80);
+    doc.text("Paiement à réception de facture.",14,y);
+
+    doc.save(clubSlug()+"_"+numero.toLowerCase()+"_"+(s.nom||"").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    closeModal("modal-facture");
+    showToast("Facture "+numero+" générée !");
   });
 }

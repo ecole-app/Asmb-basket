@@ -290,6 +290,12 @@ service cloud.firestore {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
       }
+      // Compteur de numérotation des factures sponsors : à part de la fiche
+      // club (réservée au dirigeant) pour qu'un trésorier/bureau délégué sur
+      // Sponsors puisse réserver un numéro sans toucher au doc clubs/{clubId}.
+      match /facturation_compteur/{id} {
+        allow read, write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
+      }
       match /backups/{id}      { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
       match /notes_frais/{id}  { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
       match /annuaire/{id}     { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
