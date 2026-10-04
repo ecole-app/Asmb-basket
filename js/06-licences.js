@@ -634,7 +634,8 @@ function licencePeutRelancer(lic){
   return (Date.now()-new Date(d.date).getTime())/86400000>=3;
 }
 function licenceEligibleSuspension(lic){
-  return (lic.relances||[]).length>=3 && licenceStatutPaiement(lic)!=="paye" && !lic.suspendue;
+  var seuil=(typeof clubSeuilRelances==="function")?clubSeuilRelances():3;
+  return (lic.relances||[]).length>=seuil && licenceStatutPaiement(lic)!=="paye" && !lic.suspendue;
 }
 function enregistrerMontantAttendu(code){
   var input=document.getElementById("lic-montant-attendu");

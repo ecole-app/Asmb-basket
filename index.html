@@ -1279,6 +1279,13 @@
  <button onclick="enregistrerInfosFacturation()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
+ <div class="param-block" data-sec="relances"><div class="sec">Relances impayés (licences)</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Sur une fiche licence avec un montant attendu, un bouton « Relancer » permet d'envoyer un rappel (SMS/email) à la famille. Après ce nombre de relances sans paiement, un bouton « Suspendre la licence » apparaît — jamais automatique, c'est toujours vous qui décidez.</div>
+ <div class="form-group"><label class="form-label">Nombre de relances avant proposition de suspension</label><input class="form-input" id="rel-seuil" type="number" min="1" step="1" value="3"></div>
+ <button onclick="enregistrerInfosRelances()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
+ </div>
+ </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>

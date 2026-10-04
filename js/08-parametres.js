@@ -35,6 +35,7 @@ function buildParametres(){
   if(lpEl) lpEl.value=(window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || "";
   remplirFormCerfa();
   remplirFormFacturation();
+  remplirFormRelances();
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
@@ -224,10 +225,38 @@ function clubFacturationInfos(){
   return f;
 }
 
+// ═══ RELANCES IMPAYÉS (licences) ════════════════════════════════════
+// Le seuil (nb de relances sans paiement avant que le bouton "Suspendre"
+// n'apparaisse) est au choix du dirigeant, pas une valeur figée dans le
+// code — voir licenceEligibleSuspension() dans 06-licences.js qui lit
+// clubSeuilRelances().
+function remplirFormRelances(){
+  var r=(window.CURRENT_CLUB && window.CURRENT_CLUB.relances)||{};
+  var seuilEl=document.getElementById("rel-seuil"); if(seuilEl)seuilEl.value=(r.seuilSuspension!=null?r.seuilSuspension:3);
+}
+function enregistrerInfosRelances(){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  var seuil=parseInt((document.getElementById("rel-seuil")||{}).value,10);
+  if(!seuil||seuil<1){ askAlert("Le nombre de relances doit être au moins 1."); return; }
+  var relances={seuilSuspension:seuil};
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{relances:relances})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.relances=relances;
+      showToast("Seuil de relances enregistré !");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+// Utilisé par 06-licences.js : nb de relances sans paiement avant que la
+// suspension soit proposée au dirigeant (jamais automatique). Défaut : 3.
+function clubSeuilRelances(){
+  var r=(window.CURRENT_CLUB && window.CURRENT_CLUB.relances)||{};
+  return r.seuilSuspension!=null ? r.seuilSuspension : 3;
+}
+
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };

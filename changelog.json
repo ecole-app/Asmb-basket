@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791118203",
+    "titre": "Relances impayés : seuil de suspension configurable",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Relances impayés (licences) : choisissez vous-même le nombre de relances sans paiement avant que le bouton « Suspendre la licence » n'apparaisse (3 par défaut)." }
+    ]
+  },
+  {
     "v": "1791117348",
     "titre": "Licences : suivi des impayés et relances",
     "points": [
