@@ -156,7 +156,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import {
   getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -172,11 +172,11 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 
 // App Check : même clé que l'appli principale (voir js/firebase-init.js et APP_CHECK_SETUP.md)
-const GM_APPCHECK_SITE_KEY = "REMPLACER_PAR_LA_CLE_RECAPTCHA_V3";
+const GM_APPCHECK_SITE_KEY = "REMPLACER_PAR_LA_CLE_FRAUD_DEFENSE";
 try{
   if(GM_APPCHECK_SITE_KEY && GM_APPCHECK_SITE_KEY.indexOf("REMPLACER")!==0){
     initializeAppCheck(fbApp, {
-      provider: new ReCaptchaV3Provider(GM_APPCHECK_SITE_KEY),
+      provider: new ReCaptchaEnterpriseProvider(GM_APPCHECK_SITE_KEY),
       isTokenAutoRefreshEnabled: true
     });
   }

@@ -3,31 +3,35 @@
 Protège Firestore contre les scripts qui n'exécutent pas l'appli réelle :
 brute-force des codes buvette/invitation/inscription, spam du formulaire
 d'inscription public, spam de Communauté (donc du coût Cloud Functions).
-Gratuit (plan Spark comme Blaze), basé sur reCAPTCHA v3.
+Gratuit (plan Spark comme Blaze) jusqu'à 10 000 vérifications/mois — hors
+de portée pour un seul club.
 
-Le code est déjà en place dans `js/firebase-init.js` et `buvette/index.html`,
-mais désactivé tant que la clé n'est pas configurée. 3 étapes restent à faire
-côté console, dans l'ordre :
+Firebase n'accepte plus de nouvelles clés reCAPTCHA v3 "classique" : la
+console propose maintenant **Fraud Defense** (nouveau nom de reCAPTCHA
+Enterprise). C'est ce fournisseur qu'on utilise ici — le code est déjà en
+place dans `js/firebase-init.js` et `buvette/index.html`, mais désactivé
+tant que la clé n'est pas configurée. 3 étapes restent à faire côté
+console, dans l'ordre :
 
-## 1. Créer la clé reCAPTCHA v3 et l'enregistrer dans App Check
+## 1. Créer la clé Fraud Defense et l'enregistrer dans App Check
 
 1. [Firebase Console](https://console.firebase.google.com/) > projet `asmb-app`
    > **App Check** (dans le menu Build).
 2. Onglet **Apps** > sélectionner l'appli web (celle utilisée par
    `generalmanagerapp.fr`) > **Enregistrer**.
-3. Choisir le fournisseur **reCAPTCHA v3**. La console propose de créer la clé
-   directement (sinon : [console reCAPTCHA](https://www.google.com/recaptcha/admin),
-   créer une clé v3, domaines `generalmanagerapp.fr` + `localhost` pour tester).
+3. Choisir le fournisseur **Fraud Defense**. La console crée la clé
+   score-based directement (domaine `generalmanagerapp.fr`, ajoute
+   `localhost` aussi si tu veux tester en local).
 4. Copier la clé de site obtenue.
 
 ## 2. Coller la clé dans le code
 
-Remplacer `"REMPLACER_PAR_LA_CLE_RECAPTCHA_V3"` par la clé, dans **2 fichiers** :
+Remplacer `"REMPLACER_PAR_LA_CLE_FRAUD_DEFENSE"` par la clé, dans **2 fichiers** :
 - `js/firebase-init.js`
 - `buvette/index.html`
 
-Puis commit + push (la clé de site reCAPTCHA v3 est publique par nature,
-comme l'`apiKey` Firebase — pas un secret à cacher).
+Puis commit + push (la clé de site est publique par nature, comme l'`apiKey`
+Firebase — pas un secret à cacher).
 
 ## 3. Activer l'enforcement — en 2 temps, pas en une fois
 

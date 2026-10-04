@@ -1,7 +1,7 @@
 /* ===== firebase-init.js — Initialisation Firebase (module ES6) ===== */
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
@@ -21,19 +21,20 @@ const fbApp = initializeApp(firebaseConfig);
 // ═══ APP CHECK (anti-bot / anti-brute-force) ══════════════════════
 // Protège Firestore contre les scripts qui n'exécutent pas l'appli réelle
 // (brute-force de codes buvette/invitation, spam du formulaire d'inscription).
-// Clé reCAPTCHA v3 à récupérer dans Firebase Console > App Check > Apps > Web app
-// (ou console reCAPTCHA directement). Ne PAS activer le mode "Enforced" sur
-// Firestore côté console avant d'avoir vérifié en mode "Monitor" que le trafic
-// légitime passe bien (voir APP_CHECK_SETUP.md).
-const GM_APPCHECK_SITE_KEY = "REMPLACER_PAR_LA_CLE_RECAPTCHA_V3";
+// Clé "Fraud Defense" (ex-reCAPTCHA Enterprise, seule option proposée par la
+// console Firebase désormais) à récupérer dans Firebase Console > App Check
+// > Apps > Web app. Ne PAS activer le mode "Enforced" sur Firestore côté
+// console avant d'avoir vérifié en mode "Monitor" que le trafic légitime
+// passe bien (voir APP_CHECK_SETUP.md).
+const GM_APPCHECK_SITE_KEY = "REMPLACER_PAR_LA_CLE_FRAUD_DEFENSE";
 try{
   if(GM_APPCHECK_SITE_KEY && GM_APPCHECK_SITE_KEY.indexOf("REMPLACER")!==0){
     initializeAppCheck(fbApp, {
-      provider: new ReCaptchaV3Provider(GM_APPCHECK_SITE_KEY),
+      provider: new ReCaptchaEnterpriseProvider(GM_APPCHECK_SITE_KEY),
       isTokenAutoRefreshEnabled: true
     });
   } else {
-    console.log("App Check inactif : clé reCAPTCHA v3 non configurée (voir APP_CHECK_SETUP.md)");
+    console.log("App Check inactif : clé Fraud Defense non configurée (voir APP_CHECK_SETUP.md)");
   }
 }catch(e){ console.log("App Check init:", e&&e.code||e); }
 
