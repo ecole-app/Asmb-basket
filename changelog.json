@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791092567",
+    "titre": "Comptabilité : génération des reçus fiscaux (CERFA)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Reçus fiscaux (CERFA) : renseignez une fois l'adresse, l'objet et le n° RNA/récépissé du club, puis activez. Une fois activé, chaque ligne de type Dons en Comptabilité propose un bouton « Générer le reçu fiscal » qui produit un PDF prêt à remettre au donateur." }
+    ]
+  },
+  {
     "v": "1791090404",
     "titre": "Sécurité : support de Firebase App Check (anti-bot)",
     "points": [

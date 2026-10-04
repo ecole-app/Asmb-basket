@@ -237,6 +237,8 @@ function showAddComptaLine(editId){
   setComptaType(existing?existing.type:"recette");
   var delBtn=document.getElementById("compta-delete-btn");
   if(delBtn) delBtn.style.display=existing?"block":"none";
+  var cerfaBtn=document.getElementById("compta-cerfa-btn");
+  if(cerfaBtn) cerfaBtn.style.display=(existing&&existing.type==="recette"&&existing.categorie==="Dons")?"block":"none";
   document.getElementById("modal-compta-line").style.display="flex";
 }
 // Crée une ligne comptable directement depuis un mouvement de stock (buvette)
@@ -840,3 +842,146 @@ function deleteDoc(id){
   });
 }
 
+
+// ═══ REÇU FISCAL (CERFA n°11580) POUR LES DONS ════════════════════
+// Les infos légales du club (adresse, objet, RNA...) sont saisies une
+// fois dans Paramètres (voir 08-parametres.js, clubCerfaInfos()) et
+// réutilisées ici. Les infos du donateur sont saisies à chaque don et
+// mémorisées sur la ligne comptable pour un futur réemploi/correction.
+function openCerfaModal(){
+  var lines=getComptabilite();
+  var l=comptaEditId?lines.find(function(x){return x.id===comptaEditId;}):null;
+  if(!l){askAlert("Enregistrez d'abord la ligne avant de générer le reçu.");return;}
+  var cerfaInfos=(typeof clubCerfaInfos==="function")?clubCerfaInfos():null;
+  var blockedBox=document.getElementById("cerfa-blocked-box");
+  var formBox=document.getElementById("cerfa-form-box");
+  if(!cerfaInfos){
+    if(blockedBox)blockedBox.style.display="block";
+    if(formBox)formBox.style.display="none";
+  } else {
+    if(blockedBox)blockedBox.style.display="none";
+    if(formBox)formBox.style.display="block";
+    var typeEl=document.getElementById("cerfa-donateur-type"); if(typeEl)typeEl.value=l.donateurType||"particulier";
+    var nomEl=document.getElementById("cerfa-donateur-nom"); if(nomEl)nomEl.value=l.donateurNom||l.tiers||"";
+    var adrEl=document.getElementById("cerfa-donateur-adresse"); if(adrEl)adrEl.value=l.donateurAdresse||"";
+  }
+  document.getElementById("modal-cerfa").style.display="flex";
+}
+
+// Conversion d'un entier en toutes lettres françaises (0 à 999 999 999).
+// Volontairement limité aux montants réalistes pour un don de club.
+function cerfaNombreEnLettres(n){
+  n=Math.round(n);
+  if(n===0) return "zéro";
+  var neg=n<0; n=Math.abs(n);
+  var unites=["","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize","quatorze","quinze","seize","dix-sept","dix-huit","dix-neuf"];
+  var dizaines=["","dix","vingt","trente","quarante","cinquante","soixante","soixante","quatre-vingt","quatre-vingt"];
+  function troisChiffres(x){
+    if(x===0) return "";
+    var c=Math.floor(x/100), r=x%100, out="";
+    if(c>0) out += (c>1?unites[c]+" cent":"cent") + ((r===0&&c>1)?"s":"");
+    if(r>0){
+      if(out) out+=" ";
+      if(r<20){ out+=unites[r]; }
+      else {
+        var d=Math.floor(r/10), u=r%10;
+        if(d===7||d===9){
+          var base=(d===7?"soixante":"quatre-vingt");
+          out+= (d===7&&u===1) ? (base+" et onze") : (base+"-"+unites[10+u]);
+        } else if(d===8){
+          out+= u===0 ? "quatre-vingts" : "quatre-vingt-"+unites[u];
+        } else {
+          if(u===0) out+=dizaines[d];
+          else if(u===1) out+=dizaines[d]+" et un";
+          else out+=dizaines[d]+"-"+unites[u];
+        }
+      }
+    }
+    return out;
+  }
+  var millions=Math.floor(n/1000000);
+  var milliers=Math.floor((n%1000000)/1000);
+  var reste=n%1000;
+  var parts=[];
+  if(millions>0) parts.push(troisChiffres(millions)+(millions>1?" millions":" million"));
+  if(milliers>0) parts.push(milliers===1?"mille":troisChiffres(milliers)+" mille");
+  if(reste>0 || parts.length===0) parts.push(troisChiffres(reste)||"zéro");
+  return (neg?"moins ":"")+parts.join(" ");
+}
+function cerfaMontantEnLettres(montant){
+  var euros=Math.floor(montant+1e-9);
+  var centimes=Math.round((montant-euros)*100);
+  var txt=cerfaNombreEnLettres(euros)+" euro"+(euros>1?"s":"");
+  if(centimes>0) txt+=" et "+cerfaNombreEnLettres(centimes)+" centime"+(centimes>1?"s":"");
+  return txt;
+}
+function cerfaDateFr(iso){
+  if(!iso) return "";
+  var d=new Date(iso+"T00:00:00");
+  if(isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("fr-FR");
+}
+
+function genererCerfaPdf(){
+  if(typeof window.jspdf==="undefined"){askAlert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
+  var cerfaInfos=(typeof clubCerfaInfos==="function")?clubCerfaInfos():null;
+  if(!cerfaInfos){askAlert("Informations du club manquantes.");return;}
+  var lines=getComptabilite();
+  var idx=lines.findIndex(function(x){return x.id===comptaEditId;});
+  if(idx<0){askAlert("Ligne introuvable.");return;}
+  var l=lines[idx];
+  var donType=(document.getElementById("cerfa-donateur-type")||{}).value||"particulier";
+  var donNom=((document.getElementById("cerfa-donateur-nom")||{}).value||"").trim();
+  var donAdresse=((document.getElementById("cerfa-donateur-adresse")||{}).value||"").trim();
+  if(!donNom){askAlert("Le nom du donateur est obligatoire");return;}
+
+  // Mémorise les infos donateur sur la ligne pour un futur réemploi/correction
+  l.donateurType=donType;l.donateurNom=donNom;l.donateurAdresse=donAdresse;
+  lines[idx]=l;
+  saveComptabilite(lines);
+
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF();
+  var montant=l.montant||0;
+  var y=20;
+
+  doc.setFontSize(14);doc.setTextColor(27,92,40);
+  doc.text("REÇU AU TITRE DES DONS AUX ŒUVRES",105,y,{align:"center"});
+  y+=6;
+  doc.setFontSize(9);doc.setTextColor(100,100,100);
+  doc.text(donType==="entreprise"
+    ? "(article 238 bis du Code général des impôts)"
+    : "(article 200 du Code général des impôts)",105,y,{align:"center"});
+  y+=14;
+
+  doc.setFontSize(10);doc.setTextColor(30,30,30);
+  doc.setFont(undefined,"bold");doc.text("Organisme bénéficiaire du don",14,y);doc.setFont(undefined,"normal");y+=6;
+  doc.text(clubLabel(),14,y);y+=5;
+  doc.text(cerfaInfos.adresse,14,y,{maxWidth:182});y+=5;
+  doc.text("Objet : "+cerfaInfos.objet,14,y,{maxWidth:182});y+=5;
+  doc.text("N° RNA / récépissé en préfecture : "+cerfaInfos.rna+" (déclaration du "+cerfaDateFr(cerfaInfos.dateDeclaration)+")",14,y,{maxWidth:182});y+=12;
+
+  doc.setFont(undefined,"bold");doc.text("Bénéficiaire du reçu (donateur)",14,y);doc.setFont(undefined,"normal");y+=6;
+  doc.text((donType==="entreprise"?"Entreprise : ":"")+donNom,14,y,{maxWidth:182});y+=5;
+  if(donAdresse){doc.text(donAdresse,14,y,{maxWidth:182});y+=5;}
+  y+=8;
+
+  doc.setFont(undefined,"bold");doc.text("Don",14,y);doc.setFont(undefined,"normal");y+=6;
+  doc.text("Montant : "+montant.toFixed(2)+" €",14,y);y+=5;
+  doc.text("Soit : "+cerfaMontantEnLettres(montant),14,y,{maxWidth:182});y+=5;
+  doc.text("Date du versement : "+cerfaDateFr(l.date),14,y);y+=5;
+  doc.text("Forme du don : numéraire (don manuel)",14,y);y+=5;
+  doc.text("Mode de versement : "+(l.moyen||""),14,y);y+=14;
+
+  doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text("Certifié exact et sincère.",14,y,{maxWidth:182});y+=10;
+  doc.setFontSize(10);doc.setTextColor(30,30,30);
+  doc.text("Fait le "+new Date().toLocaleDateString("fr-FR"),14,y);y+=20;
+  doc.text("Signature et cachet de l'association :",14,y);
+
+  doc.save(clubSlug()+"_recu-don_"+(l.date||"")+"_"+donNom.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+  closeModal("modal-cerfa");
+  closeModal("modal-compta-line");
+  buildComptabilite();
+  showToast("Reçu fiscal généré !");
+}

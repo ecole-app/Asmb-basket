@@ -478,7 +478,32 @@
           <input type="checkbox" id="cl-pointe" style="width:17px;height:17px"> Pointé (rapproché avec le relevé bancaire)
         </label>
         <button id="compta-save-btn" onclick="saveComptaLine()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="compta-cerfa-btn" onclick="openCerfaModal()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">🧾 Générer le reçu fiscal (CERFA)</button>
         <button id="compta-delete-btn" onclick="deleteComptaLine()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cette ligne</button>
+      </div>
+    </div>
+
+    <div id="modal-cerfa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)">Reçu fiscal (CERFA)</div>
+          <button onclick="closeModal('modal-cerfa')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div id="cerfa-blocked-box" style="display:none">
+          <div style="font-size:13px;color:var(--txt);line-height:1.5;margin-bottom:14px">Les informations légales du club ne sont pas encore renseignées (ou les reçus fiscaux ne sont pas activés pour ce club). Elles sont nécessaires pour générer un reçu valide.</div>
+          <button onclick="closeModal('modal-cerfa');closeModal('modal-compta-line');navTo('parametres')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Compléter les informations du club</button>
+        </div>
+        <div id="cerfa-form-box" style="display:none">
+          <div class="form-group"><label class="form-label">Type de donateur</label>
+            <select class="form-input" id="cerfa-donateur-type">
+              <option value="particulier">Particulier</option>
+              <option value="entreprise">Entreprise</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Nom du donateur<span id="cerfa-donateur-nom-hint" style="color:var(--mut);font-weight:400"></span></label><input class="form-input" id="cerfa-donateur-nom" placeholder="Nom et prénom, ou raison sociale"></div>
+          <div class="form-group"><label class="form-label">Adresse du donateur</label><input class="form-input" id="cerfa-donateur-adresse" placeholder="Adresse complète"></div>
+          <button onclick="genererCerfaPdf()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Télécharger le PDF</button>
+        </div>
       </div>
     </div>
 
@@ -1134,6 +1159,22 @@
  <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Collez ici le lien de votre formulaire d'adhésion en ligne (HelloAsso, ou tout autre service de paiement associatif). Un bouton « Payer ma licence » apparaîtra alors sur la fiche licence de chaque famille. Vous gérez vous-même votre compte et vos virements sur leur plateforme — l'appli se contente d'afficher le lien.</div>
  <div class="form-group"><label class="form-label">Lien de paiement</label><input class="form-input" id="club-lien-paiement" placeholder="https://www.helloasso.com/associations/..."></div>
  <button onclick="enregistrerLienPaiement()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
+ </div>
+ </div>
+ <div class="param-block" data-sec="cerfa"><div class="sec">Reçus fiscaux (CERFA)</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Permet de générer un reçu fiscal (CERFA n°11580) pour chaque don enregistré en Comptabilité, à remettre au donateur pour sa réduction d'impôt. Réservé aux associations habilitées à délivrer ce type de reçu (intérêt général). Ces informations doivent être exactes : elles sont reprises telles quelles sur le document.</div>
+ <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+ <input type="checkbox" id="cerfa-active" style="width:44px;height:24px;accent-color:var(--dkg)">
+ <label class="form-label" style="margin:0" for="cerfa-active">Mon club peut émettre des reçus fiscaux</label>
+ </div>
+ <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="cerfa-adresse" placeholder="12 rue des Sports, 42000 Saint-Étienne"></div>
+ <div class="form-group"><label class="form-label">Objet social (tel que déclaré en préfecture)</label><input class="form-input" id="cerfa-objet" placeholder="Promotion et développement de la pratique du basket-ball"></div>
+ <div style="display:flex;gap:12px">
+ <div class="form-group" style="flex:1"><label class="form-label">N° RNA / récépissé</label><input class="form-input" id="cerfa-rna" placeholder="W421000000"></div>
+ <div class="form-group" style="flex:1"><label class="form-label">Date de déclaration</label><input class="form-input" id="cerfa-date-declaration" type="date"></div>
+ </div>
+ <button onclick="enregistrerInfosCerfa()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>

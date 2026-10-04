@@ -33,6 +33,7 @@ function buildParametres(){
   majApercuLogo();
   var lpEl=document.getElementById("club-lien-paiement");
   if(lpEl) lpEl.value=(window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || "";
+  remplirFormCerfa();
   var fbBtn=document.getElementById("feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
     fbBtn.dataset.wired="1";
@@ -142,10 +143,51 @@ function clubLienPaiement(){
   return (window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || null;
 }
 
+// ═══ REÇUS FISCAUX (CERFA n°11580) ═══════════════════════════════
+// Toutes les infos légales nécessaires pour émettre un reçu fiscal valide
+// sont saisies une fois ici, puis réutilisées sur chaque don (voir
+// 15-compta-inventaire.js). cerfa.active conditionne l'apparition du
+// bouton "Générer le reçu fiscal" sur les lignes de type Dons.
+function remplirFormCerfa(){
+  var c=(window.CURRENT_CLUB && window.CURRENT_CLUB.cerfa)||{};
+  var activeEl=document.getElementById("cerfa-active"); if(activeEl)activeEl.checked=!!c.active;
+  var adrEl=document.getElementById("cerfa-adresse"); if(adrEl)adrEl.value=c.adresse||"";
+  var objEl=document.getElementById("cerfa-objet"); if(objEl)objEl.value=c.objet||"";
+  var rnaEl=document.getElementById("cerfa-rna"); if(rnaEl)rnaEl.value=c.rna||"";
+  var dateEl=document.getElementById("cerfa-date-declaration"); if(dateEl)dateEl.value=c.dateDeclaration||"";
+}
+function enregistrerInfosCerfa(){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  var cerfa={
+    active:!!(document.getElementById("cerfa-active")||{}).checked,
+    adresse:((document.getElementById("cerfa-adresse")||{}).value||"").trim(),
+    objet:((document.getElementById("cerfa-objet")||{}).value||"").trim(),
+    rna:((document.getElementById("cerfa-rna")||{}).value||"").trim(),
+    dateDeclaration:(document.getElementById("cerfa-date-declaration")||{}).value||""
+  };
+  if(cerfa.active && (!cerfa.adresse||!cerfa.objet||!cerfa.rna||!cerfa.dateDeclaration)){
+    askAlert("Renseignez tous les champs avant d'activer les reçus fiscaux.");
+    return;
+  }
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{cerfa:cerfa})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.cerfa=cerfa;
+      showToast("Informations CERFA enregistrées !");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+// Utilisé par 15-compta-inventaire.js pour savoir si la génération de
+// CERFA est possible (infos club complètes + club habilité).
+function clubCerfaInfos(){
+  var c=(window.CURRENT_CLUB && window.CURRENT_CLUB.cerfa)||null;
+  if(!c||!c.active||!c.adresse||!c.objet||!c.rna||!c.dateDeclaration) return null;
+  return c;
+}
+
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",paiement:"Paiement des licences",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };
