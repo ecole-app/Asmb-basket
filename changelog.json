@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791094170",
+    "titre": "Nouveau module : Sponsors & Partenaires",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Nouvel onglet Admin > Sponsors & Partenaires : fiches prospects/actifs/expirés avec contact, montant de convention, dates, logo, document de convention et date de relance (badge si dépassée). L'historique des paiements liés (catégorie « Sponsors/Partenaires » en Comptabilité) s'affiche directement sur la fiche. L'accès peut être délégué à un trésorier/bureau comme pour la Comptabilité et l'Inventaire." }
+    ]
+  },
+  {
     "v": "1791092567",
     "titre": "Comptabilité : génération des reçus fiscaux (CERFA)",
     "points": [

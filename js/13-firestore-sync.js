@@ -119,10 +119,15 @@ function initFirestoreSync(){
   fsStartSync("annuaire","asmb_annuaire");
   fsStartSync("notes_frais","asmb_notes_frais");
   fsStartSyncEvaluations();
-  if((window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0){
-    fsStartSync("comptabilite","asmb_comptabilite");
-    fsStartSync("inventaire","asmb_inventaire");
-  }
+  // Démarre la synchro pour le dirigeant, mais aussi pour tout coach/bureau
+  // à qui l'accès a été accordé individuellement (permissions.<id>=true) —
+  // sinon sa carte Admin s'ouvrirait sur une liste vide tant qu'aucune
+  // écriture locale n'a eu lieu. Même règle que côté Firestore (hasPermission).
+  var fsUser=window.ASMB_USER, fsRoles=(fsUser&&fsUser.roles)||[], fsPerms=(fsUser&&fsUser.permissions)||{};
+  var fsIsDirigeant=fsRoles.indexOf("dirigeant")>=0;
+  if(fsIsDirigeant || fsPerms.comptabilite) fsStartSync("comptabilite","asmb_comptabilite");
+  if(fsIsDirigeant || fsPerms.inventaire) fsStartSync("inventaire","asmb_inventaire");
+  if(fsIsDirigeant || fsPerms.sponsors) fsStartSync("sponsors","asmb_sponsors");
   fetchCycleOverridesFromCloud();
   if(typeof fetchAnimAttachmentsFromCloud==="function") fetchAnimAttachmentsFromCloud();
   if(window.fbGetDoc){

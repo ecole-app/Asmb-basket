@@ -584,6 +584,71 @@
     </div>
   </div>
 
+  <!-- ═══ SPONSORS & PARTENAIRES ═══ -->
+  <div class="scr" id="scr-sponsors">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:var(--txt)">Sponsors & Partenaires</div>
+        <div style="font-size:11px;color:var(--mut)" id="sp-count">0 sponsor</div>
+      </div>
+      <button onclick="showAddSponsor()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Sponsor</button>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 12px 0;flex-wrap:wrap">
+      <button id="sp-tab-tous" class="cat-filter on" onclick="setSponsorTab('tous')">Tous</button>
+      <button id="sp-tab-prospect" class="cat-filter" onclick="setSponsorTab('prospect')">🔎 Prospects</button>
+      <button id="sp-tab-actif" class="cat-filter" onclick="setSponsorTab('actif')">✅ Actifs</button>
+      <button id="sp-tab-expire" class="cat-filter" onclick="setSponsorTab('expire')">⏳ Expirés</button>
+    </div>
+    <div style="padding:10px 12px 0"><input id="sp-search" type="search" placeholder="Rechercher un sponsor..." oninput="buildSponsors()" style="width:100%;padding:10px 12px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box"></div>
+    <div id="sp-list" style="padding:10px 0 80px"></div>
+
+    <!-- Modal fiche sponsor -->
+    <div id="modal-sponsor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:800;color:var(--txt)" id="sp-modal-title">Nouveau sponsor</div>
+          <button onclick="closeModal('modal-sponsor')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
+        </div>
+        <div class="form-group"><label class="form-label">Nom du sponsor / partenaire</label><input class="form-input" id="sp-nom" placeholder="Ex: Intersport Saint-Étienne"></div>
+        <div class="form-group"><label class="form-label">Statut</label>
+          <select class="form-input" id="sp-statut">
+            <option value="prospect">Prospect</option>
+            <option value="actif">Actif</option>
+            <option value="expire">Expiré</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:1"><label class="form-label">Contact (nom)</label><input class="form-input" id="sp-contact-nom" placeholder="Nom du contact"></div>
+          <div class="form-group" style="flex:1"><label class="form-label">Téléphone</label><input class="form-input" id="sp-contact-tel" type="tel" placeholder="06..."></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email du contact</label><input class="form-input" id="sp-contact-email" type="email" placeholder="contact@..."></div>
+        <div class="form-group"><label class="form-label">Montant de la convention (€, optionnel)</label><input class="form-input" id="sp-montant" type="number" step="0.01" placeholder="0.00"></div>
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:1"><label class="form-label">Début de convention</label><input class="form-input" id="sp-date-debut" type="date"></div>
+          <div class="form-group" style="flex:1"><label class="form-label">Fin de convention</label><input class="form-input" id="sp-date-fin" type="date"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Prochaine relance (optionnel)</label><input class="form-input" id="sp-relance" type="date"></div>
+        <div class="form-group">
+          <label class="form-label">Logo (optionnel)</label>
+          <input type="file" id="sp-logo-file" accept="image/*" onchange="sponsorLogoPick(this)" style="display:none">
+          <button type="button" onclick="document.getElementById('sp-logo-file').click()" style="width:100%;padding:10px;border-radius:var(--rx);border:1.5px dashed var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;text-align:left" id="sp-logo-preview">Aucun logo</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Convention signée (photo ou PDF, 700 Ko max, optionnel)</label>
+          <input type="file" id="sp-doc-file" accept="image/*,application/pdf" onchange="sponsorDocPick(this)" style="display:none">
+          <button type="button" onclick="document.getElementById('sp-doc-file').click()" style="width:100%;padding:10px;border-radius:var(--rx);border:1.5px dashed var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;text-align:left" id="sp-doc-preview">Aucun document joint</button>
+        </div>
+        <div id="sp-historique" style="display:none;margin-bottom:14px">
+          <div class="form-label" style="margin-bottom:6px">Historique des paiements (Comptabilité)</div>
+          <div id="sp-historique-list"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes (optionnel)</label><textarea class="form-input" id="sp-notes" rows="3"></textarea></div>
+        <button id="sp-save-btn" onclick="saveSponsor()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="sp-delete-btn" onclick="deleteSponsor()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer ce sponsor</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ INSCRIPTION PUBLIQUE ═══ -->
   <div class="scr" id="scr-inscription">
     <div class="hero" style="padding:16px 16px 14px;text-align:left;display:flex;align-items:center;gap:12px">
@@ -1684,6 +1749,7 @@
 <script src="js/14-evenements.js"></script>
 <script src="js/15-compta-inventaire.js"></script>
 <script src="js/16-communaute.js"></script>
+<script src="js/17-sponsors.js"></script>
 <script src="js/17-poles.js"></script>
 <script src="js/18-auth.js"></script>
 <script src="js/19-profils.js"></script>

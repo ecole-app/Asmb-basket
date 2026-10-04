@@ -286,6 +286,10 @@ service cloud.firestore {
           && resource.data.categorie == 'buvette'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['qte','viaCode']);
       }
+      match /sponsors/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
+      }
       match /backups/{id}      { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
       match /notes_frais/{id}  { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
       match /annuaire/{id}     { allow read: if readStaff(clubId);     allow write: if staff(clubId); }

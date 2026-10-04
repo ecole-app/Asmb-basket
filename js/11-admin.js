@@ -13,6 +13,7 @@ var ADMIN_MODULES=[
  {id:"avis",name:"Avis & suggestions",sub:"Retours des membres",icon:"💡",color:"#8E44AD",scr:"admin"},
  {id:"fiches",name:"Fiches reçues",sub:"Inscriptions à valider",icon:"📥",color:"#16A085",scr:"admin"},
  {id:"comptabilite",name:"Comptabilité",sub:"Recettes · Dépenses",icon:"💶",color:"#1A2E5A",scr:"comptabilite"},
+ {id:"sponsors",name:"Sponsors & Partenaires",sub:"Prospects · Conventions · Suivi",icon:"🤝",color:"#E8670A",scr:"sponsors"},
  {id:"notesfrais",name:"Notes de frais",sub:"Dépenses des coachs/bénévoles",icon:"🧾",color:"#E8670A",scr:"admin"},
  {id:"inventaire",name:"Inventaire",sub:"Buvette · Matériel",icon:"📦",color:"#16A085",scr:"inventaire"},
 ];
@@ -340,6 +341,7 @@ function openAdminModule(id){
   else if(id==="documents")buildDocs();
   else if(id==="comptabilite")buildComptabilite();
   else if(id==="inventaire")buildInventaire();
+  else if(id==="sponsors")buildSponsors();
   showScr(m.scr);
 }
 
