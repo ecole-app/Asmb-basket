@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791090404",
+    "titre": "Sécurité : support de Firebase App Check (anti-bot)",
+    "points": [
+      { "roles": ["dirigeant"], "texte": "Le code support App Check (reCAPTCHA v3) pour protéger les codes buvette/invitation/inscription et le formulaire public contre les scripts automatisés. Inactif tant que la clé n'est pas configurée côté console Firebase — voir APP_CHECK_SETUP.md pour les 3 étapes restantes (gratuit, ~10 min)." }
+    ]
+  },
+  {
     "v": "1791015301",
     "titre": "Correctif sécurité : liste des joueurs (Inscriptions) non échappée",
     "points": [
