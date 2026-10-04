@@ -111,10 +111,10 @@ function publierRattachements(){
   lics.forEach(function(l){
     var f=l&&l.fiche; if(!f) return;
     var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
-    if(!p) return;
+    if(!p || p.suspendu) return; // licence suspendue (impayé) : accès espace licencié coupé
     [f.telephone,f.respTel,f.resp2Tel].forEach(function(t){ lier(t,p.id,l.id); });
   });
-  players.forEach(function(p){ lier(p.telEnfant,p.id,""); });
+  players.forEach(function(p){ if(!p.suspendu) lier(p.telEnfant,p.id,""); });
   Object.keys(entries).forEach(function(tel){
     var s=JSON.stringify(entries[tel]);
     if(RATTACH_PREV[tel]===s) return;
@@ -246,6 +246,7 @@ var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;
+var licShowImpayesOnly=false;
 // Reconstruit les rattachements des licences validees avant leur mise en place,
 // une fois par session depuis l'ecran des licences : sans cela, ces familles ne
 // retrouveraient plus leur enfant.
@@ -298,9 +299,21 @@ function buildLicences(){
     }
   }
 
+  var impayesBox=document.getElementById("lic-impayes-toggle");
+  if(impayesBox){
+    var nbImpayes=lics.filter(function(l){var s=licenceStatutPaiement(l);return (s==="impaye"||s==="partiel")||l.suspendue;}).length;
+    if(nbImpayes>0||licShowImpayesOnly){
+      impayesBox.style.display="block";
+      impayesBox.innerHTML='<button onclick="licShowImpayesOnly=!licShowImpayesOnly;buildLicences();" style="width:100%;padding:9px;border-radius:var(--rx);background:'+(licShowImpayesOnly?"var(--red)":"rgba(192,57,43,.1)")+';color:'+(licShowImpayesOnly?"#fff":"var(--red)")+';font-size:11px;font-weight:700;border:none;cursor:pointer;margin:0 12px 10px;width:calc(100% - 24px)">'+(licShowImpayesOnly?"← Voir toutes les fiches":"⚠ Voir les impayés ("+nbImpayes+")")+'</button>';
+    } else { impayesBox.style.display="none"; impayesBox.innerHTML=""; }
+  }
+  if(licShowImpayesOnly){
+    lics=lics.filter(function(l){var s=licenceStatutPaiement(l);return (s==="impaye"||s==="partiel")||l.suspendue;});
+  }
+
   el.innerHTML="";
   if(!lics.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune fiche envoyée</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Nouvelle fiche</div></div>';
+    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(licShowImpayesOnly?"Aucun impayé":"Aucune fiche envoyée")+'</div><div style="font-size:11px;margin-top:4px">'+(licShowImpayesOnly?"Toutes les familles sont à jour":"Appuyez sur + Nouvelle fiche")+'</div></div>';
     return;
   }
   // Tri par date décroissante
@@ -318,7 +331,11 @@ function buildLicences(){
     var daysSince=(Date.now()-lic.createdAt)/86400000;
     var needsRelance=lic.statut==="envoyee"&&daysSince>=5;
     var relanceBadge=needsRelance?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Relance recommandée</span>':"";
-    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
+    var statutPaie=licenceStatutPaiement(lic);
+    var impayeBadge=lic.suspendue?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">⛔ Suspendue</span>'
+      :statutPaie==="impaye"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">Impayé</span>'
+      :statutPaie==="partiel"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Partiel</span>':"";
+    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
 }
@@ -469,6 +486,7 @@ function renderLicenceDetail(lic){
         '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
         '</div>';
     }
+    paiementHtml+=renderImpayesBlock(lic);
   }
 
   // Actions
@@ -591,6 +609,160 @@ function savePaiementLicence(code,paiement){
   saveComptabilite(compta);
   renderLicenceDetail(lics[idx]);
   buildLicences();
+}
+
+// ── SUIVI DES IMPAYÉS & RELANCES (point 4) ──────────────────────────
+// Choix produit : la validation de la licence n'est JAMAIS bloquée par le
+// paiement (le licencié joue/s'entraîne normalement). Le suivi impayé est
+// un champ à part, optionnel par licence (dirigeant fixe un montant
+// attendu s'il veut suivre cette famille) ; les relances sont manuelles
+// (SMS/email via mailto:/sms:, pas d'envoi auto) et la suspension après la
+// 3e relance est PROPOSÉE au dirigeant, jamais automatique.
+function licenceMontantPaye(lic){ return (lic.paiement&&lic.paiement.montant)||0; }
+function licenceStatutPaiement(lic){
+  if(lic.montantAttendu==null) return null; // pas de suivi actif sur cette licence
+  var paye=licenceMontantPaye(lic);
+  if(paye>=lic.montantAttendu) return "paye";
+  if(paye>0) return "partiel";
+  return "impaye";
+}
+function licenceMontantDu(lic){ return Math.max(0,(lic.montantAttendu||0)-licenceMontantPaye(lic)); }
+function licenceDerniereRelance(lic){ var r=lic.relances||[]; return r.length?r[r.length-1]:null; }
+function licencePeutRelancer(lic){
+  var d=licenceDerniereRelance(lic);
+  if(!d) return true;
+  return (Date.now()-new Date(d.date).getTime())/86400000>=3;
+}
+function licenceEligibleSuspension(lic){
+  return (lic.relances||[]).length>=3 && licenceStatutPaiement(lic)!=="paye" && !lic.suspendue;
+}
+function enregistrerMontantAttendu(code){
+  var input=document.getElementById("lic-montant-attendu");
+  var montant=parseFloat(input&&input.value);
+  if(!montant||montant<=0){askAlert("Montant invalide");return;}
+  var lics=getLicences();
+  var idx=lics.findIndex(function(l){return l.code===code;});
+  if(idx<0)return;
+  lics[idx].montantAttendu=montant;
+  if(!lics[idx].attenduDepuis) lics[idx].attenduDepuis=new Date().toISOString().slice(0,10);
+  saveLicences(lics);
+  renderLicenceDetail(lics[idx]);
+}
+function renderImpayesBlock(lic){
+  var statut=licenceStatutPaiement(lic);
+  if(statut==null && !lic.suspendue){
+    // Pas encore de suivi : proposer d'en démarrer un (optionnel, à la discrétion du dirigeant).
+    return '<div style="margin-top:12px;border:1px dashed var(--bdr);border-radius:var(--rs);padding:12px">'+
+      '<div style="font-size:11.5px;font-weight:700;color:var(--mut);margin-bottom:8px">Suivre un reste à payer pour cette licence ?</div>'+
+      '<div style="display:flex;gap:8px"><input class="form-input" id="lic-montant-attendu" type="number" step="0.01" placeholder="Montant attendu (€)" style="flex:1"><button onclick="enregistrerMontantAttendu(\''+lic.code+'\')" style="padding:0 16px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">OK</button></div>'+
+      '</div>';
+  }
+  var html="";
+  if(lic.suspendue){
+    html+='<div style="margin-top:12px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);border-radius:var(--rs);padding:14px">'+
+      '<div style="font-size:13px;font-weight:800;color:var(--red)">⛔ Licence suspendue</div>'+
+      '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">Convocations et accès de l\'espace licencié coupés jusqu\'à régularisation.</div>'+
+      '<button onclick="setLicenceSuspendue(\''+lic.code+'\',false)" style="width:100%;padding:10px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Réactiver la licence</button>'+
+      '</div>';
+  }
+  if(statut&&statut!=="paye"){
+    var du=licenceMontantDu(lic);
+    var nb=(lic.relances||[]).length;
+    var histo=(lic.relances||[]).map(function(r,i){return (i+1)+". "+(r.canal==="sms"?"SMS":"Email")+" — "+new Date(r.date).toLocaleDateString("fr-FR");}).join("<br>");
+    var peut=licencePeutRelancer(lic);
+    html+='<div style="margin-top:12px;background:rgba(232,103,10,.08);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:14px">'+
+      '<div style="display:flex;align-items:baseline;justify-content:space-between">'+
+        '<div style="font-size:13px;font-weight:800;color:#E8670A">'+(statut==="partiel"?"Paiement partiel":"Impayé")+'</div>'+
+        '<div style="font-size:15px;font-weight:800;color:var(--red)">'+du.toFixed(2)+' € dus</div>'+
+      '</div>'+
+      (histo?'<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.5">'+histo+'</div>':'<div style="font-size:11px;color:var(--mut);margin-top:8px">Jamais relancé</div>')+
+      '<button onclick="openRelanceModal(\''+lic.code+'\')" '+(peut?"":"disabled")+' style="width:100%;padding:11px;border-radius:var(--rx);background:'+(peut?"#E8670A":"var(--bdr)")+';color:'+(peut?"#fff":"var(--mut)")+';font-size:12px;font-weight:700;border:none;cursor:'+(peut?"pointer":"default")+';margin-top:10px">'+(peut?"Relancer":"Relancé récemment (attendre 3 j)")+'</button>'+
+      (licenceEligibleSuspension(lic)?'<button onclick="setLicenceSuspendue(\''+lic.code+'\',true)" style="width:100%;padding:10px;border-radius:var(--rx);background:transparent;border:1px solid var(--red);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">Suspendre la licence ('+nb+' relances sans paiement)</button>':'')+
+      '</div>';
+  }
+  return html;
+}
+function openRelanceModal(code){
+  var lic=getLicences().find(function(l){return l.code===code;});
+  if(!lic)return;
+  var f=lic.fiche||{};
+  var nomEnfant=((f.prenom||"")+" "+(f.nom||"")).trim();
+  var du=licenceMontantDu(lic);
+  var modal=document.createElement("div");
+  modal.id="modal-relance-lic";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
+  var inner=document.createElement("div");
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+  inner.addEventListener("click",function(e){e.stopPropagation();});
+  function message(canal){
+    return canal==="sms"
+      ? "Bonjour, un solde de "+du.toFixed(2)+" € reste dû pour la licence de "+nomEnfant+" ("+clubLabel()+"). Merci de régulariser dès que possible."
+      : "Bonjour,\n\nNous n'avons pas encore reçu le règlement de "+du.toFixed(2)+" € pour la licence de "+nomEnfant+".\n\nMerci de régulariser rapidement, ou de nous contacter en cas de difficulté.\n\nSportivement,\n"+clubLabel();
+  }
+  inner.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+      '<div style="font-size:15px;font-weight:800;color:var(--txt)">Relancer '+authEsc(nomEnfant)+'</div>'+
+      '<button id="rl-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+      '<button type="button" id="rl-canal-sms" style="flex:1;padding:9px;border-radius:var(--rx);border:2px solid var(--grn);background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer">SMS</button>'+
+      '<button type="button" id="rl-canal-email" style="flex:1;padding:9px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:12px;font-weight:700;cursor:pointer">Email</button>'+
+    '</div>'+
+    '<textarea id="rl-message" class="form-input" style="width:100%;min-height:120px;font-size:12.5px;line-height:1.5">'+message("sms")+'</textarea>'+
+    '<button id="rl-send" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Envoyer la relance</button>'+
+    '<div style="font-size:10.5px;color:var(--mut);text-align:center;margin-top:8px">Ouvre votre app SMS/mail avec le message prêt à envoyer, puis marque la relance comme faite.</div>';
+  modal.appendChild(inner);
+  modal.addEventListener("click",function(){modal.remove();});
+  document.body.appendChild(modal);
+  var canal="sms";
+  function setCanal(c){
+    canal=c;
+    document.getElementById("rl-message").value=message(c);
+    document.getElementById("rl-canal-sms").style.borderColor=c==="sms"?"var(--grn)":"var(--bdr)";
+    document.getElementById("rl-canal-sms").style.color=c==="sms"?"var(--dkg)":"var(--mut)";
+    document.getElementById("rl-canal-email").style.borderColor=c==="email"?"var(--grn)":"var(--bdr)";
+    document.getElementById("rl-canal-email").style.color=c==="email"?"var(--dkg)":"var(--mut)";
+  }
+  document.getElementById("rl-close").addEventListener("click",function(){modal.remove();});
+  document.getElementById("rl-canal-sms").addEventListener("click",function(){setCanal("sms");});
+  document.getElementById("rl-canal-email").addEventListener("click",function(){setCanal("email");});
+  document.getElementById("rl-send").addEventListener("click",function(){
+    var texte=document.getElementById("rl-message").value;
+    var tel=(f.respTel||f.telephone||"").replace(/\s+/g,"");
+    var email=f.email||lic.email||"";
+    if(canal==="sms"&&tel) window.location.href="sms:"+tel+"?body="+encodeURIComponent(texte);
+    else if(canal==="email"&&email) window.location.href="mailto:"+email+"?subject="+encodeURIComponent("Rappel règlement licence - "+clubLabel())+"&body="+encodeURIComponent(texte);
+    else askAlert("Pas de "+(canal==="sms"?"téléphone":"email")+" renseigné pour cette famille — relance marquée quand même.");
+    var lics=getLicences();
+    var idx=lics.findIndex(function(l){return l.code===code;});
+    if(idx>=0){
+      lics[idx].relances=lics[idx].relances||[];
+      lics[idx].relances.push({date:new Date().toISOString().slice(0,10),canal:canal});
+      saveLicences(lics);
+      renderLicenceDetail(lics[idx]);
+    }
+    modal.remove();
+  });
+}
+// Propage la suspension/réactivation au joueur rattaché (convocations) et
+// republie les rattachements (coupe/rétablit l'accès espace licencié) —
+// voir publierRattachements() : un joueur suspendu n'y est plus inclus.
+function setLicenceSuspendue(code,suspendue){
+  var lics=getLicences();
+  var idx=lics.findIndex(function(l){return l.code===code;});
+  if(idx<0)return;
+  lics[idx].suspendue=suspendue;
+  saveLicences(lics);
+  var f=lics[idx].fiche;
+  if(f){
+    var players=getPlayers();
+    var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
+    if(p){ p.suspendu=suspendue; savePlayers(players); }
+  }
+  if(typeof publierRattachements==="function") publierRattachements();
+  renderLicenceDetail(lics[idx]);
+  buildLicences();
+  showToast(suspendue?"Licence suspendue.":"Licence réactivée.");
 }
 function generateFactureHtml(lic){
   var p=lic.paiement||{};

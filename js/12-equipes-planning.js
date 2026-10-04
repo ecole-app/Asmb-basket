@@ -264,18 +264,26 @@ function eventMatchesPlayer(ev,player){
 }
 
 function getPlayersForEvent(ev){
-  if(!ev.equipe)return getPlayers();
-  var teams=getTeams();
-  var equipeUp=ev.equipe.toUpperCase();
-  var matchedTeams=teams.filter(function(t){return equipeUp.indexOf(t.name.toUpperCase())>=0;});
-  if(matchedTeams.length){
-    var all=[];
-    matchedTeams.forEach(function(t){
-      getPlayersForTeam(t).forEach(function(p){if(!all.some(function(q){return q.id===p.id;}))all.push(p);});
-    });
-    return all;
+  // Un joueur dont la licence est suspendue (impayé non régularisé après
+  // relances, voir 06-licences.js) n'est jamais convocable — filtré ici,
+  // seul point d'entrée des listes de convocation.
+  var result;
+  if(!ev.equipe){ result=getPlayers(); }
+  else {
+    var teams=getTeams();
+    var equipeUp=ev.equipe.toUpperCase();
+    var matchedTeams=teams.filter(function(t){return equipeUp.indexOf(t.name.toUpperCase())>=0;});
+    if(matchedTeams.length){
+      var all=[];
+      matchedTeams.forEach(function(t){
+        getPlayersForTeam(t).forEach(function(p){if(!all.some(function(q){return q.id===p.id;}))all.push(p);});
+      });
+      result=all;
+    } else {
+      result=getPlayers().filter(function(p){return p.cat&&equipeUp.indexOf(p.cat.toUpperCase())>=0;});
+    }
   }
-  return getPlayers().filter(function(p){return p.cat&&equipeUp.indexOf(p.cat.toUpperCase())>=0;});
+  return result.filter(function(p){return !p.suspendu;});
 }
 function saveTeams(t){localStorage.setItem("asmb_teams",JSON.stringify(t));fsWriteCollection("teams",t);}
 function buildTeams(){

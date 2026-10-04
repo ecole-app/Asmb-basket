@@ -273,6 +273,8 @@ function renderEvPlayers(){
       players=getPlayers().filter(function(p){return allowedIds.indexOf(p.id)>=0||allowedCats.indexOf(p.cat)>=0;});
     }
   }
+  // Licence suspendue (impayé non régularisé) = non convocable.
+  players=players.filter(function(p){return !p.suspendu;});
   if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur concerné</div>';return;}
   el.innerHTML="";
   players.forEach(function(p){

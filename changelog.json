@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791117348",
+    "titre": "Licences : suivi des impayés et relances",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Sur une fiche licence, vous pouvez fixer un montant attendu pour suivre le reste à payer. Boutons « Relancer » (SMS/email, message prêt à envoyer) avec historique des relances. Après 3 relances sans paiement, un bouton « Suspendre la licence » apparaît (jamais automatique, c'est vous qui décidez) : le licencié n'est alors plus convocable aux événements et son accès espace licencié est coupé jusqu'à réactivation. Un filtre « Voir les impayés » a été ajouté en haut de la liste des licences. La validation d'une licence n'a jamais été, et n'est toujours pas, bloquée par le paiement." }
+    ]
+  },
+  {
     "v": "1791111014",
     "titre": "Sponsors : génération de factures numérotées",
     "points": [
