@@ -175,6 +175,21 @@ function analyseSituation(sit,catId){
    return set("gestuelle","Travail du geste");
  if(sansBallon && /appuis|rythme|pas chasse|glissade|placement|course|freinage|sprint|repli/.test(head))
    return set("athletique","Travail sans ballon");
+ // Reaction a un signal du coach (couleur, feu tricolore) : le joueur choisit son
+ // action selon ce que le coach montre. Il faut au moins deux actions citees,
+ // sinon ce n'est pas un jeu de choix et on laisse les autres regles trancher.
+ if(!estMatch && !oppo && /selon la couleur|couleur (brandie|annoncee|montree|levee|choisie)|cartons? de couleur|feu (tricolore|vert|orange)|feux? de signalisation/.test(full)){
+   var acts=[];
+   [["tir",/\btirer\b|\btirs?\b/],["passe",/\bpasser\b|\bpasses?\b/],["dribble",/dribbl/],["course",/\bcourir\b|sprinter|\bsprint\b|accelerer/]].forEach(function(a){
+     var mm=full.match(a[1]); if(mm) acts.push({id:a[0],pos:mm.index});
+   });
+   acts.sort(function(a,b){return a.pos-b.pos;});
+   if(acts.length>=2){
+     var r=set("signal","Signal du coach");
+     r.actions=acts.slice(0,3).map(function(a){return a.id;});
+     return r;
+   }
+ }
  // "Ecran retard" designe la sortie en ecran au rebond, pas un ecran d'attaque.
  if(/ecran[- ]retard/.test(full)) return set("rebond","Écran retard au rebond");
 
@@ -702,6 +717,55 @@ G_SCENES.jeu=function(ctx,t,sc,W,H){
  gLegend(ctx,W,H,sc.note+" · tout le groupe actif");
 };
 
+// Reaction a un signal : le coach montre une couleur, tout le groupe execute
+// l'action associee (tirer, passer, dribbler...). Les actions viennent du texte
+// de la situation, dans l'ordre ou il les cite : rien n'est invente.
+G_SCENES.signal=function(ctx,t,sc,W,H){
+ dhc(ctx,W,H);
+ var acts=(sc.actions&&sc.actions.length)?sc.actions:["tir","passe","dribble"];
+ var noms={tir:"Tirer",passe:"Passer",dribble:"Dribbler",course:"Courir"};
+ var cols=["#27AE60","#E8670A","#C0392B"], nomCol=["Vert","Orange","Rouge"];
+ var n=acts.length, ph=t*n, i=Math.min(n-1,Math.floor(ph)), f=ph-Math.floor(ph);
+ var panier={x:W/2,y:30};
+ // Le coach, a gauche, brandit la couleur de la phase en cours.
+ var cx=34, cy=H*0.52;
+ pl(ctx,cx,cy,"C",G_NEU,13);
+ ctx.fillStyle=cols[i];ctx.beginPath();ctx.roundRect(cx-11,cy-38,22,26,3);ctx.fill();
+ ctx.strokeStyle="rgba(255,255,255,.9)";ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.moveTo(cx,cy-12);ctx.lineTo(cx,cy-9);ctx.stroke();
+ // Les joueurs, face au panier, chacun avec son ballon.
+ var xs=[W*0.40,W*0.60,W*0.80], y0=H-58;
+ var a=acts[i];
+ if(sc.def) pl(ctx,xs[0]+26,y0-26,"D",G_DEF,11,0.9);
+ xs.forEach(function(x,k){
+   pl(ctx,x,y0,String(k+1),G_ATT,12);
+   var bx=x+9, by=y0+4;
+   if(a==="tir"){
+     var ft=cl(f*1.3,0,1);
+     bx=bz(ft,x,x,panier.x+(k-1)*10,panier.x+(k-1)*10); by=bz(ft,y0-12,y0-120,panier.y-90,panier.y);
+   } else if(a==="passe"){
+     var nx=xs[(k+1)%3], g=Math.sin(Math.PI*cl(f*1.1,0,1));
+     bx=lp(x,nx,g); by=y0-10-g*8;
+   } else if(a==="dribble"){
+     bx=x+(k%2?-10:10); by=y0+4-Math.abs(Math.sin(f*Math.PI*6+k))*14;
+   } else {
+     // Course : le joueur avance vers le panier, ballon en main.
+     var d=ease(cl(f*1.2,0,1)); by=y0+4-d*40;
+     pl(ctx,x,y0-d*40,String(k+1),G_ATT,12);
+     bx=x+9;
+   }
+   bl(ctx,bx,by,6.5);
+ });
+ // Rappel des couleurs : la phase active est mise en avant.
+ for(var q=0;q<n;q++){
+   var px=W-22-(n-1-q)*20;
+   ctx.globalAlpha=q===i?1:.35;
+   ctx.fillStyle=cols[q];ctx.beginPath();ctx.arc(px,H-30,6,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+ gLegend(ctx,W,H,"Le coach montre "+nomCol[i].toLowerCase()+" · "+noms[a]);
+};
+
 // Travail du geste sans ballon, face au coach : ni echelle de rythme ni
 // trajectoire de tir, qui montreraient tous deux ce que le texte exclut.
 G_SCENES.gestuelle=function(ctx,t,sc,W,H){
@@ -723,7 +787,7 @@ G_SCENES.gestuelle=function(ctx,t,sc,W,H){
  gLegend(ctx,W,H,sc.note+" · sans ballon");
 };
 
-var G_DUREES={gestuelle:4500,jeu:5500,pnr:6500,ecran:6000,zone:7000,presse:7000,aide:6500,interieur:6000,rebond:5500,
+var G_DUREES={signal:6500,gestuelle:4500,jeu:5500,pnr:6500,ecran:6000,zone:7000,presse:7000,aide:6500,interieur:6000,rebond:5500,
  transition:6000,surnombre:5500,duel:5000,tir:6000,passe:6000,dribble:5000,circuit:6000,
  cercle:6000,athletique:5000,theorie:5000,opposition:7000};
 var G_HAUTEURS={gestuelle:210,theorie:200,dribble:210,cercle:230,athletique:210,jeu:220};
@@ -774,7 +838,8 @@ var G_TRAITS={
  dribble:{panier:function(sc){return !!sc.panier;},def:function(sc){return !!sc.def;}},
  jeu:{panier:function(sc){return !!sc.panier;},def:1}, // deux equipes opposees a l'image
  cercle:{panier:0,def:0}, athletique:{panier:0,def:0}, theorie:{panier:0,def:0},
- gestuelle:{panier:0,def:0}
+ gestuelle:{panier:0,def:0},
+ signal:{panier:1,def:function(sc){return !!sc.def;}}
 };
 function gTrait(type,cle,sc){
  var tr=G_TRAITS[type]; if(!tr) return false;

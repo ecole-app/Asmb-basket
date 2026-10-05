@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791194179",
+    "titre": "Animation du « feu tricolore » corrigée",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Les exercices où le coach montre une couleur et où les joueurs choisissent leur action (tirer, passer, dribbler) ont maintenant leur propre animation : le coach brandit la couleur, le groupe réagit. Avant, c'était un simple schéma de tir."
+      }
+    ]
+  },
+  {
     "v": "1791193884",
     "titre": "Filles / Garçons : filtres, tri et exports",
     "points": [
