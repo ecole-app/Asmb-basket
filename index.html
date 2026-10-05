@@ -400,7 +400,10 @@
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Licences</div>
         <div style="font-size:11px;color:var(--mut)" id="lic-count">0 fiche</div>
       </div>
-      <button onclick="showNewLicence()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Nouvelle fiche</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportLicencesXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
+        <button onclick="showNewLicence()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Nouvelle fiche</button>
+      </div>
     </div>
     <div id="lic-counter-box" style="margin:12px 12px 4px"></div>
     <div id="lic-impayes-toggle" style="display:none"></div>
@@ -440,7 +443,8 @@
         <div style="font-size:11px;color:var(--mut)" id="compta-count">0 ligne</div>
       </div>
       <div style="display:flex;gap:6px">
-        <button onclick="exportComptaCsv()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter</button>
+        <button onclick="exportComptaXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
+        <button onclick="exportComptaCsv()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">CSV</button>
         <button onclick="showAddComptaLine()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ligne</button>
       </div>
     </div>
@@ -542,6 +546,7 @@
       </div>
       <div style="display:flex;gap:8px">
         <button id="inv-btn-buvette-access" onclick="openBuvetteAccessSettings()" style="display:none;padding:9px 12px;border-radius:var(--rx);background:var(--card);border:1px solid var(--bdr);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">🔑 Accès caisse</button>
+        <button onclick="exportInventaireXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
         <button onclick="showAddInvItem()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Article</button>
       </div>
     </div>
@@ -592,7 +597,10 @@
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Sponsors & Partenaires</div>
         <div style="font-size:11px;color:var(--mut)" id="sp-count">0 sponsor</div>
       </div>
-      <button onclick="showAddSponsor()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Sponsor</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportSponsorsXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
+        <button onclick="showAddSponsor()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Sponsor</button>
+      </div>
     </div>
     <div style="display:flex;gap:8px;padding:10px 12px 0;flex-wrap:wrap">
       <button id="sp-tab-tous" class="cat-filter on" onclick="setSponsorTab('tous')">Tous</button>
@@ -1800,6 +1808,7 @@
 <script src="js/20-parent-tabs.js"></script>
 <script src="js/20b-plateforme.js"></script>
 <script src="js/22-push.js"></script>
+<script src="js/23-export.js"></script>
 <script src="js/21-main.js"></script>
 </body>
 </html>

@@ -1,5 +1,12 @@
 [
   {
+    "v": "1791176856",
+    "titre": "Exports Excel : comptabilité, licences, sponsors, inventaire",
+    "points": [
+      { "roles": ["dirigeant", "coach"], "texte": "Nouveau bouton « Excel » sur Comptabilité (écritures + synthèse par catégorie), Licences (fiches avec suivi des paiements et relances), Sponsors et Inventaire. L'export respecte les filtres affichés à l'écran et les accès délégués. Le bouton CSV reste disponible en Comptabilité." }
+    ]
+  },
+  {
     "v": "1791118203",
     "titre": "Relances impayés : seuil de suspension configurable",
     "points": [
