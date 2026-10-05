@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791200068",
+    "titre": "Thème Feuille : fond à la couleur du club",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Dans le thème Feuille de match, le fond crème, les cartes et l'encre prennent la teinte de la couleur du club (clair et sombre)."
+      }
+    ]
+  },
+  {
     "v": "1791199787",
     "titre": "Couleur du club : fonds et textes teintés",
     "points": [

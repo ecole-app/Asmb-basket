@@ -100,8 +100,9 @@ function clubThemeVars(c){
     "epure":[ "--ltg:"+c, "--ltg:"+cl ],
     // Verre sur fond sombre : fond (le body reprend --hdrgrad), en-tête et boutons teintés.
     "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+T(h,0.43,0.27)+","+bentoBg+" 55%,"+T(h,0.52,0.22)+")", null ],
-    // Papier crème et encre : couleur de marque, accent plus clair, en-tête encre teintée.
-    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25)+";--hdrgrad:"+gmShade(c,0.82), "--dkg:"+cl+";--ltg:"+cl ],
+    // Papier et encre : le papier crème, l'encre et l'en-tête prennent la teinte du club.
+    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25)+";--hdrgrad:"+gmShade(c,0.82)+";--bg:"+T(h,0.4,0.91)+";--sf:"+T(h,0.4,0.985)+";--card:"+T(h,0.4,0.985)+";--bdr:"+T(h,0.5,0.08)+";--txt:"+T(h,0.5,0.08)+";--txt2:"+T(h,0.5,0.08)+";--mut:"+T(h,0.2,0.35),
+                "--dkg:"+cl+";--ltg:"+cl+";--bg:"+T(h,0.3,0.07)+";--sf:"+T(h,0.3,0.10)+";--card:"+T(h,0.3,0.10)+";--bdr:"+T(h,0.3,0.18)+";--txt:"+T(h,0.3,0.93)+";--txt2:"+T(h,0.3,0.93)+";--mut:"+T(h,0.2,0.7)+";--hdrgrad:"+T(h,0.3,0.05) ],
     // Pastel : couleur et accent adoucis, fond dégradé teinté (clair) ou fonds sombres teintés.
     "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(c,0.5)+";--carnet-body:linear-gradient(180deg,"+T(h,0.6,0.95)+","+T(h+25,0.5,0.96)+" 45%,#fdf6f0)",
                "--dkg:"+gmMix(c,0.5)+";--ltg:"+gmMix(c,0.6)+";--bg:"+T(h,0.2,0.10)+";--sf:"+T(h,0.2,0.14)+";--card:"+T(h,0.2,0.14)+";--bdr:"+T(h,0.2,0.2)+";--hdrgrad:"+T(h,0.2,0.14) ],
