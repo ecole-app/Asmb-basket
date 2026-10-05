@@ -26,7 +26,7 @@ const fbApp = initializeApp(firebaseConfig);
 // > Apps > Web app. Ne PAS activer le mode "Enforced" sur Firestore côté
 // console avant d'avoir vérifié en mode "Monitor" que le trafic légitime
 // passe bien (voir APP_CHECK_SETUP.md).
-const GM_APPCHECK_SITE_KEY = "REMPLACER_PAR_LA_CLE_FRAUD_DEFENSE";
+const GM_APPCHECK_SITE_KEY = "6Le30N8tAAAAAGUJks6zaN09Rbn8B6L-cQRC5Jwp";
 try{
   if(GM_APPCHECK_SITE_KEY && GM_APPCHECK_SITE_KEY.indexOf("REMPLACER")!==0){
     initializeAppCheck(fbApp, {

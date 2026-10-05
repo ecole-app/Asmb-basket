@@ -68,5 +68,6 @@ pour ces comptes, pas seulement pour le rôle `dirigeant`.
 - Un nouveau fichier JS doit être ajouté dans `index.html` **et** décrit dans `js/README.md`.
 - jsPDF est déjà chargé globalement (`window.jspdf.jsPDF`) ; l'export Excel charge SheetJS à la
   demande (`js/23-export.js`).
-- App Check (Fraud Defense) : code en place mais inactif tant que la clé n'est pas collée dans
-  `js/firebase-init.js` et `buvette/index.html` (voir `APP_CHECK_SETUP.md`).
+- App Check (Fraud Defense) : clé de site en place dans `js/firebase-init.js` et
+  `buvette/index.html`. Firestore doit rester en mode **Monitor** quelques jours avant de passer
+  en **Enforced** dans la console Firebase (voir `APP_CHECK_SETUP.md`), jamais directement.
