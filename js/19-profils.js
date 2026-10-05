@@ -1289,7 +1289,7 @@ async function signalerAbsence(eventId){
  var motif=(await askPrompt("Motif", {placeholder:"Optionnel", confirmText:"Envoyer"}))||"";
  var channelId=findChannelForTeamText(ev.equipe);
  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
- text:" <b>Absence signalée</b><br>"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"<br>Motif : "+motif:""),
+ text:" Absence signalée\n"+nom+" sera absent(e) pour \""+ev.titre+"\" le "+ev.date+(motif?"\nMotif : "+motif:""),
  pseudo:" "+(nom||"Parent"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
  });
  if(playerId){

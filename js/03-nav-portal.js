@@ -240,7 +240,8 @@ function relancerSansReponse(eventId){
     var noms=noResponse.map(function(p){return p.prenom+" "+p.nom;}).join(", ");
     var channelId=findChannelForTeamText(ev.equipe);
     if(!channelId){askAlert("Aucun canal trouvé pour cette équipe");return;}
-    var msg="🔔 <b>Rappel de présence</b><br>Merci de confirmer votre présence à \""+ev.titre+"\" ("+ev.date+(ev.heure?" · "+ev.heure:"")+").<br>En attente de réponse : "+noms;
+    // Texte brut + \n : le chat échappe le HTML (authEsc) et affiche les retours à la ligne.
+    var msg="🔔 Rappel de présence\nMerci de confirmer votre présence à \""+ev.titre+"\" ("+ev.date+(ev.heure?" · "+ev.heure:"")+").\nEn attente de réponse : "+noms;
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
       text:msg,pseudo:clubPseudo("Coach"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     }).then(function(){

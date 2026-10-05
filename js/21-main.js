@@ -128,7 +128,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1791192414";
+var APP_VERSION="1791193434";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
@@ -218,7 +218,7 @@ function checkTomorrowReminders(){
  window.fbSetDoc(window.fbDoc(window.fbDb,"reminders_sent",key),{eventId:m.id,date:tomorrowStr,ts:window.fbServerTimestamp()}).then(function(){
  var channelId=findChannelForTeamText(m.equipe);
  window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
- text:" <b>Rappel</b> : demain \""+m.titre+"\""+(m.heure?" à "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
+ text:" Rappel : demain \""+m.titre+"\""+(m.heure?" à "+m.heure:"")+(m.lieu?" · "+m.lieu:""),
  pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
  });
  }).catch(function(){});

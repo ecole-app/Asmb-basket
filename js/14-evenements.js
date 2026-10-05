@@ -349,7 +349,7 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
   var titre=eventObj.titre, date=eventObj.date, heure=eventObj.heure, lieu=eventObj.lieu, equipe=eventObj.equipe;
   // Envoi au canal si selectionne
   if(canal&&window.fbReady){
-    var msg="<b>"+titre+"</b><br>"+date+(heure?" · "+heure:"")+"<br>"+(lieu?"📍 "+lieu+"<br>":"")+(equipe?equipe+"<br>":"")+(participantsNoms.length?"Participants : "+participantsNoms.join(", "):"");
+    var msg=titre+"\n"+date+(heure?" · "+heure:"")+"\n"+(lieu?"📍 "+lieu+"\n":"")+(equipe?equipe+"\n":"")+(participantsNoms.length?"Participants : "+participantsNoms.join(", "):"");
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",canal,"messages"),{
       text:msg,pseudo:clubPseudo("Admin"),ts:window.fbServerTimestamp()
     });
@@ -541,7 +541,7 @@ function cancelEvent(eventId){
     if(window.fbReady){
       var channelId=findChannelForTeamText(ev.equipe);
       window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-        text:"<b>Événement annulé</b><br>\""+ev.titre+"\" du "+ev.date+(ev.heure?" à "+ev.heure:"")+" est annulé.",
+        text:"Événement annulé\n\""+ev.titre+"\" du "+ev.date+(ev.heure?" à "+ev.heure:"")+" est annulé.",
         pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
       });
     }
@@ -581,7 +581,7 @@ async function editEventDateTime(eventId){
     if(newEquipe!==oldEquipe)changesTxt.push("équipe : "+ev.equipe);
     if(newLieu!==oldLieu)changesTxt.push("lieu : "+ev.lieu);
     window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-      text:"<b>Créneau modifié</b><br>\""+ev.titre+"\" : "+changesTxt.join(", "),
+      text:"Créneau modifié\n\""+ev.titre+"\" : "+changesTxt.join(", "),
       pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
     });
     showToast("Créneau modifié, alerte envoyée dans le canal.");
@@ -742,7 +742,7 @@ function checkWeatherAlerts(){
             localStorage.setItem("asmb_weather_alerted",JSON.stringify(alerted));
             var channelId=findChannelForTeamText(ev.equipe);
             window.fbAddDoc(window.fbCollection(window.fbDb,"channels",channelId,"messages"),{
-              text:"<b>Alerte météo</b><br>"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" à "+ev.heure:"")+" · "+ev.lieu,
+              text:"Alerte météo\n"+weatherLabel(code)+" prévu pour le match \""+ev.titre+"\" le "+ev.date+(ev.heure?" à "+ev.heure:"")+" · "+ev.lieu,
               pseudo:clubPseudo("Alerte Météo"),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
             });
           });

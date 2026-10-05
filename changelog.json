@@ -1,462 +1,1028 @@
 [
   {
+    "v": "1791193434",
+    "titre": "Messages automatiques du chat : affichage corrigé",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Les messages automatiques (rappel de présence, événement créé/annulé/modifié, alerte météo, absence signalée) s'affichaient avec des balises <b> et <br> visibles. Ils sont maintenant lisibles, avec retours à la ligne."
+      }
+    ]
+  },
+  {
     "v": "1791176856",
     "titre": "Exports Excel : comptabilité, licences, sponsors, inventaire",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Nouveau bouton « Excel » sur Comptabilité (écritures + synthèse par catégorie), Licences (fiches avec suivi des paiements et relances), Sponsors et Inventaire. L'export respecte les filtres affichés à l'écran et les accès délégués. Le bouton CSV reste disponible en Comptabilité." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Nouveau bouton « Excel » sur Comptabilité (écritures + synthèse par catégorie), Licences (fiches avec suivi des paiements et relances), Sponsors et Inventaire. L'export respecte les filtres affichés à l'écran et les accès délégués. Le bouton CSV reste disponible en Comptabilité."
+      }
     ]
   },
   {
     "v": "1791118203",
     "titre": "Relances impayés : seuil de suspension configurable",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Relances impayés (licences) : choisissez vous-même le nombre de relances sans paiement avant que le bouton « Suspendre la licence » n'apparaisse (3 par défaut)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle section Paramètres > Relances impayés (licences) : choisissez vous-même le nombre de relances sans paiement avant que le bouton « Suspendre la licence » n'apparaisse (3 par défaut)."
+      }
     ]
   },
   {
     "v": "1791117348",
     "titre": "Licences : suivi des impayés et relances",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Sur une fiche licence, vous pouvez fixer un montant attendu pour suivre le reste à payer. Boutons « Relancer » (SMS/email, message prêt à envoyer) avec historique des relances. Après 3 relances sans paiement, un bouton « Suspendre la licence » apparaît (jamais automatique, c'est vous qui décidez) : le licencié n'est alors plus convocable aux événements et son accès espace licencié est coupé jusqu'à réactivation. Un filtre « Voir les impayés » a été ajouté en haut de la liste des licences. La validation d'une licence n'a jamais été, et n'est toujours pas, bloquée par le paiement." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Sur une fiche licence, vous pouvez fixer un montant attendu pour suivre le reste à payer. Boutons « Relancer » (SMS/email, message prêt à envoyer) avec historique des relances. Après 3 relances sans paiement, un bouton « Suspendre la licence » apparaît (jamais automatique, c'est vous qui décidez) : le licencié n'est alors plus convocable aux événements et son accès espace licencié est coupé jusqu'à réactivation. Un filtre « Voir les impayés » a été ajouté en haut de la liste des licences. La validation d'une licence n'a jamais été, et n'est toujours pas, bloquée par le paiement."
+      }
     ]
   },
   {
     "v": "1791111014",
     "titre": "Sponsors : génération de factures numérotées",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Facturation (sponsors/partenaires) : renseignez l'adresse et le SIRET (facultatif) du club. Par défaut, pas de TVA (franchise en base, art. 293 B du CGI) — une case permet de l'activer avec un taux si votre club y est assujetti. Depuis la fiche d'un sponsor, bouton « Générer une facture » : désignation + montant HT, numérotation automatique et continue (FAC-00001, FAC-00002...), PDF prêt à envoyer. L'accès suit la même délégation que Sponsors (comptable/bureau autorisé peut aussi facturer)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle section Paramètres > Facturation (sponsors/partenaires) : renseignez l'adresse et le SIRET (facultatif) du club. Par défaut, pas de TVA (franchise en base, art. 293 B du CGI) — une case permet de l'activer avec un taux si votre club y est assujetti. Depuis la fiche d'un sponsor, bouton « Générer une facture » : désignation + montant HT, numérotation automatique et continue (FAC-00001, FAC-00002...), PDF prêt à envoyer. L'accès suit la même délégation que Sponsors (comptable/bureau autorisé peut aussi facturer)."
+      }
     ]
   },
   {
     "v": "1791094170",
     "titre": "Nouveau module : Sponsors & Partenaires",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouvel onglet Admin > Sponsors & Partenaires : fiches prospects/actifs/expirés avec contact, montant de convention, dates, logo, document de convention et date de relance (badge si dépassée). L'historique des paiements liés (catégorie « Sponsors/Partenaires » en Comptabilité) s'affiche directement sur la fiche. L'accès peut être délégué à un trésorier/bureau comme pour la Comptabilité et l'Inventaire." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvel onglet Admin > Sponsors & Partenaires : fiches prospects/actifs/expirés avec contact, montant de convention, dates, logo, document de convention et date de relance (badge si dépassée). L'historique des paiements liés (catégorie « Sponsors/Partenaires » en Comptabilité) s'affiche directement sur la fiche. L'accès peut être délégué à un trésorier/bureau comme pour la Comptabilité et l'Inventaire."
+      }
     ]
   },
   {
     "v": "1791092567",
     "titre": "Comptabilité : génération des reçus fiscaux (CERFA)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouvelle section Paramètres > Reçus fiscaux (CERFA) : renseignez une fois l'adresse, l'objet et le n° RNA/récépissé du club, puis activez. Une fois activé, chaque ligne de type Dons en Comptabilité propose un bouton « Générer le reçu fiscal » qui produit un PDF prêt à remettre au donateur." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle section Paramètres > Reçus fiscaux (CERFA) : renseignez une fois l'adresse, l'objet et le n° RNA/récépissé du club, puis activez. Une fois activé, chaque ligne de type Dons en Comptabilité propose un bouton « Générer le reçu fiscal » qui produit un PDF prêt à remettre au donateur."
+      }
     ]
   },
   {
     "v": "1791090404",
     "titre": "Sécurité : support de Firebase App Check (anti-bot)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Le code support App Check (reCAPTCHA v3) pour protéger les codes buvette/invitation/inscription et le formulaire public contre les scripts automatisés. Inactif tant que la clé n'est pas configurée côté console Firebase — voir APP_CHECK_SETUP.md pour les 3 étapes restantes (gratuit, ~10 min)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le code support App Check (reCAPTCHA v3) pour protéger les codes buvette/invitation/inscription et le formulaire public contre les scripts automatisés. Inactif tant que la clé n'est pas configurée côté console Firebase — voir APP_CHECK_SETUP.md pour les 3 étapes restantes (gratuit, ~10 min)."
+      }
     ]
   },
   {
     "v": "1791015301",
     "titre": "Correctif sécurité : liste des joueurs (Inscriptions) non échappée",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Oubliée lors du sweep précédent : la liste des joueurs dans Admin > Inscriptions (prénom, nom, catégorie, naissance, poste) s'affichait sans échappement HTML, et l'identifiant du joueur était injecté directement dans les boutons Historique/Modifier/Suppr. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs. Aucune action requise." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Oubliée lors du sweep précédent : la liste des joueurs dans Admin > Inscriptions (prénom, nom, catégorie, naissance, poste) s'affichait sans échappement HTML, et l'identifiant du joueur était injecté directement dans les boutons Historique/Modifier/Suppr. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs. Aucune action requise."
+      }
     ]
   },
   {
     "v": "1790928548",
     "titre": "Planning : plusieurs entraînements par semaine pour une même équipe",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Dans « Nouveau créneau », tous les jours de la semaine sont maintenant sélectionnables en même temps (plus besoin d'en créer un à chaque fois). Chaque jour coché a son propre horaire et sa propre salle/lieu, pour les équipes qui s'entraînent par exemple le mardi ET le jeudi dans des gymnases différents." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Dans « Nouveau créneau », tous les jours de la semaine sont maintenant sélectionnables en même temps (plus besoin d'en créer un à chaque fois). Chaque jour coché a son propre horaire et sa propre salle/lieu, pour les équipes qui s'entraînent par exemple le mardi ET le jeudi dans des gymnases différents."
+      }
     ]
   },
   {
     "v": "1790928265",
     "titre": "Correctif sécurité : audit complet anti-XSS",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Sweep complet de l'app après la correction d'hier sur Communauté : fiche d'inscription publique (gros morceau — nom, adresse, contacts, photo, certificat), noms de joueurs, titres d'événements, canaux, documents, contacts annuaire, lignes comptables, séances de formation éditées par un coach, et plus — tout passe maintenant par l'échappement HTML déjà utilisé ailleurs. Aucune action requise." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sweep complet de l'app après la correction d'hier sur Communauté : fiche d'inscription publique (gros morceau — nom, adresse, contacts, photo, certificat), noms de joueurs, titres d'événements, canaux, documents, contacts annuaire, lignes comptables, séances de formation éditées par un coach, et plus — tout passe maintenant par l'échappement HTML déjà utilisé ailleurs. Aucune action requise."
+      }
     ]
   },
   {
     "v": "1790927580",
     "titre": "Correctif sécurité : messages/sondages Communauté non échappés",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Un message, un message épinglé ou un sondage (question/options) pouvait contenir du code HTML exécuté chez tous les autres membres du canal, au lieu de s'afficher comme du texte. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs dans l'app. Aucune action requise." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Un message, un message épinglé ou un sondage (question/options) pouvait contenir du code HTML exécuté chez tous les autres membres du canal, au lieu de s'afficher comme du texte. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs dans l'app. Aucune action requise."
+      }
     ]
   },
   {
     "v": "1790927441",
     "titre": "Notifications push : tout reste dans Firebase",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Changement technique : l'envoi des notifications passe maintenant par une Cloud Function Firebase (déclenchée automatiquement à chaque message) plutôt que par un service externe. Un compte de moins à gérer, et la notif part même si la personne qui poste ferme l'app juste après. Reste à faire côté compte avant que ce soit actif : voir PUSH_SETUP.md (passage en plan Blaze + clé Web Push + déploiement de la fonction)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Changement technique : l'envoi des notifications passe maintenant par une Cloud Function Firebase (déclenchée automatiquement à chaque message) plutôt que par un service externe. Un compte de moins à gérer, et la notif part même si la personne qui poste ferme l'app juste après. Reste à faire côté compte avant que ce soit actif : voir PUSH_SETUP.md (passage en plan Blaze + clé Web Push + déploiement de la fonction)."
+      }
     ]
   },
   {
     "v": "1790890089",
     "titre": "Vraies notifications push pour les nouveaux messages",
     "points": [
-      { "roles": ["dirigeant","coach","bureau","parent","joueur"], "texte": "Le bouton « Autoriser les notifications » dans Paramètres active maintenant un vrai abonnement push : un nouveau message dans Communauté peut notifier même app fermée. (Nécessite l'activation finale côté dirigeant technique — voir PUSH_SETUP.md ; reste inactif tant que ce n'est pas branché.)" }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "bureau",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Le bouton « Autoriser les notifications » dans Paramètres active maintenant un vrai abonnement push : un nouveau message dans Communauté peut notifier même app fermée. (Nécessite l'activation finale côté dirigeant technique — voir PUSH_SETUP.md ; reste inactif tant que ce n'est pas branché.)"
+      }
     ]
   },
   {
     "v": "1790883392",
     "titre": "Nettoyage : retrait de l'ancien outil de migration Firestore",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Le bloc « Migration vers Firestore » dans Paramètres datait d'avant le passage 100% cloud et ne servait plus à rien. Retiré." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le bloc « Migration vers Firestore » dans Paramètres datait d'avant le passage 100% cloud et ne servait plus à rien. Retiré."
+      }
     ]
   },
   {
     "v": "1790882235",
     "titre": "Essai gratuit : rappel, prolongation et passage en payant",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Rappel automatique dans les 3 derniers jours de l'essai gratuit, pour ne pas être suspendu par surprise." },
-      { "roles": ["dirigeant"], "texte": "Depuis la Plateforme, deux nouveaux boutons sur un club en essai : « Passer en payant » (arrête le compte à rebours) et « Prolonger l'essai » (ajoute des jours)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Rappel automatique dans les 3 derniers jours de l'essai gratuit, pour ne pas être suspendu par surprise."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Depuis la Plateforme, deux nouveaux boutons sur un club en essai : « Passer en payant » (arrête le compte à rebours) et « Prolonger l'essai » (ajoute des jours)."
+      }
     ]
   },
   {
     "v": "1790881872",
     "titre": "Club d'essai : expiration automatique après 30 jours",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Tout club créé depuis la Plateforme démarre maintenant avec un essai gratuit de 30 jours, affiché sous forme de compte à rebours sur sa fiche. Passé ce délai, le club se suspend automatiquement (avec les mêmes 7 jours de régularisation qu'une suspension manuelle) — pratique pour envoyer un accès test limité à un dirigeant sans avoir à suspendre soi-même." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Tout club créé depuis la Plateforme démarre maintenant avec un essai gratuit de 30 jours, affiché sous forme de compte à rebours sur sa fiche. Passé ce délai, le club se suspend automatiquement (avec les mêmes 7 jours de régularisation qu'une suspension manuelle) — pratique pour envoyer un accès test limité à un dirigeant sans avoir à suspendre soi-même."
+      }
     ]
   },
   {
     "v": "1790843536",
     "titre": "Plateforme : plus de logo d'un club sur l'écran de tous les clubs",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui de votre propre club (ASMB), ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui de votre propre club (ASMB), ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom."
+      }
     ]
   },
   {
     "v": "1790843103",
     "titre": "Nouveau rôle « Membre du bureau »",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Un parent ne peut plus recevoir d'accès bureau (Comptabilité, Licences…), même par erreur : ce bloc n'apparaît que pour un compte Coach ou « Membre du bureau ». Nouveau bouton « Inviter un membre du bureau » dans Accès & invitations, pour quelqu'un qui aide à la gestion sans entraîner d'équipe." },
-      { "roles": ["coach","parent"], "texte": "Nouveau profil « Membre du bureau » disponible à la connexion pour les comptes concernés : sans équipe, avec uniquement Communauté et ce que le dirigeant a coché." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Un parent ne peut plus recevoir d'accès bureau (Comptabilité, Licences…), même par erreur : ce bloc n'apparaît que pour un compte Coach ou « Membre du bureau ». Nouveau bouton « Inviter un membre du bureau » dans Accès & invitations, pour quelqu'un qui aide à la gestion sans entraîner d'équipe."
+      },
+      {
+        "roles": [
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau profil « Membre du bureau » disponible à la connexion pour les comptes concernés : sans équipe, avec uniquement Communauté et ce que le dirigeant a coché."
+      }
     ]
   },
   {
     "v": "1790842533",
     "titre": "Accès coach : le titre (trésorier/secrétaire) se transfère immédiatement",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Cliquer sur Trésorier ou Secrétaire pour quelqu'un l'enregistre tout de suite (plus besoin d'appuyer sur Enregistrer). Si le titre est déjà pris, une confirmation propose de le transférer directement de l'ancien détenteur au nouveau, sans étape intermédiaire." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Cliquer sur Trésorier ou Secrétaire pour quelqu'un l'enregistre tout de suite (plus besoin d'appuyer sur Enregistrer). Si le titre est déjà pris, une confirmation propose de le transférer directement de l'ancien détenteur au nouveau, sans étape intermédiaire."
+      }
     ]
   },
   {
     "v": "1790842268",
     "titre": "Accès bureau : l'onglet se nomme « Gestion »",
     "points": [
-      { "roles": ["coach"], "texte": "L'onglet qui apparaît quand le dirigeant t'accorde un accès bureau s'appelle maintenant « Gestion » (plus clair que « Admin », qui donnait l'impression d'un accès total)." }
+      {
+        "roles": [
+          "coach"
+        ],
+        "texte": "L'onglet qui apparaît quand le dirigeant t'accorde un accès bureau s'appelle maintenant « Gestion » (plus clair que « Admin », qui donnait l'impression d'un accès total)."
+      }
     ]
   },
   {
     "v": "1790836654",
     "titre": "Accès bureau : tous les modules admin, module par module",
     "points": [
-      { "roles": ["dirigeant"], "texte": "La case à cocher ne se limite plus à Comptabilité/Inventaire : au moment où vous créez le lien d'invitation d'un coach, une modale « Accès bureau » liste tous les modules admin (Licences, Équipes, Planning, Documents, Communauté, Avis, Fiches reçues, Comptabilité, Notes de frais, Inventaire). Vous cochez ce que la personne pourra voir dès la création de son compte. Vous pouvez aussi revenir dessus à tout moment pour un compte existant depuis « Accès coach »." },
-      { "roles": ["dirigeant"], "texte": "À noter : seules Comptabilité et Inventaire sont aussi bloquées côté serveur si elles sont décochées. Pour les autres modules, la case pilote ce qui s'affiche dans l'appli mais pas (encore) l'accès aux données en cas d'accès direct à la base - à faire dans une passe séparée si besoin." },
-      { "roles": ["coach"], "texte": "Si le dirigeant t'accorde au moins un accès bureau, un onglet « Admin » apparaît dans ta barre de navigation, en plus de tes onglets sportifs habituels qui ne changent pas." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "La case à cocher ne se limite plus à Comptabilité/Inventaire : au moment où vous créez le lien d'invitation d'un coach, une modale « Accès bureau » liste tous les modules admin (Licences, Équipes, Planning, Documents, Communauté, Avis, Fiches reçues, Comptabilité, Notes de frais, Inventaire). Vous cochez ce que la personne pourra voir dès la création de son compte. Vous pouvez aussi revenir dessus à tout moment pour un compte existant depuis « Accès coach »."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "À noter : seules Comptabilité et Inventaire sont aussi bloquées côté serveur si elles sont décochées. Pour les autres modules, la case pilote ce qui s'affiche dans l'appli mais pas (encore) l'accès aux données en cas d'accès direct à la base - à faire dans une passe séparée si besoin."
+      },
+      {
+        "roles": [
+          "coach"
+        ],
+        "texte": "Si le dirigeant t'accorde au moins un accès bureau, un onglet « Admin » apparaît dans ta barre de navigation, en plus de tes onglets sportifs habituels qui ne changent pas."
+      }
     ]
   },
   {
     "v": "1790835973",
     "titre": "Accès bureau : retouche visuelle",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Dans « Accès coach », le titre, les cases d'accès et l'étiquette de suggestion de rôle sont maintenant regroupés dans un encart dédié, plus lisible qu'avant." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans « Accès coach », le titre, les cases d'accès et l'étiquette de suggestion de rôle sont maintenant regroupés dans un encart dédié, plus lisible qu'avant."
+      }
     ]
   },
   {
     "v": "1790832270",
     "titre": "Accès bureau : comptabilité et inventaire réservés par le dirigeant",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Dans « Accès coach », chaque compte a maintenant un titre (Trésorier / Secrétaire, un seul par club) et des cases à cocher pour donner l'accès à la Comptabilité et à l'Inventaire buvette. Choisir un titre pré-coche les cases utiles, mais c'est bien ce qui est coché qui donne l'accès. Une étiquette en haut suggère le rôle (Coach, Membre du bureau...) selon ce qui est coché." },
-      { "roles": ["coach"], "texte": "Si le dirigeant t'accorde l'accès à la Comptabilité ou à l'Inventaire, ces écrans apparaissent dans ton admin en plus de ton accès sportif habituel, qui ne change pas." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans « Accès coach », chaque compte a maintenant un titre (Trésorier / Secrétaire, un seul par club) et des cases à cocher pour donner l'accès à la Comptabilité et à l'Inventaire buvette. Choisir un titre pré-coche les cases utiles, mais c'est bien ce qui est coché qui donne l'accès. Une étiquette en haut suggère le rôle (Coach, Membre du bureau...) selon ce qui est coché."
+      },
+      {
+        "roles": [
+          "coach"
+        ],
+        "texte": "Si le dirigeant t'accorde l'accès à la Comptabilité ou à l'Inventaire, ces écrans apparaissent dans ton admin en plus de ton accès sportif habituel, qui ne change pas."
+      }
     ]
   },
   {
     "v": "1790830815",
     "titre": "Correction : l'écran Documents ne s'ouvrait pas au premier clic",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Bug corrigé : cliquer sur « Documents » depuis l'admin ne faisait rien la première fois, et ressortait ensuite au mauvais moment avec le bouton Retour. L'écran s'ouvre maintenant normalement dès le premier clic." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Bug corrigé : cliquer sur « Documents » depuis l'admin ne faisait rien la première fois, et ressortait ensuite au mauvais moment avec le bouton Retour. L'écran s'ouvre maintenant normalement dès le premier clic."
+      }
     ]
   },
   {
     "v": "1790829838",
     "titre": "Nouvel écran d'entrée dans l'appli",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "L'écran de connexion (et mot de passe oublié) a été redessiné : fond encre avec le nom General Manager, un seul accent ambre pour le bouton. Aucun changement dans la façon de se connecter, juste l'habillage." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "L'écran de connexion (et mot de passe oublié) a été redessiné : fond encre avec le nom General Manager, un seul accent ambre pour le bouton. Aucun changement dans la façon de se connecter, juste l'habillage."
+      }
     ]
   },
   {
     "v": "1790827761",
     "titre": "Comptabilité : un tableau de bord avec des graphiques",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouveau bouton « 📈 Graphiques » en haut de la Comptabilité : recettes et dépenses mois par mois sur les 12 derniers mois, et répartition par catégorie (Cotisations, Buvette, Matériel...). De quoi repérer d'un coup d'œil où va l'argent du club." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau bouton « 📈 Graphiques » en haut de la Comptabilité : recettes et dépenses mois par mois sur les 12 derniers mois, et répartition par catégorie (Cotisations, Buvette, Matériel...). De quoi repérer d'un coup d'œil où va l'argent du club."
+      }
     ]
   },
   {
     "v": "1790794713",
     "titre": "Comptabilité : plusieurs comptes / caisses au lieu d'un seul solde",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Chaque ligne comptable peut maintenant être rattachée à un compte (Banque, Caisse espèces, Caisse buvette, Autre). Un filtre par compte et un solde détaillé par compte apparaissent en haut de la Comptabilité. Les anciennes lignes sont classées automatiquement selon leur moyen de paiement, rien à corriger à la main. Les ventes de la caisse buvette en ligne et les mouvements de stock buvette sont désormais affectés au bon compte tout seuls." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Chaque ligne comptable peut maintenant être rattachée à un compte (Banque, Caisse espèces, Caisse buvette, Autre). Un filtre par compte et un solde détaillé par compte apparaissent en haut de la Comptabilité. Les anciennes lignes sont classées automatiquement selon leur moyen de paiement, rien à corriger à la main. Les ventes de la caisse buvette en ligne et les mouvements de stock buvette sont désormais affectés au bon compte tout seuls."
+      }
     ]
   },
   {
     "v": "1790793064",
     "titre": "Code buvette permanent, pour les clubs qui gardent les mêmes bénévoles",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Dans Accès caisse buvette, deux choix maintenant : « Code du jour » (comme avant, pratique quand ça change selon les dates) ou « Code permanent » (valable jusqu'à révocation — utile si ce sont toujours les mêmes personnes qui tiennent la buvette, pas besoin d'en redemander un à chaque fois)." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans Accès caisse buvette, deux choix maintenant : « Code du jour » (comme avant, pratique quand ça change selon les dates) ou « Code permanent » (valable jusqu'à révocation — utile si ce sont toujours les mêmes personnes qui tiennent la buvette, pas besoin d'en redemander un à chaque fois)."
+      }
     ]
   },
   {
     "v": "1790792489",
     "titre": "La caisse buvette demande le nom du bénévole",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Avant d'ouvrir la caisse avec le code, le bénévole doit maintenant indiquer son nom et prénom. Il apparaît en haut de l'écran pendant toute la session et sur chaque ligne comptable créée (colonne Tiers), pour savoir qui a encaissé quoi." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Avant d'ouvrir la caisse avec le code, le bénévole doit maintenant indiquer son nom et prénom. Il apparaît en haut de l'écran pendant toute la session et sur chaque ligne comptable créée (colonne Tiers), pour savoir qui a encaissé quoi."
+      }
     ]
   },
   {
     "v": "1790782485",
     "titre": "Le doré n'est plus figé : tous les écrans suivent le thème choisi",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Licences, profils, admin, annuaire, équipes, animations, communauté... une centaine d'endroits gardaient encore la touche dorée d'origine même sur un autre thème que Classique. Ils suivent maintenant la couleur d'accent du thème actif, comme le reste de l'appli." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Licences, profils, admin, annuaire, équipes, animations, communauté... une centaine d'endroits gardaient encore la touche dorée d'origine même sur un autre thème que Classique. Ils suivent maintenant la couleur d'accent du thème actif, comme le reste de l'appli."
+      }
     ]
   },
   {
     "v": "1790780888",
     "titre": "La caisse buvette passe sur generalmanagerapp.fr",
     "points": [
-      { "roles": ["dirigeant"], "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec \"asmb\" dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec \"asmb\" dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse."
+      }
     ]
   },
   {
     "v": "1790780467",
     "titre": "Caisse buvette en ligne (asmb-buvette), reliée en temps réel",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Dans Inventaire → onglet Buvette, le bouton « 🔑 Accès caisse » génère un code court valable jusqu'à ce soir. Transmis à un bénévole, il ouvre la caisse en ligne (site séparé) sur son téléphone ou une tablette, sans qu'il ait besoin d'un compte. Chaque vente qu'il encaisse décrémente le stock et crée automatiquement la ligne comptable correspondante, visible immédiatement dans la Comptabilité du club." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans Inventaire → onglet Buvette, le bouton « 🔑 Accès caisse » génère un code court valable jusqu'à ce soir. Transmis à un bénévole, il ouvre la caisse en ligne (site séparé) sur son téléphone ou une tablette, sans qu'il ait besoin d'un compte. Chaque vente qu'il encaisse décrémente le stock et crée automatiquement la ligne comptable correspondante, visible immédiatement dans la Comptabilité du club."
+      }
     ]
   },
   {
     "v": "1790769837",
     "titre": "Lien direct entre la buvette et la comptabilité",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Chaque article de buvette peut avoir un prix d'achat et un prix de vente. Sur la fiche de l'article, les boutons + 1 / − 1 sont remplacés par « ↓ Achat » et « ↑ Vente » : ils mettent à jour le stock et créent automatiquement la ligne correspondante en comptabilité (dépense « Achats buvette » ou recette « Buvette/Événements »), montant et quantité pré-remplis mais modifiables. Les articles de matériel gardent les boutons + 1 / − 1 classiques." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Chaque article de buvette peut avoir un prix d'achat et un prix de vente. Sur la fiche de l'article, les boutons + 1 / − 1 sont remplacés par « ↓ Achat » et « ↑ Vente » : ils mettent à jour le stock et créent automatiquement la ligne correspondante en comptabilité (dépense « Achats buvette » ou recette « Buvette/Événements »), montant et quantité pré-remplis mais modifiables. Les articles de matériel gardent les boutons + 1 / − 1 classiques."
+      }
     ]
   },
   {
     "v": "1790700112",
     "titre": "Barre de navigation élargissable (thèmes Bento Glass et Carnet illustré)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Sur les thèmes où la navigation est sur le côté (Bento Glass, Carnet illustré), un appui long dessus l'élargit pour afficher le nom de chaque onglet en plus de l'icône. Un autre appui long la remet en version compacte. Le choix est mémorisé." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Sur les thèmes où la navigation est sur le côté (Bento Glass, Carnet illustré), un appui long dessus l'élargit pour afficher le nom de chaque onglet en plus de l'icône. Un autre appui long la remet en version compacte. Le choix est mémorisé."
+      }
     ]
   },
   {
     "v": "1790697980",
     "titre": "Correction : le mode sombre ne fonctionnait plus avec les nouveaux thèmes",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Depuis l'ajout des thèmes visuels, activer le mode sombre n'avait plus d'effet une fois un autre thème que Moderne choisi (Classique, Épuré, Feuille de match, Carnet illustré, Éditorial ont maintenant leur propre version sombre). Bento Glass reste identique quel que soit le mode : c'est déjà un thème sombre par nature." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Depuis l'ajout des thèmes visuels, activer le mode sombre n'avait plus d'effet une fois un autre thème que Moderne choisi (Classique, Épuré, Feuille de match, Carnet illustré, Éditorial ont maintenant leur propre version sombre). Bento Glass reste identique quel que soit le mode : c'est déjà un thème sombre par nature."
+      }
     ]
   },
   {
     "v": "1790697643",
     "titre": "Bannières d'accueil désormais adaptées au thème choisi",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les grandes bannières (accueil, jour de match) suivaient toujours le dégradé doré/marine même en changeant de thème visuel — elles utilisent maintenant la couleur du thème choisi, comme le reste de l'appli." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les grandes bannières (accueil, jour de match) suivaient toujours le dégradé doré/marine même en changeant de thème visuel — elles utilisent maintenant la couleur du thème choisi, comme le reste de l'appli."
+      }
     ]
   },
   {
     "v": "1790697380",
     "titre": "6 thèmes visuels en plus du thème par défaut",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau réglage « Thème visuel » dans Paramètres · Apparence : Classique (doré/marine d'origine), Épuré (minimal), Bento Glass (fond violet, navigation sur le côté), Feuille de match (look carnet, onglets en haut), Carnet illustré (pastel, navigation flottante) et Éditorial (bloc couleur, navigation en pilule)." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Chaque thème change vraiment l'habillage complet (couleurs, formes des cartes, position de la navigation), pas juste une couleur d'accent." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau réglage « Thème visuel » dans Paramètres · Apparence : Classique (doré/marine d'origine), Épuré (minimal), Bento Glass (fond violet, navigation sur le côté), Feuille de match (look carnet, onglets en haut), Carnet illustré (pastel, navigation flottante) et Éditorial (bloc couleur, navigation en pilule)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Chaque thème change vraiment l'habillage complet (couleurs, formes des cartes, position de la navigation), pas juste une couleur d'accent."
+      }
     ]
   },
   {
     "v": "1790683836",
     "titre": "Comptabilité complète pour le club",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Les catégories de recettes/dépenses sont maintenant une liste fixe adaptée à un club sportif (Cotisations/Licences, Subventions, Sponsors, Buvette, Dons... / Affiliation/Licences fédérales, Location salle, Matériel, Déplacements, Arbitrage/Formations, Assurances, Frais admin...) au lieu d'un texte libre." },
-      { "roles": ["dirigeant"], "texte": "Chaque ligne comptable peut avoir un justificatif joint (photo ou PDF du reçu, 700 Ko max)." },
-      { "roles": ["dirigeant"], "texte": "Nouvelle case « Pointé » sur chaque ligne pour le rapprochement bancaire, avec un solde pointé affiché en plus du solde total, et un filtre pointé/non pointé." },
-      { "roles": ["dirigeant"], "texte": "Nouveau bouton « Budget » : définissez un montant prévisionnel par catégorie pour l'année et suivez le réalisé en face." },
-      { "roles": ["dirigeant"], "texte": "Nouveau bouton « Bilan AG » : rapport financier de l'année (recettes et dépenses par catégorie, résultat net) prêt à imprimer ou exporter en PDF pour l'Assemblée Générale." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Les catégories de recettes/dépenses sont maintenant une liste fixe adaptée à un club sportif (Cotisations/Licences, Subventions, Sponsors, Buvette, Dons... / Affiliation/Licences fédérales, Location salle, Matériel, Déplacements, Arbitrage/Formations, Assurances, Frais admin...) au lieu d'un texte libre."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Chaque ligne comptable peut avoir un justificatif joint (photo ou PDF du reçu, 700 Ko max)."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle case « Pointé » sur chaque ligne pour le rapprochement bancaire, avec un solde pointé affiché en plus du solde total, et un filtre pointé/non pointé."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau bouton « Budget » : définissez un montant prévisionnel par catégorie pour l'année et suivez le réalisé en face."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau bouton « Bilan AG » : rapport financier de l'année (recettes et dépenses par catégorie, résultat net) prêt à imprimer ou exporter en PDF pour l'Assemblée Générale."
+      }
     ]
   },
   {
     "v": "1790675282",
     "titre": "Nouveau look de l'application",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau look pour l'application : cartes plus arrondies, couleurs plus modernes." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau look pour l'application : cartes plus arrondies, couleurs plus modernes."
+      }
     ]
   },
   {
     "v": "1790667688",
     "titre": "Mise à jour du 29 septembre (5)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le badge « Arbitre » utilise maintenant l'icône main qui repousse (🫷) — pas d'emoji sifflet dans le standard actuel." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Le badge « Arbitre » utilise maintenant l'icône main qui repousse (🫷) — pas d'emoji sifflet dans le standard actuel."
+      }
     ]
   },
   {
     "v": "1790667432",
     "titre": "Mise à jour du 29 septembre (4)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouveau libellé « OTM » (officiel table de marque) dans la liste des badges." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le badge « Arbitre » a désormais l'icône d'un sifflet." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau libellé « OTM » (officiel table de marque) dans la liste des badges."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Le badge « Arbitre » a désormais l'icône d'un sifflet."
+      }
     ]
   },
   {
     "v": "1790667278",
     "titre": "Mise à jour du 29 septembre (3)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le pseudo dans le chat se choisit maintenant une fois pour toutes dans Paramètres · Communauté (limité à 20 caractères), au lieu de le retaper à chaque message." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Cliquer sur le nom de l'auteur d'un message ouvre une fiche avec ses vraies infos (nom, prénom, équipe), en plus du pseudo affiché." },
-      { "roles": ["dirigeant"], "texte": "Depuis cette fiche, possibilité d'attribuer un libellé (Dirigeant, Coach, Trésorier, Secrétaire, Bénévole, Arbitre...) à n'importe quel membre, y compris soi-même. Le libellé s'affiche à côté du pseudo dans les messages suivants." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveaux réglages dans Paramètres · Communauté : son de notification, et taille du texte des messages (normal/grand)." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Le pseudo dans le chat se choisit maintenant une fois pour toutes dans Paramètres · Communauté (limité à 20 caractères), au lieu de le retaper à chaque message."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Cliquer sur le nom de l'auteur d'un message ouvre une fiche avec ses vraies infos (nom, prénom, équipe), en plus du pseudo affiché."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Depuis cette fiche, possibilité d'attribuer un libellé (Dirigeant, Coach, Trésorier, Secrétaire, Bénévole, Arbitre...) à n'importe quel membre, y compris soi-même. Le libellé s'affiche à côté du pseudo dans les messages suivants."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveaux réglages dans Paramètres · Communauté : son de notification, et taille du texte des messages (normal/grand)."
+      }
     ]
   },
   {
     "v": "1790665631",
     "titre": "Mise à jour du 29 septembre (2)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton ⚙️ sur l'écran Communauté : un panneau de paramètres simplifié (autoriser les notifications, archiver les vieux messages) s'ouvre en fenêtre plutôt qu'un nouvel écran." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Option pour masquer automatiquement les messages de plus de 30 ou 90 jours à l'ouverture d'un canal (rien n'est supprimé, un bouton permet de tout réafficher)." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau bouton ⚙️ sur l'écran Communauté : un panneau de paramètres simplifié (autoriser les notifications, archiver les vieux messages) s'ouvre en fenêtre plutôt qu'un nouvel écran."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Option pour masquer automatiquement les messages de plus de 30 ou 90 jours à l'ouverture d'un canal (rien n'est supprimé, un bouton permet de tout réafficher)."
+      }
     ]
   },
   {
     "v": "1790659880",
     "titre": "Mise à jour du 29 septembre",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Dans un canal de discussion : possibilité de répondre à un message précis (il s'affiche en citation, cliquable pour le retrouver)." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Mentionnez quelqu'un avec « @ » : une liste s'affiche pour choisir la personne, et elle reçoit une notification même si elle a coupé les notifications du canal." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Possibilité de modifier ses propres messages après envoi (repère « modifié »)." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton 🔍 pour rechercher dans les messages d'un canal." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau bouton 🔔 pour couper les notifications d'un canal précis, sans toucher aux autres." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Le partage de fichiers dans un canal accepte maintenant les PDF (en plus des photos), jusqu'à 700 Ko." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Dans un canal de discussion : possibilité de répondre à un message précis (il s'affiche en citation, cliquable pour le retrouver)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Mentionnez quelqu'un avec « @ » : une liste s'affiche pour choisir la personne, et elle reçoit une notification même si elle a coupé les notifications du canal."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Possibilité de modifier ses propres messages après envoi (repère « modifié »)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau bouton 🔍 pour rechercher dans les messages d'un canal."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau bouton 🔔 pour couper les notifications d'un canal précis, sans toucher aux autres."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Le partage de fichiers dans un canal accepte maintenant les PDF (en plus des photos), jusqu'à 700 Ko."
+      }
     ]
   },
   {
     "v": "1790628783",
     "titre": "Mise à jour du 28 septembre (17)",
     "points": [
-      { "roles": ["parent"], "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant." },
-      { "roles": ["dirigeant", "coach"], "texte": "Un message est posté dans le canal de l'équipe quand un parent quitte le suivi, pour que coach et dirigeant le voient." }
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Un message est posté dans le canal de l'équipe quand un parent quitte le suivi, pour que coach et dirigeant le voient."
+      }
     ]
   },
   {
     "v": "1790628294",
     "titre": "Mise à jour du 28 septembre (16)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouvelle carte « Évolution de l'assiduité » sur le tableau de bord : courbe de présence par semaine (sur les vraies données enregistrées), dans le style cartes arrondies avec les couleurs du club." },
-      { "roles": ["dirigeant"], "texte": "La carte « Prochain événement » a désormais une icône, à la manière des applis de gestion de club." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle carte « Évolution de l'assiduité » sur le tableau de bord : courbe de présence par semaine (sur les vraies données enregistrées), dans le style cartes arrondies avec les couleurs du club."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "La carte « Prochain événement » a désormais une icône, à la manière des applis de gestion de club."
+      }
     ]
   },
   {
     "v": "1790619994",
     "titre": "Mise à jour du 28 septembre (15)",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Le bouton pour changer de profil apparaît maintenant aussi pour un dirigeant ou un coach qui est aussi parent d'un joueur licencié (même si « parent » n'a jamais été coché explicitement sur son compte) — il reste caché pour les comptes à un seul rôle." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le bouton pour changer de profil apparaît maintenant aussi pour un dirigeant ou un coach qui est aussi parent d'un joueur licencié (même si « parent » n'a jamais été coché explicitement sur son compte) — il reste caché pour les comptes à un seul rôle."
+      }
     ]
   },
   {
     "v": "1790619896",
     "titre": "Mise à jour du 28 septembre (14)",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Correction : le bouton pour changer de profil (dirigeant/coach/parent) disparaissait une fois basculé en vue parent, ce qui bloquait le retour en dirigeant." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Correction : le bouton pour changer de profil (dirigeant/coach/parent) disparaissait une fois basculé en vue parent, ce qui bloquait le retour en dirigeant."
+      }
     ]
   },
   {
     "v": "1790619600",
     "titre": "Mise à jour du 28 septembre (13)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Retour à l'habillage doré/marine d'origine (le nouveau violet/indigo ne convainc pas)." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Retour à l'habillage doré/marine d'origine (le nouveau violet/indigo ne convainc pas)."
+      }
     ]
   },
   {
     "v": "1790619066",
     "titre": "Mise à jour du 28 septembre (12)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine ASMB au violet/indigo, sur toute l'application." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine ASMB au violet/indigo, sur toute l'application."
+      }
     ]
   },
   {
     "v": "1790618812",
     "titre": "Mise à jour du 28 septembre (11)",
     "points": [
-      { "roles": ["coach", "parent"], "texte": "Correction : le bouton retour était masqué sur l'écran de sélection d'équipe (ex : « Modifier mon équipe » depuis les réglages coach), on ne pouvait plus revenir en arrière." }
+      {
+        "roles": [
+          "coach",
+          "parent"
+        ],
+        "texte": "Correction : le bouton retour était masqué sur l'écran de sélection d'équipe (ex : « Modifier mon équipe » depuis les réglages coach), on ne pouvait plus revenir en arrière."
+      }
     ]
   },
   {
     "v": "1790618311",
     "titre": "Mise à jour du 28 septembre (10)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Première touche de la nouvelle identité visuelle : cartes plus arrondies et accent violet/indigo (au lieu du doré/marine) pour les éléments communs à l'application (navigation, prochain événement)." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Première touche de la nouvelle identité visuelle : cartes plus arrondies et accent violet/indigo (au lieu du doré/marine) pour les éléments communs à l'application (navigation, prochain événement)."
+      }
     ]
   },
   {
     "v": "1790588575",
     "titre": "Mise à jour du 28 septembre (9)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Recherche par nom dans la liste des licenciés." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les confirmations anodines (présences enregistrées, message envoyé...) s'affichent maintenant en petit message discret au lieu d'une fenêtre à fermer." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les écrans de chargement affichent une petite animation au lieu d'un texte figé." },
-      { "roles": ["dirigeant"], "texte": "Supprimer un événement, un joueur, une équipe ou un document propose désormais quelques secondes pour annuler." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Recherche par nom dans la liste des licenciés."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les confirmations anodines (présences enregistrées, message envoyé...) s'affichent maintenant en petit message discret au lieu d'une fenêtre à fermer."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les écrans de chargement affichent une petite animation au lieu d'un texte figé."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Supprimer un événement, un joueur, une équipe ou un document propose désormais quelques secondes pour annuler."
+      }
     ]
   },
   {
     "v": "1790588263",
     "titre": "Mise à jour du 28 septembre (8)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Toutes les fenêtres de confirmation et d'erreur utilisent maintenant le même style que le reste de l'application, au lieu des popups grises du navigateur." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Toutes les fenêtres de confirmation et d'erreur utilisent maintenant le même style que le reste de l'application, au lieu des popups grises du navigateur."
+      }
     ]
   },
   {
     "v": "1790587905",
     "titre": "Mise à jour du 28 septembre (7)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Nouveau réglage « Paiement des licences » : renseignez le lien de votre formulaire HelloAsso (ou équivalent) — vous gardez la main sur votre compte et vos virements." },
-      { "roles": ["parent"], "texte": "Un bouton « Payer ma licence » apparaît sur votre espace tant que le club n'a pas enregistré votre paiement, si le club a activé un lien de paiement en ligne." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau réglage « Paiement des licences » : renseignez le lien de votre formulaire HelloAsso (ou équivalent) — vous gardez la main sur votre compte et vos virements."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Un bouton « Payer ma licence » apparaît sur votre espace tant que le club n'a pas enregistré votre paiement, si le club a activé un lien de paiement en ligne."
+      }
     ]
   },
   {
     "v": "1790587700",
     "titre": "Mise à jour du 28 septembre (6)",
     "points": [
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Nouveau : proposez un covoiturage pour un match ou un entraînement depuis un canal de discussion (bouton 🚗), et réservez une place en un clic." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Nouveau : proposez un covoiturage pour un match ou un entraînement depuis un canal de discussion (bouton 🚗), et réservez une place en un clic."
+      }
     ]
   },
   {
     "v": "1790586147",
     "titre": "Mise à jour du 28 septembre (5)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Le tableau de bord affiche désormais une alerte si deux licenciés portent le même nom et prénom, pour vérifier que photo/téléphone/accès parent correspondent à la bonne personne." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le tableau de bord affiche désormais une alerte si deux licenciés portent le même nom et prénom, pour vérifier que photo/téléphone/accès parent correspondent à la bonne personne."
+      }
     ]
   },
   {
     "v": "1790585654",
     "titre": "Mise à jour du 28 septembre (4)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Le rapprochement entre une fiche licence et un joueur du club tolère maintenant les différences de majuscules/minuscules, d'accents et d'espaces dans le nom/prénom." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le rapprochement entre une fiche licence et un joueur du club tolère maintenant les différences de majuscules/minuscules, d'accents et d'espaces dans le nom/prénom."
+      }
     ]
   },
   {
     "v": "1790582482",
     "titre": "Mise à jour du 28 septembre (3)",
     "points": [
-      { "roles": ["dirigeant"], "texte": "Corrigé : la réinitialisation des données d'un club pouvait affecter des données d'autres clubs. C'est maintenant totalement cloisonné." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les erreurs de connexion (réactions, votes, sondages, messages) affichent maintenant un message clair au lieu d'échouer silencieusement." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Corrigé un bug d'affichage dans les animations et dans les notifications de rappel d'événement." },
-      { "roles": ["dirigeant"], "texte": "L'import de joueurs par fichier CSV gère maintenant correctement les noms contenant une virgule." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Corrigé : la réinitialisation des données d'un club pouvait affecter des données d'autres clubs. C'est maintenant totalement cloisonné."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les erreurs de connexion (réactions, votes, sondages, messages) affichent maintenant un message clair au lieu d'échouer silencieusement."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Corrigé un bug d'affichage dans les animations et dans les notifications de rappel d'événement."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "L'import de joueurs par fichier CSV gère maintenant correctement les noms contenant une virgule."
+      }
     ]
   },
   {
     "v": "1790580708",
     "titre": "Mise à jour du 28 septembre (2)",
     "points": [
-      { "roles": ["dirigeant", "coach"], "texte": "Corrigé : créer un événement en cochant « Tout le club » faisait planter l'écran." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Correction de nombreuses fautes d'orthographe et d'accents dans l'application." }
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Corrigé : créer un événement en cochant « Tout le club » faisait planter l'écran."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Correction de nombreuses fautes d'orthographe et d'accents dans l'application."
+      }
     ]
   },
   {
     "v": "1790576570",
     "titre": "Mise à jour du 28 septembre",
     "points": [
-      { "roles": ["dirigeant"], "texte": "En activant un nouveau club, vous devez maintenant lire et accepter le contrat qui protège les données de vos licenciés, avant de créer votre compte." },
-      { "roles": ["dirigeant", "coach", "parent"], "texte": "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application." },
-      { "roles": ["dirigeant", "parent"], "texte": "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé." },
-      { "roles": ["dirigeant", "parent"], "texte": "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord." }
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "En activant un nouveau club, vous devez maintenant lire et accepter le contrat qui protège les données de vos licenciés, avant de créer votre compte."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "parent"
+        ],
+        "texte": "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "parent"
+        ],
+        "texte": "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord."
+      }
     ]
   }
 ]
