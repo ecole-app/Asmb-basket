@@ -43,10 +43,13 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `15-compta-inventaire.js` | Comptabilité, documents, inventaire buvette/matériel |
 | `16-communaute.js` | Canaux de discussion, messages, réactions, sondages |
 | `17-poles.js` | Pages génériques des pôles du club |
+| `17-sponsors.js` | Sponsors & partenaires, conventions, factures PDF numérotées |
 | `18-auth.js` | Authentification, comptes, changement d'e-mail |
 | `19-profils.js` | Profils parent/coach/joueur, thèmes animés |
 | `20-parent-tabs.js` | Onglets événements et statistiques côté parent |
 | `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |
+| `22-push.js` | Notifications push (inscription de l'appareil) |
+| `23-export.js` | Exports Excel (.xlsx) : compta, licences, sponsors, inventaire |
 | `21-main.js` | Thème, initialisation, **démarrage de l'app** (doit rester en dernier) |
 
 ## Points d'attention connus
