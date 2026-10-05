@@ -945,7 +945,7 @@ function genererCerfaPdf(){
   var montant=l.montant||0;
   var y=20;
 
-  doc.setFontSize(14);doc.setTextColor(27,92,40);
+  doc.setFontSize(14);doc.setTextColor.apply(doc,clubPdfRgb());
   doc.text("REÇU AU TITRE DES DONS AUX ŒUVRES",105,y,{align:"center"});
   y+=6;
   doc.setFontSize(9);doc.setTextColor(100,100,100);

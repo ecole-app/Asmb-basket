@@ -306,7 +306,7 @@ function genererFacturePdf(){
     var doc=new jsPDF();
     var y=20;
 
-    doc.setFontSize(16);doc.setTextColor(27,92,40);
+    doc.setFontSize(16);doc.setTextColor.apply(doc,clubPdfRgb());
     doc.text("FACTURE "+numero,14,y);y+=6;
     doc.setFontSize(9);doc.setTextColor(100,100,100);
     doc.text("Date : "+new Date().toLocaleDateString("fr-FR"),14,y);y+=14;

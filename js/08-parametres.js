@@ -16,6 +16,7 @@ function buildParametres(){
   var gd=document.getElementById("gp-dark");
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
   buildVisualThemePicker();
+  buildPaletteClub();
   var toggle=document.getElementById("notif-toggle");
   if(toggle)toggle.checked=(typeof pushStatus==="function")?pushStatus()==="granted":localStorage.getItem("asmb_notif")==="on";
   ["messages","match","entrainement","evenement"].forEach(function(t){
@@ -75,6 +76,41 @@ function compresserLogo(file){
     reader.onerror=function(){reject(new Error("Lecture impossible"));};
     reader.readAsDataURL(file);
   });
+}
+
+// ── Couleurs du club (palette de 50 teintes, dirigeant uniquement) ──
+function buildPaletteClub(){
+  var box=document.getElementById("club-palette");
+  if(!box||typeof CLUB_PALETTE==="undefined") return;
+  var cur=clubCouleur();
+  box.innerHTML="";
+  CLUB_PALETTE.forEach(function(hex){
+    var b=document.createElement("button");
+    var on=(cur===hex.toLowerCase());
+    b.type="button";
+    b.setAttribute("aria-label","Couleur "+hex);
+    b.title=hex;
+    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(on?"3px solid var(--txt)":"2px solid transparent")+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25)";
+    b.onclick=function(){ choisirCouleurClub(hex); };
+    box.appendChild(b);
+  });
+  var etat=document.getElementById("club-couleur-etat");
+  if(etat) etat.textContent=cur?"Couleur du club : "+cur:"Couleurs General Manager (par défaut)";
+  var rs=document.getElementById("club-couleur-reset");
+  if(rs) rs.style.display=cur?"block":"none";
+}
+
+function choisirCouleurClub(hex){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  if(hex!==null && (typeof CLUB_PALETTE==="undefined" || CLUB_PALETTE.indexOf(hex)<0)) return;
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{couleur:hex})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.couleur=hex;
+      applyClubColor();
+      buildPaletteClub();
+      showToast(hex?"Couleur du club enregistrée":"Couleurs General Manager rétablies");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&(e.message||e.code))||e)); });
 }
 
 function majApercuLogo(){
@@ -256,7 +292,7 @@ function clubSeuilRelances(){
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",couleurs:"Couleurs du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };

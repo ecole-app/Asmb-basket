@@ -39,6 +39,54 @@ function clubLogoHtml(px){
     'font-weight:900;color:#F2D57E;letter-spacing:.5px">'+clubInitiales()+'</div>';
 }
 
+// ═══ COULEUR DU CLUB ═════════════════════════════════════════════
+// Par défaut l'appli garde les couleurs General Manager. Le dirigeant peut
+// choisir une couleur dans une palette de 50 (Paramètres > Couleurs du club) ;
+// elle vit sur la fiche du club (champ "couleur") et s'applique à tous ses
+// membres. Toutes les teintes de la palette ont un contraste >= 4,5:1 avec le
+// blanc : texte blanc des boutons et de l'en-tête toujours lisible.
+var CLUB_PALETTE=["#a5272f", "#911820", "#6b1f24", "#d31724", "#a54d27", "#913c18", "#6b361f", "#ca4c16", "#a16826", "#915818", "#6b471f", "#aa6313", "#1f844b", "#168847", "#1f6b40", "#0f8542", "#1f8469", "#158466", "#1f6b57", "#0f8566", "#208188", "#168088", "#1f666b", "#0f828a", "#275ea5", "#184c91", "#1f406b", "#1769d3", "#272fa5", "#182091", "#1f246b", "#1724d3", "#6627a5", "#541891", "#451f6b", "#7517d3", "#a5276e", "#91185c", "#6b1f4a", "#d31782", "#1A2E5A", "#0f1c33", "#334155", "#475569", "#1f2937", "#44403c", "#7c2d12", "#14532d", "#4c1d95", "#831843"];
+var CLUB_COULEUR_DEFAUT="#5b5bf0";
+function clubCouleur(){
+  var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur;
+  return (typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
+}
+function gmHexToRgb(h){ return [1,3,5].map(function(i){return parseInt(h.slice(i,i+2),16);}); }
+function gmMix(h,w){ // mélange avec du blanc : w = part de blanc (0..1)
+  var c=gmHexToRgb(h).map(function(v){return Math.round(v+(255-v)*w);});
+  return "#"+c.map(function(v){return ("0"+v.toString(16)).slice(-2);}).join("");
+}
+function gmHsl(h){
+  var c=gmHexToRgb(h).map(function(v){return v/255;});
+  var mx=Math.max(c[0],c[1],c[2]), mn=Math.min(c[0],c[1],c[2]), l=(mx+mn)/2, s=0, t=0;
+  if(mx!==mn){
+    var d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn);
+    t=mx===c[0]?((c[1]-c[2])/d+(c[1]<c[2]?6:0)):mx===c[1]?((c[2]-c[0])/d+2):((c[0]-c[1])/d+4);
+    t*=60;
+  }
+  return [t,s,l];
+}
+function gmFromHsl(t,s,l){
+  t=((t%360)+360)%360/360;
+  function f(p,q,x){ if(x<0)x+=1; if(x>1)x-=1; return x<1/6?p+(q-p)*6*x:x<1/2?q:x<2/3?p+(q-p)*(2/3-x)*6:p; }
+  var q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+  var r=[f(p,q,t+1/3),f(p,q,t),f(p,q,t-1/3)].map(function(v){return Math.round(v*255);});
+  return "#"+r.map(function(v){return ("0"+v.toString(16)).slice(-2);}).join("");
+}
+// Dégradé de l'en-tête : la couleur, puis deux teintes voisines un peu plus claires.
+function clubDegrade(h){
+  var x=gmHsl(h);
+  return "linear-gradient(135deg,"+h+","+gmFromHsl(x[0]+8,x[1],Math.min(0.62,x[2]+0.06))+" 55%,"+gmFromHsl(x[0]+18,x[1],Math.min(0.68,x[2]+0.12))+")";
+}
+// Couleur des PDF : celle du club, sinon le vert historique. Teinte = mélange avec du blanc.
+function clubPdfRgb(){ var c=clubCouleur(); return c?gmHexToRgb(c):[27,92,40]; }
+function clubPdfTint(w){ var c=clubPdfRgb(); return c.map(function(v){return Math.round(v+(255-v)*w);}); }
+// Logo General Manager (marine et doré) : plateforme uniquement, jamais celui d'un club.
+function gmLogoHtml(px){
+  px=px||28;
+  return '<img src="icon-192.png" alt="General Manager" style="width:'+px+'px;height:'+px+'px;display:block;border-radius:'+Math.round(px*0.22)+'px">';
+}
+
 // Auteur affiche pour les messages automatiques ("Admin", "Convocation"...).
 function clubPseudo(prefix){
   var n=clubLabel("");

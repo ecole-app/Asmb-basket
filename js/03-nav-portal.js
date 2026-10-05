@@ -74,6 +74,26 @@ function applyClubLogo(){
       if(el) el.innerHTML=clubLogoHtml(c[1]);
     });
   }catch(e){}
+  applyClubColor();
+}
+
+// Couleur du club : une feuille de style ajoutée après la principale. Elle ne
+// vise que le thème "Moderne" (sans data-visual-theme) : les autres thèmes
+// ont leur propre identité visuelle. En mode sombre, on éclaircit la teinte
+// pour qu'elle reste lisible sur fond sombre. Aucune couleur = couleurs GM.
+function applyClubColor(){
+  try{
+    var old=document.getElementById("club-colors");
+    var c=clubCouleur();
+    if(!c){ if(old) old.remove(); return; }
+    var st=old||document.createElement("style");
+    st.id="club-colors";
+    var cl=gmMix(c,0.42);
+    st.textContent=
+      'html:not([data-visual-theme]){--dkg:'+c+';--ltg:'+c+';--hdrgrad:'+clubDegrade(c)+'}'+
+      'html:not([data-visual-theme])[data-theme="dark"]{--dkg:'+c+';--ltg:'+cl+'}';
+    if(!old) document.head.appendChild(st);
+  }catch(e){}
 }
 
 function applyClubLabels(){

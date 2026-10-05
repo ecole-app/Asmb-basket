@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791199274",
+    "titre": "Couleurs du club et logo General Manager",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau : Paramètres > Couleurs du club. Choisis la couleur de ton club dans une palette de 50 teintes ; elle s'applique à l'en-tête, aux boutons et aux PDF pour tous tes membres (thème Moderne). Sans choix, l'appli garde les couleurs General Manager."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Les PDF (planning, liste des licenciés, reçus, factures) reprennent la couleur du club."
+      }
+    ]
+  },
+  {
     "v": "1791194179",
     "titre": "Animation du « feu tricolore » corrigée",
     "points": [

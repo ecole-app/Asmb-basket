@@ -271,7 +271,7 @@ function buildAdminHome(){
  if(typeof isSuperAdmin==="function" && isSuperAdmin() && !window.SUPPORT_MODE){
    var pf=document.createElement("div");
    pf.style.cssText="margin:0 12px 14px;background:linear-gradient(135deg,#0F1B33,#1B2C4F);border-radius:var(--rs);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px";
-   pf.innerHTML='<div style="width:40px;height:40px;border-radius:10px;background:#0F1B33;border:1px solid rgba(232,169,59,.5);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px"><span style="color:#F5F3ED">G</span><span style="color:#E8A93B">M</span></div>'
+   pf.innerHTML='<div style="width:40px;height:40px;flex-shrink:0">'+gmLogoHtml(40)+'</div>'
      +'<div style="flex:1"><div style="font-size:14px;font-weight:800;color:#fff">Plateforme General Manager</div><div style="font-size:11px;color:rgba(255,255,255,.65)">Clubs · Invitations · Accès support</div></div><div style="color:#E8A93B;font-size:18px">›</div>';
    pf.addEventListener("click",openPlateforme);
    el.appendChild(pf);

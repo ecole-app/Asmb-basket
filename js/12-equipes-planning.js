@@ -100,7 +100,7 @@ function exportPlanningPDF(){
   if(!events.length){askAlert("Aucun événement à exporter");return;}
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
-  doc.setFontSize(16);doc.setTextColor(27,92,40);
+  doc.setFontSize(16);doc.setTextColor.apply(doc,clubPdfRgb());
   doc.text(clubLabel()+" - Planning",14,16);
   doc.setFontSize(9);doc.setTextColor(100,100,100);
   doc.text("Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
@@ -108,14 +108,14 @@ function exportPlanningPDF(){
   var headers=["Date","Type","Titre","Heure","Lieu","Équipe"];
   var colX=[14,42,66,120,145,175];
   var y=32;
-  doc.setFontSize(8);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
+  doc.setFontSize(8);doc.setTextColor(255,255,255);doc.setFillColor.apply(doc,clubPdfRgb());
   doc.rect(12,y-5,186,7,"F");
   headers.forEach(function(h,i){doc.text(h,colX[i],y);});
   y+=8;
   doc.setTextColor(30,30,30);
   events.forEach(function(e,idx){
     if(y>280){doc.addPage();y=20;}
-    if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    if(idx%2===0){doc.setFillColor.apply(doc,clubPdfTint(0.92));doc.rect(12,y-5,186,7,"F");}
     doc.text(e.date||"",colX[0],y);
     doc.text((e.type||"").substring(0,12),colX[1],y);
     doc.text((e.titre||"").substring(0,24),colX[2],y);
@@ -206,7 +206,7 @@ function exportPlayersPDF(){
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);
-  doc.setTextColor(27,92,40);
+  doc.setTextColor.apply(doc,clubPdfRgb());
   doc.text(clubLabel()+" - Liste des licenciés",14,16);
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
@@ -223,7 +223,7 @@ function exportPlayersPDF(){
   var rc=showNR?[14,70,100,130,160]:[14,80,115,150];
   var rh=showNR?["Catégorie","Filles","Garçons","Non renseigné","Total"]:["Catégorie","Filles","Garçons","Total"];
   y+=3;
-  doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
+  doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor.apply(doc,clubPdfRgb());
   doc.rect(12,y-5,186,7,"F");
   rh.forEach(function(h,i){doc.text(h,rc[i],y);});
   y+=8;
@@ -231,7 +231,7 @@ function exportPlayersPDF(){
   eff.rows.concat([{cat:"Total",F:eff.all.F,M:eff.all.M,NR:eff.all.NR,total:eff.all.total,_t:true}]).forEach(function(r,idx){
     if(y>280){doc.addPage();y=20;}
     if(r._t){doc.setFont(undefined,"bold");}
-    else if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    else if(idx%2===0){doc.setFillColor.apply(doc,clubPdfTint(0.92));doc.rect(12,y-5,186,7,"F");}
     var vals=showNR?[r.cat,r.F,r.M,r.NR,r.total]:[r.cat,r.F,r.M,r.total];
     vals.forEach(function(v,i){doc.text(String(v),rc[i],y);});
     y+=7;
@@ -243,7 +243,7 @@ function exportPlayersPDF(){
   var headers=["Nom","Prénom","Genre","Catégorie","Type licence","N° licence","Statut"];
   var colX=[14,46,78,98,114,148,176];
   function enTete(){
-    doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
+    doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor.apply(doc,clubPdfRgb());
     doc.rect(12,y-5,186,7,"F");
     headers.forEach(function(h,i){doc.text(h,colX[i],y);});
     y+=8;doc.setTextColor(30,30,30);
@@ -257,14 +257,14 @@ function exportPlayersPDF(){
       groupe=cle;n=0;
       if(y>270){doc.addPage();y=20;enTete();}
       var nb=players.filter(function(q){return (q.cat||"?")+"|"+genreNorm(q.genre)===cle;}).length;
-      doc.setFillColor(214,232,219);doc.rect(12,y-5,186,7,"F");
-      doc.setFont(undefined,"bold");doc.setTextColor(27,92,40);
+      doc.setFillColor.apply(doc,clubPdfTint(0.8));doc.rect(12,y-5,186,7,"F");
+      doc.setFont(undefined,"bold");doc.setTextColor.apply(doc,clubPdfRgb());
       doc.text((p.cat||"Sans catégorie")+" - "+genreLabel(p.genre)+" ("+nb+")",14,y);
       doc.setFont(undefined,"normal");doc.setTextColor(30,30,30);
       y+=7;
     }
     if(y>280){doc.addPage();y=20;enTete();}
-    if(n%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    if(n%2===0){doc.setFillColor.apply(doc,clubPdfTint(0.92));doc.rect(12,y-5,186,7,"F");}
     n++;
     var typeLic=p.typeLicence==="competition"?"Compétition":"Loisir";
     var numLic=p.numLicence||"0C";

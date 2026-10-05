@@ -418,7 +418,10 @@ function finishAuthedUser(user, u, isUpdate){
     if(setBtn) setBtn.style.display=(profile==="dirigeant")?"none":"flex";
     // Retour à la plateforme, accessible depuis n'importe quel écran
     var gmb=document.getElementById("hdr-gm-btn");
-    if(gmb) gmb.style.display=(isSuperAdmin() && !window.SUPPORT_MODE)?"flex":"none";
+    if(gmb){
+      gmb.style.display=(isSuperAdmin() && !window.SUPPORT_MODE)?"flex":"none";
+      if(!gmb.firstChild) gmb.innerHTML=gmLogoHtml(30);
+    }
   }catch(e){}
 }
 
