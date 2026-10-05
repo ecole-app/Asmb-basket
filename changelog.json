@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791216539",
+    "titre": "Bandeau d'accueil arrondi (Carnet, Bento)",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Dans les thèmes Carnet et Bento, le bandeau d'accueil est maintenant une carte aux bords arrondis, alignée avec les autres cartes."
+      }
+    ]
+  },
+  {
     "v": "1791216042",
     "titre": "Thème Carnet : bandeau lisible, dégradé sur toutes les couleurs",
     "points": [

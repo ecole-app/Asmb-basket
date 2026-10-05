@@ -70,6 +70,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .hsub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}
 .theme-btn{width:34px;height:34px;border-radius:var(--rx);background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Thèmes à cartes arrondies : le bandeau d'accueil devient une carte arrondie, comme le reste */
+[data-visual-theme="bento"] .hero,[data-visual-theme="carnet"] .hero{margin:10px 12px 4px;border-radius:var(--r);border-bottom:none}
 [data-visual-theme="bento"] .main,[data-visual-theme="carnet"] .main{padding-right:64px;transition:padding-right .2s ease}
 html.bnav-expanded[data-visual-theme="bento"] .main{padding-right:180px}
 html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
