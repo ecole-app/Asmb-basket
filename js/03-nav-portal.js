@@ -105,7 +105,7 @@ function clubThemeVars(c){
     "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25)+";--hdrgrad:"+gmShade(c,0.82)+";--bg:"+T(h,0.4,0.91)+";--sf:"+T(h,0.4,0.985)+";--card:"+T(h,0.4,0.985)+";--bdr:"+T(h,0.5,0.08)+";--txt:"+T(h,0.5,0.08)+";--txt2:"+T(h,0.5,0.08)+";--mut:"+T(h,0.2,0.35),
                 "--dkg:"+cl+";--ltg:"+cl+";--bg:"+T(h,0.3,0.07)+";--sf:"+T(h,0.3,0.10)+";--card:"+T(h,0.3,0.10)+";--bdr:"+T(h,0.3,0.18)+";--txt:"+T(h,0.3,0.93)+";--txt2:"+T(h,0.3,0.93)+";--mut:"+T(h,0.2,0.7)+";--hdrgrad:"+T(h,0.3,0.05) ],
     // Pastel : couleur et accent adoucis, fond dégradé teinté (clair) ou fonds sombres teintés.
-    "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(c,0.5)+";--carnet-body:linear-gradient(180deg,"+T(h,0.6,0.95)+","+T(h+25,0.5,0.96)+" 45%,#fdf6f0)",
+    "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(c,0.5)+";--herograd:"+clubDegrade(c)+";--carnet-body:linear-gradient(180deg,"+T(h,0.75,0.94)+","+T(h+25,0.6,0.955)+" 45%,#fdf6f0)",
                "--dkg:"+gmMix(c,0.5)+";--ltg:"+gmMix(c,0.6)+";--bg:"+T(h,0.2,0.10)+";--sf:"+T(h,0.2,0.14)+";--card:"+T(h,0.2,0.14)+";--bdr:"+T(h,0.2,0.2)+";--hdrgrad:"+T(h,0.2,0.14) ],
     // Bloc couleur : l'en-tête et l'accent prennent la couleur, l'encre reste.
     "editorial":[ "--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ]

@@ -34,7 +34,7 @@
 [data-visual-theme="feuille"] .bni.on{background:var(--ltg);color:var(--hdrgrad)}
 [data-visual-theme="feuille"] .bni.on::before{display:none}
 
-[data-visual-theme="carnet"]{--bg:#fdf6f0;--sf:#ffffff;--card:#ffffff;--bdr:transparent;--mut:#8b84a0;--txt:#4a4458;--txt2:#4a4458;--dkg:#d67aa0;--ltg:#6a93d6;--shadow:rgba(180,160,220,.25);--r:26px;--rs:22px;--rx:18px;--hdrgrad:transparent}
+[data-visual-theme="carnet"]{--bg:#fdf6f0;--sf:#ffffff;--card:#ffffff;--bdr:transparent;--mut:#8b84a0;--txt:#4a4458;--txt2:#4a4458;--dkg:#d67aa0;--ltg:#6a93d6;--shadow:rgba(180,160,220,.25);--r:26px;--rs:22px;--rx:18px;--hdrgrad:transparent;--herograd:linear-gradient(135deg,#c4628c,#d67aa0 55%,#e08fb0)}
 [data-theme="dark"][data-visual-theme="carnet"]{--bg:#1a1522;--sf:#241d30;--card:#241d30;--bdr:#342a44;--mut:#a89bc0;--txt:#f5f0fa;--txt2:#d9cce8;--dkg:#e0a0c0;--ltg:#8fb3e8;--shadow:rgba(0,0,0,.4);--hdrgrad:#241d30}
 [data-theme="dark"][data-visual-theme="carnet"] body{background:var(--bg)}
 [data-theme="dark"][data-visual-theme="carnet"] .bnav{background:var(--sf)}
@@ -80,7 +80,7 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 .bni::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:0 0 3px 3px;background:var(--ltg);transition:width .18s}
 .bni.on{color:var(--ltg);font-weight:800}.bni.on::before{width:22px}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
 .sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:16px 16px 8px}
-.hero{background:var(--hdrgrad);padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
+.hero{background:var(--herograd,var(--hdrgrad));padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
 .card{margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .12s;box-shadow:0 2px 12px var(--shadow)}
 .card:active{transform:scale(.97)}.card.locked{opacity:.42;cursor:default}
 .ci{padding:16px;display:flex;align-items:center;gap:14px}

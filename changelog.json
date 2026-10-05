@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791216042",
+    "titre": "Thème Carnet : bandeau lisible, dégradé sur toutes les couleurs",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Thème Carnet : le bandeau d'accueil (texte blanc sur fond clair) était illisible ; il prend maintenant un dégradé de la couleur du club. Le fond dégradé pastel est adapté à chacune des 50 couleurs."
+      }
+    ]
+  },
+  {
     "v": "1791200459",
     "titre": "Thème Épuré : bandeau lisible et couleur du club",
     "points": [
