@@ -95,6 +95,7 @@ const PRECACHE = [
   './legal/mentions-legales.html',
   './legal/confidentialite.html',
   './legal/cgu.html',
+  './legal/cgv.html',
   './legal/contrat-sous-traitance.html'
 ];
 

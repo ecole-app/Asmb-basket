@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791226346",
+    "titre": "Conditions générales de vente",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle page « CGV » (conditions générales de vente de la plateforme : essai gratuit de 30 jours, paiement par virement, suspension, résiliation), accessible depuis le pied de page à côté des CGU et de la confidentialité."
+      }
+    ]
+  },
+  {
     "v": "1791216539",
     "titre": "Bandeau d'accueil arrondi (Carnet, Bento)",
     "points": [
