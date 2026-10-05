@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791193884",
+    "titre": "Filles / Garçons : filtres, tri et exports",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Inscriptions (Joueurs) et Licences : nouveau filtre Filles / Garçons, tri par catégorie puis genre, et effectifs filles/garçons affichés par catégorie. Filtres U18 et U21 ajoutés sur les Joueurs."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "PDF de la liste des licenciés : colonne Genre, regroupement par catégorie puis Filles / Garçons, et tableau récapitulatif des effectifs. Export Excel des licences : tri catégorie/genre et nouvel onglet « Effectifs »."
+      }
+    ]
+  },
+  {
     "v": "1791193434",
     "titre": "Messages automatiques du chat : affichage corrigé",
     "points": [

@@ -69,6 +69,49 @@ function suggestBureauRoleLabel(roles,perms){
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
 var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
+// ── Genre (F/M) : helpers partagés par Joueurs, Licences, PDF et Excel ──
+var currentGenreFilter="all"; // "all" | "F" | "M" | "NR" (non renseigné)
+var CAT_ORDER=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
+function catRank(c){var i=CAT_ORDER.indexOf(c);return i<0?99:i;}
+function genreRank(g){return g==="F"?0:g==="M"?1:2;}
+function genreNorm(g){return g==="F"||g==="M"?g:"NR";}
+function genreLabel(g){return g==="F"?"Filles":g==="M"?"Garçons":"Non renseigné";}
+function genreLabelSing(g){return g==="F"?"Fille":g==="M"?"Garçon":"Non renseigné";}
+function genreMatch(g,filter){return !filter||filter==="all"||genreNorm(g)===filter;}
+// Tri : catégorie (U7 → Senior), puis Filles avant Garçons, puis nom.
+function compareCatGenreNom(catA,genA,nomA,catB,genB,nomB){
+  return (catRank(catA)-catRank(catB))||(genreRank(genA)-genreRank(genB))||String(nomA||"").localeCompare(String(nomB||""));
+}
+// Effectifs par catégorie : [{cat,F,M,NR,total}] triés + ligne "tous" cumulée.
+function effectifsParCatGenre(items,getCat,getGenre){
+  var map={},all={F:0,M:0,NR:0,total:0};
+  items.forEach(function(it){
+    var c=getCat(it)||"Non classée",g=genreNorm(getGenre(it));
+    if(!map[c])map[c]={cat:c,F:0,M:0,NR:0,total:0};
+    map[c][g]++;map[c].total++;all[g]++;all.total++;
+  });
+  var rows=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return catRank(a.cat)-catRank(b.cat)||a.cat.localeCompare(b.cat);});
+  return {rows:rows,all:all};
+}
+function effectifTexte(e){
+  var t=[];
+  if(e.F)t.push(e.F+" fille"+(e.F>1?"s":""));
+  if(e.M)t.push(e.M+" garçon"+(e.M>1?"s":""));
+  if(e.NR)t.push(e.NR+" non renseigné"+(e.NR>1?"s":""));
+  return t.join(" · ");
+}
+// Boutons de filtre genre (même style que les filtres catégorie).
+function genreFilterHtml(current,fnName,showNR){
+  var opts=[["all","Tous"],["F","Filles"],["M","Garçons"]];
+  if(showNR)opts.push(["NR","Non renseigné"]);
+  return opts.map(function(o){
+    return '<button class="cat-filter'+(current===o[0]?' on':'')+'" onclick="'+fnName+'(\''+o[0]+'\')">'+o[1]+'</button>';
+  }).join("");
+}
+function filterGenre(g){
+  currentGenreFilter=g;
+  renderPlayers();
+}
 var editingPlayerId=null;
 
 function tryLogin(){
@@ -873,11 +916,20 @@ function buildPlayers(){renderPlayers();}
 function renderPlayers(){
   var players=getPlayers();
   var filtered=currentCatFilter==="all"?players:players.filter(function(p){return p.cat===currentCatFilter;});
+  var gBar=document.getElementById("insc-genre-filter");
+  if(gBar){
+    var hasNR=players.some(function(p){return genreNorm(p.genre)==="NR";});
+    if(!hasNR&&currentGenreFilter==="NR")currentGenreFilter="all";
+    gBar.innerHTML=genreFilterHtml(currentGenreFilter,"filterGenre",hasNR);
+  }
+  filtered=filtered.filter(function(p){return genreMatch(p.genre,currentGenreFilter);});
+  filtered=filtered.slice().sort(function(a,b){return compareCatGenreNom(a.cat,a.genre,(a.nom||"")+" "+(a.prenom||""),b.cat,b.genre,(b.nom||"")+" "+(b.prenom||""));});
   var searchEl=document.getElementById("insc-search");
   var q=searchEl?searchEl.value.trim().toLowerCase():"";
   if(q){filtered=filtered.filter(function(p){return ((p.prenom||"")+" "+(p.nom||"")).toLowerCase().indexOf(q)>=0||(p.poste||"").toLowerCase().indexOf(q)>=0;});}
   var el=document.getElementById("playerList");if(!el)return;
-  document.getElementById("insc-count").textContent=players.length+" joueur"+(players.length>1?"s":"");
+  var eff=effectifsParCatGenre(filtered,function(p){return p.cat;},function(p){return p.genre;}).all;
+  document.getElementById("insc-count").textContent=(filtered.length===players.length?players.length:filtered.length+" sur "+players.length)+" joueur"+(players.length>1?"s":"")+(filtered.length?" · "+effectifTexte(eff):"");
   if(!filtered.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun joueur")+'</div><div style="font-size:11px;margin-top:4px">'+(q?"Essayez un autre nom":"Appuyez sur + Ajouter")+'</div></div>';return;}
   el.innerHTML="";
   filtered.forEach(function(p){

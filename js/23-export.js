@@ -76,8 +76,13 @@ function exportLicencesXlsx(){
   var all=getLicences();
   var lics=licShowArchived ? all.filter(function(l){return l.saison && l.saison!==season;})
                            : all.filter(function(l){return !l.saison || l.saison===season;});
+  lics=lics.filter(function(l){return genreMatch(licGenre(l),licGenreFilter);});
+  lics.sort(function(a,b){return compareCatGenreNom(a.categorie,licGenre(a),licNomTri(a),b.categorie,licGenre(b),licNomTri(b));});
   if(!lics.length){ askAlert("Aucune fiche à exporter."); return; }
   var libPaie={paye:"Payé",partiel:"Partiel",impaye:"Impayé"};
+  var eff=effectifsParCatGenre(lics,function(l){return l.categorie;},licGenre);
+  var lignesEff=eff.rows.concat([{cat:"Total",F:eff.all.F,M:eff.all.M,NR:eff.all.NR,total:eff.all.total}])
+    .map(function(r){return [r.cat,r.F,r.M,r.NR,r.total];});
   var lignes=lics.map(function(l){
     var f=l.fiche||{};
     var st=STATUTS.find(function(s){return s.id===l.statut;})||STATUTS[0];
@@ -92,7 +97,8 @@ function exportLicencesXlsx(){
     ];
   });
   exporterXlsx(clubSlug()+"_licences_"+exportDateStr()+".xlsx",[
-    {nom:"Licences",entetes:["Code","Statut fiche","Prénom","Nom","Naissance","Genre","Catégorie","Type","Saison","Email","Téléphone","Responsable 1","Tél resp. 1","Email resp. 1","Responsable 2","Tél resp. 2","Montant attendu (€)","Payé (€)","Reste dû (€)","Paiement","Relances","Suspendue"],lignes:lignes}
+    {nom:"Licences",entetes:["Code","Statut fiche","Prénom","Nom","Naissance","Genre","Catégorie","Type","Saison","Email","Téléphone","Responsable 1","Tél resp. 1","Email resp. 1","Responsable 2","Tél resp. 2","Montant attendu (€)","Payé (€)","Reste dû (€)","Paiement","Relances","Suspendue"],lignes:lignes},
+    {nom:"Effectifs",entetes:["Catégorie","Filles","Garçons","Non renseigné","Total"],lignes:lignesEff}
   ]);
 }
 

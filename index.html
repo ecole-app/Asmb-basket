@@ -81,6 +81,7 @@
       <button class="cat-filter on" onclick="sortLicenciesList('nom')" id="sortby-nom">Nom</button>
       <button class="cat-filter" onclick="sortLicenciesList('naissance')" id="sortby-naissance">Naissance</button>
       <button class="cat-filter" onclick="sortLicenciesList('cat')" id="sortby-cat">Équipe</button>
+      <button class="cat-filter" onclick="sortLicenciesList('genre')" id="sortby-genre">Genre</button>
     </div>
     <div id="licencies-list-content"></div>
   </div>
@@ -242,8 +243,12 @@
       <button class="cat-filter" onclick="filterCat('U13')" id="cat-U13">U13</button>
       <button class="cat-filter" onclick="filterCat('U15')" id="cat-U15">U15</button>
       <button class="cat-filter" onclick="filterCat('U17')" id="cat-U17">U17</button>
+      <button class="cat-filter" onclick="filterCat('U18')" id="cat-U18">U18</button>
+      <button class="cat-filter" onclick="filterCat('U21')" id="cat-U21">U21</button>
       <button class="cat-filter" onclick="filterCat('Senior')" id="cat-Senior">Senior</button>
     </div>
+    <!-- Filtre genre -->
+    <div id="insc-genre-filter" style="padding:8px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)"></div>
     <div style="padding:0 12px 4px">
       <input id="insc-search" type="search" placeholder="Rechercher un joueur..." oninput="renderPlayers()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box">
     </div>
@@ -406,6 +411,7 @@
       </div>
     </div>
     <div id="lic-counter-box" style="margin:12px 12px 4px"></div>
+    <div id="lic-genre-filter" style="display:none;padding:0 12px 10px;gap:8px;overflow-x:auto;scrollbar-width:none"></div>
     <div id="lic-impayes-toggle" style="display:none"></div>
     <div id="lic-archive-toggle" style="display:none"></div>
     <div id="licenceList" style="padding:8px 0 80px"></div>

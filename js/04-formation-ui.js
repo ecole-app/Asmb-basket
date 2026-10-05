@@ -25,6 +25,7 @@ function sortLicenciesList(mode){
     if(mode==="nom")return (a.nom||"").localeCompare(b.nom||"");
     if(mode==="naissance")return (a.naissance||"").localeCompare(b.naissance||"");
     if(mode==="cat")return (a.cat||"").localeCompare(b.cat||"");
+    if(mode==="genre")return compareCatGenreNom(a.cat,a.genre,a.nom,b.cat,b.genre,b.nom);
     return 0;
   });
   var el=document.getElementById("licencies-list-content");
@@ -33,7 +34,7 @@ function sortLicenciesList(mode){
   players.forEach(function(p){
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+'</div></div>'+
+    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+(p.genre==="F"||p.genre==="M"?' · '+genreLabelSing(p.genre):'')+'</div></div>'+
       '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"var(--ltg)":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
     el.appendChild(div);
   });

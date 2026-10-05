@@ -247,6 +247,11 @@ var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;
 var licShowImpayesOnly=false;
+var licGenreFilter="all"; // "all" | "F" | "M" | "NR"
+function licGenre(l){return l&&l.fiche?l.fiche.genre:"";}
+function setLicGenreFilter(g){licGenreFilter=g;buildLicences();}
+var licTriCatGenre=false; // false = récentes d'abord ; true = catégorie → filles → garçons → nom
+function licNomTri(l){var f=l.fiche||{};return (f.nom||"")+" "+(f.prenom||"");}
 // Reconstruit les rattachements des licences validees avant leur mise en place,
 // une fois par session depuis l'ecran des licences : sans cela, ces familles ne
 // retrouveraient plus leur enfant.
@@ -281,18 +286,19 @@ function buildLicences(){
  var byCat={};
  lics.forEach(function(l){
  var cat=l.categorie||"Non classee";
- if(!byCat[cat])byCat[cat]={valid:0,pending:0};
+ if(!byCat[cat])byCat[cat]={valid:0,pending:0,F:0,M:0,NR:0};
  if(l.statut==="validee")byCat[cat].valid++;
  else byCat[cat].pending++;
+ byCat[cat][genreNorm(licGenre(l))]++;
  });
- var catKeys=Object.keys(byCat);
+ var catKeys=Object.keys(byCat).sort(function(a,b){return catRank(a)-catRank(b)||a.localeCompare(b);});
  if(!catKeys.length){counterEl.innerHTML="";}
  else{
  var chtml='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;box-shadow:0 2px 8px var(--shadow)">';
       chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validees vs en attente</div>';
       catKeys.forEach(function(cat){
         var c=byCat[cat];
-        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div>';
+        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div><div style="font-size:10px;color:var(--mut);padding:0 0 4px">'+effectifTexte(c)+'</div>';
       });
       chtml+='</div>';
       counterEl.innerHTML=chtml;
@@ -311,13 +317,26 @@ function buildLicences(){
     lics=lics.filter(function(l){var s=licenceStatutPaiement(l);return (s==="impaye"||s==="partiel")||l.suspendue;});
   }
 
+  var gBox=document.getElementById("lic-genre-filter");
+  if(gBox){
+    var hasNR=lics.some(function(l){return genreNorm(licGenre(l))==="NR";});
+    if(!hasNR&&licGenreFilter==="NR")licGenreFilter="all";
+    gBox.style.display=lics.length?"flex":"none";
+    gBox.innerHTML=genreFilterHtml(licGenreFilter,"setLicGenreFilter",hasNR)
+      +'<button class="cat-filter'+(licTriCatGenre?' on':'')+'" onclick="licTriCatGenre=!licTriCatGenre;buildLicences()" style="margin-left:auto;white-space:nowrap">↕ Cat. / genre</button>';
+  }
+  lics=lics.filter(function(l){return genreMatch(licGenre(l),licGenreFilter);});
+
   el.innerHTML="";
   if(!lics.length){
     el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(licShowImpayesOnly?"Aucun impayé":"Aucune fiche envoyée")+'</div><div style="font-size:11px;margin-top:4px">'+(licShowImpayesOnly?"Toutes les familles sont à jour":"Appuyez sur + Nouvelle fiche")+'</div></div>';
     return;
   }
-  // Tri par date décroissante
-  lics.sort(function(a,b){return b.createdAt-a.createdAt;});
+  // Tri : date décroissante par défaut, ou catégorie → genre → nom (bouton « Cat. / genre »)
+  lics.sort(function(a,b){
+    if(licTriCatGenre)return compareCatGenreNom(a.categorie,licGenre(a),licNomTri(a),b.categorie,licGenre(b),licNomTri(b));
+    return b.createdAt-a.createdAt;
+  });
   lics.forEach(function(lic){
     var st=STATUTS.find(function(s){return s.id===lic.statut;})||STATUTS[0];
     var div=document.createElement("div");

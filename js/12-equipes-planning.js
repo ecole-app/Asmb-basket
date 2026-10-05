@@ -197,8 +197,12 @@ function importPlayersCSV(input){
 
 function exportPlayersPDF(){
   if(typeof window.jspdf==="undefined"){askAlert("Chargement du générateur PDF, réessayez dans quelques secondes");return;}
-  var players=currentCatFilter==="all"?getPlayers():getPlayers().filter(function(p){return p.cat===currentCatFilter;});
+  var players=getPlayers().filter(function(p){
+    return (currentCatFilter==="all"||p.cat===currentCatFilter)&&genreMatch(p.genre,currentGenreFilter);
+  });
   if(!players.length){askAlert("Aucun joueur à exporter");return;}
+  // Tri : catégorie → filles puis garçons → nom
+  players.sort(function(a,b){return compareCatGenreNom(a.cat,a.genre,(a.nom||"")+" "+(a.prenom||""),b.cat,b.genre,(b.nom||"")+" "+(b.prenom||""));});
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF();
   doc.setFontSize(16);
@@ -207,37 +211,78 @@ function exportPlayersPDF(){
   doc.setFontSize(9);
   doc.setTextColor(100,100,100);
   doc.text("Généré le "+new Date().toLocaleDateString("fr-FR"),14,22);
-  if(currentCatFilter!=="all"){doc.text("Catégorie : "+currentCatFilter,14,27);}
+  var filtres=[];
+  if(currentCatFilter!=="all")filtres.push("Catégorie : "+currentCatFilter);
+  if(currentGenreFilter!=="all")filtres.push("Genre : "+genreLabel(currentGenreFilter));
+  var y=27;
+  if(filtres.length){doc.text(filtres.join("  ·  "),14,y);y+=5;}
 
-  var headers=["Nom","Prénom","Catégorie","Type licence","N° licence","Statut"];
-  var colX=[14,50,86,112,150,178];
-  var y=currentCatFilter!=="all"?35:32;
-  doc.setFontSize(9);
-  doc.setTextColor(255,255,255);
-  doc.setFillColor(27,92,40);
+  // ── Récapitulatif des effectifs (catégorie × genre) ──
+  var eff=effectifsParCatGenre(players,function(p){return p.cat;},function(p){return p.genre;});
+  var showNR=eff.all.NR>0;
+  var rc=showNR?[14,70,100,130,160]:[14,80,115,150];
+  var rh=showNR?["Catégorie","Filles","Garçons","Non renseigné","Total"]:["Catégorie","Filles","Garçons","Total"];
+  y+=3;
+  doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
   doc.rect(12,y-5,186,7,"F");
-  headers.forEach(function(h,i){doc.text(h,colX[i],y);});
+  rh.forEach(function(h,i){doc.text(h,rc[i],y);});
   y+=8;
   doc.setTextColor(30,30,30);
-  players.forEach(function(p,idx){
+  eff.rows.concat([{cat:"Total",F:eff.all.F,M:eff.all.M,NR:eff.all.NR,total:eff.all.total,_t:true}]).forEach(function(r,idx){
     if(y>280){doc.addPage();y=20;}
-    if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    if(r._t){doc.setFont(undefined,"bold");}
+    else if(idx%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    var vals=showNR?[r.cat,r.F,r.M,r.NR,r.total]:[r.cat,r.F,r.M,r.total];
+    vals.forEach(function(v,i){doc.text(String(v),rc[i],y);});
+    y+=7;
+  });
+  doc.setFont(undefined,"normal");
+  y+=6;
+
+  // ── Liste détaillée, groupée par catégorie puis genre ──
+  var headers=["Nom","Prénom","Genre","Catégorie","Type licence","N° licence","Statut"];
+  var colX=[14,46,78,98,114,148,176];
+  function enTete(){
+    doc.setFontSize(9);doc.setTextColor(255,255,255);doc.setFillColor(27,92,40);
+    doc.rect(12,y-5,186,7,"F");
+    headers.forEach(function(h,i){doc.text(h,colX[i],y);});
+    y+=8;doc.setTextColor(30,30,30);
+  }
+  if(y>260){doc.addPage();y=20;}
+  enTete();
+  var groupe="",n=0;
+  players.forEach(function(p){
+    var cle=(p.cat||"?")+"|"+genreNorm(p.genre);
+    if(cle!==groupe){
+      groupe=cle;n=0;
+      if(y>270){doc.addPage();y=20;enTete();}
+      var nb=players.filter(function(q){return (q.cat||"?")+"|"+genreNorm(q.genre)===cle;}).length;
+      doc.setFillColor(214,232,219);doc.rect(12,y-5,186,7,"F");
+      doc.setFont(undefined,"bold");doc.setTextColor(27,92,40);
+      doc.text((p.cat||"Sans catégorie")+" - "+genreLabel(p.genre)+" ("+nb+")",14,y);
+      doc.setFont(undefined,"normal");doc.setTextColor(30,30,30);
+      y+=7;
+    }
+    if(y>280){doc.addPage();y=20;enTete();}
+    if(n%2===0){doc.setFillColor(240,247,242);doc.rect(12,y-5,186,7,"F");}
+    n++;
     var typeLic=p.typeLicence==="competition"?"Compétition":"Loisir";
     var numLic=p.numLicence||"0C";
     var statut=p.licence==="ok"?"Licencié":(p.licence==="attente"?"En attente":"Sans licence");
-    doc.text((p.nom||"").substring(0,18),colX[0],y);
-    doc.text((p.prenom||"").substring(0,18),colX[1],y);
-    doc.text(p.cat||"",colX[2],y);
-    doc.text(typeLic,colX[3],y);
-    doc.text(numLic,colX[4],y);
-    doc.text(statut,colX[5],y);
+    doc.text((p.nom||"").substring(0,16),colX[0],y);
+    doc.text((p.prenom||"").substring(0,16),colX[1],y);
+    doc.text(p.genre==="F"?"F":p.genre==="M"?"M":"-",colX[2],y);
+    doc.text(p.cat||"",colX[3],y);
+    doc.text(typeLic,colX[4],y);
+    doc.text(numLic,colX[5],y);
+    doc.text(statut,colX[6],y);
     y+=7;
   });
   doc.setFontSize(8);
   doc.setTextColor(150,150,150);
   doc.text("Total : "+players.length+" licencié(s)",14,y+6);
 
-  doc.save(clubSlug()+"_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
+  doc.save(clubSlug()+"_licencies_"+(currentCatFilter!=="all"?currentCatFilter+"_":"")+(currentGenreFilter!=="all"?currentGenreFilter+"_":"")+new Date().toISOString().slice(0,10)+".pdf");
 }
 
 // ── TEAMS ────────────────────────────────────────────────────────
