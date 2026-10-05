@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791199554",
+    "titre": "Couleur du club dans tous les thèmes",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "La couleur choisie par le dirigeant s'applique maintenant à tous les thèmes visuels (Classique, Épuré, Bento, Feuille, Carnet, Éditorial), sans changer leur style : chaque thème garde ses formes et ses neutres, seule sa teinte de marque change."
+      }
+    ]
+  },
+  {
     "v": "1791199274",
     "titre": "Couleurs du club et logo General Manager",
     "points": [

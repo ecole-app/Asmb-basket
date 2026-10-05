@@ -56,6 +56,10 @@ function gmMix(h,w){ // mélange avec du blanc : w = part de blanc (0..1)
   var c=gmHexToRgb(h).map(function(v){return Math.round(v+(255-v)*w);});
   return "#"+c.map(function(v){return ("0"+v.toString(16)).slice(-2);}).join("");
 }
+function gmShade(h,w){ // mélange avec du noir : w = part de noir (0..1)
+  var c=gmHexToRgb(h).map(function(v){return Math.round(v*(1-w));});
+  return "#"+c.map(function(v){return ("0"+v.toString(16)).slice(-2);}).join("");
+}
 function gmHsl(h){
   var c=gmHexToRgb(h).map(function(v){return v/255;});
   var mx=Math.max(c[0],c[1],c[2]), mn=Math.min(c[0],c[1],c[2]), l=(mx+mn)/2, s=0, t=0;

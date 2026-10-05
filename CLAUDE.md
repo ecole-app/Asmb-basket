@@ -60,7 +60,7 @@ pour ces comptes, pas seulement pour le rôle `dirigeant`.
 - TVA des factures : « non applicable, art. 293 B du CGI » par défaut, activable par club.
 - CERFA / reçus fiscaux : prévu pour l'offre Premium.
 - Facturation de la plateforme : manuelle (RIB) pour l'instant, Stripe plus tard.
-- Couleur du club : par défaut couleurs GM ; le dirigeant choisit dans une palette de 50 teintes (`CLUB_PALETTE`, contraste ≥ 4,5:1 avec le blanc), champ `couleur` sur `clubs/{clubId}`. Elle ne s'applique qu'au thème Moderne et aux PDF (`clubPdfRgb()`). Le logo GM (marine/doré, `icon-192.png`) est réservé à la plateforme.
+- Couleur du club : par défaut couleurs GM ; le dirigeant choisit dans une palette de 50 teintes (`CLUB_PALETTE`, contraste ≥ 4,5:1 avec le blanc), champ `couleur` sur `clubs/{clubId}`. Elle s'applique à tous les thèmes visuels via `clubThemeVars()` (js/03-nav-portal.js : chaque thème n'a que sa teinte de marque remplacée, jamais ses neutres) et aux PDF (`clubPdfRgb()`). Un nouveau thème visuel doit être ajouté à `clubThemeVars()`. Le logo GM (marine/doré, `icon-192.png`) est réservé à la plateforme.
 
 ## Pièges connus
 

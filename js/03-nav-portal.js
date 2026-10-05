@@ -77,10 +77,36 @@ function applyClubLogo(){
   applyClubColor();
 }
 
-// Couleur du club : une feuille de style ajoutée après la principale. Elle ne
-// vise que le thème "Moderne" (sans data-visual-theme) : les autres thèmes
-// ont leur propre identité visuelle. En mode sombre, on éclaircit la teinte
-// pour qu'elle reste lisible sur fond sombre. Aucune couleur = couleurs GM.
+// Couleur du club : une feuille de style ajoutée après la principale. Chaque
+// thème visuel a son propre rôle pour ses variables : la couleur du club
+// remplace seulement la teinte de marque du thème, jamais ses neutres, ses
+// formes ni son fond de base. Ainsi Épuré reste noir et blanc avec un accent,
+// Éditorial garde son encre, Feuille son papier crème, etc.
+//   --dkg = couleur principale (boutons, sélection)   --ltg = accent
+//   --hdrgrad = fond de l'en-tête
+// Chaque entrée : [variables en clair, variables en mode sombre]. Les règles
+// "sombre" doivent exister même quand rien ne change, car les thèmes ont leurs
+// propres valeurs sombres qui, sinon, reprendraient le dessus.
+function clubThemeVars(c){
+  var cl=gmMix(c,0.42), h=gmHsl(c)[0];
+  var bentoBg=gmFromHsl(h,0.5,0.15);
+  return {
+    "moderne":[ "--dkg:"+c+";--ltg:"+c+";--hdrgrad:"+clubDegrade(c), "--dkg:"+c+";--ltg:"+cl+";--hdrgrad:"+clubDegrade(c) ],
+    // Marine/doré : la couleur remplace le marine ; l'or reste la signature du thème.
+    "classique":[ "--dkg:"+c+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")",
+                  "--dkg:"+gmMix(c,0.3)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")" ],
+    // Minimal : noir et blanc, seul l'accent prend la couleur.
+    "epure":[ "--ltg:"+c, "--ltg:"+cl ],
+    // Verre sur fond sombre : fond et en-tête teintés de la même couleur, boutons éclaircis.
+    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.35)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+gmFromHsl(h,0.43,0.27)+","+bentoBg+" 55%,"+gmFromHsl(h,0.52,0.22)+")", null ],
+    // Papier crème et encre : couleur de marque + une teinte plus claire en accent.
+    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25), "--dkg:"+cl+";--ltg:"+cl ],
+    // Pastel : couleur adoucie, l'accent bleu du thème est conservé.
+    "carnet":[ "--dkg:"+gmMix(c,0.4), "--dkg:"+gmMix(c,0.5) ],
+    // Bloc couleur : l'en-tête et l'accent prennent la couleur, l'encre reste.
+    "editorial":[ "--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ]
+  };
+}
 function applyClubColor(){
   try{
     var old=document.getElementById("club-colors");
@@ -88,10 +114,13 @@ function applyClubColor(){
     if(!c){ if(old) old.remove(); return; }
     var st=old||document.createElement("style");
     st.id="club-colors";
-    var cl=gmMix(c,0.42);
-    st.textContent=
-      'html:not([data-visual-theme]){--dkg:'+c+';--ltg:'+c+';--hdrgrad:'+clubDegrade(c)+'}'+
-      'html:not([data-visual-theme])[data-theme="dark"]{--dkg:'+c+';--ltg:'+cl+'}';
+    var css="", tv=clubThemeVars(c);
+    Object.keys(tv).forEach(function(t){
+      var sel=(t==="moderne")?'html:not([data-visual-theme])':'html[data-visual-theme="'+t+'"]';
+      if(tv[t][0]) css+=sel+'{'+tv[t][0]+'}';
+      if(tv[t][1]) css+=sel.replace('html','html[data-theme="dark"]')+'{'+tv[t][1]+'}';
+    });
+    st.textContent=css;
     if(!old) document.head.appendChild(st);
   }catch(e){}
 }
