@@ -98,7 +98,7 @@ function clubThemeVars(c){
     // Minimal : noir et blanc, seul l'accent prend la couleur.
     "epure":[ "--ltg:"+c, "--ltg:"+cl ],
     // Verre sur fond sombre : fond et en-tête teintés de la même couleur, boutons éclaircis.
-    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.35)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+gmFromHsl(h,0.43,0.27)+","+bentoBg+" 55%,"+gmFromHsl(h,0.52,0.22)+")", null ],
+    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+gmFromHsl(h,0.43,0.27)+","+bentoBg+" 55%,"+gmFromHsl(h,0.52,0.22)+")", null ],
     // Papier crème et encre : couleur de marque + une teinte plus claire en accent.
     "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25), "--dkg:"+cl+";--ltg:"+cl ],
     // Pastel : couleur adoucie, l'accent bleu du thème est conservé.
