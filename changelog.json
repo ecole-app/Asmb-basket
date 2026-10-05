@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791199787",
+    "titre": "Couleur du club : fonds et textes teintés",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Avec une couleur de club choisie, les thèmes se teintent entièrement : fond de Bento, fonds et textes de Classique, fonds de Carnet (clair et sombre), en-tête de Feuille. Plus de violet ou de bleu d'origine qui reste visible."
+      }
+    ]
+  },
+  {
     "v": "1791199562",
     "titre": "Couleur du club dans tous les thèmes",
     "points": [

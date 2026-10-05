@@ -88,21 +88,23 @@ function applyClubLogo(){
 // "sombre" doivent exister même quand rien ne change, car les thèmes ont leurs
 // propres valeurs sombres qui, sinon, reprendraient le dessus.
 function clubThemeVars(c){
-  var cl=gmMix(c,0.42), h=gmHsl(c)[0];
-  var bentoBg=gmFromHsl(h,0.5,0.15);
+  var cl=gmMix(c,0.42), h=gmHsl(c)[0], T=gmFromHsl;
+  var bentoBg=T(h,0.5,0.15);
   return {
     "moderne":[ "--dkg:"+c+";--ltg:"+c+";--hdrgrad:"+clubDegrade(c), "--dkg:"+c+";--ltg:"+cl+";--hdrgrad:"+clubDegrade(c) ],
-    // Marine/doré : la couleur remplace le marine ; l'or reste la signature du thème.
-    "classique":[ "--dkg:"+c+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")",
-                  "--dkg:"+gmMix(c,0.3)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")" ],
+    // Marine/doré : la couleur remplace le marine (boutons, en-tête, fonds et textes
+    // teintés) ; l'or reste la signature du thème.
+    "classique":[ "--dkg:"+c+";--bg:"+T(h,0.25,0.96)+";--bdr:"+T(h,0.2,0.84)+";--txt:"+T(h,0.3,0.14)+";--txt2:"+T(h,0.12,0.4)+";--mut:"+T(h,0.12,0.4)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")",
+                  "--dkg:"+gmMix(c,0.3)+";--bg:"+T(h,0.3,0.08)+";--sf:"+T(h,0.28,0.11)+";--card:"+T(h,0.28,0.13)+";--bdr:"+T(h,0.25,0.2)+";--txt:"+T(h,0.3,0.95)+";--txt2:"+T(h,0.2,0.82)+";--mut:"+T(h,0.15,0.62)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")" ],
     // Minimal : noir et blanc, seul l'accent prend la couleur.
     "epure":[ "--ltg:"+c, "--ltg:"+cl ],
-    // Verre sur fond sombre : fond et en-tête teintés de la même couleur, boutons éclaircis.
-    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+gmFromHsl(h,0.43,0.27)+","+bentoBg+" 55%,"+gmFromHsl(h,0.52,0.22)+")", null ],
-    // Papier crème et encre : couleur de marque + une teinte plus claire en accent.
-    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25), "--dkg:"+cl+";--ltg:"+cl ],
-    // Pastel : couleur adoucie, l'accent bleu du thème est conservé.
-    "carnet":[ "--dkg:"+gmMix(c,0.4), "--dkg:"+gmMix(c,0.5) ],
+    // Verre sur fond sombre : fond (le body reprend --hdrgrad), en-tête et boutons teintés.
+    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+T(h,0.43,0.27)+","+bentoBg+" 55%,"+T(h,0.52,0.22)+")", null ],
+    // Papier crème et encre : couleur de marque, accent plus clair, en-tête encre teintée.
+    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25)+";--hdrgrad:"+gmShade(c,0.82), "--dkg:"+cl+";--ltg:"+cl ],
+    // Pastel : couleur et accent adoucis, fond dégradé teinté (clair) ou fonds sombres teintés.
+    "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(c,0.5)+";--carnet-body:linear-gradient(180deg,"+T(h,0.6,0.95)+","+T(h+25,0.5,0.96)+" 45%,#fdf6f0)",
+               "--dkg:"+gmMix(c,0.5)+";--ltg:"+gmMix(c,0.6)+";--bg:"+T(h,0.2,0.10)+";--sf:"+T(h,0.2,0.14)+";--card:"+T(h,0.2,0.14)+";--bdr:"+T(h,0.2,0.2)+";--hdrgrad:"+T(h,0.2,0.14) ],
     // Bloc couleur : l'en-tête et l'accent prennent la couleur, l'encre reste.
     "editorial":[ "--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ]
   };
