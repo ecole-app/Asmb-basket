@@ -96,8 +96,9 @@ function clubThemeVars(c){
     // teintés) ; l'or reste la signature du thème.
     "classique":[ "--dkg:"+c+";--bg:"+T(h,0.25,0.96)+";--bdr:"+T(h,0.2,0.84)+";--txt:"+T(h,0.3,0.14)+";--txt2:"+T(h,0.12,0.4)+";--mut:"+T(h,0.12,0.4)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")",
                   "--dkg:"+gmMix(c,0.3)+";--bg:"+T(h,0.3,0.08)+";--sf:"+T(h,0.28,0.11)+";--card:"+T(h,0.28,0.13)+";--bdr:"+T(h,0.25,0.2)+";--txt:"+T(h,0.3,0.95)+";--txt2:"+T(h,0.2,0.82)+";--mut:"+T(h,0.15,0.62)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")" ],
-    // Minimal : noir et blanc, seul l'accent prend la couleur.
-    "epure":[ "--ltg:"+c, "--ltg:"+cl ],
+    // Minimal : barre du haut blanche, fond et cartes neutres ; la couleur du club fait les
+    // boutons, l'accent et le bandeau d'accueil (texte blanc dessus, comme les autres thèmes).
+    "epure":[ "--dkg:"+c+";--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ],
     // Verre sur fond sombre : fond (le body reprend --hdrgrad), en-tête et boutons teintés.
     "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+T(h,0.43,0.27)+","+bentoBg+" 55%,"+T(h,0.52,0.22)+")", null ],
     // Papier et encre : le papier crème, l'encre et l'en-tête prennent la teinte du club.

@@ -1,5 +1,20 @@
 [
   {
+    "v": "1791200459",
+    "titre": "Thème Épuré : bandeau lisible et couleur du club",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur"
+        ],
+        "texte": "Thème Épuré : le bandeau d'accueil était presque illisible (texte blanc sur fond blanc). Il est maintenant noir par défaut, ou de la couleur du club si elle est choisie, avec la barre du haut qui reste blanche. Les boutons et accents prennent aussi la couleur du club."
+      }
+    ]
+  },
+  {
     "v": "1791200068",
     "titre": "Thème Feuille : fond à la couleur du club",
     "points": [
