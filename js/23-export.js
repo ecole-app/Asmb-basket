@@ -128,3 +128,49 @@ function exportInventaireXlsx(){
     {nom:invActiveTab==="buvette"?"Buvette":"Matériel",entetes:["Article","Quantité","Unité","Seuil","Stock bas","Prix d'achat (€)","Prix de vente (€)","Emplacement","Notes"],lignes:lignes}
   ]);
 }
+
+// ── BILAN COMPTABLE PDF (Premium) ────────────────────────────────────
+// Respecte les filtres affichés (période, catégorie, compte...) : recettes et
+// dépenses par catégorie, solde, puis détail des écritures.
+function exportComptaBilanPdf(){
+  if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
+  if(typeof hasPremium==="function" && !hasPremium()){ askPremiumRequis("Bilan comptable PDF"); return; }
+  if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
+  var lines=comptaFilteredList().slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
+  if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
+  var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
+  var parCat={recette:{},depense:{}}, totR=0, totD=0;
+  lines.forEach(function(l){
+    var t=l.type==="depense"?"depense":"recette", k=l.categorie||"Autre", m=Number(l.montant)||0;
+    parCat[t][k]=(parCat[t][k]||0)+m;
+    if(t==="depense") totD+=m; else totR+=m;
+  });
+  var doc=new window.jspdf.jsPDF(), rgb=clubPdfRgb(), y=16;
+  var du=(COMPTA_FILTERS&&COMPTA_FILTERS.du)||lines[0].date, au=(COMPTA_FILTERS&&COMPTA_FILTERS.au)||lines[lines.length-1].date;
+  doc.setFontSize(16); doc.setTextColor.apply(doc,rgb);
+  doc.text(clubTitle()+" - Bilan comptable",14,y); y+=6;
+  doc.setFontSize(9); doc.setTextColor(100,100,100);
+  doc.text("Période : "+(du||"")+" au "+(au||"")+" - généré le "+new Date().toLocaleDateString("fr-FR"),14,y); y+=10;
+  function bloc(titre,obj,tot){
+    doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text(titre,14,y); y+=6;
+    doc.setFontSize(9); doc.setTextColor(30,30,30);
+    Object.keys(obj).sort().forEach(function(k){ doc.text(k,16,y); doc.text(eur(obj[k]),150,y); y+=5.5; });
+    doc.setFont(undefined,"bold"); doc.text("Total",16,y); doc.text(eur(tot),150,y); doc.setFont(undefined,"normal"); y+=9;
+  }
+  bloc("Recettes par catégorie",parCat.recette,totR);
+  bloc("Dépenses par catégorie",parCat.depense,totD);
+  doc.setFontSize(12); doc.setTextColor.apply(doc,rgb);
+  doc.text("Solde : "+eur(totR-totD),14,y); y+=10;
+  doc.setFontSize(11); doc.text("Détail des écritures",14,y); y+=6;
+  doc.setFontSize(8); doc.setTextColor(255,255,255); doc.setFillColor.apply(doc,rgb);
+  doc.rect(12,y-4,186,6,"F"); doc.text("Date",14,y); doc.text("Catégorie",38,y); doc.text("Motif",86,y); doc.text("Montant",172,y); y+=7;
+  doc.setTextColor(30,30,30);
+  lines.forEach(function(l,i){
+    if(y>285){ doc.addPage(); y=20; }
+    if(i%2===0){ doc.setFillColor.apply(doc,clubPdfTint(0.92)); doc.rect(12,y-4,186,6,"F"); }
+    var m=(l.type==="depense"?"-":"+")+eur(Number(l.montant)||0);
+    doc.text(String(l.date||""),14,y); doc.text(String(l.categorie||"").substring(0,26),38,y);
+    doc.text(String(l.motif||"").substring(0,48),86,y); doc.text(m,172,y); y+=6;
+  });
+  doc.save(clubSlug()+"_bilan_comptable_"+exportDateStr()+".pdf");
+}

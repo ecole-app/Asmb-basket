@@ -254,6 +254,7 @@ function reserverNumeroFacture(cb){
 }
 
 function openFactureModal(){
+  if(typeof hasPremium==="function"&&!hasPremium()){askPremiumRequis("Factures sponsors & partenaires");return;}
   if(!sponsorEditId){askAlert("Enregistrez d'abord le sponsor avant de générer une facture.");return;}
   var factInfos=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
   var blockedBox=document.getElementById("facture-blocked-box");

@@ -1,5 +1,37 @@
 [
   {
+    "v": "1791543688",
+    "titre": "Packs Standard et Premium",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Deux packs : Standard et Premium. Le Premium débloque la comptabilité complète, les reçus fiscaux, le bilan comptable PDF, les factures sponsors, les formations animées et le lien buvette / comptabilité."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Au-delà de 300 licences, le Pack Premium est nécessaire pour en ajouter (alerte dès 270, renouvellements jamais bloqués)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "bureau"
+        ],
+        "texte": "Nouveau : bilan comptable en PDF depuis la comptabilité."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "bureau"
+        ],
+        "texte": "Caisse buvette : onglet Récap avec export PDF/Excel pour les bénévoles (en Standard, les ventes ne vont pas en comptabilité)."
+      }
+    ]
+  },
+  {
     "v": "1791226346",
     "titre": "Conditions générales de vente",
     "points": [

@@ -628,7 +628,8 @@ function openBuvetteAccessSettings(){
     var code=genSecureCode(1,5);
     window.fbSetDoc(window.fbDoc(window.fbDb,"buvette_codes",code),{
       clubId:clubId,clubName:clubName,createdBy:(window.ASMB_USER&&window.ASMB_USER.uid)||null,
-      createdAt:window.fbServerTimestamp(),expiresAt:fin
+      createdAt:window.fbServerTimestamp(),expiresAt:fin,
+      comptaLiee:(typeof hasPremium==="function")?hasPremium():true
     }).then(function(){
       askAlert("Code d'accès caisse buvette :\n\n"+code+"\n\n"+label+"\n\nTransmettez-le au bénévole avec le lien : "+BUVETTE_SITE_URL);
       loadBuvetteGrants(grants,clubId);
@@ -849,6 +850,7 @@ function deleteDoc(id){
 // réutilisées ici. Les infos du donateur sont saisies à chaque don et
 // mémorisées sur la ligne comptable pour un futur réemploi/correction.
 function openCerfaModal(){
+  if(typeof hasPremium==="function"&&!hasPremium()){askPremiumRequis("Reçus fiscaux (CERFA)");return;}
   var lines=getComptabilite();
   var l=comptaEditId?lines.find(function(x){return x.id===comptaEditId;}):null;
   if(!l){askAlert("Enregistrez d'abord la ligne avant de générer le reçu.");return;}

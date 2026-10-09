@@ -28,6 +28,7 @@ function injectSitAnim(key,animId){
  setTimeout(function(){if(cv)fn(cv.getContext("2d"),0);},40);
 }
 function sitToggle(key){
+ if(typeof hasPremium==="function"&&!hasPremium()){askPremiumRequis("Formations animées");return;}
  var s=getSA(key),btn=document.getElementById("sb-"+key);if(!btn)return;
  if(s.running){s.running=false;cancelAnimationFrame(s.raf);btn.textContent="▶ Reprendre";}
  else{if(["▶ Lancer","▶ Rejouer"].includes(btn.textContent))s.startTs=null;s.running=true;btn.textContent="⏸ Pause";s.raf=requestAnimationFrame(function(ts){if(!s.startTs)s.startTs=ts;sitLoop(key,ts);});}

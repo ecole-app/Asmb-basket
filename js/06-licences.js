@@ -372,6 +372,17 @@ function createLicence(){
   var email=document.getElementById("lic-email").value.trim();
   var nom=document.getElementById("lic-nom-dest").value.trim();
   if(!email){askAlert("Adresse mail obligatoire");return;}
+  if(typeof hasPremium==="function" && !hasPremium()){
+    var nb=nbLicencesSaison();
+    if(nb>=GM_LIMITE_LICENCES_STANDARD){
+      closeNewLicence();
+      askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard. Passez au Pack Premium pour en ajouter. Les renouvellements restent possibles.");
+      return;
+    }
+    if(nb>=GM_ALERTE_LICENCES){
+      askAlert("Attention : "+nb+" licences sur "+GM_LIMITE_LICENCES_STANDARD+". Au-delà, le Pack Premium sera nécessaire pour en ajouter.");
+    }
+  }
   var code=genCode();
   var lic={
     id:Date.now().toString(),

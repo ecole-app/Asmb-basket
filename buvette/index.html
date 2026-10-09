@@ -87,6 +87,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .proc-add-row input:focus{border-color:var(--dkg)}
 .proc-add-btn{padding:0 16px;font-size:15px;font-weight:800;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;cursor:pointer}
 .sec-title{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+@media print{ #app-top,.tab-bar,.pay-btns,.gate-hint,#panel-caisse,#panel-procedure{display:none!important} .panel{display:none!important} #panel-recap{display:block!important} body{background:#fff} }
 </style>
 </head>
 <body>
@@ -120,7 +121,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="caisse">🧾 Caisse</button>
+    <button class="tab-btn" data-tab="recap">📄 Récap</button>
     <button class="tab-btn" data-tab="procedure">✅ Procédure</button>
+  </div>
+
+  <!-- RÉCAP (PDF pour le bureau) -->
+  <div class="panel" id="panel-recap">
+    <div class="card" id="recap-box"></div>
+    <div class="pay-btns">
+      <button class="pay-btn pay-cb" id="recap-print">📄 PDF / Imprimer</button>
+      <button class="pay-btn pay-esp" id="recap-csv">⬇ Fichier Excel (CSV)</button>
+    </div>
+    <div class="gate-hint" style="text-align:center">Ce récap ne contient que les ventes faites sur cet appareil avec ce code. Remettez-le au trésorier en fin d'événement.</div>
   </div>
 
   <!-- CAISSE -->
@@ -226,7 +238,7 @@ async function tryCode(){
     const data = snap.data();
     const exp = data.expiresAt && data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt);
     if(exp < new Date()){ errEl.textContent = 'Ce code a expiré. Demandez-en un nouveau au dirigeant.'; return; }
-    session = { code, clubId: data.clubId, clubName: data.clubName || 'Club', validUntil: exp.toISOString(), benevole };
+    session = { code, clubId: data.clubId, clubName: data.clubName || 'Club', validUntil: exp.toISOString(), benevole, comptaLiee: data.comptaLiee !== false };
     saveSession(session);
     startApp();
   }catch(e){
@@ -259,6 +271,7 @@ document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.add('active');
     document.getElementById('panel-' + b.dataset.tab).classList.add('active');
     if(b.dataset.tab === 'procedure') renderProc();
+    if(b.dataset.tab === 'recap') renderRecap();
   });
 });
 
@@ -369,13 +382,14 @@ async function encaisser(mode){
     });
     const detail = panier.map(p => p.qty + '× ' + p.name).join(', ');
     const ligneId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-    batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
+    if(session.comptaLiee) batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
       id: ligneId, date: todayISO(), montant: total, type: 'recette', categorie: 'Buvette/Événements',
       motif: 'Vente caisse buvette en ligne : ' + detail, tiers: session.benevole || '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
       compte: mode === 'especes' ? 'Caisse buvette' : 'Banque',
       reference: 'Caisse buvette en ligne', pointe: false, justificatif: null, viaCode: session.code
     });
     await batch.commit();
+    journalAdd(mode, total);
     document.getElementById('sale-ok').textContent = '✓ Vente encaissée : ' + total.toFixed(2) + ' €';
     setTimeout(() => { document.getElementById('sale-ok').textContent = ''; }, 4000);
     panier = [];
@@ -388,6 +402,50 @@ async function encaisser(mode){
 }
 document.getElementById('btn-esp').addEventListener('click', () => encaisser('especes'));
 document.getElementById('btn-cb').addEventListener('click', () => encaisser('cb'));
+
+/* ===== RÉCAP — journal local des ventes, exportable en PDF (impression) ou CSV ===== */
+const K_VENTES = 'asmb_buvette_ventes';
+function journalGet(){ try{ return JSON.parse(localStorage.getItem(K_VENTES) || '[]').filter(v => v.code === session.code); }catch(e){ return []; } }
+function journalAdd(mode, total){
+  try{
+    const all = JSON.parse(localStorage.getItem(K_VENTES) || '[]');
+    all.push({ code: session.code, t: Date.now(), mode, total, benevole: session.benevole, lignes: panier.map(p => ({ name: p.name, qty: p.qty, price: p.price })) });
+    localStorage.setItem(K_VENTES, JSON.stringify(all.slice(-2000)));
+  }catch(e){ console.log(e); }
+}
+function recapData(){
+  const ventes = journalGet();
+  const prod = {}; let esp = 0, cb = 0;
+  ventes.forEach(v => {
+    if(v.mode === 'especes') esp += v.total; else cb += v.total;
+    v.lignes.forEach(l => { const p = prod[l.name] || (prod[l.name] = { qty: 0, ca: 0 }); p.qty += l.qty; p.ca += l.qty * l.price; });
+  });
+  return { ventes, prod, esp: Math.round(esp * 100) / 100, cb: Math.round(cb * 100) / 100 };
+}
+function renderRecap(){
+  const r = recapData();
+  const box = document.getElementById('recap-box');
+  const lignes = Object.keys(r.prod).sort().map(n => '<div class="panier-item"><div><span class="panier-qty">' + r.prod[n].qty + '×</span> ' + esc(n) + '</div><span class="panier-price">' + r.prod[n].ca.toFixed(2) + ' €</span></div>').join('');
+  box.innerHTML = '<div class="sec-title">Récap de caisse — ' + esc(session.clubName) + '</div>' +
+    '<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Bénévole : ' + esc(session.benevole) + ' · ' + new Date().toLocaleDateString('fr-FR') + ' · ' + r.ventes.length + ' vente(s)</div>' +
+    (lignes || '<div class="panier-vide">Aucune vente enregistrée</div>') +
+    '<div class="panier-total"><span style="font-weight:700">💵 Espèces</span><span class="panier-price">' + r.esp.toFixed(2) + ' €</span></div>' +
+    '<div class="panier-total" style="border-top:none;margin-top:0"><span style="font-weight:700">💳 CB</span><span class="panier-price">' + r.cb.toFixed(2) + ' €</span></div>' +
+    '<div class="panier-total"><span style="font-weight:800">Total</span><span class="panier-total-val">' + (r.esp + r.cb).toFixed(2) + ' €</span></div>';
+}
+document.getElementById('recap-print').addEventListener('click', () => { renderRecap(); window.print(); });
+document.getElementById('recap-csv').addEventListener('click', () => {
+  const r = recapData();
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const rows = [['Date', 'Heure', 'Bénévole', 'Moyen', 'Détail', 'Total (€)'].join(';')];
+  r.ventes.forEach(v => {
+    const d = new Date(v.t);
+    rows.push([d.toLocaleDateString('fr-FR'), d.toLocaleTimeString('fr-FR'), q(v.benevole), v.mode === 'especes' ? 'Espèces' : 'CB', q(v.lignes.map(l => l.qty + '× ' + l.name).join(', ')), v.total.toFixed(2).replace('.', ',')].join(';'));
+  });
+  const blob = new Blob(['\ufeff' + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'recap-buvette-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+});
 
 /* ===== PROCÉDURE (locale à l'appareil, checklist du bénévole) ===== */
 function getProc(){ try{ const v = localStorage.getItem(K_PROC); return v === null ? DEFAULT_PROC.slice() : JSON.parse(v); }catch(e){ return DEFAULT_PROC.slice(); } }

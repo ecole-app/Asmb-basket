@@ -40,6 +40,28 @@ var BUREAU_GROUPS=[
 // Titres exclusifs (un seul par club à la fois) : ils ne font que pré-cocher
 // des cases pour gagner du temps — l'accès réel reste celui des cases.
 var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inventaire"]},secretaire:{label:"Secrétaire",autoCheck:[]}};
+// ═══ PACKS (Standard / Premium) ═══════════════════════════════════════
+// Le champ clubs/{id}.plan n'est modifiable que par le super admin (voir
+// firestore.rules). "standard" = pack de base ; "premium", "paid" (ancien
+// club payant), "trial" (essai complet) et le club d'origine = tout débloqué.
+var GM_LIMITE_LICENCES_STANDARD=300;
+var GM_ALERTE_LICENCES=270;
+function hasPremium(){
+  var c=window.CURRENT_CLUB||{};
+  if(window.SUPPORT_MODE) return true;
+  if(typeof isSuperAdmin==="function" && isSuperAdmin()) return true;
+  if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return true;
+  return c.plan!=="standard";
+}
+// Licences de la saison en cours (les saisons archivées ne comptent pas).
+function nbLicencesSaison(){
+  var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
+  return getLicences().filter(function(l){return !cur||(l.saison||cur)===cur;}).length;
+}
+// Écran d'explication affiché quand un module Premium est ouvert en Standard.
+function askPremiumRequis(fonction){
+  askAlert("« "+fonction+" » fait partie du Pack Premium (300 €/an). Vos données sont conservées. Contactez-nous pour passer en Premium.");
+}
 function hasModulePermission(id){
   if(!window.ASMB_USER) return false;
   var roles=window.ASMB_USER.roles||[];
@@ -369,6 +391,7 @@ function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   if(!hasModulePermission(id)){askAlert("Accès non autorisé.");return;}
+  if(id==="comptabilite" && !hasPremium()){askPremiumRequis("Comptabilité complète");return;}
   if(id==="acces"){openAccesCoach();return;}
   if(id==="invitations"){openClubAccessSettings();return;}
   if(id==="avis"){openAvisModule();return;}

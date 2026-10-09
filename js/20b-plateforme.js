@@ -465,6 +465,9 @@ function renderClubCard(c, list){
     row.appendChild(gmBtn("Passer en payant","soft",function(){ passerEnPayant(c, list); }));
     row.appendChild(gmBtn("Prolonger l'essai","soft",function(){ prolongerEssai(c, list); }));
   }
+  if(!own && !supprime){
+    row.appendChild(gmBtn("Pack : "+packLabel(c),"soft",function(){ choisirPack(c, list); }));
+  }
   // Suppression proposee seulement sur un club deja suspendu : deux gestes
   // distincts valent mieux qu'un bouton definitif a cote des actions courantes.
   // Supprimer n'apparait qu'une fois le delai de regularisation ecoule :
@@ -798,6 +801,19 @@ function expirerEssaisPerimes(clubs){
 }
 // Sort un club du suivi d'essai : plus de compte à rebours, plus de suspension
 // automatique. trialEndsAt est laissé tel quel (inutile une fois plan!=="trial").
+function packLabel(c){
+  return c.plan==="standard"?"Standard":(c.plan==="premium"?"Premium":(c.plan==="trial"?"Essai":"Payant (complet)"));
+}
+// Pack Standard / Premium : seul le super admin peut écrire "plan" (firestore.rules).
+function choisirPack(c, list){
+  askPrompt("Pack de "+(c.name||c.id)+" : tapez standard ou premium",{defaultValue:(c.plan==="standard"?"standard":"premium"),confirmText:"Valider"}).then(function(v){
+    v=(v||"").trim().toLowerCase();
+    if(v!=="standard" && v!=="premium") return;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:v}).then(function(){
+      loadClubsList(list);
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+}
 function passerEnPayant(c, list){
   askConfirm("Passer "+(c.name||c.id)+" en club payant ? L'essai gratuit ne sera plus suivi.",{confirmText:"Confirmer"}).then(function(ok){
     if(!ok) return;
