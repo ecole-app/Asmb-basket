@@ -158,6 +158,11 @@ service cloud.firestore {
       allow delete: if superAdmin();
     }
 
+    // ── Comptes de connexion à supprimer à la main (club supprimé) ──
+    match /comptes_a_supprimer/{id} {
+      allow read, write: if superAdmin();
+    }
+
     // ── Invitations (usage unique, expirent) ────────────────────────
     match /club_invites/{code} {
       allow get: if true;   // consultation par code uniquement (pas de listing public)

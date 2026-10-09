@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791567944",
+    "titre": "Rappel des comptes à supprimer",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Plateforme : après la suppression d'un club, une alerte rouge liste les comptes de connexion à supprimer dans la console Firebase, jusqu'à ce que tu les marques « fait »."
+      }
+    ]
+  },
+  {
     "v": "1791567716",
     "titre": "Retrait du bouton de suppression de licence",
     "points": [

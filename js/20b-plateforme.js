@@ -340,6 +340,11 @@ function openPlateforme(){
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
   intro.textContent=GM_INTRO;
   s.body.appendChild(intro);
+  var comptesBox=document.createElement("div");
+  comptesBox.style.marginBottom="12px";
+  window.__gmComptesBox=comptesBox;
+  s.body.appendChild(comptesBox);
+  loadComptesASupprimer(comptesBox);
   var list=document.createElement("div");
   s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   list.style.marginTop="14px";
@@ -696,10 +701,48 @@ async function compterMembres(clubId){
   }catch(e){ return -1; }
 }
 
+async function listerMembres(clubId){
+  try{
+    var q=window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("clubId","==",clubId));
+    var snap=await window.fbGetDocs(q);
+    var m=[]; snap.forEach(function(d){ var u=d.data()||{}; m.push({uid:d.id,email:u.email||u.identifiant||"",roles:u.roles||[]}); });
+    return m;
+  }catch(e){ return []; }
+}
+
+// Tâches « comptes de connexion à supprimer dans la console Firebase » : créées à
+// la suppression d'un club, affichées en tête de la Plateforme jusqu'à ce que
+// le super admin les marque comme faites.
+async function loadComptesASupprimer(box){
+  box.innerHTML="";
+  var snap;
+  try{ snap=await window.fbGetDocs(window.fbCollection(window.fbDb,"comptes_a_supprimer")); }catch(e){ return; }
+  var tasks=[]; snap.forEach(function(d){ var t=d.data()||{}; if(!t.fait) tasks.push(Object.assign({id:d.id},t)); });
+  if(!tasks.length) return;
+  var head=document.createElement("div");
+  head.style.cssText="background:var(--red);color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
+  head.textContent="🔔 "+tasks.length+" compte"+(tasks.length>1?"s":"")+" à supprimer dans la console Firebase";
+  box.appendChild(head);
+  tasks.forEach(function(t){
+    var card=gmCard();
+    var n=document.createElement("div"); n.style.cssText="font-size:13px;font-weight:800;color:var(--txt)"; n.textContent="Club supprimé : "+(t.clubName||t.clubId);
+    var mails=document.createElement("div"); mails.style.cssText="font-size:12px;color:var(--txt2);margin:6px 0;line-height:1.5;word-break:break-all";
+    var liste=(t.membres||[]).map(function(m){ return (m.email||m.uid)+(m.roles&&m.roles.length?" ("+m.roles.join(", ")+")":""); });
+    mails.textContent=liste.length?liste.join("\n"):"Aucun membre rattaché.";
+    mails.style.whiteSpace="pre-line";
+    card.appendChild(n); card.appendChild(mails);
+    card.appendChild(gmBtn("C'est fait","primary",function(){
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"comptes_a_supprimer",t.id),{fait:true,faitLe:new Date()}).then(function(){ loadComptesASupprimer(box); }).catch(function(e){ askAlert("Échec : "+((e&&e.code)||e)); });
+    }));
+    box.appendChild(card);
+  });
+}
+
 async function deleteClubFlow(c, list){
   if(!isSuperAdmin() || !c) return;
   if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas être supprimé."); return; }
-  var nb=await compterMembres(c.id);
+  var membres=await listerMembres(c.id);
+  var nb=membres.length;
   var avert="Cette suppression est définitive et irréversible.\n\n"+
     "Toutes les données du club seront effacées : joueurs, équipes, événements, évaluations, licences, pointages, messages, comptabilité, inventaire, notes de frais, annuaire, sauvegardes.\n\n"+
     (nb>0 ? nb+" compte(s) rattaché(s) perdront l'accès. Leurs comptes de connexion sont à supprimer dans la console Firebase.\n\n" : "")+
@@ -733,7 +776,14 @@ async function deleteClubFlow(c, list){
     // La fiche en dernier : tant qu'elle existe, la fenetre reste ouverte et la
     // purge peut etre relancee la ou elle s'est arretee.
     await window.fbDeleteDoc(window.fbDoc(window.fbDb,"clubs",c.id));
+    if(nb>0){
+      try{
+        await window.fbSetDoc(window.fbDoc(window.fbDb,"comptes_a_supprimer",c.id+"_"+Date.now()),
+          {clubId:c.id,clubName:c.name||c.id,membres:membres,at:new Date(),fait:false});
+      }catch(e){ console.log("comptes_a_supprimer",e); }
+    }
     loadClubsList(list);
+    if(window.__gmComptesBox) loadComptesASupprimer(window.__gmComptesBox);
     askAlert("Club supprimé.\n\n"+total+" document(s) effacés."+
       (detail.length?"\n"+detail.join("\n"):"")+
       (nb>0?"\n\n"+nb+" compte(s) de connexion restent à supprimer dans la console Firebase.":""));

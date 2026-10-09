@@ -93,7 +93,7 @@ window.fbWriteBatch = function(){ return writeBatch(db); };
 // club_invites (invitations), support_grants (codes d'accès support),
 // buvette_codes (codes d'accès caisse buvette).
 // Toute autre collection est traitée comme donnée de club.
-const GLOBAL_COLLECTIONS = new Set(["users","clubs","inscription_codes","club_invites","support_grants","buvette_codes"]);
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","inscription_codes","club_invites","support_grants","buvette_codes","comptes_a_supprimer"]);
 
 function requireClubId(coll){
   const id = window.CURRENT_CLUB_ID;
