@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791567017",
+    "titre": "Suppression d'un club",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Plateforme : un club peut être supprimé directement (sans suspension ni délai de 7 jours), après saisie de son nom."
+      }
+    ]
+  },
+  {
     "v": "1791565848",
     "titre": "Licences en accès limité",
     "points": [

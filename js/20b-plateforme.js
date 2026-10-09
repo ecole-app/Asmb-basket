@@ -471,11 +471,9 @@ function renderClubCard(c, list){
   if(!own && !supprime){
     row.appendChild(gmBtn("Pack : "+packLabel(c),"soft",function(){ choisirPack(c, list); }));
   }
-  // Suppression proposee seulement sur un club deja suspendu : deux gestes
-  // distincts valent mieux qu'un bouton definitif a cote des actions courantes.
-  // Supprimer n'apparait qu'une fois le delai de regularisation ecoule :
-  // le club doit avoir eu ses 7 jours pour reagir.
-  if(!own && ((suspended && delaiDepasse(c)) || c.status==="purging")){
+  // Suppression possible a tout moment (club test compris) : la saisie du nom
+  // exact du club sert de garde-fou, voir deleteClubFlow.
+  if(!own){
     row.appendChild(gmBtn("Supprimer","danger",function(){ deleteClubFlow(c, list); }));
   }
   row.appendChild(gmBtn(suspended?"Réactiver":"Suspendre", suspended?"soft":"danger", function(){
@@ -643,7 +641,8 @@ var GM_PURGE_MINUTES=30;
 // qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
 var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
- "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions","buvette_ventes"];
+ "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions","buvette_ventes",
+ "sponsors","facturation_compteur","push_subscriptions"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
 // actif de la session ne se substitue a celui qu'on purge.
@@ -700,13 +699,6 @@ async function compterMembres(clubId){
 async function deleteClubFlow(c, list){
   if(!isSuperAdmin() || !c) return;
   if(c.id===BOOTSTRAP_CLUB_ID){ askAlert("Le club d'origine ne peut pas être supprimé."); return; }
-  if(c.status!=="suspended" && c.status!=="purging"){ askAlert("Suspendre le club avant de le supprimer."); return; }
-  if(c.status==="suspended" && !delaiDepasse(c)){
-    var j=joursRestants(c);
-    askAlert("Délai de régularisation en cours"+(j!==null?" : "+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":""):"")+
-      ".\n\nLa suppression ne sera possible qu'à son échéance.");
-    return;
-  }
   var nb=await compterMembres(c.id);
   var avert="Cette suppression est définitive et irréversible.\n\n"+
     "Toutes les données du club seront effacées : joueurs, équipes, événements, évaluations, licences, pointages, messages, comptabilité, inventaire, notes de frais, annuaire, sauvegardes.\n\n"+
