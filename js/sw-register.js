@@ -1,6 +1,6 @@
 /* ===== sw-register.js — Enregistrement du service worker (hors-ligne) ===== */
 // Service worker : lancement hors-ligne, piloté par la version (jamais bloqué sur une vieille version)
-if('serviceWorker' in navigator && !window.GM_DEMO){
+if('serviceWorker' in navigator){
   // Quand un nouveau service worker prend la main, la page affiche encore les fichiers
   // de l'ancienne version : on recharge une fois pour repartir sur les nouveaux.
   // Un rechargement declenche par le bouton "Mettre a jour" a DEJA recharge la

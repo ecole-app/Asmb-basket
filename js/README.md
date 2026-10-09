@@ -26,7 +26,6 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 |---|---|
 | `firebase-init.js` | Init Firebase (seul vrai module ES6, chargé avec `type="module"`) |
 | `sw-register.js` | Enregistrement du service worker (hors-ligne) |
-| `00-demo.js` | Mode démo (`?demo=1`) : stockage en mémoire, démarré avant tout le reste (voir `20c-demo.js`) |
 | `01-config.js` | Constantes globales : pôles, catégories, couleurs, helpers de saison |
 | `02-formation-cycles.js` | Données et accesseurs des cycles du Pôle Formation |
 | `03-nav-portal.js` | Navigation, routage entre écrans, portail d'accueil |
@@ -51,7 +50,6 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |
 | `22-push.js` | Notifications push (inscription de l'appareil) |
 | `23-export.js` | Exports Excel (.xlsx) : compta, licences, sponsors, inventaire |
-| `20c-demo.js` | Données fictives et mini-Firestore en mémoire du mode démo ; sans effet hors `?demo=1` |
 | `21-main.js` | Thème, initialisation, **démarrage de l'app** (doit rester en dernier) |
 
 ## Points d'attention connus
