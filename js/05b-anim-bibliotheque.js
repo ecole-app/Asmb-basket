@@ -68,6 +68,15 @@ var ANIM_LIB=[
  {id:"5.2-2",n:"Bilan individuel par stations",tags:["Bilan"]}
 ];
 
+// Intitules (normalises) dont l'exercice est exactement celui d'une animation
+// dessinee a la main, quelle que soit la categorie.
+var ANIM_EQUIV_TITRE={
+ "les 5 postes":"4.2-1",
+ "les 5 zones":"4.2-1",
+ "glissades defensives":"1.5-1",
+ "glissements defensifs":"1.5-1",
+ "glissements et distance de garde":"1.5-1"
+};
 function animById(id){
  for(var i=0;i<ANIM_LIB.length;i++){ if(ANIM_LIB[i].id===id) return ANIM_LIB[i]; }
  return null;
@@ -126,6 +135,12 @@ function resolveAnimForSit(catId,seaNum,sitIdx,sit){
  if(catId===ANIM_LEGACY_CAT){
    var legacy=seaNum+"-"+(sitIdx+1);
    if(SIT_ANIMS[legacy]) return legacy;
+ }
+ // Meme exercice qu'une animation dessinee a la main, sous le meme intitule
+ // (ou son equivalent) : on montre le dessin plutot qu'un schema genere.
+ if(sit&&typeof gNorm==="function"){
+   var eq=ANIM_EQUIV_TITRE[gNorm(sit.ti||"").trim()];
+   if(eq&&SIT_ANIMS[eq]) return eq;
  }
  if(sit&&typeof genAnimFor==="function") return genAnimFor(catId,seaNum,sitIdx,sit);
  return null;

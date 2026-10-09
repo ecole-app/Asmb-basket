@@ -48,6 +48,11 @@ function comptaFilteredList(){
 }
 
 function buildComptabilite(){
+  if(hasModulePermission("comptabilite") && !hasPremium()){
+    var listElLock=document.getElementById("compta-list");
+    if(listElLock) listElLock.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Comptabilité verrouillée (Pack Premium)</div><div style="font-size:11px;margin-top:6px">Vos lignes sont conservées.</div><button onclick="exportComptaBilanPdf({archive:true})" style="margin-top:10px;padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Télécharger le PDF</button></div>';
+    return;
+  }
   if(!hasModulePermission("comptabilite")){
     var listElNo=document.getElementById("compta-list");
     if(listElNo) listElNo.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Accès non autorisé</div></div>';
@@ -243,6 +248,7 @@ function showAddComptaLine(editId){
 }
 // Crée une ligne comptable directement depuis un mouvement de stock (buvette)
 function addComptaLineFromStock(type,categorie,montant,motif,reference){
+  if(!hasPremium()) return; // Pack Standard : inventaire sans lien avec la compta
   var lines=getComptabilite();
   lines.push({
     id:Date.now().toString()+Math.random().toString(36).slice(2,6),
@@ -253,6 +259,7 @@ function addComptaLineFromStock(type,categorie,montant,motif,reference){
   saveComptabilite(lines);
 }
 function saveComptaLine(){
+  if(!hasPremium()){ askComptaVerrouillee(); return; }
   var date=document.getElementById("cl-date").value;
   var montant=parseFloat(document.getElementById("cl-montant").value);
   if(!date){askAlert("Date obligatoire");return;}
@@ -290,6 +297,7 @@ async function deleteComptaLine(){
   buildComptabilite();
 }
 function exportComptaCsv(){
+  if(!hasPremium()){ askComptaVerrouillee(); return; }
   var lines=comptaFilteredList();
   if(!lines.length){askAlert("Aucune ligne à exporter.");return;}
   var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Compte","Référence","Pointé","Justificatif"];
@@ -503,6 +511,8 @@ function buildInventaire(){
     var isDir=window.ASMB_USER&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
     accessBtn.style.display=(isDir&&invActiveTab==="buvette")?"inline-block":"none";
   }
+  var journBtn=document.getElementById("inv-btn-buvette-journees");
+  if(journBtn) journBtn.style.display=(hasModulePermission("inventaire")&&invActiveTab==="buvette")?"inline-block":"none";
   var lowStock=all.filter(function(it){return it.seuil!=null && it.seuil!=="" && Number(it.qte)<Number(it.seuil);});
   var banner=document.getElementById("inv-alert-banner");
   if(banner){
@@ -575,6 +585,14 @@ function stockMovement(id,sens){
   if(qStr===null)return;
   var qte=parseFloat(qStr.replace(",","."));
   if(!qte||qte<=0){showToast("Quantité invalide");return;}
+  // Pack Standard : inventaire de base, le stock bouge sans écriture comptable.
+  if(!hasPremium()){
+    items[idx].qte=Math.max(0,Number(it.qte||0)+(sens==="achat"?qte:-qte));
+    saveInventaire(items);
+    showToast(sens==="achat"?"Achat enregistré":"Vente enregistrée");
+    buildInventaire();
+    return;
+  }
   var prixUnit=sens==="achat"?it.prixAchat:it.prixVente;
   var montantDefault=prixUnit!=null?Math.round(prixUnit*qte*100)/100:0;
   var mStr=window.prompt("Montant "+(sens==="achat"?"dépensé":"encaissé")+" (€) :",montantDefault.toFixed(2));
@@ -620,8 +638,10 @@ function openBuvetteAccessSettings(){
   var s=gmSheet("Accès caisse buvette");
   gmSection(s.body,"Caisse buvette en ligne",
     "Un bénévole peut encaisser les ventes depuis "+BUVETTE_SITE_URL+" (téléphone ou tablette). "+
-    "La caisse est reliée en temps réel à l'inventaire buvette et à la comptabilité : chaque vente "+
-    "met à jour le stock et crée la ligne comptable automatiquement. Deux façons de donner l'accès, "+
+    (hasPremium()
+      ? "La caisse est reliée en temps réel à l'inventaire buvette et à la comptabilité : chaque vente met à jour le stock et crée la ligne comptable automatiquement. "
+      : "La caisse met à jour le stock de l'inventaire buvette. Le lien automatique avec la comptabilité fait partie du Pack Premium ; chaque journée reste consultable en PDF (bouton « Journées » de l'Inventaire). ")+
+    "Deux façons de donner l'accès, "+
     "selon comment votre club fonctionne :");
   var grants=document.createElement("div");
   function createBuvetteCode(fin,label){
@@ -677,6 +697,82 @@ function loadBuvetteGrants(el,clubId){
         el.appendChild(card);
       });
     }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+}
+
+// ═══ JOURNÉES BUVETTE (trace des ventes de la caisse en ligne) ═════════
+// Chaque vente encaissée sur la caisse buvette est enregistrée dans
+// clubs/{clubId}/buvette_ventes, quel que soit le pack : le club garde
+// toujours une trace PDF de chaque journée, même sans lien avec la compta.
+function openJourneesBuvette(){
+  if(!hasModulePermission("inventaire")){ askAlert("Accès non autorisé."); return; }
+  var s=gmSheet("Journées buvette");
+  gmSection(s.body,"Ventes de la caisse en ligne","Une ligne par journée. Le PDF reprend les ventes par article, les totaux espèces / CB et le détail par bénévole.");
+  var box=document.createElement("div");
+  box.innerHTML='<div style="font-size:12px;color:var(--mut)">Chargement…</div>';
+  s.body.appendChild(box);
+  window.fbGetDocs(window.fbCollection(window.fbDb,"buvette_ventes")).then(function(snap){
+    var parJour={};
+    snap.forEach(function(d){
+      var v=d.data(); if(!v||!v.date) return;
+      (parJour[v.date]=parJour[v.date]||[]).push(v);
+    });
+    var jours=Object.keys(parJour).sort().reverse();
+    box.innerHTML="";
+    if(!jours.length){ box.innerHTML='<div style="font-size:12px;color:var(--mut)">Aucune vente enregistrée par la caisse en ligne pour l\'instant.</div>'; return; }
+    jours.forEach(function(j){
+      var ventes=parJour[j];
+      var tot=ventes.reduce(function(a,v){return a+(Number(v.total)||0);},0);
+      var card=gmCard();
+      card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(new Date(j+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}))+'</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+ventes.length+' vente'+(ventes.length>1?'s':'')+' · '+tot.toFixed(2).replace(".",",")+' €</div>';
+      gmRow(card).appendChild(gmBtn("PDF de la journée","primary",function(){ pdfJourneeBuvette(j,ventes); }));
+      box.appendChild(card);
+    });
+  }).catch(function(e){ box.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+authEsc(String((e&&e.code)||e))+'</div>'; });
+}
+function pdfJourneeBuvette(jour,ventes){
+  if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
+  ventes=ventes.slice().sort(function(a,b){return (a.t||0)-(b.t||0);});
+  var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
+  var prod={}, esp=0, cb=0, parBen={};
+  ventes.forEach(function(v){
+    var m=Number(v.total)||0;
+    if(v.mode==="especes") esp+=m; else cb+=m;
+    var b=v.benevole||"—"; parBen[b]=(parBen[b]||0)+m;
+    (v.lignes||[]).forEach(function(l){
+      var p=prod[l.name]||(prod[l.name]={qty:0,ca:0});
+      p.qty+=Number(l.qty)||0; p.ca+=(Number(l.qty)||0)*(Number(l.price)||0);
+    });
+  });
+  var doc=new window.jspdf.jsPDF(), rgb=clubPdfRgb(), y=16;
+  doc.setFontSize(16); doc.setTextColor.apply(doc,rgb);
+  doc.text(clubTitle()+" - Journée buvette",14,y); y+=6;
+  doc.setFontSize(9); doc.setTextColor(100,100,100);
+  doc.text(new Date(jour+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" - "+ventes.length+" vente(s)",14,y); y+=10;
+  doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Ventes par article",14,y); y+=6;
+  doc.setFontSize(9); doc.setTextColor(30,30,30);
+  Object.keys(prod).sort().forEach(function(n){
+    if(y>280){ doc.addPage(); y=20; }
+    doc.text(String(prod[n].qty)+" x "+String(n).substring(0,60),16,y); doc.text(eur(prod[n].ca),160,y); y+=5.5;
+  });
+  y+=3;
+  doc.text("Espèces",16,y); doc.text(eur(esp),160,y); y+=5.5;
+  doc.text("CB",16,y); doc.text(eur(cb),160,y); y+=5.5;
+  doc.setFont(undefined,"bold"); doc.text("Total",16,y); doc.text(eur(esp+cb),160,y); doc.setFont(undefined,"normal"); y+=10;
+  doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Par bénévole",14,y); y+=6;
+  doc.setFontSize(9); doc.setTextColor(30,30,30);
+  Object.keys(parBen).sort().forEach(function(b){ doc.text(String(b).substring(0,60),16,y); doc.text(eur(parBen[b]),160,y); y+=5.5; });
+  y+=5;
+  doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Détail des ventes",14,y); y+=6;
+  doc.setFontSize(8); doc.setTextColor(30,30,30);
+  ventes.forEach(function(v){
+    if(y>285){ doc.addPage(); y=20; }
+    var h=v.t?new Date(v.t).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"";
+    var det=(v.lignes||[]).map(function(l){return l.qty+"x "+l.name;}).join(", ");
+    doc.text(h,14,y); doc.text(String(v.benevole||"").substring(0,22),28,y);
+    doc.text(v.mode==="especes"?"Espèces":"CB",70,y); doc.text(det.substring(0,52),88,y); doc.text(eur(Number(v.total)||0),172,y); y+=5;
+  });
+  doc.save(clubSlug()+"_buvette_"+jour+".pdf");
 }
 
 var invEditId=null;

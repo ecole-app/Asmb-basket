@@ -51,6 +51,12 @@ function hasPremium(){
   if(window.SUPPORT_MODE) return true;
   if(typeof isSuperAdmin==="function" && isSuperAdmin()) return true;
   if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return true;
+  // Essai gratuit : tout est ouvert pendant les 30 jours, puis les modules
+  // Premium se verrouillent (les données saisies restent intactes).
+  if(c.plan==="trial"){
+    var je=(typeof joursEssaiRestants==="function")?joursEssaiRestants(c):null;
+    return je===null || je>0;
+  }
   return c.plan!=="standard";
 }
 // Licences de la saison en cours (les saisons archivées ne comptent pas).
@@ -58,7 +64,41 @@ function nbLicencesSaison(){
   var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
   return getLicences().filter(function(l){return !cur||(l.saison||cur)===cur;}).length;
 }
+// Garde unique de la limite de licences (Pack Standard). Appelée AVANT toute
+// création (nouvelle licence, renouvellement) : alerte dès 270, refus à 300.
+// Renvoie false si la création doit être refusée.
+function verifierLimiteLicences(sansAlerte){
+  if(hasPremium()) return true;
+  var nb=nbLicencesSaison();
+  if(nb>=GM_LIMITE_LICENCES_STANDARD){
+    askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte pour la saison avec le Pack Standard.\n\nLe Pack Premium est obligatoire pour en enregistrer davantage (nouvelles licences comme renouvellements). Les licences existantes ne sont pas touchées.",{title:"Pack Premium requis"});
+    return false;
+  }
+  if(nb>=GM_ALERTE_LICENCES && !sansAlerte){
+    askAlert("Attention : "+nb+" licences sur "+GM_LIMITE_LICENCES_STANDARD+" pour la saison. Au-delà de "+GM_LIMITE_LICENCES_STANDARD+", le Pack Premium sera obligatoire pour en enregistrer davantage.");
+  }
+  return true;
+}
+// Dernier verrou, dans saveLicences : quel que soit le chemin, une liste qui
+// fait passer la saison au-delà de la limite n'est pas enregistrée.
+function licencesDepasseLimite(nouvelle){
+  if(hasPremium()) return false;
+  var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
+  function n(list){ return (list||[]).filter(function(l){return !cur||(l.saison||cur)===cur;}).length; }
+  var nNew=n(nouvelle), nOld=n(getLicences());
+  return nNew>nOld && nNew>GM_LIMITE_LICENCES_STANDARD;
+}
 // Écran d'explication affiché quand un module Premium est ouvert en Standard.
+// Comptabilité verrouillée : rien n'est supprimé. Le club peut toujours
+// télécharger en PDF tout ce qu'il a saisi (pendant l'essai ou avant).
+function askComptaVerrouillee(){
+  var n=(typeof getComptabilite==="function")?getComptabilite().length:0;
+  if(!n){ askPremiumRequis("Comptabilité complète"); return; }
+  askConfirm("La comptabilité complète fait partie du Pack Premium (300\u00a0€/an).\n\nVos "+n+" ligne"+(n>1?"s":"")+" déjà saisie"+(n>1?"s":"")+" sont conservée"+(n>1?"s":"")+" et réapparaîtront dès le passage en Premium. Vous pouvez dès maintenant les télécharger en PDF.",
+    {title:"Comptabilité verrouillée",confirmText:"Télécharger le PDF"}).then(function(ok){
+      if(ok && typeof exportComptaBilanPdf==="function") exportComptaBilanPdf({archive:true});
+    });
+}
 function askPremiumRequis(fonction){
   askAlert("« "+fonction+" » fait partie du Pack Premium (300 €/an). Vos données sont conservées. Contactez-nous pour passer en Premium.");
 }
@@ -380,7 +420,7 @@ function getAdminCount(id){
   if(id==="equipes"){var t=getTeams();return t.length+" équipe"+(t.length>1?"s":"");}
   if(id==="planning"){var e=getEvents();return e.length+" événement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
-  if(id==="comptabilite"){var c=getComptabilite();return c.length+" ligne"+(c.length>1?"s":"");}
+  if(id==="comptabilite"){var c=getComptabilite();return (hasPremium()?"":"🔒 Premium · ")+c.length+" ligne"+(c.length>1?"s":"")+(hasPremium()?"":" conservée"+(c.length>1?"s":""));}
   if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
   if(id==="inventaire"){var inv=getInventaire();return inv.length+" article"+(inv.length>1?"s":"");}
   if(id==="acces")return "Rôles & équipes";
@@ -391,7 +431,7 @@ function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   if(!hasModulePermission(id)){askAlert("Accès non autorisé.");return;}
-  if(id==="comptabilite" && !hasPremium()){askPremiumRequis("Comptabilité complète");return;}
+  if(id==="comptabilite" && !hasPremium()){askComptaVerrouillee();return;}
   if(id==="acces"){openAccesCoach();return;}
   if(id==="invitations"){openClubAccessSettings();return;}
   if(id==="avis"){openAvisModule();return;}
@@ -1185,7 +1225,7 @@ function markNoteFraisStatut(id,statut,list,isDir){
   if(idx<0)return;
   notes[idx].statut=statut;
   saveNotesFrais(notes);
-  if(statut==="remboursee"){
+  if(statut==="remboursee" && hasPremium()){
     var n=notes[idx];
     var compta=getComptabilite();
     compta.push({

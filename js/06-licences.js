@@ -84,7 +84,7 @@ function lookupInscriptionCode(code, attempt){
   }).catch(function(){ return {found:false, code:code}; });
 }
 
-function saveLicences(l){localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();}
+function saveLicences(l){if(typeof licencesDepasseLimite==="function"&&licencesDepasseLimite(l)){askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard : enregistrement refusé. Le Pack Premium est obligatoire au-delà.");return false;}localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();}
 
 // Dit a chaque numero quelles fiches joueur le concernent. C'est ce qui remplace
 // la recherche d'autrefois, qui parcourait toutes les licences du club pour y
@@ -360,6 +360,7 @@ function buildLicences(){
 }
 
 function showNewLicence(){
+  if(typeof hasPremium==="function" && !hasPremium() && nbLicencesSaison()>=GM_LIMITE_LICENCES_STANDARD){ verifierLimiteLicences(); return; }
   var tip=document.getElementById("lic-mail-tip");
   if(tip)tip.style.display=localStorage.getItem("asmb_tip_lic_mail_dismissed")?"none":"flex";
   document.getElementById("modal-new-lic").style.display="flex";
@@ -372,17 +373,7 @@ function createLicence(){
   var email=document.getElementById("lic-email").value.trim();
   var nom=document.getElementById("lic-nom-dest").value.trim();
   if(!email){askAlert("Adresse mail obligatoire");return;}
-  if(typeof hasPremium==="function" && !hasPremium()){
-    var nb=nbLicencesSaison();
-    if(nb>=GM_LIMITE_LICENCES_STANDARD){
-      closeNewLicence();
-      askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard. Passez au Pack Premium pour en ajouter. Les renouvellements restent possibles.");
-      return;
-    }
-    if(nb>=GM_ALERTE_LICENCES){
-      askAlert("Attention : "+nb+" licences sur "+GM_LIMITE_LICENCES_STANDARD+". Au-delà, le Pack Premium sera nécessaire pour en ajouter.");
-    }
-  }
+  if(typeof verifierLimiteLicences==="function" && !verifierLimiteLicences()){ closeNewLicence(); return; }
   var code=genCode();
   var lic={
     id:Date.now().toString(),
@@ -619,6 +610,9 @@ function savePaiementLicence(code,paiement){
   var wasAlreadyRecorded=!!lics[idx].paiement;
   lics[idx].paiement=paiement;
   saveLicences(lics);
+  // Pack Standard / essai terminé : le paiement reste noté sur la licence,
+  // mais aucune nouvelle écriture n'est ajoutée à la comptabilité verrouillée.
+  if(typeof hasPremium==="function" && !hasPremium()){ renderLicenceDetail(lics[idx]); buildLicences(); return; }
   // Cree (ou ne duplique pas) la ligne Comptabilite correspondante
   var compta=getComptabilite();
   var f=lics[idx].fiche||{};
@@ -886,6 +880,7 @@ async function renewLicence(oldCode){
   var lics=getLicences();
   var old=lics.find(function(l){return l.code===oldCode;});
   if(!old){askAlert("Fiche introuvable.");return;}
+  if(typeof verifierLimiteLicences==="function" && !verifierLimiteLicences(true)) return;
   var season=getCurrentSeason();
   var ok=await askConfirm("Une nouvelle fiche va être créée pour "+((old.fiche&&old.fiche.prenom)||"")+" "+((old.fiche&&old.fiche.nom)||"")+", saison "+season+", en recopiant les informations existantes (identité, contacts, adresse...). La catégorie sera recalculée selon son âge actuel.", {title:"Renouveler la licence", confirmText:"Renouveler"});
   if(!ok)return;

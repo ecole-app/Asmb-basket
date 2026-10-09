@@ -1,5 +1,37 @@
 [
   {
+    "v": "1791546567",
+    "titre": "Packs : fin d'essai, buvette et limite de licences",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Pendant les 30 jours d'essai, tout est ouvert. Ensuite, sans Pack Premium, la comptabilité est verrouillée : rien n'est perdu, tout ce qui a été saisi reste téléchargeable en PDF (archive complète)."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Pack Standard : limite de 300 licences par saison verrouillée sur tous les chemins (nouvelles licences et renouvellements), avec alerte dès 270."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "bureau"
+        ],
+        "texte": "Inventaire > Buvette : nouveau bouton « Journées » avec le PDF de chaque journée de caisse (ventes par article, espèces/CB, détail par bénévole), quel que soit le pack."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Formations animées : chaque animation correspond maintenant à l'intitulé de sa situation (une quarantaine de schémas corrigés, dessins faits main réutilisés quand l'exercice est le même)."
+      }
+    ]
+  },
+  {
     "v": "1791543688",
     "titre": "Packs Standard et Premium",
     "points": [

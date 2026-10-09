@@ -640,7 +640,7 @@ var GM_PURGE_MINUTES=30;
 // qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
 var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
- "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions"];
+ "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions","buvette_ventes"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
 // actif de la session ne se substitue a celui qu'on purge.
@@ -815,9 +815,10 @@ function choisirPack(c, list){
   });
 }
 function passerEnPayant(c, list){
-  askConfirm("Passer "+(c.name||c.id)+" en club payant ? L'essai gratuit ne sera plus suivi.",{confirmText:"Confirmer"}).then(function(ok){
-    if(!ok) return;
-    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:"paid"}).then(function(){
+  askPrompt("Passer "+(c.name||c.id)+" en club payant (l'essai ne sera plus suivi). Pack souscrit : tapez standard ou premium",{defaultValue:"standard",confirmText:"Confirmer"}).then(function(v){
+    v=(v||"").trim().toLowerCase();
+    if(v!=="standard" && v!=="premium") return;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:v}).then(function(){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   });

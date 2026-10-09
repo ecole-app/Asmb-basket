@@ -170,7 +170,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import {
-  getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch
+  getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch, setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -389,6 +389,13 @@ async function encaisser(mode){
       reference: 'Caisse buvette en ligne', pointe: false, justificatif: null, viaCode: session.code
     });
     await batch.commit();
+    // Trace côté club (Inventaire > Journées buvette), séparée du batch : si
+    // elle échoue, la vente reste encaissée et le récap local la garde.
+    const lignesVente = panier.map(p => ({ name: p.name, qty: p.qty, price: p.price }));
+    setDoc(doc(db, 'clubs', session.clubId, 'buvette_ventes', ligneId), {
+      id: ligneId, viaCode: session.code, benevole: session.benevole || '', date: todayISO(), t: Date.now(),
+      mode: mode === 'especes' ? 'especes' : 'cb', total, lignes: lignesVente
+    }).catch(e => console.log('trace buvette:', (e && e.code) || e));
     journalAdd(mode, total);
     document.getElementById('sale-ok').textContent = '✓ Vente encaissée : ' + total.toFixed(2) + ' €';
     setTimeout(() => { document.getElementById('sale-ok').textContent = ''; }, 4000);

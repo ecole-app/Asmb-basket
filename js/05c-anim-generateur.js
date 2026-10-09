@@ -84,7 +84,7 @@ function gSpots(W,H,n){
 // le mauvais schema sans rien dire de l'organisation reelle de l'exercice.
 // Le titre et l'organisation portent le signal ; la description ne sert qu'a
 // confirmer un motif tactique deja plausible.
-function analyseSituation(sit,catId){
+function analyseSituationTexte(sit,catId){
  var ti=gNorm(sit&&sit.ti||""), og=gNorm(sit&&sit.org||""), de=gNorm(sit&&sit.desc||"");
  var head=ti+" . "+og;          // signal fort
  var full=head+" . "+de;        // signal complet
@@ -301,6 +301,49 @@ function analyseSituation(sit,catId){
    return set("jeu","Jeu sur aire délimitée");
  // Defaut selon l'age : un jeu en mini-basket, un atelier au-dela.
  return mini?set("jeu","Jeu collectif"):set("circuit","Atelier");
+}
+
+// ── CORRECTIONS PAR INTITULE ────────────────────────────────────────
+// L'analyse du texte se trompe sur quelques intitules : un mot de
+// l'organisation ("ateliers", "plots") l'emporte sur ce que la situation
+// travaille vraiment. L'animation doit correspondre a l'intitule : ces
+// situations recoivent donc la scene qui illustre leur titre. La cle est
+// l'intitule normalise, ce qui couvre toutes les categories qui le partagent.
+var G_TITRE_SCENE={
+ "stop and go":{type:"dribble",note:"Stop and go"},
+ "lent-vite":{type:"dribble",note:"Changement de rythme"},
+ "hesitation et in-out":{type:"dribble",note:"Hésitation et in-out"},
+ "manipulation sous contrainte":{type:"dribble",note:"Maniement de balle"},
+ "dribble stationnaire varie":{type:"dribble",note:"Dribble sur place"},
+ "dribble sous pression":{type:"dribble",note:"Dribble sous pression"},
+ "tir apres coupe":{type:"tir",note:"Tir après coupe"},
+ "step-back":{type:"tir",note:"Step-back"},
+ "euro-step et reverse":{type:"tir",note:"Euro-step et reverse"},
+ "tir en situation":{type:"tir",note:"Tir en situation"},
+ "course panier et replacement a 45 degres":{type:"tir",note:"Replacement et tir"},
+ "concours par equipe":{type:"tir",note:"Concours de tirs"},
+ "sauter et attraper":{type:"rebond",note:"Rebond"},
+ "gestion de la faute":{type:"opposition",natt:5,ndef:5,terr:"full",note:"Gestion de la faute"},
+ "gestion de la faute et du temps":{type:"opposition",natt:5,ndef:5,terr:"full",note:"Faute et temps"},
+ "opposition avec des seniors":{type:"opposition",natt:5,ndef:5,terr:"full",note:"Opposition 5c5"},
+ "contenir sans croiser":{type:"duel",natt:1,ndef:1,note:"Contenir sans croiser"},
+ "placement et distance":{type:"duel",natt:1,ndef:1,note:"Distance de garde"},
+ "orientation et trap":{type:"presse",terr:"full",note:"Orientation et trap"},
+ "principes de sortie":{type:"presse",terr:"full",note:"Sortie de presse"},
+ "plonge au cercle":{type:"pnr",note:"Plonge au cercle"},
+ "ressortie a distance de tir":{type:"pnr",note:"Ressortie à distance de tir"},
+ "2c2 choix de la poseuse":{type:"pnr",natt:2,ndef:2,note:"Choix de la poseuse"},
+ "configurations de spacing":{type:"passe",natt:5,ndef:0,note:"Spacing"},
+ "occupation des corners":{type:"passe",natt:5,ndef:0,note:"Occupation des corners"},
+ "aide et recuperation":{type:"aide",natt:3,ndef:3,note:"Aide et récupération"},
+ "ateliers par profil":{type:"circuit",note:"Ateliers par profil"},
+ "travail par profil":{type:"circuit",note:"Ateliers par profil"}
+};
+function analyseSituation(sit,catId){
+ var sc=analyseSituationTexte(sit,catId);
+ var o=G_TITRE_SCENE[gNorm(sit&&sit.ti||"").trim()];
+ if(o){ for(var k in o){ if(Object.prototype.hasOwnProperty.call(o,k)) sc[k]=o[k]; } }
+ return sc;
 }
 
 // ── SCENES ──────────────────────────────────────────────────────────
@@ -878,6 +921,8 @@ function verifierArchetypes(){
    getCyclesForCat(cat.id).forEach(function(cy){
      (cy.seas||[]).forEach(function(s){
        (s.sits||[]).forEach(function(sit,i){
+         // Intitule corrige a la main (G_TITRE_SCENE) : choix assume, pas un ecart.
+         if(G_TITRE_SCENE[gNorm(sit.ti||"").trim()]) return;
          var sc; try{ sc=analyseSituation(sit,cat.id); }catch(e){ return; }
          var t=gNorm((sit.ti||"")+" . "+(sit.org||"")+" . "+(sit.desc||""));
          // Exception assumee : une situation faite de plusieurs ateliers tournants

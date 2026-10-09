@@ -305,9 +305,10 @@ function loadClubProfile(clubId){
           if(!localStorage.getItem(dayKey)){
             localStorage.setItem(dayKey,"1");
             setTimeout(function(){
-              askAlert(je===0
+              askAlert((je===0
                 ? "Votre essai gratuit se termine aujourd'hui. Contactez-nous pour passer en club actif et garder l'accès."
-                : "Votre essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+". Contactez-nous pour passer en club actif et garder l'accès.");
+                : "Votre essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+". Contactez-nous pour passer en club actif et garder l'accès.")
+                +"\n\nAprès l'essai, la comptabilité est réservée au Pack Premium : tout ce que vous avez saisi est conservé et reste téléchargeable en PDF.");
             },800);
           }
         }

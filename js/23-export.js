@@ -46,6 +46,7 @@ function exportDateStr(){ return new Date().toISOString().slice(0,10); }
 // Respecte les filtres affichés à l'écran (période, catégorie, compte...).
 function exportComptaXlsx(){
   if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
+  if(typeof hasPremium==="function" && !hasPremium()){ askComptaVerrouillee(); return; }
   var lines=comptaFilteredList();
   if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
   var ecritures=lines.map(function(l){
@@ -132,11 +133,15 @@ function exportInventaireXlsx(){
 // ── BILAN COMPTABLE PDF (Premium) ────────────────────────────────────
 // Respecte les filtres affichés (période, catégorie, compte...) : recettes et
 // dépenses par catégorie, solde, puis détail des écritures.
-function exportComptaBilanPdf(){
+// opts.archive : comptabilité verrouillée (fin d'essai / Pack Standard) —
+// export de TOUTES les lignes déjà saisies, sans filtre, pour que rien ne
+// soit perdu. C'est le seul export resté ouvert hors Premium.
+function exportComptaBilanPdf(opts){
+  opts=opts||{};
   if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
-  if(typeof hasPremium==="function" && !hasPremium()){ askPremiumRequis("Bilan comptable PDF"); return; }
+  if(!opts.archive && typeof hasPremium==="function" && !hasPremium()){ askComptaVerrouillee(); return; }
   if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
-  var lines=comptaFilteredList().slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
+  var lines=(opts.archive?getComptabilite():comptaFilteredList()).slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
   if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
   var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
   var parCat={recette:{},depense:{}}, totR=0, totD=0;
@@ -146,9 +151,9 @@ function exportComptaBilanPdf(){
     if(t==="depense") totD+=m; else totR+=m;
   });
   var doc=new window.jspdf.jsPDF(), rgb=clubPdfRgb(), y=16;
-  var du=(COMPTA_FILTERS&&COMPTA_FILTERS.du)||lines[0].date, au=(COMPTA_FILTERS&&COMPTA_FILTERS.au)||lines[lines.length-1].date;
+  var du=(!opts.archive&&COMPTA_FILTERS&&COMPTA_FILTERS.du)||lines[0].date, au=(!opts.archive&&COMPTA_FILTERS&&COMPTA_FILTERS.au)||lines[lines.length-1].date;
   doc.setFontSize(16); doc.setTextColor.apply(doc,rgb);
-  doc.text(clubTitle()+" - Bilan comptable",14,y); y+=6;
+  doc.text(clubTitle()+(opts.archive?" - Comptabilité (archive complète)":" - Bilan comptable"),14,y); y+=6;
   doc.setFontSize(9); doc.setTextColor(100,100,100);
   doc.text("Période : "+(du||"")+" au "+(au||"")+" - généré le "+new Date().toLocaleDateString("fr-FR"),14,y); y+=10;
   function bloc(titre,obj,tot){
@@ -172,5 +177,5 @@ function exportComptaBilanPdf(){
     doc.text(String(l.date||""),14,y); doc.text(String(l.categorie||"").substring(0,26),38,y);
     doc.text(String(l.motif||"").substring(0,48),86,y); doc.text(m,172,y); y+=6;
   });
-  doc.save(clubSlug()+"_bilan_comptable_"+exportDateStr()+".pdf");
+  doc.save(clubSlug()+(opts.archive?"_comptabilite_archive_":"_bilan_comptable_")+exportDateStr()+".pdf");
 }

@@ -286,6 +286,17 @@ service cloud.firestore {
           && resource.data.categorie == 'buvette'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['qte','viaCode']);
       }
+      // Journal des ventes de la caisse buvette : trace de chaque journée,
+      // consultable (et exportable en PDF) dans l'Inventaire, quel que soit le
+      // pack. Le bénévole avec un code valide peut seulement AJOUTER une vente.
+      match /buvette_ventes/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'inventaire');
+        allow delete: if dirigeant(clubId);
+        allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
+          && request.resource.data.keys().hasOnly(['id','viaCode','benevole','date','t','mode','total','lignes'])
+          && request.resource.data.total is number && request.resource.data.total > 0
+          && request.resource.data.lignes is list && request.resource.data.lignes.size() <= 100;
+      }
       match /sponsors/{id} {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
