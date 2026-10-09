@@ -527,9 +527,6 @@ function renderLicenceDetail(lic){
     actions+='<button onclick="showEditFiche()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(26,46,90,.12);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Modifier la fiche (dirigeant)</button>';
     actions+='<button onclick="addLicenceAsBenevole(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
   }
-  if(typeof isStaffUser==="function" && isStaffUser()){
-    actions+='<button onclick="supprimerLicence(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer cette licence</button>';
-  }
   if(lic.statut==="validee"){
     actions+='<button onclick="creerAccesParentDepuisLicence(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Créer l\'accès parent</button>';
   }
@@ -839,19 +836,6 @@ function sendFactureLicenceMail(code){
   window.location.href=mailto;
 }
 
-async function supprimerLicence(code){
-  var lics=getLicences();
-  var lic=lics.find(function(l){return l.code===code;});
-  if(!lic) return;
-  var f=lic.fiche||{};
-  var nom=((f.prenom||"")+" "+(f.nom||"")).trim()||code;
-  var ok=await askConfirm("Supprimer la licence de « "+nom+" » (code "+code+") ?\n\nLa fiche est effacée définitivement. Le joueur, les paiements déjà saisis et la comptabilité ne sont pas touchés.",{title:"Supprimer la licence",danger:true,confirmText:"Supprimer"});
-  if(!ok) return;
-  var reste=lics.filter(function(l){return l.code!==code;});
-  if(saveLicences(reste)===false) return;
-  if(typeof goBack==="function") goBack();
-  buildLicences();
-}
 async function addLicenceAsBenevole(code){
   var lics=getLicences();
   var lic=lics.find(function(l){return l.code===code;});

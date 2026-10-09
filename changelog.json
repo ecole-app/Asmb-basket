@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791567716",
+    "titre": "Retrait du bouton de suppression de licence",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le bouton « Supprimer cette licence » est retiré."
+      }
+    ]
+  },
+  {
     "v": "1791567017",
     "titre": "Suppression d'un club",
     "points": [
@@ -20,13 +33,6 @@
           "dirigeant"
         ],
         "texte": "Un club en accès limité peut saisir, modifier et valider des licences (jusqu'à 300 par saison)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Nouveau bouton « Supprimer cette licence » dans la fiche d'une licence."
       }
     ]
   },
