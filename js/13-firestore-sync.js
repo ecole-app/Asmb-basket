@@ -6,7 +6,9 @@ var FS_SYNC_STARTED = false;
 
 function fsArrFromSnap(snap){ var a=[]; snap.forEach(function(d){ a.push(d.data()); }); return a; }
 
+var FS_LSKEY={};
 function fsStartSync(coll, lsKey){
+  FS_LSKEY[coll]=lsKey;
   if(FS_UNSUB[coll] || !window.fbDb || !window.fbOnSnapshot) return;
   FS_UNSUB[coll]=window.fbOnSnapshot(
     window.fbCollection(window.fbDb, coll),
@@ -24,6 +26,17 @@ function fsStartSync(coll, lsKey){
 function fsWriteCollection(coll, arr){
   if(!window.fbDb || !window.fbSetDoc) return;
   if(window.SUPPORT_MODE) return; // mode support : lecture seule (aussi imposé par les règles serveur)
+  // Accès limité : consultation seule. La modif locale est annulée (retour à
+  // la dernière version synchronisée) et rien n'est envoyé.
+  if(typeof limiteEcritureAutorisee==="function" && !limiteEcritureAutorisee(coll)){
+    if(FS_PREV[coll] && FS_LSKEY[coll]) localStorage.setItem(FS_LSKEY[coll], JSON.stringify(FS_PREV[coll]));
+    var now=Date.now();
+    if(!window.__gmLimiteToast || now-window.__gmLimiteToast>8000){
+      window.__gmLimiteToast=now;
+      if(typeof showToast==="function") showToast("Accès limité : consultation seule, modification non enregistrée");
+    }
+    return;
+  }
   var prev=FS_PREV[coll]||[];
   var prevMap={};
   prev.forEach(function(x){ if(x&&x.id!=null) prevMap[String(x.id)]=JSON.stringify(x); });

@@ -294,6 +294,15 @@ function loadClubProfile(clubId){
         else { askAlert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }
         return;
       }
+      // Accès limité sans "Accès familles & coachs" : seuls le dirigeant (et le
+      // super admin / support) entrent ; les autres comptes voient un écran d'info.
+      if(typeof isLimite==="function" && isLimite() && !window.SUPPORT_MODE && !isSuperAdmin()
+         && (window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")<0
+         && typeof limiteOuvert==="function" && !limiteOuvert("familles")
+         && typeof showClubLimiteFamilles==="function"){
+        showClubLimiteFamilles(window.CURRENT_CLUB);
+        return;
+      }
       // Rappel au dirigeant quand l'essai gratuit arrive à échéance (3 derniers
       // jours) : un seul rappel par jour, pour ne pas matraquer à chaque ouverture.
       if(st==="active" && snap.data().plan==="trial" && !window.SUPPORT_MODE && !isSuperAdmin()
@@ -308,7 +317,7 @@ function loadClubProfile(clubId){
               askAlert((je===0
                 ? "Votre essai gratuit se termine aujourd'hui. Contactez-nous pour passer en club actif et garder l'accès."
                 : "Votre essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+". Contactez-nous pour passer en club actif et garder l'accès.")
-                +"\n\nAprès l'essai, la comptabilité est réservée au Pack Premium : tout ce que vous avez saisi est conservé et reste téléchargeable en PDF.");
+                +"\n\nSans abonnement, le club passera en accès limité (consultation de quelques modules seulement). Rien n'est supprimé : tout ce que vous avez saisi est conservé et reste téléchargeable.");
             },800);
           }
         }

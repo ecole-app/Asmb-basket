@@ -441,6 +441,9 @@ function renderClubCard(c, list){
     delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour r\u00e9gulariser</span>'
                  : ' \u00b7 <span style="color:var(--red)">d\u00e9lai d\u00e9pass\u00e9</span>';
   }
+  if(!suspended && !supprime && c.plan==="limite"){
+    delai=' \u00b7 <span style="color:#8a4500">accès limité</span>';
+  }
   if(!suspended && !supprime && c.plan==="trial"){
     var je=joursEssaiRestants(c);
     if(je!==null) delai=' \u00b7 <span style="color:#E8670A">essai : '+je+' j restant'+(je===1?'':'s')+'</span>';
@@ -784,35 +787,76 @@ function joursEssaiRestants(club){
 // continu. Un club encore en "trial" dont trialEndsAt est dépassé est
 // suspendu exactement comme une suspension manuelle (même délai de 7 jours
 // avant suppression possible), avec un motif explicite.
+// Fin d'essai sans abonnement : le club passe en accès limité (modules par
+// défaut), sans suspension ni compte à rebours de suppression. La suspension
+// totale reste un geste manuel (impayé d'un club abonné).
 function expirerEssaisPerimes(clubs){
   var expires=clubs.filter(function(c){
     return c.plan==="trial" && c.status==="active" && joursEssaiRestants(c)!==null && joursEssaiRestants(c)<=0;
   });
   if(!expires.length) return Promise.resolve(0);
-  var now=new Date();
   return Promise.all(expires.map(function(c){
-    c.status="suspended"; c.suspendedAt=now;
-    c.graceUntil=new Date(now.getTime()+GM_DELAI_REGUL_JOURS*86400000);
-    c.suspendMotif="Essai gratuit de "+GM_TRIAL_JOURS+" jours terminé.";
+    c.plan="limite"; c.modulesLimites=gmLimiteDefauts();
     return window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
-      status:"suspended", suspendedAt:now, graceUntil:c.graceUntil, suspendMotif:c.suspendMotif
+      plan:"limite", modulesLimites:c.modulesLimites
     }).catch(function(){});
   })).then(function(){ return expires.length; });
 }
 // Sort un club du suivi d'essai : plus de compte à rebours, plus de suspension
 // automatique. trialEndsAt est laissé tel quel (inutile une fois plan!=="trial").
 function packLabel(c){
-  return c.plan==="standard"?"Standard":(c.plan==="premium"?"Premium":(c.plan==="trial"?"Essai":"Payant (complet)"));
+  return c.plan==="standard"?"Standard":(c.plan==="premium"?"Premium":(c.plan==="trial"?"Essai":(c.plan==="limite"?"Limité":"Payant (complet)")));
 }
-// Pack Standard / Premium : seul le super admin peut écrire "plan" (firestore.rules).
+// Statut du club : Standard / Premium / Limité (+ modules gardés).
+// Seul le super admin peut écrire "plan" et "modulesLimites" (firestore.rules).
 function choisirPack(c, list){
-  askPrompt("Pack de "+(c.name||c.id)+" : tapez standard ou premium",{defaultValue:(c.plan==="standard"?"standard":"premium"),confirmText:"Valider"}).then(function(v){
-    v=(v||"").trim().toLowerCase();
-    if(v!=="standard" && v!=="premium") return;
-    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:v}).then(function(){
-      loadClubsList(list);
+  var s=gmSheet("Statut de "+(c.name||c.id));
+  var choix=(c.plan==="standard"||c.plan==="premium"||c.plan==="limite")?c.plan:null;
+  var mods=Object.assign(gmLimiteDefauts(), c.modulesLimites||{});
+  var boutons=document.createElement("div");
+  boutons.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px";
+  var zoneLim=document.createElement("div");
+  function rendre(){
+    boutons.innerHTML="";
+    [["standard","Standard"],["premium","Premium"],["limite","Limité"]].forEach(function(p){
+      var b=document.createElement("button");
+      var on=(choix===p[0]);
+      b.textContent=p[1];
+      b.style.cssText="min-height:44px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--txt)");
+      b.addEventListener("click",function(){ choix=p[0]; rendre(); });
+      boutons.appendChild(b);
+    });
+    zoneLim.innerHTML="";
+    if(choix!=="limite") return;
+    gmSection(zoneLim,"Modules gardés","Le club ne garde que ce qui est coché. Ses données restent intactes et reviennent dès qu'il paie.");
+    var liste=gmCard();
+    GM_LIMITE_MODULES.forEach(function(m){
+      var lab=document.createElement("label");
+      lab.style.cssText="display:flex;align-items:center;gap:10px;padding:8px 0;min-height:44px;cursor:pointer;border-bottom:1px solid var(--bdr)";
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!mods[m.id];
+      cb.style.cssText="width:18px;height:18px;accent-color:var(--dkg)";
+      cb.addEventListener("change",function(){ mods[m.id]=cb.checked; });
+      var txt=document.createElement("div");
+      txt.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(m.nom)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(m.detail)+'</div>';
+      lab.appendChild(cb); lab.appendChild(txt); liste.appendChild(lab);
+    });
+    var exp=document.createElement("div");
+    exp.style.cssText="padding:10px 0 0;font-size:12px;color:var(--txt2)";
+    exp.innerHTML='<b>✓ Export de ses données</b> — toujours ouvert (RGPD, CGV). Comptabilité, factures et formations animées restent fermées.';
+    liste.appendChild(exp);
+    zoneLim.appendChild(liste);
+  }
+  s.body.appendChild(boutons);
+  s.body.appendChild(zoneLim);
+  rendre();
+  gmRow(s.body).appendChild(gmBtn("Enregistrer","primary",function(){
+    if(!choix){ askAlert("Choisissez un statut."); return; }
+    var maj={plan:choix};
+    if(choix==="limite") maj.modulesLimites=mods;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
+      s.modal.remove(); loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
-  });
+  }));
 }
 function passerEnPayant(c, list){
   askPrompt("Passer "+(c.name||c.id)+" en club payant (l'essai ne sera plus suivi). Pack souscrit : tapez standard ou premium",{defaultValue:"standard",confirmText:"Confirmer"}).then(function(v){
@@ -835,6 +879,34 @@ function prolongerEssai(c, list){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   });
+}
+
+// Écran vu par un parent/coach quand son club est en accès limité sans
+// "Accès familles & coachs".
+function showClubLimiteFamilles(club){
+  var el=document.getElementById("club-suspendu-content");
+  if(!el) return;
+  club=club||window.CURRENT_CLUB||{};
+  el.innerHTML="";
+  var box=document.createElement("div");
+  box.style.cssText="margin:18px 12px;padding:18px 16px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid #8a4500;border-radius:var(--rs)";
+  var t=document.createElement("div");
+  t.style.cssText="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:8px";
+  t.textContent="Accès limité";
+  var p=document.createElement("div");
+  p.style.cssText="font-size:13px;color:var(--txt2);line-height:1.5";
+  p.textContent=(club.name||"Votre club")+" est en accès limité : l'application n'est pas disponible pour les familles et les coachs pour le moment. Les données sont conservées. Rapprochez-vous du club pour en savoir plus.";
+  box.appendChild(t); box.appendChild(p);
+  el.appendChild(box);
+  var out=document.createElement("button");
+  out.textContent="Se déconnecter";
+  out.style.cssText="width:calc(100% - 24px);margin:0 12px;padding:13px;border-radius:var(--rs);background:var(--card);border:1.5px solid var(--bdr);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
+  out.addEventListener("click",function(){ window.fbSignOut(window.fbAuth); showAuth("entry"); });
+  el.appendChild(out);
+  var nav=document.getElementById("bnav-main");
+  if(nav) nav.style.display="none";
+  stack=["club-suspendu"];
+  showScr("club-suspendu");
 }
 
 // Ecran vu par un club suspendu ou supprime.

@@ -96,11 +96,18 @@ service cloud.firestore {
     // la caisse buvette (generalmanagerapp.fr/buvette) n'a aucun compte, donc aucune connexion. Le
     // code est la seule barrière — il doit exister pour ce club et n'être pas
     // encore expiré.
+    // Club en accès limité : la caisse buvette ne fonctionne que si le module
+    // "Caisse buvette" a été gardé par la plateforme.
+    function buvetteOuverte(clubId) {
+      let c = get(/databases/$(database)/documents/clubs/$(clubId)).data;
+      return c.get('plan', '') != 'limite' || c.get('modulesLimites', {}).get('buvette', false) == true;
+    }
     function buvetteCodeValid(clubId, code) {
       return code is string && code != ''
         && exists(/databases/$(database)/documents/buvette_codes/$(code))
         && get(/databases/$(database)/documents/buvette_codes/$(code)).data.clubId == clubId
-        && get(/databases/$(database)/documents/buvette_codes/$(code)).data.expiresAt > request.time;
+        && get(/databases/$(database)/documents/buvette_codes/$(code)).data.expiresAt > request.time
+        && buvetteOuverte(clubId);
     }
 
     // Invitation valide pour ce club et ce rôle (non utilisée, non expirée)
@@ -204,7 +211,7 @@ service cloud.firestore {
       allow create, delete: if superAdmin();
       // Le dirigeant personnalise son club ; statut, formule et propriétaire
       // restent du ressort de la plateforme.
-      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan'])) || superAdmin();
+      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan','modulesLimites'])) || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club
       match /support_sessions/{uid} {

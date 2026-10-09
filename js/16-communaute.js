@@ -519,6 +519,10 @@ function channelVisibleToMe(ch){
 
 function buildCommunaute(){
   var el=document.getElementById("channel-list");if(!el)return;
+  if(typeof limiteOuvert==="function" && !limiteOuvert("messagerie")){
+    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">🔒 Messagerie fermée</div><div style="font-size:11px;margin-top:4px">Votre club est en accès limité. Les messages sont conservés.</div></div>';
+    return;
+  }
   window.asmbCoachMode=(["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0);
   if(!window.fbReady){
     window.addEventListener("fb-ready",function(){buildCommunaute();},{once:true});

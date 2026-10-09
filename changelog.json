@@ -1,5 +1,29 @@
 [
   {
+    "v": "1791565259",
+    "titre": "Accès limité",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau statut « Accès limité » pour un club sans abonnement : seuls les modules choisis par la plateforme restent ouverts, en consultation. Rien n'est supprimé et tout revient dès l'abonnement."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "« Exporter mes données » (Excel, PDF, sauvegarde complète) reste toujours disponible."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Fin de l'essai gratuit sans abonnement : le club passe en accès limité au lieu d'être suspendu."
+      }
+    ]
+  },
+  {
     "v": "1791547003",
     "titre": "Compta : rien ne se perd pendant le verrouillage",
     "points": [

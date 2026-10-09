@@ -57,7 +57,88 @@ function hasPremium(){
     var je=(typeof joursEssaiRestants==="function")?joursEssaiRestants(c):null;
     return je===null || je>0;
   }
-  return c.plan!=="standard";
+  return c.plan!=="standard" && c.plan!=="limite";
+}
+// ═══ ACCÈS LIMITÉ (club qui ne paie pas) ══════════════════════════════
+// plan "limite" + clubs/{id}.modulesLimites (choisis par le super admin) :
+// le club ne garde que les modules cochés, en consultation. Rien n'est
+// supprimé ; tout revient dès le passage en Standard ou Premium.
+// L'export de ses données reste toujours ouvert (RGPD, CGV).
+var GM_LIMITE_MODULES=[
+  {id:"licences",nom:"Licences",detail:"Consultation seule, pas de nouvelle licence",def:true},
+  {id:"joueurs",nom:"Joueurs & équipes",detail:"Consultation seule",def:true},
+  {id:"planning",nom:"Planning",detail:"Consultation seule",def:true},
+  {id:"documents",nom:"Documents",detail:"Consultation et téléchargement",def:true},
+  {id:"messagerie",nom:"Messagerie / Communauté",detail:"Canaux et discussions",def:false},
+  {id:"familles",nom:"Accès familles & coachs",detail:"Comptes parents et coachs (consultation)",def:false},
+  {id:"inscriptions",nom:"Inscriptions en ligne",detail:"Fiches reçues du formulaire public",def:false},
+  {id:"buvette",nom:"Caisse buvette",detail:"Codes bénévoles",def:false},
+  {id:"inventaire",nom:"Inventaire",detail:"Stock buvette et matériel",def:false},
+  {id:"sponsors",nom:"Sponsors",detail:"Suivi des partenaires",def:false}
+];
+function gmLimiteDefauts(){ var o={}; GM_LIMITE_MODULES.forEach(function(m){o[m.id]=m.def;}); return o; }
+function isLimite(){
+  var c=window.CURRENT_CLUB||{};
+  if(window.SUPPORT_MODE) return false;
+  if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return false;
+  if(c.plan==="limite") return true;
+  // Essai terminé mais pas encore traité depuis la Plateforme : même régime.
+  if(c.plan==="trial" && typeof joursEssaiRestants==="function"){
+    var je=joursEssaiRestants(c); return je!==null && je<=0;
+  }
+  return false;
+}
+function limiteOuvert(key){
+  if(!isLimite()) return true;
+  var m=(window.CURRENT_CLUB&&window.CURRENT_CLUB.modulesLimites)||gmLimiteDefauts();
+  return !!m[key];
+}
+// Module admin -> case "Accès limité". Absent = toujours ouvert (Paramètres,
+// Accès & invitations pour le code support, Avis). null = toujours fermé.
+var GM_ADMIN_LIMITE={licences:"licences",inscriptions:"joueurs",equipes:"joueurs",planning:"planning",
+  documents:"documents",communaute:"messagerie",fiches:"inscriptions",inventaire:"inventaire",
+  sponsors:"sponsors",acces:"familles",comptabilite:null,notesfrais:null};
+function adminModuleOuvertLimite(id){
+  if(!isLimite()) return true;
+  if(!Object.prototype.hasOwnProperty.call(GM_ADMIN_LIMITE,id)) return true;
+  var k=GM_ADMIN_LIMITE[id];
+  return k?limiteOuvert(k):false;
+}
+// Collections modifiables en accès limité (module coché) ; tout le reste est
+// en consultation seule (voir fsWriteCollection).
+// comptabilite : seulement les écritures automatiques cachées (horsPremium)
+// d'un mouvement de stock, le module Comptabilité restant fermé.
+var GM_LIMITE_ECRITURE={inventaire:"inventaire",sponsors:"sponsors",facturation_compteur:"sponsors",comptabilite:"inventaire"};
+function limiteEcritureAutorisee(coll){
+  if(!isLimite()) return true;
+  var k=GM_LIMITE_ECRITURE[coll];
+  return !!(k && limiteOuvert(k));
+}
+function askModuleFerme(nom){
+  askConfirm("Votre club est en accès limité : le module « "+nom+" » n'est pas disponible pour l'instant. Toutes vos données sont conservées et réapparaîtront dès la réactivation.\n\nPack Standard : 200\u00a0€/an\nPack Premium (comptabilité incluse) : 300\u00a0€/an\n\nContactez-nous pour réactiver votre club.",
+    {title:"Module « "+nom+" » fermé",confirmText:"Télécharger mes données"}).then(function(ok){ if(ok) openExportDonnees(); });
+}
+// Toujours ouvert, quel que soit le statut du club.
+function openExportDonnees(){
+  var s=gmSheet("Exporter mes données");
+  gmSection(s.body,"Vos données","Téléchargez à tout moment les données de votre club.");
+  var items=[
+    ["Licences (Excel)",function(){ exportLicencesXlsx(); }],
+    ["Joueurs (PDF)",function(){ exportPlayersPDF(); }],
+    ["Planning (PDF)",function(){ exportPlanningPDF(); }],
+    ["Inventaire (Excel)",function(){ exportInventaireXlsx(); }],
+    ["Sponsors (Excel)",function(){ exportSponsorsXlsx(); }],
+    ["Comptabilité (PDF)",function(){ exportComptaBilanPdf({archive:true}); }],
+    ["Sauvegarde complète (fichier)",function(){ exportData(); }]
+  ];
+  items.forEach(function(it){
+    var card=gmCard();
+    card.style.cssText+=";display:flex;align-items:center;justify-content:space-between;gap:10px";
+    var t=document.createElement("div"); t.style.cssText="font-size:13px;font-weight:700;color:var(--txt)"; t.textContent=it[0];
+    card.appendChild(t);
+    card.appendChild(gmBtn("Télécharger","primary",function(){ try{ it[1](); }catch(e){ askAlert("Export impossible : "+(e&&e.message||e)); } }));
+    s.body.appendChild(card);
+  });
 }
 // Licences de la saison en cours (les saisons archivées ne comptent pas).
 function nbLicencesSaison(){
@@ -68,6 +149,7 @@ function nbLicencesSaison(){
 // création (nouvelle licence, renouvellement) : alerte dès 270, refus à 300.
 // Renvoie false si la création doit être refusée.
 function verifierLimiteLicences(sansAlerte){
+  if(isLimite()){ askModuleFerme("Licences"); return false; }
   if(hasPremium()) return true;
   var nb=nbLicencesSaison();
   if(nb>=GM_LIMITE_LICENCES_STANDARD){
@@ -383,6 +465,16 @@ function buildAdminHome(){
    }
    cleanupExpiredEventChannelAccess();
  }
+ if(isLimite()){
+   var lim=document.createElement("div");
+   lim.style.cssText="margin:0 12px 14px;background:#8a4500;color:#fff;border-radius:var(--rs);padding:12px 14px";
+   lim.innerHTML='<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Vos données sont conservées. Contactez-nous pour réactiver le club.</div>';
+   el.appendChild(lim);
+   var exp=document.createElement("div");exp.className="admin-card";
+   exp.onclick=openExportDonnees;
+   exp.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:#16A085">⬇</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">Exporter mes données</div><div style="font-size:11px;color:var(--mut)">Excel et PDF · toujours disponible</div></div><div style="color:var(--mut);font-size:18px">\u203a</div></div>';
+   el.appendChild(exp);
+ }
  var isDirHome=window.ASMB_USER&&(window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
  var editToggle=document.getElementById("admin-edit-toggle");
  if(editToggle) editToggle.style.display=isDirHome?"":"none";
@@ -395,7 +487,9 @@ function buildAdminHome(){
  d.dataset.moduleId=m.id;
  d.style.cssText="position:relative"+(isHidden?";opacity:.45":"");
  if(!ADMIN_EDIT_MODE) d.onclick=function(){openAdminModule(m.id);};
- var count=getAdminCount(m.id);
+ var ferme=!adminModuleOuvertLimite(m.id);
+ if(ferme) d.style.cssText+=";opacity:.55;filter:grayscale(1)";
+ var count=ferme?"🔒 Fermé (accès limité)":getAdminCount(m.id);
  d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div class="drag-handle" style="color:var(--mut);font-size:20px;padding:10px;cursor:grab">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
  if(ADMIN_EDIT_MODE){
    var ctrl=document.createElement("div");
@@ -437,6 +531,7 @@ function openAdminModule(id){
   var m=ADMIN_MODULES.find(function(x){return x.id===id;});
   if(!m)return;
   if(!hasModulePermission(id)){askAlert("Accès non autorisé.");return;}
+  if(!adminModuleOuvertLimite(id)){askModuleFerme(m.name);return;}
   if(id==="comptabilite" && !hasPremium()){askComptaVerrouillee();return;}
   if(id==="acces"){openAccesCoach();return;}
   if(id==="invitations"){openClubAccessSettings();return;}
