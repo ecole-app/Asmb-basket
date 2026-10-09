@@ -65,7 +65,7 @@ function hasPremium(){
 // supprimé ; tout revient dès le passage en Standard ou Premium.
 // L'export de ses données reste toujours ouvert (RGPD, CGV).
 var GM_LIMITE_MODULES=[
-  {id:"licences",nom:"Licences",detail:"Consultation seule, pas de nouvelle licence",def:true},
+  {id:"licences",nom:"Licences",detail:"Saisie, modification et suppression de licences",def:true},
   {id:"joueurs",nom:"Joueurs & équipes",detail:"Consultation seule",def:true},
   {id:"planning",nom:"Planning",detail:"Consultation seule",def:true},
   {id:"documents",nom:"Documents",detail:"Consultation et téléchargement",def:true},
@@ -106,9 +106,11 @@ function adminModuleOuvertLimite(id){
 }
 // Collections modifiables en accès limité (module coché) ; tout le reste est
 // en consultation seule (voir fsWriteCollection).
+// licences (+ players/roster que la validation d'une licence met à jour) :
+// le club en accès limité peut saisir, modifier et supprimer des licences.
 // comptabilite : seulement les écritures automatiques cachées (horsPremium)
 // d'un mouvement de stock, le module Comptabilité restant fermé.
-var GM_LIMITE_ECRITURE={inventaire:"inventaire",sponsors:"sponsors",facturation_compteur:"sponsors",comptabilite:"inventaire"};
+var GM_LIMITE_ECRITURE={licences:"licences",players:"licences",roster:"licences",inventaire:"inventaire",sponsors:"sponsors",facturation_compteur:"sponsors",comptabilite:"inventaire"};
 function limiteEcritureAutorisee(coll){
   if(!isLimite()) return true;
   var k=GM_LIMITE_ECRITURE[coll];
@@ -149,7 +151,7 @@ function nbLicencesSaison(){
 // création (nouvelle licence, renouvellement) : alerte dès 270, refus à 300.
 // Renvoie false si la création doit être refusée.
 function verifierLimiteLicences(sansAlerte){
-  if(isLimite()){ askModuleFerme("Licences"); return false; }
+  if(isLimite() && !limiteOuvert("licences")){ askModuleFerme("Licences"); return false; }
   if(hasPremium()) return true;
   var nb=nbLicencesSaison();
   if(nb>=GM_LIMITE_LICENCES_STANDARD){

@@ -1,5 +1,24 @@
 [
   {
+    "v": "1791565848",
+    "titre": "Licences en accès limité",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Un club en accès limité peut saisir, modifier et valider des licences (jusqu'à 300 par saison)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Nouveau bouton « Supprimer cette licence » dans la fiche d'une licence."
+      }
+    ]
+  },
+  {
     "v": "1791565259",
     "titre": "Accès limité",
     "points": [
