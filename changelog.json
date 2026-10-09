@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791573820",
+    "titre": "Mode démo",
+    "points": [
+      {
+        "roles": [
+          "plateforme"
+        ],
+        "texte": "Mode démo interactif (?demo=1) : la vraie appli sur un club fictif, sans compte ni écriture, pour le site vitrine."
+      }
+    ]
+  },
+  {
     "v": "1791567944",
     "titre": "Rappel des comptes à supprimer",
     "points": [

@@ -20,9 +20,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 <title>General Manager</title>
 
+<script src="js/00-demo.js"></script>
 <script src="js/sw-register.js"></script>
 
-<script type="module" src="js/firebase-init.js"></script>
+<script type="module">if(!window.GM_DEMO){import("./js/firebase-init.js");}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -1827,6 +1828,7 @@
 <script src="js/20b-plateforme.js"></script>
 <script src="js/22-push.js"></script>
 <script src="js/23-export.js"></script>
+<script src="js/20c-demo.js"></script>
 <script src="js/21-main.js"></script>
 </body>
 </html>
