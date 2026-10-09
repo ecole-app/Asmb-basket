@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791547003",
+    "titre": "Compta : rien ne se perd pendant le verrouillage",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Compta verrouillée (Pack Standard ou essai terminé) : les paiements de licences, notes de frais remboursées, ventes buvette et mouvements de stock continuent d'être enregistrés en arrière-plan. Au passage en Premium, même des mois plus tard, tout s'ajoute à la comptabilité existante."
+      }
+    ]
+  },
+  {
     "v": "1791546567",
     "titre": "Packs : fin d'essai, buvette et limite de licences",
     "points": [

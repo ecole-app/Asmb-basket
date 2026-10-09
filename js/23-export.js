@@ -141,7 +141,7 @@ function exportComptaBilanPdf(opts){
   if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
   if(!opts.archive && typeof hasPremium==="function" && !hasPremium()){ askComptaVerrouillee(); return; }
   if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
-  var lines=(opts.archive?getComptabilite():comptaFilteredList()).slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
+  var lines=(opts.archive?(hasPremium()?getComptabilite():comptaLignesAvantVerrou()):comptaFilteredList()).slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
   if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
   var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
   var parCat={recette:{},depense:{}}, totR=0, totD=0;

@@ -91,8 +91,14 @@ function licencesDepasseLimite(nouvelle){
 // Écran d'explication affiché quand un module Premium est ouvert en Standard.
 // Comptabilité verrouillée : rien n'est supprimé. Le club peut toujours
 // télécharger en PDF tout ce qu'il a saisi (pendant l'essai ou avant).
+// Lignes visibles quand la compta est verrouillée : celles saisies AVANT le
+// verrouillage. Les écritures automatiques faites pendant le verrouillage
+// (horsPremium) restent cachées et apparaîtront au passage en Premium.
+function comptaLignesAvantVerrou(){
+  return (typeof getComptabilite==="function"?getComptabilite():[]).filter(function(l){return !l.horsPremium;});
+}
 function askComptaVerrouillee(){
-  var n=(typeof getComptabilite==="function")?getComptabilite().length:0;
+  var n=comptaLignesAvantVerrou().length;
   if(!n){ askPremiumRequis("Comptabilité complète"); return; }
   askConfirm("La comptabilité complète fait partie du Pack Premium (300\u00a0€/an).\n\nVos "+n+" ligne"+(n>1?"s":"")+" déjà saisie"+(n>1?"s":"")+" sont conservée"+(n>1?"s":"")+" et réapparaîtront dès le passage en Premium. Vous pouvez dès maintenant les télécharger en PDF.",
     {title:"Comptabilité verrouillée",confirmText:"Télécharger le PDF"}).then(function(ok){
@@ -420,7 +426,7 @@ function getAdminCount(id){
   if(id==="equipes"){var t=getTeams();return t.length+" équipe"+(t.length>1?"s":"");}
   if(id==="planning"){var e=getEvents();return e.length+" événement"+(e.length>1?"s":"");}
   if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
-  if(id==="comptabilite"){var c=getComptabilite();return (hasPremium()?"":"🔒 Premium · ")+c.length+" ligne"+(c.length>1?"s":"")+(hasPremium()?"":" conservée"+(c.length>1?"s":""));}
+  if(id==="comptabilite"){var c=hasPremium()?getComptabilite():comptaLignesAvantVerrou();return (hasPremium()?"":"🔒 Premium · ")+c.length+" ligne"+(c.length>1?"s":"")+(hasPremium()?"":" conservée"+(c.length>1?"s":""));}
   if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
   if(id==="inventaire"){var inv=getInventaire();return inv.length+" article"+(inv.length>1?"s":"");}
   if(id==="acces")return "Rôles & équipes";
@@ -1225,13 +1231,14 @@ function markNoteFraisStatut(id,statut,list,isDir){
   if(idx<0)return;
   notes[idx].statut=statut;
   saveNotesFrais(notes);
-  if(statut==="remboursee" && hasPremium()){
+  if(statut==="remboursee"){
     var n=notes[idx];
     var compta=getComptabilite();
     compta.push({
       id:Date.now().toString(),date:new Date().toISOString().slice(0,10),montant:n.montant||0,type:"depense",
       categorie:"Note de frais",motif:n.motif||"",tiers:n.demandeurNom||n.demandeurEmail||"",moyen:"Virement",
-      reference:"Note de frais #"+n.id
+      reference:"Note de frais #"+n.id,
+      horsPremium:!hasPremium()
     });
     saveComptabilite(compta);
   }

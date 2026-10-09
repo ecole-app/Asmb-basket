@@ -382,7 +382,10 @@ async function encaisser(mode){
     });
     const detail = panier.map(p => p.qty + '× ' + p.name).join(', ');
     const ligneId = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-    if(session.comptaLiee) batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
+    // Pack Standard : la ligne est écrite quand même, marquée horsPremium,
+    // invisible tant que le club n'est pas en Premium (puis s'y ajoute).
+    batch.set(doc(db, 'clubs', session.clubId, 'comptabilite', ligneId), {
+      horsPremium: !session.comptaLiee,
       id: ligneId, date: todayISO(), montant: total, type: 'recette', categorie: 'Buvette/Événements',
       motif: 'Vente caisse buvette en ligne : ' + detail, tiers: session.benevole || '', moyen: mode === 'especes' ? 'Espèces' : 'CB',
       compte: mode === 'especes' ? 'Caisse buvette' : 'Banque',

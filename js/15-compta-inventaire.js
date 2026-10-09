@@ -248,9 +248,11 @@ function showAddComptaLine(editId){
 }
 // Crée une ligne comptable directement depuis un mouvement de stock (buvette)
 function addComptaLineFromStock(type,categorie,montant,motif,reference){
-  if(!hasPremium()) return; // Pack Standard : inventaire sans lien avec la compta
+  // Pack Standard : l'inventaire n'affiche aucun lien avec la compta, mais
+  // l'écriture est gardée (horsPremium) pour s'ajouter au passage en Premium.
   var lines=getComptabilite();
   lines.push({
+    horsPremium:!hasPremium(),
     id:Date.now().toString()+Math.random().toString(36).slice(2,6),
     date:new Date().toISOString().slice(0,10),
     montant:montant,type:type,categorie:categorie,motif:motif,tiers:"",
@@ -585,10 +587,15 @@ function stockMovement(id,sens){
   if(qStr===null)return;
   var qte=parseFloat(qStr.replace(",","."));
   if(!qte||qte<=0){showToast("Quantité invalide");return;}
-  // Pack Standard : inventaire de base, le stock bouge sans écriture comptable.
+  // Pack Standard : inventaire de base, pas de question sur le montant. Le
+  // montant est calculé depuis le prix de l'article et gardé en attente pour
+  // la compta (visible seulement au passage en Premium).
   if(!hasPremium()){
+    var prixU=sens==="achat"?it.prixAchat:it.prixVente;
+    var mt=prixU!=null?Math.round(Number(prixU)*qte*100)/100:0;
     items[idx].qte=Math.max(0,Number(it.qte||0)+(sens==="achat"?qte:-qte));
     saveInventaire(items);
+    if(mt>0) addComptaLineFromStock(sens==="achat"?"depense":"recette",sens==="achat"?"Achats buvette":"Buvette/Événements",mt,(sens==="achat"?"Achat ":"Vente ")+(it.nom||"article"),"Buvette");
     showToast(sens==="achat"?"Achat enregistré":"Vente enregistrée");
     buildInventaire();
     return;

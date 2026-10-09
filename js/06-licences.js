@@ -610,9 +610,6 @@ function savePaiementLicence(code,paiement){
   var wasAlreadyRecorded=!!lics[idx].paiement;
   lics[idx].paiement=paiement;
   saveLicences(lics);
-  // Pack Standard / essai terminé : le paiement reste noté sur la licence,
-  // mais aucune nouvelle écriture n'est ajoutée à la comptabilité verrouillée.
-  if(typeof hasPremium==="function" && !hasPremium()){ renderLicenceDetail(lics[idx]); buildLicences(); return; }
   // Cree (ou ne duplique pas) la ligne Comptabilite correspondante
   var compta=getComptabilite();
   var f=lics[idx].fiche||{};
@@ -624,6 +621,9 @@ function savePaiementLicence(code,paiement){
     categorie:"Licence",motif:"Licence "+nom+(lics[idx].typeLicence?" ("+(lics[idx].typeLicence==="competition"?"Compétition":"Loisir")+")":""),
     tiers:f.respNom||nom,moyen:paiement.moyen,reference:refCompta
   };
+  // Compta verrouillée (Standard / essai terminé) : l'écriture est quand même
+  // enregistrée, invisible, et s'ajoutera à la compta au passage en Premium.
+  if(typeof hasPremium==="function" && !hasPremium() && !existingLine) comptaData.horsPremium=true;
   if(existingLine){
     Object.assign(existingLine,comptaData);
   } else {
