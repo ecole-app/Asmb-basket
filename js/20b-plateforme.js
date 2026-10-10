@@ -345,6 +345,10 @@ function openPlateforme(){
   window.__gmComptesBox=comptesBox;
   s.body.appendChild(comptesBox);
   loadComptesASupprimer(comptesBox);
+  var aboBox=document.createElement("div");
+  aboBox.style.marginBottom="12px";
+  window.__gmAboBox=aboBox;
+  s.body.appendChild(aboBox);
   var list=document.createElement("div");
   s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   list.style.marginTop="14px";
@@ -417,7 +421,10 @@ function loadClubsList(list){
     };
     // Pas de cron côté serveur : on vérifie les essais expirés à chaque
     // ouverture de cet écran par le super admin, pas en continu.
-    expirerEssaisPerimes(clubs).then(function(){ paint(); });
+    expirerEssaisPerimes(clubs).then(function(){
+      paint();
+      if(window.__gmAboBox) renderAvisReconduction(window.__gmAboBox, clubs, list);
+    });
   }).catch(function(e){
     list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Erreur : '+((e&&e.code)||e)+'</div>';
   });
@@ -449,6 +456,11 @@ function renderClubCard(c, list){
   if(!suspended && !supprime && c.plan==="limite"){
     delai=' \u00b7 <span style="color:#8a4500">accès limité</span>';
   }
+  if(!suspended && !supprime && (c.plan==="standard"||c.plan==="premium")){
+    var ea=aboEcheance(c);
+    delai=ea ? ' \u00b7 échéance '+ea.toLocaleDateString("fr-FR")
+             : ' \u00b7 <span style="color:#E8670A">échéance non renseignée</span>';
+  }
   if(!suspended && !supprime && c.plan==="trial"){
     var je=joursEssaiRestants(c);
     if(je!==null) delai=' \u00b7 <span style="color:#E8670A">essai : '+je+' j restant'+(je===1?'':'s')+'</span>';
@@ -475,6 +487,9 @@ function renderClubCard(c, list){
   }
   if(!own && !supprime){
     row.appendChild(gmBtn("Pack : "+packLabel(c),"soft",function(){ choisirPack(c, list); }));
+    if(c.plan==="standard"||c.plan==="premium"){
+      row.appendChild(gmBtn("Échéance","soft",function(){ modifierEcheance(c, list); }));
+    }
   }
   // Suppression possible a tout moment (club test compris) : la saisie du nom
   // exact du club sert de garde-fou, voir deleteClubFlow.
@@ -895,6 +910,7 @@ function choisirPack(c, list){
     if(!choix){ askAlert("Choisissez un statut."); return; }
     var maj={plan:choix};
     if(choix==="limite") maj.modulesLimites=mods;
+    if((choix==="standard"||choix==="premium") && !aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       s.modal.remove(); loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
@@ -904,7 +920,9 @@ function passerEnPayant(c, list){
   askPrompt("Passer "+(c.name||c.id)+" en club payant (l'essai ne sera plus suivi). Pack souscrit : tapez standard ou premium",{defaultValue:"standard",confirmText:"Confirmer"}).then(function(v){
     v=(v||"").trim().toLowerCase();
     if(v!=="standard" && v!=="premium") return;
-    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{plan:v}).then(function(){
+    var maj={plan:v};
+    if(!aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   });
@@ -920,6 +938,108 @@ function prolongerEssai(c, list){
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{trialEndsAt:until}).then(function(){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+}
+
+// --- Échéance d'abonnement et avis de reconduction tacite ---
+// Abonnement de 12 mois reconduit tacitement (CGV art. 7). Un club associatif
+// peut être un non-professionnel : l'art. L215-1 du Code de la consommation
+// impose alors de le prévenir par écrit entre 3 mois et 1 mois avant
+// l'échéance qu'il peut ne pas reconduire. Pas d'envoi automatique (décision
+// produit) : la Plateforme rappelle au super admin d'envoyer l'avis (mailto).
+// Champs sur clubs/{id}, écrits par le super admin seul (firestore.rules) :
+// aboEcheance (date) et aboAvisPour ("AAAA-MM-JJ" de l'échéance déjà avisée).
+var GM_AVIS_DEBUT_JOURS=90, GM_AVIS_FIN_JOURS=30;
+function gmPlusUnAn(d){ var x=new Date(d.getTime()); x.setFullYear(x.getFullYear()+1); return x; }
+function aboEcheance(c){ return gmDate(c&&c.aboEcheance); }
+function aboCle(d){
+  return d ? d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0") : "";
+}
+function aboJours(c){ var e=aboEcheance(c); return e ? Math.ceil((e.getTime()-Date.now())/86400000) : null; }
+// À afficher : clubs payants dont l'échéance est à moins de 3 mois (ou
+// dépassée sans avoir été marquée renouvelée) et dont l'avis n'est pas fait.
+function aboARappeler(c){
+  if(!(c.plan==="standard"||c.plan==="premium")) return false;
+  if(c.status==="deleted"||c.status==="purging") return false;
+  var j=aboJours(c);
+  if(j===null) return false;
+  if(j<0) return true;
+  return j<=GM_AVIS_DEBUT_JOURS && c.aboAvisPour!==aboCle(aboEcheance(c));
+}
+function renderAvisReconduction(box, clubs, list){
+  box.innerHTML="";
+  var aFaire=clubs.filter(aboARappeler);
+  if(!aFaire.length) return;
+  var head=document.createElement("div");
+  head.style.cssText="background:#E8670A;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
+  head.textContent="📅 "+aFaire.length+" avis de reconduction à envoyer";
+  box.appendChild(head);
+  aFaire.forEach(function(c){
+    var e=aboEcheance(c), j=aboJours(c);
+    var limite=new Date(e.getTime()-GM_AVIS_FIN_JOURS*86400000);
+    var card=gmCard();
+    var t=document.createElement("div");
+    t.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    t.textContent=(c.name||c.id)+" · "+packLabel(c);
+    var d=document.createElement("div");
+    d.style.cssText="font-size:12px;color:var(--txt2);margin:6px 0;line-height:1.5";
+    if(j<0){
+      d.innerHTML='Échéance dépassée le '+e.toLocaleDateString("fr-FR")+'. Si le club a payé, marquez-le renouvelé.';
+    }else{
+      var retard=(j<GM_AVIS_FIN_JOURS);
+      d.innerHTML='Échéance le <b>'+e.toLocaleDateString("fr-FR")+'</b> (dans '+j+' j).<br>'
+        +(retard?'<span style="color:var(--red);font-weight:700">Avis en retard : il devait partir avant le '+limite.toLocaleDateString("fr-FR")+'. Sans avis, le club peut résilier à tout moment.</span>'
+                :'Avis à envoyer avant le <b>'+limite.toLocaleDateString("fr-FR")+'</b>.');
+    }
+    card.appendChild(t); card.appendChild(d);
+    var row=gmRow(card);
+    if(j>=0){
+      row.appendChild(gmBtn("Écrire l'avis","primary",function(){ ecrireAvisReconduction(c); }));
+      row.appendChild(gmBtn("Avis envoyé","soft",function(){
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{aboAvisPour:aboCle(e)})
+          .then(function(){ loadClubsList(list); })
+          .catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); });
+      }));
+    }
+    row.appendChild(gmBtn("Renouvelé (+12 mois)","soft",function(){
+      askConfirm("Prolonger l'abonnement de "+(c.name||c.id)+" jusqu'au "+gmPlusUnAn(e).toLocaleDateString("fr-FR")+" ?").then(function(ok){
+        if(!ok) return;
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{aboEcheance:gmPlusUnAn(e)})
+          .then(function(){ loadClubsList(list); })
+          .catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); });
+      });
+    }));
+    box.appendChild(card);
+  });
+}
+async function ecrireAvisReconduction(c){
+  var membres=await listerMembres(c.id);
+  var mails=membres.filter(function(m){ return (m.roles||[]).indexOf("dirigeant")>=0 && m.email && m.email.indexOf("@")>0; })
+    .map(function(m){ return m.email; });
+  var e=aboEcheance(c);
+  var ech=e.toLocaleDateString("fr-FR");
+  var sujet="General Manager : reconduction de votre abonnement au "+ech;
+  var corps="Bonjour,\n\n"
+    +"L'abonnement General Manager (pack "+packLabel(c)+") de "+(c.name||c.id)+" arrive à échéance le "+ech+".\n\n"
+    +"Conformément à l'article 7 de nos conditions générales de vente, il sera reconduit automatiquement pour une nouvelle période de 12 mois.\n\n"
+    +"Vous pouvez choisir de ne pas le reconduire : il suffit de me l'indiquer par simple réponse à ce message avant le "+ech+". "
+    +"Vos données restent exportables depuis l'application jusqu'à cette date.\n\n"
+    +"Cette information vous est adressée en application de l'article L. 215-1 du Code de la consommation.\n\n"
+    +"Cordialement,\nGeneral Manager";
+  if(!mails.length) askAlert("Aucune adresse e-mail de dirigeant trouvée pour ce club : complétez le destinataire dans le message.");
+  location.href="mailto:"+mails.map(encodeURIComponent).join(",")+"?subject="+encodeURIComponent(sujet)+"&body="+encodeURIComponent(corps);
+}
+function modifierEcheance(c, list){
+  var e=aboEcheance(c);
+  askPrompt("Date d'échéance de l'abonnement de "+(c.name||c.id)+" (JJ/MM/AAAA)",{defaultValue:e?e.toLocaleDateString("fr-FR"):"",confirmText:"Enregistrer"}).then(function(v){
+    if(v===null||v===undefined) return;
+    var m=String(v).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m){ askAlert("Format attendu : JJ/MM/AAAA."); return; }
+    var d=new Date(+m[3], +m[2]-1, +m[1], 12);
+    if(isNaN(d.getTime())||d.getDate()!==+m[1]){ askAlert("Date invalide."); return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{aboEcheance:d})
+      .then(function(){ loadClubsList(list); })
+      .catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); });
   });
 }
 

@@ -216,7 +216,7 @@ service cloud.firestore {
       allow create, delete: if superAdmin();
       // Le dirigeant personnalise son club ; statut, formule et propriétaire
       // restent du ressort de la plateforme.
-      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan','modulesLimites'])) || superAdmin();
+      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan','modulesLimites','aboEcheance','aboAvisPour'])) || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club
       match /support_sessions/{uid} {

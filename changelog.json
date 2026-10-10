@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791644576",
+    "titre": "Échéances d'abonnement et avis de reconduction",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Plateforme : chaque club Standard ou Premium a une date d'échéance (12 mois, modifiable). Trois mois avant, une alerte orange rappelle d'envoyer l'avis de reconduction : e-mail pré-rempli au dirigeant, puis « Avis envoyé » et « Renouvelé (+12 mois) »."
+      }
+    ]
+  },
+  {
     "v": "1791567944",
     "titre": "Rappel des comptes à supprimer",
     "points": [
