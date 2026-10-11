@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791737358",
+    "titre": "Onglet Inscription retiré du dirigeant",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "L'onglet « Inscription » disparaît de la barre du bas du dirigeant : les familles remplissent leur fiche via le lien ou le QR code du club, et le dirigeant gère tout dans Admin → Licences."
+      }
+    ]
+  },
+  {
     "v": "1791735121",
     "titre": "Paramètres rangés",
     "points": [

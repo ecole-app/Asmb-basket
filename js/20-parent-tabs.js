@@ -92,7 +92,6 @@ function buildBottomNav(profile){
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navTo(\'portal\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
       '<button class="bni" id="bni-communaute" onclick="navTo(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
-      '<button class="bni" id="bni-inscription" onclick="navTo(\'inscription\')"><span class="bni-ic">'+NAV_ICONS.inscription+'</span>Inscription</button>'+
       '<button class="bni" id="bni-admin" onclick="navTo(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Admin</button>';
   } else if(profile==="coach"){
     // "Admin" n'apparaît que si le dirigeant a coché au moins un accès bureau
