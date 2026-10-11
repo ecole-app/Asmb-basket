@@ -12,6 +12,10 @@ peu d'explications, et on **présente l'idée avant de coder** les fonctionnalit
    `cp js/firebase-init.js /tmp/x.mjs && node --check /tmp/x.mjs`.
 2. Après toute modif de `firestore.rules` : le nombre de `{` et de `}` doit être identique
    (`python3 -c "s=open('firestore.rules').read(); print(s.count('{'), s.count('}'))"`).
+   Adapter/ajouter le test dans `tests/rules/regles.test.js` ; GitHub les relance au push
+   (workflow « Tests des règles Firestore », résultat lisible via l'API check-runs/annotations).
+   La fiche `clubs/{clubId}` est en liste blanche pour le dirigeant : tout nouveau champ
+   qu'il doit pouvoir modifier y est ajouté.
 3. Après toute modif d'`index.html` : nombre de `<div` = nombre de `</div>`.
 4. JSON valides : `changelog.json` et `version.json`.
 
