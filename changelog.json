@@ -1,6 +1,6 @@
 [
   {
-    "v": "1791702449",
+    "v": "1791703451",
     "titre": "Communauté façon WhatsApp",
     "points": [
       {
@@ -33,7 +33,7 @@
           "coach",
           "parent"
         ],
-        "texte": "Messages vocaux (1 min max), séparateurs Aujourd'hui / Hier, bouton « nouveaux messages », liens cliquables."
+        "texte": "Séparateurs Aujourd'hui / Hier, bouton « nouveaux messages », liens cliquables."
       },
       {
         "roles": [

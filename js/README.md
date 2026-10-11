@@ -42,7 +42,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `14-evenements.js` | Événements, créneaux, convocations, météo du match |
 | `15-compta-inventaire.js` | Comptabilité, documents, inventaire buvette/matériel |
 | `16-communaute.js` | Canaux de discussion, messages, réactions, sondages |
-| `16b-messagerie.js` | Messagerie façon WhatsApp : affichage des messages, menu appui long, modif 2 min, suppression, coches de lecture, vocaux, transfert, discussions privées (`dms`), convocations reliées aux présences (`checkins`) |
+| `16b-messagerie.js` | Messagerie façon WhatsApp : affichage des messages, menu appui long, modif 2 min, suppression, coches de lecture, transfert, discussions privées (`dms`), convocations reliées aux présences (`checkins`) |
 | `17-poles.js` | Pages génériques des pôles du club |
 | `17-sponsors.js` | Sponsors & partenaires, conventions, factures PDF numérotées |
 | `18-auth.js` | Authentification, comptes, changement d'e-mail |

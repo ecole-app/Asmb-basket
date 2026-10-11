@@ -2,7 +2,7 @@
    Affichage des messages d'un canal ou d'une discussion privée, menu par appui
    long (réagir, répondre, copier, modifier 2 min, transférer, infos, épingler,
    supprimer), coches de lecture (✓ / ✓✓ / ✓✓ bleu), glisser pour répondre,
-   séparateurs de jour, bouton « nouveaux messages », messages vocaux,
+   séparateurs de jour, bouton « nouveaux messages » (pas de vocaux : écrit seulement),
    discussions privées staff ↔ adulte, convocations reliées aux présences
    (checkins) de l'écran d'accueil.
    S'appuie sur les globales de 16-communaute.js (currentChannelId,
@@ -99,26 +99,6 @@ function chatEnsureUi(){
     nb.style.display="none"; chatNewCount=0;
   });
   document.body.appendChild(nb);
-  // Bouton micro dans la barre de saisie (avant le bouton envoyer)
-  var bar=document.getElementById("chat-input-bar");
-  if(bar && !document.getElementById("chat-mic-btn")){
-    var mic=document.createElement("button");
-    mic.id="chat-mic-btn"; mic.type="button"; mic.title="Message vocal"; mic.textContent="🎤";
-    mic.style.cssText="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0";
-    mic.addEventListener("click",chatStartVoice);
-    var send=bar.lastElementChild;
-    bar.insertBefore(mic,send);
-    var rec=document.createElement("div");
-    rec.id="chat-rec-bar";
-    rec.style.cssText="display:none;position:absolute;inset:0;background:var(--sf);align-items:center;gap:10px;padding:10px 12px";
-    rec.innerHTML='<button type="button" id="chat-rec-cancel" style="width:38px;height:38px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:15px;color:var(--mut)">✕</button>'+
-      '<span style="width:10px;height:10px;border-radius:50%;background:#C0392B;animation:pulse 1s infinite"></span>'+
-      '<span id="chat-rec-time" style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">0:00</span>'+
-      '<button type="button" id="chat-rec-send" style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;border:none;cursor:pointer;font-size:18px">➤</button>';
-    bar.appendChild(rec);
-    document.getElementById("chat-rec-cancel").addEventListener("click",function(){ chatStopVoice(false); });
-    document.getElementById("chat-rec-send").addEventListener("click",function(){ chatStopVoice(true); });
-  }
   var msgs=document.getElementById("chat-messages");
   if(msgs && !msgs.__scrollBound){
     msgs.__scrollBound=true;
@@ -708,51 +688,6 @@ function chatForward(msgId){
       if(typeof showToast==="function") showToast("Message transféré");
     }).catch(function(e){ askAlert("Le transfert a échoué : "+((e&&e.code)||e)); });
   };
-}
-
-// ═══ MESSAGES VOCAUX (60 s max) ════════════════════════════════════
-var chatRec=null;
-function chatStartVoice(){
-  if(!navigator.mediaDevices||!window.MediaRecorder){ askAlert("L'enregistrement vocal n'est pas disponible sur ce navigateur."); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-    var type=(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported("audio/mp4"))?"audio/mp4":((MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported("audio/webm;codecs=opus"))?"audio/webm;codecs=opus":"");
-    var opts={audioBitsPerSecond:24000}; if(type) opts.mimeType=type;
-    var rec; try{ rec=new MediaRecorder(stream,opts); }catch(e){ rec=new MediaRecorder(stream); }
-    var chunks=[];
-    rec.ondataavailable=function(e){ if(e.data&&e.data.size) chunks.push(e.data); };
-    chatRec={rec:rec,stream:stream,chunks:chunks,start:Date.now(),send:false,type:rec.mimeType||type||"audio/webm"};
-    rec.onstop=function(){
-      stream.getTracks().forEach(function(t){t.stop();});
-      var st=chatRec; chatRec=null;
-      clearInterval(st.timer);
-      document.getElementById("chat-rec-bar").style.display="none";
-      if(!st.send) return;
-      var blob=new Blob(st.chunks,{type:st.type});
-      if(blob.size>650*1024){ askAlert("Message vocal trop long."); return; }
-      var fr=new FileReader();
-      fr.onload=function(){
-        var payload=Object.assign({type:"media",mediaType:"audio",mediaUrl:fr.result,duree:Math.round((Date.now()-st.start)/1000),pseudo:myChatPseudo(),ts:window.fbServerTimestamp()},mySenderMeta());
-        window.fbAddDoc(window.fbCollection(window.fbDb,convColl(),currentChannelId,"messages"),payload).then(function(){
-          if(currentConvKind==="dm") dmTouch(currentChannelId,"🎤 Message vocal");
-        }).catch(function(e){ askAlert("Le message vocal n'a pas pu être envoyé : "+((e&&e.code)||e)); });
-      };
-      fr.readAsDataURL(blob);
-    };
-    rec.start();
-    var bar=document.getElementById("chat-rec-bar"); bar.style.display="flex";
-    var tEl=document.getElementById("chat-rec-time");
-    chatRec.timer=setInterval(function(){
-      if(!chatRec) return;
-      var s=Math.floor((Date.now()-chatRec.start)/1000);
-      tEl.textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0")+" / 1:00";
-      if(s>=60) chatStopVoice(true);
-    },250);
-  }).catch(function(){ askAlert("Micro refusé : autorisez-le dans les réglages du navigateur."); });
-}
-function chatStopVoice(send){
-  if(!chatRec) return;
-  chatRec.send=!!send;
-  try{ chatRec.rec.stop(); }catch(e){}
 }
 
 // ═══ DISCUSSIONS PRIVÉES ═══════════════════════════════════════════
