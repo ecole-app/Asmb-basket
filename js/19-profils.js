@@ -1171,6 +1171,7 @@ function buildParentHome(){
     '<div style="font-size:18px;font-weight:900;color:var(--dkg)">'+matchesPlayed+'</div>'+
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joué'+(matchesPlayed>1?"s":"")+'</div>'+
   '</div>'+licBadge;
+  if(typeof renderReinscriptionParent==="function") renderReinscriptionParent();
 
   // Chips : enfants (avatar) si rattachés, sinon équipes
   var chipsEl=document.getElementById("parent-team-chips");

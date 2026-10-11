@@ -404,3 +404,36 @@ describe("Fiches d'inscription publiques", () => {
     await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/inscription_submissions/f1")));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Réinscriptions en ligne", () => {
+  const demande = (uid, playerId, saison) => ({ auteurUid: uid, playerId, saison, statut: "nouvelle", fiche: { prenom: "Lucas" }, ts: serverTimestamp() });
+  const ouvrir = async (ouvert) => setDoc(doc(await as("dirA"), "clubs/A/app_data/reinscriptions"), { ouvert, saison: "2027-2028" });
+
+  it("fermées : aucun parent ne peut réinscrire", async () => {
+    await ouvrir(false);
+    await assertFails(addDoc(collection(await as("parentA"), "clubs/A/reinscriptions"), demande("parentA", "p1", "2027-2028")));
+  });
+  it("ouvertes : le parent réinscrit SON enfant, pour la saison annoncée seulement", async () => {
+    await ouvrir(true);
+    const db = await as("parentA");
+    await assertSucceeds(addDoc(collection(db, "clubs/A/reinscriptions"), demande("parentA", "p1", "2027-2028")));
+    await assertFails(addDoc(collection(db, "clubs/A/reinscriptions"), demande("parentA", "p2", "2027-2028")));
+    await assertFails(addDoc(collection(db, "clubs/A/reinscriptions"), demande("parentA", "p1", "2030-2031")));
+    await assertFails(addDoc(collection(db, "clubs/A/reinscriptions"), demande("parent2A", "p1", "2027-2028")));
+    await assertFails(addDoc(collection(db, "clubs/A/reinscriptions"), { ...demande("parentA", "p1", "2027-2028"), statut: "importee" }));
+    await assertFails(addDoc(collection(await as("dirB"), "clubs/A/reinscriptions"), demande("dirB", "p1", "2027-2028")));
+  });
+  it("le parent relit ses demandes, pas celles des autres ; le staff les traite", async () => {
+    await ouvrir(true);
+    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/reinscriptions/r1"), demande("parentA", "p1", "2027-2028")));
+    await assertSucceeds(setDoc(doc(await as("parent2A"), "clubs/A/reinscriptions/r2"), demande("parent2A", "p2", "2027-2028")));
+    const db = await as("parentA");
+    await assertSucceeds(getDocs(query(collection(db, "clubs/A/reinscriptions"), where("auteurUid", "==", "parentA"))));
+    await assertFails(getDoc(doc(db, "clubs/A/reinscriptions/r2")));
+    await assertFails(getDocs(collection(db, "clubs/A/reinscriptions")));
+    await assertFails(updateDoc(doc(db, "clubs/A/reinscriptions/r1"), { statut: "importee" }));
+    await assertSucceeds(getDocs(collection(await as("coachA"), "clubs/A/reinscriptions")));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/reinscriptions/r1"), { statut: "importee" }));
+  });
+});

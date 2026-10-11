@@ -1,5 +1,29 @@
 [
   {
+    "v": "1791742473",
+    "titre": "Accès famille par SMS et réinscription en ligne",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "En validant une licence, l'appli propose tout de suite d'envoyer l'accès à la famille par SMS (message prêt, qui commence par le nom du club). Si la famille a déjà un compte, rien à envoyer : l'enfant apparaît chez elle."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Licences : nouveau bloc « Réinscriptions en ligne » pour les ouvrir pour la saison suivante. Les demandes des familles arrivent automatiquement comme fiches reçues."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Quand le club ouvre les réinscriptions, une carte « Réinscrire » apparaît sur l'Accueil, avec la fiche de l'an dernier déjà remplie. Pas de code à saisir."
+      }
+    ]
+  },
+  {
     "v": "1791737960",
     "titre": "Lien d'inscription direct",
     "points": [

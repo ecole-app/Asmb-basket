@@ -676,7 +676,7 @@ var GM_PURGE_MINUTES=30;
 // qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
 var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
- "annuaire","app_data","reminders_sent","inscription_submissions","support_sessions","buvette_ventes",
+ "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","support_sessions","buvette_ventes",
  "sponsors","facturation_compteur","push_subscriptions"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club

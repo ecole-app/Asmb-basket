@@ -162,11 +162,25 @@ function publierRattachements(){
     // ouvre bien l'acces d'un de ses propres enfants.
     if(entries[t].playerIds.indexOf(String(playerId))<0) entries[t].playerIds.push(String(playerId));
   }
+  // Derniere fiche connue de chaque enfant : sert a pre-remplir la reinscription
+  // en ligne cote parent. Seulement l'identite et les contacts que la famille a
+  // elle-meme donnes : ni photo, ni certificat, ni notes medicales.
+  function ficheReinscription(l){
+    var f=l.fiche, o={saison:l.saison||getCurrentSeason(), typeLicence:l.typeLicence||null};
+    ["genre","prenom","nom","naissance","adresse","telephone","emailLic","respNom","respLien","respTel","respEmail",
+     "resp2Nom","resp2Lien","resp2Tel","resp2Email","urgenceNom","urgenceTel"].forEach(function(k){ if(f[k]) o[k]=f[k]; });
+    return o;
+  }
   lics.forEach(function(l){
     var f=l&&l.fiche; if(!f) return;
     var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
     if(!p || p.suspendu) return; // licence suspendue (impayé) : accès espace licencié coupé
-    [f.telephone,f.respTel,f.resp2Tel].forEach(function(t){ lier(t,p.id,l.id); });
+    [f.telephone,f.respTel,f.resp2Tel].forEach(function(t){
+      lier(t,p.id,l.id);
+      var k=String(t||"").replace(/\s+/g,""); if(!k||!entries[k]) return;
+      var fx=entries[k].fiches||(entries[k].fiches={}), cur=fx[String(p.id)];
+      if(!cur || String(l.saison||"")>=String(cur.saison||"")) fx[String(p.id)]=ficheReinscription(l);
+    });
   });
   players.forEach(function(p){ if(!p.suspendu) lier(p.telEnfant,p.id,""); });
   Object.keys(entries).forEach(function(tel){
@@ -211,15 +225,21 @@ function playerIdsPourTelephones(tels){
 // compte, le club le fait a sa place au moment ou la licence est validee.
 function creerAccesParentDepuisLicence(code){
   var lic=getLicences().find(function(l){return l.code===code;});
-  if(!lic||!lic.fiche){ askAlert("Fiche introuvable."); return; }
-  if(!window.fbSetDoc||!window.CURRENT_CLUB_ID){ askAlert("Connexion en cours, réessayez."); return; }
+  creerInvitationParent(lic).then(function(code2){
+    showInviteResult(code2,"parent",(typeof clubLabel==="function"?clubLabel(""):""));
+  }).catch(function(e){ askAlert(e&&e.message?e.message:"Erreur : "+((e&&e.code)||e)); });
+}
+// Cree l'invitation parent d'une licence validee ; renvoie le code (promesse).
+function creerInvitationParent(lic){
+  if(!lic||!lic.fiche) return Promise.reject(new Error("Fiche introuvable."));
+  if(!window.fbSetDoc||!window.CURRENT_CLUB_ID) return Promise.reject(new Error("Connexion en cours, réessayez."));
   var f=lic.fiche;
   var tels=[f.respTel,f.telephone,f.resp2Tel].filter(Boolean);
-  if(!tels.length){ askAlert("Aucun téléphone sur cette fiche : impossible de savoir à qui donner l'accès."); return; }
+  if(!tels.length) return Promise.reject(new Error("Aucun téléphone sur cette fiche : impossible de savoir à qui donner l'accès."));
   var playerIds=playerIdsPourTelephones(tels);
-  if(!playerIds.length){ askAlert("Fiche joueur introuvable : validez d'abord la licence."); return; }
+  if(!playerIds.length) return Promise.reject(new Error("Fiche joueur introuvable : validez d'abord la licence."));
   var code2=genSecureCode(3,4);
-  window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code2),{
+  return window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code2),{
     clubId:window.CURRENT_CLUB_ID, clubName:(typeof clubLabel==="function"?clubLabel(""):""),
     role:"parent", playerIds:playerIds,
     // Le contact reste celui deja fourni sur la fiche : le parent n'a rien a
@@ -229,9 +249,72 @@ function creerAccesParentDepuisLicence(code){
     tel:String(tels[0]).replace(/\s+/g,""), usedBy:null,
     createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp(),
     expiresAt:new Date(Date.now()+7*86400000)
-  }).then(function(){
-    showInviteResult(code2,"parent",(typeof clubLabel==="function"?clubLabel(""):""));
-  }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  }).then(function(){ return code2; });
+}
+
+// Juste apres la validation (ou depuis la fiche) : proposer d'envoyer l'acces
+// a la famille par SMS. Le SMS part du telephone du dirigeant (lien sms:
+// pre-rempli), il commence par le nom du club pour etre reconnu.
+// Si la famille a deja un compte, rien a envoyer : l'enfant apparait chez elle.
+function proposerAccesFamille(lic, depuisFiche){
+  if(!lic||!lic.fiche) return;
+  var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  if(roles.indexOf("dirigeant")<0){ if(depuisFiche) askAlert("Seul le dirigeant peut envoyer l'accès à la famille."); return; }
+  var f=lic.fiche;
+  var tel=telNorm(f.respTel||f.telephone||f.resp2Tel);
+  var prenom=f.prenom||"votre enfant";
+  if(!tel){ if(depuisFiche) askAlert("Aucun téléphone sur cette fiche : ajoutez-en un pour envoyer l'accès."); return; }
+  var dejaCompte=(window.fbReady&&window.fbQuery)
+    ? window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID),window.fbWhere("phone","==",tel)))
+        .then(function(s){ return !s.empty; }).catch(function(){ return false; })
+    : Promise.resolve(false);
+  dejaCompte.then(function(existe){
+    if(existe){
+      if(typeof publierRattachements==="function") publierRattachements();
+      showToast("La famille a déjà un compte : "+prenom+" apparaît dans son espace.");
+      return;
+    }
+    var club=(typeof clubLabel==="function"?clubLabel(""):"")||"Votre club";
+    var debut=club+" : la licence de "+prenom+" est validée. Créez votre compte pour suivre ses matchs et convocations : ";
+    var s=gmSheet("Licence de "+prenom+" validée");
+    var q=document.createElement("div");
+    q.style.cssText="font-size:13px;color:var(--txt2);line-height:1.45";
+    q.textContent="Envoyer l'accès à l'appli à la famille maintenant ?";
+    var a=document.createElement("div");
+    a.style.cssText="font-size:12px;color:var(--mut);margin-top:10px";
+    a.textContent="À : "+(f.respNom||((f.prenom||"")+" "+(f.nom||"")).trim())+" · "+tel;
+    var bulle=document.createElement("div");
+    bulle.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:12.5px;line-height:1.45;color:var(--txt);margin-top:8px";
+    bulle.textContent=debut+"[lien personnel]";
+    s.body.appendChild(q); s.body.appendChild(a); s.body.appendChild(bulle);
+    var col=document.createElement("div");
+    col.style.cssText="display:flex;flex-direction:column;gap:8px;margin-top:14px";
+    var go=gmBtn("Envoyer par SMS","primary",function(b){
+      b.disabled=true; b.textContent="Préparation…";
+      creerInvitationParent(lic).then(function(code){
+        marquerAccesEnvoye(lic.code);
+        s.modal.remove();
+        window.location.href="sms:"+tel+"?&body="+encodeURIComponent(debut+inviteLink(code));
+      }).catch(function(e){ b.disabled=false; b.textContent="Envoyer par SMS"; askAlert(e&&e.message?e.message:"Erreur : "+((e&&e.code)||e)); });
+    });
+    var autre=gmBtn("Copier le lien à la place","soft",function(){
+      s.modal.remove();
+      creerInvitationParent(lic).then(function(code){
+        marquerAccesEnvoye(lic.code);
+        showInviteResult(code,"parent",club);
+      }).catch(function(e){ askAlert(e&&e.message?e.message:"Erreur : "+((e&&e.code)||e)); });
+    });
+    var tard=gmBtn("Plus tard","ghost",function(){ s.modal.remove(); });
+    [go,autre,tard].forEach(function(b){ b.style.padding="13px"; b.style.borderRadius="var(--rx)"; b.style.fontSize="14px"; col.appendChild(b); });
+    s.body.appendChild(col);
+  });
+}
+function marquerAccesEnvoye(code){
+  var lics=getLicences(), i=lics.findIndex(function(l){return l.code===code;});
+  if(i<0) return;
+  lics[i].accesEnvoyeLe=Date.now();
+  saveLicences(lics);
+  if(currentLicCode===code) renderLicenceDetail(lics[i]);
 }
 
 // ── GESTION DE SAISON (archivage annuel des licences) ──────────────
@@ -321,14 +404,17 @@ function buildLicences(){
  reconstruireRattachements();
  var season=getCurrentSeason();
  var allLics=getLicences();
- var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison!==season;})
-                           : allLics.filter(function(l){return !l.saison || l.saison===season;});
+ // Les licences d'une saison a venir (reinscriptions ouvertes en avance) restent
+ // dans la liste courante, avec un badge ; seules les saisons passees sont archivees.
+ var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison<season;})
+                           : allLics.filter(function(l){return !l.saison || l.saison>=season;});
+ if(typeof renderReinscriptionAdmin==="function") renderReinscriptionAdmin();
  var el=document.getElementById("licenceList");if(!el)return;
  document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"")+" · Saison "+season+(licShowArchived?" (archives)":"");
 
  var archBox=document.getElementById("lic-archive-toggle");
  if(archBox){
-   var archivedCount=allLics.filter(function(l){return l.saison && l.saison!==season;}).length;
+   var archivedCount=allLics.filter(function(l){return l.saison && l.saison<season;}).length;
    if(archivedCount>0){
      archBox.style.display="block";
      archBox.innerHTML='<button onclick="licShowArchived=!licShowArchived;buildLicences();" style="width:100%;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer;margin:0 12px 10px;width:calc(100% - 24px)">'+(licShowArchived?"← Retour à la saison "+season:"Voir les saisons précédentes ("+archivedCount+")")+'</button>';
@@ -408,7 +494,7 @@ function buildLicences(){
     var impayeBadge=lic.suspendue?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">⛔ Suspendue</span>'
       :statutPaie==="impaye"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">Impayé</span>'
       :statutPaie==="partiel"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Partiel</span>':"";
-    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
+    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+(lic.saison&&lic.saison>season?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#1A2E5A">Saison '+authEsc(lic.saison)+'</span>':'')+(lic.reinscriptionEnLigne?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 15%, transparent)">Réinscription en ligne</span>':'')+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
 }
@@ -526,6 +612,8 @@ function renderLicenceDetail(lic){
  ["Email resp. 2",f.resp2Email],
  ["Contact urgence",f.urgenceNom+(f.urgenceTel?" · "+f.urgenceTel:"")],
  ["Notes",f.notes],
+ ["Questionnaire de santé",f.questionnaireSanteNon===true?"Toutes les réponses à NON":f.questionnaireSanteNon===false?"Au moins un OUI : certificat médical à demander":""],
+ ["Règlement du club",f.reglementAccepte?"Accepté en ligne":""],
  ["Certificat medical",f.certDate?(f.certMedecin?" Dr "+f.certMedecin+" · ":"")+f.certDate+(f.certificat?" ✓ Fichier joint":""):"Non fourni"],
  ].filter(function(r){return r[1];});
  ficheHtml='<div style="margin-top:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden">';
@@ -567,7 +655,7 @@ function renderLicenceDetail(lic){
   // Actions
   var actions="";
   var curSeason=getCurrentSeason();
-  if(lic.saison && lic.saison!==curSeason){
+  if(lic.saison && lic.saison<curSeason){
     actions+='<button onclick="renewLicence(\''+lic.code+'\')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Renouveler pour la saison '+curSeason+'</button>';
     actions+='<div style="font-size:11px;color:var(--mut);text-align:center;margin-top:4px">Recopie la fiche existante (identité, contacts...) sans tout ressaisir.</div>';
   }
@@ -582,7 +670,8 @@ function renderLicenceDetail(lic){
     actions+='<button onclick="addLicenceAsBenevole(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
   }
   if(lic.statut==="validee"){
-    actions+='<button onclick="creerAccesParentDepuisLicence(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Créer l\'accès parent</button>';
+    if(lic.accesEnvoyeLe) actions+='<div style="font-size:11px;color:var(--grn);font-weight:700;text-align:center;margin-top:10px">✓ Accès famille envoyé le '+new Date(lic.accesEnvoyeLe).toLocaleDateString("fr-FR")+'</div>';
+    actions+='<button onclick="proposerAccesFamille(getLicences().find(function(l){return l.code===\''+lic.code+'\';}),true)" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">'+(lic.accesEnvoyeLe?"Renvoyer l'accès à la famille":"Envoyer l'accès à la famille")+'</button>';
   }
 
   el.innerHTML=
@@ -985,7 +1074,8 @@ function validerLicence(){
       savePlayers(players);
     }
   }
-  askAlert("Licence validée ! Le joueur a été ajouté aux inscriptions.");
+  showToast("Licence validée, joueur ajouté aux inscriptions");
+  proposerAccesFamille(lics[idx]);
 }
 
 function resendLicMail(){

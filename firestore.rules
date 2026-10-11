@@ -454,6 +454,22 @@ service cloud.firestore {
         allow read: if readStaff(clubId);
         allow update, delete: if staff(clubId);
       }
+
+      // Réinscription en ligne : un parent redemande une licence pour SON enfant
+      // (celui que le club lui a rattaché), seulement pendant l'ouverture décidée
+      // par le club et pour la saison annoncée. Le staff l'importe en licence.
+      match /reinscriptions/{id} {
+        allow create: if member(clubId)
+          && request.resource.data.auteurUid == request.auth.uid
+          && request.resource.data.statut == 'nouvelle'
+          && request.resource.data.playerId in
+               get(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', [])
+          && get(/databases/$(database)/documents/clubs/$(clubId)/app_data/reinscriptions).data.get('ouvert', false) == true
+          && request.resource.data.saison ==
+               get(/databases/$(database)/documents/clubs/$(clubId)/app_data/reinscriptions).data.get('saison', '');
+        allow read: if readStaff(clubId) || (member(clubId) && resource.data.auteurUid == request.auth.uid);
+        allow update, delete: if staff(clubId);
+      }
     }
 
     // ── Index publics (lecture avant connexion) ─────────────────────

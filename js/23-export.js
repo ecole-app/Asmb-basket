@@ -75,8 +75,8 @@ function exportLicencesXlsx(){
   if(typeof isStaffUser==="function" && !isStaffUser()){ askAlert("Accès non autorisé."); return; }
   var season=getCurrentSeason();
   var all=getLicences();
-  var lics=licShowArchived ? all.filter(function(l){return l.saison && l.saison!==season;})
-                           : all.filter(function(l){return !l.saison || l.saison===season;});
+  var lics=licShowArchived ? all.filter(function(l){return l.saison && l.saison<season;})
+                           : all.filter(function(l){return !l.saison || l.saison>=season;});
   lics=lics.filter(function(l){return genreMatch(licGenre(l),licGenreFilter);});
   lics.sort(function(a,b){return compareCatGenreNom(a.categorie,licGenre(a),licNomTri(a),b.categorie,licGenre(b),licNomTri(b));});
   if(!lics.length){ askAlert("Aucune fiche à exporter."); return; }

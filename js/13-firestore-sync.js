@@ -111,6 +111,8 @@ function chargerMesRattachements(){
   window.fbGetDoc(window.fbDoc(window.fbDb,"rattachements",tel)).then(function(s){
     var j=(s&&s.exists()&&s.data().joueurs)||{};
     localStorage.setItem("asmb_mes_joueurs",JSON.stringify(Object.keys(j)));
+    // Fiches pour la reinscription en ligne : gardees en memoire seulement.
+    window.MES_FICHES=(s&&s.exists()&&s.data().fiches)||{};
     refreshCurrentScreen();
   }).catch(function(){});
 }
