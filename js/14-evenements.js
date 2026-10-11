@@ -1002,7 +1002,7 @@ function shareCovoiturage(eventId){
 }
 
 function showQrModal(kind){
-  var base="https://ecole-app.github.io/Asmb-basket/";
+  var base="https://generalmanagerapp.fr/";
   var url=kind==="inscription"?base+"?inscription=1":base;
   document.getElementById("qr-title").textContent=kind==="inscription"?"QR S'inscrire":"QR Rejoindre l'app";
   document.getElementById("qr-sub").textContent=kind==="inscription"?"Ouvre directement la fiche d'inscription":"Ouvre l'application";

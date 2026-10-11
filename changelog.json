@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791737960",
+    "titre": "Lien d'inscription direct",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Le mail d'inscription contient maintenant un lien qui ouvre directement la fiche de la famille, sans recopier le code. Adresse et QR code passent sur generalmanagerapp.fr."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Écran d'inscription : « Entrez le code envoyé par votre club », exemple de code neutre."
+      }
+    ]
+  },
+  {
     "v": "1791737358",
     "titre": "Onglet Inscription retiré du dirigeant",
     "points": [

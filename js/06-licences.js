@@ -445,7 +445,8 @@ function createLicence(){
 
 function sendLicenceMail(lic){
   var sujet="Votre inscription "+clubLabel()+" - Code "+lic.code;
-  var appUrl="https://ecole-app.github.io/Asmb-basket/?inscription=1";
+  // Lien direct : le code est dans le lien, la famille n'a rien à recopier.
+  var appUrl="https://generalmanagerapp.fr/?inscription=1&code="+encodeURIComponent(lic.code);
   var body=
     "Bonjour"+(lic.nomDest?" "+lic.nomDest:"")+",\n\n"+
     clubLabel()+" vous invite à compléter votre fiche d'inscription en ligne.\n\n"+
@@ -455,9 +456,8 @@ function sendLicenceMail(lic){
     "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"+
     "Comment procéder :\n"+
     "1. Ouvrez ce lien : "+appUrl+"\n"+
-    "2. Appuyez sur l'onglet « Inscription »\n"+
-    "3. Entrez votre code ci-dessus\n"+
-    "4. Remplissez et validez votre fiche\n\n"+
+    "2. Remplissez et validez votre fiche\n\n"+
+    "Si le lien ne s'ouvre pas, allez sur https://generalmanagerapp.fr/?inscription=1 et entrez le code ci-dessus.\n\n"+
     "Astuce : vous pouvez aussi ajouter cette page à votre écran d'accueil pour un accès rapide.\n\n"+
     "Ce code est personnel et valable pour une seule inscription.\n\n"+
     "En cas de problème, contactez le club directement.\n\n"+
@@ -1075,6 +1075,14 @@ function buildInscriptionPublic(){
   // Vérifier si code déjà renseigné
   licCurrentCode=null;
   el.innerHTML=renderCodeEntry();
+  // Lien direct (?inscription=1&code=...) : la fiche s'ouvre sans rien taper.
+  var c=new URLSearchParams(location.search).get("code");
+  var inp=document.getElementById("code-input");
+  if(c&&inp&&!buildInscriptionPublic.__fait){
+    buildInscriptionPublic.__fait=true;
+    inp.value=String(c).trim().toUpperCase().slice(0,20);
+    validerCode();
+  }
 }
 
 function renderCodeEntry(){
@@ -1082,8 +1090,8 @@ function renderCodeEntry(){
     '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;box-shadow:0 4px 20px var(--shadow);text-align:center">'+
       '<div style="font-size:40px;margin-bottom:12px"></div>'+
       '<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Fiche d\'inscription</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code reçu par mail</div>'+
-      '<input id="code-input" type="text" placeholder="'+clubCodePrefix()+'-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
+      '<div style="font-size:12px;color:var(--mut);margin-bottom:20px">Entrez le code envoyé par votre club</div>'+
+      '<input id="code-input" type="text" placeholder="XXXX-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:16px;font-family:monospace;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px" oninput="formatCodeInput(this)">'+
       '<button id="valider-code-btn" onclick="validerCode()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Accéder à ma fiche</button>'+
     '</div>'+
   '</div>';
@@ -1104,7 +1112,7 @@ async function validerCode(){
   if(btn){btn.disabled=true;btn.textContent="Vérification...";}
   var res=await lookupInscriptionCode(code);
   if(btn){btn.disabled=false;btn.textContent="Accéder à ma fiche";}
-  if(!res.found){askAlert("Code invalide. Vérifiez votre mail.");return;}
+  if(!res.found){askAlert("Code invalide. Vérifiez le code envoyé par votre club.");return;}
   // Visiteur public (non connecté) : la fiche sera déposée dans le club du code.
   if(!window.CURRENT_CLUB_ID){
     if(!res.clubId){askAlert("Ce code n'est rattaché à aucun club. Contactez le club.");return;}
