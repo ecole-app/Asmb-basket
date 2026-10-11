@@ -1,0 +1,29 @@
+name: Tests des règles Firestore
+
+on:
+  push:
+    branches: [main]
+    paths: ["firestore.rules", "tests/**", ".github/workflows/tests.yml"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  regles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run test:rules
