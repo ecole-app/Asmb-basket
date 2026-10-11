@@ -51,6 +51,11 @@ function clubCouleur(){
   var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur;
   return (typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
 }
+// Couleur secondaire (facultative) : accent et dégradés, dans tous les thèmes.
+function clubCouleur2(){
+  var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur2;
+  return (clubCouleur() && typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
+}
 function gmHexToRgb(h){ return [1,3,5].map(function(i){return parseInt(h.slice(i,i+2),16);}); }
 function gmMix(h,w){ // mélange avec du blanc : w = part de blanc (0..1)
   var c=gmHexToRgb(h).map(function(v){return Math.round(v+(255-v)*w);});
@@ -78,7 +83,8 @@ function gmFromHsl(t,s,l){
   return "#"+r.map(function(v){return ("0"+v.toString(16)).slice(-2);}).join("");
 }
 // Dégradé de l'en-tête : la couleur, puis deux teintes voisines un peu plus claires.
-function clubDegrade(h){
+function clubDegrade(h,h2){
+  if(h2) return "linear-gradient(135deg,"+h+","+h2+")";
   var x=gmHsl(h);
   return "linear-gradient(135deg,"+h+","+gmFromHsl(x[0]+8,x[1],Math.min(0.62,x[2]+0.06))+" 55%,"+gmFromHsl(x[0]+18,x[1],Math.min(0.68,x[2]+0.12))+")";
 }

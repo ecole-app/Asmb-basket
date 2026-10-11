@@ -193,6 +193,25 @@ service cloud.firestore {
       allow read, write: if superAdmin();
     }
 
+    // ── Demandes d'essai déposées depuis le site (accueil.generalmanagerapp.fr) ──
+    // Formulaire public : création seule, contenu strictement contrôlé. Seul le
+    // super admin les lit et les traite (Plateforme).
+    match /demandes_essai/{id} {
+      function couleurOk(c) { return c == null || (c is string && c.matches('^#[0-9a-fA-F]{6}$')); }
+      allow create: if request.resource.data.keys().hasOnly(['club','sport','ville','licencies','couleur','couleur2','nom','tel','email','statut','at'])
+        && request.resource.data.club is string && request.resource.data.club.size() >= 2 && request.resource.data.club.size() <= 80
+        && request.resource.data.sport is string && request.resource.data.sport.size() <= 30
+        && request.resource.data.get('ville', '') is string && request.resource.data.get('ville', '').size() <= 60
+        && request.resource.data.get('licencies', 0) is int && request.resource.data.get('licencies', 0) >= 0 && request.resource.data.get('licencies', 0) <= 5000
+        && couleurOk(request.resource.data.get('couleur', null)) && couleurOk(request.resource.data.get('couleur2', null))
+        && request.resource.data.nom is string && request.resource.data.nom.size() >= 2 && request.resource.data.nom.size() <= 60
+        && request.resource.data.tel is string && request.resource.data.tel.matches('^[+]?[0-9]{9,15}$')
+        && request.resource.data.get('email', '') is string && request.resource.data.get('email', '').size() <= 100
+        && request.resource.data.statut == 'nouvelle'
+        && request.resource.data.at == request.time;
+      allow read, update, delete: if superAdmin();
+    }
+
     // ── Invitations (usage unique, expirent) ────────────────────────
     match /club_invites/{code} {
       allow get: if true;   // consultation par code uniquement (pas de listing public)
@@ -251,7 +270,7 @@ service cloud.firestore {
       // listé ici (couvert par tests/rules).
       allow update: if (dirigeant(clubId)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name','zone','departement','couleur','logo','lienPaiement','cerfa','facturation','relances']))
+               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','cerfa','facturation','relances']))
         || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club

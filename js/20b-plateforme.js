@@ -98,9 +98,9 @@ function gmRow(parent){
 }
 
 // ═══ INVITATIONS (usage unique, 7 jours) ══════════════════════════════
-function createClubInvite(clubId, clubName, role, grantedPermissions){
+function createClubInvite(clubId, clubName, role, grantedPermissions, extra){
   var code=genSecureCode(3,4);
-  return window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code),{
+  return window.fbSetDoc(window.fbDoc(window.fbDb,"club_invites",code),Object.assign({},extra||{},{
     clubId:clubId, clubName:clubName||"", role:role, usedBy:null,
     // Choisi par le dirigeant au moment de la création du lien (voir
     // openBureauPermissionPicker) ; copié sur le compte à la création dans
@@ -108,7 +108,7 @@ function createClubInvite(clubId, clubName, role, grantedPermissions){
     grantedPermissions:grantedPermissions||{},
     createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp(),
     expiresAt:new Date(Date.now()+7*86400000)
-  }).then(function(){ return code; });
+  })).then(function(){ return code; });
 }
 // Modale "Accès bureau" affichée AVANT de générer le lien d'invitation d'un
 // coach : le dirigeant coche module par module ce que la personne pourra
@@ -345,6 +345,11 @@ function openPlateforme(){
   window.__gmComptesBox=comptesBox;
   s.body.appendChild(comptesBox);
   loadComptesASupprimer(comptesBox);
+  var demBox=document.createElement("div");
+  demBox.style.marginBottom="12px";
+  window.__gmDemBox=demBox;
+  s.body.appendChild(demBox);
+  loadDemandesEssai(demBox);
   var aboBox=document.createElement("div");
   aboBox.style.marginBottom="12px";
   window.__gmAboBox=aboBox;
@@ -505,20 +510,26 @@ function renderClubCard(c, list){
 // se suspend tout seul (voir expirerEssaisPerimes) avec le même mécanisme et
 // le même délai de régularisation de 7 jours qu'une suspension manuelle.
 var GM_TRIAL_JOURS=30;
+// Crée la fiche d'un club en essai gratuit. extra : champs en plus (couleurs,
+// ville...) venus d'une demande d'essai.
+async function creerClub(name, sport, extra){
+  var id=gmSlug(name)+"-"+genSecureCode(1,4).toLowerCase();
+  await window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",id),Object.assign({},extra||{},{
+    name:name, sport:(sport||"basket").trim().toLowerCase(), status:"active", plan:"trial",
+    trialEndsAt:new Date(Date.now()+GM_TRIAL_JOURS*86400000),
+    codePrefix:clubCodePrefixFrom(name), poles:BASE_POLES.slice(),
+    createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp()
+  }));
+  return id;
+}
 async function createClubFlow(list){
   var name=await askPrompt("Nom du club",{placeholder:"Ex : BC Saint-Chamond",confirmText:"Suivant"});
   if(!name||!name.trim()) return;
   var sport=await askPrompt("Sport du club",{defaultValue:"basket",confirmText:"Créer le club"});
   if(sport===null) return;
   name=name.trim();
-  var id=gmSlug(name)+"-"+genSecureCode(1,4).toLowerCase();
   try{
-    await window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",id),{
-      name:name, sport:(sport||"basket").trim().toLowerCase(), status:"active", plan:"trial",
-      trialEndsAt:new Date(Date.now()+GM_TRIAL_JOURS*86400000),
-      codePrefix:clubCodePrefixFrom(name), poles:BASE_POLES.slice(),
-      createdBy:window.ASMB_USER.uid, createdAt:window.fbServerTimestamp()
-    });
+    var id=await creerClub(name, sport);
     var code=await createClubInvite(id, name, "dirigeant");
     loadClubsList(list);
     showInviteResult(code,"dirigeant",name);
@@ -732,6 +743,82 @@ async function listerMembres(clubId){
     var m=[]; snap.forEach(function(d){ var u=d.data()||{}; m.push({uid:d.id,email:u.email||u.identifiant||"",roles:u.roles||[]}); });
     return m;
   }catch(e){ return []; }
+}
+
+// ── Demandes d'essai (formulaire du site) ─────────────────────────────
+// Le dirigeant choisit lui-même nom, sport, ville et couleurs. Valider crée le
+// club en essai avec ces choix, prépare son invitation dirigeant (liée à son
+// numéro) et ouvre un SMS pré-rempli. Rien ne part tout seul.
+async function loadDemandesEssai(box){
+  box.innerHTML="";
+  var snap;
+  try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"demandes_essai"),window.fbWhere("statut","==","nouvelle"))); }catch(e){ return; }
+  var dem=[]; snap.forEach(function(d){ dem.push(Object.assign({id:d.id},d.data())); });
+  dem.sort(function(a,b){ return (gmDate(a.at)||0)-(gmDate(b.at)||0); });
+  if(!dem.length) return;
+  var head=document.createElement("div");
+  head.style.cssText="background:var(--dkg);color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
+  head.textContent="🆕 "+dem.length+" demande"+(dem.length>1?"s":"")+" d'essai";
+  box.appendChild(head);
+  dem.forEach(function(d){
+    var card=gmCard();
+    var at=gmDate(d.at);
+    var coul=[d.couleur,d.couleur2].filter(function(x){return x&&/^#[0-9a-fA-F]{6}$/.test(x);});
+    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email]];
+    var h='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(d.club||"")+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">'+(at?at.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
+    lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+l[0]+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
+    if(coul.length) h+='<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0"><span style="color:var(--mut)">Couleurs</span><span style="display:flex;gap:4px">'+coul.map(function(c){return '<span style="width:18px;height:18px;border-radius:5px;background:'+c+'"></span>';}).join("")+'</span></div>';
+    var info=document.createElement("div"); info.innerHTML=h; card.appendChild(info);
+    var row=gmRow(card);
+    row.appendChild(gmBtn("Valider","primary",function(){ validerDemandeEssai(d); }));
+    row.appendChild(gmBtn("Appeler","soft",function(){ location.href="tel:"+String(d.tel||"").replace(/[^+0-9]/g,""); }));
+    row.appendChild(gmBtn("Refuser","danger",function(){
+      askConfirm("Refuser la demande de "+(d.club||"ce club")+" ?",{danger:true,confirmText:"Refuser"}).then(function(ok){
+        if(!ok) return;
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"demandes_essai",d.id),{statut:"refusee",traiteeLe:new Date()})
+          .then(function(){ loadDemandesEssai(box); majBadgeDemandes(); }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+      });
+    }));
+    box.appendChild(card);
+  });
+}
+async function validerDemandeEssai(d){
+  var ok=await askConfirm("Créer le club « "+d.club+" » en essai gratuit de "+GM_TRIAL_JOURS+" jours, avec ses couleurs, et préparer le SMS pour "+(d.nom||"le dirigeant")+" ?",{confirmText:"Créer le club"});
+  if(!ok) return;
+  try{
+    var extra={};
+    var pal=(typeof CLUB_PALETTE!=="undefined")?CLUB_PALETTE.map(function(x){return x.toLowerCase();}):[];
+    var c1=(d.couleur||"").toLowerCase(), c2=(d.couleur2||"").toLowerCase();
+    if(pal.indexOf(c1)>=0){ extra.couleur=c1; if(pal.indexOf(c2)>=0&&c2!==c1) extra.couleur2=c2; }
+    if(d.ville) extra.ville=String(d.ville).slice(0,60);
+    var tel=String(d.tel||"").replace(/[^+0-9]/g,"");
+    var id=await creerClub(String(d.club).trim(), d.sport||"basket", extra);
+    var code=await createClubInvite(id, d.club, "dirigeant", null, {tel:tel});
+    await window.fbUpdateDoc(window.fbDoc(window.fbDb,"demandes_essai",d.id),{statut:"validee",clubId:id,traiteeLe:new Date()});
+    if(window.__gmDemBox) loadDemandesEssai(window.__gmDemBox);
+    majBadgeDemandes();
+    var prenom=String(d.nom||"").trim().split(/\s+/)[0]||"";
+    var txt="Bonjour"+(prenom?" "+prenom:"")+", votre club "+d.club+" est prêt sur General Manager (essai gratuit "+GM_TRIAL_JOURS+" jours). Créez votre compte dirigeant ici : "+inviteLink(code)+" (lien valable 7 jours).";
+    var sms="sms:"+tel+"?&body="+encodeURIComponent(txt);
+    askConfirm("Club créé. Ouvrir le SMS pré-rempli pour "+(d.nom||tel)+" ?",{confirmText:"Ouvrir le SMS"}).then(function(go){
+      if(go) location.href=sms; else showInviteResult(code,"dirigeant",d.club);
+    });
+  }catch(e){ askAlert("Erreur lors de la création : "+((e&&e.code)||e)); }
+}
+// Pastille sur le bouton Plateforme (accueil admin) : demandes en attente.
+var __gmDemUnsub=null;
+function majBadgeDemandes(){
+  if(typeof isSuperAdmin!=="function"||!isSuperAdmin()||!window.fbReady) return;
+  if(__gmDemUnsub) return;
+  try{
+    __gmDemUnsub=window.fbOnSnapshot(window.fbQuery(window.fbCollection(window.fbDb,"demandes_essai"),window.fbWhere("statut","==","nouvelle")),function(snap){
+      var n=snap.size||0;
+      window.__gmDemandesN=n;
+      var b=document.getElementById("gm-pf-badge");
+      if(b){ b.style.display=n?"flex":"none"; b.textContent=n; }
+    },function(){});
+  }catch(e){}
 }
 
 // Tâches « comptes de connexion à supprimer dans la console Firebase » : créées à

@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791704047",
+    "titre": "2 couleurs de club et demandes d'essai",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Couleurs du club : choisissez 1 ou 2 couleurs. La 2e devient l'accent et termine les dégradés, dans tous les thèmes visuels."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Plateforme : les demandes d'essai envoyées depuis le site arrivent dans la Plateforme (pastille sur le bouton). « Valider » crée le club avec ses couleurs et ouvre un SMS pré-rempli avec le lien d'accès du dirigeant."
+      }
+    ]
+  },
+  {
     "v": "1791703451",
     "titre": "Communauté façon WhatsApp",
     "points": [

@@ -78,38 +78,54 @@ function compresserLogo(file){
   });
 }
 
-// ── Couleurs du club (palette de 50 teintes, dirigeant uniquement) ──
+// ── Couleurs du club (palette de 50 teintes, 2 au plus, dirigeant uniquement) ──
+// 1re touche = couleur principale (en-tête, boutons, PDF), 2e = couleur
+// secondaire (accent, fin des dégradés). Toucher une couleur choisie la retire.
 function buildPaletteClub(){
   var box=document.getElementById("club-palette");
   if(!box||typeof CLUB_PALETTE==="undefined") return;
-  var cur=clubCouleur();
+  var c1=clubCouleur(), c2=clubCouleur2();
   box.innerHTML="";
   CLUB_PALETTE.forEach(function(hex){
+    var h=hex.toLowerCase();
+    var rang=(h===c1)?1:((h===c2)?2:0);
     var b=document.createElement("button");
-    var on=(cur===hex.toLowerCase());
     b.type="button";
-    b.setAttribute("aria-label","Couleur "+hex);
+    b.setAttribute("aria-label","Couleur "+hex+(rang?(rang===1?" (principale)":" (secondaire)"):""));
     b.title=hex;
-    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(on?"3px solid var(--txt)":"2px solid transparent")+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25)";
-    b.onclick=function(){ choisirCouleurClub(hex); };
+    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(rang?"3px solid var(--txt)":"2px solid transparent")+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25);color:#fff;font-size:11px;font-weight:900";
+    if(rang) b.textContent=String(rang);
+    b.onclick=function(){ toucherCouleurClub(h); };
     box.appendChild(b);
   });
   var etat=document.getElementById("club-couleur-etat");
-  if(etat) etat.textContent=cur?"Couleur du club : "+cur:"Couleurs General Manager (par défaut)";
+  if(etat) etat.textContent=c1?("Couleur principale : "+c1+(c2?" · secondaire : "+c2:" · touchez une 2e couleur si vous voulez")):"Couleurs General Manager (par défaut)";
   var rs=document.getElementById("club-couleur-reset");
-  if(rs) rs.style.display=cur?"block":"none";
+  if(rs) rs.style.display=c1?"block":"none";
 }
-
-function choisirCouleurClub(hex){
+function toucherCouleurClub(hex){
+  var c1=clubCouleur(), c2=clubCouleur2(), n1=c1, n2=c2, msg=null;
+  if(hex===c1){ n1=c2||null; n2=null; }
+  else if(hex===c2){ n2=null; }
+  else if(!c1){ n1=hex; }
+  else if(!c2){ n2=hex; }
+  else { n2=hex; msg="2 couleurs maximum : la couleur secondaire a été remplacée"; }
+  enregistrerCouleursClub(n1,n2,msg);
+}
+// Compatibilité : ancien point d'entrée (bouton « Revenir aux couleurs GM »).
+function choisirCouleurClub(hex){ if(hex===null) enregistrerCouleursClub(null,null); else toucherCouleurClub(String(hex).toLowerCase()); }
+function enregistrerCouleursClub(c1,c2,msg){
   if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
   if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
-  if(hex!==null && (typeof CLUB_PALETTE==="undefined" || CLUB_PALETTE.indexOf(hex)<0)) return;
-  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{couleur:hex})
+  var ok=function(x){ return x===null || (typeof CLUB_PALETTE!=="undefined" && CLUB_PALETTE.map(function(p){return p.toLowerCase();}).indexOf(x)>=0); };
+  if(!ok(c1)||!ok(c2)) return;
+  if(!c1) c2=null;
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{couleur:c1,couleur2:c2})
     .then(function(){
-      if(window.CURRENT_CLUB) window.CURRENT_CLUB.couleur=hex;
+      if(window.CURRENT_CLUB){ window.CURRENT_CLUB.couleur=c1; window.CURRENT_CLUB.couleur2=c2; }
       applyClubColor();
       buildPaletteClub();
-      showToast(hex?"Couleur du club enregistrée":"Couleurs General Manager rétablies");
+      showToast(msg||(c1?"Couleurs du club enregistrées":"Couleurs General Manager rétablies"));
     }).catch(function(e){ askAlert("Erreur : "+((e&&(e.message||e.code))||e)); });
 }
 

@@ -3,7 +3,7 @@
 import { describe, it, beforeEach, after } from "node:test";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import {
-  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, collection, query, where, writeBatch, Timestamp,
+  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, collection, query, where, writeBatch, Timestamp, serverTimestamp,
 } from "firebase/firestore";
 import { getEnv, seed, as, SUPER_ADMIN, futur, SG_EXP } from "./helpers.js";
 
@@ -113,7 +113,7 @@ describe("Club suspendu", () => {
 describe("Fiche du club (clubs/{id})", () => {
   it("le dirigeant change le nom et la couleur", async () => {
     const db = await as("dirA");
-    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { name: "Club A+", couleur: "#1f844b" }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { name: "Club A+", couleur: "#1f844b", couleur2: "#1A2E5A" }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });
@@ -354,6 +354,28 @@ describe("Discussions privées", () => {
   it("le staff voit les comptes de son club, pas un parent", async () => {
     await assertSucceeds(getDocs(query(collection(await as("coachA"), "users"), where("clubId", "==", "A"))));
     await assertFails(getDocs(query(collection(await as("parentA"), "users"), where("clubId", "==", "A"))));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
+describe("Demandes d'essai (formulaire public du site)", () => {
+  const ok = () => ({ club: "US Firminy Basket", sport: "basket", ville: "Firminy", licencies: 180, couleur: "#1f844b", couleur2: "#1A2E5A", nom: "Karim B.", tel: "0612345678", email: "", statut: "nouvelle", at: serverTimestamp() });
+  it("un visiteur dépose une demande valide", async () => {
+    await assertSucceeds(addDoc(collection(await as(null), "demandes_essai"), ok()));
+  });
+  it("champ inconnu, numéro invalide, statut forcé ou date choisie : refusé", async () => {
+    const db = await as(null);
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), plan: "premium" }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), tel: "06 12" }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), statut: "validee" }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), at: Timestamp.now() }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), couleur: "red" }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), club: "x".repeat(200) }));
+  });
+  it("personne d'autre que le super admin ne lit les demandes", async () => {
+    await assertFails(getDocs(collection(await as(null), "demandes_essai")));
+    await assertFails(getDocs(collection(await as("dirA"), "demandes_essai")));
+    await assertSucceeds(getDocs(collection(await as(SUPER_ADMIN), "demandes_essai")));
   });
 });
 

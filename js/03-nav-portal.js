@@ -87,28 +87,31 @@ function applyClubLogo(){
 // Chaque entrée : [variables en clair, variables en mode sombre]. Les règles
 // "sombre" doivent exister même quand rien ne change, car les thèmes ont leurs
 // propres valeurs sombres qui, sinon, reprendraient le dessus.
-function clubThemeVars(c){
+function clubThemeVars(c,c2){
   var cl=gmMix(c,0.42), h=gmHsl(c)[0], T=gmFromHsl;
   var bentoBg=T(h,0.5,0.15);
+  // Couleur secondaire : elle prend la place de l'accent de chaque thème
+  // (l'or du thème marine, le bleu d'Épuré...) et termine les dégradés.
+  var a=c2||c, aD=c2?gmMix(c2,0.42):cl, deg=clubDegrade(c,c2);
   return {
-    "moderne":[ "--dkg:"+c+";--ltg:"+c+";--hdrgrad:"+clubDegrade(c), "--dkg:"+c+";--ltg:"+cl+";--hdrgrad:"+clubDegrade(c) ],
+    "moderne":[ "--dkg:"+c+";--ltg:"+a+";--hdrgrad:"+deg, "--dkg:"+c+";--ltg:"+aD+";--hdrgrad:"+deg ],
     // Marine/doré : la couleur remplace le marine (boutons, en-tête, fonds et textes
-    // teintés) ; l'or reste la signature du thème.
-    "classique":[ "--dkg:"+c+";--bg:"+T(h,0.25,0.96)+";--bdr:"+T(h,0.2,0.84)+";--txt:"+T(h,0.3,0.14)+";--txt2:"+T(h,0.12,0.4)+";--mut:"+T(h,0.12,0.4)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")",
-                  "--dkg:"+gmMix(c,0.3)+";--bg:"+T(h,0.3,0.08)+";--sf:"+T(h,0.28,0.11)+";--card:"+T(h,0.28,0.13)+";--bdr:"+T(h,0.25,0.2)+";--txt:"+T(h,0.3,0.95)+";--txt2:"+T(h,0.2,0.82)+";--mut:"+T(h,0.15,0.62)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c,0.78)+")" ],
+    // teintés) ; l'or reste la signature du thème, sauf si le club a une 2e couleur.
+    "classique":[ "--dkg:"+c+(c2?";--ltg:"+c2:"")+";--bg:"+T(h,0.25,0.96)+";--bdr:"+T(h,0.2,0.84)+";--txt:"+T(h,0.3,0.14)+";--txt2:"+T(h,0.12,0.4)+";--mut:"+T(h,0.12,0.4)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c2||c,0.78)+")",
+                  "--dkg:"+gmMix(c,0.3)+(c2?";--ltg:"+gmMix(c2,0.3):"")+";--bg:"+T(h,0.3,0.08)+";--sf:"+T(h,0.28,0.11)+";--card:"+T(h,0.28,0.13)+";--bdr:"+T(h,0.25,0.2)+";--txt:"+T(h,0.3,0.95)+";--txt2:"+T(h,0.2,0.82)+";--mut:"+T(h,0.15,0.62)+";--hdrgrad:linear-gradient(135deg,"+gmShade(c,0.9)+","+gmShade(c2||c,0.78)+")" ],
     // Minimal : barre du haut blanche, fond et cartes neutres ; la couleur du club fait les
     // boutons, l'accent et le bandeau d'accueil (texte blanc dessus, comme les autres thèmes).
-    "epure":[ "--dkg:"+c+";--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ],
+    "epure":[ "--dkg:"+c+";--ltg:"+a+";--hdrgrad:"+c, "--ltg:"+aD+";--hdrgrad:"+c ],
     // Verre sur fond sombre : fond (le body reprend --hdrgrad), en-tête et boutons teintés.
-    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(c,0.55)+";--hdrgrad:linear-gradient(160deg,"+T(h,0.43,0.27)+","+bentoBg+" 55%,"+T(h,0.52,0.22)+")", null ],
+    "bento":[ "--bg:"+bentoBg+";--dkg:"+gmMix(c,0.25)+";--ltg:"+gmMix(a,0.55)+";--hdrgrad:linear-gradient(160deg,"+T(h,0.43,0.27)+","+bentoBg+" 55%,"+(c2?gmShade(c2,0.55):T(h,0.52,0.22))+")", null ],
     // Papier et encre : le papier crème, l'encre et l'en-tête prennent la teinte du club.
-    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(c,0.25)+";--hdrgrad:"+gmShade(c,0.82)+";--bg:"+T(h,0.4,0.91)+";--sf:"+T(h,0.4,0.985)+";--card:"+T(h,0.4,0.985)+";--bdr:"+T(h,0.5,0.08)+";--txt:"+T(h,0.5,0.08)+";--txt2:"+T(h,0.5,0.08)+";--mut:"+T(h,0.2,0.35),
-                "--dkg:"+cl+";--ltg:"+cl+";--bg:"+T(h,0.3,0.07)+";--sf:"+T(h,0.3,0.10)+";--card:"+T(h,0.3,0.10)+";--bdr:"+T(h,0.3,0.18)+";--txt:"+T(h,0.3,0.93)+";--txt2:"+T(h,0.3,0.93)+";--mut:"+T(h,0.2,0.7)+";--hdrgrad:"+T(h,0.3,0.05) ],
+    "feuille":[ "--dkg:"+c+";--ltg:"+gmMix(a,0.25)+";--hdrgrad:"+gmShade(c,0.82)+";--bg:"+T(h,0.4,0.91)+";--sf:"+T(h,0.4,0.985)+";--card:"+T(h,0.4,0.985)+";--bdr:"+T(h,0.5,0.08)+";--txt:"+T(h,0.5,0.08)+";--txt2:"+T(h,0.5,0.08)+";--mut:"+T(h,0.2,0.35),
+                "--dkg:"+cl+";--ltg:"+aD+";--bg:"+T(h,0.3,0.07)+";--sf:"+T(h,0.3,0.10)+";--card:"+T(h,0.3,0.10)+";--bdr:"+T(h,0.3,0.18)+";--txt:"+T(h,0.3,0.93)+";--txt2:"+T(h,0.3,0.93)+";--mut:"+T(h,0.2,0.7)+";--hdrgrad:"+T(h,0.3,0.05) ],
     // Pastel : couleur et accent adoucis, fond dégradé teinté (clair) ou fonds sombres teintés.
-    "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(c,0.5)+";--herograd:"+clubDegrade(c)+";--carnet-body:linear-gradient(180deg,"+T(h,0.75,0.94)+","+T(h+25,0.6,0.955)+" 45%,#fdf6f0)",
-               "--dkg:"+gmMix(c,0.5)+";--ltg:"+gmMix(c,0.6)+";--bg:"+T(h,0.2,0.10)+";--sf:"+T(h,0.2,0.14)+";--card:"+T(h,0.2,0.14)+";--bdr:"+T(h,0.2,0.2)+";--hdrgrad:"+T(h,0.2,0.14) ],
-    // Bloc couleur : l'en-tête et l'accent prennent la couleur, l'encre reste.
-    "editorial":[ "--ltg:"+c+";--hdrgrad:"+c, "--ltg:"+cl+";--hdrgrad:"+c ]
+    "carnet":[ "--dkg:"+gmMix(c,0.4)+";--ltg:"+gmMix(a,0.5)+";--herograd:"+deg+";--carnet-body:linear-gradient(180deg,"+T(h,0.75,0.94)+","+(c2?gmMix(c2,0.9):T(h+25,0.6,0.955))+" 45%,#fdf6f0)",
+               "--dkg:"+gmMix(c,0.5)+";--ltg:"+gmMix(a,0.6)+";--bg:"+T(h,0.2,0.10)+";--sf:"+T(h,0.2,0.14)+";--card:"+T(h,0.2,0.14)+";--bdr:"+T(h,0.2,0.2)+";--hdrgrad:"+T(h,0.2,0.14) ],
+    // Bloc couleur : l'en-tête prend la couleur, l'accent la 2e couleur, l'encre reste.
+    "editorial":[ "--ltg:"+a+";--hdrgrad:"+c, "--ltg:"+aD+";--hdrgrad:"+c ]
   };
 }
 function applyClubColor(){
@@ -118,7 +121,7 @@ function applyClubColor(){
     if(!c){ if(old) old.remove(); return; }
     var st=old||document.createElement("style");
     st.id="club-colors";
-    var css="", tv=clubThemeVars(c);
+    var css="", tv=clubThemeVars(c,(typeof clubCouleur2==="function")?clubCouleur2():null);
     Object.keys(tv).forEach(function(t){
       var sel=(t==="moderne")?'html:not([data-visual-theme])':'html[data-visual-theme="'+t+'"]';
       if(tv[t][0]) css+=sel+'{'+tv[t][0]+'}';
