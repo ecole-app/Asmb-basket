@@ -114,11 +114,13 @@ describe("Fiche du club (clubs/{id})", () => {
   it("le dirigeant change le nom et la couleur", async () => {
     const db = await as("dirA");
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { name: "Club A+", couleur: "#1f844b" }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 } }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });
   it("le dirigeant ne touche pas au pack, au statut, au propriétaire ni à l'échéance", async () => {
     const db = await as("dirA");
-    await assertFails(updateDoc(doc(db, "clubs/A"), { plan: "premium" }));
-    await assertFails(updateDoc(doc(db, "clubs/A"), { status: "active" }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { plan: "paid" }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { status: "suspended" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { ownerUid: "coachA" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { modulesLimites: { compta: true } }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboEcheance: futur() }));
@@ -202,6 +204,20 @@ describe("Invitations", () => {
   it("une invitation valide crée le compte et se consomme", async () => {
     await assertSucceeds(rejoindre("nouveau1", "INVCOACH", {}));
   });
+  it("le numéro du compte est celui de l'invitation, pas un numéro choisi", async () => {
+    const db = await as("famille1");
+    const ok = writeBatch(db);
+    ok.set(doc(db, "users/famille1"), { clubId: "A", roles: ["parent"], inviteCode: "INVPARENT", phone: "0633333333" });
+    ok.update(doc(db, "club_invites/INVPARENT"), { usedBy: "famille1", usedAt: Timestamp.now() });
+    await assertSucceeds(ok.commit());
+  });
+  it("on ne peut pas rejoindre avec le numéro d'une autre famille", async () => {
+    const db = await as("famille2");
+    const b = writeBatch(db);
+    b.set(doc(db, "users/famille2"), { clubId: "A", roles: ["parent"], inviteCode: "INVPARENT", phone: "0622222222" });
+    b.update(doc(db, "club_invites/INVPARENT"), { usedBy: "famille2", usedAt: Timestamp.now() });
+    await assertFails(b.commit());
+  });
   it("une invitation ne sert qu'une fois", async () => {
     await assertSucceeds(rejoindre("nouveau1", "INVCOACH", {}));
     await assertFails(rejoindre("nouveau2", "INVCOACH", {}));
@@ -265,11 +281,31 @@ describe("Caisse buvette (sans compte, avec code du jour)", () => {
 describe("Communauté", () => {
   it("un membre écrit dans un canal de son club", async () => {
     const db = await as("parentA");
-    await assertSucceeds(addDoc(collection(db, "clubs/A/channels/ch1/messages"), { auteurUid: "parentA", texte: "Merci" }));
+    await assertSucceeds(addDoc(collection(db, "clubs/A/channels/ch1/messages"), { senderUid: "parentA", text: "Merci" }));
   });
-  it("un parent ne peut pas modifier le message d'un coach", async () => {
+  it("un parent ne peut ni modifier ni supprimer le message d'un coach", async () => {
     const db = await as("parentA");
-    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { texte: "Entraînement annulé" }));
+    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { text: "Entraînement annulé", edited: true }));
+    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { deleted: true, deletedBy: "vous" }));
+  });
+  it("un parent réagit au message d'un coach et répond à une convocation", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { reactions: { "👍": ["parentA"] } }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { "responses.p1": "present" }));
+  });
+  it("on modifie et supprime son propre message", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(setDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { senderUid: "parentA", text: "Coucou" }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { text: "Bonjour", edited: true }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { deleted: true, deletedBy: "vous" }));
+  });
+  it("on ne poste pas au nom de quelqu'un d'autre", async () => {
+    const db = await as("parentA");
+    await assertFails(setDoc(doc(db, "clubs/A/channels/ch1/messages/m3"), { senderUid: "coachA", text: "Match annulé" }));
+  });
+  it("le coach modère n'importe quel message", async () => {
+    const db = await as("coachA");
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { deleted: true, deletedBy: "le coach" }));
   });
   it("un parent ne crée ni ne supprime un canal", async () => {
     const db = await as("parentA");

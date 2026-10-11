@@ -137,7 +137,10 @@ service cloud.firestore {
         // permissions/titre doivent être exactement ceux posés par le dirigeant
         // sur l'invitation elle-même (grantedPermissions), jamais autre chose.
         && request.resource.data.get('permissions', {}) == get(invitePath(request.resource.data.inviteCode)).data.get('grantedPermissions', {})
-        && request.resource.data.get('titre', null) == null;
+        && request.resource.data.get('titre', null) == null
+        // Le numero rattache le compte aux enfants (rattachements/{tel}) : c'est
+        // celui pose par le club sur l'invitation, jamais un numero choisi.
+        && request.resource.data.get('phone', '') == get(invitePath(request.resource.data.inviteCode)).data.get('tel', '');
       // c) Compte d'origine du super admin : recréation à l'identique du seed
       //    posé par applyAuthedUser() (même après suppression), jamais avec un
       //    autre club ou un autre rôle — sinon la restriction de l'update
@@ -150,7 +153,7 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone']))
         || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
         || (superAdmin() && request.auth.uid == uid
             && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
@@ -214,9 +217,15 @@ service cloud.firestore {
     match /clubs/{clubId} {
       allow read: if member(clubId) || superAdmin();
       allow create, delete: if superAdmin();
-      // Le dirigeant personnalise son club ; statut, formule et propriétaire
-      // restent du ressort de la plateforme.
-      allow update: if (dirigeant(clubId) && !changes(['status','ownerUid','plan','modulesLimites','aboEcheance','aboAvisPour'])) || superAdmin();
+      // Le dirigeant personnalise son club ; tout le reste (statut, formule,
+      // propriétaire, essai, délai de régularisation, échéance d'abonnement...)
+      // est du ressort de la plateforme. Liste blanche : un champ ajouté plus
+      // tard sur la fiche club est refusé au dirigeant tant qu'il n'est pas
+      // listé ici (couvert par tests/rules).
+      allow update: if (dirigeant(clubId)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['name','zone','departement','couleur','logo','lienPaiement','cerfa','facturation','relances']))
+        || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club
       match /support_sessions/{uid} {
@@ -260,7 +269,17 @@ service cloud.firestore {
         allow write: if staff(clubId);
         match /messages/{msgId} {
           allow read: if readMember(clubId);
-          allow create, update: if member(clubId);
+          // On ne poste qu'en son propre nom.
+          allow create: if member(clubId)
+            && request.resource.data.get('senderUid', null) in [request.auth.uid, null];
+          // Texte, suppression : l'auteur ou le staff. Les autres membres ne
+          // touchent qu'aux champs partagés (réactions, sondage, réponses de
+          // convocation, covoiturage).
+          allow update: if member(clubId) && (
+            staff(clubId)
+            || (resource.data.get('senderUid', null) == request.auth.uid
+                && request.resource.data.get('senderUid', null) == request.auth.uid)
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions','options','responses','passagers']));
           allow delete: if staff(clubId);
         }
       }

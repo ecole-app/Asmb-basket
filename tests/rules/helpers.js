@@ -56,7 +56,7 @@ export async function seed() {
     await set("clubs/A/rattachements/0611111111", { playerIds: ["p1"] });
     await set("clubs/A/rattachements/0622222222", { playerIds: ["p2"] });
     await set("clubs/A/channels/ch1", { nom: "U13" });
-    await set("clubs/A/channels/ch1/messages/m1", { auteurUid: "coachA", texte: "RDV 14h" });
+    await set("clubs/A/channels/ch1/messages/m1", { senderUid: "coachA", text: "RDV 14h", reactions: {} });
     await set("clubs/S/roster/x", { nom: "X" });
     await set("clubs/L/inventaire/buv1", { categorie: "buvette", nom: "Eau", prix: 1, qte: 5 });
 
@@ -64,6 +64,7 @@ export async function seed() {
     await set("buvette_codes/BUVOLD", { clubId: "A", expiresAt: passe() });
     await set("buvette_codes/BUVL", { clubId: "L", expiresAt: futur() });
     await set("club_invites/INVCOACH", { clubId: "A", role: "coach", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
+    await set("club_invites/INVPARENT", { clubId: "A", role: "parent", tel: "0633333333", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
     await set("club_invites/INVOLD", { clubId: "A", role: "coach", usedBy: null, expiresAt: passe(), createdBy: "dirA" });
     await set("support_grants/SGA", { clubId: "A", expiresAt: SG_EXP });
     await set("inscription_codes/INSA", { clubId: "A" });
