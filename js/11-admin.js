@@ -716,6 +716,24 @@ function renderAccesList(list,users,phoneToName){
     sub.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
     sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
     card.appendChild(sub);
+    // Le numéro rattache le compte aux enfants (rattachements/{tel}) : seul le
+    // staff le change (firestore.rules), jamais le titulaire du compte.
+    var telBtn=document.createElement("button");
+    telBtn.type="button";
+    telBtn.textContent="📞 Modifier le numéro";
+    telBtn.style.cssText="background:none;border:1px solid var(--bdr);border-radius:10px;padding:6px 10px;min-height:36px;font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:-4px 0 10px";
+    telBtn.addEventListener("click",function(){
+      askPrompt("Nouveau numéro pour "+nameFor(u),{defaultValue:u.phone||"",confirmText:"Enregistrer"}).then(function(v){
+        if(v===null||v===undefined) return;
+        var tel=String(v).replace(/[\s.\-]/g,"");
+        if(tel && !/^\+?\d{9,15}$/.test(tel)){ askAlert("Numéro invalide."); return; }
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{phone:tel}).then(function(){
+          u.phone=tel;
+          sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
+        }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+      });
+    });
+    card.appendChild(telBtn);
     var state={roles:(u.roles||[]).slice(),teams:(u.linkedTeamIds||[]).slice(),titre:u.titre||null,permissions:Object.assign({},u.permissions||{})};
     var teamBox=document.createElement("div");
     var roleWrap=document.createElement("div");

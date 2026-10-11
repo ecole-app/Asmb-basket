@@ -187,6 +187,12 @@ describe("Comptes utilisateurs", () => {
     await assertFails(getDoc(doc(db, "clubs/A/rattachements/0622222222")));
     await assertFails(updateDoc(doc(db, "users/parentA"), { phone: "0622222222" }));
   });
+  it("le dirigeant ou un coach corrige le numéro d'un parent de son club", async () => {
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "users/parentA"), { phone: "0644444444" }));
+    await assertSucceeds(updateDoc(doc(await as("coachA"), "users/parent2A"), { phone: "0655555555" }));
+    await assertFails(updateDoc(doc(await as("coachA"), "users/parentA"), { roles: ["coach"] }));
+    await assertFails(updateDoc(doc(await as("dirB"), "users/parentA"), { phone: "0666666666" }));
+  });
   it("le dirigeant donne un accès compta à un membre du bureau", async () => {
     await assertSucceeds(updateDoc(doc(await as("dirA"), "users/coachA"), { permissions: { comptabilite: true } }));
   });

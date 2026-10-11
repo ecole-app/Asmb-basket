@@ -155,6 +155,9 @@ service cloud.firestore {
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
       allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone']))
         || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
+        // Le coach peut corriger le numéro d'un compte de son club (et rien d'autre).
+        || (staff(resource.data.get('clubId', null))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['phone']))
         || (superAdmin() && request.auth.uid == uid
             && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clubId']));

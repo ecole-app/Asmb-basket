@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791699588",
+    "titre": "Numéro de téléphone modifiable par le club",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Accès : bouton « Modifier le numéro » sur chaque compte. Le titulaire ne peut plus changer son numéro lui-même (il sert à le relier à ses enfants)."
+      }
+    ]
+  },
+  {
     "v": "1791644576",
     "titre": "Échéances d'abonnement et avis de reconduction",
     "points": [
