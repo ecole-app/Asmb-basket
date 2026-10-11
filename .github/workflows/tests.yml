@@ -26,4 +26,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
-      - run: npm run test:rules:ci
+      - run: set -o pipefail; npm run test:rules:ci 2>&1 | tee sortie.log
+        shell: bash
+      - name: Résumé en cas d'échec
+        if: failure()
+        shell: bash
+        run: |
+          msg=$(grep -v '^::' sortie.log | tail -n 60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Fin du journal::$msg"
