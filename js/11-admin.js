@@ -727,8 +727,11 @@ function renderAccesList(list,users,phoneToName){
         if(v===null||v===undefined) return;
         var tel=String(v).replace(/[\s.\-]/g,"");
         if(tel && !/^\+?\d{9,15}$/.test(tel)){ askAlert("Numéro invalide."); return; }
+        var ancien=u.phone||"";
         window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{phone:tel}).then(function(){
           u.phone=tel;
+          // Même numéro sur la fiche d'inscription et dans les canaux.
+          if(ancien&&tel&&typeof remplacerTelephoneClub==="function") remplacerTelephoneClub(ancien,tel,{skipUsers:true});
           sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
         }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
       });

@@ -84,7 +84,61 @@ function lookupInscriptionCode(code, attempt){
   }).catch(function(){ return {found:false, code:code}; });
 }
 
-function saveLicences(l){if(typeof licencesDepasseLimite==="function"&&licencesDepasseLimite(l)){askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard : enregistrement refusé. Le Pack Premium est obligatoire au-delà.");return false;}localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();}
+function saveLicences(l){if(typeof licencesDepasseLimite==="function"&&licencesDepasseLimite(l)){askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard : enregistrement refusé. Le Pack Premium est obligatoire au-delà.");return false;}var avant=null;try{avant=JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){}localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();if(avant)detecterChangementsTelephone(avant,l);}
+
+// ── Numéro de téléphone : fiche d'inscription ↔ compte de connexion ──
+// Le même numéro sert à la fiche (contact), au compte (users/{uid}.phone, qui
+// relie un parent à ses enfants) et aux membres des canaux. Changer l'un met
+// les autres à jour, qu'on parte de la fiche ou de l'écran Accès.
+function telNorm(t){ return String(t||"").replace(/[\s.\-]/g,""); }
+function detecterChangementsTelephone(avant,apres){
+  if(typeof isStaffUser!=="function"||!isStaffUser()) return;
+  var parId={}; (avant||[]).forEach(function(x){ if(x&&x.id!=null) parId[x.id]=x; });
+  var vus={};
+  (apres||[]).forEach(function(x){
+    var a=x&&parId[x.id]; if(!a||!a.fiche||!x.fiche) return;
+    ["telephone","respTel","resp2Tel"].forEach(function(k){
+      var o=telNorm(a.fiche[k]), n=telNorm(x.fiche[k]);
+      if(o&&n&&o!==n&&!vus[o+">"+n]){ vus[o+">"+n]=1; remplacerTelephoneClub(o,n,{skipLicences:true}); }
+    });
+  });
+}
+function remplacerTelephoneClub(ancien,nouveau,opts){
+  opts=opts||{};
+  var o=telNorm(ancien), n=telNorm(nouveau);
+  if(!o||!n||o===n||!window.fbReady) return Promise.resolve();
+  var taches=[];
+  if(!opts.skipUsers){
+    var q=window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID),window.fbWhere("phone","==",o));
+    taches.push(window.fbGetDocs(q).then(function(snap){
+      var w=[]; snap.forEach(function(d){ w.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",d.id),{phone:n})); });
+      return Promise.all(w);
+    }).catch(function(e){ console.log("tel comptes:",e&&e.code); }));
+  }
+  taches.push(window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
+    var w=[];
+    snap.forEach(function(d){
+      var mem=d.data().members||[], change=false;
+      var maj=mem.map(function(m){
+        var t=telNorm(typeof m==="string"?m:m.phone);
+        if(t!==o) return m;
+        change=true;
+        return (typeof m==="string")?n:Object.assign({},m,{phone:n});
+      });
+      if(change) w.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",d.id),{members:maj}));
+    });
+    return Promise.all(w);
+  }).catch(function(e){ console.log("tel canaux:",e&&e.code); }));
+  if(!opts.skipLicences){
+    var lics=getLicences(), change=false;
+    lics.forEach(function(x){
+      var f=x&&x.fiche; if(!f) return;
+      ["telephone","respTel","resp2Tel"].forEach(function(k){ if(telNorm(f[k])===o){ f[k]=n; change=true; } });
+    });
+    if(change) saveLicences(lics);
+  }
+  return Promise.all(taches);
+}
 
 // Dit a chaque numero quelles fiches joueur le concernent. C'est ce qui remplace
 // la recherche d'autrefois, qui parcourait toutes les licences du club pour y

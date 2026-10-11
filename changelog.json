@@ -1,5 +1,71 @@
 [
   {
+    "v": "1791702449",
+    "titre": "Communauté façon WhatsApp",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Appui long sur un message : réagir, répondre, copier, modifier (pendant 2 minutes), transférer, infos, supprimer. Glisser un message vers la droite pour y répondre."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Coches de lecture : ✓ envoyé, ✓✓ lu par certains, ✓✓ bleu lu par tous. « Infos » montre qui a lu."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Messages supprimés : « Ce message a été supprimé », ou « Supprimé par un admin » quand le coach ou le dirigeant le retire."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Messages vocaux (1 min max), séparateurs Aujourd'hui / Hier, bouton « nouveaux messages », liens cliquables."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Discussions privées avec un parent ou un membre du club (jamais avec un compte joueur)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "La convocation dans le canal et les boutons Présent/Absent de l'accueil sont maintenant la même réponse."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Le premier onglet s'appelle Accueil."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Changer un numéro sur la fiche d'inscription met à jour le compte du parent (et inversement)."
+      }
+    ]
+  },
+  {
     "v": "1791699588",
     "titre": "Numéro de téléphone modifiable par le club",
     "points": [

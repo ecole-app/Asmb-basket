@@ -117,7 +117,7 @@ function buildBottomNav(profile){
       (hasBureauAccess2?'<button class="bni" id="bni-c-admin" onclick="navToCoach(\'admin\')"><span class="bni-ic">'+NAV_ICONS.admin+'</span>Gestion</button>':'');
   } else {
     nav.innerHTML=
-      '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.match+'</span>Match</button>'+
+      '<button class="bni on" id="bni-portal" onclick="navToParent(\'home\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
       '<button class="bni" id="bni-eq" onclick="navToParent(\'equipe\')"><span class="bni-ic">'+NAV_ICONS.equipe+'</span>Équipe</button>'+
       '<button class="bni" id="bni-stats" onclick="navToParent(\'stats\')"><span class="bni-ic">'+NAV_ICONS.stats+'</span>Stats</button>'+
       '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>'+

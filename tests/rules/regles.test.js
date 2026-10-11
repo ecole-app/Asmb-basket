@@ -299,11 +299,24 @@ describe("Communauté", () => {
     await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { reactions: { "👍": ["parentA"] } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { "responses.p1": "present" }));
   });
-  it("on modifie et supprime son propre message", async () => {
+  it("on modifie son message pendant 2 minutes, pas après", async () => {
     const db = await as("parentA");
-    await assertSucceeds(setDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { senderUid: "parentA", text: "Coucou" }));
-    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { text: "Bonjour", edited: true }));
-    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m2"), { deleted: true, deletedBy: "vous" }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mRecent"), { text: "Bonjour", edited: true }));
+    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mVieux"), { text: "Modifié", edited: true }));
+  });
+  it("on supprime son propre message à tout moment, contenu effacé", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mVieux"), { deleted: true, deletedBy: "vous", text: "" }));
+  });
+  it("on ne se fait pas passer pour un admin en supprimant", async () => {
+    const db = await as("parentA");
+    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mVieux"), { deleted: true, deletedByAdmin: true, text: "" }));
+  });
+  it("chacun note sa propre lecture, pas celle des autres", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(setDoc(doc(db, "clubs/A/channels/ch1/reads/parentA"), { uid: "parentA", ts: Timestamp.now() }));
+    await assertFails(setDoc(doc(db, "clubs/A/channels/ch1/reads/coachA"), { uid: "coachA", ts: Timestamp.now() }));
+    await assertSucceeds(getDoc(doc(db, "clubs/A/channels/ch1/reads/parentA")));
   });
   it("on ne poste pas au nom de quelqu'un d'autre", async () => {
     const db = await as("parentA");
@@ -317,6 +330,30 @@ describe("Communauté", () => {
     const db = await as("parentA");
     await assertFails(setDoc(doc(db, "clubs/A/channels/ch2"), { nom: "Pirate" }));
     await assertFails(deleteDoc(doc(db, "clubs/A/channels/ch1/messages/m1")));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
+describe("Discussions privées", () => {
+  it("les deux personnes lisent et écrivent, personne d'autre", async () => {
+    await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/messages/d1")));
+    await assertSucceeds(addDoc(collection(await as("parentA"), "clubs/A/dms/dirA__parentA/messages"), { senderUid: "parentA", text: "Merci", ts: Timestamp.now() }));
+    await assertFails(getDoc(doc(await as("coachA"), "clubs/A/dms/dirA__parentA/messages/d1")));
+    await assertFails(getDoc(doc(await as("parent2A"), "clubs/A/dms/dirA__parentA")));
+    await assertFails(addDoc(collection(await as("coachA"), "clubs/A/dms/dirA__parentA/messages"), { senderUid: "coachA", text: "Intrus" }));
+  });
+  it("on liste ses propres discussions", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(getDocs(query(collection(db, "clubs/A/dms"), where("memberUids", "array-contains", "parentA"))));
+  });
+  it("seul le staff ouvre une discussion, à deux et en en faisant partie", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/dms/coachA__parent2A"), { memberUids: ["coachA", "parent2A"] }));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/dms/parentA__parent2A"), { memberUids: ["parentA", "parent2A"] }));
+    await assertFails(setDoc(doc(await as("coachA"), "clubs/A/dms/dirA__parent2A"), { memberUids: ["dirA", "parent2A"] }));
+  });
+  it("le staff voit les comptes de son club, pas un parent", async () => {
+    await assertSucceeds(getDocs(query(collection(await as("coachA"), "users"), where("clubId", "==", "A"))));
+    await assertFails(getDocs(query(collection(await as("parentA"), "users"), where("clubId", "==", "A"))));
   });
 });
 

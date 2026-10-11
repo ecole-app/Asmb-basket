@@ -85,6 +85,7 @@ const PRECACHE = [
   './js/14-evenements.js',
   './js/15-compta-inventaire.js',
   './js/16-communaute.js',
+  './js/16b-messagerie.js',
   './js/17-poles.js',
   './js/18-auth.js',
   './js/19-profils.js',

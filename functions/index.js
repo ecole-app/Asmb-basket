@@ -63,3 +63,42 @@ exports.onChannelMessage = onDocumentCreated(
     if (cleanup.length) await Promise.all(cleanup);
   }
 );
+
+// Discussion privée : seule l'autre personne de la discussion est notifiée.
+exports.onDmMessage = onDocumentCreated(
+  "clubs/{clubId}/dms/{dmId}/messages/{messageId}",
+  async (event) => {
+    const msg = event.data && event.data.data();
+    if (!msg || msg.deleted) return;
+    const { clubId, dmId } = event.params;
+    const dmSnap = await db.collection("clubs").doc(clubId).collection("dms").doc(dmId).get();
+    const uids = (dmSnap.exists && dmSnap.data().memberUids) || [];
+    const dest = uids.filter((u) => u !== msg.senderUid);
+    if (!dest.length) return;
+    const title = msg.pseudo ? `${msg.pseudo} (message privé)` : "Message privé";
+    const body = (msg.type === "media")
+      ? (msg.mediaType === "audio" ? "🎤 Message vocal" : msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
+      : String(msg.text || "").slice(0, 120);
+    if (!body) return;
+    const subsCol = db.collection("clubs").doc(clubId).collection("push_subscriptions");
+    const docs = await Promise.all(dest.map((u) => subsCol.doc(u).get()));
+    const tokens = [], tokenToDocId = {};
+    docs.forEach((d) => {
+      const t = d.exists && d.data() && d.data().token;
+      if (t) { tokens.push(t); tokenToDocId[t] = d.id; }
+    });
+    if (!tokens.length) return;
+    const resp = await admin.messaging().sendEachForMulticast({
+      tokens, notification: { title, body }, data: { url: "./" }, webpush: { fcmOptions: { link: "./" } }
+    });
+    const cleanup = [];
+    resp.responses.forEach((r, i) => {
+      if (r.success) return;
+      const code = r.error && r.error.code;
+      if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
+        cleanup.push(subsCol.doc(tokenToDocId[tokens[i]]).delete());
+      }
+    });
+    if (cleanup.length) await Promise.all(cleanup);
+  }
+);

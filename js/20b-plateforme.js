@@ -686,17 +686,26 @@ async function purgeSousCollection(clubId, name){
 
 // Les canaux portent leurs messages en sous-collection : a purger avant eux.
 async function purgeCanaux(clubId){
-  var snap=await window.fbGetDocs(gmRefCol(clubId,"channels"));
-  var chans=[]; snap.forEach(function(d){ chans.push(d.id); });
-  var msgs=0;
-  for(var c=0;c<chans.length;c++){
-    var ms=await window.fbGetDocs(window.fbCollection(window.fbDb,"clubs",clubId,"channels",chans[c],"messages"));
-    var refs=[];
-    ms.forEach(function(d){ refs.push(window.fbDoc(window.fbDb,"clubs",clubId,"channels",chans[c],"messages",d.id)); });
-    msgs+=await purgeParLots(refs);
+  // Canaux ET discussions privées, avec leurs sous-collections (messages,
+  // lectures, "écrit...").
+  var total={canaux:0, messages:0};
+  var parents=["channels","dms"], subs=["messages","reads","typing"];
+  for(var p=0;p<parents.length;p++){
+    var snap=await window.fbGetDocs(gmRefCol(clubId,parents[p]));
+    var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
+    for(var c=0;c<ids.length;c++){
+      for(var s=0;s<subs.length;s++){
+        var ms=await window.fbGetDocs(window.fbCollection(window.fbDb,"clubs",clubId,parents[p],ids[c],subs[s]));
+        var refs=[];
+        ms.forEach(function(d){ refs.push(window.fbDoc(window.fbDb,"clubs",clubId,parents[p],ids[c],subs[s],d.id)); });
+        var n=await purgeParLots(refs);
+        if(subs[s]==="messages") total.messages+=n;
+      }
+    }
+    await purgeParLots(ids.map(function(id){ return gmRefDoc(clubId,parents[p],id); }));
+    total.canaux+=ids.length;
   }
-  await purgeParLots(chans.map(function(id){ return gmRefDoc(clubId,"channels",id); }));
-  return {canaux:chans.length, messages:msgs};
+  return total;
 }
 
 // Entrees des collections globales rattachees a ce club.

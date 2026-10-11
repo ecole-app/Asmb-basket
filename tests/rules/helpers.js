@@ -57,6 +57,10 @@ export async function seed() {
     await set("clubs/A/rattachements/0622222222", { playerIds: ["p2"] });
     await set("clubs/A/channels/ch1", { nom: "U13" });
     await set("clubs/A/channels/ch1/messages/m1", { senderUid: "coachA", text: "RDV 14h", reactions: {} });
+    await set("clubs/A/channels/ch1/messages/mRecent", { senderUid: "parentA", text: "Coucou", ts: Timestamp.now() });
+    await set("clubs/A/channels/ch1/messages/mVieux", { senderUid: "parentA", text: "Hier", ts: Timestamp.fromMillis(Date.now() - 10 * 60000) });
+    await set("clubs/A/dms/dirA__parentA", { memberUids: ["dirA", "parentA"], members: [], lastMsg: "" });
+    await set("clubs/A/dms/dirA__parentA/messages/d1", { senderUid: "dirA", text: "Bonjour", ts: Timestamp.now() });
     await set("clubs/S/roster/x", { nom: "X" });
     await set("clubs/L/inventaire/buv1", { categorie: "buvette", nom: "Eau", prix: 1, qte: 5 });
 

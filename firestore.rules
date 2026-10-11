@@ -88,6 +88,28 @@ service cloud.firestore {
     function readStaff(clubId)     { return staff(clubId)     || supportActive(clubId); }
     function readDirigeant(clubId) { return dirigeant(clubId) || supportActive(clubId); }
 
+    // ── Messagerie (canaux et discussions privées) ──
+    // Les autres membres ne touchent qu'aux champs partagés : réactions, votes
+    // de sondage, réponses de convocation, places de covoiturage.
+    function champsPartages() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['reactions','options','responses','passagers']);
+    }
+    // L'auteur modifie son texte pendant 2 minutes, et peut le supprimer
+    // (pour tout le monde) quand il veut : le contenu est alors effacé.
+    function auteurPeut() {
+      return resource.data.get('senderUid', null) == request.auth.uid
+        && request.resource.data.get('senderUid', null) == request.auth.uid
+        && (
+          (request.time < resource.data.ts + duration.value(2, 'm')
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text','edited','editedAt']))
+          || (request.resource.data.get('deleted', false) == true
+            && request.resource.data.get('deletedByAdmin', false) == false
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['deleted','deletedBy','deletedAt','text','mediaUrl','fileName','question','replyTo']))
+        );
+    }
+
     function changes(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
     }
@@ -120,8 +142,10 @@ service cloud.firestore {
 
     // ── Comptes utilisateurs ────────────────────────────────────────
     match /users/{uid} {
+      // Le staff (dirigeant, coach) voit les comptes de son club : il en a besoin
+      // pour ouvrir une discussion privée avec un parent.
       allow read: if signedIn()
-        && (request.auth.uid == uid || dirigeant(resource.data.get('clubId', null)) || superAdmin());
+        && (request.auth.uid == uid || staff(resource.data.get('clubId', null)) || superAdmin());
 
       // a) [retiré] L'auto-inscription par numéro de téléphone (phone_index)
       //    n'existe plus : parents comme joueurs rejoignent par invitation
@@ -275,15 +299,17 @@ service cloud.firestore {
           // On ne poste qu'en son propre nom.
           allow create: if member(clubId)
             && request.resource.data.get('senderUid', null) in [request.auth.uid, null];
-          // Texte, suppression : l'auteur ou le staff. Les autres membres ne
-          // touchent qu'aux champs partagés (réactions, sondage, réponses de
-          // convocation, covoiturage).
-          allow update: if member(clubId) && (
-            staff(clubId)
-            || (resource.data.get('senderUid', null) == request.auth.uid
-                && request.resource.data.get('senderUid', null) == request.auth.uid)
-            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions','options','responses','passagers']));
+          allow update: if member(clubId) && (staff(clubId) || auteurPeut() || champsPartages());
           allow delete: if staff(clubId);
+        }
+        // Lu par (coches bleues) : chacun ne note que sa propre lecture.
+        match /reads/{uid} {
+          allow read: if readMember(clubId);
+          allow write: if member(clubId) && request.auth.uid == uid;
+        }
+        // "... écrit" : indicateur éphémère.
+        match /typing/{pseudo} {
+          allow read, write: if member(clubId);
         }
       }
       match /gallery/{id} {
@@ -355,6 +381,32 @@ service cloud.firestore {
       // ces règles.
       match /push_subscriptions/{uid} {
         allow read, write: if member(clubId) && signedIn() && request.auth.uid==uid;
+      }
+
+      // ── Discussions privées (2 personnes : un membre du staff et un adulte du
+      // club). Ouvertes par le staff seulement ; personne d'autre ne les lit,
+      // pas même le dirigeant s'il n'en fait pas partie.
+      match /dms/{dmId} {
+        function dansLaDiscussion() {
+          return member(clubId) && request.auth.uid in
+            get(/databases/$(database)/documents/clubs/$(clubId)/dms/$(dmId)).data.get('memberUids', []);
+        }
+        allow read: if member(clubId) && request.auth.uid in resource.data.get('memberUids', []);
+        allow create: if staff(clubId)
+          && request.resource.data.memberUids is list
+          && request.resource.data.memberUids.size() == 2
+          && request.auth.uid in request.resource.data.memberUids;
+        allow update: if member(clubId) && request.auth.uid in resource.data.get('memberUids', [])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMsg','lastTs','lastSender']);
+        match /messages/{msgId} {
+          allow read: if dansLaDiscussion();
+          allow create: if dansLaDiscussion() && request.resource.data.get('senderUid', null) == request.auth.uid;
+          allow update: if dansLaDiscussion() && (auteurPeut() || champsPartages());
+        }
+        match /reads/{uid} {
+          allow read: if dansLaDiscussion();
+          allow write: if dansLaDiscussion() && request.auth.uid == uid;
+        }
       }
 
       // Purge : lecture et suppression sur TOUTES les sous-collections de ce
