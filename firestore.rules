@@ -212,9 +212,9 @@ service cloud.firestore {
       allow read, update, delete: if superAdmin();
     }
 
-    // ── Avis et suggestions des dirigeants, adressés à l'équipe General Manager ──
+    // ── Avis et suggestions des membres (dirigeants, coachs, parents), adressés à l'équipe General Manager ──
     match /avis_plateforme/{id} {
-      allow create: if dirigeant(request.resource.data.clubId)
+      allow create: if member(request.resource.data.clubId)
         && request.resource.data.keys().hasOnly(['clubId','clubName','uid','email','message','statut','ts'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.message is string && request.resource.data.message.size() >= 1 && request.resource.data.message.size() <= 2000

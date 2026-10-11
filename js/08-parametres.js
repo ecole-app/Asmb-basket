@@ -446,10 +446,6 @@ function buildParamsAccordeon(){
     if(legal&&legal.parentNode) scr.appendChild(legal.parentNode);
     // Ce qui n'a plus d'usage dans cet écran
     var cl=document.getElementById("params-custom-list"); if(cl) cl.style.display="none";
-    ["match","entrainement","evenement"].forEach(function(t){
-      var tg=document.getElementById("notif-"+t+"-toggle");
-      var lab=tg&&tg.closest("label"); if(lab) lab.style.display="none"; // sans effet tant que le push n'est pas actif
-    });
     paramsPaletteRepliable();
   }
   // Le conteneur "dirigeant seul" ne sert plus : la visibilité se fait par bloc.
@@ -461,7 +457,6 @@ function buildParamsAccordeon(){
     var r=grp.querySelector(".pgrp-res"); if(r) r.textContent=paramsResume(g.id);
   });
   var nf=scr.querySelector('.param-block[data-sec="notesfrais"]'); if(nf) nf.style.display=isStaff?"":"none";
-  var av=scr.querySelector('.param-block[data-sec="avis"]'); if(av) av.style.display=isDir?"":"none";
 }
 // Palette des couleurs repliée derrière une ligne qui montre les couleurs choisies.
 function paramsPaletteRepliable(){
@@ -629,7 +624,7 @@ function sendFeedback(prefix){
   if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
   var u=window.ASMB_USER||{};
   // Paramètres du dirigeant : l'avis part à l'équipe General Manager (Plateforme).
-  var versPlateforme=(prefix==="");
+  var versPlateforme=true; // dirigeant, coach ou parent : tous les avis vont à la plateforme
   var envoi=versPlateforme
     ? window.fbAddDoc(window.fbCollection(window.fbDb,"avis_plateforme"),{
         clubId:window.CURRENT_CLUB_ID||"", clubName:(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"",

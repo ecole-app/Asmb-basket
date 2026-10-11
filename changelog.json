@@ -1,6 +1,6 @@
 [
   {
-    "v": "1791734087",
+    "v": "1791735121",
     "titre": "Paramètres rangés",
     "points": [
       {
@@ -13,9 +13,11 @@
       },
       {
         "roles": [
-          "dirigeant"
+          "dirigeant",
+          "coach",
+          "parent"
         ],
-        "texte": "Couleurs du club dans un menu déroulant. « Avis et suggestions » arrive maintenant directement à l'équipe General Manager."
+        "texte": "Couleurs du club dans un menu déroulant. « Avis et suggestions » (dirigeants, coachs et parents) arrive directement à l'équipe General Manager."
       },
       {
         "roles": [

@@ -1215,7 +1215,7 @@
  </div>
  </div><div class="param-block" data-sec="avis"><div class="sec">Avis et suggestions</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
- <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque sur General Manager ? Votre message arrive directement à l'équipe General Manager.</div>
+ <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque sur l'appli ? Votre message arrive directement à l'équipe General Manager.</div>
  <textarea id="feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
  <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
  <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
@@ -1554,6 +1554,13 @@
         <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="continu" id="pp-ta-dur-continu"> Continu en fond (écran d'accueil)</label>
       </div>
 
+      <div class="sec" style="padding:16px 0 8px">Avis et suggestions</div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;padding:14px">
+        <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement à l'équipe General Manager.</div>
+        <textarea id="pp-feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
+        <button id="pp-feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
+        <div id="pp-feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
+      </div>
 
       <div style="margin-top:18px">
         <button onclick="openChangeEmailModal()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:8px">Changer mon e-mail de connexion</button>

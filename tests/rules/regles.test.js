@@ -382,9 +382,10 @@ describe("Demandes d'essai (formulaire public du site)", () => {
 // ───────────────────────────────────────────────────────────────
 describe("Avis des dirigeants à la plateforme", () => {
   const avis = (uid, clubId) => ({ clubId, clubName: "Club", uid, email: "", message: "Super appli", statut: "nouveau", ts: serverTimestamp() });
-  it("le dirigeant envoie un avis pour son club, pas un parent ni un autre club", async () => {
+  it("dirigeant et parent envoient un avis pour leur club, jamais pour un autre", async () => {
     await assertSucceeds(addDoc(collection(await as("dirA"), "avis_plateforme"), avis("dirA", "A")));
-    await assertFails(addDoc(collection(await as("parentA"), "avis_plateforme"), avis("parentA", "A")));
+    await assertSucceeds(addDoc(collection(await as("parentA"), "avis_plateforme"), avis("parentA", "A")));
+    await assertFails(addDoc(collection(await as("parentA"), "avis_plateforme"), avis("dirA", "A")));
     await assertFails(addDoc(collection(await as("dirA"), "avis_plateforme"), avis("dirA", "B")));
   });
   it("seul le super admin lit les avis", async () => {

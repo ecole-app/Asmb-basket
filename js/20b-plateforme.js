@@ -810,7 +810,7 @@ async function validerDemandeEssai(d){
     });
   }catch(e){ askAlert("Erreur lors de la création : "+((e&&e.code)||e)); }
 }
-// ── Avis et suggestions envoyés par les dirigeants (Paramètres) ───────
+// ── Avis et suggestions envoyés par les membres des clubs (Paramètres) ───────
 async function loadAvisPlateforme(box){
   box.innerHTML="";
   var snap;
@@ -820,7 +820,7 @@ async function loadAvisPlateforme(box){
   avis.sort(function(a,b){ return (gmDate(b.ts)||0)-(gmDate(a.ts)||0); });
   var head=document.createElement("div");
   head.style.cssText="background:#2f6f8f;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
-  head.textContent="💬 "+avis.length+" avis de dirigeant"+(avis.length>1?"s":"");
+  head.textContent="💬 "+avis.length+" avis reçu"+(avis.length>1?"s":"");
   box.appendChild(head);
   avis.forEach(function(a){
     var card=gmCard(), t=gmDate(a.ts);
