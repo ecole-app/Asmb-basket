@@ -102,6 +102,7 @@ function buildPaletteClub(){
   if(etat) etat.textContent=c1?("Couleur principale : "+c1+(c2?" · secondaire : "+c2:" · touchez une 2e couleur si vous voulez")):"Couleurs General Manager (par défaut)";
   var rs=document.getElementById("club-couleur-reset");
   if(rs) rs.style.display=c1?"block":"none";
+  if(typeof majBoutonPalette==="function") majBoutonPalette();
 }
 function toucherCouleurClub(hex){
   var c1=clubCouleur(), c2=clubCouleur2(), n1=c1, n2=c2, msg=null;
@@ -355,82 +356,132 @@ function toggleParamHidden(secId){
   buildParametresLayout();
 }
 
-function buildParametresLayout(){
-  renderCustomShortcuts();
-  var order=getParamsOrder();
-  var hidden=getParamsHidden();
-  var allBlocks=Array.prototype.slice.call(document.querySelectorAll("#scr-parametres .param-block"));
+function buildParametresLayout(){ buildParamsAccordeon(); }
 
-  // Reordonne les vrais noeuds du DOM, groupe par parent reel
-  var groups=new Map();
-  allBlocks.forEach(function(b){
-    if(!groups.has(b.parentNode)) groups.set(b.parentNode,[]);
-    groups.get(b.parentNode).push(b);
-  });
-  groups.forEach(function(group,parent){
-    var sorted=group.slice().sort(function(a,b){
-      var ia=order.indexOf(a.dataset.sec), ib=order.indexOf(b.dataset.sec);
-      if(ia<0) ia=999+group.indexOf(a);
-      if(ib<0) ib=999+group.indexOf(b);
-      return ia-ib;
-    });
-    sorted.forEach(function(b){ parent.appendChild(b); });
-  });
-
-  // Etat visuel + controles
-  groups.forEach(function(group,parent){
-    var visible=Array.prototype.slice.call(parent.children).filter(function(c){return c.classList&&c.classList.contains("param-block");});
-    visible.forEach(function(block){
-      var secId=block.dataset.sec;
-      var isCustom=secId.indexOf("custom-")===0;
-      var isHidden=hidden.indexOf(secId)>=0;
-      block.style.display=(isHidden && !PARAMS_EDIT_MODE)?"none":"";
-      block.style.opacity=(isHidden && PARAMS_EDIT_MODE)?".45":"1";
-      block.classList.toggle("editing", PARAMS_EDIT_MODE);
-      var oldCtrl=block.querySelector(".param-ctrl");
-      if(oldCtrl) oldCtrl.remove();
-      if(!PARAMS_EDIT_MODE) return;
-      var ctrl=document.createElement("div");
-      ctrl.className="param-ctrl";
-      ctrl.style.cssText="display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:0 12px 12px";
-      var handle=document.createElement("span");
-      handle.className="drag-handle";
-      handle.style.cssText="color:var(--mut);font-size:20px;margin-right:auto;padding:10px;cursor:grab";
-      handle.textContent="\u2807";
-      ctrl.appendChild(handle);
-      if(isCustom){
-        var delBtn=document.createElement("button");
-        delBtn.textContent="Supprimer";
-        delBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;cursor:pointer";
-        delBtn.addEventListener("click",function(e){
-          e.stopPropagation();
-          askConfirm("Supprimer ce raccourci ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
-            if(!ok)return;
-            var scId=secId.replace("custom-","");
-            saveCustomShortcuts(getCustomShortcuts().filter(function(s){return s.id!==scId;}));
-            buildParametresLayout();
-          });
-        });
-        ctrl.appendChild(delBtn);
-      } else {
-        var hideBtn=document.createElement("button");
-        hideBtn.textContent=isHidden?"Afficher":"Masquer";
-        hideBtn.style.cssText="padding:0 14px;height:34px;border-radius:17px;border:none;background:"+(isHidden?"color-mix(in srgb, var(--ltg) 15%, transparent)":"rgba(192,57,43,.1)")+";color:"+(isHidden?"var(--dkg)":"var(--red)")+";font-size:11px;font-weight:700;cursor:pointer";
-        hideBtn.addEventListener("click",function(e){e.stopPropagation();toggleParamHidden(secId);});
-        ctrl.appendChild(hideBtn);
+// ═══ PARAMÈTRES EN BLOCS REPLIABLES ══════════════════════════════
+// Les sections existantes (param-block) sont rangées dans 5 blocs repliables,
+// tous fermés à l'ouverture. Rien n'est dupliqué : on déplace les vrais noeuds.
+var PARAMS_GROUPES=[
+  {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
+  {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
+  {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","stats","qr"]},
+  {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","relances","facturation","cerfa"]},
+  {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees","@danger"]},
+  {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
+];
+function paramsResume(id){
+  var u=window.ASMB_USER||{}, c=window.CURRENT_CLUB||{};
+  if(id==="compte") return (u.email||"Mon compte")+" · notifications";
+  if(id==="apparence"){
+    var vt=document.documentElement.getAttribute("data-visual-theme")||"moderne";
+    var noms={moderne:"Moderne",classique:"Marine/doré",epure:"Épuré",bento:"Bento",feuille:"Feuille",carnet:"Carnet",editorial:"Éditorial"};
+    return "Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
+  }
+  if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · QR codes";
+  if(id==="argent") return "Paiement licences · relances · factures · CERFA";
+  if(id==="donnees") return "Saison "+getCurrentSeason()+" · sauvegarde auto";
+  if(id==="demo") return "Données fictives pour tester";
+  return "";
+}
+function paramsNoeuds(scr,key){
+  if(key==="@compte"){
+    var box=document.getElementById("account-info-box");
+    var cont=box&&box.parentNode; if(!cont) return [];
+    var sec=cont.previousElementSibling;
+    return (sec&&sec.classList.contains("sec"))?[sec,cont]:[cont];
+  }
+  if(key==="@danger"){
+    var out=[], secs=scr.querySelectorAll(".sec");
+    for(var i=0;i<secs.length;i++){
+      if(secs[i].textContent.trim()==="Zone dangereuse"){
+        out.push(secs[i]);
+        var n=secs[i].nextElementSibling;
+        while(n && !n.classList.contains("sec") && !n.classList.contains("param-block") && !n.classList.contains("pgrp")){ out.push(n); n=n.nextElementSibling; }
+        break;
       }
-      block.appendChild(ctrl);
-    });
-    if(PARAMS_EDIT_MODE && visible.length>1){
-      enablePressDrag(visible, function(newOrder){
-        var globalOrder=getParamsOrder().filter(function(id){return newOrder.indexOf(id)<0;});
-        saveParamsOrder(globalOrder.concat(newOrder));
-        buildParametresLayout();
-      });
     }
+    return out;
+  }
+  var b=scr.querySelector('.param-block[data-sec="'+key+'"]');
+  return b?[b]:[];
+}
+function buildParamsAccordeon(){
+  var scr=document.getElementById("scr-parametres"); if(!scr) return;
+  var profil=localStorage.getItem("asmb_profile");
+  var isDir=(profil==="dirigeant"), isStaff=(profil==="dirigeant"||profil==="coach");
+  var isSA=(typeof isSuperAdmin==="function"&&isSuperAdmin()&&!window.SUPPORT_MODE);
+  var zone=document.getElementById("params-groupes");
+  if(!zone){
+    zone=document.createElement("div");
+    zone.id="params-groupes";
+    zone.style.cssText="padding:12px 12px 4px";
+    var hdr=scr.firstElementChild;
+    scr.insertBefore(zone,hdr.nextSibling);
+    PARAMS_GROUPES.forEach(function(g){
+      var grp=document.createElement("div");
+      grp.className="pgrp"; grp.setAttribute("data-grp",g.id);
+      grp.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px var(--shadow)";
+      var btn=document.createElement("button");
+      btn.type="button";
+      btn.setAttribute("aria-expanded","false");
+      btn.style.cssText="width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;padding:14px;min-height:60px;cursor:pointer;text-align:left;color:var(--txt);font:inherit";
+      btn.innerHTML='<span style="width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">'+g.ic+'</span>'+
+        '<span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:800">'+g.titre+'</span><span class="pgrp-res" style="display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span></span>'+
+        '<span class="pgrp-chev" style="color:var(--mut);font-size:16px;transition:transform .2s">›</span>';
+      var cont=document.createElement("div");
+      cont.className="pgrp-cont";
+      cont.style.cssText="display:none;border-top:1px solid var(--bdr);padding:8px 0 4px";
+      btn.addEventListener("click",function(){
+        var open=cont.style.display==="none";
+        cont.style.display=open?"block":"none";
+        btn.setAttribute("aria-expanded",open?"true":"false");
+        btn.querySelector(".pgrp-chev").style.transform=open?"rotate(90deg)":"";
+      });
+      grp.appendChild(btn); grp.appendChild(cont);
+      zone.appendChild(grp);
+      g.secs.forEach(function(k){ paramsNoeuds(scr,k).forEach(function(n){ cont.appendChild(n); }); });
+    });
+    // Liens légaux en bas de l'écran
+    var legal=scr.querySelector('a[href="legal/cgu.html"]');
+    if(legal&&legal.parentNode) scr.appendChild(legal.parentNode);
+    // Ce qui n'a plus d'usage dans cet écran
+    var cl=document.getElementById("params-custom-list"); if(cl) cl.style.display="none";
+    ["match","entrainement","evenement"].forEach(function(t){
+      var tg=document.getElementById("notif-"+t+"-toggle");
+      var lab=tg&&tg.closest("label"); if(lab) lab.style.display="none"; // sans effet tant que le push n'est pas actif
+    });
+    paramsPaletteRepliable();
+  }
+  // Le conteneur "dirigeant seul" ne sert plus : la visibilité se fait par bloc.
+  var adminOnly=document.getElementById("params-dirigeant-only"); if(adminOnly) adminOnly.style.display="block";
+  PARAMS_GROUPES.forEach(function(g){
+    var grp=zone.querySelector('[data-grp="'+g.id+'"]'); if(!grp) return;
+    var vis=g.sa?isSA:(g.dir?isDir:true);
+    grp.style.display=vis?"":"none";
+    var r=grp.querySelector(".pgrp-res"); if(r) r.textContent=paramsResume(g.id);
   });
-
-  renderParamsAddTile();
+  var nf=scr.querySelector('.param-block[data-sec="notesfrais"]'); if(nf) nf.style.display=isStaff?"":"none";
+  var av=scr.querySelector('.param-block[data-sec="avis"]'); if(av) av.style.display=isDir?"":"none";
+}
+// Palette des couleurs repliée derrière une ligne qui montre les couleurs choisies.
+function paramsPaletteRepliable(){
+  var pal=document.getElementById("club-palette");
+  if(!pal||document.getElementById("club-palette-btn")) return;
+  var btn=document.createElement("button");
+  btn.type="button"; btn.id="club-palette-btn";
+  btn.style.cssText="width:100%;display:flex;align-items:center;gap:10px;border:1.5px solid var(--bdr);border-radius:var(--rx);padding:10px 12px;min-height:46px;background:var(--bg);color:var(--txt);font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left;margin-bottom:8px";
+  btn.innerHTML='<span id="club-palette-sw" style="display:flex;gap:4px"></span><span id="club-palette-lbl" style="flex:1">Choisir les couleurs</span><span style="color:var(--mut)">▾</span>';
+  pal.parentNode.insertBefore(btn,pal);
+  pal.style.display="none";
+  btn.addEventListener("click",function(){ pal.style.display=(pal.style.display==="none")?"grid":"none"; });
+  majBoutonPalette();
+}
+function majBoutonPalette(){
+  var sw=document.getElementById("club-palette-sw"), lbl=document.getElementById("club-palette-lbl");
+  if(!sw||!lbl) return;
+  var c=[clubCouleur(),clubCouleur2()].filter(Boolean);
+  sw.innerHTML=c.map(function(x){ return '<i style="width:20px;height:20px;border-radius:6px;display:block;background:'+x+'"></i>'; }).join("");
+  lbl.textContent=c.length?(c.length===2?"2 couleurs choisies":"1 couleur choisie"):"Couleurs General Manager (par défaut)";
 }
 
 function renderParamsAddTile(){
@@ -577,11 +628,19 @@ function sendFeedback(prefix){
   var btn=document.getElementById(prefix+"feedback-send-btn");
   if(btn){ btn.disabled=true; btn.textContent="Envoi..."; }
   var u=window.ASMB_USER||{};
-  window.fbAddDoc(window.fbCollection(window.fbDb,"feedback"),{
-    uid:u.uid||"", email:u.email||"", phone:u.phone||"",
-    roles:u.roles||[], message:msg, status:"nouveau",
-    ts:window.fbServerTimestamp()
-  }).then(function(){
+  // Paramètres du dirigeant : l'avis part à l'équipe General Manager (Plateforme).
+  var versPlateforme=(prefix==="");
+  var envoi=versPlateforme
+    ? window.fbAddDoc(window.fbCollection(window.fbDb,"avis_plateforme"),{
+        clubId:window.CURRENT_CLUB_ID||"", clubName:(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"",
+        uid:u.uid||"", email:u.email||"", message:msg.slice(0,2000), statut:"nouveau", ts:window.fbServerTimestamp()
+      })
+    : window.fbAddDoc(window.fbCollection(window.fbDb,"feedback"),{
+        uid:u.uid||"", email:u.email||"", phone:u.phone||"",
+        roles:u.roles||[], message:msg, status:"nouveau",
+        ts:window.fbServerTimestamp()
+      });
+  envoi.then(function(){
     if(ta) ta.value="";
     var st=document.getElementById(prefix+"feedback-status");
     if(st){ st.style.display="block"; setTimeout(function(){st.style.display="none";},3000); }

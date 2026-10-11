@@ -350,6 +350,10 @@ function openPlateforme(){
   window.__gmDemBox=demBox;
   s.body.appendChild(demBox);
   loadDemandesEssai(demBox);
+  var avisBox=document.createElement("div");
+  avisBox.style.marginBottom="12px";
+  s.body.appendChild(avisBox);
+  loadAvisPlateforme(avisBox);
   var aboBox=document.createElement("div");
   aboBox.style.marginBottom="12px";
   window.__gmAboBox=aboBox;
@@ -806,6 +810,34 @@ async function validerDemandeEssai(d){
     });
   }catch(e){ askAlert("Erreur lors de la création : "+((e&&e.code)||e)); }
 }
+// ── Avis et suggestions envoyés par les dirigeants (Paramètres) ───────
+async function loadAvisPlateforme(box){
+  box.innerHTML="";
+  var snap;
+  try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"avis_plateforme"),window.fbWhere("statut","==","nouveau"))); }catch(e){ return; }
+  var avis=[]; snap.forEach(function(d){ avis.push(Object.assign({id:d.id},d.data())); });
+  if(!avis.length) return;
+  avis.sort(function(a,b){ return (gmDate(b.ts)||0)-(gmDate(a.ts)||0); });
+  var head=document.createElement("div");
+  head.style.cssText="background:#2f6f8f;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
+  head.textContent="💬 "+avis.length+" avis de dirigeant"+(avis.length>1?"s":"");
+  box.appendChild(head);
+  avis.forEach(function(a){
+    var card=gmCard(), t=gmDate(a.ts);
+    var info=document.createElement("div");
+    info.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--txt)">'+authEsc(a.clubName||a.clubId||"")+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+authEsc(a.email||"")+(t?" · "+t.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>'+
+      '<div style="font-size:13px;color:var(--txt);white-space:pre-line;line-height:1.45">'+authEsc(a.message||"")+'</div>';
+    card.appendChild(info);
+    var row=gmRow(card);
+    if(a.email) row.appendChild(gmBtn("Répondre","soft",function(){ location.href="mailto:"+encodeURIComponent(a.email)+"?subject="+encodeURIComponent("Votre avis sur General Manager"); }));
+    row.appendChild(gmBtn("Traité","primary",function(){
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"avis_plateforme",a.id),{statut:"traite"}).then(function(){ loadAvisPlateforme(box); }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+    }));
+    box.appendChild(card);
+  });
+}
+
 // Pastille sur le bouton Plateforme (accueil admin) : demandes en attente.
 var __gmDemUnsub=null;
 function majBadgeDemandes(){

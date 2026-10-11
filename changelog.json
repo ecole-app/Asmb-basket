@@ -1,5 +1,32 @@
 [
   {
+    "v": "1791734087",
+    "titre": "Paramètres rangés",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les Paramètres sont rangés en blocs repliables (Mon compte, Apparence, Mon club, Argent & documents, Données & saison), tous fermés à l'ouverture."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Couleurs du club dans un menu déroulant. « Avis et suggestions » arrive maintenant directement à l'équipe General Manager."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Notes de frais : réservées au dirigeant et aux coachs. Le mail groupé « Communication » est retiré."
+      }
+    ]
+  },
+  {
     "v": "1791704047",
     "titre": "2 couleurs de club et demandes d'essai",
     "points": [

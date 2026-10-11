@@ -380,6 +380,20 @@ describe("Demandes d'essai (formulaire public du site)", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Avis des dirigeants à la plateforme", () => {
+  const avis = (uid, clubId) => ({ clubId, clubName: "Club", uid, email: "", message: "Super appli", statut: "nouveau", ts: serverTimestamp() });
+  it("le dirigeant envoie un avis pour son club, pas un parent ni un autre club", async () => {
+    await assertSucceeds(addDoc(collection(await as("dirA"), "avis_plateforme"), avis("dirA", "A")));
+    await assertFails(addDoc(collection(await as("parentA"), "avis_plateforme"), avis("parentA", "A")));
+    await assertFails(addDoc(collection(await as("dirA"), "avis_plateforme"), avis("dirA", "B")));
+  });
+  it("seul le super admin lit les avis", async () => {
+    await assertFails(getDocs(collection(await as("dirA"), "avis_plateforme")));
+    await assertSucceeds(getDocs(collection(await as(SUPER_ADMIN), "avis_plateforme")));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
 describe("Fiches d'inscription publiques", () => {
   it("dépôt possible avec le code du club, lecture réservée au staff", async () => {
     await assertSucceeds(setDoc(doc(await as(null), "clubs/A/inscription_submissions/f1"), { code: "INSA", nom: "Léa" }));

@@ -1179,9 +1179,8 @@
  <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:10px">
  <div style="flex:1;min-width:0">
  <div style="font-size:16px;font-weight:800;color:var(--txt)">Paramètres</div>
- <div style="font-size:11px;color:var(--mut)">Notifications · Compte · Données</div>
+ <div style="font-size:11px;color:var(--mut)">Touchez un bloc pour l'ouvrir</div>
  </div>
- <button id="params-edit-toggle" onclick="toggleParamsEditMode()" style="flex-shrink:0;padding:8px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Organiser</button>
  </div>
  <div class="sec">Compte</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
@@ -1216,7 +1215,7 @@
  </div>
  </div><div class="param-block" data-sec="avis"><div class="sec">Avis et suggestions</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
- <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
+ <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque sur General Manager ? Votre message arrive directement à l'équipe General Manager.</div>
  <textarea id="feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
  <button id="feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
  <div id="feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
@@ -1259,7 +1258,7 @@
  </div>
  <div class="param-block" data-sec="couleurs"><div class="sec">Couleurs du club</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
- <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Choisissez 1 ou 2 couleurs : la 1re (principale) fait l'en-tête, les boutons et les PDF, la 2e (secondaire) les accents et les dégradés. Elles s'appliquent pour tous vos membres, dans tous les thèmes visuels (chaque thème garde son style). Touchez une couleur choisie pour la retirer. Sans choix, l'appli garde les couleurs General Manager.</div>
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">1 ou 2 couleurs : la 1re pour l'en-tête, les boutons et les PDF, la 2e pour les accents. Pour tous vos membres, dans tous les thèmes. Touchez une couleur choisie pour la retirer.</div>
  <div id="club-palette" style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px"></div>
  <div id="club-couleur-etat" style="font-size:11px;color:var(--mut);margin-top:10px"></div>
  <button id="club-couleur-reset" onclick="choisirCouleurClub(null)" style="display:none;width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revenir aux couleurs General Manager</button>
@@ -1341,11 +1340,6 @@
  <div style="font-size:12px;font-weight:600;color:var(--txt)"> Rappel événements</div>
  <input type="checkbox" id="notif-evenement-toggle" onchange="toggleNotifType('evenement',this.checked)" style="width:38px;height:20px;accent-color:var(--dkg)">
  </label>
- </div>
- </div><div class="param-block" data-sec="communication"><div class="sec">Communication</div>
- <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="showBroadcast()">
- <div style="font-size:13px;font-weight:700;color:var(--txt)"> Envoyer une info aux familles</div>
- <div style="font-size:11px;color:var(--mut);margin-top:2px">Email groupe a tous les contacts valides</div>
  </div>
  </div><div class="param-block" data-sec="donnees"><div class="sec">Données</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="exportData()">
@@ -1560,13 +1554,6 @@
         <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--txt)"><input type="radio" name="pp-ta-dur" value="continu" id="pp-ta-dur-continu"> Continu en fond (écran d'accueil)</label>
       </div>
 
-      <div class="sec" style="padding:16px 0 8px">Avis et suggestions</div>
-      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;padding:14px">
-        <div style="font-size:12px;color:var(--mut);margin-bottom:10px">Une idée, un bug, une remarque ? Le message part directement au dirigeant.</div>
-        <textarea id="pp-feedback-text" rows="3" placeholder="Écrire ici..." style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--txt);resize:vertical;font-family:inherit"></textarea>
-        <button id="pp-feedback-send-btn" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer">Envoyer</button>
-        <div id="pp-feedback-status" style="font-size:11px;color:var(--grn);margin-top:8px;display:none">Merci, votre message a bien été envoyé.</div>
-      </div>
 
       <div style="margin-top:18px">
         <button onclick="openChangeEmailModal()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-bottom:8px">Changer mon e-mail de connexion</button>
