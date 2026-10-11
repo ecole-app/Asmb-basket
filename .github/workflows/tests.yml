@@ -1,9 +1,9 @@
-name: Tests des règles Firestore
+name: Tests automatiques
 
 on:
   push:
     branches: [main]
-    paths: ["firestore.rules", "tests/**", ".github/workflows/tests.yml"]
+    paths: ["firestore.rules", "js/**", "tests/**", ".github/workflows/tests.yml"]
   pull_request:
   workflow_dispatch:
 
@@ -26,11 +26,19 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
-      - run: set -o pipefail; npm run test:rules:ci 2>&1 | tee sortie.log
+      - name: Règles métier (packs, licences, accès limité)
+        run: npm run test:metier:ci
+        env:
+          TITRE_TESTS: Tests métier
+      - name: Règles de sécurité Firestore
+        run: set -o pipefail; npm run test:rules:ci 2>&1 | tee sortie.log
         shell: bash
+        env:
+          TITRE_TESTS: Tests des règles
       - name: Résumé en cas d'échec
         if: failure()
         shell: bash
         run: |
+          [ -f sortie.log ] || exit 0
           msg=$(grep -v '^::' sortie.log | tail -n 60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
           echo "::error title=Fin du journal::$msg"

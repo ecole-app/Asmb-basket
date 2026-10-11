@@ -13,6 +13,7 @@ export default async function* (source) {
     }
   }
   const enc = (s) => s.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
-  yield "::notice title=Tests des règles::" + pass + " réussis, " + fails.length + " échoués\n";
-  if (fails.length) yield "::error title=Tests en échec::" + enc(fails.join("\n")) + "\n";
+  const titre = process.env.TITRE_TESTS || "Tests des règles";
+  yield "::notice title=" + titre + "::" + pass + " réussis, " + fails.length + " échoués\n";
+  if (fails.length) yield "::error title=" + titre + " en échec::" + enc(fails.join("\n")) + "\n";
 }

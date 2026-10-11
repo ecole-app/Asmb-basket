@@ -16,6 +16,8 @@ peu d'explications, et on **présente l'idée avant de coder** les fonctionnalit
    (workflow « Tests des règles Firestore », résultat lisible via l'API check-runs/annotations).
    La fiche `clubs/{clubId}` est en liste blanche pour le dirigeant : tout nouveau champ
    qu'il doit pouvoir modifier y est ajouté.
+   Règles métier (packs, licences, accès limité) : `tests/metier/` (`cd tests && npm run test:metier`),
+   à compléter quand on touche à ces règles.
 3. Après toute modif d'`index.html` : nombre de `<div` = nombre de `</div>`.
 4. JSON valides : `changelog.json` et `version.json`.
 
