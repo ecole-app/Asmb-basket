@@ -76,7 +76,7 @@ function configurerEssais(){
   s.body.appendChild(intro);
   var actif=document.createElement("label");
   actif.style.cssText="display:flex;align-items:center;gap:10px;padding:12px 0;font-size:14px;font-weight:700;color:var(--txt);cursor:pointer";
-  var cbA=document.createElement("input"); cbA.type="checkbox"; cbA.checked=p.actif!==false; cbA.style.cssText="width:20px;height:20px;accent-color:var(--dkg)";
+  var cbA=document.createElement("input"); cbA.type="checkbox"; cbA.checked=(p.actif===true)||!p.majLe; // jamais configurée : ouverte par défaut cbA.style.cssText="width:20px;height:20px;accent-color:var(--dkg)";
   actif.appendChild(cbA); actif.appendChild(document.createTextNode("Page ouverte aux demandes"));
   s.body.appendChild(actif);
   gmSection(s.body,"Équipes proposées");
