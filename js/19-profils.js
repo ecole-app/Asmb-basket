@@ -164,6 +164,7 @@ function maybeShowDailyThemeAnimation(){
 
 function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.has("essai") && typeof showEssaiPublic==="function"){ showEssaiPublic(urlParams.get("essai")); return; }
   if(urlParams.has("inscription")){
     stack=["inscription"];
     var nav=document.getElementById("bnav-main");
@@ -1457,6 +1458,7 @@ function buildCoachEquipe(){
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
   renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);
   buildCoachDashboard(document.getElementById("coach-presence-summary"));
+  if(typeof renderEssaisCoach==="function") renderEssaisCoach(team);
 
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
   var el=document.getElementById("coach-eq-members");

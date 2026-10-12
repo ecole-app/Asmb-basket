@@ -409,6 +409,7 @@ function buildLicences(){
  var lics=licShowArchived ? allLics.filter(function(l){return l.saison && l.saison<season;})
                            : allLics.filter(function(l){return !l.saison || l.saison>=season;});
  if(typeof renderReinscriptionAdmin==="function") renderReinscriptionAdmin();
+ if(typeof renderEssaisAdmin==="function") renderEssaisAdmin();
  var el=document.getElementById("licenceList");if(!el)return;
  document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"")+" · Saison "+season+(licShowArchived?" (archives)":"");
 

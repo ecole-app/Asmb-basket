@@ -445,3 +445,42 @@ describe("Réinscriptions en ligne", () => {
     await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/reinscriptions/r1"), { statut: "importee" }));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Séances d'essai (page publique du club)", () => {
+  const page = (actif) => ({ actif, nom: "Club A", equipes: [{ id: "t1", nom: "U11", creneaux: "Mercredi 14h" }] });
+  const demande = () => ({ equipeId: "t1", equipeNom: "U11", prenom: "Léo", naissance: "2016-05-04", parentNom: "Nadia K.", tel: "0612345678", message: "", statut: "nouvelle", at: serverTimestamp() });
+
+  it("seul le dirigeant publie la page ; tout le monde la lit par son lien, personne ne liste", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "essai_pages/A"), page(true)));
+    await assertFails(setDoc(doc(await as("coachA"), "essai_pages/A"), page(false)));
+    await assertFails(setDoc(doc(await as("dirB"), "essai_pages/A"), page(false)));
+    await assertSucceeds(getDoc(doc(await as(null), "essai_pages/A")));
+    await assertFails(getDocs(collection(await as(null), "essai_pages")));
+  });
+  it("page ouverte : un visiteur dépose une demande valide, rien d'autre", async () => {
+    await setDoc(doc(await as("dirA"), "essai_pages/A"), page(true));
+    const db = await as(null);
+    await assertSucceeds(addDoc(collection(db, "clubs/A/essais"), demande()));
+    await assertFails(addDoc(collection(db, "clubs/A/essais"), { ...demande(), plan: "x" }));
+    await assertFails(addDoc(collection(db, "clubs/A/essais"), { ...demande(), tel: "06" }));
+    await assertFails(addDoc(collection(db, "clubs/A/essais"), { ...demande(), naissance: "04/05/2016" }));
+    await assertFails(addDoc(collection(db, "clubs/A/essais"), { ...demande(), statut: "planifie" }));
+    await assertFails(addDoc(collection(db, "clubs/A/essais"), { ...demande(), message: "x".repeat(400) }));
+  });
+  it("page fermée, absente ou club suspendu : refus", async () => {
+    await setDoc(doc(await as("dirA"), "essai_pages/A"), page(false));
+    await assertFails(addDoc(collection(await as(null), "clubs/A/essais"), demande()));
+    await assertFails(addDoc(collection(await as(null), "clubs/B/essais"), demande()));
+    await assertFails(addDoc(collection(await as(null), "clubs/S/essais"), demande()));
+  });
+  it("lecture et suivi réservés au staff du club", async () => {
+    await setDoc(doc(await as("dirA"), "essai_pages/A"), page(true));
+    await assertSucceeds(setDoc(doc(await as(null), "clubs/A/essais/e1"), demande()));
+    await assertFails(getDoc(doc(await as(null), "clubs/A/essais/e1")));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/essais/e1")));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/essais/e1")));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/essais/e1"), { statut: "planifie" }));
+    await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/essais/e1"), { statut: "planifie" }));
+  });
+});
