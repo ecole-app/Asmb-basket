@@ -440,6 +440,7 @@ function initAuthGate(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
   if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
+  if(urlParams.has("essai")){ showEssaiPublic(urlParams.get("essai")); return; } // séance d'essai : page publique, pas d'auth
   if(!window.fbAuthReady || !window.fbAuth){
     // Firebase pas prêt : on retente brièvement, sinon fallback ancien comportement
     if(!window.__authWait){ window.__authWait=0; }

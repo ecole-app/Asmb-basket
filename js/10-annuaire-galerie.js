@@ -696,7 +696,7 @@ async function resetAllData(){
     // les inscription_codes de TOUS les clubs a chaque reinitialisation d'un seul
     // club -- elle est donc purgee a part, filtree par clubId (comme le fait
     // deja purgeGlobalePourClub() pour la suppression complete d'un club).
-    var collections=["players","teams","events","licences","evaluations","inscription_submissions","reinscriptions","checkins","gallery","comptabilite","app_data","joinRequests","reminders_sent","backups","feedback"];
+    var collections=["players","teams","events","licences","evaluations","inscription_submissions","reinscriptions","essais","checkins","gallery","comptabilite","app_data","joinRequests","reminders_sent","backups","feedback"];
     for(var i=0;i<collections.length;i++){
       try{
         var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,collections[i]));

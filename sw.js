@@ -76,6 +76,7 @@ const PRECACHE = [
   './js/05c-anim-generateur.js',
   './js/06-licences.js',
   './js/06b-reinscription.js',
+  './js/06c-essais.js',
   './js/07-presences.js',
   './js/08-parametres.js',
   './js/09-ui-modales.js',

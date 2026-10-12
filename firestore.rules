@@ -280,6 +280,16 @@ service cloud.firestore {
       allow delete: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);    // révocation, ou purge du club
     }
 
+    // ── Page publique « Venir essayer » d'un club (id = clubId) ─────
+    // Lisible par tous via son lien (pas de listing) ; seul le dirigeant la publie.
+    // Contient uniquement ce que le club choisit d'afficher (nom, logo, couleurs,
+    // réseaux, équipes et créneaux) : aucune donnée de membre.
+    match /essai_pages/{clubId} {
+      allow get: if true;
+      allow create, update: if dirigeant(clubId) || superAdmin();
+      allow delete: if dirigeant(clubId) || purgeWindow(clubId);
+    }
+
     // ── Clubs ───────────────────────────────────────────────────────
     match /clubs/{clubId} {
       allow read: if member(clubId) || superAdmin();
@@ -461,6 +471,25 @@ service cloud.firestore {
       match /inscription_submissions/{id} {
         allow create: if request.resource.data.code is string
           && get(/databases/$(database)/documents/inscription_codes/$(request.resource.data.code)).data.clubId == clubId;
+        allow read: if readStaff(clubId);
+        allow update, delete: if staff(clubId);
+      }
+
+      // Demande de séance d'essai, déposée sans compte depuis la page publique
+      // du club, seulement quand le dirigeant l'a ouverte. Lecture réservée au staff.
+      match /essais/{id} {
+        allow create: if clubStatus(clubId) == 'active'
+          && get(/databases/$(database)/documents/essai_pages/$(clubId)).data.get('actif', false) == true
+          && request.resource.data.keys().hasOnly(['equipeId','equipeNom','prenom','naissance','parentNom','tel','message','statut','at'])
+          && request.resource.data.equipeId is string && request.resource.data.equipeId.size() <= 60
+          && request.resource.data.equipeNom is string && request.resource.data.equipeNom.size() <= 60
+          && request.resource.data.prenom is string && request.resource.data.prenom.size() >= 1 && request.resource.data.prenom.size() <= 40
+          && request.resource.data.naissance is string && request.resource.data.naissance.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && request.resource.data.parentNom is string && request.resource.data.parentNom.size() >= 2 && request.resource.data.parentNom.size() <= 60
+          && request.resource.data.tel is string && request.resource.data.tel.matches('^[+]?[0-9]{9,15}$')
+          && request.resource.data.get('message', '') is string && request.resource.data.get('message', '').size() <= 300
+          && request.resource.data.statut == 'nouvelle'
+          && request.resource.data.at == request.time;
         allow read: if readStaff(clubId);
         allow update, delete: if staff(clubId);
       }
