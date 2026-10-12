@@ -462,6 +462,9 @@ function renderClubCard(c, list){
     delai=(jr>0) ? ' \u00b7 <span style="color:#E8670A">'+jr+' j pour r\u00e9gulariser</span>'
                  : ' \u00b7 <span style="color:var(--red)">d\u00e9lai d\u00e9pass\u00e9</span>';
   }
+  if(!suspended && !supprime && c.plan==="gratuit"){
+    delai=' \u00b7 <span style="color:var(--grn)">offre gratuite</span>';
+  }
   if(!suspended && !supprime && c.plan==="limite"){
     delai=' \u00b7 <span style="color:#8a4500">accès limité</span>';
   }
@@ -995,20 +998,20 @@ function expirerEssaisPerimes(clubs){
 // Sort un club du suivi d'essai : plus de compte à rebours, plus de suspension
 // automatique. trialEndsAt est laissé tel quel (inutile une fois plan!=="trial").
 function packLabel(c){
-  return c.plan==="standard"?"Standard":(c.plan==="premium"?"Premium":(c.plan==="trial"?"Essai":(c.plan==="limite"?"Limité":"Payant (complet)")));
+  return c.plan==="gratuit"?"Gratuit":c.plan==="standard"?"Standard":(c.plan==="premium"?"Premium":(c.plan==="trial"?"Essai":(c.plan==="limite"?"Limité":"Payant (complet)")));
 }
 // Statut du club : Standard / Premium / Limité (+ modules gardés).
 // Seul le super admin peut écrire "plan" et "modulesLimites" (firestore.rules).
 function choisirPack(c, list){
   var s=gmSheet("Statut de "+(c.name||c.id));
-  var choix=(c.plan==="standard"||c.plan==="premium"||c.plan==="limite")?c.plan:null;
+  var choix=(c.plan==="gratuit"||c.plan==="standard"||c.plan==="premium"||c.plan==="limite")?c.plan:null;
   var mods=Object.assign(gmLimiteDefauts(), c.modulesLimites||{});
   var boutons=document.createElement("div");
-  boutons.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px";
+  boutons.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px";
   var zoneLim=document.createElement("div");
   function rendre(){
     boutons.innerHTML="";
-    [["standard","Standard"],["premium","Premium"],["limite","Limité"]].forEach(function(p){
+    [["gratuit","Gratuit (≤ 60)"],["standard","Standard"],["premium","Premium"],["limite","Limité"]].forEach(function(p){
       var b=document.createElement("button");
       var on=(choix===p[0]);
       b.textContent=p[1];
@@ -1017,6 +1020,12 @@ function choisirPack(c, list){
       boutons.appendChild(b);
     });
     zoneLim.innerHTML="";
+    if(choix==="gratuit"){
+      var g=document.createElement("div");
+      g.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+      g.textContent="Petit club : contenu du Pack Standard, 60 licences par saison au plus. À la 61e, l'appli bloque et demande le passage au Standard. Pas d'échéance ni de facture. (Premium possible à 200 €/an : choisissez Premium et facturez 200 €.)";
+      zoneLim.appendChild(g);
+    }
     if(choix!=="limite") return;
     gmSection(zoneLim,"Modules gardés","Le club ne garde que ce qui est coché. Ses données restent intactes et reviennent dès qu'il paie.");
     var liste=gmCard();
@@ -1050,11 +1059,11 @@ function choisirPack(c, list){
   }));
 }
 function passerEnPayant(c, list){
-  askPrompt("Passer "+(c.name||c.id)+" en club payant (l'essai ne sera plus suivi). Pack souscrit : tapez standard ou premium",{defaultValue:"standard",confirmText:"Confirmer"}).then(function(v){
+  askPrompt("Passer "+(c.name||c.id)+" en club payant (l'essai ne sera plus suivi). Formule : tapez gratuit, standard ou premium",{defaultValue:"standard",confirmText:"Confirmer"}).then(function(v){
     v=(v||"").trim().toLowerCase();
-    if(v!=="standard" && v!=="premium") return;
+    if(v!=="gratuit" && v!=="standard" && v!=="premium") return;
     var maj={plan:v};
-    if(!aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
+    if(v!=="gratuit" && !aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });

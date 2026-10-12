@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791827574",
+    "titre": "Offre gratuite pour les petits clubs",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle offre gratuite pour les clubs jusqu'à 60 licenciés : tout le contenu du Pack Standard. À la 61e licence, l'appli propose le passage au Standard. Le Premium leur est proposé à 200 €/an."
+      }
+    ]
+  },
+  {
     "v": "1791827014",
     "titre": "Réseaux sociaux et boutique du club",
     "points": [

@@ -99,6 +99,31 @@ describe("Limite de 300 licences (Pack Standard)", () => {
   });
 });
 
+describe("Offre gratuite (petits clubs, 60 licences)", () => {
+  it("contenu du Standard : Premium fermé, pas d'accès limité", () => {
+    const c = app({ id: "A", plan: "gratuit" });
+    assert.equal(c.hasPremium(), false);
+    assert.equal(c.isLimite(), false);
+  });
+  it("59 licences : on peut en ajouter une ; 55 : alerte", () => {
+    const c = app({ id: "A", plan: "gratuit" }); c.licences = licences(59);
+    assert.equal(c.verifierLimiteLicences(true), true);
+    const d = app({ id: "A", plan: "gratuit" }); d.licences = licences(55);
+    assert.equal(d.verifierLimiteLicences(), true);
+    assert.equal(d.alertes.length, 1);
+  });
+  it("60 licences : refus, avec passage au Standard demandé", () => {
+    const c = app({ id: "A", plan: "gratuit" }); c.licences = licences(60);
+    assert.equal(c.verifierLimiteLicences(), false);
+    assert.match(String(c.alertes[0]), /Standard/);
+    assert.equal(c.licencesDepasseLimite(licences(61)), true);
+  });
+  it("Premium des petits clubs annoncé à 200 €, 300 € pour les autres", () => {
+    assert.match(app({ id: "A", plan: "gratuit" }).prixPremium(), /^200/);
+    assert.match(app({ id: "A", plan: "standard" }).prixPremium(), /^300/);
+  });
+});
+
 describe("Fin d'essai (Plateforme)", () => {
   it("essai dépassé → accès limité avec les modules par défaut", async () => {
     const c = app({ id: "P", plan: "premium" });

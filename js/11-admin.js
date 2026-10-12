@@ -46,6 +46,21 @@ var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inve
 // club payant), "trial" (essai complet) et le club d'origine = tout débloqué.
 var GM_LIMITE_LICENCES_STANDARD=300;
 var GM_ALERTE_LICENCES=270;
+// Offre gratuite (plan "gratuit", petits clubs) : contenu du Pack Standard,
+// 60 licences par saison au plus ; au-delà, passage au Standard obligatoire.
+var GM_LIMITE_LICENCES_GRATUIT=60;
+var GM_ALERTE_LICENCES_GRATUIT=55;
+function estGratuit(){ var c=window.CURRENT_CLUB||{}; return c.plan==="gratuit" && !window.SUPPORT_MODE; }
+// Plafond de licences par saison du club courant (Infinity en Premium).
+function limiteLicencesClub(){
+  if(hasPremium()) return Infinity;
+  return estGratuit()?GM_LIMITE_LICENCES_GRATUIT:GM_LIMITE_LICENCES_STANDARD;
+}
+function messageLimiteLicences(){
+  return estGratuit()
+    ? "Limite de "+GM_LIMITE_LICENCES_GRATUIT+" licences atteinte pour la saison avec l'offre gratuite.\n\nPassez au Pack Standard (200\u00a0€/an) pour en enregistrer davantage. Les licences existantes ne sont pas touchées. Contactez-nous pour changer de formule."
+    : "Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte pour la saison avec le Pack Standard.\n\nLe Pack Premium est obligatoire pour en enregistrer davantage (nouvelles licences comme renouvellements). Les licences existantes ne sont pas touchées.";
+}
 function hasPremium(){
   var c=window.CURRENT_CLUB||{};
   if(window.SUPPORT_MODE) return true;
@@ -57,7 +72,7 @@ function hasPremium(){
     var je=(typeof joursEssaiRestants==="function")?joursEssaiRestants(c):null;
     return je===null || je>0;
   }
-  return c.plan!=="standard" && c.plan!=="limite";
+  return c.plan!=="standard" && c.plan!=="gratuit" && c.plan!=="limite";
 }
 // ═══ ACCÈS LIMITÉ (club qui ne paie pas) ══════════════════════════════
 // plan "limite" + clubs/{id}.modulesLimites (choisis par le super admin) :
@@ -153,13 +168,14 @@ function nbLicencesSaison(){
 function verifierLimiteLicences(sansAlerte){
   if(isLimite() && !limiteOuvert("licences")){ askModuleFerme("Licences"); return false; }
   if(hasPremium()) return true;
-  var nb=nbLicencesSaison();
-  if(nb>=GM_LIMITE_LICENCES_STANDARD){
-    askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte pour la saison avec le Pack Standard.\n\nLe Pack Premium est obligatoire pour en enregistrer davantage (nouvelles licences comme renouvellements). Les licences existantes ne sont pas touchées.",{title:"Pack Premium requis"});
+  var nb=nbLicencesSaison(), max=limiteLicencesClub();
+  var alerte=estGratuit()?GM_ALERTE_LICENCES_GRATUIT:GM_ALERTE_LICENCES;
+  if(nb>=max){
+    askAlert(messageLimiteLicences(),{title:estGratuit()?"Pack Standard requis":"Pack Premium requis"});
     return false;
   }
-  if(nb>=GM_ALERTE_LICENCES && !sansAlerte){
-    askAlert("Attention : "+nb+" licences sur "+GM_LIMITE_LICENCES_STANDARD+" pour la saison. Au-delà de "+GM_LIMITE_LICENCES_STANDARD+", le Pack Premium sera obligatoire pour en enregistrer davantage.");
+  if(nb>=alerte && !sansAlerte){
+    askAlert("Attention : "+nb+" licences sur "+max+" pour la saison. Au-delà de "+max+", "+(estGratuit()?"le Pack Standard (200\u00a0€/an)":"le Pack Premium")+" sera obligatoire pour en enregistrer davantage.");
   }
   return true;
 }
@@ -170,7 +186,7 @@ function licencesDepasseLimite(nouvelle){
   var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
   function n(list){ return (list||[]).filter(function(l){return !cur||(l.saison||cur)===cur;}).length; }
   var nNew=n(nouvelle), nOld=n(getLicences());
-  return nNew>nOld && nNew>GM_LIMITE_LICENCES_STANDARD;
+  return nNew>nOld && nNew>limiteLicencesClub();
 }
 // Écran d'explication affiché quand un module Premium est ouvert en Standard.
 // Comptabilité verrouillée : rien n'est supprimé. Le club peut toujours
@@ -181,10 +197,12 @@ function licencesDepasseLimite(nouvelle){
 function comptaLignesAvantVerrou(){
   return (typeof getComptabilite==="function"?getComptabilite():[]).filter(function(l){return !l.horsPremium;});
 }
+// Petit club en offre gratuite : Premium à 200 €/an au lieu de 300.
+function prixPremium(){ return estGratuit()?"200\u00a0€/an":"300\u00a0€/an"; }
 function askComptaVerrouillee(){
   var n=comptaLignesAvantVerrou().length;
   if(!n){ askPremiumRequis("Comptabilité complète"); return; }
-  askConfirm("La comptabilité complète fait partie du Pack Premium (300\u00a0€/an).\n\nVos "+n+" ligne"+(n>1?"s":"")+" déjà saisie"+(n>1?"s":"")+" sont conservée"+(n>1?"s":"")+" et réapparaîtront dès le passage en Premium. Vous pouvez dès maintenant les télécharger en PDF.",
+  askConfirm("La comptabilité complète fait partie du Pack Premium ("+prixPremium()+").\n\nVos "+n+" ligne"+(n>1?"s":"")+" déjà saisie"+(n>1?"s":"")+" sont conservée"+(n>1?"s":"")+" et réapparaîtront dès le passage en Premium. Vous pouvez dès maintenant les télécharger en PDF.",
     {title:"Comptabilité verrouillée",confirmText:"Télécharger le PDF"}).then(function(ok){
       if(ok && typeof exportComptaBilanPdf==="function") exportComptaBilanPdf({archive:true});
     });

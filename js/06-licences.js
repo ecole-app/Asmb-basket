@@ -84,7 +84,7 @@ function lookupInscriptionCode(code, attempt){
   }).catch(function(){ return {found:false, code:code}; });
 }
 
-function saveLicences(l){if(typeof licencesDepasseLimite==="function"&&licencesDepasseLimite(l)){askAlert("Limite de "+GM_LIMITE_LICENCES_STANDARD+" licences atteinte avec le Pack Standard : enregistrement refusé. Le Pack Premium est obligatoire au-delà.");return false;}var avant=null;try{avant=JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){}localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();if(avant)detecterChangementsTelephone(avant,l);}
+function saveLicences(l){if(typeof licencesDepasseLimite==="function"&&licencesDepasseLimite(l)){askAlert(messageLimiteLicences());return false;}var avant=null;try{avant=JSON.parse(localStorage.getItem("asmb_licences")||"[]");}catch(e){}localStorage.setItem("asmb_licences",JSON.stringify(l));fsWriteCollection("licences",l);syncInscriptionCodes(l);publierRattachements();if(avant)detecterChangementsTelephone(avant,l);}
 
 // ── Numéro de téléphone : fiche d'inscription ↔ compte de connexion ──
 // Le même numéro sert à la fiche (contact), au compte (users/{uid}.phone, qui
@@ -500,7 +500,7 @@ function buildLicences(){
 }
 
 function showNewLicence(){
-  if(typeof hasPremium==="function" && !hasPremium() && nbLicencesSaison()>=GM_LIMITE_LICENCES_STANDARD){ verifierLimiteLicences(); return; }
+  if(typeof hasPremium==="function" && !hasPremium() && nbLicencesSaison()>=limiteLicencesClub()){ verifierLimiteLicences(); return; }
   var tip=document.getElementById("lic-mail-tip");
   if(tip)tip.style.display=localStorage.getItem("asmb_tip_lic_mail_dismissed")?"none":"flex";
   document.getElementById("modal-new-lic").style.display="flex";
