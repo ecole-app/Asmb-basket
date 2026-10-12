@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791842463",
+    "titre": "Version ordinateur (dirigeant)",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur, un menu fixe à gauche remplace la barre du bas : Accueil, Communauté, Planning, Équipes, Joueurs, Formation, Licences (avec le nombre de fiches à valider), Comptabilité, Buvette, Sponsors, Documents… Le contenu prend toute la largeur. Rien ne change sur téléphone."
+      }
+    ]
+  },
+  {
     "v": "1791842190",
     "titre": "Séances d'essai",
     "points": [

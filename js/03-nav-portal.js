@@ -55,6 +55,7 @@ function showScr(id){
  if(id==="portal"||id==="parent-home"||id==="coach-equipe"){
    setTimeout(maybeShowDailyThemeAnimation, 60);
  }
+ if(typeof gmDeskEcran==="function") gmDeskEcran(id);
 }
 // Nom du club actif : jamais de nom de club écrit en dur dans l'interface,
 // sinon un autre club verrait « ASMB » dans son propre header.
@@ -138,6 +139,7 @@ function applyClubLabels(){
     document.querySelectorAll(".js-club-name").forEach(function(el){ el.textContent=n; });
     applyClubLogo();
     if(typeof stack!=="undefined" && stack.length) updateHdr(stack[stack.length-1]);
+    if(typeof gmDeskSync==="function") gmDeskSync();
   }catch(e){}
 }
 

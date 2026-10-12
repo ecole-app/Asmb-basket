@@ -122,6 +122,7 @@ function buildBottomNav(profile){
       '<button class="bni" id="bni-ev" onclick="navToParent(\'events\')"><span class="bni-ic">'+NAV_ICONS.events+'</span>Événement</button>'+
       '<button class="bni" id="bni-p-communaute" onclick="navToParent(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>';
   }
+  if(typeof gmDeskSync==="function") gmDeskSync();
 }
 
 function navToParent(which){
