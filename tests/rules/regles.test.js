@@ -114,6 +114,7 @@ describe("Fiche du club (clubs/{id})", () => {
   it("le dirigeant change le nom et la couleur", async () => {
     const db = await as("dirA");
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { name: "Club A+", couleur: "#1f844b", couleur2: "#1A2E5A" }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { liens: { facebook: "https://www.facebook.com/clubA", boutique: "https://boutique.clubA.fr" } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });
@@ -362,6 +363,13 @@ describe("Demandes d'essai (formulaire public du site)", () => {
   const ok = () => ({ club: "US Firminy Basket", sport: "basket", ville: "Firminy", licencies: 180, couleur: "#1f844b", couleur2: "#1A2E5A", nom: "Karim B.", tel: "0612345678", email: "", statut: "nouvelle", at: serverTimestamp() });
   it("un visiteur dépose une demande valide", async () => {
     await assertSucceeds(addDoc(collection(await as(null), "demandes_essai"), ok()));
+  });
+  it("réseaux sociaux et boutique facultatifs, mais rien d'autre dedans", async () => {
+    const db = await as(null);
+    await assertSucceeds(addDoc(collection(db, "demandes_essai"), { ...ok(), liens: { instagram: "https://www.instagram.com/usfb", boutique: "https://shop.usfb.fr" } }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), liens: { plan: "premium" } }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), liens: { site: "x".repeat(300) } }));
+    await assertFails(addDoc(collection(db, "demandes_essai"), { ...ok(), liens: "https://x.fr" }));
   });
   it("champ inconnu, numéro invalide, statut forcé ou date choisie : refusé", async () => {
     const db = await as(null);

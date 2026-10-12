@@ -34,6 +34,7 @@ function buildParametres(){
   majApercuLogo();
   var lpEl=document.getElementById("club-lien-paiement");
   if(lpEl) lpEl.value=(window.CURRENT_CLUB && window.CURRENT_CLUB.lienPaiement) || "";
+  remplirFormLiensClub();
   remplirFormCerfa();
   remplirFormFacturation();
   remplirFormRelances();
@@ -189,6 +190,37 @@ function enregistrerLienPaiement(){
     .then(function(){
       if(window.CURRENT_CLUB) window.CURRENT_CLUB.lienPaiement=val||null;
       showToast(val?"Lien de paiement enregistré !":"Lien de paiement retiré.");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+
+// ═══ RÉSEAUX SOCIAUX ET BOUTIQUE DU CLUB ════════════════════════════
+function remplirFormLiensClub(){
+  var box=document.getElementById("club-liens-form"); if(!box) return;
+  var l=(window.CURRENT_CLUB&&window.CURRENT_CLUB.liens)||{};
+  box.innerHTML="";
+  CLUB_LIENS.forEach(function(d){
+    var g=document.createElement("div"); g.className="form-group";
+    var lab=document.createElement("label"); lab.className="form-label"; lab.htmlFor="club-lien-"+d.k; lab.textContent=d.label;
+    var i=document.createElement("input"); i.className="form-input"; i.id="club-lien-"+d.k;
+    i.type="url"; i.inputMode="url"; i.autocapitalize="off"; i.placeholder=d.ph; i.value=l[d.k]||"";
+    g.appendChild(lab); g.appendChild(i); box.appendChild(g);
+  });
+}
+function enregistrerLiensClub(){
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
+  if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
+  var liens={}, faux=[];
+  CLUB_LIENS.forEach(function(d){
+    var el=document.getElementById("club-lien-"+d.k); if(!el) return;
+    var v=normaliserLienClub(d.k, el.value);
+    if(v===null){ faux.push(d.label); return; }
+    if(v){ liens[d.k]=v; el.value=v; }
+  });
+  if(faux.length){ askAlert("Lien non reconnu : "+faux.join(", ")+". Collez l'adresse complète (https://...)."); return; }
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{liens:liens})
+    .then(function(){
+      if(window.CURRENT_CLUB) window.CURRENT_CLUB.liens=liens;
+      showToast(Object.keys(liens).length?"Liens enregistrés":"Liens retirés");
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
 }
 
@@ -364,7 +396,7 @@ function buildParametresLayout(){ buildParamsAccordeon(); }
 var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
   {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
-  {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","stats","qr"]},
+  {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","relances","facturation","cerfa"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees","@danger"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
@@ -377,7 +409,7 @@ function paramsResume(id){
     var noms={moderne:"Moderne",classique:"Marine/doré",epure:"Épuré",bento:"Bento",feuille:"Feuille",carnet:"Carnet",editorial:"Éditorial"};
     return "Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
   }
-  if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · QR codes";
+  if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · "+(clubLiens().length?clubLiens().length+" lien"+(clubLiens().length>1?"s":""):"réseaux")+" · QR codes";
   if(id==="argent") return "Paiement licences · relances · factures · CERFA";
   if(id==="donnees") return "Saison "+getCurrentSeason()+" · sauvegarde auto";
   if(id==="demo") return "Données fictives pour tester";

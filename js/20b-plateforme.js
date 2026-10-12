@@ -768,7 +768,7 @@ async function loadDemandesEssai(box){
     var card=gmCard();
     var at=gmDate(d.at);
     var coul=[d.couleur,d.couleur2].filter(function(x){return x&&/^#[0-9a-fA-F]{6}$/.test(x);});
-    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email]];
+    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
     var h='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(d.club||"")+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">'+(at?at.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
     lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+l[0]+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
@@ -796,6 +796,11 @@ async function validerDemandeEssai(d){
     var c1=(d.couleur||"").toLowerCase(), c2=(d.couleur2||"").toLowerCase();
     if(pal.indexOf(c1)>=0){ extra.couleur=c1; if(pal.indexOf(c2)>=0&&c2!==c1) extra.couleur2=c2; }
     if(d.ville) extra.ville=String(d.ville).slice(0,60);
+    // Réseaux et boutique donnés dans la demande : re-vérifiés avant d'aller sur la fiche du club.
+    if(d.liens && typeof d.liens==="object" && typeof normaliserLienClub==="function"){
+      var lz={}; CLUB_LIENS.forEach(function(x){ var v=normaliserLienClub(x.k,d.liens[x.k]); if(v) lz[x.k]=v; });
+      if(Object.keys(lz).length) extra.liens=lz;
+    }
     var tel=String(d.tel||"").replace(/[^+0-9]/g,"");
     var id=await creerClub(String(d.club).trim(), d.sport||"basket", extra);
     var code=await createClubInvite(id, d.club, "dirigeant", null, {tel:tel});

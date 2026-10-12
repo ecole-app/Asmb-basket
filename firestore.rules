@@ -198,7 +198,17 @@ service cloud.firestore {
     // super admin les lit et les traite (Plateforme).
     match /demandes_essai/{id} {
       function couleurOk(c) { return c == null || (c is string && c.matches('^#[0-9a-fA-F]{6}$')); }
-      allow create: if request.resource.data.keys().hasOnly(['club','sport','ville','licencies','couleur','couleur2','nom','tel','email','statut','at'])
+      function lienOk(l) { return l is string && l.size() <= 200; }
+      // Réseaux sociaux et boutique du club (facultatifs) : 5 liens au plus, texte court.
+      function liensOk(d) {
+        return !('liens' in d) || (d.liens is map
+          && d.liens.keys().hasOnly(['facebook','instagram','tiktok','site','boutique'])
+          && lienOk(d.liens.get('facebook','')) && lienOk(d.liens.get('instagram',''))
+          && lienOk(d.liens.get('tiktok','')) && lienOk(d.liens.get('site',''))
+          && lienOk(d.liens.get('boutique','')));
+      }
+      allow create: if request.resource.data.keys().hasOnly(['club','sport','ville','licencies','couleur','couleur2','liens','nom','tel','email','statut','at'])
+        && liensOk(request.resource.data)
         && request.resource.data.club is string && request.resource.data.club.size() >= 2 && request.resource.data.club.size() <= 80
         && request.resource.data.sport is string && request.resource.data.sport.size() <= 30
         && request.resource.data.get('ville', '') is string && request.resource.data.get('ville', '').size() <= 60
@@ -281,7 +291,7 @@ service cloud.firestore {
       // listé ici (couvert par tests/rules).
       allow update: if (dirigeant(clubId)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','cerfa','facturation','relances']))
+               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances']))
         || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club

@@ -1172,6 +1172,7 @@ function buildParentHome(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Match'+(matchesPlayed>1?"s":"")+' joué'+(matchesPlayed>1?"s":"")+'</div>'+
   '</div>'+licBadge;
   if(typeof renderReinscriptionParent==="function") renderReinscriptionParent();
+  var lienEl=document.getElementById("parent-club-liens"); if(lienEl&&typeof clubLiensHtml==="function") lienEl.innerHTML=clubLiensHtml();
 
   // Chips : enfants (avatar) si rattachés, sinon équipes
   var chipsEl=document.getElementById("parent-team-chips");

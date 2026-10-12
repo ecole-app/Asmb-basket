@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791827014",
+    "titre": "Réseaux sociaux et boutique du club",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Paramètres › Mon club › Réseaux et boutique : ajoutez Facebook, Instagram, TikTok, le site et la boutique du club (un @compte suffit pour Instagram et TikTok)."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Nouveau « Suivre le club » en bas de l'Accueil : les réseaux et la boutique du club en un clic."
+      }
+    ]
+  },
+  {
     "v": "1791742473",
     "titre": "Accès famille par SMS et réinscription en ligne",
     "points": [
