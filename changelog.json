@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791842190",
+    "titre": "Séances d'essai",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Licences › Séances d'essai : ouvrez une page « Venir essayer » (lien + QR code) avec vos équipes et créneaux. Les familles demandent une séance sans créer de compte ; vous répondez par SMS en choisissant l'entraînement, puis « Inscrire » crée la fiche et envoie le lien d'inscription."
+      },
+      {
+        "roles": [
+          "coach"
+        ],
+        "texte": "Équipe : les séances d'essai prévues pour votre équipe s'affichent avec le prénom et l'âge de l'enfant."
+      }
+    ]
+  },
+  {
     "v": "1791827574",
     "titre": "Offre gratuite pour les petits clubs",
     "points": [
