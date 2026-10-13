@@ -466,3 +466,240 @@ function comptaExportFec(ex){
   if(siren.length!==9) askAlert("FEC téléchargé ("+f.ecritures+" écritures). Le nom officiel commence par le SIREN du club : renseignez le SIRET dans Paramètres › Facturation pour qu'il soit repris.");
   else showToast("FEC téléchargé : "+f.ecritures+" écritures, équilibré ("+comptaEur(f.debit)+")");
 }
+
+// ── Étape 3 : rapprochement bancaire ─────────────────────────────────
+// Le relevé (CSV ou OFX exporté depuis la banque en ligne) est lu sur
+// l'appareil, rien n'est envoyé ni gardé. Chaque opération est comparée aux
+// lignes « Banque » non pointées : même montant, date proche. Une ligne
+// pointée garde l'identifiant de l'opération (releveId) : réimporter le même
+// relevé ne pointe jamais deux fois.
+function comptaDecoderFichier(buf){
+  var t;
+  try{ t=new TextDecoder("utf-8",{fatal:true}).decode(buf); }
+  catch(e){ t=new TextDecoder("windows-1252").decode(buf); }
+  return t.replace(/^﻿/,"");
+}
+function comptaNombreFr(s){
+  s=String(s==null?"":s).replace(/[\s  €]|EUR/gi,"");
+  if(!s) return null;
+  var neg=/^\(.*\)$/.test(s)||/-$/.test(s); s=s.replace(/[()]/g,"").replace(/-$/,"");
+  if(/^[+-]?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s=s.replace(/\./g,"").replace(",",".");
+  else if(/^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s=s.replace(/,/g,"");
+  else s=s.replace(",",".");
+  if(!/^[+-]?\d+(\.\d+)?$/.test(s)) return null;
+  var n=parseFloat(s); return neg?-Math.abs(n):n;
+}
+function comptaDateReleve(s){
+  s=String(s||"").trim(); var m;
+  if((m=s.match(/^(\d{4})-?(\d{2})-?(\d{2})/))) return m[1]+"-"+m[2]+"-"+m[3];
+  if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/))){
+    var y=m[3].length===2?"20"+m[3]:m[3];
+    return y+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2);
+  }
+  return null;
+}
+function comptaCsv(txt,sep){
+  var rows=[], row=[], cur="", q=false;
+  for(var i=0;i<txt.length;i++){
+    var c=txt.charAt(i);
+    if(q){ if(c==='"'){ if(txt.charAt(i+1)==='"'){ cur+='"'; i++; } else q=false; } else cur+=c; continue; }
+    if(c==='"'&&cur==="") q=true;
+    else if(c===sep){ row.push(cur); cur=""; }
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&txt.charAt(i+1)==="\n") i++; row.push(cur); cur=""; if(row.join("").trim()) rows.push(row); row=[]; }
+    else cur+=c;
+  }
+  row.push(cur); if(row.join("").trim()) rows.push(row);
+  return rows.map(function(r){ return r.map(function(x){ return x.trim(); }); });
+}
+function comptaIdOp(date,montant,lib){
+  return date+"|"+comptaArrondi(montant).toFixed(2)+"|"+String(lib||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,30);
+}
+function comptaLireReleve(txt){
+  txt=String(txt||"");
+  var ops=[];
+  if(/<STMTTRN>/i.test(txt)){
+    txt.split(/<STMTTRN>/i).slice(1).forEach(function(bloc){
+      function tag(n){ var m=bloc.match(new RegExp("<"+n+">([^<\\r\\n]*)","i")); return m?m[1].trim():""; }
+      var d=comptaDateReleve(tag("DTPOSTED").slice(0,8)), mt=comptaNombreFr(tag("TRNAMT"));
+      var lib=[tag("NAME"),tag("MEMO")].filter(function(x,i,a){ return x&&a.indexOf(x)===i; }).join(" ");
+      if(d&&mt) ops.push({date:d,montant:comptaArrondi(mt),libelle:lib,fitid:tag("FITID")});
+    });
+  } else {
+    var lignes=txt.split(/\r?\n/).slice(0,40), sep=";", best=-1;
+    [";","\t",","].forEach(function(s){ var n=lignes.reduce(function(t,l){ return t+(l.split(s).length-1); },0); if(n>best){ best=n; sep=s; } });
+    var rows=comptaCsv(txt,sep), h=-1;
+    for(var i=0;i<Math.min(rows.length,30);i++){
+      var j=rows[i].join("|").toLowerCase();
+      if(/date/.test(j)&&/(montant|d[ée]bit|cr[ée]dit|amount|somme)/.test(j)){ h=i; break; }
+    }
+    if(h<0) return {ops:[],erreur:"Colonnes introuvables : le fichier doit avoir une ligne d'en-tête avec « Date » et « Montant » (ou « Débit » / « Crédit »)."};
+    var hd=rows[h].map(function(x){ return x.toLowerCase(); });
+    function col(re,sauf){ for(var k=0;k<hd.length;k++){ if(re.test(hd[k])&&!(sauf&&sauf.test(hd[k]))) return k; } return -1; }
+    var cD=col(/date.*op/); if(cD<0) cD=col(/date/,/valeur/); if(cD<0) cD=col(/date/);
+    var cDeb=col(/d[ée]bit/), cCre=col(/cr[ée]dit/), cMt=col(/montant|amount|somme/);
+    var cLibs=[]; hd.forEach(function(x,k){ if(/libell|label|description|intitul|d[ée]tail|nature|motif|op[ée]ration|information/.test(x)&&k!==cD&&k!==cDeb&&k!==cCre&&k!==cMt) cLibs.push(k); });
+    rows.slice(h+1).forEach(function(r){
+      var d=comptaDateReleve(r[cD]); if(!d) return;
+      var mt=null;
+      if(cDeb>=0||cCre>=0){
+        var de=cDeb>=0?comptaNombreFr(r[cDeb]):null, cr=cCre>=0?comptaNombreFr(r[cCre]):null;
+        if(de!=null||cr!=null) mt=(cr||0)-Math.abs(de||0);
+      }
+      if(mt==null&&cMt>=0) mt=comptaNombreFr(r[cMt]);
+      if(!mt) return;
+      var lib=cLibs.map(function(k){ return r[k]||""; }).filter(function(x,i,a){ return x&&a.indexOf(x)===i; }).join(" ").replace(/\s+/g," ");
+      ops.push({date:d,montant:comptaArrondi(mt),libelle:lib});
+    });
+  }
+  // Identifiant stable ; deux opérations identiques le même jour restent distinctes.
+  var vus={};
+  ops.forEach(function(o){
+    var base=o.fitid?"ofx|"+o.fitid:comptaIdOp(o.date,o.montant,o.libelle);
+    vus[base]=(vus[base]||0)+1; o.id=base+(vus[base]>1?"#"+vus[base]:"");
+    delete o.fitid;
+  });
+  ops.sort(function(a,b){ return a.date.localeCompare(b.date); });
+  return {ops:ops,erreur:ops.length?"":"Aucune opération lue dans ce fichier."};
+}
+function comptaJoursEntre(a,b){ return Math.abs((new Date(a+"T12:00:00")-new Date(b+"T12:00:00"))/86400000); }
+function comptaMotsCommuns(a,b){
+  function mots(s){ return String(s||"").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"").split(/[^A-Z0-9]+/).filter(function(m){ return m.length>=3; }); }
+  var mb=mots(b), n=0; mots(a).forEach(function(m){ if(mb.indexOf(m)>=0) n++; }); return n;
+}
+function comptaMontantSigne(l){ return comptaArrondi((l.type==="depense"?-1:1)*(Number(l.montant)||0)); }
+// Résultat : une entrée par opération, état « deja » (déjà pointée), « trouve »
+// (ligne proposée) ou « aCreer » (avec les lignes de même montant à choisir).
+function comptaRapprocher(ops,lines){
+  var banque=(lines||[]).filter(function(l){ return comptaJournal(l)==="BQ"; });
+  var parReleve={}; banque.forEach(function(l){ if(l.releveId) parReleve[l.releveId]=l; });
+  var libres=banque.filter(function(l){ return !l.pointe; });
+  var res=ops.map(function(o){ return {op:o,etat:parReleve[o.id]?"deja":"aCreer",ligne:parReleve[o.id]||null,choix:[]}; });
+  var paires=[];
+  res.forEach(function(r,i){
+    if(r.etat==="deja") return;
+    libres.forEach(function(l){
+      if(Math.abs(comptaMontantSigne(l)-r.op.montant)>0.005) return;
+      var j=comptaJoursEntre(l.date||r.op.date,r.op.date);
+      if(j<=20) paires.push({i:i,l:l,score:j-3*comptaMotsCommuns(r.op.libelle,[l.motif,l.tiers,l.reference].join(" "))});
+    });
+  });
+  paires.sort(function(a,b){ return a.score-b.score; });
+  var pris={};
+  paires.forEach(function(p){
+    if(res[p.i].ligne||pris[p.l.id]) return;
+    res[p.i].ligne=p.l; res[p.i].etat="trouve"; pris[p.l.id]=1;
+  });
+  res.forEach(function(r){
+    if(r.etat!=="aCreer") return;
+    r.choix=libres.filter(function(l){ return !pris[l.id]&&Math.abs(comptaMontantSigne(l)-r.op.montant)<=0.005; });
+  });
+  return res;
+}
+function comptaMoyenDepuisLibelle(lib){
+  lib=String(lib||"").toUpperCase();
+  if(/\bCB\b|CARTE|PAIEMENT PAR C/.test(lib)) return "CB";
+  if(/CHQ|CHEQUE|CHÈQUE|REMISE/.test(lib)) return "Chèque";
+  if(/RETRAIT|DAB|ESPECES|ESPÈCES/.test(lib)) return "Espèces";
+  return "Virement";
+}
+
+function openComptaReleve(){
+  if(typeof hasModulePermission==="function"&&!hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
+  if(typeof hasPremium==="function"&&!hasPremium()){ askComptaVerrouillee(); return; }
+  var s=gmSheet("Relevé bancaire"), b=s.body;
+  var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.5";
+  intro.textContent="Téléchargez le relevé depuis votre banque en ligne (format CSV, Excel-CSV ou OFX), puis importez-le ici. L'appli retrouve les lignes de la compta qui correspondent : vous pointez en un clic, et ce qui manque devient une ligne. Le fichier reste sur votre appareil.";
+  b.appendChild(intro);
+  var inp=document.createElement("input"); inp.type="file"; inp.accept=".csv,.ofx,.qfx,.txt,text/csv"; inp.style.display="none"; b.appendChild(inp);
+  var row=gmRow(b);
+  var btnImp=gmBtn("📂 Importer un relevé","primary",function(){ inp.click(); }); row.appendChild(btnImp);
+  var zone=document.createElement("div"); zone.style.marginTop="12px"; b.appendChild(zone);
+  var ops=[];
+  inp.addEventListener("change",function(){
+    var f=inp.files&&inp.files[0]; if(!f) return;
+    if(f.size>3*1024*1024){ inp.value=""; return askAlert("Fichier trop gros (3 Mo max)."); }
+    var r=new FileReader();
+    r.onload=function(){
+      var lu=comptaLireReleve(comptaDecoderFichier(new Uint8Array(r.result)));
+      inp.value="";
+      if(lu.erreur){ zone.innerHTML=""; return askAlert(lu.erreur); }
+      ops=lu.ops; btnImp.textContent="📂 Importer un autre relevé"; rendre();
+    };
+    r.readAsArrayBuffer(f);
+  });
+  function fr(d){ return d.split("-").reverse().join("/"); }
+  function rendre(){
+    var lines=getComptabilite(), res=comptaRapprocher(ops,lines);
+    var nb={deja:0,trouve:0,aCreer:0}; res.forEach(function(r){ nb[r.etat]++; });
+    var entrees=0, sorties=0; ops.forEach(function(o){ if(o.montant>0) entrees+=o.montant; else sorties-=o.montant; });
+    zone.innerHTML="";
+    var resume=document.createElement("div");
+    resume.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;font-size:12.5px;color:var(--txt);line-height:1.6";
+    resume.innerHTML='<b>'+ops.length+' opération'+(ops.length>1?"s":"")+'</b> du '+fr(ops[0].date)+' au '+fr(ops[ops.length-1].date)+
+      ' · entrées '+comptaEur(entrees)+' · sorties '+comptaEur(sorties)+'<br>'+
+      '<span style="color:var(--grn);font-weight:700">'+nb.trouve+' trouvée'+(nb.trouve>1?"s":"")+'</span> · '+
+      '<span style="color:#b45309;font-weight:700">'+nb.aCreer+' sans ligne</span> · '+
+      '<span style="color:var(--mut)">'+nb.deja+' déjà pointée'+(nb.deja>1?"s":"")+'</span>';
+    zone.appendChild(resume);
+    var coches=[];
+    var ordre={trouve:0,aCreer:1,deja:2};
+    res.slice().sort(function(a,b){ return ordre[a.etat]-ordre[b.etat]||a.op.date.localeCompare(b.op.date); }).forEach(function(r){
+      var o=r.op, c=document.createElement("div");
+      c.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(r.etat==="trouve"?"var(--grn)":r.etat==="aCreer"?"#d97706":"var(--bdr)")+";border-radius:var(--rs);padding:10px 12px;margin-top:8px;"+(r.etat==="deja"?"opacity:.6":"");
+      c.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0;flex:1"><div style="font-size:11px;color:var(--mut)">'+fr(o.date)+'</div>'+
+        '<div style="font-size:12.5px;font-weight:700;color:var(--txt);word-break:break-word">'+authEsc(o.libelle||"(sans libellé)")+'</div></div>'+
+        '<div style="font-size:14px;font-weight:800;white-space:nowrap;color:'+(o.montant<0?"var(--red)":"var(--grn)")+'">'+(o.montant>0?"+":"")+comptaEur(o.montant)+'</div></div>';
+      var bas=document.createElement("div"); bas.style.cssText="margin-top:8px;font-size:12px;color:var(--txt2)";
+      if(r.etat==="deja"){
+        bas.textContent="✓ Déjà pointée : "+(r.ligne.piece||"")+" · "+(r.ligne.motif||"");
+      } else if(r.etat==="trouve"){
+        var lab=document.createElement("label"); lab.style.cssText="display:flex;gap:8px;align-items:flex-start;cursor:pointer";
+        var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=true; cb.style.cssText="width:17px;height:17px;flex-shrink:0;margin-top:1px";
+        var t=document.createElement("span"); t.innerHTML='Correspond à <b>'+authEsc(r.ligne.piece||"")+'</b> · '+authEsc(r.ligne.motif||r.ligne.categorie||"")+' ('+fr(r.ligne.date||o.date)+')';
+        lab.appendChild(cb); lab.appendChild(t); bas.appendChild(lab);
+        coches.push({cb:cb,r:r});
+      } else {
+        var lig=document.createElement("div"); lig.style.cssText="display:flex;gap:6px;flex-wrap:wrap;align-items:center";
+        if(r.choix.length){
+          var ch=document.createElement("select"); ch.className="form-input"; ch.style.cssText="flex:1 1 100%;padding:7px;font-size:12px";
+          ch.innerHTML='<option value="">Associer à une ligne existante de même montant…</option>'+r.choix.map(function(l){ return '<option value="'+authEsc(l.id)+'">'+authEsc((l.piece||"")+" · "+(l.motif||l.categorie||"")+" ("+fr(l.date||"")+")")+'</option>'; }).join("");
+          ch.addEventListener("change",function(){
+            if(!ch.value) return;
+            var all=getComptabilite(), l=all.filter(function(x){ return String(x.id)===ch.value; })[0]; if(!l) return;
+            l.pointe=true; l.releveId=o.id; saveComptabilite(all); showToast("Ligne "+(l.piece||"")+" pointée"); rendre(); buildComptabilite();
+          });
+          lig.appendChild(ch);
+        }
+        var type=o.montant>0?"recette":"depense";
+        // Frais de la banque (tenue de compte, commissions, agios) : compte 627 « Services bancaires ».
+        var fraisBq=type==="depense"&&/FRAIS|COMMISSION|AGIOS|TENUE DE COMPTE|COTIS(ATION)? ?CARTE|ABONNEMENT/i.test(o.libelle||"");
+        var defCat=fraisBq?"Frais administratifs":"Autre";
+        var cat=document.createElement("select"); cat.className="form-input"; cat.style.cssText="flex:1;min-width:140px;padding:7px;font-size:12px";
+        cat.innerHTML=COMPTA_CATS[type].map(function(x){ return '<option value="'+authEsc(x)+'"'+(x===defCat?" selected":"")+'>'+authEsc(x)+'</option>'; }).join("");
+        lig.appendChild(cat);
+        lig.appendChild(gmBtn("+ Créer la ligne","soft",function(){
+          var all=getComptabilite();
+          all.push({id:Date.now().toString()+Math.random().toString(36).slice(2,6),date:o.date,montant:Math.abs(o.montant),type:type,categorie:cat.value,
+            motif:String(o.libelle||"Opération bancaire").slice(0,120),tiers:"",moyen:comptaMoyenDepuisLibelle(o.libelle),compte:"Banque",
+            reference:"Relevé bancaire",pointe:true,releveId:o.id,justificatif:null});
+          if(fraisBq&&cat.value==="Frais administratifs") all[all.length-1].compteNum="627";
+          saveComptabilite(all); showToast("Ligne créée et pointée"); rendre(); buildComptabilite();
+        }));
+        bas.appendChild(lig);
+      }
+      c.appendChild(bas); zone.appendChild(c);
+    });
+    if(coches.length){
+      var pied=document.createElement("div"); pied.style.cssText="position:sticky;bottom:-20px;background:var(--bg);padding:12px 0 4px;margin-top:8px";
+      var go=gmBtn("✓ Pointer les "+coches.length+" opérations trouvées","primary",function(){
+        var all=getComptabilite(), n=0, parId={}; all.forEach(function(l){ parId[String(l.id)]=l; });
+        coches.forEach(function(x){ if(!x.cb.checked) return; var l=parId[String(x.r.ligne.id)]; if(!l) return; l.pointe=true; l.releveId=x.r.op.id; n++; });
+        if(!n) return askAlert("Aucune opération cochée.");
+        saveComptabilite(all); showToast(n+" ligne"+(n>1?"s":"")+" pointée"+(n>1?"s":"")); rendre(); buildComptabilite();
+      });
+      go.style.cssText+=";width:100%;padding:13px;font-size:13.5px";
+      coches.forEach(function(x){ x.cb.addEventListener("change",function(){ var k=coches.filter(function(y){ return y.cb.checked; }).length; go.textContent="✓ Pointer les "+k+" opération"+(k>1?"s":"")+" cochée"+(k>1?"s":""); }); });
+      pied.appendChild(go); zone.appendChild(pied);
+    }
+  }
+}

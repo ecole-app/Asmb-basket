@@ -147,12 +147,13 @@ function buildComptabilite(){
         '<div style="color:var(--txt);font-weight:800;font-size:13px">'+soldesComptes[c].toFixed(2)+' €</div></div>';
     }).join("")+
   '</div>'+
-  '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rs);font-size:11px;color:var(--mut)">'+
-    '<span>🏦 Solde pointé (rapproché banque) : <b style="color:var(--txt)">'+soldePointe.toFixed(2)+' €</b></span>'+
+  '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px dashed var(--bdr);border-radius:var(--rs);font-size:11px;color:var(--mut)">'+
+    '<span style="flex:1 1 100%">🏦 Solde pointé (rapproché banque) : <b style="color:var(--txt)">'+soldePointe.toFixed(2)+' €</b></span>'+
     '<span style="display:flex;gap:6px;flex-wrap:wrap">'+
       '<button onclick="openComptaDashboard()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📈 Graphiques</button>'+
       '<button onclick="openBudgetPrev()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📊 Budget</button>'+
       '<button onclick="openBilanAnnuel()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📄 Bilan AG</button>'+
+      '<button onclick="openComptaReleve()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">🏦 Relevé bancaire</button>'+
       '<button onclick="openComptaComptes()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📑 Comptes annuels</button>'+
       '<button onclick="openComptaPlan()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">⚙️ Plan comptable</button>'+
     '</span>'+

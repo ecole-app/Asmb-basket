@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791887999",
+    "titre": "Compta : rapprochement bancaire",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "« 🏦 Relevé bancaire » : importez le relevé de votre banque (CSV ou OFX). L'appli retrouve les lignes correspondantes (même montant, date proche) : un clic pour tout pointer."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Une opération sans ligne dans la compta ? Associez-la à une ligne existante, ou créez-la directement (déjà pointée). Les frais bancaires vont tout seuls au compte 627. Réimporter le même relevé ne pointe jamais deux fois."
+      }
+    ]
+  },
+  {
     "v": "1791887793",
     "titre": "Compta : compte de résultat et export FEC",
     "points": [

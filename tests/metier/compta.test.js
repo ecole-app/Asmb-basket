@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { charger } from "./contexte.js";
 
+const J = (x) => JSON.parse(JSON.stringify(x));
 function app(reglages) {
   const c = charger(["js/15-compta-inventaire.js", "js/15b-compta-plan.js"], { fsWriteCollection() {} });
   if (reglages) c.localStorage.setItem("asmb_compta_reglages", JSON.stringify(reglages));
@@ -142,5 +143,69 @@ describe("Compte de résultat et FEC", () => {
   it("encodage ISO-8859-15 : accents et euro sur un octet", () => {
     const c = app();
     assert.deepEqual(Array.from(c.comptaIso885915("é€’")), [0xe9, 0xa4, 0x27]);
+  });
+});
+
+describe("Rapprochement bancaire", () => {
+  it("lit un CSV Crédit Agricole (préambule, Débit/Crédit, libellé sur 2 lignes)", () => {
+    const c = app();
+    const csv = 'Téléchargement du 13/10/2026;\n\nCompte courant ASMB;\nDate;Libellé;Débit euros;Crédit euros;\n12/09/2026;"PRLV SEPA MAIRIE\nLOCATION GYMNASE";300,00;;\n05/09/2026;"REMISE CHEQUE 1234567";;1 120,00;\n';
+    const r = c.comptaLireReleve(csv);
+    assert.equal(r.erreur, "");
+    assert.deepEqual(J(r.ops.map((o) => [o.date, o.montant])), [["2026-09-05", 1120], ["2026-09-12", -300]]);
+    assert.match(r.ops[1].libelle, /PRLV SEPA MAIRIE\s+LOCATION GYMNASE/);
+  });
+  it("lit un CSV Société Générale (montant signé, deux colonnes de libellé)", () => {
+    const c = app();
+    const csv = "Date de l'opération;Libellé;Détail de l'écriture;Montant de l'opération;Devise\n02/10/2026;VIR RECU;VIR DE MME X DON;200,00;EUR\n03/10/2026;CARTE X1234;DECATHLON;-80,50;EUR\n";
+    const r = c.comptaLireReleve(csv);
+    assert.deepEqual(J(r.ops.map((o) => [o.date, o.montant, o.libelle])), [["2026-10-02", 200, "VIR RECU VIR DE MME X DON"], ["2026-10-03", -80.5, "CARTE X1234 DECATHLON"]]);
+  });
+  it("lit un OFX", () => {
+    const c = app();
+    const ofx = "<OFX><STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260912<TRNAMT>-300.00<FITID>A1<NAME>PRLV MAIRIE</STMTTRN><STMTTRN><DTPOSTED>20260905120000<TRNAMT>120.00<FITID>A2<NAME>REMISE CHQ</STMTTRN></OFX>";
+    const r = c.comptaLireReleve(ofx);
+    assert.deepEqual(J(r.ops.map((o) => [o.id, o.date, o.montant])), [["ofx|A2", "2026-09-05", 120], ["ofx|A1", "2026-09-12", -300]]);
+  });
+  it("sans en-tête reconnaissable : message clair", () => {
+    const c = app();
+    assert.match(c.comptaLireReleve("02/10/2026;-25,00;Carte\n").erreur, /en-tête/);
+  });
+  it("nombres à la française et à l'anglaise", () => {
+    const c = app();
+    assert.equal(c.comptaNombreFr("1 234,56 €"), 1234.56);
+    assert.equal(c.comptaNombreFr("1.234,56"), 1234.56);
+    assert.equal(c.comptaNombreFr("1,234.56"), 1234.56);
+    assert.equal(c.comptaNombreFr("-12.5"), -12.5);
+    assert.equal(c.comptaNombreFr(""), null);
+    assert.equal(c.comptaNombreFr("abc"), null);
+  });
+  it("propose la bonne ligne (montant signé, date proche, libellé), ignore caisse et lignes déjà pointées", () => {
+    const c = app();
+    const lignes = [
+      { id: "a", date: "2026-09-10", montant: 300, type: "depense", compte: "Banque", motif: "Gymnase septembre" },
+      { id: "b", date: "2026-09-11", montant: 300, type: "depense", compte: "Banque", motif: "Mairie location" },
+      { id: "c", date: "2026-09-12", montant: 300, type: "recette", compte: "Banque", motif: "Sponsor" },
+      { id: "d", date: "2026-09-12", montant: 300, type: "depense", compte: "Caisse espèces", motif: "Mairie" },
+      { id: "e", date: "2026-09-05", montant: 120, type: "recette", compte: "Banque", pointe: true, releveId: "2026-09-05|120.00|REMISECHQ" },
+      { id: "f", date: "2026-06-01", montant: 55, type: "depense", compte: "Banque", motif: "Vieille facture" },
+    ];
+    const ops = [
+      { id: "x1", date: "2026-09-12", montant: -300, libelle: "PRLV SEPA MAIRIE LOCATION" },
+      { id: "2026-09-05|120.00|REMISECHQ", date: "2026-09-05", montant: 120, libelle: "REMISE CHQ" },
+      { id: "x3", date: "2026-10-01", montant: -55, libelle: "FACTURE" },
+      { id: "x4", date: "2026-10-01", montant: -9.9, libelle: "FRAIS TENUE COMPTE" },
+    ];
+    const r = c.comptaRapprocher(ops, lignes);
+    assert.equal(r[0].etat, "trouve"); assert.equal(r[0].ligne.id, "b");
+    assert.equal(r[1].etat, "deja"); assert.equal(r[1].ligne.id, "e");
+    assert.equal(r[2].etat, "aCreer"); assert.deepEqual(J(r[2].choix.map((l) => l.id)), ["f"]);
+    assert.equal(r[3].etat, "aCreer"); assert.equal(r[3].choix.length, 0);
+  });
+  it("moyen de paiement deviné depuis le libellé", () => {
+    const c = app();
+    assert.equal(c.comptaMoyenDepuisLibelle("CARTE X1234 DECATHLON"), "CB");
+    assert.equal(c.comptaMoyenDepuisLibelle("REMISE CHEQUE"), "Chèque");
+    assert.equal(c.comptaMoyenDepuisLibelle("PRLV SEPA"), "Virement");
   });
 });
