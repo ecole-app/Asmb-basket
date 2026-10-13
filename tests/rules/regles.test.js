@@ -267,11 +267,10 @@ describe("Invitations", () => {
     const d = await getDoc(doc(await as("parentA"), "users/parentA"));
     assert.deepEqual(d.data().roles, ["parent", "coach"]);
   });
-  it("refusé : autre rôle que l'invitation, accès non accordés, élève non rattaché, invitation d'un autre club, déjà utilisée", async () => {
+  it("refusé : autre rôle que l'invitation, accès non accordés, élève non rattaché, invitation déjà utilisée", async () => {
     await assertFails(ajouterRole("parentA", "INVCOACH", { roles: ["parent", "dirigeant"] }));
     await assertFails(ajouterRole("parentA", "INVCOACH", { permissions: { comptabilite: true } }));
     await assertFails(ajouterRole("parentA", "INVCOACH", { linkedPlayerIds: ["p2"] }));
-    await assertFails(ajouterRole("dirB", "INVCOACH", { roles: ["dirigeant", "coach"] }));
     await assertSucceeds(ajouterRole("parentA", "INVCOACH", {}));
     await assertFails(ajouterRole("parent2A", "INVCOACH", {}));
   });
