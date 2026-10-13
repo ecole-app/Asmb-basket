@@ -211,6 +211,17 @@ describe("Comptes utilisateurs", () => {
     b.update(doc(db, "club_invites/INVCOACH"), { usedBy: "coachA", usedAt: Timestamp.now() });
     await assertSucceeds(b.commit());
   });
+  it("un dirigeant ne peut pas se retirer son propre rôle de dirigeant", async () => {
+    await assertFails(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: [] }));
+    await assertFails(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: ["coach"] }));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: ["dirigeant", "coach"] }));
+  });
+  it("le super admin récupère son rôle de dirigeant sur son compte", async () => {
+    const env = await getEnv();
+    await env.withSecurityRulesDisabled(async (c) => { await setDoc(doc(c.firestore(), `users/${SUPER_ADMIN}`), { clubId: "asmb", roles: [] }); });
+    await assertSucceeds(updateDoc(doc(await as(SUPER_ADMIN), `users/${SUPER_ADMIN}`), { roles: ["dirigeant"] }));
+    await assertFails(updateDoc(doc(await as(SUPER_ADMIN), `users/${SUPER_ADMIN}`), { roles: ["dirigeant"], clubId: "B" }));
+  });
   it("le dirigeant donne un accès compta à un membre du bureau", async () => {
     await assertSucceeds(updateDoc(doc(await as("dirA"), "users/coachA"), { permissions: { comptabilite: true } }));
   });

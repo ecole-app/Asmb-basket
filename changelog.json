@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791883789",
+    "titre": "Accès coach : impossible de se retirer son propre rôle de dirigeant",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans « Accès coach », un dirigeant ne peut plus se retirer lui-même son rôle de dirigeant (protégé aussi côté serveur). Le compte principal du club retrouve automatiquement son rôle à la connexion."
+      }
+    ]
+  },
+  {
     "v": "1791880993",
     "titre": "Lien d'inscription : page publique isolée",
     "points": [

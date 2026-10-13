@@ -354,6 +354,13 @@ function applyAuthedUser(user){
           .catch(function(e){ console.log("rattachement club:",e&&e.code); });
         data=Object.assign({},data,{clubId:BOOTSTRAP_CLUB_ID});
       }
+      // Le super admin ne peut jamais perdre son rôle de dirigeant (par exemple
+      // décoché par erreur dans « Accès coach ») : il est rétabli à la connexion.
+      if(user.uid===BOOTSTRAP_DIRIGEANT_UID && (data.roles||[]).indexOf("dirigeant")<0){
+        var rolesSa=(data.roles||[]).concat(["dirigeant"]);
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",user.uid),{roles:rolesSa}).catch(function(e){ console.log("rôle super admin:",e&&e.code); });
+        data=Object.assign({},data,{roles:rolesSa});
+      }
       finishAuthedUser(user, data, !firstLoad);
       firstLoad=false;
     } else if(firstLoad && user.uid===BOOTSTRAP_DIRIGEANT_UID && BOOTSTRAP_DIRIGEANT_UID){
