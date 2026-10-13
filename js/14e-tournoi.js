@@ -204,6 +204,11 @@ function trnOuvrir(eid){
       t.addEventListener("click",function(){ onglet=o[0]; rendre(); }); tabs.appendChild(t);
     });
     zone.appendChild(tabs);
+    // Comme pour les autres événements : affiche à partager + lien / QR de la page du tournoi.
+    var outils=document.createElement("div"); outils.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 12px";
+    if(typeof evtAffiche==="function") outils.appendChild(gmBtn("🖼️ Affiche","soft",function(){ s.modal.remove(); evtAffiche(eid); }));
+    outils.appendChild(gmBtn("Lien et QR code","soft",function(){ trnPublier(eid).then(function(){ trnPartager(eid); }).catch(function(err){ askAlert("Publication impossible ("+((err&&err.code)||"réseau")+"). Réessayez."); }); }));
+    zone.appendChild(outils);
     if(c.matchs.length&&c.modifLe&&c.genereLe&&c.modifLe>c.genereLe){
       var w=document.createElement("div"); w.style.cssText="background:rgba(217,105,11,.12);color:#b45309;font-size:12px;font-weight:700;padding:9px 12px;border-radius:10px;margin-bottom:10px";
       w.textContent="Équipes ou réglages modifiés depuis le dernier planning : pensez à le générer de nouveau.";
@@ -338,7 +343,6 @@ function trnOuvrir(eid){
       zone.appendChild(v); return;
     }
     row.appendChild(gmBtn("Planning PDF","soft",function(){ trnPdf(eid); }));
-    row.appendChild(gmBtn("Lien et QR code","soft",function(){ trnPublier(eid).then(function(){ trnPartager(eid); }).catch(function(err){ askAlert("Publication impossible ("+((err&&err.code)||"réseau")+"). Réessayez."); }); }));
     var e2=getEvents().find(function(x){ return x.id===eid; })||e;
     var poules=(e2.trn&&e2.trn.poules)||{};
     Object.keys(poules).forEach(function(k){

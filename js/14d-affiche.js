@@ -225,7 +225,7 @@ function afModeleSimple(D,C,L,k,plein){
   if(qrS){
     afRect(D,x+w-qrS-12,bas-qrS-26,qrS+12,qrS+26,8,"#fff");
     if(!D.dry&&C.qr){ c.imageSmoothingEnabled=false; c.drawImage(C.qr,x+w-qrS-6,bas-qrS-20,qrS,qrS); c.imageSmoothingEnabled=true; }
-    afTexte(D,"S'INSCRIRE",x+w-qrS/2-6,bas-14,{size:9,weight:800,color:"#111827",align:"center",lh:1});
+    afTexte(D,C.qrLabel||"S'INSCRIRE",x+w-qrS/2-6,bas-14,{size:9,weight:800,color:"#111827",align:"center",lh:1});
   }
   var limite=bas-hb-12;
   afLogo(D,C,x,y,46,{fg:C.c1});
@@ -445,7 +445,7 @@ function afRendre(canvas, C){
     var q=C.qrLibre, qs=q.s*F.bw, qx=q.x*F.bw, qy=q.y*F.bh, pad=qs*0.07, lab=Math.max(9,qs*0.11);
     afRect(D,qx,qy,qs,qs+lab*1.6,qs*0.06,"#fff");
     c.imageSmoothingEnabled=false; c.drawImage(q.img,qx+pad,qy+pad,qs-2*pad,qs-2*pad); c.imageSmoothingEnabled=true;
-    afTexte(D,"S'INSCRIRE",qx+qs/2,qy+qs+lab*0.15,{size:lab,weight:800,color:"#111827",align:"center",lh:1});
+    afTexte(D,C.qrLabel||"S'INSCRIRE",qx+qs/2,qy+qs+lab*0.15,{size:lab,weight:800,color:"#111827",align:"center",lh:1});
     C.qrRect={x:qx/F.bw,y:qy/F.bh,w:qs/F.bw,h:(qs+lab*1.6)/F.bh};
   }
   if(C.complet){
@@ -476,7 +476,10 @@ function afContenu(e, st, page, imgs){
   var parJ=!!(e.inscr&&e.inscr.parJour), places=parJ?0:((e.inscr&&e.inscr.places)||0), nb=(page&&page.nb)||0, restant=places?Math.max(0,places-nb):null;
   var tag=st.show.accroche===false?"":(st.accroche||AF_TAGS[e.type]||"Événement").trim();
   var prog=(st.show.programme&&e.inscr&&e.inscr.programme)?String(e.inscr.programme).trim():"";
-  var txt=[(st.show.texte?(st.texte||""):"").replace(/^\n+|\s+$/g,""),prog].filter(Boolean).join("\n");
+  // Tournoi : les catégories (celles ouvertes à l'inscription, sinon celles des équipes).
+  var trn=e.type==="tournoi"&&e.trn?e.trn:null, trnCats="";
+  if(trn&&typeof trnCatsDe==="function"){ var lc=(trn.inscr&&trn.inscr.ouvert&&trn.inscr.cats&&trn.inscr.cats.length)?trn.inscr.cats:trnCatsDe(trn.equipes||[]); if(lc.length) trnCats="Catégories : "+lc.join(" · "); }
+  var txt=[trnCats,(st.show.texte?(st.texte||""):"").replace(/^\n+|\s+$/g,""),prog].filter(Boolean).join("\n");
   var qrLibre=!!(st.qrPos&&st.show.qr&&imgs.qr);
   return {
     modele:st.modele, format:st.format, carre:st.format==="carre", show:Object.assign({},st.show,{texte:!!txt}),
@@ -491,7 +494,8 @@ function afContenu(e, st, page, imgs){
     qr:qrLibre?null:imgs.qr, qrLibre:qrLibre?{img:imgs.qr,x:st.qrPos.x,y:st.qrPos.y,s:st.qrPos.s}:null, photo:imgs.photo,
     interv:(st.intervenants||[]).filter(function(x){return x.nom;}).map(function(x,i){ return {nom:x.nom,role:x.role||"",img:imgs.interv[i]||null}; }),
     sponsors:imgs.sponsors||[],
-    restant:restant, placesBandeau:!!(st.show.places&&places&&restant>0), complet:!!(places&&restant===0)
+    restant:restant, placesBandeau:!!(st.show.places&&places&&restant>0), complet:!!(places&&restant===0),
+    qrLabel:trn?((trn.inscr&&trn.inscr.ouvert)?"S'INSCRIRE":"RÉSULTATS"):null
   };
 }
 function afReglagesDefaut(e){
@@ -556,7 +560,10 @@ function evtAffiche(eid){
     '</div>';
   document.body.appendChild(o);
   var cv=document.getElementById("af-cv"), ctrl=document.getElementById("af-ctrl");
-  function lien(){ return e.inscr?evtLien(e.id):""; }
+  // Tournoi : le QR mène à la page du tournoi (inscription des équipes, poules, planning, résultats).
+  var estTrn=e.type==="tournoi"&&!!e.trn&&typeof trnLien==="function";
+  function lien(){ return estTrn?trnLien(e.id):(e.inscr?evtLien(e.id):""); }
+  if(estTrn&&typeof trnPublier==="function") trnPublier(e.id).catch(function(){});
   var redessinT=null;
     function redessiner(){
     clearTimeout(redessinT); redessinT=setTimeout(function(){ afRendre(cv,afContenu(e,st,page,imgs)); alerte(); },30);
@@ -602,7 +609,7 @@ function evtAffiche(eid){
   }
   function message(){
     var C=afContenu(e,st,page,imgs);
-    return (C.club?C.club+" : ":"")+(C.titre||"")+(C.dates?" ("+C.dates.long+")":"")+(C.complet?" : c'est complet, merci à tous !":(C.restant!=null&&C.restant<=5?" : plus que "+C.restant+" place"+(C.restant>1?"s":"")+" !":""))+(lien()&&!C.complet?" Inscriptions : "+lien():"");
+    return (C.club?C.club+" : ":"")+(C.titre||"")+(C.dates?" ("+C.dates.long+")":"")+(C.complet?" : c'est complet, merci à tous !":(C.restant!=null&&C.restant<=5?" : plus que "+C.restant+" place"+(C.restant>1?"s":"")+" !":""))+(lien()&&!C.complet?((estTrn&&!(e.trn.inscr&&e.trn.inscr.ouvert))?" Poules, planning et résultats : ":" Inscriptions : ")+lien():"");
   }
   // Partage : la fenêtre de partage de l'appareil (Windows, téléphone) avec l'image jointe,
   // qui ouvre l'appli choisie (WhatsApp...). Sans fenêtre de partage : téléchargement + secours.
@@ -675,7 +682,7 @@ function evtAffiche(eid){
   majDl();
   var infos=bloc("Ce qui s'affiche");
   AF_INFOS.forEach(function(it){
-    if(it[0]==="qr"&&!e.inscr) return;
+    if(it[0]==="qr"&&!lien()) return;
     if(it[0]==="programme"&&!(e.inscr&&e.inscr.programme)) return;
     if(it[0]==="places"&&(!(e.inscr&&e.inscr.places)||e.inscr.parJour)) return;
     if(it[0]==="prix"&&!(e.inscr&&e.inscr.tarifs&&e.inscr.tarifs.length)) return;
@@ -686,7 +693,7 @@ function evtAffiche(eid){
     if(it[0]==="sponsors"&&!(typeof getSponsors==="function"&&getSponsors().length)){ var h=document.createElement("span"); h.style.cssText="font-size:11px;color:var(--mut);font-weight:500"; h.textContent="(aucun sponsor enregistré)"; l.appendChild(h); }
     infos.appendChild(l);
   });
-  if(e.inscr){
+  if(lien()){
     var qb=bloc("Position du QR code");
     var qh=document.createElement("div"); qh.style.cssText="font-size:12px;color:var(--mut);line-height:1.45;margin-bottom:8px"; qb.appendChild(qh);
     var qrow=document.createElement("div"); qrow.style.cssText="display:flex;gap:8px;flex-wrap:wrap"; qb.appendChild(qrow);

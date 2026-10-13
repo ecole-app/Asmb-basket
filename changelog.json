@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791910411",
+    "titre": "Tournois : affiche",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Bouton « 🖼️ Affiche » dans l'outil Tournoi : même éditeur d'affiche que les événements (modèles, formats, logo, photo, partage WhatsApp). Les catégories s'affichent toutes seules et le QR code mène à la page du tournoi : inscription des équipes, puis poules, planning et résultats."
+      }
+    ]
+  },
+  {
     "v": "1791909926",
     "titre": "Tournois : création depuis le pôle Événements",
     "points": [
