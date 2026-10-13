@@ -336,6 +336,10 @@ html.gm-desk .main>#scr-portal.on{max-width:1360px}
 html.gm-public .hdr,html.gm-public .bnav,html.gm-public #bnav-main{display:none!important}
 html.gm-public .main{padding-right:0!important;max-width:560px;margin:0 auto;width:100%}
 html.gm-public .main>#desk-home{display:none!important}
+/* Écrans hors club (plateforme du super admin, connexion, choix du profil) et pages
+   publiques : pas de menu latéral du club sur ordinateur. */
+html.gm-public .gm-side,html.gm-horsclub .gm-side{display:none!important}
+html.gm-public body,html.gm-horsclub body{padding-left:0!important}
 
 /* ── iPhone (Safari) ──
    1) Les panneaux qui montent du bas utilisent vh : sur Safari, vh compte aussi la zone

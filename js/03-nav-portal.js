@@ -32,6 +32,8 @@ var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role
 // n'y apparaît (ni barre du bas, ni en-tête, ni bouton retour). Sinon un visiteur
 // se retrouve dans l'espace du club en touchant « Accueil ».
 var SCR_PUBLICS=["evt","billet","entree","essai","trn","marque"];
+// Écrans qui ne sont pas dans un club : jamais de menu latéral du club.
+var GM_SCR_HORS_CLUB=["plateforme","auth","role-select"];
 function gmModePublic(on){
   document.documentElement.classList.toggle("gm-public",!!on);
   var h=document.querySelector(".hdr"); if(h) h.style.display=on?"none":"";
@@ -41,6 +43,7 @@ function showScr(id){
  // Premier écran choisi par le routage (connexion, accueil, page publique) : fin du démarrage.
  document.documentElement.classList.remove("gm-boot");
  if(SCR_PUBLICS.indexOf(id)>=0) gmModePublic(true);
+ document.documentElement.classList.toggle("gm-horsclub", GM_SCR_HORS_CLUB.indexOf(id)>=0);
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
  var el=document.getElementById("scr-"+id);
  if(el)el.classList.add("on");
