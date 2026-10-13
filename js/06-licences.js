@@ -410,6 +410,7 @@ function buildLicences(){
                            : allLics.filter(function(l){return !l.saison || l.saison>=season;});
  if(typeof renderReinscriptionAdmin==="function") renderReinscriptionAdmin();
  if(typeof renderEssaisAdmin==="function") renderEssaisAdmin();
+  if(typeof renderChequesAdmin==="function") renderChequesAdmin();
  var el=document.getElementById("licenceList");if(!el)return;
  document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"")+" · Saison "+season+(licShowArchived?" (archives)":"");
 
@@ -615,6 +616,7 @@ function renderLicenceDetail(lic){
  ["Notes",f.notes],
  ["Questionnaire de santé",f.questionnaireSanteNon===true?"Toutes les réponses à NON":f.questionnaireSanteNon===false?"Au moins un OUI : certificat médical à demander":""],
  ["Règlement du club",f.reglementAccepte?"Accepté en ligne":""],
+ ["Paiement prévu",(typeof CHQ_PREVU!=="undefined"&&CHQ_PREVU[f.paiementPrevu])||""],
  ["Certificat medical",f.certDate?(f.certMedecin?" Dr "+f.certMedecin+" · ":"")+f.certDate+(f.certificat?" ✓ Fichier joint":""):"Non fourni"],
  ].filter(function(r){return r[1];});
  ficheHtml='<div style="margin-top:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden">';
@@ -635,8 +637,9 @@ function renderLicenceDetail(lic){
     if(lic.paiement){
       var p=lic.paiement;
       paiementHtml='<div style="margin-top:12px;background:color-mix(in srgb, var(--ltg) 8%, transparent);border:1px solid color-mix(in srgb, var(--ltg) 30%, transparent);border-radius:var(--rs);padding:14px">'+
-        '<div style="font-size:13px;font-weight:800;color:var(--dkg)">✓ Paiement reçu</div>'+
-        '<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+p.moyen+' · '+(p.montant||0).toFixed(2)+' € · '+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):"")+'</div>'+
+        '<div style="font-size:13px;font-weight:800;color:var(--dkg)">'+(lic.cheques&&lic.cheques.length?"✓ Payé par chèque"+(lic.cheques.length>1?" en "+lic.cheques.length+" fois":""):"✓ Paiement reçu")+'</div>'+
+        '<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(p.moyen)+' · '+(p.montant||0).toFixed(2)+' €'+(lic.cheques&&lic.cheques.length?'':' · '+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):""))+'</div>'+
+        (typeof chqHtmlLicence==="function"?chqHtmlLicence(lic):"")+
         '<div style="display:flex;gap:8px;margin-top:10px">'+
           '<button onclick="printFactureLicence(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Imprimer</button>'+
           '<button onclick="sendFactureLicenceMail(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Envoyer</button>'+
@@ -715,17 +718,27 @@ function openPaiementLicenceModal(code){
     '</div>'+
     '<div style="font-size:12px;color:var(--mut);margin-bottom:14px">'+(lic.fiche?authEsc((lic.fiche.prenom||"")+" "+(lic.fiche.nom||"")):"")+(lic.typeLicence?" · "+(lic.typeLicence==="competition"?"Compétition":"Loisir"):"")+'</div>'+
     '<div class="form-group"><label class="form-label">Moyen de paiement</label><div id="pl-moyen-row" style="display:flex;gap:6px;flex-wrap:wrap">'+moyenBtns+'</div></div>'+
+    '<div id="pl-simple">'+
     '<div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="pl-montant" type="number" step="0.01" value="'+(p.montant!=null?p.montant:"")+'" placeholder="0.00"></div>'+
     '<div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" id="pl-date" type="date" value="'+(p.date||new Date().toISOString().slice(0,10))+'"></div>'+
-    '<div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="pl-reference" value="'+authEsc(p.reference||"")+'" placeholder="N° de chèque, etc."></div>'+
+    '<div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="pl-reference" value="'+authEsc(p.reference||"")+'" placeholder="N° de virement, etc."></div>'+
+    '</div><div id="pl-cheques"></div>'+
     '<button id="pl-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>';
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
   document.body.appendChild(modal);
-  var selectedMoyen=p.moyen||"Espèces";
+  var selectedMoyen=p.moyen||"Espèces", chqEd=null;
+  function plMajCheque(){
+    var chq=selectedMoyen==="Chèque"&&typeof chqEditeur==="function";
+    document.getElementById("pl-simple").style.display=chq?"none":"block";
+    var box=document.getElementById("pl-cheques");
+    if(chq){ if(!chqEd) chqEd=chqEditeur(box,lic); box.style.display="block"; } else box.style.display="none";
+  }
+  plMajCheque();
   Array.prototype.forEach.call(document.querySelectorAll(".pl-moyen-btn"),function(btn){
     btn.addEventListener("click",function(){
       selectedMoyen=btn.dataset.moyen;
+      plMajCheque();
       Array.prototype.forEach.call(document.querySelectorAll(".pl-moyen-btn"),function(b){
         var sel=b.dataset.moyen===selectedMoyen;
         b.style.borderColor=sel?"var(--grn)":"var(--bdr)";
@@ -736,6 +749,7 @@ function openPaiementLicenceModal(code){
   });
   document.getElementById("pl-close").addEventListener("click",function(){modal.remove();});
   document.getElementById("pl-save").addEventListener("click",function(){
+    if(selectedMoyen==="Chèque"&&chqEd){ var l=chqEd.lire(); if(!l) return; chqEnregistrer(code,l); modal.remove(); return; }
     var montant=parseFloat(document.getElementById("pl-montant").value);
     var date=document.getElementById("pl-date").value;
     if(!montant||montant<=0){askAlert("Montant invalide");return;}
@@ -753,9 +767,10 @@ function savePaiementLicence(code,paiement){
   if(idx<0)return;
   var wasAlreadyRecorded=!!lics[idx].paiement;
   lics[idx].paiement=paiement;
+  var compta=getComptabilite();
+  if(lics[idx].cheques&&typeof chqRetirer==="function") compta=chqRetirer(lics[idx],compta); // passage du chèque à un autre moyen
   saveLicences(lics);
   // Cree (ou ne duplique pas) la ligne Comptabilite correspondante
-  var compta=getComptabilite();
   var f=lics[idx].fiche||{};
   var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
   var refCompta="Licence "+code;
@@ -1370,6 +1385,13 @@ function renderFicheForm(lic){
       '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prénom Nom"></div>'+
       '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
       '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label" for="f-paiementPrevu">Comment pensez-vous régler la licence ?</label>'+
+        '<select class="form-input" id="f-paiementPrevu" onchange="var h=document.getElementById(\'f-ordre\');if(h)h.style.display=/^cheque/.test(this.value)?\'block\':\'none\'">'+
+          '<option value="">Je verrai avec le club</option>'+
+          ['especes','cheque1','cheque2','cheque3','virement','cb','enligne'].map(function(k){ return '<option value="'+k+'"'+(f.paiementPrevu===k?' selected':'')+'>'+(typeof CHQ_PREVU!=="undefined"?CHQ_PREVU[k]:k)+'</option>'; }).join("")+
+        '</select>'+
+        '<div id="f-ordre" style="display:'+(/^cheque/.test(f.paiementPrevu||'')?'block':'none')+';font-size:12px;color:var(--txt2);margin-top:6px">Chèques à l\'ordre de : <b>'+authEsc((window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"le club")+'</b>. Vous les remettez au club, qui les encaisse aux dates convenues.</div>'+
+      '</div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div class="form-group" style="background:rgba(232,103,10,.06);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
         '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
@@ -1544,6 +1566,7 @@ function soumettreFiche(){
     urgenceNom:(document.getElementById("f-urgenceNom")||{}).value||"",
     urgenceTel:(document.getElementById("f-urgenceTel")||{}).value||"",
     notes:(document.getElementById("f-notes")||{}).value||"",
+    paiementPrevu:(document.getElementById("f-paiementPrevu")||{}).value||"",
     certDate:(document.getElementById("f-certDate")||{}).value||"",
     certMedecin:(document.getElementById("f-certMedecin")||{}).value||"",
     certificat:ficheCertificat||null,

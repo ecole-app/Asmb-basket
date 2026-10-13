@@ -1,5 +1,30 @@
 [
   {
+    "v": "1791877776",
+    "titre": "Licences : paiement par chèque",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Paiement « Chèque » en 1 à 4 fois : n°, banque, émetteur, montant et date d'encaissement de chaque chèque. Le total se répartit tout seul."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "« Remise en banque » dans Licences : les chèques encaissables sont cochés, bordereau PDF à joindre au dépôt, puis « Marquer comme déposés » ajoute une recette par chèque en compta, à la date du dépôt."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Sur la fiche d'inscription, indiquez comment vous comptez régler (chèque en 1, 2 ou 3 fois, espèces, virement…) ; l'ordre des chèques est rappelé."
+      }
+    ]
+  },
+  {
     "v": "1791877211",
     "titre": "Événements : l'affiche",
     "points": [
