@@ -128,31 +128,38 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1791884569";
+var APP_VERSION="1791884951";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
  .then(function(data){
  if(data.v&&data.v!==APP_VERSION){
+ // Mise à jour déjà tentée pour cette version (fichiers encore en cache) :
+ // on ne réaffiche pas le bandeau en boucle, la version arrivera au prochain lancement.
+ var tente=null; try{ tente=localStorage.getItem("gm_maj_tentee"); }catch(e){}
+ if(tente===data.v) return;
  var banner=document.getElementById("update-banner");
  if(banner)banner.style.display="flex";
  }
  })
  .catch(function(){});
 }
+// Mise à jour : on force le téléchargement des nouveaux fichiers (sinon le navigateur
+// peut recharger les anciens depuis son cache et le bandeau revient aussitôt),
+// on vide les caches du service worker, puis on recharge.
 function applyUpdate(){
- // Signale a sw-register.js que le rechargement est volontaire, pour qu'il
- // n'en ajoute pas un second quand le nouveau service worker prendra la main.
  try{ sessionStorage.setItem("gm_manual_update","1"); }catch(e){}
+ var banner=document.getElementById("update-banner"); if(banner) banner.style.display="none";
  var dest=location.href.split("?")[0]+"?v="+Date.now();
- if('serviceWorker' in navigator){
-   navigator.serviceWorker.getRegistrations().then(function(regs){
-     regs.forEach(function(r){r.unregister();});
-     location.href=dest;
-   }).catch(function(){ location.href=dest; });
- } else {
-   location.href=dest;
- }
+ var fichiers=[].slice.call(document.querySelectorAll("script[src],link[rel=stylesheet][href]")).map(function(el){ return el.src||el.href; })
+   .filter(function(u){ return u&&u.indexOf(location.origin)===0; });
+ fichiers.push(location.origin+location.pathname.replace(/[^/]*$/,"")+"sw.js");
+ var frais=Promise.all(fichiers.map(function(u){ return fetch(u,{cache:"reload"}).catch(function(){}); }));
+ var vider=(window.caches&&caches.keys)?caches.keys().then(function(k){ return Promise.all(k.map(function(n){ return caches.delete(n); })); }).catch(function(){}):Promise.resolve();
+ var desinscrire=('serviceWorker' in navigator)?navigator.serviceWorker.getRegistrations().then(function(regs){ return Promise.all(regs.map(function(r){ return r.unregister(); })); }).catch(function(){}):Promise.resolve();
+ fetch("./version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){ try{ if(d&&d.v) localStorage.setItem("gm_maj_tentee",d.v); }catch(e){} }).catch(function(){})
+   .then(function(){ return Promise.all([frais,vider,desinscrire]); })
+   .then(function(){ location.href=dest; }, function(){ location.href=dest; });
 }
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,120000);

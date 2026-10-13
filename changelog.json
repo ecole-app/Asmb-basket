@@ -1,5 +1,15 @@
 [
   {
+    "v": "1791884951",
+    "titre": "Mise à jour : fini le bandeau en boucle",
+    "points": [
+      {
+        "roles": [],
+        "texte": "« Mettre à jour » télécharge vraiment les nouveaux fichiers avant de recharger. Le bandeau ne réapparaît plus en boucle pour une même version."
+      }
+    ]
+  },
+  {
     "v": "1791884569",
     "titre": "Événements : adresse du lieu",
     "points": [
