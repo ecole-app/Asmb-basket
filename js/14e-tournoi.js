@@ -521,10 +521,20 @@ function showTrnPublic(pid){
 function trnRendrePublic(el,p){
   var cats=Object.keys(p.poules||{});
   if(!cats.length) cats=trnCatsDe(p.equipes||[]);
-  var choix=cats[0]||"", ecoute=null;
+  var choix=cats[0]||"", ecoute=null, ecouteLive=null, live={};
   try{ var mem=localStorage.getItem("gm_trn_cat_"+p.eventId); if(mem&&cats.indexOf(mem)>=0) choix=mem; }catch(e){}
+  // Scores : ceux recopiés par l'écran Jour J, complétés par les matchs clôturés
+  // publiés par la table de marque (trn_live), qui font foi.
+  function scores(){
+    var r=Object.assign({},p.resultats||{}), maj=Number(p.resultatsLe)||0;
+    Object.keys(live).forEach(function(mid){ var l=live[mid]; r[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; maj=Math.max(maj,Number(l.le)||0); });
+    var res=Object.assign({},p.resolus||{});
+    try{ if(typeof trnResoudre==="function") Object.assign(res,trnResoudre(p.matchs||[],p.poules||{},r)); }catch(e){}
+    return {r:r,resolus:res,maj:maj};
+  }
   function rendre(){
-    var c={equipes:p.equipes||[],terrains:p.terrains||1,resultats:p.resultats||{},resolus:p.resolus||{}};
+    var sc=scores();
+    var c={equipes:p.equipes||[],terrains:p.terrains||1,resultats:sc.r,resolus:sc.resolus};
     el.innerHTML=evtEntete(p)+'<div style="padding:14px 16px 40px" id="trn-pub"></div>';
     var z=el.querySelector("#trn-pub");
     if(p.inscrOuvertes&&(p.catsInscr||[]).length&&typeof trnInscrireEquipe==="function"){
@@ -544,7 +554,7 @@ function trnRendrePublic(el,p){
       poules.forEach(function(po){ var card=gmCard(); card.style.margin="0"; card.style.padding="10px 12px"; card.innerHTML=trnClassementHtml(c,po,ms); gg.appendChild(card); });
       z.appendChild(gg);
     }
-    gmSection(z,"Matchs",ms.length?"Du premier match à "+ms[0].debut+" au dernier vers "+ms[ms.length-1].fin+"."+(p.resultatsLe?" Mis à jour à "+new Date(p.resultatsLe).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+".":""):"");
+    gmSection(z,"Matchs",ms.length?"Du premier match à "+ms[0].debut+" au dernier vers "+ms[ms.length-1].fin+"."+(sc.maj?" Mis à jour à "+new Date(sc.maj).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+".":""):"");
     z.appendChild(trnListeHtml(c,ms,true));
     if(p.pause){ var pz=document.createElement("div"); pz.style.cssText="font-size:12px;color:var(--mut);margin-top:10px"; pz.textContent="Pause de "+p.pause.debut+" à "+p.pause.fin+"."; z.appendChild(pz); }
   }
@@ -557,6 +567,15 @@ function trnRendrePublic(el,p){
         var y=window.scrollY; p=snap.data();
         cats=Object.keys(p.poules||{}); if(!cats.length) cats=trnCatsDe(p.equipes||[]);
         if(cats.indexOf(choix)<0) choix=cats[0]||"";
+        rendre(); window.scrollTo(0,y);
+      },function(){});
+    }catch(e){}
+  }
+  if(window.fbOnSnapshot&&window.fbQuery&&!ecouteLive){
+    try{
+      ecouteLive=window.fbOnSnapshot(window.fbQuery(window.fbCollection(window.fbDb,"trn_live"),window.fbWhere("clubId","==",String(p.clubId)),window.fbWhere("eventId","==",String(p.eventId))),function(snap){
+        var y=window.scrollY; live={};
+        snap.forEach(function(d){ var x=d.data(); if(x&&x.matchId) live[x.matchId]=x; });
         rendre(); window.scrollTo(0,y);
       },function(){});
     }catch(e){}

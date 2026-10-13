@@ -711,7 +711,7 @@ async function resetAllData(){
       try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"evt_entrees"); }catch(e){}
       try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"evt_pages"); }
       catch(e){ console.log("reset evt_pages:", e); }
-      for(const col of ["trn_pages","trn_matchs","trn_inscriptions"]){
+      for(const col of ["trn_pages","trn_matchs","trn_inscriptions","trn_live"]){
         try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,col); }
         catch(e){ console.log("reset "+col+":", e); }
       }

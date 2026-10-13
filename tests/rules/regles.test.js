@@ -762,6 +762,37 @@ describe("Tournoi : table de marque (code du match)", () => {
   });
 });
 
+describe("Tournoi : résultat publié à la clôture (trn_live)", () => {
+  const match = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", matchId: "U13|PA1", nomA: "ASMB 1", nomB: "Firminy", sa: 0, sb: 0, statut: "prevu" }, o);
+  const live = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", matchId: "U13|PA1", sa: 30, sb: 24, code: "K7P2XR", le: 1 }, o);
+  const ID = "trn_live/A__t1__U13|PA1";
+  beforeEach(async () => { await setDoc(doc(await as("coachA"), "trn_matchs/K7P2XR"), match()); });
+  it("la table de marque publie le score d'un match clôturé ; tout le monde le lit", async () => {
+    const db = await as(null);
+    await updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "termine" });
+    await assertSucceeds(setDoc(doc(db, ID), live()));
+    await assertSucceeds(getDocs(query(collection(db, "trn_live"), where("clubId", "==", "A"), where("eventId", "==", "t1"))));
+  });
+  it("refusé : match pas clôturé, score différent, mauvais id, mauvais code, forfait posé sans compte", async () => {
+    const db = await as(null);
+    await updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "encours" });
+    await assertFails(setDoc(doc(db, ID), live()));
+    await updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "termine" });
+    await assertFails(setDoc(doc(db, ID), live({ sa: 40 })));
+    await assertFails(setDoc(doc(db, "trn_live/A__t1__U13|PA2"), live()));
+    await assertFails(setDoc(doc(db, ID), live({ code: "ZZZZZZ" })));
+    await assertFails(setDoc(doc(db, ID), live({ forfait: "b" })));
+    await assertFails(setDoc(doc(db, "trn_live/B__t1__U13|PA1"), live({ clubId: "B" })));
+  });
+  it("le staff corrige, déclare un forfait et retire ; un autre club non", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), ID), { clubId: "A", eventId: "t1", matchId: "U13|PA1", sa: 20, sb: 0, forfait: "b", le: 2 }));
+    await assertFails(setDoc(doc(await as("dirB"), ID), { clubId: "A", eventId: "t1", matchId: "U13|PA1", sa: 0, sb: 20, le: 3 }));
+    await assertSucceeds(setDoc(doc(await as("dirA"), "trn_live/A__t1__U11_U13|PA1"), { clubId: "A", eventId: "t1", matchId: "U11/U13|PA1", sa: 9, sb: 4, le: 4 }));
+    await assertFails(deleteDoc(doc(await as(null), ID)));
+    await assertSucceeds(deleteDoc(doc(await as("coachA"), ID)));
+  });
+});
+
 describe("Tournoi : inscription d'une équipe par le lien", () => {
   const ins = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", nom: "BC Firminy U13", club: "BC Firminy", cat: "U13 M", contact: "Marc D.", tel: "0611223344", email: "", at: 1 }, o);
   const page = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", titre: "Tournoi", inscrOuvertes: true, catsInscr: ["U13 M", "U11"] }, o);

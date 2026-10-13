@@ -17,6 +17,18 @@ function trnCodeMatch(){
   for(var i=0;i<6;i++) s+=TRN_ALPHA.charAt(a[i]%TRN_ALPHA.length);
   return s;
 }
+// Résultat publié (trn_live) : la page publique l'affiche même sans l'écran Jour J ouvert.
+// (un « / » est interdit dans un id Firestore : une catégorie « U11/U13 » devient « U11_U13 »)
+function trnLiveId(clubId,eventId,matchId){ return String(clubId)+"__"+String(eventId)+"__"+String(matchId).replace(/\//g,"_"); }
+function trnLiveEcrire(x,sa,sb,extra){
+  if(!window.fbSetDoc||!x||!x.matchId) return Promise.resolve();
+  var d=Object.assign({clubId:String(x.clubId),eventId:String(x.eventId),matchId:String(x.matchId),sa:sa,sb:sb,le:Date.now()},extra||{});
+  return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId)),d).catch(function(){});
+}
+function trnLiveRetirer(x){
+  if(!window.fbDeleteDoc||!x||!x.matchId) return Promise.resolve();
+  return window.fbDeleteDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId))).catch(function(){});
+}
 function trnCodeNet(s){ return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6); }
 // Classement FIBA : victoire 2 pts, défaite 1 pt, forfait 0 pt. À égalité de points :
 // d'abord les matchs entre équipes à égalité (points, puis écart, puis points marqués),
@@ -132,7 +144,7 @@ function trnJourJ(zone,eid){
   var c=trnCfg(e);
   if(!c.matchs.length){ var v=document.createElement("div"); v.style.cssText="font-size:12.5px;color:var(--mut);line-height:1.5"; v.textContent="Générez d'abord le planning (onglet Planning)."; zone.appendChild(v); return; }
   var aide=document.createElement("div"); aide.style.cssText="font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:8px";
-  aide.textContent="Chaque match a son code. La table de marque ouvre le lien « Table de marque », tape le code du match, saisit le score, puis retape le code pour clôturer. Gardez cet écran ouvert pendant le tournoi : il met à jour la page publique (scores, classements, équipes qualifiées).";
+  aide.textContent="Chaque match a son code. La table de marque ouvre le lien « Table de marque », tape le code du match, saisit le score, puis retape le code pour clôturer. Les matchs clôturés s'affichent tout seuls sur la page publique (scores, classements, équipes qualifiées). Gardez cet écran ouvert si vous voulez aussi les scores en cours et le nom des équipes qualifiées chez la table de marque.";
   zone.appendChild(aide);
   var row=gmRow(zone); row.style.marginTop="0";
   var etat=document.createElement("div"); etat.style.cssText="font-size:11.5px;color:var(--mut);margin-top:8px";
@@ -160,7 +172,7 @@ function trnJourJ(zone,eid){
         '<div style="font-size:10.5px;font-weight:800;color:'+coul+'">'+(x.statut==="termine"?"Clôturé":x.statut==="encours"?"En cours":"À venir")+'</div></div></div>';
       var act=document.createElement("div"); act.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px";
       act.appendChild(gmBtn("Corriger le score","ghost",function(){ trnCorriger(x,nA,nB); }));
-      if(x.statut==="termine") act.appendChild(gmBtn("Rouvrir","ghost",function(){ window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),{statut:"encours",forfait:null}).catch(erreur); }));
+      if(x.statut==="termine") act.appendChild(gmBtn("Rouvrir","ghost",function(){ window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),{statut:"encours",forfait:null}).then(function(){ trnLiveRetirer(x); }).catch(erreur); }));
       act.appendChild(gmBtn("Forfait…","danger",function(){ trnForfait(x,nA,nB); }));
       d.appendChild(act); liste.appendChild(d);
     });
@@ -195,7 +207,7 @@ function trnCorriger(x,nA,nB){
   gmRow(s.body).appendChild(gmBtn("Enregistrer et clôturer","primary",function(){
     var sa=Math.max(0,Math.min(250,parseInt(a.value,10)||0)), sb=Math.max(0,Math.min(250,parseInt(b.value,10)||0));
     if(sa===sb) return askAlert("Pas de match nul au basket : vérifiez le score.");
-    window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),{sa:sa,sb:sb,statut:"termine",forfait:null,clotureLe:Date.now()}).then(function(){ s.modal.remove(); }).catch(function(err){ askAlert("Enregistrement impossible ("+((err&&err.code)||"réseau")+")."); });
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),{sa:sa,sb:sb,statut:"termine",forfait:null,clotureLe:Date.now()}).then(function(){ s.modal.remove(); trnLiveEcrire(x,sa,sb); }).catch(function(err){ askAlert("Enregistrement impossible ("+((err&&err.code)||"réseau")+")."); });
   }));
 }
 function trnForfait(x,nA,nB){
@@ -206,7 +218,7 @@ function trnForfait(x,nA,nB){
   [["a",nA],["b",nB]].forEach(function(o){
     row.appendChild(gmBtn("Forfait de "+o[1],"danger",function(){
       var maj=o[0]==="a"?{sa:0,sb:20}:{sa:20,sb:0};
-      window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),Object.assign(maj,{statut:"termine",forfait:o[0],clotureLe:Date.now()})).then(function(){ s.modal.remove(); }).catch(function(err){ askAlert("Enregistrement impossible ("+((err&&err.code)||"réseau")+")."); });
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),Object.assign(maj,{statut:"termine",forfait:o[0],clotureLe:Date.now()})).then(function(){ s.modal.remove(); trnLiveEcrire(x,maj.sa,maj.sb,{forfait:o[0]}); }).catch(function(err){ askAlert("Enregistrement impossible ("+((err&&err.code)||"réseau")+")."); });
     }));
   });
 }
@@ -322,6 +334,7 @@ function showMarque(code){
         clearTimeout(envoi);
         window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,statut:"termine",clotureLe:Date.now(),majLe:Date.now()}).then(function(){
           m.statut="termine"; rendre(); showToast("Match clôturé");
+          trnLiveEcrire(m,sa,sb,{code:k});
         }).catch(function(){ askAlert("Clôture impossible : vérifiez la connexion et réessayez."); });
       });
     }

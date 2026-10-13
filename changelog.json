@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791926652",
+    "titre": "Tournoi : résultats en direct sans l'écran Jour J",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi : dès qu'une table de marque clôture un match, le score, les classements et les équipes qualifiées apparaissent sur la page publique, même si personne n'a l'écran « Jour J » ouvert."
+      }
+    ]
+  },
+  {
     "v": "1791922174",
     "titre": "Plateforme sans menu du club",
     "points": [

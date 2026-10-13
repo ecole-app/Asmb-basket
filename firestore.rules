@@ -381,6 +381,33 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Résultat d'un match clôturé, publié pour la page publique du tournoi ──
+    // id = clubId__eventId__matchId. La table de marque l'écrit à la clôture :
+    // la règle vérifie que trn_matchs/{code} est bien clôturé avec le même score
+    // (le code ne sert plus à rien une fois le match clôturé). Ainsi les
+    // résultats et classements s'affichent même sans l'écran « Jour J » ouvert.
+    match /trn_live/{id} {
+      function liveCles(lid, d) { return d.keys().hasOnly(['clubId','eventId','matchId','sa','sb','forfait','code','le'])
+        && d.clubId is string && d.eventId is string && d.matchId is string
+        && lid == d.clubId + '__' + d.eventId + '__' + d.matchId.replace('/', '_')
+        && d.sa is int && d.sb is int && d.sa >= 0 && d.sa <= 250 && d.sb >= 0 && d.sb <= 250; }
+      function liveTable(d) { return d.code is string && d.code.matches('^[A-HJ-NP-Z2-9]{6}$')
+        && !('forfait' in d)
+        && existsAfter(/databases/$(database)/documents/trn_matchs/$(d.code))
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.statut == 'termine'
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.clubId == d.clubId
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.eventId == d.eventId
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.matchId == d.matchId
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.sa == d.sa
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.sb == d.sb; }
+      allow get, list: if true;
+      allow create: if liveCles(id, request.resource.data)
+        && (staff(request.resource.data.clubId) || liveTable(request.resource.data));
+      allow update: if liveCles(id, request.resource.data) && request.resource.data.clubId == resource.data.clubId
+        && (staff(resource.data.clubId) || liveTable(request.resource.data));
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Inscription d'une équipe à un tournoi, par le lien public ─────
     // Possible seulement si le club a ouvert les inscriptions sur la page publique.
     // Le contact du responsable n'est lisible que par le staff du club.
