@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791885604",
+    "titre": "Affiche : partage depuis l'ordinateur",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Sur ordinateur, « WhatsApp » ouvre WhatsApp Web avec le texte et le lien, et télécharge l'affiche à glisser dans la conversation. « Partager » télécharge l'affiche et copie le texte. Sur téléphone, la feuille de partage s'ouvre à chaque clic."
+      }
+    ]
+  },
+  {
     "v": "1791885356",
     "titre": "iPhone : la barre du bas ne cache plus les fenêtres",
     "points": [

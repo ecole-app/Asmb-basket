@@ -558,7 +558,7 @@ function evtAffiche(eid){
   var cv=document.getElementById("af-cv"), ctrl=document.getElementById("af-ctrl");
   function lien(){ return e.inscr?evtLien(e.id):""; }
   var redessinT=null;
-  var cacheF=null, cacheT=null, partageEnCours=false;
+  var cacheF=null, cacheT=null;
   function redessiner(){
     clearTimeout(redessinT); redessinT=setTimeout(function(){ afRendre(cv,afContenu(e,st,page,imgs)); alerte(); },30);
     // Fichier prêt d'avance : le partage doit partir tout de suite au clic, sinon
@@ -594,14 +594,18 @@ function evtAffiche(eid){
     var C=afContenu(e,st,page,imgs);
     return (C.club?C.club+" : ":"")+(C.titre||"")+(C.dates?" ("+C.dates.long+")":"")+(C.complet?" : c'est complet, merci à tous !":(C.restant!=null&&C.restant<=5?" : plus que "+C.restant+" place"+(C.restant>1?"s":"")+" !":""))+(lien()&&!C.complet?" Inscriptions : "+lien():"");
   }
-  // Partage : avec le fichier déjà prêt quand c'est possible (dans le geste), une seule feuille à la fois.
+  // Partage. Sur téléphone : la feuille de partage du téléphone, avec l'image déjà prête
+  // (elle doit partir dans le geste, sinon le téléphone refuse). Sur ordinateur, la feuille
+  // de partage de Windows est peu fiable : on télécharge l'image et on ouvre WhatsApp Web.
+  var MOBILE=(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   function partagerFichier(f, avecTitre, secours){
-    if(partageEnCours) return;
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      partageEnCours=true;
+    if(MOBILE&&navigator.canShare&&navigator.share&&navigator.canShare({files:[f]})){
       var data={files:[f],text:message()}; if(avecTitre) data.title=st.titre||e.titre||"Affiche";
-      navigator.share(data).catch(function(err){ if(!err||err.name!=="AbortError") secours(f); })
-        .then(function(){ partageEnCours=false; });
+      navigator.share(data).catch(function(err){
+        var n=err&&err.name;
+        if(n==="AbortError"||n==="InvalidStateError") return; // annulé, ou une feuille déjà ouverte
+        secours(f);
+      });
       return;
     }
     secours(f);
@@ -612,16 +616,20 @@ function evtAffiche(eid){
     fichier().then(function(f){ cacheF=f; fn(f); }).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); });
   }
   function partager(){
-    viaFichier(function(f){ partagerFichier(f,true,function(ff){ telecharger(ff); copyToClipboard(message()); showToast("Image téléchargée, texte copié : collez-les dans votre publication"); }); });
+    viaFichier(function(f){ partagerFichier(f,true,function(ff){ telecharger(ff); copyToClipboard(message()); showToast("Image téléchargée et texte copié : collez-les dans votre publication"); }); });
   }
   document.getElementById("af-x").addEventListener("click",function(){ garder(); if(unsub) try{unsub();}catch(err){} o.remove(); });
   document.getElementById("af-dl").addEventListener("click",function(){ garder(); fichier().then(telecharger).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); }); });
   document.getElementById("af-share").addEventListener("click",partager);
-  // WhatsApp : sur téléphone, la feuille de partage envoie l'image (choisir WhatsApp) ;
-  // sinon, l'image est téléchargée et WhatsApp s'ouvre avec le texte et le lien.
   document.getElementById("af-wa").addEventListener("click",function(){
-    var wa=function(f){ if(f) telecharger(f); window.open("https://wa.me/?text="+encodeURIComponent(message()),"_blank"); };
-    viaFichier(function(f){ partagerFichier(f,false,wa); });
+    if(!MOBILE){
+      // Ordinateur : WhatsApp s'ouvre tout de suite (dans le geste, sinon la fenêtre est bloquée),
+      // l'image est téléchargée pour être glissée dans la conversation.
+      window.open("https://web.whatsapp.com/send?text="+encodeURIComponent(message()),"_blank");
+      viaFichier(function(f){ telecharger(f); showToast("Affiche téléchargée : glissez-la dans la conversation WhatsApp"); });
+      return;
+    }
+    viaFichier(function(f){ partagerFichier(f,false,function(ff){ telecharger(ff); window.location.href="https://wa.me/?text="+encodeURIComponent(message()); }); });
   });
   function garder(){
     var evs=getEvents(), i=evs.findIndex(function(x){return x.id===eid;}); if(i<0) return;
