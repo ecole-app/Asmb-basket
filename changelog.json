@@ -1,5 +1,32 @@
 [
   {
+    "v": "1791877211",
+    "titre": "Événements : l'affiche",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Bouton « Affiche » dans les inscriptions : 6 modèles (Dégradé, Couleur pleine, Sport, Photo plein écran, Épurée, Calendrier), en post carré, story ou A4 à imprimer (PDF). Logo et couleurs du club, QR code d'inscription, tarifs, sponsors sous l'affiche."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Intervenants mis en avant avec leur photo, nom et rôle. Partage direct sur WhatsApp."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Les places restantes se mettent à jour toutes seules : à 5 places, l'appli propose de republier l'affiche ; à 0, elle passe en « Complet »."
+      }
+    ]
+  },
+  {
     "v": "1791875682",
     "titre": "Événements : l'entrée, comme un pass",
     "points": [

@@ -126,7 +126,7 @@ function entreeSaisieCode(err){
 function entreeOverlay(){
   var old=document.getElementById("entree-ecran"); if(old) old.remove();
   var o=document.createElement("div"); o.id="entree-ecran";
-  o.style.cssText="position:fixed;inset:0;z-index:9000;background:var(--bg);display:flex;flex-direction:column;overflow:hidden";
+  o.style.cssText="position:fixed;inset:0;z-index:350;background:var(--bg);display:flex;flex-direction:column;overflow:hidden";
   document.body.appendChild(o); return o;
 }
 function entreeEcran(src, opt){
@@ -223,7 +223,7 @@ function entreeChargerJsQR(){
 }
 function entreeScanner(src, repeindre){
   var o=document.createElement("div");
-  o.style.cssText="position:fixed;inset:0;z-index:9100;background:#000;display:flex;flex-direction:column";
+  o.style.cssText="position:fixed;inset:0;z-index:360;background:#000;display:flex;flex-direction:column";
   o.innerHTML=
     '<video playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>'+
     '<div style="position:absolute;left:50%;top:42%;width:min(68vw,280px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);border:3px solid rgba(255,255,255,.9)"></div>'+
@@ -280,7 +280,7 @@ function entreeScanner(src, repeindre){
 // Résultat d'un scan : vert = entrée validée, orange = déjà entré, rouge = inconnu.
 function entreeResultat(src, code, host, suivant, fermer){
   var it=src.items.find(function(x){ return x.c===code; });
-  if(!host){ host=document.createElement("div"); host.style.cssText="position:fixed;inset:0;z-index:9200"; document.body.appendChild(host); var h0=host; suivant=suivant||function(){ h0.remove(); if(src.repeindre) src.repeindre(); }; }
+  if(!host){ host=document.createElement("div"); host.style.cssText="position:fixed;inset:0;z-index:370"; document.body.appendChild(host); var h0=host; suivant=suivant||function(){ h0.remove(); if(src.repeindre) src.repeindre(); }; }
   var etat=!it?"inconnu":(it.pr?"deja":"ok");
   var col={ok:"#1E9E57",deja:"#E8670A",inconnu:"#C0392B"}[etat];
   function peindre(){

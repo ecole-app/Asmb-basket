@@ -190,6 +190,7 @@ function evtTableau(eid){
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Entrée","primary",function(){ s.modal.remove(); evtEntree(eid); }));
   row.appendChild(gmBtn("Lien et QR code","soft",function(){ evtPartager(e); }));
+  row.appendChild(gmBtn("Affiche","soft",function(){ s.modal.remove(); evtAffiche(eid); }));
   row.appendChild(gmBtn("Code bénévole","soft",function(){ evtCodesBenevoles(eid); }));
   row.appendChild(gmBtn("Réglages","soft",function(){ s.modal.remove(); evtConfigurer(eid); }));
   var list=document.createElement("div"); list.style.marginTop="12px";
@@ -217,7 +218,9 @@ function evtTableau(eid){
           evtStat(actifs.filter(function(x){return x.present;}).length,"présent"+(actifs.filter(function(x){return x.present;}).length>1?"s":""))+
         '</div>'+
         '<div style="font-size:12px;color:var(--mut);margin-bottom:4px">'+authEsc(evtDateTxt(e))+(e.lieu?" · "+authEsc(e.lieu):"")+
-          (e.inscr.actif?(places?" · "+authEsc(evtPlacesTxt(places,page.nb)):""):' · <b style="color:var(--red)">Inscriptions fermées</b>')+'</div>';
+          (e.inscr.actif?(places?" · "+authEsc(evtPlacesTxt(places,page.nb)):""):' · <b style="color:var(--red)">Inscriptions fermées</b>')+'</div>'+
+        ((places&&e.inscr.actif&&places-(page.nb||0)<=5&&typeof afAlerteTxt==="function")?
+          '<button onclick="document.querySelectorAll(\'.gm-sheet\').forEach(function(m){m.remove();});evtAffiche(\''+authEsc(eid)+'\')" style="margin-top:8px;width:100%;text-align:left;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer">'+authEsc(afAlerteTxt(Math.max(0,places-(page.nb||0))))+' : republier l\'affiche à jour →</button>':'');
       evtListe(list, items, e, page, peindre);
     }
     peindre();
