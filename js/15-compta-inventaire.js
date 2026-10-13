@@ -162,6 +162,7 @@ function buildComptabilite(){
   var listEl=document.getElementById("compta-list");
   listEl.innerHTML="";
   if(!filtered.length){listEl.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune ligne</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Ligne pour ajouter</div></div>';return;}
+  if(typeof gmDeskOn==="function"&&gmDeskOn()){ comptaTableau(listEl,filtered); return; }
   filtered.forEach(function(l){
     var row=document.createElement("div");
     row.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(l.type==="depense"?"var(--red)":"var(--grn)")+";border-radius:var(--rs);padding:12px;cursor:pointer";
@@ -188,6 +189,26 @@ function buildComptabilite(){
     row.appendChild(top);
     listEl.appendChild(row);
   });
+}
+
+// Version ordinateur : la liste devient un tableau (une ligne = une écriture).
+function comptaTableau(listEl,lines){
+  function fr(d){ return d?d.split("-").reverse().join("/"):""; }
+  var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Date</th><th>Pièce</th><th>Libellé</th><th>Catégorie · compte</th><th>Paiement</th><th title="Pointé avec le relevé">Pointé</th><th class="num">Montant</th></tr></thead><tbody>';
+  lines.forEach(function(l){
+    var dep=l.type==="depense", n=(typeof comptaCompteNum==="function")?comptaCompteNum(l):"";
+    h+='<tr data-id="'+authEsc(String(l.id))+'">'+
+      '<td style="white-space:nowrap">'+fr(l.date)+'</td>'+
+      '<td class="mono">'+authEsc(l.piece||"")+'</td>'+
+      '<td><div style="font-weight:700">'+authEsc(l.motif||"(sans motif)")+(l.justificatif?' <span title="Justificatif joint">📎</span>':'')+'</div>'+(l.tiers?'<div class="mut">'+authEsc(l.tiers)+'</div>':'')+'</td>'+
+      '<td>'+authEsc(l.categorie||"")+(n?'<div class="mono">'+authEsc(n+" "+((typeof comptaLibCompte==="function")?comptaLibCompte(n):""))+'</div>':'')+'</td>'+
+      '<td class="mut">'+authEsc([l.moyen,comptaLigneCompte(l)].filter(Boolean).join(" · "))+'</td>'+
+      '<td style="text-align:center;color:var(--grn);font-weight:800">'+(l.pointe?"✓":"")+'</td>'+
+      '<td class="num" style="color:'+(dep?"var(--red)":"var(--grn)")+'">'+(dep?"-":"+")+(Number(l.montant)||0).toFixed(2).replace(".",",")+' €</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  listEl.innerHTML=h;
+  listEl.querySelector("tbody").addEventListener("click",function(e){ var tr=e.target.closest("tr"); if(tr) showAddComptaLine(tr.dataset.id); });
 }
 
 var comptaCurrentType="recette";

@@ -355,3 +355,34 @@ html.gm-public .main>#desk-home{display:none!important}
 @supports (-webkit-touch-callout:none){
   input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
 }
+
+/* ═══ Version ordinateur : tableaux et fenêtres centrées (Compta, Licences, Joueurs) ═══ */
+.gm-tw{margin:4px 12px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden;box-shadow:0 2px 8px var(--shadow)}
+.gm-table{width:100%;border-collapse:collapse;font-size:13px;color:var(--txt)}
+.gm-table th{background:var(--sf);text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);padding:11px 12px;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.gm-table td{padding:10px 12px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.gm-table tbody tr:last-child td{border-bottom:none}
+.gm-table tbody tr{cursor:pointer;transition:background .12s}
+.gm-table tbody tr:hover{background:color-mix(in srgb,var(--ltg) 8%,transparent)}
+.gm-table .num,.gm-table th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gm-table td.num{font-weight:800}
+.gm-table .mut{color:var(--mut);font-size:12px}
+.gm-table .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--mut)}
+.gm-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.gm-pill{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.gm-tb{padding:5px 10px;margin-left:6px;border-radius:var(--rx);background:var(--bdr);color:var(--txt2);font-size:11px;font-weight:700;border:none;cursor:pointer}
+.gm-tb:hover{background:color-mix(in srgb,var(--ltg) 18%,transparent);color:var(--txt)}
+.gm-tb-red{background:rgba(192,57,43,.1);color:var(--red)}
+.gm-tb-red:hover{background:rgba(192,57,43,.2);color:var(--red)}
+html.gm-desk .lic-cnt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 24px}
+/* Les fenêtres « tiroir » du téléphone deviennent des fenêtres centrées. */
+html.gm-desk [id^="modal-"][style*="flex-end"]{align-items:center!important;justify-content:center!important;padding:24px;box-sizing:border-box}
+html.gm-desk [id^="modal-"][style*="flex-end"]>div{max-width:640px;width:100%;border-radius:var(--r)!important;max-height:calc(100vh - 48px)!important}
+html.gm-desk .gm-sheet{align-items:center!important;justify-content:center!important;padding:24px;box-sizing:border-box}
+html.gm-desk .gm-sheet>div{max-width:720px;width:100%;border-radius:20px!important;max-height:calc(100vh - 48px)!important}
+/* Licences : les encarts « Séances d'essai » et « Réinscriptions » côte à côte. */
+html.gm-desk #scr-licences.on{display:grid;grid-template-columns:1fr 1fr;column-gap:0;align-content:start}
+html.gm-desk #scr-licences.on>*{grid-column:1/-1;min-width:0}
+html.gm-desk #scr-licences.on>#lic-essai-box,html.gm-desk #scr-licences.on>#lic-reinsc-box{grid-column:auto}
+html.gm-desk #scr-licences.on>#lic-essai-box:empty,html.gm-desk #scr-licences.on>#lic-reinsc-box:empty{display:none}
+html.gm-desk #scr-licences.on>div:empty{display:none}

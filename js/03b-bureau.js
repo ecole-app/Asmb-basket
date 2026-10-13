@@ -48,10 +48,19 @@ var GM_DESK_SVG={
 function gmDeskEstDirigeant(){
   return localStorage.getItem("asmb_profile")==="dirigeant" && !!window.ASMB_USER;
 }
+function gmDeskOn(){ return document.documentElement.classList.contains("gm-desk"); }
+// Écrans qui ont une présentation en tableau sur ordinateur : on les redessine
+// quand on passe d'un mode à l'autre (fenêtre agrandie ou réduite).
+var GM_DESK_REDESSIN={comptabilite:"buildComptabilite",licences:"buildLicences",inscriptions:"renderPlayers"};
 // Allume ou éteint la version ordinateur selon la largeur et le profil.
 function gmDeskSync(){
   var on=!!(GM_DESK_MQ&&GM_DESK_MQ.matches) && gmDeskEstDirigeant();
+  var avant=gmDeskOn();
   document.documentElement.classList.toggle("gm-desk", on);
+  if(avant!==on){
+    var scr=document.querySelector(".scr.on"), f=scr&&GM_DESK_REDESSIN[scr.id.replace(/^scr-/,"")];
+    if(f&&typeof window[f]==="function") try{ window[f](); }catch(e){}
+  }
   var side=document.getElementById("gm-side");
   if(!side) return;
   if(on) gmDeskRender(); else side.innerHTML="";

@@ -437,12 +437,12 @@ function buildLicences(){
  if(!catKeys.length){counterEl.innerHTML="";}
  else{
  var chtml='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;box-shadow:0 2px 8px var(--shadow)">';
-      chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validees vs en attente</div>';
+      chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validées vs en attente</div><div class="lic-cnt-grid">';
       catKeys.forEach(function(cat){
         var c=byCat[cat];
-        chtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div><div style="font-size:10px;color:var(--mut);padding:0 0 4px">'+effectifTexte(c)+'</div>';
+        chtml+='<div class="lic-cnt-cat"><div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div><div style="font-size:10px;color:var(--mut);padding:0 0 4px">'+effectifTexte(c)+'</div></div>';
       });
-      chtml+='</div>';
+      chtml+='</div></div>';
       counterEl.innerHTML=chtml;
     }
   }
@@ -479,6 +479,7 @@ function buildLicences(){
     if(licTriCatGenre)return compareCatGenreNom(a.categorie,licGenre(a),licNomTri(a),b.categorie,licGenre(b),licNomTri(b));
     return b.createdAt-a.createdAt;
   });
+  if(typeof gmDeskOn==="function"&&gmDeskOn()){ licencesTableau(el,lics,season); return; }
   lics.forEach(function(lic){
     var st=STATUTS.find(function(s){return s.id===lic.statut;})||STATUTS[0];
     var div=document.createElement("div");
@@ -499,6 +500,30 @@ function buildLicences(){
     div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+(lic.saison&&lic.saison>season?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#1A2E5A">Saison '+authEsc(lic.saison)+'</span>':'')+(lic.reinscriptionEnLigne?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 15%, transparent)">Réinscription en ligne</span>':'')+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
+}
+
+// Version ordinateur : fiches en tableau ; clic sur la ligne = ouvrir la fiche.
+function licencesTableau(el,lics,season){
+  function pastille(txt,fond,coul){ return '<span class="gm-pill" style="background:'+fond+';color:'+(coul||"#fff")+'">'+txt+'</span>'; }
+  var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Licencié</th><th>Code</th><th>Email</th><th>Catégorie</th><th>Statut</th><th>Paiement</th><th>Suivi</th></tr></thead><tbody>';
+  lics.forEach(function(lic){
+    var st=STATUTS.find(function(s){return s.id===lic.statut;})||STATUTS[0];
+    var nom=lic.fiche?authEsc((lic.fiche.prenom||"")+" "+(lic.fiche.nom||"")):'<span class="mut">Fiche en attente'+(lic.nomDest?" · "+authEsc(lic.nomDest):"")+'</span>';
+    var photo=lic.fiche&&lic.fiche.photo?'<img src="'+authEsc(lic.fiche.photo)+'" class="gm-av" style="object-fit:cover">':'<span class="gm-av" style="background:var(--dkg)"></span>';
+    var sp=licenceStatutPaiement(lic);
+    var paie=lic.suspendue?pastille("⛔ Suspendue","var(--red)"):sp==="impaye"?pastille("Impayé","var(--red)"):sp==="partiel"?pastille("Partiel","#E8670A"):sp==="paye"?pastille("Payé","color-mix(in srgb, var(--grn) 15%, transparent)","var(--grn)"):'';
+    var suivi=[];
+    if(lic.statut==="envoyee"&&(Date.now()-lic.createdAt)/86400000>=5) suivi.push(pastille("Relance recommandée","#E8670A"));
+    if(lic.saison&&lic.saison>season) suivi.push(pastille("Saison "+authEsc(lic.saison),"#1A2E5A"));
+    if(lic.reinscriptionEnLigne) suivi.push(pastille("Réinscription en ligne","color-mix(in srgb, var(--ltg) 15%, transparent)","var(--dkg)"));
+    if(lic.ouvertLe) suivi.push('<span class="mut">Ouverte le '+authEsc(lic.ouvertLe)+'</span>');
+    h+='<tr data-code="'+authEsc(lic.code)+'"><td><div style="display:flex;align-items:center;gap:10px">'+photo+'<b>'+nom+'</b></div></td>'+
+      '<td class="mono">'+authEsc(lic.code)+'</td><td class="mut">'+authEsc(lic.email||"")+'</td>'+
+      '<td>'+(lic.categorie?pastille(authEsc(lic.categorie),CAT_COLS_LIC[lic.categorie]||"#1A2E5A"):'')+'</td>'+
+      '<td>'+pastille(st.icon+" "+authEsc(st.label),st.color)+'</td><td>'+paie+'</td><td><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+suivi.join("")+'</div></td></tr>';
+  });
+  el.innerHTML=h+'</tbody></table></div>';
+  el.querySelector("tbody").addEventListener("click",function(e){ var tr=e.target.closest("tr"); if(tr) openLicenceDetail(tr.dataset.code); });
 }
 
 function showNewLicence(){

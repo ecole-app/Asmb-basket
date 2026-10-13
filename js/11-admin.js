@@ -1181,6 +1181,7 @@ function renderPlayers(){
   document.getElementById("insc-count").textContent=(filtered.length===players.length?players.length:filtered.length+" sur "+players.length)+" joueur"+(players.length>1?"s":"")+(filtered.length?" · "+effectifTexte(eff):"");
   if(!filtered.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun joueur")+'</div><div style="font-size:11px;margin-top:4px">'+(q?"Essayez un autre nom":"Appuyez sur + Ajouter")+'</div></div>';return;}
   el.innerHTML="";
+  if(typeof gmDeskOn==="function"&&gmDeskOn()){ joueursTableau(el,filtered); return; }
   filtered.forEach(function(p){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();
     var col=CAT_COLORS[p.cat]||"#1A2E5A";
@@ -1198,6 +1199,25 @@ function renderPlayers(){
       +'<div class="player-meta">'+meta+'</div>'
       +'<div style="margin-top:4px">'+status+genreBadge+'</div></div>'+btns;
     el.appendChild(d);
+  });
+}
+// Version ordinateur : joueurs en tableau ; clic sur la ligne = modifier.
+function joueursTableau(el,list){
+  var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Joueur</th><th>Catégorie</th><th>Genre</th><th>Naissance</th><th>Poste</th><th>Licence</th><th></th></tr></thead><tbody>';
+  list.forEach(function(p){
+    var id=authEsc(String(p.id||"")), col=CAT_COLORS[p.cat]||"#1A2E5A";
+    var ini=authEsc(((p.prenom||"?")[0]+(p.nom||"?")[0]).toUpperCase());
+    var lic=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
+    h+='<tr data-id="'+id+'"><td><div style="display:flex;align-items:center;gap:10px"><span class="gm-av" style="background:'+col+'">'+ini+'</span><b>'+authEsc((p.prenom||"")+" "+(p.nom||""))+'</b></div></td>'+
+      '<td>'+authEsc(p.cat||"")+'</td><td>'+(p.genre==="F"?"Fille":p.genre==="M"?"Garçon":"")+'</td>'+
+      '<td class="mut">'+authEsc(p.naissance?p.naissance.split("-").reverse().join("/"):"")+'</td><td class="mut">'+authEsc(p.poste||"")+'</td><td>'+lic+'</td>'+
+      '<td style="white-space:nowrap;text-align:right"><button class="gm-tb" data-act="hist">Historique</button><button class="gm-tb" data-act="edit">Modifier</button><button class="gm-tb gm-tb-red" data-act="del">Suppr.</button></td></tr>';
+  });
+  el.innerHTML=h+'</tbody></table></div>';
+  el.querySelector("tbody").addEventListener("click",function(e){
+    var tr=e.target.closest("tr"); if(!tr) return;
+    var b=e.target.closest("[data-act]"), act=b?b.dataset.act:"edit";
+    if(act==="hist") showPresenceHistory(tr.dataset.id); else if(act==="del") deletePlayer(tr.dataset.id); else editPlayer(tr.dataset.id);
   });
 }
 function showAddPlayer(){

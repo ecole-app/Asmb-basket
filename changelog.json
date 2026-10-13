@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791894856",
+    "titre": "Sur ordinateur : tableaux pour la compta, les licences et les joueurs",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur grand écran, Comptabilité, Licences et Joueurs s'affichent en tableaux lisibles d'un coup d'œil (pièce, compte, statut, paiement…). Un clic sur une ligne l'ouvre."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur, les fenêtres (ligne de compta, fiche, réglages) s'ouvrent au centre de l'écran au lieu de monter du bas. Rien ne change sur téléphone."
+      }
+    ]
+  },
+  {
     "v": "1791890331",
     "titre": "iPhone : glisser depuis le bord pour revenir",
     "points": [
