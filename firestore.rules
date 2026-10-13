@@ -140,6 +140,27 @@ service cloud.firestore {
         && inv.clubId == clubId && roles == [inv.role];
     }
 
+    // Élèves rattachés par une invitation (playerIds, ou playerId seul)
+    function inviteIds(inv) {
+      return inv.get('playerIds', []).concat(inv.get('playerId', null) == null ? [] : [string(inv.playerId)]);
+    }
+    // Un compte existant du MÊME club accepte une invitation : le rôle s'ajoute, rien d'autre ne bouge.
+    function accepteInvitation(uid) {
+      let code = request.resource.data.get('inviteCode', '');
+      let inv = get(invitePath(code)).data;
+      let avant = resource.data;
+      return signedIn() && request.auth.uid == uid
+        && code is string && code.size() > 0
+        && request.resource.data.diff(avant).affectedKeys().hasOnly(['roles','permissions','linkedPlayerIds','inviteCode'])
+        && inv.usedBy == null && inv.expiresAt > request.time
+        && inv.clubId == avant.get('clubId', null)
+        && getAfter(invitePath(code)).data.usedBy == request.auth.uid
+        && request.resource.data.roles.hasAll(avant.get('roles', []))
+        && request.resource.data.roles.hasOnly(avant.get('roles', []).concat([inv.role]))
+        && request.resource.data.permissions.diff(avant.get('permissions', {})).affectedKeys().hasOnly(inv.get('grantedPermissions', {}).keys())
+        && request.resource.data.linkedPlayerIds.toSet().difference(avant.get('linkedPlayerIds', []).toSet()).difference(inviteIds(inv).toSet()).size() == 0;
+    }
+
     // ── Comptes utilisateurs ────────────────────────────────────────
     match /users/{uid} {
       // Le staff (dirigeant, coach) voit les comptes de son club : il en a besoin
@@ -184,8 +205,13 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['phone']))
         || (superAdmin() && request.auth.uid == uid
             && resource.data.get('clubId', null) == null && request.resource.data.clubId == "asmb"
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clubId']));
-      allow delete: if superAdmin();
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clubId']))
+        || accepteInvitation(uid);
+      // Le dirigeant retire l'accès d'un compte de son club (jamais un dirigeant, jamais le sien) :
+      // l'adresse e-mail pourra être réinvitée (« J'ai déjà un compte »).
+      allow delete: if superAdmin()
+        || (dirigeant(resource.data.get('clubId', null)) && request.auth.uid != uid
+            && !('dirigeant' in resource.data.get('roles', [])));
     }
 
     // ── Comptes de connexion à supprimer à la main (club supprimé) ──

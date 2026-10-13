@@ -1,6 +1,7 @@
 // Tests des règles de sécurité Firestore (firestore.rules).
 // Lancement : cd tests && npm run test:rules   (voir tests/README.md)
 import { describe, it, beforeEach, after } from "node:test";
+import assert from "node:assert/strict";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import {
   doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, collection, query, where, writeBatch, Timestamp, serverTimestamp,
@@ -194,6 +195,22 @@ describe("Comptes utilisateurs", () => {
     await assertFails(updateDoc(doc(await as("coachA"), "users/parentA"), { roles: ["coach"] }));
     await assertFails(updateDoc(doc(await as("dirB"), "users/parentA"), { phone: "0666666666" }));
   });
+  it("le dirigeant retire l'accès d'un compte de son club, pas d'un dirigeant, pas d'un autre club", async () => {
+    await assertFails(deleteDoc(doc(await as("coachA"), "users/parentA")));
+    await assertFails(deleteDoc(doc(await as("parentA"), "users/parent2A")));
+    await assertFails(deleteDoc(doc(await as("dirB"), "users/parentA")));
+    await assertFails(deleteDoc(doc(await as("dirA"), "users/dirA")));
+    await assertFails(deleteDoc(doc(await as("dirA"), "users/dirB")));
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "users/parentA")));
+  });
+  it("après retrait, la même personne retrouve un accès avec une nouvelle invitation", async () => {
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "users/coachA")));
+    const db = await as("coachA");
+    const b = writeBatch(db);
+    b.set(doc(db, "users/coachA"), { clubId: "A", roles: ["coach"], inviteCode: "INVCOACH" });
+    b.update(doc(db, "club_invites/INVCOACH"), { usedBy: "coachA", usedAt: Timestamp.now() });
+    await assertSucceeds(b.commit());
+  });
   it("le dirigeant donne un accès compta à un membre du bureau", async () => {
     await assertSucceeds(updateDoc(doc(await as("dirA"), "users/coachA"), { permissions: { comptabilite: true } }));
   });
@@ -237,6 +254,30 @@ describe("Invitations", () => {
   });
   it("on ne peut pas s'ajouter des accès en acceptant l'invitation", async () => {
     await assertFails(rejoindre("nouveau1", "INVCOACH", { permissions: { comptabilite: true } }));
+  });
+  async function ajouterRole(uid, code, data) {
+    const db = await as(uid);
+    const b = writeBatch(db);
+    b.update(doc(db, `users/${uid}`), { roles: ["parent", "coach"], permissions: {}, linkedPlayerIds: [], inviteCode: code, ...data });
+    b.update(doc(db, `club_invites/${code}`), { usedBy: uid, usedAt: Timestamp.now() });
+    return b.commit();
+  }
+  it("un compte existant du club ajoute le rôle de l'invitation (parent qui devient coach)", async () => {
+    await assertSucceeds(ajouterRole("parentA", "INVCOACH", {}));
+    const d = await getDoc(doc(await as("parentA"), "users/parentA"));
+    assert.deepEqual(d.data().roles, ["parent", "coach"]);
+  });
+  it("refusé : autre rôle que l'invitation, accès non accordés, élève non rattaché, invitation d'un autre club, déjà utilisée", async () => {
+    await assertFails(ajouterRole("parentA", "INVCOACH", { roles: ["parent", "dirigeant"] }));
+    await assertFails(ajouterRole("parentA", "INVCOACH", { permissions: { comptabilite: true } }));
+    await assertFails(ajouterRole("parentA", "INVCOACH", { linkedPlayerIds: ["p2"] }));
+    await assertFails(ajouterRole("dirB", "INVCOACH", { roles: ["dirigeant", "coach"] }));
+    await assertSucceeds(ajouterRole("parentA", "INVCOACH", {}));
+    await assertFails(ajouterRole("parent2A", "INVCOACH", {}));
+  });
+  it("ajouter un rôle sans consommer l'invitation est refusé", async () => {
+    const db = await as("parentA");
+    await assertFails(updateDoc(doc(db, "users/parentA"), { roles: ["parent", "coach"], permissions: {}, linkedPlayerIds: [], inviteCode: "INVCOACH" }));
   });
   it("un parent ne peut pas créer une invitation de coach", async () => {
     const db = await as("parentA");

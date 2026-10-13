@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791880312",
+    "titre": "Invitations : compte déjà existant et retrait d'accès",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Sur la page d'invitation, « Me connecter avec mon compte » : si l'e-mail a déjà un compte, l'accès de l'invitation s'ajoute à ce compte (un parent qui devient aussi coach, par exemple). Lien déjà utilisé : bouton « Me connecter »."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Accès coach : bouton « Retirer l'accès » pour un compte du club. La personne peut ensuite retrouver un accès avec la même adresse e-mail grâce à une nouvelle invitation."
+      }
+    ]
+  },
+  {
     "v": "1791880033",
     "titre": "Événements : qui vient chaque jour",
     "points": [

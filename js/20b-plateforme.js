@@ -185,16 +185,19 @@ function showInviteScreen(code){
     window.fbGetDoc(window.fbDoc(window.fbDb,"club_invites",code)).then(function(snap){
       if(!snap.exists()) return inviteError(el,"Invitation introuvable. Vérifiez le lien reçu.");
       var inv=snap.data();
-      if(inv.usedBy) return inviteError(el,"Cette invitation a déjà été utilisée.");
+      if(inv.usedBy) return inviteError(el,"Cette invitation a déjà été utilisée. Si c'est vous qui l'avez ouverte, votre compte existe : connectez-vous.",true);
       var exp=inv.expiresAt&&inv.expiresAt.toDate?inv.expiresAt.toDate():null;
       if(exp && exp<new Date()) return inviteError(el,"Cette invitation a expiré. Demandez-en une nouvelle.");
       renderInviteForm(el, code, inv);
     }).catch(function(){ inviteError(el,"Impossible de vérifier l'invitation."); });
   })();
 }
-function inviteError(el,msg){
+function inviteError(el,msg,avecConnexion){
   el.innerHTML=authHero("Invitation","General Manager")
-    +'<div style="padding:22px 18px"><div style="background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:600;padding:14px;border-radius:var(--rs);text-align:center;line-height:1.45">'+authEsc(msg)+'</div></div>';
+    +'<div style="padding:22px 18px"><div style="background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:600;padding:14px;border-radius:var(--rs);text-align:center;line-height:1.45">'+authEsc(msg)+'</div>'
+    +(avecConnexion?'<a href="'+authEsc(location.origin+location.pathname)+'" style="'+AUTH_BTN+';display:block;text-align:center;text-decoration:none;box-sizing:border-box">Me connecter</a>'
+      +'<p style="font-size:12px;color:var(--mut);text-align:center;line-height:1.5;margin-top:14px">Mot de passe oublié ? Depuis l\'écran de connexion, « Mot de passe oublié ». Pour un nouvel accès, demandez une nouvelle invitation au dirigeant.</p>':'')
+    +'</div>';
 }
 // Identifiant interne des comptes joueur. Le sous-domaine n'existe pas dans le
 // DNS : rien ne peut y etre delivre, et il ne le pourra jamais meme si une
@@ -266,9 +269,79 @@ function renderInviteCompteForm(el, code, inv){
     +authPassField("auth-pass","6 caractères minimum")
     +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
     +'<button id="invite-accept-btn" style="'+AUTH_BTN+'">Créer mon compte</button>'
+    +'<p style="text-align:center;font-size:13px;color:var(--mut);margin-top:16px">Vous avez déjà un compte General Manager ? <a href="#" id="invite-existant" style="color:var(--dkg);font-weight:800">Me connecter avec mon compte</a></p>'
     +'</div>';
   authWirePassToggles();
   document.getElementById("invite-accept-btn").addEventListener("click",function(){ acceptInvite(code, inv); });
+  document.getElementById("invite-existant").addEventListener("click",function(e){ e.preventDefault(); renderInviteExistant(el, code, inv, (document.getElementById("auth-email")||{}).value||""); });
+}
+// Compte déjà existant (même e-mail) : on se connecte, et l'accès de l'invitation s'ajoute à ce compte.
+function renderInviteExistant(el, code, inv, email){
+  var roleLbl=inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach");
+  el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"), roleLbl)
+    +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
+    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Connectez-vous avec votre compte : l\'accès <b>'+roleLbl.toLowerCase()+'</b> de '+authEsc(inv.clubName||"ce club")+' s\'ajoutera à votre compte.</p>'
+    +'<label style="'+AUTH_LBL+'">E-mail</label>'
+    +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(email||"")+'" placeholder="prenom@email.fr">'
+    +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
+    +authPassField("auth-pass","Votre mot de passe")
+    +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
+    +'<button id="invite-accept-btn" style="'+AUTH_BTN+'">Me connecter et rejoindre</button>'
+    +'<p style="text-align:center;font-size:13px;margin-top:14px"><a href="#" id="invite-oubli" style="color:var(--dkg);font-weight:800">Mot de passe oublié</a></p>'
+    +'<p style="text-align:center;font-size:13px;color:var(--mut);margin-top:6px"><a href="#" id="invite-nouveau" style="color:var(--mut)">Créer un nouveau compte à la place</a></p>'
+    +'</div>';
+  authWirePassToggles();
+  document.getElementById("invite-accept-btn").addEventListener("click",function(){ acceptInviteExistant(code, inv); });
+  document.getElementById("invite-nouveau").addEventListener("click",function(e){ e.preventDefault(); renderInviteCompteForm(el, code, inv); });
+  document.getElementById("invite-oubli").addEventListener("click",function(e){
+    e.preventDefault();
+    var m=((document.getElementById("auth-email")||{}).value||"").trim();
+    if(m.indexOf("@")<1){ authErr("Saisissez d'abord votre e-mail."); return; }
+    window.fbSendReset(window.fbAuth,m).then(function(){ authErr("Un e-mail de réinitialisation vient d'être envoyé (pensez aux courriers indésirables)."); }).catch(function(){ authErr("Envoi impossible pour le moment."); });
+  });
+}
+function acceptInviteExistant(code, inv){
+  var email=((document.getElementById("auth-email")||{}).value||"").trim();
+  var pass=(document.getElementById("auth-pass")||{}).value||"";
+  if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
+  if(!pass){ authErr("Saisissez votre mot de passe."); return; }
+  var btn=document.getElementById("invite-accept-btn");
+  if(btn){ btn.disabled=true; btn.textContent="Connexion…"; }
+  window.fbSignIn(window.fbAuth, email, pass).then(function(cred){
+    var uid=cred.user.uid, uref=window.fbDoc(window.fbDb,"users",uid);
+    return window.fbGetDoc(uref).then(function(snap){
+      var b=window.fbWriteBatch();
+      if(!snap.exists()){
+        // Compte de connexion sans accès (par exemple retiré par le dirigeant) : on recrée la fiche d'accès.
+        b.set(uref,{
+          email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
+          permissions:(inv.grantedPermissions||{}), titre:null,
+          linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
+          dpaAcceptedAt:(inv.role==="dirigeant"?window.fbServerTimestamp():null),
+          createdAt:window.fbServerTimestamp()
+        });
+      } else {
+        var u=snap.data();
+        if((u.clubId||null)!==inv.clubId) throw {code:"autre-club"};
+        var roles=(u.roles||[]).slice(); if(roles.indexOf(inv.role)<0) roles.push(inv.role);
+        var linked=(u.linkedPlayerIds||[]).slice();
+        (inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])).forEach(function(id){ if(linked.indexOf(id)<0) linked.push(id); });
+        b.update(uref,{roles:roles, permissions:Object.assign({},u.permissions||{},inv.grantedPermissions||{}), linkedPlayerIds:linked, inviteCode:code});
+      }
+      b.update(window.fbDoc(window.fbDb,"club_invites",code),{usedBy:uid, usedAt:window.fbServerTimestamp()});
+      return b.commit();
+    });
+  }).then(function(){
+    location.href=location.origin+location.pathname;
+  }).catch(function(e){
+    var c=e&&e.code||"";
+    if(btn){ btn.disabled=false; btn.textContent="Me connecter et rejoindre"; }
+    if(c==="autre-club"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr("Ce compte est déjà rattaché à un autre club. Un compte ne peut appartenir qu'à un club : utilisez une autre adresse e-mail."); }
+    else if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-login-credentials") authErr("E-mail ou mot de passe incorrect.");
+    else if(c==="auth/too-many-requests") authErr("Trop d'essais. Réessayez dans quelques minutes, ou utilisez « Mot de passe oublié ».");
+    else if(c==="permission-denied") authErr("Invitation déjà utilisée ou expirée.");
+    else authErr("Erreur : "+(c||e.message||"inconnue"));
+  });
 }
 // L'enfant ne saisit qu'un mot de passe : aucune donnee de contact ne lui est
 // demandee, et le club n'en stocke donc aucune le concernant.
@@ -322,7 +395,7 @@ function acceptInvite(code, inv){
     // pour ne pas laisser de compte orphelin.
     if(createdUser && c!=="auth/email-already-in-use"){ createdUser.delete().catch(function(){}); }
     if(btn){ btn.disabled=false; btn.textContent="Créer mon compte"; }
-    if(c==="auth/email-already-in-use") authErr("Cet e-mail a déjà un compte. Utilisez une autre adresse, ou demandez au dirigeant de vous ajouter depuis « Accès coach ».");
+    if(c==="auth/email-already-in-use") { authErr("Cet e-mail a déjà un compte. Touchez « Me connecter avec mon compte » ci-dessous : l'accès s'ajoutera à ce compte."); }
     else if(c==="auth/weak-password") authErr("Mot de passe trop faible (6 caractères min.)");
     else if(c==="auth/invalid-email") authErr("E-mail invalide");
     else if(c==="permission-denied") authErr("Invitation déjà utilisée ou expirée.");
