@@ -579,6 +579,117 @@ function evtDessinerQr(root, pid){
     if(q.childNodes.length) return;
     try{ new QRCode(q,{text:"https://generalmanagerapp.fr/?billet="+encodeURIComponent(q.dataset.code)+"&evt="+encodeURIComponent(pid),width:170,height:170,colorDark:"#0b1630",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
   });
+  evtBrancherGarder(root);
+}
+
+// ── Garder son billet : image à enregistrer + lien à s'envoyer ──────
+// Le lien porte le billet lui-même (code, nom, jours, tarif) : rouvert sur
+// n'importe quel téléphone, il réaffiche le billet, sans rien publier de plus.
+var EVT_BILLETS_VUS={};
+function evtLienBillet(b,pid){
+  var q="?billet="+encodeURIComponent(b.code)+"&evt="+encodeURIComponent(pid)+
+    "&n="+encodeURIComponent(((b.prenom||"")+" "+(b.nom||"")).trim().slice(0,100));
+  if(b.jours&&b.jours.length) q+="&j="+encodeURIComponent(b.jours.join(","));
+  if(b.tarifNom) q+="&t="+encodeURIComponent(String(b.tarifNom).slice(0,40));
+  if(b.montant!=null) q+="&m="+encodeURIComponent(Number(b.montant)||0);
+  if(b.mode) q+="&mo="+encodeURIComponent(b.mode);
+  return "https://generalmanagerapp.fr/"+q;
+}
+// Billet reçu par lien (?billet=…&n=…) : on le range dans « Mes billets » de ce téléphone.
+function evtBilletDepuisLien(code,pid){
+  try{
+    var u=new URLSearchParams(location.search), n=u.get("n");
+    if(!n||!pid||!/^[A-Z0-9-]{5,14}$/.test(code)) return;
+    if(evtMesBillets(pid).some(function(b){ return b.code===code; })) return;
+    var mo=u.get("mo")||"";
+    evtGarderBillet(pid,{
+      code:code, prenom:String(n).slice(0,100), nom:"",
+      jours:String(u.get("j")||"").split(",").filter(function(j){ return /^\d{4}-\d{2}-\d{2}$/.test(j); }).slice(0,60),
+      tarifNom:String(u.get("t")||"").slice(0,40), montant:Number(u.get("m"))||0,
+      mode:(typeof EVT_MODES!=="undefined"&&EVT_MODES[mo])?mo:""
+    });
+  }catch(e){}
+}
+function evtBoutonsBillet(b,p,pid){
+  EVT_BILLETS_VUS[b.code]={b:b,p:p,pid:pid};
+  function bt(act,txt,fond,coul){ return '<button data-act="'+act+'" style="flex:1;padding:11px 6px;border-radius:var(--rx);border:none;cursor:pointer;font-size:13px;font-weight:800;background:'+fond+';color:'+coul+'">'+txt+'</button>'; }
+  return '<div class="evt-garder" data-code="'+authEsc(b.code)+'" style="margin:-4px 0 14px">'+
+    '<div style="display:flex;gap:8px">'+
+      bt("img","📥 Enregistrer l'image","var(--dkg)","#fff")+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px">'+
+      bt("wa","M'envoyer par WhatsApp","#25D366","#0b1630")+
+      bt("sms","Par SMS","var(--bdr)","var(--txt)")+
+    '</div></div>';
+}
+function evtBrancherGarder(root){
+  Array.prototype.forEach.call(root.querySelectorAll(".evt-garder"),function(g){
+    if(g.dataset.ok) return; g.dataset.ok="1";
+    g.addEventListener("click",function(ev){
+      var t=ev.target.closest("[data-act]"); if(!t) return;
+      var x=EVT_BILLETS_VUS[g.dataset.code]; if(!x) return;
+      var lien=evtLienBillet(x.b,x.pid);
+      var msg="Mon billet pour "+(x.p.titre||"l'événement")+" ("+((x.b.prenom||"")+" "+(x.b.nom||"")).trim()+") : code "+x.b.code+". Pour réafficher le QR code : "+lien;
+      if(t.dataset.act==="wa") return void window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+      if(t.dataset.act==="sms") return void (window.location.href="sms:?&body="+encodeURIComponent(msg));
+      evtEnregistrerImage(x.b,x.p,root.querySelector('.evt-qr[data-code="'+x.b.code+'"]'));
+    });
+  });
+}
+// Image du billet fabriquée tout de suite dans le clic (sinon le partage est refusé sur téléphone).
+function evtImageBillet(b,p,qrHost){
+  var W=720,H=1100,cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  var c=cv.getContext("2d"), rgb=(typeof clubPdfRgb==="function")?clubPdfRgb():[27,92,40];
+  var coul="rgb("+rgb.join(",")+")";
+  try{ var v=getComputedStyle(document.documentElement).getPropertyValue("--dkg").trim(); if(v) coul=v; }catch(e){}
+  function lignes(txt,maxW,max){
+    var mots=String(txt||"").split(/\s+/), out=[], l="";
+    mots.forEach(function(m){ var t=l?l+" "+m:m; if(c.measureText(t).width>maxW&&l){ out.push(l); l=m; } else l=t; });
+    if(l) out.push(l);
+    if(out.length>max){ out=out.slice(0,max); out[max-1]=out[max-1].replace(/.{0,2}$/,"…"); }
+    return out;
+  }
+  c.fillStyle="#ffffff"; c.fillRect(0,0,W,H);
+  c.fillStyle=coul; c.fillRect(0,0,W,270);
+  c.textAlign="center"; c.fillStyle="#ffffff";
+  c.font="800 24px sans-serif"; c.fillText(lignes((p.nom||"").toUpperCase(),W-80,1)[0]||"",W/2,56);
+  c.font="900 46px sans-serif"; var tl=lignes(p.titre||"",W-80,2), y=118;
+  tl.forEach(function(l){ c.fillText(l,W/2,y); y+=54; });
+  c.font="600 26px sans-serif"; c.fillText(lignes(evtDateTxt(p),W-80,1)[0]||"",W/2,tl.length>1?236:190);
+  y=320; c.fillStyle="#334155"; c.font="600 24px sans-serif";
+  if(p.lieu){ c.fillText(lignes(p.lieu,W-80,1)[0],W/2,y); y+=32; }
+  if(p.adresse){ c.fillStyle="#64748b"; c.font="22px sans-serif"; c.fillText(lignes(p.adresse,W-80,1)[0],W/2,y); y+=30; }
+  var src=qrHost&&(qrHost.querySelector("canvas")||qrHost.querySelector("img")), qs=380, qy=Math.max(y+20,380);
+  if(src){ try{ c.imageSmoothingEnabled=false; c.drawImage(src,(W-qs)/2,qy,qs,qs); }catch(e){} }
+  y=qy+qs+70;
+  c.fillStyle=coul; c.font="900 60px monospace"; c.fillText(b.code,W/2,y);
+  y+=58; c.fillStyle="#0b1630"; c.font="900 36px sans-serif"; c.fillText(lignes(((b.prenom||"")+" "+(b.nom||"")).trim(),W-80,1)[0]||"",W/2,y);
+  c.font="700 24px sans-serif"; c.fillStyle="#334155";
+  if(b.jours&&b.jours.length){ y+=40; c.fillText(lignes(evtJoursTxt(b.jours,(p.jours||[]).length),W-80,1)[0],W/2,y); }
+  y+=36; c.fillText(lignes((b.tarifNom?b.tarifNom+" · ":"")+evtTarifTxt(b.montant),W-80,1)[0],W/2,y);
+  c.fillStyle="#64748b"; c.font="600 22px sans-serif"; c.fillText("Présentez ce billet à l'entrée",W/2,H-40);
+  return cv;
+}
+function evtEnregistrerImage(b,p,qrHost){
+  var nomF="billet-"+b.code+".png", url, f=null;
+  try{ url=evtImageBillet(b,p,qrHost).toDataURL("image/png"); }catch(e){ return askAlert("Impossible de fabriquer l'image. Faites une capture d'écran du billet."); }
+  try{
+    var bin=atob(url.split(",")[1]), arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    f=new File([arr],nomF,{type:"image/png"});
+  }catch(e){}
+  var tactile=false; try{ tactile=window.matchMedia("(pointer:coarse)").matches; }catch(e){}
+  var peut=false; try{ peut=!!(f&&tactile&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})); }catch(e){}
+  function telecharger(){
+    var a=document.createElement("a"); a.href=url; a.download=nomF;
+    document.body.appendChild(a); a.click(); a.remove();
+    showToast("Billet enregistré dans vos téléchargements");
+  }
+  if(peut){
+    navigator.share({files:[f]}).catch(function(err){ var n=err&&err.name; if(n==="AbortError") return; telecharger(); });
+    return;
+  }
+  telecharger();
 }
 
 // ── Page publique (?evt=clubId__eventId), sans compte ───────────────
@@ -623,7 +734,7 @@ function rendreEvtPublic(el,p,pid){
       '<div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc((b.prenom||"")+" "+(b.nom||""))+'</div>'+
       '<div style="font-size:13px;font-weight:800;color:var(--red);margin-top:6px">Inscription annulée par le club</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:4px">Ce billet n\'est plus valable. Contactez le club pour toute question.</div></div>';
-    return evtBilletHtml(b,p);
+    return evtBilletHtml(b,p)+evtBoutonsBillet(b,p,pid);
   }).join("")+'</div>':'';
   var ferme=p.actif!==true||(p.limite&&p.limite<auj)||((p.dateFin||p.date||auj)<auj);
   var complet=p.parJour?(p.places>0&&(p.jours||[]).length>0&&(p.jours||[]).every(function(j){ return ((p.nbJ||{})[j]||0)>=p.places; })):(p.places&&(p.nb||0)>=p.places);
@@ -744,8 +855,8 @@ function evtConfirmation(el,p,pid,b){
   el.innerHTML=evtEntete(p)+
     '<div style="padding:18px 16px 40px">'+
       '<div style="text-align:center;font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px">✅ Inscription enregistrée</div>'+
-      '<div style="text-align:center;font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:14px">Gardez ce code : il sera scanné à l\'entrée. Faites une capture d\'écran.</div>'+
-      evtBilletHtml(b,p)+pay+
+      '<div style="text-align:center;font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:14px">Gardez ce billet : il sera scanné à l\'entrée. Enregistrez l\'image ou envoyez-vous le lien.</div>'+
+      evtBilletHtml(b,p)+evtBoutonsBillet(b,p,pid)+pay+
       '<button id="evt-autre" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:14px;font-weight:700;border:none;cursor:pointer">Inscrire une autre personne</button>'+
     '</div>';
   evtDessinerQr(el,pid);
@@ -872,7 +983,7 @@ function evtInscrireEnfant(e){
     evtInscrire(pageId,data).then(function(r){
       var billet=Object.assign({code:r.code},data);
       evtGarderBillet(pageId,billet);
-      s.body.innerHTML=evtBilletHtml(billet,Object.assign({},r.page))+
+      s.body.innerHTML=evtBilletHtml(billet,Object.assign({},r.page))+evtBoutonsBillet(billet,Object.assign({},r.page),pageId)+
         ((mode==="helloasso"&&e.inscr.helloasso)?'<a href="'+authEsc(e.inscr.helloasso)+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
           (Number(data.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center">À régler sur place : '+authEsc(evtPrix(data.montant))+'</div>':''));
       evtDessinerQr(s.body,pageId);

@@ -458,6 +458,7 @@ function showBilletPublic(code, pid){
     if(g&&g.fin>Date.now()&&(!pid||g.pid===pid)){ showEntreeBenevole(g.code); return; }
   }catch(e){}
   if(pid && typeof showEvtPublic==="function"){
+    if(typeof evtBilletDepuisLien==="function") evtBilletDepuisLien(code,pid);
     var mes=(typeof evtMesBillets==="function")?evtMesBillets(pid):[];
     showEvtPublic(pid);
     if(!mes.some(function(b){return b.code===code;})) setTimeout(function(){ showToast("Billet "+code+" : présentez ce QR code à l'entrée"); },800);

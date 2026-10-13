@@ -1,5 +1,27 @@
 [
   {
+    "v": "1791886645",
+    "titre": "Événements : le billet se garde facilement",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Après l'inscription, « Enregistrer l'image » sauvegarde le billet (QR code, code, nom, jours) dans les photos ou les téléchargements."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "« M'envoyer par WhatsApp / SMS » : le lien reçu réaffiche le billet et son QR code sur n'importe quel téléphone, même si la page a été fermée."
+      }
+    ]
+  },
+  {
     "v": "1791885946",
     "titre": "Affiche : partage avec l'image jointe, à chaque clic",
     "points": [
