@@ -37,6 +37,8 @@ function buildPoleScreen(poleId){
   var pole=POLES.find(function(p){return p.id===poleId;});
   var countEl=document.getElementById(poleId+"-count");
   var listEl=document.getElementById(poleId+"-list");
+  // Coachs du pôle (choisis par le dirigeant) et joueurs (choisis par les coachs) : js/17b-poles-joueurs.js
+  if(listEl&&typeof poleRendreEquipe==="function") poleRendreEquipe(poleId,listEl);
   if(countEl)countEl.textContent=data.length+" élément"+(data.length>1?"s":"");
   if(!listEl)return;
   // About section

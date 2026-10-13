@@ -1172,6 +1172,7 @@ function renderPlayers(){
     gBar.innerHTML=genreFilterHtml(currentGenreFilter,"filterGenre",hasNR);
   }
   filtered=filtered.filter(function(p){return genreMatch(p.genre,currentGenreFilter);});
+  if(typeof polesFiltreJoueurs==="function") filtered=polesFiltreJoueurs(players,filtered);
   filtered=filtered.slice().sort(function(a,b){return compareCatGenreNom(a.cat,a.genre,(a.nom||"")+" "+(a.prenom||""),b.cat,b.genre,(b.nom||"")+" "+(b.prenom||""));});
   var searchEl=document.getElementById("insc-search");
   var q=searchEl?searchEl.value.trim().toLowerCase():"";
@@ -1197,20 +1198,20 @@ function renderPlayers(){
     d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
       +'<div class="player-info"><div class="player-name">'+authEsc(p.prenom||"")+" "+authEsc(p.nom||"")+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
-      +'<div style="margin-top:4px">'+status+genreBadge+'</div></div>'+btns;
+      +'<div style="margin-top:4px">'+status+genreBadge+'</div>'+(typeof polePastilles==="function"?'<div>'+polePastilles(p)+'</div>':'')+'</div>'+btns;
     el.appendChild(d);
   });
 }
 // Version ordinateur : joueurs en tableau ; clic sur la ligne = modifier.
 function joueursTableau(el,list){
-  var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Joueur</th><th>Catégorie</th><th>Genre</th><th>Naissance</th><th>Poste</th><th>Licence</th><th></th></tr></thead><tbody>';
+  var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Joueur</th><th>Catégorie</th><th>Genre</th><th>Naissance</th><th>Poste</th><th>Licence</th><th>Pôles</th><th></th></tr></thead><tbody>';
   list.forEach(function(p){
     var id=authEsc(String(p.id||"")), col=CAT_COLORS[p.cat]||"#1A2E5A";
     var ini=authEsc(((p.prenom||"?")[0]+(p.nom||"?")[0]).toUpperCase());
     var lic=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     h+='<tr data-id="'+id+'"><td><div style="display:flex;align-items:center;gap:10px"><span class="gm-av" style="background:'+col+'">'+ini+'</span><b>'+authEsc((p.prenom||"")+" "+(p.nom||""))+'</b></div></td>'+
       '<td>'+authEsc(p.cat||"")+'</td><td>'+(p.genre==="F"?"Fille":p.genre==="M"?"Garçon":"")+'</td>'+
-      '<td class="mut">'+authEsc(p.naissance?p.naissance.split("-").reverse().join("/"):"")+'</td><td class="mut">'+authEsc(p.poste||"")+'</td><td>'+lic+'</td>'+
+      '<td class="mut">'+authEsc(p.naissance?p.naissance.split("-").reverse().join("/"):"")+'</td><td class="mut">'+authEsc(p.poste||"")+'</td><td>'+lic+'</td><td>'+(typeof polePastilles==="function"?polePastilles(p):"")+'</td>'+
       '<td style="white-space:nowrap;text-align:right"><button class="gm-tb" data-act="hist">Historique</button><button class="gm-tb" data-act="edit">Modifier</button><button class="gm-tb gm-tb-red" data-act="del">Suppr.</button></td></tr>';
   });
   el.innerHTML=h+'</tbody></table></div>';
@@ -1283,9 +1284,11 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
     '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
-    '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+(p?p.contact:'')+'" placeholder="06..."></div>'+
-    '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+(p?p.notes:'')+'</textarea></div>';
+    '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+authEsc(p&&p.contact||'')+'" placeholder="06..."></div>'+
+    '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+authEsc(p&&p.notes||'')+'</textarea></div>'+
+    (typeof polesFicheHtml==="function"?polesFicheHtml(p):"");
   wirePlayerCatAutofill();
+  if(typeof polesFicheBrancher==="function") polesFicheBrancher();
 }
 function savePlayer(){
   var prenom=document.getElementById("fp-prenom").value.trim();
@@ -1305,6 +1308,7 @@ function savePlayer(){
     contact:document.getElementById("fp-contact").value,telEnfant:document.getElementById("fp-telEnfant").value,
     notes:document.getElementById("fp-notes").value
   });
+  if(typeof polesFicheLire==="function"){ var pl=polesFicheLire(data.poles); if(Object.keys(pl).length) data.poles=pl; else delete data.poles; }
   if(idx>=0) players[idx]=data;
   else players.push(data);
   savePlayers(players);

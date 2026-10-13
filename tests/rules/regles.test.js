@@ -128,6 +128,12 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });
+  it("coachs des pôles : le dirigeant les choisit, un coach ne peut pas se nommer lui-même", async () => {
+    const m = { elite: [{ uid: "coachA", nom: "Karim" }] };
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { polesCoachs: m }));
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), { polesCoachs: m }));
+    await assertFails(updateDoc(doc(await as("dirB"), "clubs/A"), { polesCoachs: m }));
+  });
   it("le dirigeant ne touche pas au pack, au statut, au propriétaire ni à l'échéance", async () => {
     const db = await as("dirA");
     await assertFails(updateDoc(doc(db, "clubs/A"), { plan: "paid" }));

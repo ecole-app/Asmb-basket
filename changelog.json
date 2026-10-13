@@ -1,5 +1,24 @@
 [
   {
+    "v": "1791899715",
+    "titre": "Pôles : coachs et joueurs",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans chaque pôle, « Choisir les coachs » : vous désignez les coachs qui gèrent le pôle (Formation et Événements : coachs seulement)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Élite, 5x5, 3x3 et Basket Pour Tous : les coachs du pôle y ajoutent leurs joueurs et renseignent leurs infos (niveau et objectif pour l'Élite, équipe, groupe…). Les pôles apparaissent en pastilles sur la fiche joueur, et la liste Joueurs se filtre par pôle."
+      }
+    ]
+  },
+  {
     "v": "1791898793",
     "titre": "Tournois : poules, phases finales et planning automatique",
     "points": [

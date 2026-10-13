@@ -399,7 +399,7 @@ service cloud.firestore {
       // listé ici (couvert par tests/rules).
       allow update: if (dirigeant(clubId)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances']))
+               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances','polesCoachs']))
         || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club

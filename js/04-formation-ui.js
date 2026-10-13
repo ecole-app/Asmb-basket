@@ -142,6 +142,7 @@ function openPole(id){
 }
 function buildElite(){
   var el=document.getElementById("eliteCards");if(!el)return;el.innerHTML="";
+  if(typeof poleRendreEquipe==="function") poleRendreEquipe("formation",el);
   ELITE_CATS.forEach(function(cat){el.appendChild(makeCard(cat,function(){openCat(cat.id);}));});
 }
 function openCat(id){

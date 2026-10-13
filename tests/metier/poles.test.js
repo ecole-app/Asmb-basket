@@ -1,0 +1,33 @@
+// Pôles (js/17b-poles-joueurs.js) : qui gère quel pôle, quels pôles ont des joueurs.
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import { charger } from "./contexte.js";
+
+function app(user, club) {
+  const c = charger(["js/01-config.js", "js/17b-poles-joueurs.js"]);
+  c.ASMB_USER = user; c.CURRENT_CLUB = club;
+  return c;
+}
+const club = { id: "x", poles: ["formation", "competition", "evenement", "3x3", "basketpourtous"], polesCoachs: { "3x3": [{ uid: "c1", nom: "Karim" }], formation: [{ uid: "c2", nom: "Lucie" }] } };
+
+describe("Pôles", () => {
+  it("seuls les pôles avec joueurs proposent des pastilles (pas Formation ni Événements)", () => {
+    const c = app({ uid: "d", roles: ["dirigeant"] }, club);
+    assert.deepEqual(JSON.parse(JSON.stringify(c.polesJoueursActifs().map((p) => p.id))), ["competition", "3x3", "basketpourtous"]);
+  });
+  it("le dirigeant gère tous les pôles", () => {
+    const c = app({ uid: "d", roles: ["dirigeant"] }, club);
+    assert.equal(c.peutGererPole("competition"), true);
+  });
+  it("un coach ne gère que les pôles où le dirigeant l'a mis", () => {
+    const c = app({ uid: "c1", roles: ["coach"] }, club);
+    assert.equal(c.peutGererPole("3x3"), true);
+    assert.equal(c.peutGererPole("competition"), false);
+    const p = app({ uid: "c1", roles: ["parent"] }, club);
+    assert.equal(p.peutGererPole("3x3"), false);
+  });
+  it("infos du pôle en texte court", () => {
+    const c = app({ uid: "d", roles: ["dirigeant"] }, club);
+    assert.equal(c.poleInfosTxt("elite", { niveau: "Espoir", objectif: "Sélection", depuis: "2026-09-01" }), "Espoir · Sélection");
+  });
+});

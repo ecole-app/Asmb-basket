@@ -97,6 +97,7 @@ const PRECACHE = [
   './js/16-communaute.js',
   './js/16b-messagerie.js',
   './js/17-poles.js',
+  './js/17b-poles-joueurs.js',
   './js/18-auth.js',
   './js/19-profils.js',
   './js/20-parent-tabs.js',
