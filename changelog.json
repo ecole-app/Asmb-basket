@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791879176",
+    "titre": "Événements : inscriptions sur ordinateur et dates",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le bouton « Ouvrir les inscriptions » apparaît aussi sur la version ordinateur."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Une date de fin avant la date de début est refusée, et déplacer un événement décale sa date de fin."
+      }
+    ]
+  },
+  {
     "v": "1791878470",
     "titre": "Version ordinateur : nouvel accueil",
     "points": [

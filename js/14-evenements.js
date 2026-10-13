@@ -319,6 +319,7 @@ function saveEventFull(){
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
   var canal=document.getElementById("ev-canal").value;
   if(!titre||!date){askAlert("Titre et date obligatoires");return;}
+  if(dateFin&&dateFin<date){askAlert("La date de fin doit être après la date de début.");return;}
   var participantsClub=Array.from(document.querySelectorAll(".ev-player-cb:checked")).map(function(cb){return cb.value;});
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
@@ -569,6 +570,12 @@ async function editEventDateTime(eventId){
 
   var changed=(newDate!==oldDate)||(newHeure!==oldHeure)||(newEquipe!==oldEquipe)||(newLieu!==oldLieu);
   ev.date=newDate.trim()||oldDate;
+  // Plage de dates : si le début dépasse la fin, la fin suit le même décalage
+  if(ev.dateFin&&ev.date>ev.dateFin&&oldDate){
+    var dec=Math.round((new Date(ev.date+"T12:00:00")-new Date(oldDate+"T12:00:00"))/86400000);
+    if(!isNaN(dec)){ var df=new Date(ev.dateFin+"T12:00:00"); df.setDate(df.getDate()+dec); ev.dateFin=df.toISOString().slice(0,10); }
+    if(ev.dateFin<ev.date) ev.dateFin=ev.date;
+  }
   ev.heure=newHeure.trim();
   ev.equipe=newEquipe.trim();
   ev.lieu=newLieu.trim();
