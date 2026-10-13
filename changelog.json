@@ -1,5 +1,15 @@
 [
   {
+    "v": "1791885356",
+    "titre": "iPhone : la barre du bas ne cache plus les fenêtres",
+    "points": [
+      {
+        "roles": [],
+        "texte": "Sur iPhone, la barre du bas (Accueil, Communauté, Admin) passait par-dessus les fenêtres et cachait le bouton « Enregistrer ». Corrigé pour toutes les fenêtres."
+      }
+    ]
+  },
+  {
     "v": "1791885210",
     "titre": "Inscription aux événements : e-mail",
     "points": [

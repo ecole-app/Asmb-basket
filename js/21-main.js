@@ -100,6 +100,16 @@ function toggleBnavExpanded(){
 }());
 
 // ═══ INIT ════════════════════════════════════════════════════════
+// Les fenêtres (modal-*) sont écrites dans la zone qui défile (#main-scroll). Sur
+// iPhone (Safari), cette zone forme une « couche » à part : la barre du bas de
+// l'appli passait PAR-DESSUS la fenêtre et cachait son bouton « Enregistrer ».
+// On les sort de la zone qui défile, directement dans <body>.
+(function(){
+  var zone=document.getElementById("main-scroll"); if(!zone) return;
+  Array.prototype.slice.call(zone.querySelectorAll('[id^="modal-"]')).forEach(function(m){
+    if(m.style.position==="fixed") document.body.appendChild(m);
+  });
+}());
 (function(){var t=localStorage.getItem("asmb_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}());
 (function(){var vt=localStorage.getItem("asmb_visual_theme");if(vt&&vt!=="moderne"&&VISUAL_THEMES[vt]){document.documentElement.setAttribute("data-visual-theme",vt);}}());
 
@@ -128,7 +138,7 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1791885210";
+var APP_VERSION="1791885356";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
