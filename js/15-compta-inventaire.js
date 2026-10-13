@@ -281,6 +281,7 @@ function showAddComptaLine(editId){
   var justifPrev=document.getElementById("cl-justif-preview");
   if(justifPrev) justifPrev.textContent=comptaJustifDataUrl?"📎 Justificatif joint":"Aucun justificatif joint";
   var justifFile=document.getElementById("cl-justif-file"); if(justifFile) justifFile.value="";
+  if(typeof comptaTicketStatut==="function") comptaTicketStatut("");
   setComptaType(existing?existing.type:"recette");
   if(typeof comptaRemplirCompte==="function") comptaRemplirCompte(existing?(existing.compteNum||""):"");
   var delBtn=document.getElementById("compta-delete-btn");

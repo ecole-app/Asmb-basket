@@ -451,15 +451,16 @@
 
   <!-- ═══ COMPTABILITE ═══ -->
   <div class="scr" id="scr-comptabilite">
-    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Comptabilité</div>
         <div style="font-size:11px;color:var(--mut)" id="compta-count">0 ligne</div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto">
         <button onclick="exportComptaXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
         <button onclick="exportComptaBilanPdf()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Bilan PDF</button>
         <button onclick="exportComptaCsv()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">CSV</button>
+        <button onclick="comptaTicketNouveau()" title="Photo d'un ticket" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">📷 Ticket</button>
         <button onclick="showAddComptaLine()" style="padding:9px 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Ligne</button>
       </div>
     </div>
@@ -478,6 +479,8 @@
           <button id="compta-type-recette" onclick="setComptaType('recette')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">+ Recette</button>
           <button id="compta-type-depense" onclick="setComptaType('depense')" style="flex:1;padding:10px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:13px;font-weight:700;cursor:pointer">− Dépense</button>
         </div>
+        <button type="button" id="cl-ticket-btn" onclick="comptaTicketChoisir()" style="width:100%;padding:11px;border-radius:var(--rx);border:1.5px dashed var(--dkg);background:var(--card);color:var(--dkg);font-size:13px;font-weight:800;cursor:pointer;margin-bottom:6px">📷 Remplir avec la photo du ticket</button>
+        <div id="cl-ticket-st" style="display:none;font-size:12px;font-weight:700;margin-bottom:10px"></div>
         <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="cl-date" type="date"></div>
         <div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="cl-montant" type="number" step="0.01" placeholder="0.00"></div>
         <div class="form-group"><label class="form-label">Catégorie</label><select class="form-input" id="cl-categorie"></select></div>
@@ -1870,6 +1873,7 @@
 <script src="js/14f-tournoi-jourj.js"></script>
 <script src="js/15-compta-inventaire.js"></script>
 <script src="js/15b-compta-plan.js"></script>
+<script src="js/15c-compta-ticket.js"></script>
 <script src="js/16-communaute.js"></script>
 <script src="js/16b-messagerie.js"></script>
 <script src="js/17-sponsors.js"></script>

@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791912160",
+    "titre": "Compta : photo de ticket",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "bureau"
+        ],
+        "texte": "Compta : bouton « 📷 Ticket » : prenez le ticket en photo, la date, le montant, le fournisseur et la catégorie sont remplis tout seuls. Vous vérifiez puis enregistrez ; la photo est jointe en justificatif."
+      }
+    ]
+  },
+  {
     "v": "1791911186",
     "titre": "Soirée : réservation par famille",
     "points": [
