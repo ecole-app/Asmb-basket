@@ -13,7 +13,7 @@ var AF_FORMATS={
   story:{nom:"Story",bw:338,bh:600,W:1080,H:1917},
   a4:{nom:"A4 à imprimer",bw:424,bh:600,W:1240,H:1754}
 };
-var AF_INFOS=[["dates","Dates"],["horaires","Horaires"],["lieu","Lieu"],["prix","Tarifs"],["places","Places restantes"],["texte","Texte libre"],["intervenants","Intervenants"],["qr","QR code d'inscription"],["sponsors","Logos des sponsors"]];
+var AF_INFOS=[["accroche","Accroche"],["dates","Dates"],["horaires","Horaires"],["lieu","Lieu"],["prix","Tarifs"],["places","Places restantes"],["texte","Texte libre"],["programme","Programme"],["intervenants","Intervenants"],["qr","QR code d'inscription"],["sponsors","Logos des sponsors"]];
 var AF_TAGS={stage:"Stage",tournoi:"Tournoi",soiree:"Soirée"};
 var AF_F={sans:"'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",anton:"Anton, Impact, 'Arial Narrow', sans-serif",serif:"Fraunces, Georgia, serif",mono:"'JetBrains Mono', ui-monospace, monospace"};
 var AF_JOURS=["DIM","LUN","MAR","MER","JEU","VEN","SAM"];
@@ -96,8 +96,21 @@ function afEcrire(ctx,s,x,y,ls){
   if(!ls){ ctx.fillText(s,x,y); return; }
   for(var i=0;i<s.length;i++){ ctx.fillText(s[i],x,y); x+=ctx.measureText(s[i]).width+ls; }
 }
-function afCouper(ctx,s,maxW,ls){
+function afCouper(ctx,s,maxW,ls,pre){
   var out=[];
+  if(pre){
+    // Texte saisi tel quel : retours à la ligne et espaces multiples conservés.
+    String(s).split("\n").forEach(function(par){
+      var morceaux=par.split(/( +)/).filter(function(x){return x!=="";}), ligne="";
+      morceaux.forEach(function(m){
+        var t=ligne+m;
+        if(!ligne||afMesure(ctx,t.replace(/ +$/,""),ls)<=maxW) ligne=t;
+        else { out.push(ligne.replace(/ +$/,"")); ligne=/^ +$/.test(m)?"":m; }
+      });
+      out.push(ligne.replace(/ +$/,""));
+    });
+    return out;
+  }
   String(s).split("\n").forEach(function(par){
     var mots=par.split(/\s+/).filter(Boolean), ligne="";
     mots.forEach(function(m){
@@ -116,7 +129,7 @@ function afTexte(D,s,x,y,o){
   var size=o.size, lignes;
   for(var essai=0;essai<14;essai++){
     ctx.font=afFont({italic:o.italic,weight:o.weight,size:size,fam:o.fam});
-    lignes=o.maxW?afCouper(ctx,s,o.maxW,o.ls):[s];
+    lignes=o.maxW?afCouper(ctx,s,o.maxW,o.ls,o.pre):[s];
     var tropLarge=o.maxW&&lignes.some(function(l){ return afMesure(ctx,l,o.ls)>o.maxW+0.5; });
     if(!o.fit||((!o.maxLines||lignes.length<=o.maxLines)&&!tropLarge)) break;
     size*=0.92;
@@ -218,16 +231,18 @@ function afModeleSimple(D,C,L,k,plein){
   afLogo(D,C,x,y,46,{fg:C.c1});
   afTexte(D,C.club.toUpperCase(),x+56,y+15,{size:13,weight:800,ls:1,maxW:w-56,maxLines:1,color:"#fff"});
   y+=46+16*k;
-  var tag=C.tag.toUpperCase(); c.font=afFont({size:12,weight:800});
-  var tw=afMesure(c,tag,2)+20;
-  afRect(D,x,y,tw,22,4,plein?"rgba(0,0,0,.22)":C.c2);
-  afTexte(D,tag,x+10,y+5,{size:12,weight:800,ls:2,color:"#fff",lh:1});
-  y+=22+10*k;
+  if(C.tag){
+    var tag=C.tag.toUpperCase(); c.font=afFont({size:12,weight:800});
+    var tw=afMesure(c,tag,2)+20;
+    afRect(D,x,y,tw,22,4,plein?"rgba(0,0,0,.22)":C.c2);
+    afTexte(D,tag,x+10,y+5,{size:12,weight:800,ls:2,color:"#fff",lh:1});
+    y+=22+10*k;
+  }
   y+=afTexte(D,C.titre,x,y,{size:(C.carre?50:40)*k,fam:plein?AF_F.serif:AF_F.anton,weight:plein?800:400,upper:!plein,lh:1,maxW:w,maxLines:3,fit:true,color:"#fff"});
   if(S.dates&&C.dates) y+=10*k+afTexte(D,C.dates.long,x,y+10*k,{size:17*k,weight:800,maxW:w,color:"#fff"});
   if(S.horaires&&C.horaires) y+=3*k+afTexte(D,C.horaires,x,y+3*k,{size:14*k,weight:600,maxW:w,color:"rgba(255,255,255,.9)"});
   if(S.lieu&&C.lieu) y+=3*k+afTexte(D,C.lieu,x,y+3*k,{size:14*k,weight:600,maxW:w,maxLines:2,color:"rgba(255,255,255,.9)"});
-  if(S.texte&&C.texte) y+=10*k+afTexte(D,C.texte,x,y+10*k,{size:14*k,weight:700,maxW:w,maxLines:3,color:"#fff"});
+  if(S.texte&&C.texte) y+=10*k+afTexte(D,C.texte,x,y+10*k,{size:14*k,weight:700,maxW:w,pre:true,maxLines:9,color:"#fff"});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,x,y+14*k,w,"#fff","left",k);
   return y>limite;
 }
@@ -244,7 +259,7 @@ function afModeleSport(D,C,L,k){
     var h=0;
     if(S.horaires&&C.horaires) h+=4+afTexte(D3,C.horaires,x,y0+h,{size:13,weight:700,maxW:gw,color:"#fff"});
     if(S.lieu&&C.lieu) h+=4+afTexte(D3,C.lieu,x,y0+h,{size:13,weight:700,maxW:gw,maxLines:2,color:"#fff"});
-    if(S.texte&&C.texte) h+=4+afTexte(D3,C.texte,x,y0+h,{size:13,weight:700,maxW:gw,maxLines:2,color:"rgba(255,255,255,.85)"});
+    if(S.texte&&C.texte) h+=4+afTexte(D3,C.texte,x,y0+h,{size:13,weight:700,maxW:gw,pre:true,maxLines:9,color:"rgba(255,255,255,.85)"});
     if(S.prix) C.prix.forEach(function(t){
       var p=t.prix>0?evtPrix(t.prix):"GRATUIT";
       var hh=afTexte(D3,p,x,y0+h+2,{size:22,fam:AF_F.anton,weight:400,color:"#fff",lh:1.12});
@@ -259,10 +274,12 @@ function afModeleSport(D,C,L,k){
   if(qrS) afQrBox(D,C,x+w-qrS-12,bas-qrS-12,qrS,6);
   var limite=bas-hb-12;
   afLogo(D,C,x,y,50,{fg:C.c1});
-  var tag=C.tag.toUpperCase(); c.font=afFont({size:18,fam:AF_F.anton,weight:400});
-  var tw=afMesure(c,tag,3)+20;
-  afRect(D,x+w-tw,y+9,tw,32,0,null,"#fff",2);
-  afTexte(D,tag,x+w-tw+10,y+14,{size:18,fam:AF_F.anton,weight:400,ls:3,color:"#fff",lh:1.1});
+  if(C.tag){
+    var tag=C.tag.toUpperCase(); c.font=afFont({size:18,fam:AF_F.anton,weight:400});
+    var tw=afMesure(c,tag,3)+20;
+    afRect(D,x+w-tw,y+9,tw,32,0,null,"#fff",2);
+    afTexte(D,tag,x+w-tw+10,y+14,{size:18,fam:AF_F.anton,weight:400,ls:3,color:"#fff",lh:1.1});
+  }
   y+=50+16*k;
   y+=afTexte(D,C.titre,x,y,{size:(C.carre?72:50)*k,fam:AF_F.anton,weight:400,upper:true,lh:.92,maxW:w,maxLines:3,fit:true,color:"#fff"});
   if(S.dates&&C.dates) y+=10*k+afTexte(D,C.dates.court,x,y+10*k,{size:26*k,fam:AF_F.anton,weight:400,maxW:w,color:"#fde68a",lh:1.1});
@@ -295,7 +312,7 @@ function afModelePhoto(D,C,L,k){
     var info=[S.horaires&&C.horaires,S.lieu&&C.lieu].filter(Boolean).join("   ·   ");
     if(info) y+=6*k+afTexte(D3,info,x,y+6*k,{size:13*k,weight:600,maxW:w,maxLines:2,color:"rgba(255,255,255,.9)"});
     if(S.dates&&C.dates&&!bw) y+=4*k+afTexte(D3,C.dates.long,x,y+4*k,{size:13*k,weight:700,maxW:w,color:"#fff"});
-    if(S.texte&&C.texte) y+=6*k+afTexte(D3,C.texte,x,y+6*k,{size:13*k,weight:500,maxW:w,maxLines:2,color:"rgba(255,255,255,.85)"});
+    if(S.texte&&C.texte) y+=6*k+afTexte(D3,C.texte,x,y+6*k,{size:13*k,weight:500,maxW:w,pre:true,maxLines:9,color:"rgba(255,255,255,.85)"});
     if(S.intervenants&&C.interv.length) y+=12*k+afIntervenants(D3,C,x,y+12*k,w,"#fff","left",k);
     var qrS=S.qr&&C.qr?46:0;
     if(S.prix||qrS){
@@ -350,7 +367,7 @@ function afModeleEpure(D,C,L,k){
   y+=8*k;
   if(S.horaires&&C.horaires) y+=4*k+afTexte(D,C.horaires,cx,y+4*k,{size:13*k,color:"#57534e",align:"center",maxW:w});
   if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,cx,y+4*k,{size:13*k,color:"#57534e",align:"center",maxW:w,maxLines:2});
-  if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,cx,y+4*k,{size:13*k,italic:true,color:"#57534e",align:"center",maxW:w,maxLines:2});
+  if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,cx,y+4*k,{size:13*k,italic:true,color:"#57534e",align:"center",maxW:w,pre:true,maxLines:9});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,L.x+28,y+14*k,w,ink,"center",k);
   return y>limite;
 }
@@ -378,7 +395,7 @@ function afModeleCalendrier(D,C,L,k){
   }
   var limite=bas-(hp||qrS?hc:0)-12;
   afLogo(D,C,x,y,40,{carre:true,bg:C.c1,fg:"#fff"});
-  afTexte(D,(C.club+" · "+C.tag).toUpperCase(),x+50,y+14,{size:12,weight:800,ls:1.5,maxW:w-50,maxLines:1,color:"#fff"});
+  afTexte(D,(C.club+(C.tag?" · "+C.tag:"")).toUpperCase(),x+50,y+14,{size:12,weight:800,ls:1.5,maxW:w-50,maxLines:1,color:"#fff"});
   y+=40+12*k;
   y+=afTexte(D,C.titre,x,y,{size:(C.carre?38:32)*k,weight:800,lh:1.04,maxW:w,maxLines:3,fit:true,color:"#fff"});
   if(S.dates&&C.dates){
@@ -398,7 +415,7 @@ function afModeleCalendrier(D,C,L,k){
   y+=6*k;
   if(S.horaires&&C.horaires) y+=4*k+afTexte(D,C.horaires,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w});
   if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,maxLines:2});
-  if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,maxLines:2});
+  if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,pre:true,maxLines:9});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,x,y+14*k,w,"#fff","left",k);
   return y>limite;
 }
@@ -424,6 +441,13 @@ function afRendre(canvas, C){
   for(var i=0;i<ks.length;i++){ if(!dessin({ctx:c,dry:true},C,L,ks[i])){ k=ks[i]; break; } }
   c.save(); c.beginPath(); c.rect(L.x,L.y,L.w,L.h); c.clip();
   dessin(D,C,L,k);
+  if(C.qrLibre&&C.qrLibre.img){
+    var q=C.qrLibre, qs=q.s*F.bw, qx=q.x*F.bw, qy=q.y*F.bh, pad=qs*0.07, lab=Math.max(9,qs*0.11);
+    afRect(D,qx,qy,qs,qs+lab*1.6,qs*0.06,"#fff");
+    c.imageSmoothingEnabled=false; c.drawImage(q.img,qx+pad,qy+pad,qs-2*pad,qs-2*pad); c.imageSmoothingEnabled=true;
+    afTexte(D,"S'INSCRIRE",qx+qs/2,qy+qs+lab*0.15,{size:lab,weight:800,color:"#111827",align:"center",lh:1});
+    C.qrRect={x:qx/F.bw,y:qy/F.bh,w:qs/F.bw,h:(qs+lab*1.6)/F.bh};
+  }
   if(C.complet){
     c.fillStyle="rgba(17,24,39,.55)"; c.fillRect(L.x,L.y,L.w,L.h);
     c.save(); c.translate(L.x+L.w/2,L.y+L.h/2); c.rotate(-12*Math.PI/180);
@@ -450,18 +474,21 @@ function afContenu(e, st, page, imgs){
   var club=window.CURRENT_CLUB||{};
   var c1=afHex(club.couleur)||"#1A2E5A", c2=afHex(club.couleur2)||afMix(c1,-0.45);
   var parJ=!!(e.inscr&&e.inscr.parJour), places=parJ?0:((e.inscr&&e.inscr.places)||0), nb=(page&&page.nb)||0, restant=places?Math.max(0,places-nb):null;
-  var tag=(st.accroche||AF_TAGS[e.type]||"Événement").trim();
+  var tag=st.show.accroche===false?"":(st.accroche||AF_TAGS[e.type]||"Événement").trim();
+  var prog=(st.show.programme&&e.inscr&&e.inscr.programme)?String(e.inscr.programme).trim():"";
+  var txt=[(st.show.texte?(st.texte||""):"").replace(/^\n+|\s+$/g,""),prog].filter(Boolean).join("\n");
+  var qrLibre=!!(st.qrPos&&st.show.qr&&imgs.qr);
   return {
-    modele:st.modele, format:st.format, carre:st.format==="carre", show:st.show,
+    modele:st.modele, format:st.format, carre:st.format==="carre", show:Object.assign({},st.show,{texte:!!txt}),
     c1:c1, c2:c2, club:club.name||"", initiales:afInitiales(club.name), logo:imgs.logo,
-    tag:tag, accrocheEpure:(e.type==="soiree"?"la ":"le ")+tag.toLowerCase(),
-    titre:(st.titre||e.titre||"").trim(), dates:afDates(e), horaires:e.heure||"", lieu:e.lieu||"", texte:(st.texte||"").trim(),
+    tag:tag, accrocheEpure:!tag?"":(st.accroche?st.accroche.trim():(e.type==="soiree"?"la ":"le ")+tag.toLowerCase()),
+    titre:(st.titre||e.titre||"").trim(), dates:afDates(e), horaires:e.heure||"", lieu:e.lieu||"", texte:txt,
     prix:((e.inscr&&e.inscr.tarifs)||[]).reduce(function(l,t){
       l.push({nom:t.nom+(parJ&&Number(t.prix)>0?" (par jour)":""),prix:Number(t.prix)||0});
       if(parJ&&Number(t.forfait)>0) l.push({nom:"Forfait tous les jours"+((e.inscr.tarifs.length>1)?" · "+t.nom:""),prix:Number(t.forfait)});
       return l;
     },[]),
-    qr:imgs.qr, photo:imgs.photo,
+    qr:qrLibre?null:imgs.qr, qrLibre:qrLibre?{img:imgs.qr,x:st.qrPos.x,y:st.qrPos.y,s:st.qrPos.s}:null, photo:imgs.photo,
     interv:(st.intervenants||[]).filter(function(x){return x.nom;}).map(function(x,i){ return {nom:x.nom,role:x.role||"",img:imgs.interv[i]||null}; }),
     sponsors:imgs.sponsors||[],
     restant:restant, placesBandeau:!!(st.show.places&&places&&restant>0), complet:!!(places&&restant===0)
@@ -471,8 +498,8 @@ function afReglagesDefaut(e){
   var a=e.affiche||{};
   return {
     modele:a.modele||"degrade", format:a.format||"carre",
-    show:Object.assign({dates:true,horaires:true,lieu:true,prix:true,places:true,texte:true,intervenants:true,qr:true,sponsors:false},a.show||{}),
-    titre:a.titre||"", accroche:a.accroche||"", texte:a.texte||"",
+    show:Object.assign({accroche:true,dates:true,horaires:true,lieu:true,prix:true,places:true,texte:true,programme:true,intervenants:true,qr:true,sponsors:false},a.show||{}),
+    titre:a.titre||"", accroche:a.accroche||"", texte:a.texte||"", qrPos:a.qrPos||null,
     intervenants:(a.intervenants||[]).map(function(x){return Object.assign({},x);})
   };
 }
@@ -531,7 +558,13 @@ function evtAffiche(eid){
   var cv=document.getElementById("af-cv"), ctrl=document.getElementById("af-ctrl");
   function lien(){ return e.inscr?evtLien(e.id):""; }
   var redessinT=null;
-  function redessiner(){ clearTimeout(redessinT); redessinT=setTimeout(function(){ afRendre(cv,afContenu(e,st,page,imgs)); alerte(); },30); }
+  var cacheF=null, cacheT=null, partageEnCours=false;
+  function redessiner(){
+    clearTimeout(redessinT); redessinT=setTimeout(function(){ afRendre(cv,afContenu(e,st,page,imgs)); alerte(); },30);
+    // Fichier prêt d'avance : le partage doit partir tout de suite au clic, sinon
+    // le téléphone le refuse (le geste de l'utilisateur est « périmé »).
+    cacheF=null; clearTimeout(cacheT); cacheT=setTimeout(function(){ fichier().then(function(f){ cacheF=f; }).catch(function(){}); },500);
+  }
   function alerte(){
     var a=document.getElementById("af-alerte"); if(!a) return;
     var C=afContenu(e,st,page,imgs);
@@ -561,12 +594,25 @@ function evtAffiche(eid){
     var C=afContenu(e,st,page,imgs);
     return (C.club?C.club+" : ":"")+(C.titre||"")+(C.dates?" ("+C.dates.long+")":"")+(C.complet?" : c'est complet, merci à tous !":(C.restant!=null&&C.restant<=5?" : plus que "+C.restant+" place"+(C.restant>1?"s":"")+" !":""))+(lien()&&!C.complet?" Inscriptions : "+lien():"");
   }
-  function partager(){
+  // Partage : avec le fichier déjà prêt quand c'est possible (dans le geste), une seule feuille à la fois.
+  function partagerFichier(f, avecTitre, secours){
+    if(partageEnCours) return;
+    if(navigator.canShare&&navigator.canShare({files:[f]})){
+      partageEnCours=true;
+      var data={files:[f],text:message()}; if(avecTitre) data.title=st.titre||e.titre||"Affiche";
+      navigator.share(data).catch(function(err){ if(!err||err.name!=="AbortError") secours(f); })
+        .then(function(){ partageEnCours=false; });
+      return;
+    }
+    secours(f);
+  }
+  function viaFichier(fn){
     garder();
-    fichier().then(function(f){
-      if(navigator.canShare&&navigator.canShare({files:[f]})) return navigator.share({files:[f],text:message(),title:st.titre||e.titre||"Affiche"}).catch(function(){});
-      telecharger(f); copyToClipboard(message()); showToast("Image téléchargée, texte copié : collez-les dans votre publication");
-    }).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); });
+    if(cacheF){ fn(cacheF); return; }
+    fichier().then(function(f){ cacheF=f; fn(f); }).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); });
+  }
+  function partager(){
+    viaFichier(function(f){ partagerFichier(f,true,function(ff){ telecharger(ff); copyToClipboard(message()); showToast("Image téléchargée, texte copié : collez-les dans votre publication"); }); });
   }
   document.getElementById("af-x").addEventListener("click",function(){ garder(); if(unsub) try{unsub();}catch(err){} o.remove(); });
   document.getElementById("af-dl").addEventListener("click",function(){ garder(); fichier().then(telecharger).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); }); });
@@ -574,15 +620,12 @@ function evtAffiche(eid){
   // WhatsApp : sur téléphone, la feuille de partage envoie l'image (choisir WhatsApp) ;
   // sinon, l'image est téléchargée et WhatsApp s'ouvre avec le texte et le lien.
   document.getElementById("af-wa").addEventListener("click",function(){
-    garder();
-    fichier().then(function(f){
-      if(navigator.canShare&&navigator.canShare({files:[f]})) return navigator.share({files:[f],text:message()}).catch(function(){});
-      telecharger(f); window.open("https://wa.me/?text="+encodeURIComponent(message()),"_blank");
-    }).catch(function(){ window.open("https://wa.me/?text="+encodeURIComponent(message()),"_blank"); });
+    var wa=function(f){ if(f) telecharger(f); window.open("https://wa.me/?text="+encodeURIComponent(message()),"_blank"); };
+    viaFichier(function(f){ partagerFichier(f,false,wa); });
   });
   function garder(){
     var evs=getEvents(), i=evs.findIndex(function(x){return x.id===eid;}); if(i<0) return;
-    var a={modele:st.modele,format:st.format,show:st.show,titre:st.titre,accroche:st.accroche,texte:st.texte,
+    var a={modele:st.modele,format:st.format,show:st.show,titre:st.titre,accroche:st.accroche,texte:st.texte,qrPos:st.qrPos||null,
       intervenants:st.intervenants.filter(function(x){return x.nom;}).slice(0,4)};
     if(JSON.stringify(evs[i].affiche||null)===JSON.stringify(a)) return;
     evs[i].affiche=a; e.affiche=a; saveEvents(evs);
@@ -615,6 +658,7 @@ function evtAffiche(eid){
   var infos=bloc("Ce qui s'affiche");
   AF_INFOS.forEach(function(it){
     if(it[0]==="qr"&&!e.inscr) return;
+    if(it[0]==="programme"&&!(e.inscr&&e.inscr.programme)) return;
     if(it[0]==="places"&&(!(e.inscr&&e.inscr.places)||e.inscr.parJour)) return;
     if(it[0]==="prix"&&!(e.inscr&&e.inscr.tarifs&&e.inscr.tarifs.length)) return;
     var l=document.createElement("label"); l.style.cssText="display:flex;align-items:center;gap:10px;min-height:38px;font-size:14px;font-weight:600;color:var(--txt);cursor:pointer";
@@ -624,13 +668,58 @@ function evtAffiche(eid){
     if(it[0]==="sponsors"&&!(typeof getSponsors==="function"&&getSponsors().length)){ var h=document.createElement("span"); h.style.cssText="font-size:11px;color:var(--mut);font-weight:500"; h.textContent="(aucun sponsor enregistré)"; l.appendChild(h); }
     infos.appendChild(l);
   });
+  if(e.inscr){
+    var qb=bloc("Position du QR code");
+    var qh=document.createElement("div"); qh.style.cssText="font-size:12px;color:var(--mut);line-height:1.45;margin-bottom:8px"; qb.appendChild(qh);
+    var qrow=document.createElement("div"); qrow.style.cssText="display:flex;gap:8px;flex-wrap:wrap"; qb.appendChild(qrow);
+    var qTaille=document.createElement("input"); qTaille.type="range"; qTaille.min="12"; qTaille.max="45"; qTaille.step="1";
+    qTaille.setAttribute("aria-label","Taille du QR code"); qTaille.style.cssText="width:100%;margin-top:10px;accent-color:var(--dkg)";
+    qTaille.addEventListener("input",function(){ if(!st.qrPos) return; var ns=Number(qTaille.value)/100; st.qrPos.x=Math.min(st.qrPos.x,1-ns); st.qrPos.s=ns; redessiner(); });
+    qb.appendChild(qTaille);
+    var peindreQr=function(){
+      qrow.innerHTML="";
+      var libre=!!st.qrPos;
+      qh.textContent=libre?"Faites glisser le QR code sur l'affiche. Le curseur change sa taille.":"Le QR code est placé par le modèle. Activez le placement libre pour le déplacer et changer sa taille.";
+      var b1=document.createElement("button"); b1.type="button"; b1.textContent=libre?"Remettre à sa place":"Déplacer / redimensionner";
+      b1.style.cssText="min-height:38px;padding:0 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--txt);background:"+(libre?"var(--card)":"var(--txt)")+";color:"+(libre?"var(--txt)":"var(--bg)");
+      b1.addEventListener("click",function(){ st.qrPos=libre?null:{x:0.66,y:0.62,s:0.26}; st.show.qr=true; peindreQr(); redessiner(); });
+      qrow.appendChild(b1);
+      qTaille.style.display=libre?"block":"none"; if(libre) qTaille.value=Math.round(st.qrPos.s*100);
+      cv.style.touchAction=libre?"none":"auto"; cv.style.cursor=libre?"grab":"default";
+    };
+    peindreQr();
+    // Glisser le QR code sur l'aperçu
+    var drag=null;
+    var pt=function(ev){ var r=cv.getBoundingClientRect(); return {x:(ev.clientX-r.left)/r.width, y:(ev.clientY-r.top)/r.height}; };
+    cv.addEventListener("pointerdown",function(ev){
+      if(!st.qrPos) return;
+      var F=AF_FORMATS[st.format]||AF_FORMATS.carre, p0=pt(ev), q=st.qrPos, hq=q.s*F.bw/F.bh*1.2;
+      if(p0.x<q.x||p0.x>q.x+q.s||p0.y<q.y||p0.y>q.y+hq) return;
+      drag={dx:p0.x-q.x, dy:p0.y-q.y, hq:hq}; cv.setPointerCapture(ev.pointerId); cv.style.cursor="grabbing"; ev.preventDefault();
+    });
+    cv.addEventListener("pointermove",function(ev){
+      if(!drag) return; var p1=pt(ev), q=st.qrPos;
+      q.x=Math.max(0,Math.min(1-q.s,p1.x-drag.dx)); q.y=Math.max(0,Math.min(1-drag.hq,p1.y-drag.dy));
+      afRendre(cv,afContenu(e,st,page,imgs));
+    });
+    var fin=function(){ if(!drag) return; drag=null; cv.style.cursor="grab"; redessiner(); };
+    cv.addEventListener("pointerup",fin); cv.addEventListener("pointercancel",fin);
+  }
   function champ(titre, cle, ph, max){
     var b=bloc(titre), i=document.createElement("input"); i.className="form-input"; i.maxLength=max; i.placeholder=ph; i.value=st[cle]||"";
     i.addEventListener("input",function(){ st[cle]=i.value; redessiner(); }); b.appendChild(i);
   }
   champ("Titre","titre",e.titre||"",70);
   champ("Accroche","accroche",AF_TAGS[e.type]||"Événement",30);
-  champ("Texte libre","texte","Ex : Ouvert aux U9 à U15 · Repas tiré du sac",110);
+  (function(){
+    var b=bloc("Texte libre"), t=document.createElement("textarea"); t.className="form-input"; t.rows=5; t.maxLength=500;
+    t.placeholder="Ex : Ouvert aux U9 à U15\nRepas tiré du sac\nVendredi de 15h à 19h";
+    t.style.cssText="resize:vertical;min-height:110px;line-height:1.45;white-space:pre-wrap";
+    t.value=st.texte||"";
+    t.addEventListener("input",function(){ st.texte=t.value; redessiner(); });
+    var h=document.createElement("div"); h.style.cssText="font-size:11px;color:var(--mut);margin-top:4px"; h.textContent="Les retours à la ligne et les espaces s'affichent tels quels sur l'affiche.";
+    b.appendChild(t); b.appendChild(h);
+  })();
   var iv=bloc("Intervenants"); var ivL=document.createElement("div"); iv.appendChild(ivL);
   var ivH=document.createElement("div"); ivH.style.cssText="font-size:11px;color:var(--mut);margin-bottom:8px;line-height:1.4"; ivH.textContent="Coachs, joueurs pros, invités : nom, rôle et photo (4 maximum).";
   iv.insertBefore(ivH,ivL);

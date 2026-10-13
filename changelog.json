@@ -1,5 +1,39 @@
 [
   {
+    "v": "1791883949",
+    "titre": "Affiche : texte libre, programme, accroche, QR code",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Texte libre sur plusieurs lignes : les retours à la ligne et les espaces s'affichent tels quels sur l'affiche."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Nouvelles cases dans « Ce qui s'affiche » : Accroche (à cocher ou non) et Programme (repris des réglages des inscriptions)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "QR code : « Déplacer / redimensionner » pour le faire glisser sur l'affiche et changer sa taille."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "WhatsApp et Partager fonctionnent à chaque clic (l'image est préparée à l'avance)."
+      }
+    ]
+  },
+  {
     "v": "1791883789",
     "titre": "Accès coach : impossible de se retirer son propre rôle de dirigeant",
     "points": [
