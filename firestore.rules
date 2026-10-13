@@ -223,9 +223,11 @@ service cloud.firestore {
         || accepteInvitation(uid);
       // Le dirigeant retire l'accès d'un compte de son club (jamais un dirigeant, jamais le sien) :
       // l'adresse e-mail pourra être réinvitée (« J'ai déjà un compte »).
+      // Le dirigeant retire l'accès de n'importe quel compte de son club (y compris un
+      // autre dirigeant), jamais le sien ni celui du super admin.
       allow delete: if superAdmin()
         || (dirigeant(resource.data.get('clubId', null)) && request.auth.uid != uid
-            && !('dirigeant' in resource.data.get('roles', [])));
+            && uid != "7f2br1aTiJVWHTEbqVePbMLD0uc2");
     }
 
     // ── Comptes de connexion à supprimer à la main (club supprimé) ──

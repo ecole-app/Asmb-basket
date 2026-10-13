@@ -210,13 +210,19 @@ describe("Comptes utilisateurs", () => {
     await assertFails(updateDoc(doc(await as("coachA"), "users/parentA"), { roles: ["coach"] }));
     await assertFails(updateDoc(doc(await as("dirB"), "users/parentA"), { phone: "0666666666" }));
   });
-  it("le dirigeant retire l'accès d'un compte de son club, pas d'un dirigeant, pas d'un autre club", async () => {
+  it("le dirigeant retire l'accès d'un compte de son club (même un autre dirigeant), jamais le sien ni un autre club", async () => {
     await assertFails(deleteDoc(doc(await as("coachA"), "users/parentA")));
     await assertFails(deleteDoc(doc(await as("parentA"), "users/parent2A")));
     await assertFails(deleteDoc(doc(await as("dirB"), "users/parentA")));
     await assertFails(deleteDoc(doc(await as("dirA"), "users/dirA")));
     await assertFails(deleteDoc(doc(await as("dirA"), "users/dirB")));
     await assertSucceeds(deleteDoc(doc(await as("dirA"), "users/parentA")));
+    await (await getEnv()).withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), "users/dir2A"), { clubId: "A", roles: ["dirigeant"] }));
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "users/dir2A")));
+  });
+  it("personne d'autre que lui ne retire l'accès du super admin", async () => {
+    await (await getEnv()).withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), "users/" + SUPER_ADMIN), { clubId: "A", roles: ["dirigeant"] }));
+    await assertFails(deleteDoc(doc(await as("dirA"), "users/" + SUPER_ADMIN)));
   });
   it("après retrait, la même personne retrouve un accès avec une nouvelle invitation", async () => {
     await assertSucceeds(deleteDoc(doc(await as("dirA"), "users/coachA")));

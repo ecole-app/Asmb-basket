@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791910868",
+    "titre": "Accès coach : retirer n'importe quel compte",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Dans « Accès coach », le bouton « Retirer l'accès » apparaît sur tous les comptes du club, y compris les autres dirigeants (jamais sur votre propre compte)."
+      }
+    ]
+  },
+  {
     "v": "1791910542",
     "titre": "Inscriptions et affiche pour tous les événements",
     "points": [

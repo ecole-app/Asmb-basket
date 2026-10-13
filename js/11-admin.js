@@ -935,13 +935,14 @@ function renderAccesList(list,users,phoneToName){
     // n'a plus aucun accès ; une nouvelle invitation lui redonne le sien avec le même e-mail
     // (« J'ai déjà un compte » sur la page d'invitation).
     var estMoi=window.ASMB_USER&&window.ASMB_USER.uid===u._uid;
-    if(!estMoi && (u.roles||[]).indexOf("dirigeant")<0){
+    var estDir=(u.roles||[]).indexOf("dirigeant")>=0;
+    if(!estMoi && u._uid!==BOOTSTRAP_DIRIGEANT_UID){
       var del=document.createElement("button"); del.type="button";
       del.textContent="Retirer l'accès";
       del.style.cssText="margin-left:8px;padding:8px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer";
       del.addEventListener("click",function(e){
         e.stopPropagation();
-        askConfirm("Retirer l'accès de "+nameFor(u)+" ? Cette personne ne pourra plus entrer dans le club. Pour lui redonner un accès avec la même adresse e-mail, créez-lui une nouvelle invitation : elle choisira « J'ai déjà un compte ».",{danger:true,confirmText:"Retirer l'accès"}).then(function(ok){
+        askConfirm("Retirer l'accès de "+nameFor(u)+(estDir?" (dirigeant)":"")+" ? Cette personne ne pourra plus entrer dans le club. Pour lui redonner un accès avec la même adresse e-mail, créez-lui une nouvelle invitation : elle choisira « J'ai déjà un compte ».",{danger:true,confirmText:"Retirer l'accès"}).then(function(ok){
           if(!ok) return;
           del.disabled=true;
           window.fbDeleteDoc(window.fbDoc(window.fbDb,"users",u._uid)).then(function(){
