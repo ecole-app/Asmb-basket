@@ -1,5 +1,38 @@
 [
   {
+    "v": "1791874739",
+    "titre": "Événements : inscriptions en ligne et billets",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Stage/camp, tournoi et nouvelle « Soirée » : bouton « Ouvrir les inscriptions » sur l'événement. Tarifs licencié / extérieur, espèces, chèque, CB sur place ou lien HelloAsso, nombre de places et date limite."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Un lien et un QR code à partager : les extérieurs s'inscrivent sans compte. Chaque inscrit reçoit un billet avec QR code (STG-12345, TRN-…, SOI-…)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Suivi des inscrits : licenciés reconnus automatiquement (sinon « À vérifier »), « Paiement reçu » ajoute la recette en comptabilité."
+      },
+      {
+        "roles": [
+          "parent"
+        ],
+        "texte": "Onglet Événements : inscrivez votre enfant en un geste aux stages, tournois et soirées du club."
+      }
+    ]
+  },
+  {
     "v": "1791842463",
     "titre": "Version ordinateur (dirigeant)",
     "points": [

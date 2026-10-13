@@ -20,8 +20,8 @@ function cycleProgress(cyId){
 var stack=["portal"],curCy=null,curSea=null;
 // Couleurs et libellés partages pour differencier visuellement les types d'evenement
 // (utilise partout ou des evenements sont affiches : Calendrier, onglet Evenements, etc.)
-var EVENT_TYPE_COLORS={"match":"#C0392B","entrainement":"#1A2E5A","tournoi":"#E8670A","stage":"#8E44AD","formation":"#0B7285","autre":"#8E44AD"};
-var EVENT_TYPE_LABELS={"match":"Match","entrainement":"Entraînement","tournoi":"Tournoi","stage":"Stage/Camp","formation":"Formation","autre":"Événement"};
+var EVENT_TYPE_COLORS={"match":"#C0392B","entrainement":"#1A2E5A","tournoi":"#E8670A","stage":"#8E44AD","formation":"#0B7285","soiree":"#B0306A","autre":"#8E44AD"};
+var EVENT_TYPE_LABELS={"match":"Match","entrainement":"Entraînement","tournoi":"Tournoi","stage":"Stage/Camp","formation":"Formation","soiree":"Soirée","autre":"Événement"};
 function eventTypeColor(type){ return EVENT_TYPE_COLORS[type]||"#8E44AD"; }
 function eventTypeLabel(type){ return EVENT_TYPE_LABELS[type]||(type?type.charAt(0).toUpperCase()+type.slice(1):"Événement"); }
 

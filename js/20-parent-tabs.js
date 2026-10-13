@@ -6,14 +6,16 @@ function buildParentEvents(){
   var team=teams.find(function(t){return t.id===activeId;});
   document.getElementById("parent-events-sub").textContent=team?team.name:"";
   var el=document.getElementById("parent-events-list");
-  if(!team){el.innerHTML="";return;}
+  var ouverts=(typeof evtCartesParent==="function")?evtCartesParent():null;
+  if(!team){el.innerHTML="";if(ouverts)el.appendChild(ouverts);return;}
   var events=getVisibleEvents().filter(function(e){
     if(!e.equipe)return false;
     return e.equipe.toUpperCase().indexOf(team.name.toUpperCase())>=0;
   });
   events.sort(function(a,b){return a.date>b.date?1:-1;});
-  if(!events.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun événement</div></div>';return;}
+  if(!events.length){el.innerHTML=ouverts?"":'<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun événement</div></div>';if(ouverts)el.appendChild(ouverts);return;}
   el.innerHTML="";
+  if(ouverts) el.appendChild(ouverts);
   events.forEach(function(e){
     var col=eventTypeColor(e.type);
     var div=document.createElement("div");

@@ -679,7 +679,7 @@ var GM_PURGE_MINUTES=30;
 // qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
 var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
- "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","support_sessions","buvette_ventes",
+ "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
  "sponsors","facturation_compteur","push_subscriptions"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
@@ -919,7 +919,7 @@ async function deleteClubFlow(c, list){
     if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
 
     try{ await window.fbDeleteDoc(window.fbDoc(window.fbDb,"essai_pages",c.id)); }catch(e){}
-    var globales=["club_invites","support_grants","inscription_codes","buvette_codes"];
+    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages"];
     for(var g=0;g<globales.length;g++){
       var ng=await purgeGlobalePourClub(c.id,globales[g]);
       if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }

@@ -694,6 +694,11 @@
     <div id="essai-public-content"></div>
   </div>
 
+  <!-- ═══ ÉVÉNEMENT : inscription publique (?evt=clubId__eventId) ═══ -->
+  <div class="scr" id="scr-evt">
+    <div id="evt-public-content"></div>
+  </div>
+
   <!-- ═══ INSCRIPTION PUBLIQUE ═══ -->
   <div class="scr" id="scr-inscription">
     <div class="hero" style="padding:16px 16px 14px;text-align:left;display:flex;align-items:center;gap:12px">
@@ -1108,7 +1113,7 @@
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
       </div>
       <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder="Ex: Tournoi de Noël"></div>
-      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="formation">Formation (arbitre, table de marque...)</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="soiree">Soirée</option><option value="formation">Formation (arbitre, table de marque...)</option><option value="autre" selected>Autre</option></select></div>
       <div class="form-group" id="ev-eval-option" style="display:none">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input type="checkbox" id="ev-eval-enabled" style="width:18px;height:18px;accent-color:var(--dkg)">
@@ -1832,6 +1837,7 @@
 <script src="js/12-equipes-planning.js"></script>
 <script src="js/13-firestore-sync.js"></script>
 <script src="js/14-evenements.js"></script>
+<script src="js/14b-billetterie.js"></script>
 <script src="js/15-compta-inventaire.js"></script>
 <script src="js/16-communaute.js"></script>
 <script src="js/16b-messagerie.js"></script>

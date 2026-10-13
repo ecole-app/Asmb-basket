@@ -484,3 +484,63 @@ describe("Séances d'essai (page publique du club)", () => {
     await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/essais/e1"), { statut: "planifie" }));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Événements à inscription (stage, tournoi, soirée)", () => {
+  const page = (o = {}) => ({ clubId: "A", eventId: "e1", actif: true, titre: "Camp", places: 2, nb: 0,
+    tarifs: [{ nom: "Licencié", prix: 40, pour: "lic" }, { nom: "Extérieur", prix: 55, pour: "ext" }], ...o });
+  const insc = (o = {}) => ({ eventId: "e1", prenom: "Léo", nom: "Kaci", naissance: "2016-05-04", tel: "0612345678",
+    clubOrigine: "", tarifIdx: 1, tarifNom: "Extérieur", montant: 55, mode: "helloasso",
+    statut: "inscrit", paye: false, present: false, source: "public", at: serverTimestamp(), ...o });
+  async function inscrire(db, code, data, nb) {
+    const b = writeBatch(db);
+    b.set(doc(db, "clubs/A/evt_inscrits/" + code), data);
+    b.update(doc(db, "evt_pages/A__e1"), { nb, dernier: code });
+    return b.commit();
+  }
+  beforeEach(async () => { await setDoc(doc(await as("dirA"), "evt_pages/A__e1"), page()); });
+
+  it("le staff publie la page de son club, pas d'un autre ; tout le monde la lit", async () => {
+    await assertFails(setDoc(doc(await as("dirB"), "evt_pages/A__e2"), page({ eventId: "e2" })));
+    await assertFails(setDoc(doc(await as("parentA"), "evt_pages/A__e2"), page({ eventId: "e2" })));
+    await assertSucceeds(getDoc(doc(await as(null), "evt_pages/A__e1")));
+    await assertFails(getDocs(collection(await as(null), "evt_pages")));
+  });
+  it("un visiteur s'inscrit avec le bon prix et le compteur monte de 1", async () => {
+    await assertSucceeds(inscrire(await as(null), "STG-12345", insc(), 1));
+  });
+  it("refusé : mauvais prix, code mal formé, compteur faux, champ en trop, déjà payé", async () => {
+    const db = await as(null);
+    await assertFails(inscrire(db, "STG-11111", insc({ montant: 40 }), 1));
+    await assertFails(inscrire(db, "XYZ-11111", insc(), 1));
+    await assertFails(inscrire(db, "STG-11112", insc(), 2));
+    await assertFails(inscrire(db, "STG-11113", insc({ plan: "x" }), 1));
+    await assertFails(inscrire(db, "STG-11114", insc({ paye: true }), 1));
+    await assertFails(setDoc(doc(db, "clubs/A/evt_inscrits/STG-11115"), insc()));
+    await assertFails(updateDoc(doc(db, "evt_pages/A__e1"), { nb: 1, dernier: "STG-99999" }));
+  });
+  it("complet : plus d'inscription au-delà des places", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-20001", insc(), 1));
+    await assertSucceeds(inscrire(db, "STG-20002", insc(), 2));
+    await assertFails(inscrire(db, "STG-20003", insc(), 3));
+  });
+  it("page fermée : refus", async () => {
+    await updateDoc(doc(await as("dirA"), "evt_pages/A__e1"), { actif: false });
+    await assertFails(inscrire(await as(null), "STG-30001", insc(), 1));
+  });
+  it("un parent inscrit SON enfant (relié à sa fiche), pas celui d'un autre", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(inscrire(db, "STG-40001", insc({ tarifIdx: 0, tarifNom: "Licencié", montant: 40, playerId: "p1", auteurUid: "parentA", source: "app" }), 1));
+    await assertFails(inscrire(db, "STG-40002", insc({ tarifIdx: 0, tarifNom: "Licencié", montant: 40, playerId: "p2", auteurUid: "parentA", source: "app" }), 2));
+    await assertSucceeds(getDoc(doc(db, "clubs/A/evt_inscrits/STG-40001")));
+  });
+  it("seul le staff lit la liste et marque le paiement", async () => {
+    await assertSucceeds(inscrire(await as(null), "STG-50001", insc(), 1));
+    await assertFails(getDoc(doc(await as(null), "clubs/A/evt_inscrits/STG-50001")));
+    await assertFails(getDoc(doc(await as("parent2A"), "clubs/A/evt_inscrits/STG-50001")));
+    await assertSucceeds(getDocs(collection(await as("coachA"), "clubs/A/evt_inscrits")));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/evt_inscrits/STG-50001"), { paye: true }));
+    await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/evt_inscrits/STG-50001"), { paye: true }));
+  });
+});

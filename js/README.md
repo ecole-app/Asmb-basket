@@ -43,6 +43,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `12-equipes-planning.js` | Équipes, effectifs, planning, historique de présence |
 | `13-firestore-sync.js` | Synchronisation temps réel et migration Firestore |
 | `14-evenements.js` | Événements, créneaux, convocations, météo du match |
+| `14b-billetterie.js` | Événements à inscription (stage/camp, tournoi, soirée) : tarifs licencié/extérieur, modes de paiement, places ; page publique sans compte (`?evt=clubId__eventId`, `evt_pages`), billets QR (`evt_inscrits`, codes STG-/TRN-/SOI-), inscription d'un enfant par le parent, suivi et paiement → compta |
 | `15-compta-inventaire.js` | Comptabilité, documents, inventaire buvette/matériel |
 | `16-communaute.js` | Canaux de discussion, messages, réactions, sondages |
 | `16b-messagerie.js` | Messagerie façon WhatsApp : affichage des messages, menu appui long, modif 2 min, suppression, coches de lecture, transfert, discussions privées (`dms`), convocations reliées aux présences (`checkins`) |
