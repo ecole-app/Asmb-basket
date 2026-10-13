@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791880033",
+    "titre": "Événements : qui vient chaque jour",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Dans les inscrits d'un stage à jours au choix : onglets par jour (avec le nombre d'inscrits) et « Feuille du jour » en PDF avec les présents attendus, à imprimer."
+      }
+    ]
+  },
+  {
     "v": "1791879800",
     "titre": "Événements : jours au choix et modification complète",
     "points": [

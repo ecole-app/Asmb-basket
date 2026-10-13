@@ -284,6 +284,7 @@ function evtTableau(eid){
     items.sort(function(a,b){ return ((a.at&&a.at.toMillis)?a.at.toMillis():0)-((b.at&&b.at.toMillis)?b.at.toMillis():0); });
     evtRapprocher(items);
     if(typeof entreeReporter==="function") entreeReporter(eid, items.filter(function(x){return x.statut!=="annule";})).then(function(){ peindre(); });
+    var jourSel=null;
     function peindre(){
       var actifs=items.filter(function(x){return x.statut!=="annule";});
       var encaisse=0, attendu=0;
@@ -304,10 +305,63 @@ function evtTableau(eid){
         (jTxt?'<div style="font-size:12px;color:var(--txt2);font-weight:700;margin-bottom:4px">'+authEsc(jTxt)+'</div>':'')+
         ((places&&e.inscr.actif&&places-(page.nb||0)<=5&&typeof afAlerteTxt==="function")?
           '<button onclick="document.querySelectorAll(\'.gm-sheet\').forEach(function(m){m.remove();});evtAffiche(\''+authEsc(eid)+'\')" style="margin-top:8px;width:100%;text-align:left;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer">'+authEsc(afAlerteTxt(Math.max(0,places-(page.nb||0))))+' : republier l\'affiche à jour →</button>':'');
-      evtListe(list, items, e, page, peindre);
+      var vue=items;
+      if(parJ){
+        var ch=document.createElement("div"); ch.style.cssText="display:flex;gap:6px;overflow-x:auto;margin:10px 0 2px;padding-bottom:4px";
+        [null].concat(page.jours||evtJoursPlage(e.date,e.dateFin)).forEach(function(j){
+          var on=jourSel===j, b=document.createElement("button"); b.type="button";
+          b.style.cssText="flex-shrink:0;padding:8px 12px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"color-mix(in srgb, var(--dkg) 12%, var(--card))":"var(--card)")+";color:var(--txt)";
+          b.textContent=j?evtJourTxt(j)+" ("+(cptJ[j]||0)+")":"Tous ("+actifs.length+")";
+          b.addEventListener("click",function(){ jourSel=j; peindre(); });
+          ch.appendChild(b);
+        });
+        head.appendChild(ch);
+        if(jourSel){
+          vue=items.filter(function(x){ return x.jours&&x.jours.indexOf(jourSel)>=0; });
+          var fj=document.createElement("button"); fj.type="button";
+          fj.style.cssText="margin-top:6px;width:100%;padding:11px;border-radius:var(--rx);border:1.5px solid var(--dkg);background:var(--card);color:var(--dkg);font-size:13px;font-weight:800;cursor:pointer";
+          fj.textContent="Feuille du "+evtJourTxt(jourSel)+" (PDF · "+vue.filter(function(x){return x.statut!=="annule";}).length+" présents attendus)";
+          fj.addEventListener("click",function(){ evtFeuilleJour(e,jourSel,vue.filter(function(x){return x.statut!=="annule";})); });
+          head.appendChild(fj);
+        }
+      }
+      evtListe(list, vue, e, page, peindre);
     }
     peindre();
   }).catch(function(err){ list.innerHTML='<div style="color:var(--red);padding:16px;text-align:center">Erreur : '+authEsc((err&&err.code)||String(err))+'</div>'; });
+}
+// Feuille du jour : qui est attendu ce jour-là (à imprimer ou à garder sur le téléphone).
+function evtFeuilleJour(e, jour, items){
+  if(!window.jspdf||!window.jspdf.jsPDF){ askAlert("PDF indisponible pour le moment."); return; }
+  var doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+  var rgb=(typeof clubPdfRgb==="function")?clubPdfRgb():[26,46,90];
+  var club=(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"Club";
+  function cut(t,w){ t=String(t||""); while(t.length>1&&doc.getTextWidth(t)>w) t=t.slice(0,-1); return t; }
+  function tete(){
+    doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.rect(0,0,210,24,"F");
+    doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.text(cut(e.titre||"Événement",180),14,11);
+    doc.setFont("helvetica","normal"); doc.setFontSize(10);
+    doc.text(club+" · "+evtJourTxt(jour,true)+" · "+items.length+" attendu"+(items.length>1?"s":""),14,18);
+    doc.setTextColor(30,30,30); doc.setFont("helvetica","bold"); doc.setFontSize(9);
+    doc.text("Présent",14,34); doc.text("Nom",32,34); doc.text("Âge",92,34); doc.text("Téléphone",108,34); doc.text("Tarif",138,34); doc.text("Paiement",172,34);
+    doc.setDrawColor(200); doc.line(14,36,196,36); doc.setFont("helvetica","normal");
+  }
+  tete();
+  var y=43;
+  items.slice().sort(function(a,b){ return evtNorm(a.nom).localeCompare(evtNorm(b.nom))||evtNorm(a.prenom).localeCompare(evtNorm(b.prenom)); }).forEach(function(x,i){
+    if(y>278){ doc.addPage(); tete(); y=43; }
+    if(i%2===0){ doc.setFillColor(245,246,248); doc.rect(13,y-5,184,8,"F"); }
+    doc.setDrawColor(120); doc.rect(16,y-3.6,4.5,4.5);
+    var pre=(x.present||(x.presentJ&&x.presentJ[jour]));
+    if(x.presentJ&&x.presentJ[jour]){ doc.setFont("helvetica","bold"); doc.text("x",17.2,y); doc.setFont("helvetica","normal"); }
+    doc.text(cut((x.nom||"").toUpperCase()+" "+(x.prenom||""),58),32,y);
+    doc.text(typeof essaiAge==="function"?String(essaiAge(x.naissance)||"").replace("ans","").trim():"",92,y);
+    doc.text(String(x.tel||""),108,y);
+    doc.text(cut(x.tarifNom||"",32),138,y);
+    doc.text(Number(x.montant)>0?(x.paye?"Payé":"À payer"):"Gratuit",172,y);
+    y+=8;
+  });
+  doc.save("feuille-"+evtNorm(e.titre||"evenement").slice(0,20)+"-"+jour+".pdf");
 }
 function evtStat(v,l){
   return '<div style="flex:1;background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:var(--txt)">'+authEsc(String(v))+'</div><div style="font-size:10px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.4px">'+authEsc(l)+'</div></div>';
