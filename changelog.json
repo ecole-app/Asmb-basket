@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791887793",
+    "titre": "Compta : compte de résultat et export FEC",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "« 📑 Comptes annuels » : compte de résultat de l'exercice au format des associations, comparé à l'exercice précédent, en PDF prêt pour l'AG (ligne d'approbation et signatures)."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Export FEC : le fichier officiel des écritures comptables, lu par les logiciels des experts-comptables et par les impôts. Le SIREN du club (Paramètres › Facturation) est repris dans le nom du fichier."
+      }
+    ]
+  },
+  {
     "v": "1791887653",
     "titre": "Compta : plan comptable associatif et numéros de pièce",
     "points": [

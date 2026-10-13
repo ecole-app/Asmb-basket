@@ -251,3 +251,218 @@ function comptaPlanFenetre(r){
     champs.forEach(function(c){ c.inp.value=c.inp.dataset.defaut; c.inp.dispatchEvent(new Event("input")); });
   }));
 }
+
+// ── Étape 2 : comptes annuels (compte de résultat + FEC) ──────────────
+// Rubriques du compte de résultat des associations (règlement ANC 2018-06).
+// Le premier motif qui correspond l'emporte (ordre important).
+var CR_PRODUITS=[
+  {lib:"Cotisations",re:/^756/},
+  {lib:"Ventes de biens et services (stages, buvette, partenariats…)",re:/^70/},
+  {lib:"Subventions d'exploitation",re:/^74/},
+  {lib:"Dons, mécénat (générosité du public)",re:/^75[45]/},
+  {lib:"Autres produits de gestion courante",re:/^75/},
+  {lib:"Produits financiers",re:/^76/},
+  {lib:"Produits exceptionnels",re:/^77/},
+  {lib:"Reprises et transferts de charges",re:/^7[89]/},
+  {lib:"Autres produits",re:/^7/}
+];
+var CR_CHARGES=[
+  {lib:"Achats (matériel, fournitures, marchandises)",re:/^60/},
+  {lib:"Services extérieurs (locations, entretien, assurances)",re:/^61/},
+  {lib:"Autres services extérieurs (honoraires, déplacements, cotisations)",re:/^62/},
+  {lib:"Impôts et taxes",re:/^63/},
+  {lib:"Charges de personnel",re:/^64/},
+  {lib:"Autres charges de gestion courante",re:/^65/},
+  {lib:"Charges financières",re:/^66/},
+  {lib:"Charges exceptionnelles",re:/^67/},
+  {lib:"Dotations aux amortissements et provisions",re:/^68/},
+  {lib:"Autres charges",re:/^6/}
+];
+function comptaArrondi(n){ return Math.round((Number(n)||0)*100)/100; }
+function comptaLignesPeriode(lines,ex){
+  return (lines||[]).filter(function(l){ var d=l.date||""; return d>=ex.debut&&d<=ex.fin; });
+}
+// Une ligne = une écriture à 2 lignes : recette → débit trésorerie / crédit produit ;
+// dépense → débit charge / crédit trésorerie (montant négatif : sens inversé).
+function comptaEcritures(l){
+  var m=comptaArrondi(l.montant); if(!m) return [];
+  var cn=comptaCompteNum(l), tr=comptaTresoNum(l), dep=l.type==="depense";
+  var debit=dep?cn:tr, credit=dep?tr:cn;
+  if(m<0){ m=-m; var x=debit; debit=credit; credit=x; }
+  return [{compte:debit,debit:m,credit:0},{compte:credit,debit:0,credit:m}];
+}
+function comptaCompteResultat(lines){
+  var soldes={};
+  (lines||[]).forEach(function(l){
+    comptaEcritures(l).forEach(function(e){ soldes[e.compte]=(soldes[e.compte]||0)+e.debit-e.credit; });
+  });
+  function rubriques(def,classe,signe){
+    var out=def.map(function(r){ return {lib:r.lib,re:r.re,total:0,comptes:{}}; }), tot=0;
+    Object.keys(soldes).forEach(function(num){
+      if(num.charAt(0)!==classe) return;
+      var v=comptaArrondi(soldes[num]*signe); if(!v) return;
+      for(var i=0;i<out.length;i++){ if(out[i].re.test(num)){ out[i].comptes[num]=v; out[i].total=comptaArrondi(out[i].total+v); break; } }
+      tot=comptaArrondi(tot+v);
+    });
+    return {rubriques:out,total:tot};
+  }
+  var P=rubriques(CR_PRODUITS,"7",-1), C=rubriques(CR_CHARGES,"6",1);
+  return {produits:P.rubriques,totalProduits:P.total,charges:C.rubriques,totalCharges:C.total,resultat:comptaArrondi(P.total-C.total)};
+}
+function comptaEur(n){
+  n=comptaArrondi(n); var neg=n<0, s=Math.abs(n).toFixed(2).split(".");
+  return (neg?"-":"")+s[0].replace(/\B(?=(\d{3})+(?!\d))/g," ")+","+s[1]+" €";
+}
+
+function openComptaComptes(){
+  if(typeof hasModulePermission==="function"&&!hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
+  if(typeof hasPremium==="function"&&!hasPremium()){ askComptaVerrouillee(); return; }
+  var all=getComptabilite();
+  if(comptaDedoublonnerPieces(all)+comptaNumeroter(all)>0) saveComptabilite(all);
+  var exs=comptaExercicesConnus(all);
+  var s=gmSheet("Comptes annuels"), b=s.body;
+  var sel=document.createElement("select"); sel.className="form-input";
+  sel.innerHTML=exs.map(function(e){ return '<option value="'+e.cle+'">Exercice '+e.label+'</option>'; }).join("");
+  // Par défaut : le dernier exercice terminé s'il a des lignes (c'est lui qu'on présente en AG).
+  var cour=comptaExerciceCourant(), prec=exs.filter(function(e){ return e.cle<cour.cle&&comptaLignesPeriode(all,e).length; })[0];
+  sel.value=(prec&&!comptaLignesPeriode(all,cour).length)?prec.cle:cour.cle;
+  b.appendChild(sel);
+  var zone=document.createElement("div"); b.appendChild(zone);
+  var row=gmRow(b); row.style.marginTop="14px";
+  function exChoisi(){ return exs.filter(function(e){ return e.cle===sel.value; })[0]; }
+  row.appendChild(gmBtn("📄 Compte de résultat (PDF)","primary",function(){ comptaCompteResultatPdf(exChoisi()); }));
+  row.appendChild(gmBtn("🧾 Export FEC","soft",function(){ comptaExportFec(exChoisi()); }));
+  var aide=document.createElement("div"); aide.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.5;margin-top:12px";
+  aide.textContent="Le FEC (fichier des écritures comptables) est le format officiel que lisent les logiciels des experts-comptables et l'administration fiscale. Le compte de résultat suit le plan comptable des associations, avec l'exercice précédent pour comparer.";
+  b.appendChild(aide);
+  function rendre(){
+    var ex=exChoisi(), n1=comptaExercice(String(parseInt(ex.cle,10)-1)+ex.debut.slice(4));
+    var cr=comptaCompteResultat(comptaLignesPeriode(all,ex)), crN1=comptaCompteResultat(comptaLignesPeriode(all,n1));
+    var nb=comptaLignesPeriode(all,ex).length;
+    function bloc(titre,rubs,tot,rubsN1,totN1,coul){
+      var h='<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin:16px 0 4px"><span>'+titre+'</span><span>'+ex.label+' · <span style="opacity:.7">'+n1.label+'</span></span></div>';
+      rubs.forEach(function(r,i){
+        var v1=rubsN1[i].total; if(!r.total&&!v1) return;
+        h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--txt);padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="flex:1;min-width:0">'+authEsc(r.lib)+
+          '<span style="display:block;font-size:10.5px;color:var(--mut);font-family:monospace">'+Object.keys(r.comptes).sort().map(function(k){ return k+" "+authEsc(comptaLibCompte(k))+" : "+comptaEur(r.comptes[k]); }).join("<br>")+'</span></span>'+
+          '<span style="text-align:right;white-space:nowrap;font-weight:700">'+comptaEur(r.total)+'<span style="display:block;font-weight:500;color:var(--mut);font-size:11px">'+comptaEur(v1)+'</span></span></div>';
+      });
+      h+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:'+coul+';padding:7px 0">Total '+titre.toLowerCase()+'<span style="text-align:right">'+comptaEur(tot)+'<span style="display:block;font-weight:500;color:var(--mut);font-size:11px">'+comptaEur(totN1)+'</span></span></div>';
+      return h;
+    }
+    zone.innerHTML='<div style="font-size:12px;color:var(--txt2);margin-top:8px">Du '+ex.debut.split("-").reverse().join("/")+' au '+ex.fin.split("-").reverse().join("/")+' · '+nb+' écriture'+(nb>1?"s":"")+'</div>'+
+      bloc("Produits",cr.produits,cr.totalProduits,crN1.produits,crN1.totalProduits,"var(--grn)")+
+      bloc("Charges",cr.charges,cr.totalCharges,crN1.charges,crN1.totalCharges,"var(--red)")+
+      '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--dkg);padding:12px 0;margin-top:6px;border-top:2px solid var(--bdr)">'+(cr.resultat>=0?"Excédent":"Déficit")+' de l\'exercice<span style="text-align:right">'+comptaEur(cr.resultat)+'<span style="display:block;font-size:11px;font-weight:500;color:var(--mut)">'+n1.label+' : '+comptaEur(crN1.resultat)+'</span></span></div>';
+  }
+  sel.addEventListener("change",rendre); rendre();
+}
+
+function comptaCompteResultatPdf(ex){
+  if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
+  var all=getComptabilite(), n1=comptaExercice(String(parseInt(ex.cle,10)-1)+ex.debut.slice(4));
+  var cr=comptaCompteResultat(comptaLignesPeriode(all,ex)), crN1=comptaCompteResultat(comptaLignesPeriode(all,n1));
+  if(!comptaLignesPeriode(all,ex).length){ askAlert("Aucune ligne sur l'exercice "+ex.label+"."); return; }
+  var doc=new window.jspdf.jsPDF(), rgb=clubPdfRgb(), y=18;
+  function fr(d){ return d.split("-").reverse().join("/"); }
+  function eur(n){ return comptaEur(n).replace("€","EUR"); }
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor.apply(doc,rgb);
+  doc.text(clubTitle()||"Association",14,y); y+=8;
+  doc.setFontSize(13); doc.setTextColor(30,30,30); doc.text("Compte de résultat - exercice "+ex.label,14,y); y+=6;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110,110,110);
+  var fi=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
+  doc.text("Du "+fr(ex.debut)+" au "+fr(ex.fin)+(fi&&fi.siret?"  -  SIRET "+fi.siret:"")+"  -  édité le "+new Date().toLocaleDateString("fr-FR"),14,y); y+=10;
+  var xN=162, xN1=196;
+  function entete(titre){
+    if(y>265){ doc.addPage(); y=20; }
+    doc.setFillColor.apply(doc,rgb); doc.rect(12,y-5,186,7,"F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(9.5); doc.setTextColor(255,255,255);
+    doc.text(titre,14,y); doc.text(ex.label,xN,y,{align:"right"}); doc.text(n1.label,xN1,y,{align:"right"}); y+=8;
+  }
+  function bloc(titre,rubs,tot,rubsN1,totN1){
+    entete(titre);
+    rubs.forEach(function(r,i){
+      var v1=rubsN1[i].total; if(!r.total&&!v1) return;
+      if(y>275){ doc.addPage(); y=20; }
+      doc.setFont("helvetica","bold"); doc.setFontSize(9.5); doc.setTextColor(30,30,30);
+      doc.text(doc.splitTextToSize(r.lib,120)[0],14,y); doc.text(eur(r.total),xN,y,{align:"right"});
+      doc.setTextColor(120,120,120); doc.text(eur(v1),xN1,y,{align:"right"}); y+=5;
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
+      Object.keys(r.comptes).sort().forEach(function(k){
+        if(y>282){ doc.addPage(); y=20; }
+        doc.text(k+"  "+comptaLibCompte(k),20,y); doc.text(eur(r.comptes[k]),xN,y,{align:"right"}); y+=4.5;
+      });
+      y+=1.5;
+    });
+    doc.setDrawColor(200,200,200); doc.line(14,y-3,198,y-3);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor.apply(doc,rgb);
+    doc.text("Total "+titre.toLowerCase(),14,y+1); doc.text(eur(tot),xN,y+1,{align:"right"});
+    doc.setTextColor(120,120,120); doc.text(eur(totN1),xN1,y+1,{align:"right"}); y+=11;
+  }
+  bloc("Produits",cr.produits,cr.totalProduits,crN1.produits,crN1.totalProduits);
+  bloc("Charges",cr.charges,cr.totalCharges,crN1.charges,crN1.totalCharges);
+  if(y>260){ doc.addPage(); y=20; }
+  doc.setFillColor.apply(doc,clubPdfTint(0.88)); doc.rect(12,y-6,186,10,"F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(20,20,20);
+  doc.text((cr.resultat>=0?"Excédent":"Déficit")+" de l'exercice",14,y+1); doc.text(eur(cr.resultat),xN,y+1,{align:"right"});
+  doc.setFontSize(10); doc.setTextColor(120,120,120); doc.text(eur(crN1.resultat),xN1,y+1,{align:"right"}); y+=18;
+  if(y>250){ doc.addPage(); y=30; }
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(60,60,60);
+  doc.text("Approuvé par l'assemblée générale du ..................................",14,y); y+=14;
+  doc.text("Le président",30,y); doc.text("Le trésorier",130,y);
+  doc.setFontSize(7.5); doc.setTextColor(140,140,140);
+  doc.text("Présenté selon le plan comptable des associations (règlement ANC n° 2018-06). Comptabilité de trésorerie : recettes et dépenses à la date de paiement.",14,290);
+  doc.save(clubSlug()+"_compte_de_resultat_"+ex.label+".pdf");
+}
+
+// FEC (article A47 A-1 du LPF) : 18 colonnes séparées par des tabulations,
+// dates AAAAMMJJ, montants à virgule, encodage ISO-8859-15.
+var FEC_COLONNES=["JournalCode","JournalLib","EcritureNum","EcritureDate","CompteNum","CompteLib","CompAuxNum","CompAuxLib","PieceRef","PieceDate","EcritureLib","Debit","Credit","EcritureLet","DateLet","ValidDate","Montantdevise","Idevise"];
+function comptaFecTexte(lines){
+  function d8(d){ return String(d||"").replace(/-/g,"").slice(0,8); }
+  function txt(s){ return String(s==null?"":s).replace(/[\t\r\n|]+/g," ").trim().slice(0,200); }
+  function mt(n){ return comptaArrondi(n).toFixed(2).replace(".",","); }
+  var tri=(lines||[]).slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||"")||String(a.piece||"").localeCompare(String(b.piece||"")); });
+  var out=[FEC_COLONNES.join("\t")], totD=0, totC=0, n=0;
+  tri.forEach(function(l){
+    var ecr=comptaEcritures(l); if(!ecr.length) return;
+    var j=comptaJournal(l), lib=txt(l.motif||l.categorie||"Écriture")+(l.tiers?" - "+txt(l.tiers):"");
+    n++;
+    ecr.forEach(function(e){
+      totD+=e.debit; totC+=e.credit;
+      out.push([j,COMPTA_JOURNAUX[j],txt(l.piece),d8(l.date),e.compte,txt(comptaLibCompte(e.compte)),"","",txt(l.piece),d8(l.date),txt(lib),mt(e.debit),mt(e.credit),"","",d8(l.date),"",""].join("\t"));
+    });
+  });
+  return {texte:out.join("\r\n")+"\r\n", ecritures:n, debit:comptaArrondi(totD), credit:comptaArrondi(totC)};
+}
+var ISO885915={0x20AC:0xA4,0x160:0xA6,0x161:0xA8,0x17D:0xB4,0x17E:0xB8,0x152:0xBC,0x153:0xBD,0x178:0xBE};
+function comptaIso885915(s){
+  var out=new Uint8Array(s.length);
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    if(ISO885915[c]) out[i]=ISO885915[c];
+    else if(c<256&&[0xA4,0xA6,0xA8,0xB4,0xB8,0xBC,0xBD,0xBE].indexOf(c)<0) out[i]=c;
+    else if(c===0x2019||c===0x2018) out[i]=0x27;
+    else if(c===0x201C||c===0x201D) out[i]=0x22;
+    else if(c===0x2013||c===0x2014) out[i]=0x2D;
+    else if(c===0x2026) out[i]=0x2E;
+    else out[i]=0x3F;
+  }
+  return out;
+}
+function comptaExportFec(ex){
+  var all=getComptabilite();
+  if(comptaDedoublonnerPieces(all)+comptaNumeroter(all)>0) saveComptabilite(all);
+  var lignes=comptaLignesPeriode(all,ex);
+  if(!lignes.length){ askAlert("Aucune ligne sur l'exercice "+ex.label+"."); return; }
+  var f=comptaFecTexte(lignes);
+  var fi=(typeof clubFacturationInfos==="function")?clubFacturationInfos():null;
+  var siren=String((fi&&fi.siret)||"").replace(/\D/g,"").slice(0,9);
+  var nom=(siren.length===9?siren:clubSlug())+"FEC"+ex.fin.replace(/-/g,"")+".txt";
+  var blob=new Blob([comptaIso885915(f.texte)],{type:"text/plain;charset=ISO-8859-15"});
+  var url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download=nom; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); },1500);
+  if(siren.length!==9) askAlert("FEC téléchargé ("+f.ecritures+" écritures). Le nom officiel commence par le SIREN du club : renseignez le SIRET dans Paramètres › Facturation pour qu'il soit repris.");
+  else showToast("FEC téléchargé : "+f.ecritures+" écritures, équilibré ("+comptaEur(f.debit)+")");
+}
