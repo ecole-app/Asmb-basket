@@ -292,9 +292,15 @@ service cloud.firestore {
       allow update: if (staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId
                           && request.resource.data.eventId == resource.data.eventId)
         || (resource.data.actif == true
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nb','dernier'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nb','dernier','nbJ'])
             && request.resource.data.nb == resource.data.get('nb', 0) + 1
-            && (resource.data.get('places', 0) == 0 || request.resource.data.nb <= resource.data.places)
+            // Choix des jours : les places se comptent par jour (nbJ, côté appli) ; le total n'est pas borné.
+            && (resource.data.get('parJour', false) == true || resource.data.get('places', 0) == 0 || request.resource.data.nb <= resource.data.places)
+            // nbJ ne peut bouger que pour les jours du billet créé dans la même opération.
+            && (!('nbJ' in request.resource.data.diff(resource.data).affectedKeys())
+                || (resource.data.get('parJour', false) == true
+                    && request.resource.data.nbJ.diff(resource.data.get('nbJ', {})).affectedKeys()
+                         .hasOnly(getAfter(/databases/$(database)/documents/clubs/$(resource.data.clubId)/evt_inscrits/$(request.resource.data.dernier)).data.jours)))
             && existsAfter(/databases/$(database)/documents/clubs/$(resource.data.clubId)/evt_inscrits/$(request.resource.data.dernier))
             && !exists(/databases/$(database)/documents/clubs/$(resource.data.clubId)/evt_inscrits/$(request.resource.data.dernier)));
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
@@ -520,9 +526,20 @@ service cloud.firestore {
       // Id = code du billet (STG-12345, TRN-…, SOI-…, EVT-…).
       match /evt_inscrits/{code} {
         function evtPage(eventId) { return /databases/$(database)/documents/evt_pages/$(clubId + '__' + eventId); }
+        // Prix du billet : tarif fixe, ou « par jour » (jours choisis parmi ceux de la page,
+        // forfait facultatif quand tous les jours sont pris).
+        function evtMontantOk(p, d) {
+          return p.get('parJour', false) != true
+            ? (!('jours' in d) && d.montant == p.tarifs[d.tarifIdx].prix)
+            : (d.get('jours', null) is list && d.jours.size() >= 1 && d.jours.size() <= 14
+               && d.jours.toSet().size() == d.jours.size()
+               && d.jours.hasOnly(p.jours)
+               && math.abs(d.montant - ((p.tarifs[d.tarifIdx].get('forfait', 0) > 0 && d.jours.size() == p.jours.size())
+                    ? p.tarifs[d.tarifIdx].forfait : p.tarifs[d.tarifIdx].prix * d.jours.size())) < 0.01);
+        }
         allow create: if clubStatus(clubId) == 'active'
           && code.matches('^(STG|TRN|SOI|EVT)-[0-9]{5}$')
-          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','mode','statut','paye','present','playerId','auteurUid','source','at'])
+          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','mode','statut','paye','present','playerId','auteurUid','source','at'])
           && request.resource.data.eventId is string
           && get(evtPage(request.resource.data.eventId)).data.actif == true
           && get(evtPage(request.resource.data.eventId)).data.clubId == clubId
@@ -534,7 +551,7 @@ service cloud.firestore {
           && request.resource.data.tel is string && request.resource.data.tel.matches('^[+]?[0-9]{9,15}$')
           && request.resource.data.get('clubOrigine', '') is string && request.resource.data.get('clubOrigine', '').size() <= 60
           && request.resource.data.tarifIdx is int
-          && request.resource.data.montant == get(evtPage(request.resource.data.eventId)).data.tarifs[request.resource.data.tarifIdx].prix
+          && evtMontantOk(get(evtPage(request.resource.data.eventId)).data, request.resource.data)
           && request.resource.data.mode in ['especes','cheque','cb','helloasso','gratuit']
           && (request.resource.data.mode != 'gratuit' || request.resource.data.montant == 0)
           && request.resource.data.statut == 'inscrit' && request.resource.data.paye == false && request.resource.data.present == false

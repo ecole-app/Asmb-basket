@@ -552,6 +552,55 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Événements : jours au choix (prix par jour, forfait)", () => {
+  const J = ["2026-10-19", "2026-10-20", "2026-10-21"];
+  const page = (o = {}) => ({ clubId: "A", eventId: "e1", actif: true, titre: "Stage", places: 2, nb: 0, nbJ: {},
+    parJour: true, jours: J, tarifs: [{ nom: "Extérieur", prix: 20, forfait: 50, pour: "ext" }], ...o });
+  const insc = (jours, montant, o = {}) => ({ eventId: "e1", prenom: "Léo", nom: "Kaci", naissance: "2016-05-04", tel: "0612345678",
+    clubOrigine: "", tarifIdx: 0, tarifNom: "Extérieur", montant, jours, mode: "cb",
+    statut: "inscrit", paye: false, present: false, source: "public", at: serverTimestamp(), ...o });
+  async function inscrire(db, code, data, nb, nbJ) {
+    const b = writeBatch(db);
+    b.set(doc(db, "clubs/A/evt_inscrits/" + code), data);
+    b.update(doc(db, "evt_pages/A__e1"), nbJ ? { nb, dernier: code, nbJ } : { nb, dernier: code });
+    return b.commit();
+  }
+  beforeEach(async () => { await setDoc(doc(await as("dirA"), "evt_pages/A__e1"), page()); });
+
+  it("prix = jours × tarif, forfait quand tous les jours sont pris", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-70001", insc([J[0], J[2]], 40), 1, { [J[0]]: 1, [J[2]]: 1 }));
+    await assertSucceeds(inscrire(db, "STG-70002", insc(J, 50), 2, { [J[0]]: 2, [J[1]]: 1, [J[2]]: 2 }));
+  });
+  it("refusé : mauvais total, jour inconnu, doublon, aucun jour, forfait avec moins de jours", async () => {
+    const db = await as(null);
+    await assertFails(inscrire(db, "STG-71001", insc([J[0], J[1]], 20), 1, { [J[0]]: 1, [J[1]]: 1 }));
+    await assertFails(inscrire(db, "STG-71002", insc(["2026-10-30"], 20), 1, { "2026-10-30": 1 }));
+    await assertFails(inscrire(db, "STG-71003", insc([J[0], J[0]], 40), 1, { [J[0]]: 1 }));
+    await assertFails(inscrire(db, "STG-71004", insc([], 0), 1));
+    await assertFails(inscrire(db, "STG-71005", insc([J[0], J[1]], 50), 1, { [J[0]]: 1, [J[1]]: 1 }));
+  });
+  it("un billet sans jours est refusé quand le choix des jours est actif", async () => {
+    const sansJours = insc([J[0]], 20); delete sansJours.jours;
+    await assertFails(inscrire(await as(null), "STG-72001", sansJours, 1));
+  });
+  it("les compteurs par jour ne bougent que pour les jours du billet", async () => {
+    const db = await as(null);
+    await assertFails(inscrire(db, "STG-73001", insc([J[0]], 20), 1, { [J[1]]: 1 }));
+  });
+  it("les places ne bloquent pas le total quand on compte par jour", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-74001", insc([J[0]], 20), 1, { [J[0]]: 1 }));
+    await assertSucceeds(inscrire(db, "STG-74002", insc([J[1]], 20), 2, { [J[0]]: 1, [J[1]]: 1 }));
+    await assertSucceeds(inscrire(db, "STG-74003", insc([J[2]], 20), 3, { [J[0]]: 1, [J[1]]: 1, [J[2]]: 1 }));
+  });
+  it("sans choix des jours, un billet avec des jours est refusé", async () => {
+    await updateDoc(doc(await as("dirA"), "evt_pages/A__e1"), { parJour: false, jours: [] });
+    await assertFails(inscrire(await as(null), "STG-75001", insc([J[0]], 20), 1));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
 describe("Entrée d'un événement : code bénévole", () => {
   const fin = (j) => Timestamp.fromMillis(Date.now() + j * 86400000);
   const entree = (o = {}) => ({ clubId: "A", eventId: "e1", titre: "Camp", liste: [{ c: "STG-12345", p: "Léo", n: "Kaci" }],

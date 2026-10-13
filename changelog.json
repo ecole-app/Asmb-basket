@@ -1,5 +1,40 @@
 [
   {
+    "v": "1791879800",
+    "titre": "Événements : jours au choix et modification complète",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Stage sur plusieurs jours : dans les réglages des inscriptions, option « Les familles choisissent leurs jours ». Prix par jour, forfait facultatif pour tous les jours, places par jour."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les familles cochent les jours qui les intéressent (ou tous les jours) et voient le total se calculer. Le billet affiche les jours réservés."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Entrée : choix du jour, liste et scan par jour ; un billet scanné un jour non réservé est refusé."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "« Modifier » sur un événement rouvre le formulaire complet, prérempli."
+      }
+    ]
+  },
+  {
     "v": "1791879176",
     "titre": "Événements : inscriptions sur ordinateur et dates",
     "points": [

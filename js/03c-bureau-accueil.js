@@ -103,7 +103,7 @@ function renderDeskHome(){
     Array.prototype.forEach.call(box.querySelectorAll(".dk-nb"),function(sp){
       var e=ins.find(function(x){return String(x.id)===sp.dataset.eid;});
       window.fbGetDoc(window.fbDoc(window.fbDb,"evt_pages",evtPageId(sp.dataset.eid))).then(function(s){
-        var nb=s.exists()?(s.data().nb||0):0, pl=(e&&e.inscr.places)||0;
+        var nb=s.exists()?(s.data().nb||0):0, pl=(e&&!e.inscr.parJour&&e.inscr.places)||0;
         sp.textContent=nb+(pl?" / "+pl:"")+" inscrit"+(nb>1?"s":"");
       }).catch(function(){ sp.textContent=""; });
     });

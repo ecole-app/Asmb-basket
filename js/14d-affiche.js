@@ -449,14 +449,18 @@ function afRendre(canvas, C){
 function afContenu(e, st, page, imgs){
   var club=window.CURRENT_CLUB||{};
   var c1=afHex(club.couleur)||"#1A2E5A", c2=afHex(club.couleur2)||afMix(c1,-0.45);
-  var places=(e.inscr&&e.inscr.places)||0, nb=(page&&page.nb)||0, restant=places?Math.max(0,places-nb):null;
+  var parJ=!!(e.inscr&&e.inscr.parJour), places=parJ?0:((e.inscr&&e.inscr.places)||0), nb=(page&&page.nb)||0, restant=places?Math.max(0,places-nb):null;
   var tag=(st.accroche||AF_TAGS[e.type]||"Événement").trim();
   return {
     modele:st.modele, format:st.format, carre:st.format==="carre", show:st.show,
     c1:c1, c2:c2, club:club.name||"", initiales:afInitiales(club.name), logo:imgs.logo,
     tag:tag, accrocheEpure:(e.type==="soiree"?"la ":"le ")+tag.toLowerCase(),
     titre:(st.titre||e.titre||"").trim(), dates:afDates(e), horaires:e.heure||"", lieu:e.lieu||"", texte:(st.texte||"").trim(),
-    prix:((e.inscr&&e.inscr.tarifs)||[]).map(function(t){return {nom:t.nom,prix:Number(t.prix)||0};}),
+    prix:((e.inscr&&e.inscr.tarifs)||[]).reduce(function(l,t){
+      l.push({nom:t.nom+(parJ&&Number(t.prix)>0?" (par jour)":""),prix:Number(t.prix)||0});
+      if(parJ&&Number(t.forfait)>0) l.push({nom:"Forfait tous les jours"+((e.inscr.tarifs.length>1)?" · "+t.nom:""),prix:Number(t.forfait)});
+      return l;
+    },[]),
     qr:imgs.qr, photo:imgs.photo,
     interv:(st.intervenants||[]).filter(function(x){return x.nom;}).map(function(x,i){ return {nom:x.nom,role:x.role||"",img:imgs.interv[i]||null}; }),
     sponsors:imgs.sponsors||[],
@@ -611,7 +615,7 @@ function evtAffiche(eid){
   var infos=bloc("Ce qui s'affiche");
   AF_INFOS.forEach(function(it){
     if(it[0]==="qr"&&!e.inscr) return;
-    if(it[0]==="places"&&!(e.inscr&&e.inscr.places)) return;
+    if(it[0]==="places"&&(!(e.inscr&&e.inscr.places)||e.inscr.parJour)) return;
     if(it[0]==="prix"&&!(e.inscr&&e.inscr.tarifs&&e.inscr.tarifs.length)) return;
     var l=document.createElement("label"); l.style.cssText="display:flex;align-items:center;gap:10px;min-height:38px;font-size:14px;font-weight:600;color:var(--txt);cursor:pointer";
     var c=document.createElement("input"); c.type="checkbox"; c.checked=!!st.show[it[0]]; c.style.cssText="width:20px;height:20px;accent-color:var(--dkg)";

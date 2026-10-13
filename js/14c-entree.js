@@ -17,6 +17,18 @@ function entreeCodeDepuis(txt){
   var m=txt.toUpperCase().match(/(STG|TRN|SOI|EVT)-[0-9]{5}/);
   return m?m[0]:"";
 }
+// Jours au choix : l'écran Entrée travaille sur UN jour à la fois (aujourd'hui si c'est un jour de l'événement).
+function entreeJourDefaut(jours){
+  if(!jours||!jours.length) return null;
+  var auj=new Date().toISOString().slice(0,10);
+  return jours.indexOf(auj)>=0?auj:jours[0];
+}
+function entreeFiltrerJour(src){
+  var tous=src.tous||[];
+  if(!src.jours){ src.items=tous; return; }
+  src.items=tous.filter(function(x){ return x.j&&x.j.indexOf(src.jour)>=0; });
+  tous.forEach(function(x){ x.pr=(x.prj||{})[src.jour]||0; });
+}
 function entreeEvent(eid){ return (typeof getEvents==="function"?getEvents():[]).find(function(x){return x.id===eid;}); }
 
 // Reporte sur les billets ce que les bénévoles ont coché (présents, paiements).
@@ -30,6 +42,17 @@ function entreeReporter(eid, items){
       items.forEach(function(x){
         var pr=0, py=0;
         docs.forEach(function(d){ var a=(d.presents||{})[x._id]; if(a) pr=pr||a; if((d.payes||{})[x._id]) py=1; });
+        if(x.jours&&x.jours.length){
+          x.jours.forEach(function(j){
+            var aj=0; docs.forEach(function(d){ var a=(d.presents||{})[x._id+"@"+j]; if(a) aj=aj||a; });
+            if(aj && !(x.presentJ||{})[j]){
+              x.presentJ=x.presentJ||{}; x.presentJ[j]=aj; x.present=aj;
+              var m={present:aj}; m["presentJ."+j]=aj;
+              ops.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_inscrits",x._id),m).catch(function(){}));
+            }
+          });
+          pr=0;
+        }
         if(pr && !x.present){
           x.present=pr;
           ops.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_inscrits",x._id),{present:pr}).catch(function(){}));
@@ -43,21 +66,32 @@ function entreeReporter(eid, items){
 // ── Source « staff » : les billets eux-mêmes ────────────────────────
 function evtEntree(eid){
   var e=entreeEvent(eid); if(!e) return;
+  var jj=(e.inscr&&e.inscr.parJour)?evtJoursPlage(e.date,e.dateFin):null;
   var src={
     titre:e.titre||eventTypeLabel(e.type), sous:(typeof evtDateTxt==="function"?evtDateTxt(e):e.date)+(e.lieu?" · "+e.lieu:""),
-    items:[], docs:[],
+    items:[], tous:[], docs:[], jours:jj, jour:entreeJourDefaut(jj),
+    filtrer:function(){ entreeFiltrerJour(src); },
     charger:function(){
       return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"evt_inscrits"),window.fbWhere("eventId","==",String(eid))))
         .then(function(snap){
           var l=[]; snap.forEach(function(d){ var v=d.data(); v._id=d.id; if(v.statut!=="annule") l.push(v); });
           return entreeReporter(eid,l).then(function(docs){
             src.docs=docs.filter(function(d){ var t=d.expiresAt&&d.expiresAt.toMillis?d.expiresAt.toMillis():0; return t>Date.now(); });
-            src.items=l.map(function(v){ return {c:v._id,p:v.prenom,n:v.nom,t:v.tarifNom,m:v.montant,mo:v.mode,py:!!v.paye,pr:v.present||0,_x:v}; });
+            src.tous=l.map(function(v){ return {c:v._id,p:v.prenom,n:v.nom,t:v.tarifNom,m:v.montant,mo:v.mode,py:!!v.paye,pr:v.present||0,j:v.jours||null,prj:v.presentJ||{},_x:v}; });
+            src.filtrer();
           });
         });
     },
     present:function(it,val){
       var ms=val?Date.now():false;
+      if(src.jours){
+        var jr=src.jour, maj={}; maj["presentJ."+jr]=ms;
+        var autres=Object.keys(it.prj||{}).filter(function(k){ return k!==jr&&it.prj[k]; });
+        maj.present=ms||(autres.length?it.prj[autres[0]]:false);
+        var opsJ=[window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_inscrits",it.c),maj)];
+        src.docs.forEach(function(d){ var m={}; m["presents."+it.c+"@"+jr]=ms; opsJ.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_entrees",d._id),m).catch(function(){})); });
+        return Promise.all(opsJ).then(function(){ it.prj=it.prj||{}; it.prj[jr]=ms; it.pr=ms; it._x.presentJ=Object.assign({},it._x.presentJ||{}); it._x.presentJ[jr]=ms; it._x.present=maj.present; });
+      }
       var ops=[window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_inscrits",it.c),{present:ms})];
       src.docs.forEach(function(d){ var m={}; m["presents."+it.c]=ms; ops.push(window.fbUpdateDoc(window.fbDoc(window.fbDb,"evt_entrees",d._id),m).catch(function(){})); });
       return Promise.all(ops).then(function(){ it.pr=ms; it._x.present=ms; });
@@ -88,13 +122,23 @@ function showEntreeBenevole(code){
       if(typeof applyClubColor==="function") applyClubColor();
       try{ document.title="Entrée · "+(d.titre||""); }catch(e){}
       var src={
-        titre:d.titre||"Entrée", sous:(d.sous||"")+" · Accès bénévole", items:[], benevole:true,
+        titre:d.titre||"Entrée", sous:(d.sous||"")+" · Accès bénévole", items:[], tous:[], benevole:true,
+        jours:(d.jours&&d.jours.length>1)?d.jours:null, jour:entreeJourDefaut(d.jours&&d.jours.length>1?d.jours:null),
+        filtrer:function(){ entreeFiltrerJour(src); },
         appliquer:function(v){
           var pres=v.presents||{}, pays=v.payes||{};
-          src.items=(v.liste||[]).map(function(x){ return {c:x.c,p:x.p,n:x.n,t:x.t,m:x.m,mo:x.mo,py:!!(x.py||pays[x.c]),pr:(x.c in pres)?pres[x.c]:(x.pr||0)}; });
+          src.tous=(v.liste||[]).map(function(x){
+            var prj=Object.assign({},x.pj||{});
+            if(x.j) x.j.forEach(function(j){ var k=x.c+"@"+j; if(k in pres) prj[j]=pres[k]; });
+            return {c:x.c,p:x.p,n:x.n,t:x.t,m:x.m,mo:x.mo,py:!!(x.py||pays[x.c]),j:x.j||null,prj:prj,pr:(x.c in pres)?pres[x.c]:(x.pr||0)};
+          });
+          src.filtrer();
         },
         charger:function(){ return window.fbGetDoc(ref).then(function(s){ if(s.exists()) src.appliquer(s.data()); }); },
-        present:function(it,val){ var m={}; m["presents."+it.c]=val?Date.now():false; return window.fbUpdateDoc(ref,m).then(function(){ it.pr=m["presents."+it.c]; }); },
+        present:function(it,val){
+          var k="presents."+it.c+(src.jours?"@"+src.jour:""), m={}; m[k]=val?Date.now():false;
+          return window.fbUpdateDoc(ref,m).then(function(){ it.pr=m[k]; if(src.jours){ it.prj=it.prj||{}; it.prj[src.jour]=m[k]; } });
+        },
         payer:function(it){ var m={}; m["payes."+it.c]=Date.now(); return window.fbUpdateDoc(ref,m).then(function(){ it.py=true; }); },
         ecouter:function(cb){
           if(window.fbOnSnapshot) return window.fbOnSnapshot(ref,function(s){ if(s.exists()){ src.appliquer(s.data()); cb(); } },function(){});
@@ -144,6 +188,7 @@ function entreeEcran(src, opt){
       '</div>'+
       '<input id="entree-q" type="search" placeholder="Rechercher un nom ou un code" style="margin-top:12px;width:100%;box-sizing:border-box;padding:10px 14px;border-radius:20px;border:none;font-size:14px;background:rgba(255,255,255,.95);color:#0b1630">'+
     '</div>'+
+    '<div id="entree-jours" style="display:none;gap:6px;padding:10px 12px 0;flex-shrink:0;overflow-x:auto"></div>'+
     '<div id="entree-filtres" style="display:flex;gap:6px;padding:10px 12px 4px;flex-shrink:0;overflow-x:auto"></div>'+
     '<div id="entree-liste" style="flex:1;overflow-y:auto;padding:4px 12px 110px;-webkit-overflow-scrolling:touch"><div style="text-align:center;color:var(--mut);padding:30px;font-size:13px">Chargement…</div></div>'+
     '<div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px calc(env(safe-area-inset-bottom) + 14px);background:linear-gradient(transparent,var(--bg) 30%)">'+
@@ -161,6 +206,18 @@ function entreeEcran(src, opt){
     var entres=its.filter(function(x){return x.pr;}).length;
     document.getElementById("entree-cpt").textContent=entres+" / "+its.length;
     var aPayer=its.filter(function(x){return !x.py&&Number(x.m)>0;}).length;
+    var fj=document.getElementById("entree-jours");
+    if(src.jours){
+      fj.style.display="flex"; fj.innerHTML="";
+      src.jours.forEach(function(j){
+        var n=(src.tous||[]).filter(function(x){ return x.j&&x.j.indexOf(j)>=0; }).length, on=src.jour===j;
+        var b=document.createElement("button"); b.type="button";
+        b.style.cssText="flex-shrink:0;padding:8px 12px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;border:2px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"color-mix(in srgb, var(--dkg) 12%, var(--card))":"var(--card)")+";color:var(--txt)";
+        b.textContent=evtJourTxt(j)+" ("+n+")";
+        b.addEventListener("click",function(){ src.jour=j; src.filtrer(); peindre(); });
+        fj.appendChild(b);
+      });
+    }
     var f=document.getElementById("entree-filtres"); f.innerHTML="";
     [["tous","Tous ("+its.length+")"],["attente","À entrer ("+(its.length-entres)+")"],["entres","Entrés ("+entres+")"]].concat(aPayer?[["payer","À payer ("+aPayer+")"]]:[]).forEach(function(k){
       var b=document.createElement("button"); b.type="button"; var on=filtre===k[0];
@@ -280,17 +337,19 @@ function entreeScanner(src, repeindre){
 // Résultat d'un scan : vert = entrée validée, orange = déjà entré, rouge = inconnu.
 function entreeResultat(src, code, host, suivant, fermer){
   var it=src.items.find(function(x){ return x.c===code; });
+  var hj=(!it&&src.jours)?(src.tous||[]).find(function(x){ return x.c===code; }):null;
   if(!host){ host=document.createElement("div"); host.style.cssText="position:fixed;inset:0;z-index:370"; document.body.appendChild(host); var h0=host; suivant=suivant||function(){ h0.remove(); if(src.repeindre) src.repeindre(); }; }
-  var etat=!it?"inconnu":(it.pr?"deja":"ok");
-  var col={ok:"#1E9E57",deja:"#E8670A",inconnu:"#C0392B"}[etat];
+  var etat=hj?"horsjour":(!it?"inconnu":(it.pr?"deja":"ok"));
+  var col={ok:"#1E9E57",deja:"#E8670A",inconnu:"#C0392B",horsjour:"#C0392B"}[etat];
   function peindre(){
     var aPayer=it&&Number(it.m)>0&&!it.py;
     host.style.display="flex";
     host.innerHTML='<div style="margin:auto;width:100%;height:100%;background:'+col+';color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box">'+
       '<div style="width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900">'+(etat==="ok"?"✓":etat==="deja"?"!":"✕")+'</div>'+
-      '<div style="font-size:24px;font-weight:900;margin-top:16px">'+(etat==="ok"?"Entrée validée":etat==="deja"?"Déjà entré"+(it.pr?" à "+authEsc(entreeHeure(it.pr)):""):"Billet inconnu")+'</div>'+
+      '<div style="font-size:24px;font-weight:900;margin-top:16px">'+(etat==="ok"?"Entrée validée":etat==="deja"?"Déjà entré"+(it.pr?" à "+authEsc(entreeHeure(it.pr)):""):etat==="horsjour"?"Pas inscrit ce jour":"Billet inconnu")+'</div>'+
+      (hj?'<div style="font-size:20px;font-weight:800;margin-top:10px">'+authEsc((hj.p||"")+" "+(hj.n||""))+'</div><div style="font-size:14px;opacity:.95;margin-top:6px;max-width:320px;line-height:1.45">Inscrit : '+authEsc(evtJoursTxt(hj.j,src.jours.length))+'<br>Aujourd\'hui : '+authEsc(evtJourTxt(src.jour,true))+'</div>':'')+
       (it?'<div style="font-size:20px;font-weight:800;margin-top:10px">'+authEsc((it.p||"")+" "+(it.n||""))+'</div><div style="font-size:14px;opacity:.9;margin-top:4px">'+authEsc((it.t||"")+" · "+it.c)+'</div>'
-         :'<div style="font-size:14px;opacity:.9;margin-top:8px;max-width:300px;line-height:1.45">'+authEsc(code||"Code illisible")+(src.benevole?" n'est pas dans la liste. Inscription récente ? Demandez au responsable d'actualiser la liste.":" n'est pas un billet de cet événement.")+'</div>')+
+         :hj?'':'<div style="font-size:14px;opacity:.9;margin-top:8px;max-width:300px;line-height:1.45">'+authEsc(code||"Code illisible")+(src.benevole?" n'est pas dans la liste. Inscription récente ? Demandez au responsable d'actualiser la liste.":" n'est pas un billet de cet événement.")+'</div>')+
       (aPayer?'<div style="margin-top:18px;background:#fff;color:#C0392B;border-radius:14px;padding:12px 16px;font-size:15px;font-weight:900">'+authEsc(evtPrix(it.m))+' à payer ('+authEsc(EVT_MODES[it.mo]||"sur place")+')</div>'+
         '<button class="sr-pay" style="margin-top:10px;padding:12px 20px;border-radius:30px;border:2px solid #fff;background:transparent;color:#fff;font-size:14px;font-weight:800;cursor:pointer">Paiement reçu</button>':'')+
       '<button class="sr-next" style="margin-top:26px;width:100%;max-width:320px;padding:16px;border-radius:30px;border:none;background:#fff;color:#0b1630;font-size:16px;font-weight:900;cursor:pointer">Scanner le suivant</button>'+
@@ -308,7 +367,7 @@ function entreeResultat(src, code, host, suivant, fermer){
 // ── Codes bénévoles (staff) ─────────────────────────────────────────
 function entreeListeFigee(eid){
   return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"evt_inscrits"),window.fbWhere("eventId","==",String(eid)))).then(function(snap){
-    var l=[]; snap.forEach(function(d){ var v=d.data(); if(v.statut!=="annule") l.push({c:d.id,p:v.prenom||"",n:v.nom||"",t:v.tarifNom||"",m:Number(v.montant)||0,mo:v.mode||"",py:!!v.paye,pr:v.present||0}); });
+    var l=[]; snap.forEach(function(d){ var v=d.data(); if(v.statut!=="annule") l.push({c:d.id,p:v.prenom||"",n:v.nom||"",t:v.tarifNom||"",m:Number(v.montant)||0,mo:v.mode||"",py:!!v.paye,pr:v.jours?0:(v.present||0),j:v.jours||null,pj:v.presentJ||{}}); });
     return l;
   });
 }
@@ -329,7 +388,7 @@ function evtCodesBenevoles(eid){
       return window.fbSetDoc(window.fbDoc(window.fbDb,"evt_entrees",code),{
         clubId:window.CURRENT_CLUB_ID, eventId:String(eid), titre:String(e.titre||eventTypeLabel(e.type)).slice(0,100),
         sous:(typeof evtDateTxt==="function"?evtDateTxt(e):e.date)+(e.lieu?" · "+e.lieu:""), clubNom:c.name||"", couleur:c.couleur||null, couleur2:c.couleur2||null,
-        liste:l, presents:{}, payes:{}, expiresAt:fin, creePar:(window.ASMB_USER&&window.ASMB_USER.uid)||null, majLe:Date.now()
+        liste:l, jours:(e.inscr&&e.inscr.parJour)?evtJoursPlage(e.date,e.dateFin):[], presents:{}, payes:{}, expiresAt:fin, creePar:(window.ASMB_USER&&window.ASMB_USER.uid)||null, majLe:Date.now()
       });
     }).then(function(){ b.disabled=false; charger(); entreeEnvoyerCode(code,e); })
       .catch(function(err){ b.disabled=false; askAlert("Erreur : "+((err&&err.code)||err)); });
