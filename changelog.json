@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791910542",
+    "titre": "Inscriptions et affiche pour tous les événements",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tous les événements du club (stage, tournoi, soirée, formation, autre) ont maintenant les inscriptions en ligne (lien, QR, billets, entrée) et un bouton « 🖼️ Affiche » directement sur leur carte. Les matchs et entraînements gardent leurs convocations."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Sur un tournoi, le bouton des inscriptions individuelles s'appelle « Billetterie » (entrées payantes) ; les équipes s'inscrivent par l'outil 🏆 Tournoi."
+      }
+    ]
+  },
+  {
     "v": "1791910411",
     "titre": "Tournois : affiche",
     "points": [

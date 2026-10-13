@@ -14,7 +14,7 @@ var AF_FORMATS={
   a4:{nom:"A4 à imprimer",bw:424,bh:600,W:1240,H:1754}
 };
 var AF_INFOS=[["accroche","Accroche"],["dates","Dates"],["horaires","Horaires"],["lieu","Lieu"],["prix","Tarifs"],["places","Places restantes"],["texte","Texte libre"],["programme","Programme"],["intervenants","Intervenants"],["qr","QR code d'inscription"],["sponsors","Logos des sponsors"]];
-var AF_TAGS={stage:"Stage",tournoi:"Tournoi",soiree:"Soirée"};
+var AF_TAGS={stage:"Stage",tournoi:"Tournoi",soiree:"Soirée",formation:"Formation",autre:"Événement"};
 var AF_F={sans:"'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",anton:"Anton, Impact, 'Arial Narrow', sans-serif",serif:"Fraunces, Georgia, serif",mono:"'JetBrains Mono', ui-monospace, monospace"};
 var AF_JOURS=["DIM","LUN","MAR","MER","JEU","VEN","SAM"];
 var AF_MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];

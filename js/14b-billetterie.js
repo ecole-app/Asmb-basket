@@ -11,7 +11,8 @@
 
 var EVT_URL_BASE="https://generalmanagerapp.fr/?evt=";
 var EVT_PREFIX={stage:"STG",tournoi:"TRN",soiree:"SOI"};
-var EVT_TYPES_INSCR=["stage","tournoi","soiree"];
+// Tous les événements du club (pas les matchs ni les entraînements, qui ont leurs convocations).
+var EVT_TYPES_INSCR=["stage","tournoi","soiree","formation","autre"];
 var EVT_MODES={especes:"Espèces",cheque:"Chèque",cb:"CB sur place",helloasso:"HelloAsso"};
 var EVT_MODES_COMPTA={especes:"Espèces",cheque:"Chèque",cb:"CB",helloasso:"CB"};
 
@@ -122,7 +123,9 @@ function evtBoutonCarte(e){
   if(EVT_TYPES_INSCR.indexOf(e.type)<0) return "";
   if(typeof isStaffUser==="function"&&!isStaffUser()) return "";
   var on=e.inscr&&e.inscr.actif;
-  return "<button onclick=\"evtTableau('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?"Inscriptions":"Ouvrir les inscriptions")+"</button>";
+  // Tournoi : les équipes s'inscrivent par l'outil Tournoi (le bouton billetterie reste pour les entrées payantes).
+  return "<button onclick=\"evtTableau('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?"Inscriptions":(e.type==="tournoi"?"Billetterie":"Ouvrir les inscriptions"))+"</button>"+
+    (typeof evtAffiche==="function"?"<button onclick=\"evtAffiche('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 10%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">🖼️ Affiche</button>":"");
 }
 
 // ── Réglages des inscriptions (staff) ───────────────────────────────
