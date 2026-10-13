@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791885210",
+    "titre": "Inscription aux événements : e-mail",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Nouvelle case « E-mail (facultatif) » sur la fiche d'inscription d'un événement. Pour un parent connecté, l'e-mail de son compte est repris. Il apparaît dans la liste des inscrits."
+      }
+    ]
+  },
+  {
     "v": "1791885166",
     "titre": "iPhone : fenêtres et formulaires corrigés",
     "points": [

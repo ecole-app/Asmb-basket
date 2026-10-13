@@ -574,6 +574,11 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
     await assertFails(setDoc(doc(db, "clubs/A/evt_inscrits/STG-11115"), insc()));
     await assertFails(updateDoc(doc(db, "evt_pages/A__e1"), { nb: 1, dernier: "STG-99999" }));
   });
+  it("e-mail facultatif : accepté s'il est court", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-12397", insc({ email: "parent@test.fr" }), 1));
+    await assertFails(inscrire(db, "STG-12396", insc({ email: "x".repeat(120) + "@test.fr" }), 2));
+  });
   it("catégorie de l'enfant : texte court accepté, trop long refusé", async () => {
     const db = await as(null);
     await assertSucceeds(inscrire(db, "STG-12399", insc({ cat: "U13" }), 1));

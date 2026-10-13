@@ -413,7 +413,7 @@ function evtListe(list, items, e, page, repeindre){
     d.textContent=(x.tarifNom||"")+(evtCat(x)?" · "+evtCat(x):"")+" · "+evtTarifTxt(x.montant)+(EVT_MODES[x.mode]?" · "+EVT_MODES[x.mode]:"")+(x.clubOrigine?" · "+x.clubOrigine:"");
     if(x.jours&&x.jours.length){ var dj=document.createElement("div"); dj.style.cssText="font-size:12px;color:var(--dkg);font-weight:700;margin-top:2px"; dj.textContent="📅 "+evtJoursTxt(x.jours,(page.jours||[]).length); g.appendChild(dj); }
     var c=document.createElement("div"); c.style.cssText="font-size:11px;color:var(--mut);margin-top:2px;font-family:monospace";
-    c.textContent=x._id+(x.tel?" · "+x.tel:"");
+    c.textContent=x._id+(x.tel?" · "+x.tel:"")+(x.email?" · "+x.email:"");
     g.insertBefore(n,g.firstChild); g.insertBefore(d,n.nextSibling); g.appendChild(c);
     var pills=document.createElement("div"); pills.style.cssText="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0";
     function pill(t,bg,fg){ var p=document.createElement("span"); p.style.cssText="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:"+bg+";color:"+(fg||"#fff"); p.textContent=t; pills.appendChild(p); }
@@ -646,6 +646,7 @@ function rendreEvtPublic(el,p,pid){
       '<div id="evt-club-g"><div class="form-group"><label class="form-label" for="evt-cat">Catégorie</label><select class="form-select" id="evt-cat">'+EVT_CATS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("")+'</select><div style="font-size:11px;color:var(--mut);margin-top:4px">Calculée d\'après la date de naissance, modifiable.</div></div>'+
         '<div class="form-group"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div></div>'+
       '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
+      '<div class="form-group"><label class="form-label" for="evt-email">E-mail (facultatif)</label><input class="form-input" id="evt-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email" placeholder="prenom@email.fr"></div>'+
       '<div id="evt-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
       '<input id="evt-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
       '<button id="evt-envoyer" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">M\'inscrire</button>'+
@@ -703,6 +704,8 @@ function rendreEvtPublic(el,p,pid){
     if(!v("evt-nom")) return askAlert("Indiquez le nom.");
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v("evt-naiss"))) return askAlert("Indiquez la date de naissance.");
     if(!/^[+]?[0-9]{9,15}$/.test(tel)) return askAlert("Numéro de téléphone invalide.");
+    var mail=v("evt-email").slice(0,100);
+    if(mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return askAlert("Adresse e-mail invalide.");
     var t=tarifs[tIdx];
     if(p.parJour&&!sel.length) return askAlert("Choisissez au moins un jour.");
     var montant=montantCourant();
@@ -714,6 +717,7 @@ function rendreEvtPublic(el,p,pid){
       mode:gratuit?"gratuit":mode, statut:"inscrit", paye:false, present:false, source:"public"
     };
     if(p.parJour) data.jours=sel.slice().sort();
+    if(mail) data.email=mail;
     if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
     if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
     btn.disabled=true; btn.textContent="Inscription…";
@@ -861,6 +865,7 @@ function evtInscrireEnfant(e){
     };
     if(parJour) data.jours=sel.slice().sort();
     var catEnf=String(f.cat||k.cat||"").slice(0,12); if(catEnf) data.cat=catEnf;
+    var mailCpt=String(u.email||"").slice(0,100); if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mailCpt)&&mailCpt.indexOf("@joueur.")<0) data.email=mailCpt;
     if(!data.prenom||!data.nom) return askAlert("Nom ou prénom manquant sur la fiche de l'enfant : contactez le club.");
     btn.disabled=true;
     var pageId=evtPageId(e.id);
