@@ -9,7 +9,9 @@ var POLES_JOUEURS={
   elite:{court:"Élite",champs:[{id:"niveau",label:"Niveau",options:["Débutant","Espoir","Confirmé"]},{id:"objectif",label:"Objectif",ph:"ex. Sélection départementale",max:60}]},
   competition:{court:"5x5",champs:[{id:"equipe",label:"Équipe",type:"team"}]},
   "3x3":{court:"3x3",champs:[{id:"equipe",label:"Équipe 3x3",ph:"ex. Les Verts U15",max:40}]},
-  basketpourtous:{court:"Basket Pour Tous",champs:[{id:"groupe",label:"Groupe",ph:"ex. Mercredi 14h",max:40}]}
+  basketpourtous:{court:"Basket Pour Tous",champs:[{id:"groupe",label:"Groupe",ph:"ex. Mercredi 14h",max:40}]},
+  // Basket Santé : aucune donnée de santé sur la fiche, seulement le groupe.
+  basketsante:{court:"Basket Santé",champs:[{id:"groupe",label:"Groupe",ph:"ex. Mardi 10h",max:40}]}
 };
 var currentPoleFilter="all";
 

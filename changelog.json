@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791903596",
+    "titre": "Nouveau pôle : Basket Santé",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Basket Santé devient un pôle à part (séances adaptées, reprise d'activité, seniors, sport sur ordonnance), avec ses coachs, ses joueurs et leur groupe. Basket Pour Tous garde le loisir, le handicap et le basket adapté."
+      }
+    ]
+  },
+  {
     "v": "1791903493",
     "titre": "Pôles : coachs et joueurs",
     "points": [

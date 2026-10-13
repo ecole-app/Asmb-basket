@@ -611,7 +611,7 @@ function collectAllData(){
     players:getPlayers(),teams:getTeams(),events:getEvents(),docs:getDocs(),
     licences:getLicences(),annuaire:getAnnuaire(),
     pole_elite:getPoleData("elite"),pole_competition:getPoleData("competition"),
-    pole_3x3:getPoleData("3x3"),pole_evenement:getPoleData("evenement"),pole_basketpourtous:getPoleData("basketpourtous")
+    pole_3x3:getPoleData("3x3"),pole_evenement:getPoleData("evenement"),pole_basketpourtous:getPoleData("basketpourtous"),pole_basketsante:getPoleData("basketsante")
   };
 }
 
@@ -649,7 +649,7 @@ function restoreFromCloud(){
       localStorage.setItem("asmb_docs",JSON.stringify(data.docs||[]));
       localStorage.setItem("asmb_licences",JSON.stringify(data.licences||[]));
       localStorage.setItem("asmb_annuaire",JSON.stringify(data.annuaire||[]));
-      ["elite","competition","3x3","evenement","basketpourtous"].forEach(function(id){
+      ["elite","competition","3x3","evenement","basketpourtous","basketsante"].forEach(function(id){
         localStorage.setItem("asmb_pole_"+id,JSON.stringify(data["pole_"+id]||[]));
       });
       askAlert("Données restaurées depuis le cloud ! L'application va se recharger.").then(function(){location.reload();});

@@ -188,7 +188,7 @@ function clubSlug(){
 // retiree. Elite Academy reste propre au club d'origine : le suivi
 // individualise demande une autre structure, il n'est pas proposable en option.
 const BASE_POLES=["formation","competition","evenement"];
-const OPTION_POLES=["3x3","basketpourtous"];   // activables plus tard, club par club
+const OPTION_POLES=["3x3","basketpourtous","basketsante"];   // activables plus tard, club par club
 
 // Poles reellement affiches pour le club actif.
 function activePoles(){
@@ -305,7 +305,10 @@ const POLES=[
  items:["Création de tournois 3x3 et 5x5","Soirées et journées club","Échanges inter-clubs · Tournoi international","Journées formation et arbitrage"]},
  {id:"basketpourtous",name:"Basket Pour Tous",sub:"Un club où chacun trouve sa place",desc:"Basket santé · Loisir · Inclusif · Adapté",icon:"🤝",color:"#16A085",ready:true,
  about:"Le basket accessible à toutes et tous, sans distinction. Des séances adaptées, inclusives et bienveillantes pour partager le plaisir du jeu ensemble.",
- items:["Basket Santé · Basket Handicap","Basket Loisir · Basket Adapté","Tous âges · Tous niveaux · Débutants bienvenus","Séances adaptées et bienveillantes"]}
+ items:["Basket Handicap · Basket Adapté","Basket Loisir","Tous âges · Tous niveaux · Débutants bienvenus","Séances adaptées et bienveillantes"]},
+ {id:"basketsante",name:"Basket Santé",sub:"Bouger pour sa santé",desc:"Prévention · Reprise d'activité · Seniors",icon:"💚",color:"#0E7490",ready:true,
+ about:"Des séances de basket adaptées pour reprendre une activité physique en douceur, entretenir sa forme et prendre soin de sa santé, encadrées par des animateurs formés.",
+ items:["Séances adaptées · Intensité modérée","Reprise d'activité · Seniors · Sédentaires","Sport sur ordonnance","Animateurs formés au Basket Santé"]}
 ];
 // Chaque categorie porte son titre et ses chips : ajouter une categorie ne
 // demande plus de toucher au code d'ouverture (openCat etait une liste blanche).

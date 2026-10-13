@@ -8,12 +8,12 @@ function app(user, club) {
   c.ASMB_USER = user; c.CURRENT_CLUB = club;
   return c;
 }
-const club = { id: "x", poles: ["formation", "competition", "evenement", "3x3", "basketpourtous"], polesCoachs: { "3x3": [{ uid: "c1", nom: "Karim" }], formation: [{ uid: "c2", nom: "Lucie" }] } };
+const club = { id: "x", poles: ["formation", "competition", "evenement", "3x3", "basketpourtous", "basketsante"], polesCoachs: { "3x3": [{ uid: "c1", nom: "Karim" }], formation: [{ uid: "c2", nom: "Lucie" }] } };
 
 describe("Pôles", () => {
   it("seuls les pôles avec joueurs proposent des pastilles (pas Formation ni Événements)", () => {
     const c = app({ uid: "d", roles: ["dirigeant"] }, club);
-    assert.deepEqual(JSON.parse(JSON.stringify(c.polesJoueursActifs().map((p) => p.id))), ["competition", "3x3", "basketpourtous"]);
+    assert.deepEqual(JSON.parse(JSON.stringify(c.polesJoueursActifs().map((p) => p.id))), ["competition", "3x3", "basketpourtous", "basketsante"]);
   });
   it("le dirigeant gère tous les pôles", () => {
     const c = app({ uid: "d", roles: ["dirigeant"] }, club);

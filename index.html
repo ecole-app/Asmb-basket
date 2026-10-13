@@ -782,6 +782,18 @@
     <div id="basketpourtous-list" style="padding:8px 0 80px"></div>
   </div>
 
+  <!-- ═══ BASKET SANTÉ ═══ -->
+  <div class="scr" id="scr-pole-basketsante">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:16px;font-weight:800;color:var(--txt)">Basket Santé</div><div style="font-size:11px;color:var(--mut)" id="basketsante-count">0 groupe</div></div>
+    </div>
+    <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
+      <button onclick="showAddPoleItem('basketsante','groupe')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid #0E7490;color:#0E7490;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Groupe</button>
+      <button onclick="showAddPoleItem('basketsante','seance')" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Séance</button>
+    </div>
+    <div id="basketsante-list" style="padding:8px 0 80px"></div>
+  </div>
+
   <!-- ═══ MODAL POLE ITEM ═══ -->
   <div id="modal-pole-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
     <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">

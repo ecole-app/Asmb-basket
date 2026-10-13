@@ -136,7 +136,7 @@ function showAssiduiteChart(){
 
 function openPole(id){
   if(id==="formation"){stack.push("elite");buildElite();showScr("elite");}
-  else if(id==="elite"||id==="competition"||id==="3x3"||id==="evenement"||id==="basketpourtous"){
+  else if(id==="elite"||id==="competition"||id==="3x3"||id==="evenement"||id==="basketpourtous"||id==="basketsante"){
     openPoleScreen(id);
   }
 }

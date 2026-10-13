@@ -95,7 +95,7 @@ function buildPoleScreen(poleId){
 }
 
 function getPoleIcon(id){
-  var icons={"elite":"","competition":"","3x3":"","evenement":"","basketpourtous":""};
+  var icons={"elite":"","competition":"","3x3":"","evenement":"","basketpourtous":"","basketsante":""};
   return icons[id]||"";
 }
 
