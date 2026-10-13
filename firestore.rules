@@ -565,7 +565,7 @@ service cloud.firestore {
         }
         allow create: if clubStatus(clubId) == 'active'
           && code.matches('^(STG|TRN|SOI|EVT)-[0-9]{5}$')
-          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','mode','statut','paye','present','playerId','auteurUid','source','at'])
+          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','cat','mode','statut','paye','present','playerId','auteurUid','source','at'])
           && request.resource.data.eventId is string
           && get(evtPage(request.resource.data.eventId)).data.actif == true
           && get(evtPage(request.resource.data.eventId)).data.clubId == clubId
@@ -576,6 +576,7 @@ service cloud.firestore {
           && request.resource.data.naissance is string && request.resource.data.naissance.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
           && request.resource.data.tel is string && request.resource.data.tel.matches('^[+]?[0-9]{9,15}$')
           && request.resource.data.get('clubOrigine', '') is string && request.resource.data.get('clubOrigine', '').size() <= 60
+          && request.resource.data.get('cat', '') is string && request.resource.data.get('cat', '').size() <= 12
           && request.resource.data.tarifIdx is int
           && evtMontantOk(get(evtPage(request.resource.data.eventId)).data, request.resource.data)
           && request.resource.data.mode in ['especes','cheque','cb','helloasso','gratuit']

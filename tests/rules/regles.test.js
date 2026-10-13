@@ -559,6 +559,11 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
     await assertFails(setDoc(doc(db, "clubs/A/evt_inscrits/STG-11115"), insc()));
     await assertFails(updateDoc(doc(db, "evt_pages/A__e1"), { nb: 1, dernier: "STG-99999" }));
   });
+  it("catégorie de l'enfant : texte court accepté, trop long refusé", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-12399", insc({ cat: "U13" }), 1));
+    await assertFails(inscrire(db, "STG-12398", insc({ cat: "U13-un-texte-beaucoup-trop-long" }), 2));
+  });
   it("tarif gratuit : mode « gratuit » seulement si le prix est 0", async () => {
     await updateDoc(doc(await as("dirA"), "evt_pages/A__e1"), { tarifs: [{ nom: "Gratuit", prix: 0, pour: "tous" }, { nom: "Extérieur", prix: 55, pour: "ext" }] });
     const db = await as(null);

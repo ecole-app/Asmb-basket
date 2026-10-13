@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791880476",
+    "titre": "Événements : catégorie de l'enfant",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Inscription d'un extérieur : choix de la catégorie (calculée d'après la date de naissance, modifiable). Pour un licencié du club, la catégorie vient de sa fiche. Elle apparaît dans la liste des inscrits et sur la feuille du jour."
+      }
+    ]
+  },
+  {
     "v": "1791880312",
     "titre": "Invitations : compte déjà existant et retrait d'accès",
     "points": [

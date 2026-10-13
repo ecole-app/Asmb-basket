@@ -100,6 +100,16 @@ function evtOuvertes(e){
   if(i.limite && i.limite<auj) return false;
   return (e.dateFin||e.date||auj)>=auj;
 }
+// Catégorie d'un inscrit : saisie (extérieurs) ou connue par sa fiche joueur (licenciés du club).
+var EVT_CATS=["U7","U9","U11","U13","U15","U18","U21","Senior"];
+function evtCat(x){
+  if(x&&x.cat) return String(x.cat);
+  if(x&&x.playerId&&typeof getPlayers==="function"){
+    var p=getPlayers().find(function(q){ return String(q.id)===String(x.playerId); });
+    if(p&&p.cat) return String(p.cat);
+  }
+  return "";
+}
 function evtNorm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z]/g,""); }
 function evtPeutCompta(){
   var dir=((window.ASMB_USER&&window.ASMB_USER.roles)||[]).indexOf("dirigeant")>=0;
@@ -343,7 +353,7 @@ function evtFeuilleJour(e, jour, items){
     doc.setFont("helvetica","normal"); doc.setFontSize(10);
     doc.text(club+" · "+evtJourTxt(jour,true)+" · "+items.length+" attendu"+(items.length>1?"s":""),14,18);
     doc.setTextColor(30,30,30); doc.setFont("helvetica","bold"); doc.setFontSize(9);
-    doc.text("Présent",14,34); doc.text("Nom",32,34); doc.text("Âge",92,34); doc.text("Téléphone",108,34); doc.text("Tarif",138,34); doc.text("Paiement",172,34);
+    doc.text("Présent",14,34); doc.text("Nom",32,34); doc.text("Cat.",84,34); doc.text("Âge",98,34); doc.text("Téléphone",110,34); doc.text("Tarif",140,34); doc.text("Paiement",174,34);
     doc.setDrawColor(200); doc.line(14,36,196,36); doc.setFont("helvetica","normal");
   }
   tete();
@@ -354,11 +364,12 @@ function evtFeuilleJour(e, jour, items){
     doc.setDrawColor(120); doc.rect(16,y-3.6,4.5,4.5);
     var pre=(x.present||(x.presentJ&&x.presentJ[jour]));
     if(x.presentJ&&x.presentJ[jour]){ doc.setFont("helvetica","bold"); doc.text("x",17.2,y); doc.setFont("helvetica","normal"); }
-    doc.text(cut((x.nom||"").toUpperCase()+" "+(x.prenom||""),58),32,y);
-    doc.text(typeof essaiAge==="function"?String(essaiAge(x.naissance)||"").replace("ans","").trim():"",92,y);
-    doc.text(String(x.tel||""),108,y);
-    doc.text(cut(x.tarifNom||"",32),138,y);
-    doc.text(Number(x.montant)>0?(x.paye?"Payé":"À payer"):"Gratuit",172,y);
+    doc.text(cut((x.nom||"").toUpperCase()+" "+(x.prenom||""),50),32,y);
+    doc.text(evtCat(x),84,y);
+    doc.text(typeof essaiAge==="function"?String(essaiAge(x.naissance)||"").replace("ans","").trim():"",98,y);
+    doc.text(String(x.tel||""),110,y);
+    doc.text(cut(x.tarifNom||"",32),140,y);
+    doc.text(Number(x.montant)>0?(x.paye?"Payé":"À payer"):"Gratuit",174,y);
     y+=8;
   });
   doc.save("feuille-"+evtNorm(e.titre||"evenement").slice(0,20)+"-"+jour+".pdf");
@@ -395,7 +406,7 @@ function evtListe(list, items, e, page, repeindre){
     var n=document.createElement("div"); n.style.cssText="font-size:14px;font-weight:800;color:var(--txt)";
     n.textContent=(x.prenom||"")+" "+(x.nom||"")+(typeof essaiAge==="function"&&essaiAge(x.naissance)?" · "+essaiAge(x.naissance):"");
     var d=document.createElement("div"); d.style.cssText="font-size:12px;color:var(--txt2);margin-top:2px";
-    d.textContent=(x.tarifNom||"")+" · "+evtTarifTxt(x.montant)+(EVT_MODES[x.mode]?" · "+EVT_MODES[x.mode]:"")+(x.clubOrigine?" · "+x.clubOrigine:"");
+    d.textContent=(x.tarifNom||"")+(evtCat(x)?" · "+evtCat(x):"")+" · "+evtTarifTxt(x.montant)+(EVT_MODES[x.mode]?" · "+EVT_MODES[x.mode]:"")+(x.clubOrigine?" · "+x.clubOrigine:"");
     if(x.jours&&x.jours.length){ var dj=document.createElement("div"); dj.style.cssText="font-size:12px;color:var(--dkg);font-weight:700;margin-top:2px"; dj.textContent="📅 "+evtJoursTxt(x.jours,(page.jours||[]).length); g.appendChild(dj); }
     var c=document.createElement("div"); c.style.cssText="font-size:11px;color:var(--mut);margin-top:2px;font-family:monospace";
     c.textContent=x._id+(x.tel?" · "+x.tel:"");
@@ -623,7 +634,8 @@ function rendreEvtPublic(el,p,pid){
       '<div class="form-group"><label class="form-label" for="evt-prenom">Prénom du participant</label><input class="form-input" id="evt-prenom" maxlength="40" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-nom">Nom</label><input class="form-input" id="evt-nom" maxlength="60" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-naiss">Date de naissance</label><input class="form-input" id="evt-naiss" type="date"></div>'+
-      '<div class="form-group" id="evt-club-g"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div>'+
+      '<div id="evt-club-g"><div class="form-group"><label class="form-label" for="evt-cat">Catégorie</label><select class="form-select" id="evt-cat">'+EVT_CATS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("")+'</select><div style="font-size:11px;color:var(--mut);margin-top:4px">Calculée d\'après la date de naissance, modifiable.</div></div>'+
+        '<div class="form-group"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div></div>'+
       '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
       '<div id="evt-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
       '<input id="evt-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
@@ -662,6 +674,15 @@ function rendreEvtPublic(el,p,pid){
     });
   }
   peindre();
+  (function(){
+    var na=document.getElementById("evt-naiss"), ca=document.getElementById("evt-cat"), manuel=false;
+    ca.addEventListener("change",function(){ manuel=true; });
+    na.addEventListener("input",function(){
+      if(manuel||typeof categorieFromNaissance!=="function") return;
+      var c=categorieFromNaissance(na.value); if(c==="U17") c="U18";
+      if(c&&EVT_CATS.indexOf(c)>=0) ca.value=c;
+    });
+  })();
   if(p.parJour) evtSelecteurJours(document.getElementById("evt-jours"),p,sel,peindre);
   document.getElementById("evt-envoyer").addEventListener("click",function(){
     var btn=this;
@@ -684,6 +705,8 @@ function rendreEvtPublic(el,p,pid){
       mode:gratuit?"gratuit":mode, statut:"inscrit", paye:false, present:false, source:"public"
     };
     if(p.parJour) data.jours=sel.slice().sort();
+    if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
+    if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
     btn.disabled=true; btn.textContent="Inscription…";
     evtInscrire(pid,data).then(function(r){
       var billet=Object.assign({code:r.code},data);
@@ -829,6 +852,7 @@ function evtInscrireEnfant(e){
       statut:"inscrit", paye:false, present:false, playerId:pid, auteurUid:(window.ASMB_USER&&window.ASMB_USER.uid)||(window.fbAuth&&window.fbAuth.currentUser&&window.fbAuth.currentUser.uid)||"", source:"app"
     };
     if(parJour) data.jours=sel.slice().sort();
+    var catEnf=String(f.cat||k.cat||"").slice(0,12); if(catEnf) data.cat=catEnf;
     if(!data.prenom||!data.nom) return askAlert("Nom ou prénom manquant sur la fiche de l'enfant : contactez le club.");
     btn.disabled=true;
     var pageId=evtPageId(e.id);
