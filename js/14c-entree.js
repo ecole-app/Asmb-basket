@@ -104,8 +104,7 @@ function evtEntree(eid){
 // ── Source « bénévole » : le doc evt_entrees/{code} ────────────────
 function showEntreeBenevole(code){
   code=String(code||"").toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,9);
-  var nav=document.getElementById("bnav-main"); if(nav) nav.style.display="none";
-  ["hdr-settings-btn","hdr-profile-btn"].forEach(function(id){ var b=document.getElementById(id); if(b) b.style.display="none"; });
+  if(typeof gmModePublic==="function") gmModePublic(true);
   if(!/^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code)){ entreeSaisieCode(); return; }
   var n=0;
   (function attendre(){

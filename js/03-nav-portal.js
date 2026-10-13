@@ -27,7 +27,18 @@ function eventTypeLabel(type){ return EVENT_TYPE_LABELS[type]||(type?type.charAt
 
 var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role-select","parent-home","parent-equipe","parent-events","parent-stats","coach-equipe","elite","tutoriel","joueur","plateforme","club-suspendu"];
 
+// Écrans publics, ouverts par un lien sans compte (inscription à un événement,
+// billet, entrée bénévole, séance d'essai) : AUCUN élément de l'appli du club
+// n'y apparaît (ni barre du bas, ni en-tête, ni bouton retour). Sinon un visiteur
+// se retrouve dans l'espace du club en touchant « Accueil ».
+var SCR_PUBLICS=["evt","billet","entree","essai"];
+function gmModePublic(on){
+  document.documentElement.classList.toggle("gm-public",!!on);
+  var h=document.querySelector(".hdr"); if(h) h.style.display=on?"none":"";
+  var n=document.getElementById("bnav-main"); if(n) n.style.display=on?"none":"";
+}
 function showScr(id){
+ if(SCR_PUBLICS.indexOf(id)>=0) gmModePublic(true);
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
  var el=document.getElementById("scr-"+id);
  if(el)el.classList.add("on");
@@ -46,9 +57,10 @@ function showScr(id){
  }
  var nb=navKey?document.getElementById("bni-"+navKey):null;
  if(nb)nb.classList.add("on");
- document.getElementById("hbk").classList.toggle("show", stack.length>1 && !ROOTS.includes(id));
+ document.getElementById("hbk").classList.toggle("show", stack.length>1 && !ROOTS.includes(id) && SCR_PUBLICS.indexOf(id)<0);
  var navEl=document.getElementById("bnav-main");
- if(navEl)navEl.style.display=(id==="role-select"||id==="auth"||id==="plateforme")?"none":"flex";
+ if(navEl)navEl.style.display=(id==="role-select"||id==="auth"||id==="plateforme"||SCR_PUBLICS.indexOf(id)>=0)?"none":"flex";
+ if(SCR_PUBLICS.indexOf(id)>=0){ var hd=document.querySelector(".hdr"); if(hd) hd.style.display="none"; }
  document.querySelector(".main").scrollTop=0;
  refreshHeaderProfileBtn();
  updateHdr(id);

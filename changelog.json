@@ -1,5 +1,27 @@
 [
   {
+    "v": "1791880993",
+    "titre": "Lien d'inscription : page publique isolée",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Le lien d'un événement ouvre uniquement la page d'inscription : plus de barre de navigation ni d'en-tête du club autour. Pareil pour le billet, l'entrée bénévole et la page « Venir essayer »."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Après l'inscription, la page affiche le billet seul : QR code, code à présenter le jour J et montant à régler."
+      }
+    ]
+  },
+  {
     "v": "1791880476",
     "titre": "Événements : catégorie de l'enfant",
     "points": [

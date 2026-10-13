@@ -330,3 +330,9 @@ html.gm-desk .main>#scr-portal.on{max-width:1360px}
 .dk-rac{display:flex;flex-wrap:wrap;gap:8px}
 .dk-rac button{padding:10px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;font-weight:600;cursor:pointer}
 .dk-rac button:hover,.dk-cta:hover{border-color:var(--dkg)}
+
+/* ── Pages publiques ouvertes par un lien (inscription à un événement, billet,
+   entrée bénévole, séance d'essai) : aucune trace de l'appli du club autour. ── */
+html.gm-public .hdr,html.gm-public .bnav,html.gm-public #bnav-main{display:none!important}
+html.gm-public .main{padding-right:0!important;max-width:560px;margin:0 auto;width:100%}
+html.gm-public .main>#desk-home{display:none!important}

@@ -580,8 +580,7 @@ function evtDessinerQr(root, pid){
 // ── Page publique (?evt=clubId__eventId), sans compte ───────────────
 function showEvtPublic(pid){
   pid=String(pid||"").replace(/[^a-z0-9_-]/gi,"").slice(0,140);
-  var nav=document.getElementById("bnav-main"); if(nav) nav.style.display="none";
-  ["hdr-settings-btn","hdr-profile-btn"].forEach(function(id){ var b=document.getElementById(id); if(b) b.style.display="none"; });
+  if(typeof gmModePublic==="function") gmModePublic(true);
   stack=["evt"]; showScr("evt");
   var el=document.getElementById("evt-public-content"); if(!el) return;
   el.innerHTML='<div style="padding:40px 20px;text-align:center;color:var(--mut)">Chargement…</div>';
@@ -731,10 +730,9 @@ function evtConfirmation(el,p,pid,b){
   el.innerHTML=evtEntete(p)+
     '<div style="padding:18px 16px 40px">'+
       '<div style="text-align:center;font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px">✅ Inscription enregistrée</div>'+
-      '<div style="text-align:center;font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:14px">Faites une capture d\'écran de votre billet : il sera scanné à l\'entrée.</div>'+
+      '<div style="text-align:center;font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:14px">Gardez ce code : il sera scanné à l\'entrée. Faites une capture d\'écran.</div>'+
       evtBilletHtml(b,p)+pay+
       '<button id="evt-autre" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:14px;font-weight:700;border:none;cursor:pointer">Inscrire une autre personne</button>'+
-      '<div style="margin-top:24px">'+clubLiensHtml()+'</div>'+
     '</div>';
   evtDessinerQr(el,pid);
   document.getElementById("evt-autre").addEventListener("click",function(){ rendreEvtPublic(el,p,pid); window.scrollTo(0,0); });
