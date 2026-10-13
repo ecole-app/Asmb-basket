@@ -550,3 +550,41 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
     await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/evt_inscrits/STG-50001"), { paye: true }));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Entrée d'un événement : code bénévole", () => {
+  const fin = (j) => Timestamp.fromMillis(Date.now() + j * 86400000);
+  const entree = (o = {}) => ({ clubId: "A", eventId: "e1", titre: "Camp", liste: [{ c: "STG-12345", p: "Léo", n: "Kaci" }],
+    presents: {}, payes: {}, expiresAt: fin(1), ...o });
+  beforeEach(async () => { await setDoc(doc(await as("dirA"), "evt_entrees/ABCD-EFGH"), entree()); });
+
+  it("seul le staff du club crée un code ; format imposé", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "evt_entrees/WXYZ-2345"), entree()));
+    await assertFails(setDoc(doc(await as("dirB"), "evt_entrees/WXYZ-2346"), entree()));
+    await assertFails(setDoc(doc(await as("parentA"), "evt_entrees/WXYZ-2347"), entree()));
+    await assertFails(setDoc(doc(await as("dirA"), "evt_entrees/court"), entree()));
+  });
+  it("le bénévole sans compte lit la liste par son code, sans pouvoir lister", async () => {
+    const db = await as(null);
+    await assertSucceeds(getDoc(doc(db, "evt_entrees/ABCD-EFGH")));
+    await assertFails(getDocs(collection(db, "evt_entrees")));
+  });
+  it("le bénévole coche présents et paiements, rien d'autre", async () => {
+    const db = await as(null);
+    await assertSucceeds(updateDoc(doc(db, "evt_entrees/ABCD-EFGH"), { "presents.STG-12345": Date.now() }));
+    await assertSucceeds(updateDoc(doc(db, "evt_entrees/ABCD-EFGH"), { "payes.STG-12345": Date.now() }));
+    await assertFails(updateDoc(doc(db, "evt_entrees/ABCD-EFGH"), { liste: [] }));
+    await assertFails(updateDoc(doc(db, "evt_entrees/ABCD-EFGH"), { expiresAt: fin(30) }));
+    await assertFails(deleteDoc(doc(db, "evt_entrees/ABCD-EFGH")));
+  });
+  it("code expiré : plus aucune écriture du bénévole", async () => {
+    await updateDoc(doc(await as("dirA"), "evt_entrees/ABCD-EFGH"), { expiresAt: fin(-1) });
+    await assertFails(updateDoc(doc(await as(null), "evt_entrees/ABCD-EFGH"), { "presents.STG-12345": Date.now() }));
+  });
+  it("le staff liste, actualise et révoque les codes de son club", async () => {
+    await assertSucceeds(getDocs(query(collection(await as("dirA"), "evt_entrees"), where("clubId", "==", "A"))));
+    await assertFails(getDocs(query(collection(await as("dirB"), "evt_entrees"), where("clubId", "==", "A"))));
+    await assertSucceeds(updateDoc(doc(await as("coachA"), "evt_entrees/ABCD-EFGH"), { liste: [] }));
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "evt_entrees/ABCD-EFGH")));
+  });
+});

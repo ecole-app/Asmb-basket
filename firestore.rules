@@ -300,6 +300,25 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Code bénévole pour l'entrée d'un événement (sans compte) ─────
+    // Id = code secret (XXXX-XXXX) transmis par le staff, valable jusqu'au
+    // lendemain de l'événement. Le doc contient la liste figée des billets
+    // (prénom, nom, tarif, payé : pas de téléphone). Le bénévole ne peut
+    // que cocher les présents et les paiements reçus sur place (maps
+    // presents / payes) ; le club les reporte ensuite sur les billets.
+    match /evt_entrees/{code} {
+      allow get: if code.matches('^[A-Z2-9]{4}-[A-Z2-9]{4}$');
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+      allow create: if staff(request.resource.data.clubId) && code.matches('^[A-Z2-9]{4}-[A-Z2-9]{4}$')
+        && request.resource.data.expiresAt is timestamp;
+      allow update: if (staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
+        || (resource.data.expiresAt > request.time
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['presents','payes'])
+            && request.resource.data.presents is map && request.resource.data.payes is map
+            && request.resource.data.presents.size() <= 3000 && request.resource.data.payes.size() <= 3000);
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Page publique « Venir essayer » d'un club (id = clubId) ─────
     // Lisible par tous via son lien (pas de listing) ; seul le dirigeant la publie.
     // Contient uniquement ce que le club choisit d'afficher (nom, logo, couleurs,

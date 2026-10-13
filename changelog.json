@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791875682",
+    "titre": "Événements : l'entrée, comme un pass",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Bouton « Entrée » dans les inscriptions : la liste à cocher, une recherche, et en bas « Scanner un billet ». Vert = entrée validée, orange = déjà entré, rouge = billet inconnu. Les paiements sur place s'encaissent au même endroit."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "« Code bénévole » : un bénévole sans compte tient l'entrée avec un lien et un code envoyés par WhatsApp ou SMS. Il voit la liste (sans les numéros) et scanne les billets. Ses entrées et paiements sont reportés automatiquement."
+      }
+    ]
+  },
+  {
     "v": "1791875103",
     "titre": "Événements : tarif gratuit",
     "points": [

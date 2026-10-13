@@ -164,6 +164,8 @@ function maybeShowDailyThemeAnimation(){
 
 function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.has("entree") && typeof showEntreeBenevole==="function"){ showEntreeBenevole(urlParams.get("entree")); return; }
+  if(urlParams.has("billet") && typeof showBilletPublic==="function"){ showBilletPublic(urlParams.get("billet"), urlParams.get("evt")); return; }
   if(urlParams.has("evt") && typeof showEvtPublic==="function"){ showEvtPublic(urlParams.get("evt")); return; }
   if(urlParams.has("essai") && typeof showEssaiPublic==="function"){ showEssaiPublic(urlParams.get("essai")); return; }
   if(urlParams.has("inscription")){

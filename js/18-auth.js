@@ -440,6 +440,8 @@ function initAuthGate(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
   if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
+  if(urlParams.has("entree")){ showEntreeBenevole(urlParams.get("entree")); return; } // bénévole à l'entrée d'un événement : code, pas d'auth
+  if(urlParams.has("billet")){ showBilletPublic(urlParams.get("billet"), urlParams.get("evt")); return; }
   if(urlParams.has("evt")){ showEvtPublic(urlParams.get("evt")); return; } // inscription à un événement : page publique, pas d'auth
   if(urlParams.has("essai")){ showEssaiPublic(urlParams.get("essai")); return; } // séance d'essai : page publique, pas d'auth
   if(!window.fbAuthReady || !window.fbAuth){

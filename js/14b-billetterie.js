@@ -188,7 +188,9 @@ function evtTableau(eid){
   var s=gmSheet((e.titre||eventTypeLabel(e.type)));
   var head=document.createElement("div"); s.body.appendChild(head);
   var row=gmRow(s.body);
-  row.appendChild(gmBtn("Lien et QR code","primary",function(){ evtPartager(e); }));
+  row.appendChild(gmBtn("Entrée","primary",function(){ s.modal.remove(); evtEntree(eid); }));
+  row.appendChild(gmBtn("Lien et QR code","soft",function(){ evtPartager(e); }));
+  row.appendChild(gmBtn("Code bénévole","soft",function(){ evtCodesBenevoles(eid); }));
   row.appendChild(gmBtn("Réglages","soft",function(){ s.modal.remove(); evtConfigurer(eid); }));
   var list=document.createElement("div"); list.style.marginTop="12px";
   list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Chargement…</div>';
@@ -202,6 +204,7 @@ function evtTableau(eid){
     var items=[]; r[1].forEach(function(d){ var v=d.data(); v._id=d.id; items.push(v); });
     items.sort(function(a,b){ return ((a.at&&a.at.toMillis)?a.at.toMillis():0)-((b.at&&b.at.toMillis)?b.at.toMillis():0); });
     evtRapprocher(items);
+    if(typeof entreeReporter==="function") entreeReporter(eid, items.filter(function(x){return x.statut!=="annule";})).then(function(){ peindre(); });
     function peindre(){
       var actifs=items.filter(function(x){return x.statut!=="annule";});
       var encaisse=0, attendu=0;

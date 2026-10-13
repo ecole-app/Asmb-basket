@@ -708,6 +708,7 @@ async function resetAllData(){
     if(typeof purgeGlobalePourClub==="function" && window.CURRENT_CLUB_ID){
       try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"inscription_codes"); }
       catch(e){ console.log("reset inscription_codes:", e); }
+      try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"evt_entrees"); }catch(e){}
       try{ await purgeGlobalePourClub(window.CURRENT_CLUB_ID,"evt_pages"); }
       catch(e){ console.log("reset evt_pages:", e); }
     }
