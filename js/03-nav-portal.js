@@ -31,7 +31,7 @@ var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role
 // billet, entrée bénévole, séance d'essai) : AUCUN élément de l'appli du club
 // n'y apparaît (ni barre du bas, ni en-tête, ni bouton retour). Sinon un visiteur
 // se retrouve dans l'espace du club en touchant « Accueil ».
-var SCR_PUBLICS=["evt","billet","entree","essai"];
+var SCR_PUBLICS=["evt","billet","entree","essai","trn"];
 function gmModePublic(on){
   document.documentElement.classList.toggle("gm-public",!!on);
   var h=document.querySelector(".hdr"); if(h) h.style.display=on?"none":"";

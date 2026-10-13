@@ -675,6 +675,23 @@ describe("Événements : jours au choix (prix par jour, forfait)", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Planning public d'un tournoi", () => {
+  const page = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", titre: "Tournoi de Noël", equipes: [{ id: "q1", nom: "ASMB 1", cat: "U13 M" }], matchs: [] }, o);
+  it("le staff du club publie et met à jour, tout le monde lit", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "trn_pages/A__t1"), page()));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "trn_pages/A__t1"), { titre: "Tournoi de Noël U13" }));
+    await assertSucceeds(getDoc(doc(await as(null), "trn_pages/A__t1")));
+  });
+  it("ni un autre club, ni un parent, ni un visiteur n'écrivent ; l'id suit le club", async () => {
+    await setDoc(doc(await as("dirA"), "trn_pages/A__t1"), page());
+    await assertFails(setDoc(doc(await as("dirB"), "trn_pages/A__t2"), page({ eventId: "t2" })));
+    await assertFails(setDoc(doc(await as("parentA"), "trn_pages/A__t2"), page({ eventId: "t2" })));
+    await assertFails(updateDoc(doc(await as(null), "trn_pages/A__t1"), { titre: "X" }));
+    await assertFails(setDoc(doc(await as("dirA"), "trn_pages/B__t3"), page({ eventId: "t3" })));
+    await assertFails(updateDoc(doc(await as("dirA"), "trn_pages/A__t1"), { clubId: "B" }));
+  });
+});
+
 describe("Entrée d'un événement : code bénévole", () => {
   const fin = (j) => Timestamp.fromMillis(Date.now() + j * 86400000);
   const entree = (o = {}) => ({ clubId: "A", eventId: "e1", titre: "Camp", liste: [{ c: "STG-12345", p: "Léo", n: "Kaci" }],

@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791898793",
+    "titre": "Tournois : poules, phases finales et planning automatique",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Sur un événement de type Tournoi, bouton « 🏆 Tournoi » : ajoutez les équipes (ou vos équipes du club en un clic), réglez la journée (horaires, pause de midi, terrains, battement) et le format de chaque catégorie : poules puis finale, demi-finales, matchs de classement ou rien."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "« Générer le planning » donne à chaque match un terrain et un horaire, sans qu'une équipe enchaîne deux matchs, et prévient si la journée est trop courte. Planning en PDF (grille horaires × terrains) et page publique avec lien et QR code pour les équipes et les familles."
+      }
+    ]
+  },
+  {
     "v": "1791894879",
     "titre": "Sur ordinateur : tableaux pour la compta, les licences et les joueurs",
     "points": [

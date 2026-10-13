@@ -346,6 +346,19 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Planning public d'un tournoi (?trn=clubId__eventId) ─────────
+    // Équipes, poules et horaires, sans donnée personnelle : lisible par tous,
+    // écrit par le staff du club seulement.
+    match /trn_pages/{pid} {
+      allow get: if true;
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+      allow create: if staff(request.resource.data.clubId)
+        && pid == request.resource.data.clubId + '__' + request.resource.data.eventId;
+      allow update: if staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId
+        && request.resource.data.eventId == resource.data.eventId;
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Code bénévole pour l'entrée d'un événement (sans compte) ─────
     // Id = code secret (XXXX-XXXX) transmis par le staff, valable jusqu'au
     // lendemain de l'événement. Le doc contient la liste figée des billets
