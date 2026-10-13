@@ -546,7 +546,7 @@ function gmActionRetour(){
   if(acc&&!acc.classList.contains("on")&&["auth","role-select","plateforme","club-suspendu"].indexOf(gmEcranCourant())<0){ acc.click(); return true; }
   return false;
 }
-window.addEventListener("popstate",function(){
+if(window.addEventListener) window.addEventListener("popstate",function(){
   if(gmActionRetour()){ gmArmerRetour(); return; }
   if(document.documentElement.classList.contains("gm-public")) return;
   var now=Date.now();
