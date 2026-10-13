@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791884288",
+    "titre": "Accès coach : passer la main avant de quitter son rôle de dirigeant",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Un dirigeant peut quitter son rôle seulement si un autre dirigeant du club est déjà en place. Sinon, l'appli demande d'en nommer un d'abord (contrôlé aussi côté serveur)."
+      }
+    ]
+  },
+  {
     "v": "1791884091",
     "titre": "Billet annulé et rôle de dirigeant",
     "points": [

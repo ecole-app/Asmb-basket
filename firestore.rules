@@ -161,6 +161,13 @@ service cloud.firestore {
         && request.resource.data.linkedPlayerIds.toSet().difference(avant.get('linkedPlayerIds', []).toSet()).difference(inviteIds(inv).toSet()).size() == 0;
     }
 
+    // Un autre compte dirigeant du même club (pour qu'un dirigeant puisse quitter son rôle).
+    function autreDirigeant(autre, clubId) {
+      return autre is string && autre.size() > 0 && autre != request.auth.uid
+        && get(/databases/$(database)/documents/users/$(autre)).data.get('clubId', null) == clubId
+        && get(/databases/$(database)/documents/users/$(autre)).data.get('roles', []).hasAny(['dirigeant']);
+    }
+
     // ── Comptes utilisateurs ────────────────────────────────────────
     match /users/{uid} {
       // Le staff (dirigeant, coach) voit les comptes de son club : il en a besoin
@@ -199,7 +206,10 @@ service cloud.firestore {
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
       allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone']))
-        || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
+        // Un dirigeant ne quitte SON rôle que si un autre dirigeant du club est déjà en place (remplacePar).
+        || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null)
+            && (request.auth.uid != uid || request.resource.data.get('roles', []).hasAll(['dirigeant'])
+                || autreDirigeant(request.resource.data.get('remplacePar', ''), resource.data.get('clubId', null))))
         // Le super admin récupère toujours son rôle de dirigeant sur son propre compte (même club).
         || (superAdmin() && request.auth.uid == uid
             && request.resource.data.get('roles', []).hasAll(['dirigeant'])

@@ -907,15 +907,27 @@ function renderAccesList(list,users,phoneToName){
       save.textContent="…";
       if(u._uid===BOOTSTRAP_DIRIGEANT_UID && state.roles.indexOf("dirigeant")<0) state.roles.push("dirigeant");
       var seRetire=window.ASMB_USER && window.ASMB_USER.uid===u._uid && (u.roles||[]).indexOf("dirigeant")>=0 && state.roles.indexOf("dirigeant")<0;
-      if(seRetire && !window.confirm("Vous retirez votre propre rôle de dirigeant : vous n'aurez plus accès à la gestion du club. Continuer ?")){ save.textContent="Enregistrer"; return; }
-      window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions}).then(function(){
+      // Un dirigeant ne quitte son rôle que si un autre dirigeant est déjà en place
+      // (vérifié aussi par les règles, via remplacePar).
+      var avant=seRetire
+        ? window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(sn){
+            var autre=null; sn.forEach(function(d){ var v=d.data(); if(!autre&&d.id!==u._uid&&(v.roles||[]).indexOf("dirigeant")>=0) autre=d.id; });
+            if(!autre){ askAlert("Nommez d'abord un autre dirigeant (cochez « Dirigeant » sur son compte et enregistrez). Vous pourrez ensuite quitter votre rôle."); throw "annule"; }
+            return askConfirm("Vous quittez votre rôle de dirigeant : vous n'aurez plus accès à la gestion du club. Continuer ?",{danger:true,confirmText:"Quitter mon rôle"}).then(function(ok){ if(!ok) throw "annule"; return autre; });
+          })
+        : Promise.resolve(null);
+      avant.then(function(autre){
+        var maj={roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions};
+        if(autre) maj.remplacePar=autre;
+        return window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),maj);
+      }).then(function(){
         return syncCoachChannels(u,state.teams);
       }).then(function(){
         save.textContent="\u2713 Enregistré";
         sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
         u.permissions=Object.assign({},state.permissions);
         setTimeout(function(){save.textContent="Enregistrer";},1500);
-      }).catch(function(err){save.textContent="Erreur";askAlert((err&&err.code)||err);});
+      }).catch(function(err){ if(err==="annule"){ save.textContent="Enregistrer"; state.roles.indexOf("dirigeant")<0&&state.roles.push("dirigeant"); return; } save.textContent="Erreur";askAlert((err&&err.code)||err);});
     });
     card.appendChild(save);
     // Retirer l'accès : supprime la fiche d'accès du club. Le e-mail reste connu de
