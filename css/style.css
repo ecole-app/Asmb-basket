@@ -336,3 +336,22 @@ html.gm-desk .main>#scr-portal.on{max-width:1360px}
 html.gm-public .hdr,html.gm-public .bnav,html.gm-public #bnav-main{display:none!important}
 html.gm-public .main{padding-right:0!important;max-width:560px;margin:0 auto;width:100%}
 html.gm-public .main>#desk-home{display:none!important}
+
+/* ── iPhone (Safari) ──
+   1) Les panneaux qui montent du bas utilisent vh : sur Safari, vh compte aussi la zone
+      cachée sous la barre d'adresse, donc le bas du panneau (et son bouton « Enregistrer »)
+      passe dessous et devient inatteignable. dvh = la hauteur réellement visible.
+   2) Safari zoome sur un champ dont le texte fait moins de 16 px, ce qui décale les
+      fenêtres fixes : on passe les champs à 16 px sur iPhone/iPad uniquement. */
+[style*="max-height:75vh"]{max-height:75dvh!important}
+[style*="max-height:80vh"]{max-height:80dvh!important}
+[style*="max-height:82vh"]{max-height:82dvh!important}
+[style*="max-height:85vh"]{max-height:85dvh!important}
+[style*="max-height:88vh"]{max-height:88dvh!important}
+[style*="max-height:90vh"]{max-height:90dvh!important}
+[style*="border-radius:20px 20px 0 0"][style*="overflow-y:auto"],
+[style*="border-radius:var(--r) var(--r) 0 0"][style*="overflow-y:auto"]{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important}
+#ev-modal-btn{position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 16px var(--sf)}
+@supports (-webkit-touch-callout:none){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
+}

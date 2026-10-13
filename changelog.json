@@ -1,5 +1,15 @@
 [
   {
+    "v": "1791885166",
+    "titre": "iPhone : fenêtres et formulaires corrigés",
+    "points": [
+      {
+        "roles": [],
+        "texte": "Sur iPhone, le bas des fenêtres (et le bouton « Enregistrer ») ne passe plus sous la barre de Safari. Dans la fiche d'un événement, le bouton reste toujours visible en bas. Les champs ne font plus zoomer l'écran."
+      }
+    ]
+  },
+  {
     "v": "1791884951",
     "titre": "Mise à jour : fini le bandeau en boucle",
     "points": [
