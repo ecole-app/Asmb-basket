@@ -31,3 +31,12 @@ describe("Pôles", () => {
     assert.equal(c.poleInfosTxt("elite", { niveau: "Espoir", objectif: "Sélection", depuis: "2026-09-01" }), "Espoir · Sélection");
   });
 });
+
+describe("Élite Academy", () => {
+  it("réservée au club d'origine, même si un autre club l'avait dans sa liste", () => {
+    const autre = app({ uid: "d", roles: ["dirigeant"] }, { id: "x", poles: ["formation", "elite", "competition"] });
+    assert.equal(autre.activePoles().some((p) => p.id === "elite"), false);
+    const asmb = app({ uid: "d", roles: ["dirigeant"] }, { id: "asmb" });
+    assert.equal(asmb.activePoles().some((p) => p.id === "elite"), true);
+  });
+});

@@ -199,7 +199,9 @@ function activePoles(){
     var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
     ids = (c && c.id===boot) ? POLES.map(function(p){ return p.id; }) : BASE_POLES;
   }
-  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
+  // Élite Academy : réservée au club d'origine, même si la liste d'un autre club la contenait.
+  var estOrigine=!!(c && c.id===((typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb"));
+  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0 && (p.id!=="elite"||estOrigine); });
 }
 
 function isPoleActive(poleId){
