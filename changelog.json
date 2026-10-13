@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791875103",
+    "titre": "Événements : tarif gratuit",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Réglages des inscriptions : bouton « Gratuit » sur chaque tarif. Si tout est gratuit, plus de mode de paiement à choisir, ni pour vous ni pour les inscrits."
+      }
+    ]
+  },
+  {
     "v": "1791874739",
     "titre": "Événements : inscriptions en ligne et billets",
     "points": [

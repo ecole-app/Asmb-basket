@@ -519,6 +519,12 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
     await assertFails(setDoc(doc(db, "clubs/A/evt_inscrits/STG-11115"), insc()));
     await assertFails(updateDoc(doc(db, "evt_pages/A__e1"), { nb: 1, dernier: "STG-99999" }));
   });
+  it("tarif gratuit : mode « gratuit » seulement si le prix est 0", async () => {
+    await updateDoc(doc(await as("dirA"), "evt_pages/A__e1"), { tarifs: [{ nom: "Gratuit", prix: 0, pour: "tous" }, { nom: "Extérieur", prix: 55, pour: "ext" }] });
+    const db = await as(null);
+    await assertFails(inscrire(db, "SOI-60001", insc({ tarifIdx: 1, mode: "gratuit" }), 1));
+    await assertSucceeds(inscrire(db, "SOI-60002", insc({ tarifIdx: 0, tarifNom: "Gratuit", montant: 0, mode: "gratuit" }), 1));
+  });
   it("complet : plus d'inscription au-delà des places", async () => {
     const db = await as(null);
     await assertSucceeds(inscrire(db, "STG-20001", insc(), 1));

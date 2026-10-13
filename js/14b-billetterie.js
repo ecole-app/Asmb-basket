@@ -22,6 +22,7 @@ function evtCode(type){
   return (EVT_PREFIX[type]||"EVT")+"-"+n;
 }
 function evtPrix(p){ p=Number(p)||0; return (Math.round(p*100)/100).toString().replace(".",",")+" €"; }
+function evtTarifTxt(p){ return Number(p)>0?evtPrix(p):"Gratuit"; }
 function evtDateTxt(e){
   function f(iso){ var d=new Date(iso+"T12:00:00"); return isNaN(d)?(iso||""):d.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"}); }
   if(!e||!e.date) return "";
@@ -59,7 +60,7 @@ function evtConfigurer(eid){
   var events=getEvents();
   var e=events.find(function(x){return x.id===eid;}); if(!e) return;
   var i=e.inscr||{};
-  var tarifs=(i.tarifs&&i.tarifs.length)?i.tarifs.map(function(t){return Object.assign({},t);})
+  var tarifs=(i.tarifs&&i.tarifs.length)?i.tarifs.map(function(t){return Object.assign({gratuit:!(Number(t.prix)>0)},t);})
     :[{nom:"Licencié du club",prix:"",pour:"lic"},{nom:"Extérieur",prix:"",pour:"ext"}];
   var modes=i.modes||["especes","cheque","cb"];
   var s=gmSheet("Inscriptions · "+(e.titre||eventTypeLabel(e.type)));
@@ -74,7 +75,7 @@ function evtConfigurer(eid){
   lab.appendChild(cbA); lab.appendChild(document.createTextNode("Inscriptions ouvertes"));
   s.body.appendChild(lab);
 
-  gmSection(s.body,"Tarifs","Prix différents pour les licenciés du club et les extérieurs. 0 = gratuit.");
+  gmSection(s.body,"Tarifs","Prix différents pour les licenciés du club et les extérieurs, ou « Gratuit ».");
   var tBox=document.createElement("div"); s.body.appendChild(tBox);
   function peindreTarifs(){
     tBox.innerHTML="";
@@ -82,12 +83,15 @@ function evtConfigurer(eid){
       var r=document.createElement("div"); r.style.cssText="display:flex;gap:6px;margin-bottom:6px;align-items:center";
       var n=document.createElement("input"); n.className="form-input"; n.maxLength=40; n.value=t.nom||""; n.placeholder="Nom du tarif"; n.style.flex="2";
       n.addEventListener("input",function(){ t.nom=n.value; });
-      var p=document.createElement("input"); p.className="form-input"; p.type="number"; p.min="0"; p.step="0.5"; p.value=t.prix; p.placeholder="€"; p.style.cssText="flex:1;min-width:64px";
+      var p=document.createElement("input"); p.className="form-input"; p.type="number"; p.min="0"; p.step="0.5"; p.value=t.gratuit?"":t.prix; p.placeholder=t.gratuit?"0":"€"; p.disabled=!!t.gratuit; p.style.cssText="flex:1;min-width:64px";
       p.addEventListener("input",function(){ t.prix=p.value; });
+      var gr=document.createElement("button"); gr.type="button"; gr.textContent="Gratuit"; gr.setAttribute("aria-pressed",t.gratuit?"true":"false");
+      gr.style.cssText="flex-shrink:0;padding:8px 10px;border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;border:1.5px solid "+(t.gratuit?"var(--grn)":"var(--bdr)")+";background:"+(t.gratuit?"var(--grn)":"var(--card)")+";color:"+(t.gratuit?"#fff":"var(--mut)");
+      gr.addEventListener("click",function(){ t.gratuit=!t.gratuit; if(t.gratuit) t.prix=0; peindreTarifs(); majModes(); });
       var w=document.createElement("select"); w.className="form-select"; w.style.cssText="flex:1.3;min-width:90px";
       [["lic","Licenciés"],["ext","Extérieurs"],["tous","Tous"]].forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; if((t.pour||"tous")===o[0]) op.selected=true; w.appendChild(op); });
       w.addEventListener("change",function(){ t.pour=w.value; });
-      r.appendChild(n); r.appendChild(p); r.appendChild(w);
+      r.appendChild(n); r.appendChild(p); r.appendChild(gr); r.appendChild(w);
       if(tarifs.length>1){
         var x=document.createElement("button"); x.type="button"; x.textContent="✕"; x.setAttribute("aria-label","Retirer ce tarif");
         x.style.cssText="border:none;background:none;color:var(--red);font-size:14px;cursor:pointer;padding:6px";
@@ -99,13 +103,15 @@ function evtConfigurer(eid){
     if(tarifs.length<6){
       var add=document.createElement("button"); add.type="button"; add.textContent="+ Ajouter un tarif";
       add.style.cssText="border:none;background:none;color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;padding:4px 0";
-      add.addEventListener("click",function(){ tarifs.push({nom:"",prix:"",pour:"tous"}); peindreTarifs(); });
+      add.addEventListener("click",function(){ tarifs.push({nom:"",prix:"",pour:"tous"}); peindreTarifs(); majModes(); });
       tBox.appendChild(add);
     }
   }
+  function majModes(){}
   peindreTarifs();
 
-  gmSection(s.body,"Paiement","Le paiement ne bloque jamais l'inscription : vous le marquez reçu ensuite.");
+  var paySec=document.createElement("div"); s.body.appendChild(paySec);
+  gmSection(paySec,"Paiement","Le paiement ne bloque jamais l'inscription : vous le marquez reçu ensuite.");
   var mBox=document.createElement("div"); mBox.style.cssText="display:flex;flex-wrap:wrap;gap:8px";
   var mCbs={};
   Object.keys(EVT_MODES).forEach(function(k){
@@ -113,10 +119,12 @@ function evtConfigurer(eid){
     var c=document.createElement("input"); c.type="checkbox"; c.checked=modes.indexOf(k)>=0; c.style.accentColor="var(--dkg)";
     l.appendChild(c); l.appendChild(document.createTextNode(EVT_MODES[k])); mBox.appendChild(l); mCbs[k]=c;
   });
-  s.body.appendChild(mBox);
+  paySec.appendChild(mBox);
   var ha=document.createElement("input"); ha.className="form-input"; ha.type="url"; ha.maxLength=300;
   ha.placeholder="Lien HelloAsso (https://www.helloasso.com/…)"; ha.value=i.helloasso||""; ha.style.marginTop="8px";
-  s.body.appendChild(ha);
+  paySec.appendChild(ha);
+  majModes=function(){ paySec.style.display=tarifs.every(function(t){return t.gratuit;})?"none":"block"; };
+  majModes();
   function majHa(){ ha.style.display=mCbs.helloasso.checked?"block":"none"; }
   mCbs.helloasso.addEventListener("change",majHa); majHa();
 
@@ -134,13 +142,14 @@ function evtConfigurer(eid){
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Enregistrer","primary",function(b){
     var tf=tarifs.filter(function(t){return String(t.nom||"").trim();}).map(function(t){
-      return {nom:String(t.nom).trim().slice(0,40), prix:Math.max(0,Math.round((parseFloat(String(t.prix).replace(",","."))||0)*100)/100), pour:t.pour||"tous"};
+      return {nom:String(t.nom).trim().slice(0,40), prix:t.gratuit?0:Math.max(0,Math.round((parseFloat(String(t.prix).replace(",","."))||0)*100)/100), pour:t.pour||"tous"};
     });
     if(!tf.length){ askAlert("Ajoutez au moins un tarif."); return; }
-    var md=Object.keys(mCbs).filter(function(k){return mCbs[k].checked;});
-    if(!md.length){ askAlert("Choisissez au moins un mode de paiement."); return; }
+    var toutGratuit=tf.every(function(t){return !(t.prix>0);});
+    var md=toutGratuit?[]:Object.keys(mCbs).filter(function(k){return mCbs[k].checked;});
+    if(!toutGratuit && !md.length){ askAlert("Choisissez au moins un mode de paiement."); return; }
     var lienHa=ha.value.trim();
-    if(md.indexOf("helloasso")>=0 && !/^https:\/\/([a-z0-9-]+\.)*helloasso\.com\//i.test(lienHa)){ askAlert("Collez le lien HelloAsso de l'événement (il commence par https://www.helloasso.com/)."); return; }
+    if(!toutGratuit && md.indexOf("helloasso")>=0 && !/^https:\/\/([a-z0-9-]+\.)*helloasso\.com\//i.test(lienHa)){ askAlert("Collez le lien HelloAsso de l'événement (il commence par https://www.helloasso.com/)."); return; }
     var inscr={
       actif:cbA.checked, tarifs:tf, modes:md, helloasso:md.indexOf("helloasso")>=0?lienHa.slice(0,300):"",
       places:Math.max(0,parseInt(iP.value,10)||0), limite:iL.value||"", programme:prog.value.trim().slice(0,600), majLe:Date.now()
@@ -243,7 +252,7 @@ function evtListe(list, items, e, page, repeindre){
     var n=document.createElement("div"); n.style.cssText="font-size:14px;font-weight:800;color:var(--txt)";
     n.textContent=(x.prenom||"")+" "+(x.nom||"")+(typeof essaiAge==="function"&&essaiAge(x.naissance)?" · "+essaiAge(x.naissance):"");
     var d=document.createElement("div"); d.style.cssText="font-size:12px;color:var(--txt2);margin-top:2px";
-    d.textContent=(x.tarifNom||"")+" · "+evtPrix(x.montant)+" · "+(EVT_MODES[x.mode]||x.mode||"")+(x.clubOrigine?" · "+x.clubOrigine:"");
+    d.textContent=(x.tarifNom||"")+" · "+evtTarifTxt(x.montant)+(EVT_MODES[x.mode]?" · "+EVT_MODES[x.mode]:"")+(x.clubOrigine?" · "+x.clubOrigine:"");
     var c=document.createElement("div"); c.style.cssText="font-size:11px;color:var(--mut);margin-top:2px;font-family:monospace";
     c.textContent=x._id+(x.tel?" · "+x.tel:"");
     g.appendChild(n); g.appendChild(d); g.appendChild(c);
@@ -254,12 +263,14 @@ function evtListe(list, items, e, page, repeindre){
       if(x.playerId) pill("Licencié ✓","var(--ltg)");
       else if(evtEstLicTarif(x,page)) pill("À vérifier","#E8670A");
       else pill("Extérieur","var(--bdr)","var(--txt2)");
-      pill(x.paye?"Payé":"À payer",x.paye?"var(--grn)":"rgba(192,57,43,.12)",x.paye?"#fff":"var(--red)");
+      if(Number(x.montant)>0) pill(x.paye?"Payé":"À payer",x.paye?"var(--grn)":"rgba(192,57,43,.12)",x.paye?"#fff":"var(--red)");
+      else pill("Gratuit","var(--bdr)","var(--txt2)");
     }
     h.appendChild(g); h.appendChild(pills); card.appendChild(h);
     if(x.statut!=="annule"){
       var r=gmRow(card);
-      if(!x.paye) r.appendChild(gmBtn("Paiement reçu","primary",function(b){ b.disabled=true; evtMarquerPaye(x,e,true).then(repeindre).catch(function(err){ b.disabled=false; askAlert("Erreur : "+((err&&err.code)||err)); }); }));
+      if(!(Number(x.montant)>0)){}
+      else if(!x.paye) r.appendChild(gmBtn("Paiement reçu","primary",function(b){ b.disabled=true; evtMarquerPaye(x,e,true).then(repeindre).catch(function(err){ b.disabled=false; askAlert("Erreur : "+((err&&err.code)||err)); }); }));
       else r.appendChild(gmBtn("Annuler le paiement","ghost",function(b){ b.disabled=true; evtMarquerPaye(x,e,false).then(repeindre).catch(function(){ b.disabled=false; }); }));
       if(!x.playerId && evtEstLicTarif(x,page)) r.appendChild(gmBtn("Relier","soft",function(){ evtRelier(x, repeindre); }));
       if(x.tel) r.appendChild(gmBtn("SMS","soft",function(){ window.location.href="sms:"+String(x.tel).replace(/[^+0-9]/g,""); }));
@@ -388,7 +399,7 @@ function evtBilletHtml(b, p){
     '<div style="font-size:12px;color:var(--txt2);margin-top:2px">'+authEsc((p.titre||"")+" · "+evtDateTxt(p))+'</div>'+
     '<div class="evt-qr" data-code="'+authEsc(b.code)+'" style="display:flex;justify-content:center;margin:14px 0 8px"></div>'+
     '<div style="font-size:22px;font-weight:900;letter-spacing:2px;font-family:monospace;color:var(--dkg)">'+authEsc(b.code)+'</div>'+
-    '<div style="font-size:12px;color:var(--txt2);margin-top:6px">'+authEsc((b.tarifNom||"")+" · "+evtPrix(b.montant)+" · "+(EVT_MODES[b.mode]||""))+'</div>'+
+    '<div style="font-size:12px;color:var(--txt2);margin-top:6px">'+authEsc((b.tarifNom||"")+" · "+evtTarifTxt(b.montant)+(EVT_MODES[b.mode]?" · "+EVT_MODES[b.mode]:""))+'</div>'+
   '</div>';
 }
 function evtDessinerQr(root, pid){
@@ -455,7 +466,7 @@ function rendreEvtPublic(el,p,pid){
       '<div class="form-group"><label class="form-label" for="evt-naiss">Date de naissance</label><input class="form-input" id="evt-naiss" type="date"></div>'+
       '<div class="form-group" id="evt-club-g"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
-      '<div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>'+
+      '<div id="evt-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
       '<input id="evt-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
       '<button id="evt-envoyer" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">M\'inscrire</button>'+
       '<div style="font-size:11px;color:var(--mut);line-height:1.45;margin-top:10px">Vos coordonnées servent uniquement au club pour organiser l\'événement. Elles ne sont ni publiées ni transmises.</div>'+
@@ -476,6 +487,7 @@ function rendreEvtPublic(el,p,pid){
       b.addEventListener("click",function(){ tIdx=i; peindre(); });
       tBox.appendChild(b);
     });
+    var pg=document.getElementById("evt-pay-g"); if(pg) pg.style.display=(tIdx!=null&&!(Number(tarifs[tIdx].prix)>0))?"none":"block";
     var cg=document.getElementById("evt-club-g"); if(cg) cg.style.display=(tIdx!=null&&tarifs[tIdx].pour==="lic")?"none":"block";
     mBox.innerHTML="";
     modes.forEach(function(m){
@@ -498,12 +510,13 @@ function rendreEvtPublic(el,p,pid){
     if(!v("evt-nom")) return askAlert("Indiquez le nom.");
     if(!/^\d{4}-\d{2}-\d{2}$/.test(v("evt-naiss"))) return askAlert("Indiquez la date de naissance.");
     if(!/^[+]?[0-9]{9,15}$/.test(tel)) return askAlert("Numéro de téléphone invalide.");
-    if(!mode) return askAlert("Choisissez le mode de paiement.");
     var t=tarifs[tIdx];
+    var gratuit=!(Number(t.prix)>0);
+    if(!gratuit && !mode) return askAlert("Choisissez le mode de paiement.");
     var data={
       eventId:String(p.eventId), prenom:v("evt-prenom").slice(0,40), nom:v("evt-nom").slice(0,60), naissance:v("evt-naiss"), tel:tel,
       clubOrigine:t.pour==="lic"?"":v("evt-club").slice(0,60), tarifIdx:tIdx, tarifNom:String(t.nom||"").slice(0,40), montant:t.prix,
-      mode:mode, statut:"inscrit", paye:false, present:false, source:"public"
+      mode:gratuit?"gratuit":mode, statut:"inscrit", paye:false, present:false, source:"public"
     };
     btn.disabled=true; btn.textContent="Inscription…";
     evtInscrire(pid,data).then(function(r){
@@ -585,8 +598,9 @@ function evtInscrireEnfant(e){
   s.body.appendChild(naissG);
   gmSection(s.body,"Tarif");
   var tBox=document.createElement("div"); tBox.style.cssText="display:flex;flex-direction:column;gap:6px"; s.body.appendChild(tBox);
-  gmSection(s.body,"Paiement");
-  var mBox=document.createElement("div"); mBox.style.cssText="display:flex;flex-wrap:wrap;gap:8px"; s.body.appendChild(mBox);
+  var payG=document.createElement("div"); s.body.appendChild(payG);
+  gmSection(payG,"Paiement");
+  var mBox=document.createElement("div"); mBox.style.cssText="display:flex;flex-wrap:wrap;gap:8px"; payG.appendChild(mBox);
   function chip(on){ return "padding:9px 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--txt)"); }
   function peindre(){
     eBox.innerHTML="";
@@ -602,6 +616,7 @@ function evtInscrireEnfant(e){
       var a=document.createElement("span"); a.textContent=t.nom; var c=document.createElement("span"); c.textContent=t.prix?evtPrix(t.prix):"Gratuit";
       b.appendChild(a); b.appendChild(c); b.addEventListener("click",function(){ tIdx=i; peindre(); }); tBox.appendChild(b);
     });
+    payG.style.display=(tarifs[tIdx]&&Number(tarifs[tIdx].prix)>0)?"block":"none";
     mBox.innerHTML="";
     modes.forEach(function(m){
       var b=document.createElement("button"); b.type="button"; b.style.cssText=chip(mode===m); b.textContent=EVT_MODES[m];
@@ -611,7 +626,8 @@ function evtInscrireEnfant(e){
   peindre();
   var go=gmBtn("Valider l'inscription","primary",function(btn){
     if(!pid) return askAlert("Choisissez l'enfant.");
-    if(!mode) return askAlert("Choisissez le mode de paiement.");
+    var gratuit=!(Number(tarifs[tIdx].prix)>0);
+    if(!gratuit && !mode) return askAlert("Choisissez le mode de paiement.");
     var k=enfants.find(function(x){return String(x.id)===pid;})||{};
     var f=fiches[pid]||{};
     var naiss=/^\d{4}-\d{2}-\d{2}$/.test(f.naissance||"")?f.naissance:String((document.getElementById("evt-p-naiss")||{}).value||"");
@@ -622,7 +638,7 @@ function evtInscrireEnfant(e){
     var t=tarifs[tIdx];
     var data={
       eventId:String(e.id), prenom:String(f.prenom||k.prenom||"").slice(0,40), nom:String(f.nom||k.nom||"").slice(0,60), naissance:naiss, tel:tel,
-      clubOrigine:"", tarifIdx:tIdx, tarifNom:String(t.nom||"").slice(0,40), montant:t.prix, mode:mode,
+      clubOrigine:"", tarifIdx:tIdx, tarifNom:String(t.nom||"").slice(0,40), montant:t.prix, mode:gratuit?"gratuit":mode,
       statut:"inscrit", paye:false, present:false, playerId:pid, auteurUid:(window.ASMB_USER&&window.ASMB_USER.uid)||(window.fbAuth&&window.fbAuth.currentUser&&window.fbAuth.currentUser.uid)||"", source:"app"
     };
     if(!data.prenom||!data.nom) return askAlert("Nom ou prénom manquant sur la fiche de l'enfant : contactez le club.");

@@ -516,7 +516,8 @@ service cloud.firestore {
           && request.resource.data.get('clubOrigine', '') is string && request.resource.data.get('clubOrigine', '').size() <= 60
           && request.resource.data.tarifIdx is int
           && request.resource.data.montant == get(evtPage(request.resource.data.eventId)).data.tarifs[request.resource.data.tarifIdx].prix
-          && request.resource.data.mode in ['especes','cheque','cb','helloasso']
+          && request.resource.data.mode in ['especes','cheque','cb','helloasso','gratuit']
+          && (request.resource.data.mode != 'gratuit' || request.resource.data.montant == 0)
           && request.resource.data.statut == 'inscrit' && request.resource.data.paye == false && request.resource.data.present == false
           && request.resource.data.at == request.time
           && (!('playerId' in request.resource.data)
