@@ -55,6 +55,7 @@ function gmDeskSync(){
   var side=document.getElementById("gm-side");
   if(!side) return;
   if(on) gmDeskRender(); else side.innerHTML="";
+  if(typeof renderDeskHome==="function") renderDeskHome();
 }
 if(GM_DESK_MQ){
   if(GM_DESK_MQ.addEventListener) GM_DESK_MQ.addEventListener("change", gmDeskSync);
@@ -89,7 +90,8 @@ function gmDeskEcran(scr){
   if(!document.documentElement.classList.contains("gm-desk")) return;
   var it=GM_DESK_ITEMS.find(function(x){ return x.scr.indexOf(scr)>=0; });
   if(it) GM_DESK_ACTIF=it.id;
-  gmDeskRender(); // badges et nom du club à jour à chaque écran
+  gmDeskRender();
+  if(scr==="portal"&&typeof renderDeskHome==="function") renderDeskHome(); // badges et nom du club à jour à chaque écran
 }
 function gmDeskRender(){
   var side=document.getElementById("gm-side"); if(!side) return;

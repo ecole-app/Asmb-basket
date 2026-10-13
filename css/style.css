@@ -285,3 +285,48 @@ html.gm-desk #poleCards>.card,html.gm-desk #adminCards>.admin-card{margin:0}
 .gs-item:focus-visible{outline:3px solid var(--ltg);outline-offset:1px}
 .gs-lbl{flex:1;min-width:0}
 .gs-badge{min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+/* Version ordinateur : accueil du dirigeant (js/03c-bureau-accueil.js) */
+#desk-home{display:none}
+html.gm-desk #desk-home{display:block;padding:30px 32px 48px}
+html.gm-desk #scr-portal>*:not(#desk-home){display:none!important}
+html.gm-desk .main>#scr-portal.on{max-width:1360px}
+.dk-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.dk-head h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.5px;color:var(--txt)}
+.dk-sub{font-size:14px;color:var(--mut);margin-top:4px}
+.dk-head-act{display:flex;gap:10px;flex-wrap:wrap}
+.dk-cta{min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:14px;font-weight:700;cursor:pointer}
+.dk-cta-main{background:var(--dkg);border-color:var(--dkg);color:#fff}
+.dk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:22px}
+.dk-kpi{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px 20px;transition:box-shadow .15s,transform .15s}
+.dk-kpi:hover{box-shadow:0 6px 20px var(--shadow);transform:translateY(-1px)}
+.dk-kpi:focus-visible,.dk-rv:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.dk-kpi-t{font-size:13px;color:var(--mut);font-weight:600}
+.dk-kpi-v{font-size:32px;font-weight:800;margin-top:6px;color:var(--txt);font-variant-numeric:tabular-nums;line-height:1.1}
+.dk-kpi-s{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.35}
+.dk-cols{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.dk-col-a{flex:3 1 440px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.dk-col-b{flex:2 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.dk-card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px 20px}
+.dk-card h2{margin:0 0 10px;font-size:16px;font-weight:800;color:var(--txt)}
+.dk-todo,.dk-evt{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.dk-todo:last-child,.dk-evt:last-child{border-bottom:none}
+.dk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dk-todo-t{flex:1;font-size:14px;font-weight:600;color:var(--txt)}
+.dk-btn{flex-shrink:0;padding:8px 14px;border-radius:10px;border:none;background:var(--dkg);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.dk-btn-ghost{background:var(--bdr);color:var(--txt)}
+.dk-vide{font-size:14px;color:var(--mut);padding:8px 0}
+.dk-evt-t{font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-evt-s{font-size:12px;color:var(--mut);margin-top:2px}
+.dk-rv{all:unset;box-sizing:border-box;display:flex;gap:14px;align-items:center;width:100%;padding:10px 6px;border-bottom:1px solid var(--bdr);cursor:pointer;border-radius:8px}
+.dk-rv:hover{background:color-mix(in srgb, var(--dkg) 5%, transparent)}
+.dk-rv-d{width:50px;text-align:center;flex-shrink:0}
+.dk-rv-j{font-size:11px;font-weight:800;color:var(--dkg);letter-spacing:.5px}
+.dk-rv-n{font-size:21px;font-weight:800;color:var(--txt);line-height:1.1}
+.dk-rv-m{font-size:10px;color:var(--mut)}
+.dk-rv-t{font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-rv-s{font-size:12px;color:var(--mut);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;margin-right:8px;vertical-align:1px}
+.dk-lien{all:unset;cursor:pointer;display:block;margin-top:12px;font-size:13px;font-weight:700;color:var(--dkg)}
+.dk-rac{display:flex;flex-wrap:wrap;gap:8px}
+.dk-rac button{padding:10px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;font-weight:600;cursor:pointer}
+.dk-rac button:hover,.dk-cta:hover{border-color:var(--dkg)}

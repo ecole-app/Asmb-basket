@@ -189,6 +189,7 @@ function buildPortal(){
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
   activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
   buildDashboard();
+  if(typeof renderDeskHome==="function") renderDeskHome();
 }
 
 function updateCountdownBanner(bannerId){

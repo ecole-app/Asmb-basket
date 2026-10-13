@@ -30,6 +30,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `02-formation-cycles.js` | Données et accesseurs des cycles du Pôle Formation |
 | `03-nav-portal.js` | Navigation, routage entre écrans, portail d'accueil |
 | `03b-bureau.js` | Version ordinateur (≥ 1024 px) : menu latéral du dirigeant (`html.gm-desk`), rubriques reliées aux écrans existants |
+| `03c-bureau-accueil.js` | Version ordinateur : accueil du dirigeant en tableau de bord (chiffres clés, À faire, inscriptions en cours, prochains rendez-vous, raccourcis) |
 | `04-formation-ui.js` | Affichage et édition des cycles et séances |
 | `05-animations.js` | Moteur d'animation canvas des situations pédagogiques |
 | `06-licences.js` | Licences, codes d'inscription, fiche publique, paiement |

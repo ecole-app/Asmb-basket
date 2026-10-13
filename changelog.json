@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791878470",
+    "titre": "Version ordinateur : nouvel accueil",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur, l'accueil devient un tableau de bord pleine largeur : chiffres clés (licenciés, paiements, essais, semaine, résultat), « À faire » avec un bouton pour chaque action, inscriptions en cours, prochains rendez-vous et raccourcis. Sur téléphone, rien ne change."
+      }
+    ]
+  },
+  {
     "v": "1791877776",
     "titre": "Licences : paiement par chèque",
     "points": [
