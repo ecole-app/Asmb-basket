@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791909926",
+    "titre": "Tournois : création depuis le pôle Événements",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "« + Tournoi » (pôles Événements et 3x3) crée maintenant un vrai tournoi du calendrier et ouvre directement l'outil Tournoi (équipes, format, planning, jour J)."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Les tournois notés avant à la main ont un bouton « 🏆 Organiser » qui les transforme en vrai tournoi. Le bloc « Coachs du pôle » passe en haut de la page Événements."
+      }
+    ]
+  },
+  {
     "v": "1791907512",
     "titre": "Ouverture de l'appli sans clignotement",
     "points": [

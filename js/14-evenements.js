@@ -187,7 +187,8 @@ function toggleEvEvalOption(){
   if(box)box.style.display=(type==="stage")?"block":"none";
 }
 
-function showAddEvent(){
+// type : facultatif, pré-choisit le type (ex. « + Tournoi » du pôle Événements).
+function showAddEvent(type){
   evEditId=null;
   var mt=document.getElementById("ev-modal-titre"); if(mt) mt.textContent="Nouvel événement";
   var mb=document.getElementById("ev-modal-btn"); if(mb) mb.textContent="Créer l'événement";
@@ -203,7 +204,7 @@ function showAddEvent(){
   document.getElementById("ev-heure").value="";
   document.getElementById("ev-lieu").value="";
   document.getElementById("ev-adresse").value="";
-  document.getElementById("ev-type").value="autre";
+  document.getElementById("ev-type").value=(typeof type==="string"&&type)?type:"autre";
   document.getElementById("ev-canal").value="";
   document.getElementById("ev-eval-enabled").checked=false;
   toggleEvEvalOption();
@@ -353,6 +354,8 @@ function saveEventFull(){
   }
   if(eventObj.canalId && eventObj.canalAutoTeamIds.length){ grantEventChannelAccess(eventObj); }
   finishSaveEventFullNotify(eventObj, canal, participantsNoms);
+  // Un tournoi s'organise tout de suite : équipes, format, planning.
+  if(type==="tournoi" && typeof trnOuvrir==="function") setTimeout(function(){ trnOuvrir(eventObj.id); },300);
 }
 function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
   var titre=eventObj.titre, date=eventObj.date, heure=eventObj.heure, lieu=eventObj.lieu, equipe=eventObj.equipe;

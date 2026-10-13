@@ -38,7 +38,11 @@ function buildPoleScreen(poleId){
   var countEl=document.getElementById(poleId+"-count");
   var listEl=document.getElementById(poleId+"-list");
   // Coachs du pôle (choisis par le dirigeant) et joueurs (choisis par les coachs) : js/17b-poles-joueurs.js
-  if(listEl&&typeof poleRendreEquipe==="function") poleRendreEquipe(poleId,listEl);
+  if(listEl&&typeof poleRendreEquipe==="function"){
+    // Événements : le bloc coachs passe au-dessus de la liste du calendrier.
+    var rel=poleId==="evenement"&&document.getElementById("real-events-list");
+    poleRendreEquipe(poleId,(rel&&rel.previousElementSibling)||listEl);
+  }
   if(countEl)countEl.textContent=data.length+" élément"+(data.length>1?"s":"");
   if(!listEl)return;
   // About section
@@ -62,8 +66,10 @@ function buildPoleScreen(poleId){
     var dateRange=item.date_debut?(item.date_fin&&item.date_fin!==item.date_debut?(item.date_debut+" → "+item.date_fin):item.date_debut):item.date;
     var subInfo=[item.cat,dateRange,item.heure,item.lieu,item.groupe].filter(Boolean).join(" · ");
     var subHtml=subInfo?"<div style=\"font-size:11px;color:var(--mut)\">"+subInfo+"</div>":"";
+ // Ancien « tournoi » noté à la main : on le transforme en vrai tournoi (équipes, planning, jour J).
+    var orgBtn=(item.type==="tournoi"&&typeof trnOuvrir==="function")?"<button onclick=\"poleTournoiVersEvenement('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:#b7791f;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">🏆 Organiser</button>":"";
     var delBtn="<button onclick=\"deletePoleItem('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?" ":"")+mainInfo+"</div>"+subHtml+"</div>"+delBtn;
+    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?" ":"")+mainInfo+"</div>"+subHtml+"</div>"+orgBtn+delBtn;
     listEl.appendChild(div);
   }
 
@@ -202,4 +208,16 @@ function deletePoleItem(poleId,id){
   });
 }
 
-
+// Ancien « tournoi » noté dans un pôle → événement Tournoi du calendrier, ouvert dans l'outil Tournoi.
+function poleTournoiVersEvenement(poleId,id){
+  var item=getPoleData(poleId).filter(function(d){ return d.id===id; })[0]; if(!item) return;
+  if(!item.date) return askAlert("Ajoutez d'abord une date : supprimez cette note et créez le tournoi avec « + Tournoi ».");
+  var ev={id:Date.now().toString(),titre:item.nom||"Tournoi",type:"tournoi",date:item.date,dateFin:"",heure:"",lieu:item.lieu||"",adresse:"",equipe:"",
+    participantsClub:[],participantsExternes:[],presences:{},evaluationEnabled:false,canalId:null,canalAutoTeamIds:[],canalAccessGranted:false,canalAccessRevoked:false,
+    statut:"validee",creePar:(window.ASMB_USER&&window.ASMB_USER.email)||"",creeParRole:"dirigeant"};
+  var events=getEvents(); events.push(ev); saveEvents(events);
+  savePoleData(poleId,getPoleData(poleId).filter(function(d){ return d.id!==id; }));
+  buildPoleScreen(poleId);
+  if(typeof buildPlanning==="function") try{ buildPlanning(); }catch(e){}
+  trnOuvrir(ev.id);
+}
