@@ -258,7 +258,7 @@ function evtPublierPage(e, inscr){
   var ref=window.fbDoc(window.fbDb,"evt_pages",evtPageId(e.id));
   var page={
     clubId:window.CURRENT_CLUB_ID, eventId:String(e.id), actif:!!inscr.actif, type:e.type||"",
-    titre:String(e.titre||"").slice(0,100), date:e.date||"", dateFin:e.dateFin||"", heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120),
+    titre:String(e.titre||"").slice(0,100), date:e.date||"", dateFin:e.dateFin||"", heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120), adresse:String(e.adresse||"").slice(0,140),
     tarifs:inscr.tarifs, parJour:!!inscr.parJour, jours:inscr.parJour?evtJoursPlage(e.date,e.dateFin):[], modes:inscr.modes, helloasso:inscr.helloasso||"", places:inscr.places||0, limite:inscr.limite||"",
     programme:inscr.programme||"", nom:c.name||"", logo:c.logo||null, couleur:c.couleur||null, couleur2:c.couleur2||null,
     liens:c.liens||{}, majLe:Date.now()
@@ -611,7 +611,7 @@ function evtEntete(p){
     '</div>'+
     '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;opacity:.85;margin-top:16px">'+authEsc(eventTypeLabel(p.type))+'</div>'+
     '<div style="font-size:24px;font-weight:900;line-height:1.15;margin-top:2px">'+authEsc(p.titre||"")+'</div>'+
-    '<div style="font-size:13px;opacity:.92;margin-top:6px">'+authEsc(evtDateTxt(p))+(p.lieu?'<br>'+authEsc(p.lieu):'')+'</div>'+
+    '<div style="font-size:13px;opacity:.92;margin-top:6px">'+authEsc(evtDateTxt(p))+(p.lieu?'<br>'+authEsc(p.lieu):'')+(p.adresse?'<br><span style="opacity:.85">'+authEsc(p.adresse)+'</span>':'')+'</div>'+
     (places?'<div style="display:inline-block;margin-top:10px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.18);font-size:12px;font-weight:800">'+authEsc(places)+'</div>':'')+
   '</div>';
 }

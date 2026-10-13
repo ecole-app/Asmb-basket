@@ -23,7 +23,7 @@ function buildRealEventsList(){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
     var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
-    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>":"";
+    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>"+(e.adresse?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px;padding-left:16px\">"+authEsc(e.adresse)+"</div>":""):"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+authEsc(e.equipe)+"</div>":"";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
     var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
@@ -202,6 +202,7 @@ function showAddEvent(){
   document.getElementById("ev-date-fin").value="";
   document.getElementById("ev-heure").value="";
   document.getElementById("ev-lieu").value="";
+  document.getElementById("ev-adresse").value="";
   document.getElementById("ev-type").value="autre";
   document.getElementById("ev-canal").value="";
   document.getElementById("ev-eval-enabled").checked=false;
@@ -318,6 +319,7 @@ function saveEventFull(){
   var dateFin=document.getElementById("ev-date-fin").value;
   var heure=document.getElementById("ev-heure").value;
   var lieu=document.getElementById("ev-lieu").value.trim();
+  var adresse=((document.getElementById("ev-adresse")||{}).value||"").trim().slice(0,140);
   var teams=getTeams();
   var realSelectedTeamIds=evSelectedTeams.filter(function(id){return id!=="__all__";});
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
@@ -328,10 +330,10 @@ function saveEventFull(){
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
   var isDirigeant=(window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
-  if(evEditId){ sauverModifEvent(evEditId,{titre:titre,type:type,date:date,dateFin:dateFin,heure:heure,lieu:lieu,equipe:equipe,
+  if(evEditId){ sauverModifEvent(evEditId,{titre:titre,type:type,date:date,dateFin:dateFin,heure:heure,lieu:lieu,adresse:adresse,equipe:equipe,
     participantsClub:participantsClub,canal:canal,realSelectedTeamIds:realSelectedTeamIds}); return; }
   var eventObj={
-    id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",equipe:equipe||"",
+    id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",adresse:adresse,equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
     presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked),
     canalId:canal||null, canalAutoTeamIds:(canal&&realSelectedTeamIds.length)?realSelectedTeamIds:[],
@@ -569,6 +571,7 @@ function editEventDateTime(eventId){
   document.getElementById("ev-date-fin").value=ev.dateFin||"";
   document.getElementById("ev-heure").value=ev.heure||"";
   document.getElementById("ev-lieu").value=ev.lieu||"";
+  document.getElementById("ev-adresse").value=ev.adresse||"";
   document.getElementById("ev-canal").value=ev.canalId||"";
   document.getElementById("ev-eval-enabled").checked=!!ev.evaluationEnabled;
   toggleEvEvalOption();
@@ -585,7 +588,7 @@ function sauverModifEvent(eventId,v){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev){ evEditId=null; return; }
   var old={date:ev.date,heure:ev.heure,equipe:ev.equipe,lieu:ev.lieu};
-  ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.equipe=v.equipe||"";
+  ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.adresse=v.adresse||""; ev.equipe=v.equipe||"";
   ev.participantsClub=v.participantsClub; ev.participantsExternes=evExternes.slice();
   ev.evaluationEnabled=(v.type==="stage"&&document.getElementById("ev-eval-enabled").checked);
   if(v.canal!==undefined && v.canal!==(ev.canalId||"")){ ev.canalId=v.canal||null; ev.canalAutoTeamIds=(v.canal&&v.realSelectedTeamIds.length)?v.realSelectedTeamIds:[]; }

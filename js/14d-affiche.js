@@ -241,7 +241,7 @@ function afModeleSimple(D,C,L,k,plein){
   y+=afTexte(D,C.titre,x,y,{size:(C.carre?50:40)*k,fam:plein?AF_F.serif:AF_F.anton,weight:plein?800:400,upper:!plein,lh:1,maxW:w,maxLines:3,fit:true,color:"#fff"});
   if(S.dates&&C.dates) y+=10*k+afTexte(D,C.dates.long,x,y+10*k,{size:17*k,weight:800,maxW:w,color:"#fff"});
   if(S.horaires&&C.horaires) y+=3*k+afTexte(D,C.horaires,x,y+3*k,{size:14*k,weight:600,maxW:w,color:"rgba(255,255,255,.9)"});
-  if(S.lieu&&C.lieu) y+=3*k+afTexte(D,C.lieu,x,y+3*k,{size:14*k,weight:600,maxW:w,maxLines:2,color:"rgba(255,255,255,.9)"});
+  if(S.lieu&&C.lieu) y+=3*k+afTexte(D,C.lieu,x,y+3*k,{size:14*k,weight:600,maxW:w,maxLines:3,color:"rgba(255,255,255,.9)"});
   if(S.texte&&C.texte) y+=10*k+afTexte(D,C.texte,x,y+10*k,{size:14*k,weight:700,maxW:w,pre:true,maxLines:9,color:"#fff"});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,x,y+14*k,w,"#fff","left",k);
   return y>limite;
@@ -258,7 +258,7 @@ function afModeleSport(D,C,L,k){
   function colonne(D3,y0){
     var h=0;
     if(S.horaires&&C.horaires) h+=4+afTexte(D3,C.horaires,x,y0+h,{size:13,weight:700,maxW:gw,color:"#fff"});
-    if(S.lieu&&C.lieu) h+=4+afTexte(D3,C.lieu,x,y0+h,{size:13,weight:700,maxW:gw,maxLines:2,color:"#fff"});
+    if(S.lieu&&C.lieu) h+=4+afTexte(D3,C.lieu,x,y0+h,{size:13,weight:700,maxW:gw,maxLines:3,color:"#fff"});
     if(S.texte&&C.texte) h+=4+afTexte(D3,C.texte,x,y0+h,{size:13,weight:700,maxW:gw,pre:true,maxLines:9,color:"rgba(255,255,255,.85)"});
     if(S.prix) C.prix.forEach(function(t){
       var p=t.prix>0?evtPrix(t.prix):"GRATUIT";
@@ -366,7 +366,7 @@ function afModeleEpure(D,C,L,k){
   if(S.dates&&C.dates) y+=14*k+afTexte(D,C.dates.espace,cx,y+14*k,{size:14*k,weight:600,ls:3*k,color:ink,align:"center",maxW:w,maxLines:2});
   y+=8*k;
   if(S.horaires&&C.horaires) y+=4*k+afTexte(D,C.horaires,cx,y+4*k,{size:13*k,color:"#57534e",align:"center",maxW:w});
-  if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,cx,y+4*k,{size:13*k,color:"#57534e",align:"center",maxW:w,maxLines:2});
+  if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,cx,y+4*k,{size:13*k,color:"#57534e",align:"center",maxW:w,maxLines:3});
   if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,cx,y+4*k,{size:13*k,italic:true,color:"#57534e",align:"center",maxW:w,pre:true,maxLines:9});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,L.x+28,y+14*k,w,ink,"center",k);
   return y>limite;
@@ -414,7 +414,7 @@ function afModeleCalendrier(D,C,L,k){
   }
   y+=6*k;
   if(S.horaires&&C.horaires) y+=4*k+afTexte(D,C.horaires,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w});
-  if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,maxLines:2});
+  if(S.lieu&&C.lieu) y+=4*k+afTexte(D,C.lieu,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,maxLines:3});
   if(S.texte&&C.texte) y+=4*k+afTexte(D,C.texte,x,y+4*k,{size:13*k,color:"#d1d5db",maxW:w,pre:true,maxLines:9});
   if(S.intervenants&&C.interv.length) y+=14*k+afIntervenants(D,C,x,y+14*k,w,"#fff","left",k);
   return y>limite;
@@ -482,7 +482,7 @@ function afContenu(e, st, page, imgs){
     modele:st.modele, format:st.format, carre:st.format==="carre", show:Object.assign({},st.show,{texte:!!txt}),
     c1:c1, c2:c2, club:club.name||"", initiales:afInitiales(club.name), logo:imgs.logo,
     tag:tag, accrocheEpure:!tag?"":(st.accroche?st.accroche.trim():(e.type==="soiree"?"la ":"le ")+tag.toLowerCase()),
-    titre:(st.titre||e.titre||"").trim(), dates:afDates(e), horaires:e.heure||"", lieu:e.lieu||"", texte:txt,
+    titre:(st.titre||e.titre||"").trim(), dates:afDates(e), horaires:e.heure||"", lieu:[e.lieu||"",e.adresse||""].filter(Boolean).join("\n"), texte:txt,
     prix:((e.inscr&&e.inscr.tarifs)||[]).reduce(function(l,t){
       l.push({nom:t.nom+(parJ&&Number(t.prix)>0?" (par jour)":""),prix:Number(t.prix)||0});
       if(parJ&&Number(t.forfait)>0) l.push({nom:"Forfait tous les jours"+((e.inscr.tarifs.length>1)?" · "+t.nom:""),prix:Number(t.forfait)});

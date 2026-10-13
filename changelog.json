@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791884569",
+    "titre": "Événements : adresse du lieu",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Nouveau champ « Adresse du lieu » dans le formulaire d'événement. Elle s'affiche sur une ligne sous le lieu : carte de l'événement, page d'inscription et affiche."
+      }
+    ]
+  },
+  {
     "v": "1791884288",
     "titre": "Accès coach : passer la main avant de quitter son rôle de dirigeant",
     "points": [

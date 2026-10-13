@@ -587,7 +587,7 @@ function buildPlanning(){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
     var evDate=(e.dateFin&&e.dateFin!==e.date?(e.date+" → "+e.dateFin):e.date)+(e.heure?" · "+e.heure:"");
-    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>":"";
+    var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>"+(e.adresse?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px;padding-left:16px\">"+authEsc(e.adresse)+"</div>":""):"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+authEsc(e.equipe)+"</div>":"";
     var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
