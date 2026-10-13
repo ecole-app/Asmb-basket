@@ -302,6 +302,10 @@ function evtTableau(eid){
       var parJ=!!e.inscr.parJour, places=parJ?0:(e.inscr.places||0);
       var cptJ={}; if(parJ) actifs.forEach(function(x){ (x.jours||[]).forEach(function(j){ cptJ[j]=(cptJ[j]||0)+1; }); });
       var jTxt=parJ?(page.jours||evtJoursPlage(e.date,e.dateFin)).map(function(j){ return evtJourTxt(j)+" : "+(cptJ[j]||0)+(e.inscr.places?" / "+e.inscr.places:""); }).join(" · "):"";
+      if(!peindre.syncA){ peindre.syncA=1;
+        // Codes annulés publiés sur la page : le billet gardé par la famille s'affiche « annulé ».
+        var ann=items.filter(function(x){return x.statut==="annule";}).map(function(x){return x._id;}).sort();
+        if(JSON.stringify(ann)!==JSON.stringify((page.annules||[]).slice().sort())&&r[0].exists()){ page.annules=ann; window.fbUpdateDoc(pageRef,{annules:ann}).catch(function(){}); } }
       if(parJ&&!peindre.sync){ peindre.sync=1; var vieux=page.nbJ||{}, diff=false; (page.jours||[]).forEach(function(j){ if((vieux[j]||0)!==(cptJ[j]||0)) diff=true; });
         if(diff){ var nn={}; (page.jours||[]).forEach(function(j){ nn[j]=cptJ[j]||0; }); page.nbJ=nn; window.fbUpdateDoc(pageRef,{nbJ:nn}).catch(function(){}); } }
       head.innerHTML=
@@ -467,7 +471,7 @@ function evtAnnuler(x, e){
     var b=window.fbWriteBatch();
     b.update(window.fbDoc(window.fbDb,"evt_inscrits",x._id),{statut:"annule"});
     if(snap.exists()){
-      var maj={nb:nb};
+      var maj={nb:nb, annules:((snap.data().annules||[]).filter(function(c){return c!==x._id;})).concat([x._id]).slice(-2000)};
       if(x.jours&&x.jours.length){ var nj=Object.assign({},snap.data().nbJ||{}); x.jours.forEach(function(j){ nj[j]=Math.max(0,(nj[j]||0)-1); }); maj.nbJ=nj; }
       b.update(pageRef,maj);
     }
@@ -613,8 +617,14 @@ function evtEntete(p){
 }
 function rendreEvtPublic(el,p,pid){
   var auj=new Date().toISOString().slice(0,10);
-  var mes=evtMesBillets(pid);
-  var mesHtml=mes.length?'<div style="padding:16px 16px 0"><div class="form-label" style="margin-bottom:8px">Mes billets</div>'+mes.map(function(b){return evtBilletHtml(b,p);}).join("")+'</div>':'';
+  var mes=evtMesBillets(pid), annules=p.annules||[];
+  var mesHtml=mes.length?'<div style="padding:16px 16px 0"><div class="form-label" style="margin-bottom:8px">Mes billets</div>'+mes.map(function(b){
+    if(annules.indexOf(b.code)>=0) return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;text-align:center;margin-bottom:12px;opacity:.75">'+
+      '<div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc((b.prenom||"")+" "+(b.nom||""))+'</div>'+
+      '<div style="font-size:13px;font-weight:800;color:var(--red);margin-top:6px">Inscription annulée par le club</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:4px">Ce billet n\'est plus valable. Contactez le club pour toute question.</div></div>';
+    return evtBilletHtml(b,p);
+  }).join("")+'</div>':'';
   var ferme=p.actif!==true||(p.limite&&p.limite<auj)||((p.dateFin||p.date||auj)<auj);
   var complet=p.parJour?(p.places>0&&(p.jours||[]).length>0&&(p.jours||[]).every(function(j){ return ((p.nbJ||{})[j]||0)>=p.places; })):(p.places&&(p.nb||0)>=p.places);
   if(ferme||complet){

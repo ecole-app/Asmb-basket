@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791884091",
+    "titre": "Billet annulé et rôle de dirigeant",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Quand le club annule une inscription, la famille voit « Inscription annulée par le club » à la place du billet : plus de QR code ni de code."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Un dirigeant peut de nouveau se retirer son propre rôle (avec confirmation). Seul le compte principal de la plateforme le garde toujours."
+      }
+    ]
+  },
+  {
     "v": "1791883949",
     "titre": "Affiche : texte libre, programme, accroche, QR code",
     "points": [

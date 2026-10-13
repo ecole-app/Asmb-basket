@@ -211,10 +211,8 @@ describe("Comptes utilisateurs", () => {
     b.update(doc(db, "club_invites/INVCOACH"), { usedBy: "coachA", usedAt: Timestamp.now() });
     await assertSucceeds(b.commit());
   });
-  it("un dirigeant ne peut pas se retirer son propre rôle de dirigeant", async () => {
-    await assertFails(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: [] }));
-    await assertFails(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: ["coach"] }));
-    await assertSucceeds(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: ["dirigeant", "coach"] }));
+  it("un dirigeant peut se retirer son propre rôle", async () => {
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "users/dirA"), { roles: ["coach"] }));
   });
   it("le super admin récupère son rôle de dirigeant sur son compte", async () => {
     const env = await getEnv();

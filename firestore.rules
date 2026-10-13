@@ -199,9 +199,7 @@ service cloud.firestore {
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
       allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone']))
-        // Un dirigeant ne peut jamais se retirer lui-même son rôle de dirigeant.
-        || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null)
-            && (request.auth.uid != uid || request.resource.data.get('roles', []).hasAll(['dirigeant'])))
+        || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null))
         // Le super admin récupère toujours son rôle de dirigeant sur son propre compte (même club).
         || (superAdmin() && request.auth.uid == uid
             && request.resource.data.get('roles', []).hasAll(['dirigeant'])

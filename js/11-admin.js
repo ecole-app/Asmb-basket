@@ -769,9 +769,9 @@ function renderAccesList(list,users,phoneToName){
       chip.addEventListener("click",function(e){
         e.stopPropagation();
         var i=state.roles.indexOf(r);
-        // Personne ne se retire son propre rôle de dirigeant (sinon plus d'accès à rien).
-        if(i>=0 && r==="dirigeant" && window.ASMB_USER && window.ASMB_USER.uid===u._uid){
-          askAlert("Vous ne pouvez pas retirer votre propre rôle de dirigeant : vous perdriez l'accès à l'appli.");
+        // Le compte principal (super admin) garde toujours son rôle de dirigeant.
+        if(i>=0 && r==="dirigeant" && u._uid===BOOTSTRAP_DIRIGEANT_UID){
+          askAlert("Le compte principal de la plateforme garde toujours son rôle de dirigeant.");
           return;
         }
         if(i>=0)state.roles.splice(i,1);else state.roles.push(r);
@@ -905,7 +905,9 @@ function renderAccesList(list,users,phoneToName){
       // Le titre se sauvegarde déjà tout seul (voir setTitreImmediate) : on ne
       // renvoie ici que roles/équipes/cases, qui restent en brouillon jusqu'au clic.
       save.textContent="…";
-      if(window.ASMB_USER && window.ASMB_USER.uid===u._uid && (u.roles||[]).indexOf("dirigeant")>=0 && state.roles.indexOf("dirigeant")<0) state.roles.push("dirigeant");
+      if(u._uid===BOOTSTRAP_DIRIGEANT_UID && state.roles.indexOf("dirigeant")<0) state.roles.push("dirigeant");
+      var seRetire=window.ASMB_USER && window.ASMB_USER.uid===u._uid && (u.roles||[]).indexOf("dirigeant")>=0 && state.roles.indexOf("dirigeant")<0;
+      if(seRetire && !window.confirm("Vous retirez votre propre rôle de dirigeant : vous n'aurez plus accès à la gestion du club. Continuer ?")){ save.textContent="Enregistrer"; return; }
       window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u._uid),{roles:state.roles,linkedTeamIds:state.teams,permissions:state.permissions}).then(function(){
         return syncCoachChannels(u,state.teams);
       }).then(function(){
