@@ -489,3 +489,68 @@ function fillTodayHero(eventElId,noEventElId,teamFilter,fallbackLine1,fallbackLi
   }
 }
 
+
+// ═══ BOUTON RETOUR DU TÉLÉPHONE (Android, geste retour) ═══════════
+// Sans entrée d'historique, le retour Android ferme l'appli. On garde une
+// entrée « garde » en haut de l'historique ; à chaque retour :
+//   1. une fenêtre est ouverte → on la ferme ;
+//   2. on est dans un sous-écran → même effet que la flèche ← de l'en-tête ;
+//   3. on est sur un onglet du bas → retour à l'Accueil ;
+//   4. à l'Accueil → « Appuyez encore pour quitter », le 2e appui ferme l'appli.
+// Les pages publiques (billet, inscription par lien…) gardent le retour normal.
+var GM_RETOUR={sortie:0};
+function gmFenetresOuvertes(){
+  var out=[], W=window.innerWidth, H=window.innerHeight;
+  Array.prototype.forEach.call(document.body.children,function(el){
+    if(el.id==="bnav-main"||el.id==="toast-stack"||el.tagName==="SCRIPT"||el.classList.contains("hdr")) return;
+    if(el.querySelector&&el.querySelector(".scr")) return;
+    var cs=getComputedStyle(el);
+    if(cs.position!=="fixed"||cs.display==="none"||cs.visibility==="hidden"||cs.pointerEvents==="none") return;
+    var r=el.getBoundingClientRect();
+    if(r.width<W*0.9||r.height<H*0.8) return;
+    out.push({el:el,z:parseInt(cs.zIndex,10)||0});
+  });
+  return out.sort(function(a,b){ return a.z-b.z; }).map(function(x){ return x.el; });
+}
+function gmFermerFenetre(el){
+  var btns=Array.prototype.filter.call(el.querySelectorAll("button"),function(b){ return b.offsetParent!==null; });
+  var x=btns.filter(function(b){ return /^\s*[✕×✖]\s*$/.test(b.textContent); })[0];
+  if(x){ x.click(); }
+  else if(el.classList.contains("confirm-modal")||el.classList.contains("prompt-modal")||el.classList.contains("gm-sheet")){ el.click(); }
+  else{
+    var a=btns.filter(function(b){ return /^\s*(Annuler|Fermer|Retour|Plus tard)\s*$/i.test(b.textContent); })[0];
+    if(a) a.click();
+    else if(el.id) el.style.display="none";
+    else el.click();
+  }
+  // Rien n'a réagi : on retire la fenêtre (sauf celles de la page, qu'on masque).
+  if(document.body.contains(el)&&getComputedStyle(el).display!=="none"){
+    if(el.id) el.style.display="none"; else el.remove();
+  }
+}
+function gmEcranCourant(){ var s=document.querySelector(".scr.on"); return s?s.id.replace(/^scr-/,""):""; }
+function gmArmerRetour(){
+  if(document.documentElement.classList.contains("gm-public")) return;
+  if(!(history.state&&history.state.gmGarde)){ try{ history.pushState({gmGarde:1},""); }catch(e){} }
+}
+window.addEventListener("popstate",function(){
+  if(document.documentElement.classList.contains("gm-public")){
+    var fp=gmFenetresOuvertes(); if(fp.length){ gmFermerFenetre(fp[fp.length-1]); gmArmerRetour(); }
+    return;
+  }
+  var f=gmFenetresOuvertes();
+  if(f.length){ gmFermerFenetre(f[f.length-1]); gmArmerRetour(); return; }
+  var hbk=document.getElementById("hbk");
+  if(hbk&&hbk.classList.contains("show")&&getComputedStyle(hbk).display!=="none"){ hbk.click(); gmArmerRetour(); return; }
+  var nav=document.getElementById("bnav-main");
+  var acc=nav&&Array.prototype.filter.call(nav.querySelectorAll(".bni"),function(b){ return b.offsetParent!==null; })[0];
+  if(acc&&!acc.classList.contains("on")&&["auth","role-select","plateforme","club-suspendu"].indexOf(gmEcranCourant())<0){ acc.click(); gmArmerRetour(); return; }
+  var now=Date.now();
+  if(now-GM_RETOUR.sortie<2500) return; // 2e appui rapproché : on laisse fermer
+  GM_RETOUR.sortie=now;
+  if(typeof showToast==="function") showToast("Appuyez encore sur retour pour quitter");
+  // Le garde n'est pas remis tout de suite : le prochain retour ferme l'appli.
+  setTimeout(function(){ if(Date.now()-GM_RETOUR.sortie>=2400) gmArmerRetour(); },2500);
+});
+// Chrome ignore les entrées d'historique créées sans geste : on (ré)arme au toucher.
+["pointerdown","keydown"].forEach(function(t){ document.addEventListener(t,gmArmerRetour,true); });

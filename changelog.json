@@ -1,5 +1,21 @@
 [
   {
+    "v": "1791888784",
+    "titre": "Bouton retour du téléphone",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Le bouton retour d'Android (Samsung…) ne ferme plus l'appli : il ferme la fenêtre ouverte, revient à l'écran précédent, puis à l'Accueil. À l'Accueil, un 2e appui quitte l'appli."
+      }
+    ]
+  },
+  {
     "v": "1791887999",
     "titre": "Compta : rapprochement bancaire",
     "points": [
