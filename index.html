@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="gm-boot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -27,6 +27,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+<!-- Écran de démarrage : masque l'appli tant que la connexion n'est pas vérifiée
+     (sinon l'accueil du club s'affiche une seconde avant l'écran de connexion). -->
+<div id="gm-boot" aria-label="Chargement"><img src="icon-192.png" alt="" width="72" height="72"><div class="gm-boot-sp"></div></div>
 
 <!-- LOGO SVG ASMB (template cache) -->
 

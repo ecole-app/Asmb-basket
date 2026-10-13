@@ -1,5 +1,21 @@
 [
   {
+    "v": "1791907512",
+    "titre": "Ouverture de l'appli sans clignotement",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "À l'ouverture, un écran de chargement s'affiche le temps de vérifier la connexion : on ne voit plus l'accueil du club apparaître une seconde avant l'écran de connexion."
+      }
+    ]
+  },
+  {
     "v": "1791907094",
     "titre": "Tournois : le jour J",
     "points": [

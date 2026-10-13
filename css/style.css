@@ -386,3 +386,11 @@ html.gm-desk #scr-licences.on>*{grid-column:1/-1;min-width:0}
 html.gm-desk #scr-licences.on>#lic-essai-box,html.gm-desk #scr-licences.on>#lic-reinsc-box{grid-column:auto}
 html.gm-desk #scr-licences.on>#lic-essai-box:empty,html.gm-desk #scr-licences.on>#lic-reinsc-box:empty{display:none}
 html.gm-desk #scr-licences.on>div:empty{display:none}
+
+/* ═══ Écran de démarrage (html.gm-boot, retiré au premier showScr) ═══ */
+#gm-boot{display:none}
+html.gm-boot #gm-boot{display:flex;position:fixed;inset:0;z-index:9999;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:22px}
+html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)}
+.gm-boot-sp{width:28px;height:28px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);animation:gmBootTourne .8s linear infinite}
+@keyframes gmBootTourne{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.gm-boot-sp{animation-duration:2.4s}}

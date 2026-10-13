@@ -38,6 +38,8 @@ function gmModePublic(on){
   var n=document.getElementById("bnav-main"); if(n) n.style.display=on?"none":"";
 }
 function showScr(id){
+ // Premier écran choisi par le routage (connexion, accueil, page publique) : fin du démarrage.
+ document.documentElement.classList.remove("gm-boot");
  if(SCR_PUBLICS.indexOf(id)>=0) gmModePublic(true);
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
  var el=document.getElementById("scr-"+id);

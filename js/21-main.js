@@ -136,9 +136,11 @@ if(localStorage.getItem("gm_is_su")==="1"){
   buildPortal();
 }
 setTimeout(initAuthGate,80);
+// Filet de sécurité : l'écran de démarrage ne reste jamais plus de 10 s.
+setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1791907094";
+var APP_VERSION="1791907512";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
