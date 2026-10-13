@@ -638,6 +638,36 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Soirée : réservation par famille", () => {
+  const page = (o = {}) => ({ clubId: "A", eventId: "s1", actif: true, titre: "Soirée du club", type: "soiree", resa: true, places: 10, nb: 0,
+    tarifs: [{ nom: "Adulte", prix: 15, pour: "tous" }, { nom: "Enfant", prix: 8, pour: "tous" }], ...o });
+  const resa = (o = {}) => ({ eventId: "s1", prenom: "Nadia", nom: "Kaci", tel: "0612345678", tarifIdx: 0, tarifNom: "2 Adulte, 1 Enfant",
+    qte: { 0: 2, 1: 1 }, personnes: 3, montant: 38, mode: "especes", statut: "inscrit", paye: false, present: false, source: "public", at: serverTimestamp(), ...o });
+  async function reserver(db, code, data, nb) {
+    const b = writeBatch(db);
+    b.set(doc(db, "clubs/A/evt_inscrits/" + code), data);
+    b.update(doc(db, "evt_pages/A__s1"), { nb, dernier: code });
+    return b.commit();
+  }
+  beforeEach(async () => { await setDoc(doc(await as("dirA"), "evt_pages/A__s1"), page()); });
+  it("une famille réserve pour 3 personnes : bon prix, compteur +3, sans date de naissance", async () => {
+    await assertSucceeds(reserver(await as(null), "SOI-12345", resa(), 3));
+  });
+  it("refusé : prix faux, total de personnes faux, compteur +1, places dépassées, tarif inexistant, naissance", async () => {
+    const db = await as(null);
+    await assertFails(reserver(db, "SOI-11111", resa({ montant: 30 }), 3));
+    await assertFails(reserver(db, "SOI-11112", resa({ personnes: 2 }), 2));
+    await assertFails(reserver(db, "SOI-11113", resa(), 1));
+    await assertFails(reserver(db, "SOI-11114", resa({ qte: { 0: 10, 1: 1 }, personnes: 11, montant: 158 }), 11));
+    await assertFails(reserver(db, "SOI-11115", resa({ qte: { 0: 2, 2: 1 }, personnes: 3, montant: 30 }), 3));
+    await assertFails(reserver(db, "SOI-11116", resa({ naissance: "2016-05-04" }), 3));
+  });
+  it("hors soirée, les quantités sont refusées", async () => {
+    await setDoc(doc(await as("dirA"), "evt_pages/A__s1"), page({ resa: false, type: "stage" }));
+    await assertFails(reserver(await as(null), "STG-22222", resa({ naissance: "2016-05-04" }), 3));
+  });
+});
+
 describe("Événements : jours au choix (prix par jour, forfait)", () => {
   const J = ["2026-10-19", "2026-10-20", "2026-10-21"];
   const page = (o = {}) => ({ clubId: "A", eventId: "e1", actif: true, titre: "Stage", places: 2, nb: 0, nbJ: {},

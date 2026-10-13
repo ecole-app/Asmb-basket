@@ -11,8 +11,14 @@
 
 var EVT_URL_BASE="https://generalmanagerapp.fr/?evt=";
 var EVT_PREFIX={stage:"STG",tournoi:"TRN",soiree:"SOI"};
-// Tous les événements du club (pas les matchs ni les entraînements, qui ont leurs convocations).
-var EVT_TYPES_INSCR=["stage","tournoi","soiree","formation","autre"];
+// Inscriptions en ligne : tous les événements du club, sauf les matchs et entraînements
+// (convocations) et les tournois (les équipes passent par l'outil 🏆 Tournoi).
+var EVT_TYPES_INSCR=["stage","soiree","formation","autre"];
+// Affiche : tous les événements sauf matchs et entraînements.
+var EVT_TYPES_AFFICHE=["stage","tournoi","soiree","formation","autre"];
+// Soirée : réservation par famille (adultes, enfants…), un seul billet pour la réservation.
+function evtResa(x){ return !!x&&(x.resa===true||x.type==="soiree"); }
+var EVT_RESA_MAX=20;
 var EVT_MODES={especes:"Espèces",cheque:"Chèque",cb:"CB sur place",helloasso:"HelloAsso"};
 var EVT_MODES_COMPTA={especes:"Espèces",cheque:"Chèque",cb:"CB",helloasso:"CB"};
 
@@ -120,12 +126,14 @@ function evtPeutCompta(){
 
 // ── Bouton sur la carte d'événement (staff) ─────────────────────────
 function evtBoutonCarte(e){
-  if(EVT_TYPES_INSCR.indexOf(e.type)<0) return "";
   if(typeof isStaffUser==="function"&&!isStaffUser()) return "";
-  var on=e.inscr&&e.inscr.actif;
-  // Tournoi : les équipes s'inscrivent par l'outil Tournoi (le bouton billetterie reste pour les entrées payantes).
-  return "<button onclick=\"evtTableau('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?"Inscriptions":(e.type==="tournoi"?"Billetterie":"Ouvrir les inscriptions"))+"</button>"+
-    (typeof evtAffiche==="function"?"<button onclick=\"evtAffiche('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 10%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">🖼️ Affiche</button>":"");
+  var h="";
+  if(EVT_TYPES_INSCR.indexOf(e.type)>=0){
+    var on=e.inscr&&e.inscr.actif;
+    h+="<button onclick=\"evtTableau('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?(evtResa(e)?"Réservations":"Inscriptions"):(evtResa(e)?"Ouvrir les réservations":"Ouvrir les inscriptions"))+"</button>";
+  }
+  if(EVT_TYPES_AFFICHE.indexOf(e.type)<0) return h;
+  return h+(typeof evtAffiche==="function"?"<button onclick=\"evtAffiche('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 10%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">🖼️ Affiche</button>":"");
 }
 
 // ── Réglages des inscriptions (staff) ───────────────────────────────
@@ -133,22 +141,26 @@ function evtConfigurer(eid){
   var events=getEvents();
   var e=events.find(function(x){return x.id===eid;}); if(!e) return;
   var i=e.inscr||{};
+  var resa=evtResa(e);
   var tarifs=(i.tarifs&&i.tarifs.length)?i.tarifs.map(function(t){return Object.assign({gratuit:!(Number(t.prix)>0)},t);})
-    :[{nom:"Licencié du club",prix:"",pour:"lic"},{nom:"Extérieur",prix:"",pour:"ext"}];
+    :(resa?[{nom:"Adulte",prix:"",pour:"tous"},{nom:"Enfant (moins de 12 ans)",prix:"",pour:"tous"}]:[{nom:"Licencié du club",prix:"",pour:"lic"},{nom:"Extérieur",prix:"",pour:"ext"}]);
+  if(resa) tarifs=tarifs.slice(0,4);
   var modes=i.modes||["especes","cheque","cb"];
   var s=gmSheet("Inscriptions · "+(e.titre||eventTypeLabel(e.type)));
   var intro=document.createElement("div");
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:6px";
-  intro.textContent="Les familles du club inscrivent leur enfant depuis l'appli. Les extérieurs passent par un lien ou une affiche, sans créer de compte. Chaque inscrit reçoit un billet avec QR code.";
+  intro.textContent=resa
+    ?"Chaque famille réserve pour plusieurs personnes (adultes, enfants…) depuis l'appli ou par le lien, sans compte. Une seule réservation = un seul billet avec QR code, scanné à l'entrée."
+    :"Les familles du club inscrivent leur enfant depuis l'appli. Les extérieurs passent par un lien ou une affiche, sans créer de compte. Chaque inscrit reçoit un billet avec QR code.";
   s.body.appendChild(intro);
   var lab=document.createElement("label");
   lab.style.cssText="display:flex;align-items:center;gap:10px;padding:12px 0;font-size:14px;font-weight:700;color:var(--txt);cursor:pointer";
   var cbA=document.createElement("input"); cbA.type="checkbox"; cbA.checked=i.actif!==false;
   cbA.style.cssText="width:20px;height:20px;accent-color:var(--dkg)";
-  lab.appendChild(cbA); lab.appendChild(document.createTextNode("Inscriptions ouvertes"));
+  lab.appendChild(cbA); lab.appendChild(document.createTextNode(resa?"Réservations ouvertes":"Inscriptions ouvertes"));
   s.body.appendChild(lab);
 
-  var jr=evtJoursPlage(e.date,e.dateFin), parJour=!!(i.parJour&&jr.length>1);
+  var jr=resa?[]:evtJoursPlage(e.date,e.dateFin), parJour=!!(i.parJour&&jr.length>1);
   var lj=document.createElement("label");
   lj.style.cssText="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--card);cursor:"+(jr.length>1?"pointer":"default")+(jr.length>1?"":";opacity:.7");
   var cbJ=document.createElement("input"); cbJ.type="checkbox"; cbJ.checked=parJour; cbJ.disabled=jr.length<2; cbJ.style.cssText="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0;margin-top:1px";
@@ -157,9 +169,9 @@ function evtConfigurer(eid){
     '<div style="font-size:12px;color:var(--mut);line-height:1.4;margin-top:2px">'+(jr.length>1
       ? authEsc("Du "+evtJourTxt(jr[0])+" au "+evtJourTxt(jr[jr.length-1])+" ("+jr.length+" jours) : chacun coche les jours qui l'intéressent, ou prend tous les jours. Le tarif devient « par jour », avec un forfait facultatif pour tous les jours.")
       : "Pour proposer plusieurs jours, mettez une date de fin à l'événement (« du … au … »), puis revenez ici.")+'</div>';
-  lj.appendChild(cbJ); lj.appendChild(tj); s.body.appendChild(lj);
+  lj.appendChild(cbJ); lj.appendChild(tj); if(!resa) s.body.appendChild(lj);
   cbJ.addEventListener("change",function(){ parJour=cbJ.checked; peindreTarifs(); iP.placeholder=parJour?"Places par jour (vide = illimité)":"Places (vide = illimité)"; });
-  gmSection(s.body,"Tarifs","Prix différents pour les licenciés du club et les extérieurs, ou « Gratuit ». Avec le choix des jours, le prix est par jour.");
+  gmSection(s.body,"Tarifs",resa?"Prix par personne (4 tarifs au plus) : la famille choisit combien de places de chaque tarif. « Gratuit » possible.":"Prix différents pour les licenciés du club et les extérieurs, ou « Gratuit ». Avec le choix des jours, le prix est par jour.");
   var tBox=document.createElement("div"); s.body.appendChild(tBox);
   function peindreTarifs(){
     tBox.innerHTML="";
@@ -175,7 +187,7 @@ function evtConfigurer(eid){
       var w=document.createElement("select"); w.className="form-select"; w.style.cssText="flex:1.3;min-width:90px";
       [["lic","Licenciés"],["ext","Extérieurs"],["tous","Tous"]].forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; if((t.pour||"tous")===o[0]) op.selected=true; w.appendChild(op); });
       w.addEventListener("change",function(){ t.pour=w.value; });
-      r.appendChild(n); r.appendChild(p); r.appendChild(gr); r.appendChild(w);
+      r.appendChild(n); r.appendChild(p); r.appendChild(gr); if(!resa) r.appendChild(w);
       if(parJour&&!t.gratuit){
         var fo=document.createElement("input"); fo.className="form-input"; fo.type="number"; fo.min="0"; fo.step="0.5"; fo.value=t.forfait||""; fo.placeholder="Forfait tous les jours (facultatif)"; fo.setAttribute("aria-label","Forfait tous les jours");
         fo.style.cssText="flex:1 1 100%;order:9";
@@ -190,7 +202,7 @@ function evtConfigurer(eid){
       }
       tBox.appendChild(r);
     });
-    if(tarifs.length<6){
+    if(tarifs.length<(resa?4:6)){
       var add=document.createElement("button"); add.type="button"; add.textContent="+ Ajouter un tarif";
       add.style.cssText="border:none;background:none;color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;padding:4px 0";
       add.addEventListener("click",function(){ tarifs.push({nom:"",prix:"",pour:"tous"}); peindreTarifs(); majModes(); });
@@ -220,13 +232,13 @@ function evtConfigurer(eid){
 
   gmSection(s.body,"Places et date limite");
   var pl=document.createElement("div"); pl.style.cssText="display:flex;gap:8px";
-  var iP=document.createElement("input"); iP.className="form-input"; iP.type="number"; iP.min="0"; iP.max="5000"; iP.placeholder=parJour?"Places par jour (vide = illimité)":"Places (vide = illimité)"; iP.value=i.places||""; iP.style.flex="1";
+  var iP=document.createElement("input"); iP.className="form-input"; iP.type="number"; iP.min="0"; iP.max="5000"; iP.placeholder=resa?"Places (personnes, vide = illimité)":(parJour?"Places par jour (vide = illimité)":"Places (vide = illimité)"); iP.value=i.places||""; iP.style.flex="1";
   var iL=document.createElement("input"); iL.className="form-input"; iL.type="date"; iL.value=i.limite||""; iL.style.flex="1"; iL.setAttribute("aria-label","Date limite d'inscription");
   pl.appendChild(iP); pl.appendChild(iL); s.body.appendChild(pl);
 
   gmSection(s.body,"Programme (facultatif)","Affiché sur la page d'inscription.");
   var prog=document.createElement("textarea"); prog.className="form-input"; prog.rows=3; prog.maxLength=600;
-  prog.placeholder="Ex : 9h-17h, repas du midi compris, prévoir gourde et baskets propres";
+  prog.placeholder=resa?"Ex : apéritif à 19h, repas, DJ, tombola. Menu enfant disponible.":"Ex : 9h-17h, repas du midi compris, prévoir gourde et baskets propres";
   prog.value=i.programme||""; s.body.appendChild(prog);
 
   var row=gmRow(s.body);
@@ -262,7 +274,7 @@ function evtPublierPage(e, inscr){
   var page={
     clubId:window.CURRENT_CLUB_ID, eventId:String(e.id), actif:!!inscr.actif, type:e.type||"",
     titre:String(e.titre||"").slice(0,100), date:e.date||"", dateFin:e.dateFin||"", heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120), adresse:String(e.adresse||"").slice(0,140),
-    tarifs:inscr.tarifs, parJour:!!inscr.parJour, jours:inscr.parJour?evtJoursPlage(e.date,e.dateFin):[], modes:inscr.modes, helloasso:inscr.helloasso||"", places:inscr.places||0, limite:inscr.limite||"",
+    tarifs:inscr.tarifs, parJour:!!inscr.parJour, resa:evtResa(e), jours:inscr.parJour?evtJoursPlage(e.date,e.dateFin):[], modes:inscr.modes, helloasso:inscr.helloasso||"", places:inscr.places||0, limite:inscr.limite||"",
     programme:inscr.programme||"", nom:c.name||"", logo:c.logo||null, couleur:c.couleur||null, couleur2:c.couleur2||null,
     liens:c.liens||{}, majLe:Date.now()
   };
@@ -295,14 +307,15 @@ function evtTableau(eid){
     var page=r[0].exists()?r[0].data():{nb:0};
     var items=[]; r[1].forEach(function(d){ var v=d.data(); v._id=d.id; items.push(v); });
     items.sort(function(a,b){ return ((a.at&&a.at.toMillis)?a.at.toMillis():0)-((b.at&&b.at.toMillis)?b.at.toMillis():0); });
-    evtRapprocher(items);
+    if(!evtResa(e)) evtRapprocher(items);
     if(typeof entreeReporter==="function") entreeReporter(eid, items.filter(function(x){return x.statut!=="annule";})).then(function(){ peindre(); });
     var jourSel=null;
     function peindre(){
       var actifs=items.filter(function(x){return x.statut!=="annule";});
       var encaisse=0, attendu=0;
       actifs.forEach(function(x){ attendu+=Number(x.montant)||0; if(x.paye) encaisse+=Number(x.montant)||0; });
-      var parJ=!!e.inscr.parJour, places=parJ?0:(e.inscr.places||0);
+      var parJ=!!e.inscr.parJour, places=parJ?0:(e.inscr.places||0), resa=evtResa(e);
+      var pers=0; actifs.forEach(function(x){ pers+=Number(x.personnes)>0?Number(x.personnes):1; });
       var cptJ={}; if(parJ) actifs.forEach(function(x){ (x.jours||[]).forEach(function(j){ cptJ[j]=(cptJ[j]||0)+1; }); });
       var jTxt=parJ?(page.jours||evtJoursPlage(e.date,e.dateFin)).map(function(j){ return evtJourTxt(j)+" : "+(cptJ[j]||0)+(e.inscr.places?" / "+e.inscr.places:""); }).join(" · "):"";
       if(!peindre.syncA){ peindre.syncA=1;
@@ -313,7 +326,7 @@ function evtTableau(eid){
         if(diff){ var nn={}; (page.jours||[]).forEach(function(j){ nn[j]=cptJ[j]||0; }); page.nbJ=nn; window.fbUpdateDoc(pageRef,{nbJ:nn}).catch(function(){}); } }
       head.innerHTML=
         '<div style="display:flex;gap:8px;margin-bottom:10px">'+
-          evtStat(actifs.length+(places?" / "+places:""),"inscrit"+(actifs.length>1?"s":""))+
+          (resa?evtStat(pers+(places?" / "+places:""),"personne"+(pers>1?"s":"")+" · "+actifs.length+" résa"):evtStat(actifs.length+(places?" / "+places:""),"inscrit"+(actifs.length>1?"s":"")))+
           evtStat(evtPrix(encaisse),"encaissé"+(attendu>encaisse?" sur "+evtPrix(attendu):""))+
           evtStat(actifs.filter(function(x){return x.present;}).length,"présent"+(actifs.filter(function(x){return x.present;}).length>1?"s":""))+
         '</div>'+
@@ -411,7 +424,7 @@ function evtListe(list, items, e, page, repeindre){
     var h=document.createElement("div"); h.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px";
     var g=document.createElement("div"); g.style.minWidth="0";
     var n=document.createElement("div"); n.style.cssText="font-size:14px;font-weight:800;color:var(--txt)";
-    n.textContent=(x.prenom||"")+" "+(x.nom||"")+(typeof essaiAge==="function"&&essaiAge(x.naissance)?" · "+essaiAge(x.naissance):"");
+    n.textContent=(x.prenom||"")+" "+(x.nom||"")+(Number(x.personnes)>0?" · 👥 "+x.personnes:"")+(typeof essaiAge==="function"&&essaiAge(x.naissance)?" · "+essaiAge(x.naissance):"");
     var d=document.createElement("div"); d.style.cssText="font-size:12px;color:var(--txt2);margin-top:2px";
     d.textContent=(x.tarifNom||"")+(evtCat(x)?" · "+evtCat(x):"")+" · "+evtTarifTxt(x.montant)+(EVT_MODES[x.mode]?" · "+EVT_MODES[x.mode]:"")+(x.clubOrigine?" · "+x.clubOrigine:"");
     if(x.jours&&x.jours.length){ var dj=document.createElement("div"); dj.style.cssText="font-size:12px;color:var(--dkg);font-weight:700;margin-top:2px"; dj.textContent="📅 "+evtJoursTxt(x.jours,(page.jours||[]).length); g.appendChild(dj); }
@@ -422,7 +435,8 @@ function evtListe(list, items, e, page, repeindre){
     function pill(t,bg,fg){ var p=document.createElement("span"); p.style.cssText="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;background:"+bg+";color:"+(fg||"#fff"); p.textContent=t; pills.appendChild(p); }
     if(x.statut==="annule") pill("Annulé","var(--bdr)","var(--mut)");
     else {
-      if(x.playerId) pill("Licencié ✓","var(--ltg)");
+      if(evtResa(e)){}
+      else if(x.playerId) pill("Licencié ✓","var(--ltg)");
       else if(evtEstLicTarif(x,page)) pill("À vérifier","#E8670A");
       else pill("Extérieur","var(--bdr)","var(--txt2)");
       if(Number(x.montant)>0) pill(x.paye?"Payé":"À payer",x.paye?"var(--grn)":"rgba(192,57,43,.12)",x.paye?"#fff":"var(--red)");
@@ -470,7 +484,7 @@ function evtMarquerPaye(x, e, paye){
 function evtAnnuler(x, e){
   var pageRef=window.fbDoc(window.fbDb,"evt_pages",evtPageId(e.id));
   return window.fbGetDoc(pageRef).then(function(snap){
-    var nb=snap.exists()?Math.max(0,(snap.data().nb||0)-1):0;
+    var nb=snap.exists()?Math.max(0,(snap.data().nb||0)-(Number(x.personnes)>0?Number(x.personnes):1)):0;
     var b=window.fbWriteBatch();
     b.update(window.fbDoc(window.fbDb,"evt_inscrits",x._id),{statut:"annule"});
     if(snap.exists()){
@@ -537,8 +551,10 @@ function evtInscrire(pid, data, essai){
     if(!snap.exists()) throw {code:"introuvable"};
     var p=snap.data();
     if(p.actif!==true) throw {code:"ferme"};
-    var maj={nb:(p.nb||0)+1};
-    if(p.parJour){
+    var pers=(p.resa&&data.personnes>0)?data.personnes:1;
+    var maj={nb:(p.nb||0)+pers};
+    if(p.resa){ if(p.places&&(p.nb||0)+pers>p.places) throw {code:"complet",reste:Math.max(0,p.places-(p.nb||0))}; }
+    else if(p.parJour){
       var js=data.jours||[], nbJ=Object.assign({},p.nbJ||{});
       if(!js.length||js.some(function(j){ return (p.jours||[]).indexOf(j)<0; })) throw {code:"jours"};
       js.forEach(function(j){ if(p.places&&(nbJ[j]||0)>=p.places) throw {code:"complet",jour:j}; nbJ[j]=(nbJ[j]||0)+1; });
@@ -573,6 +589,7 @@ function evtBilletHtml(b, p){
     '<div class="evt-qr" data-code="'+authEsc(b.code)+'" style="display:flex;justify-content:center;margin:14px 0 8px"></div>'+
     '<div style="font-size:22px;font-weight:900;letter-spacing:2px;font-family:monospace;color:var(--dkg)">'+authEsc(b.code)+'</div>'+
     (b.jours&&b.jours.length?'<div style="font-size:13px;font-weight:800;color:var(--txt);margin-top:6px">📅 '+authEsc(evtJoursTxt(b.jours,(p.jours||[]).length))+'</div>':'')+
+    (Number(b.personnes)>0?'<div style="font-size:14px;font-weight:900;color:var(--txt);margin-top:6px">👥 '+b.personnes+' personne'+(b.personnes>1?"s":"")+'</div>':'')+
     '<div style="font-size:12px;color:var(--txt2);margin-top:6px">'+authEsc((b.tarifNom||"")+" · "+evtTarifTxt(b.montant)+(EVT_MODES[b.mode]?" · "+EVT_MODES[b.mode]:""))+'</div>'+
   '</div>';
 }
@@ -729,6 +746,73 @@ function evtEntete(p){
     (places?'<div style="display:inline-block;margin-top:10px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.18);font-size:12px;font-weight:800">'+authEsc(places)+'</div>':'')+
   '</div>';
 }
+// ── Soirée : formulaire de réservation (page publique et appli) ─────
+// La famille choisit combien de places de chaque tarif ; un seul billet pour tout le monde.
+function evtFormResa(host,p,o){
+  o=o||{};
+  var tarifs=(p.tarifs||[]).slice(0,4), modes=p.modes||[], qte=tarifs.map(function(){ return 0; }), mode=modes.length===1?modes[0]:null;
+  var reste=p.places?Math.max(0,p.places-(p.nb||0)):null;
+  host.innerHTML=
+    '<div class="form-label" style="margin-bottom:8px">Combien de personnes ?</div><div id="rs-qte" style="display:flex;flex-direction:column;gap:8px"></div>'+
+    '<div id="rs-total" style="font-size:15px;font-weight:900;color:var(--dkg);margin:10px 0 16px"></div>'+
+    '<div class="form-group"><label class="form-label" for="rs-prenom">Prénom</label><input class="form-input" id="rs-prenom" maxlength="40" autocomplete="given-name"></div>'+
+    '<div class="form-group"><label class="form-label" for="rs-nom">Nom de la réservation</label><input class="form-input" id="rs-nom" maxlength="60" autocomplete="family-name"></div>'+
+    '<div class="form-group"><label class="form-label" for="rs-tel">Téléphone</label><input class="form-input" id="rs-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
+    '<div class="form-group"><label class="form-label" for="rs-email">E-mail (facultatif)</label><input class="form-input" id="rs-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email"></div>'+
+    '<div id="rs-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="rs-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
+    (o.public?'<input id="rs-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">':'')+
+    '<button id="rs-go" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">Réserver</button>';
+  ["prenom","nom","tel","email"].forEach(function(k){ if(o[k]) host.querySelector("#rs-"+k).value=o[k]; });
+  function total(){ var n=0, m=0; qte.forEach(function(q,i){ n+=q; m+=q*(Number(tarifs[i].prix)||0); }); return {n:n,m:Math.round(m*100)/100}; }
+  function peindre(){
+    var box=host.querySelector("#rs-qte"); box.innerHTML="";
+    tarifs.forEach(function(t,i){
+      var r=document.createElement("div"); r.style.cssText="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);border:2px solid "+(qte[i]?"var(--dkg)":"var(--bdr)")+";background:var(--card)";
+      r.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(t.nom)+'</div><div style="font-size:12px;color:var(--mut);font-weight:700">'+(Number(t.prix)>0?evtPrix(t.prix)+" / personne":"Gratuit")+'</div></div>'+
+        '<button type="button" data-i="'+i+'" data-d="-1" aria-label="Une place de moins" style="width:38px;height:38px;border-radius:50%;border:none;background:var(--bdr);color:var(--txt);font-size:20px;font-weight:900;cursor:pointer">−</button>'+
+        '<div style="min-width:26px;text-align:center;font-size:18px;font-weight:900;color:var(--txt);font-variant-numeric:tabular-nums">'+qte[i]+'</div>'+
+        '<button type="button" data-i="'+i+'" data-d="1" aria-label="Une place de plus" style="width:38px;height:38px;border-radius:50%;border:none;background:var(--dkg);color:#fff;font-size:20px;font-weight:900;cursor:pointer">+</button>';
+      box.appendChild(r);
+    });
+    var T=total();
+    host.querySelector("#rs-total").textContent=T.n?(T.n+" personne"+(T.n>1?"s":"")+" · "+(T.m>0?evtPrix(T.m):"Gratuit")+(reste!=null?" · "+reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":""):"")):"Ajoutez au moins une personne"+(reste!=null?" ("+reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":"")+")":"")+".";
+    host.querySelector("#rs-pay-g").style.display=T.m>0?"block":"none";
+    var mb=host.querySelector("#rs-modes"); mb.innerHTML="";
+    modes.forEach(function(m){
+      var b=document.createElement("button"); b.type="button"; var on=mode===m;
+      b.style.cssText="padding:9px 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--txt)");
+      b.textContent=EVT_MODES[m]+(m==="helloasso"?" (en ligne)":""); b.addEventListener("click",function(){ mode=m; peindre(); }); mb.appendChild(b);
+    });
+  }
+  host.querySelector("#rs-qte").addEventListener("click",function(ev){
+    var b=ev.target.closest("[data-i]"); if(!b) return;
+    var i=parseInt(b.dataset.i,10), d=parseInt(b.dataset.d,10), T=total();
+    if(d>0&&(qte[i]>=EVT_RESA_MAX||T.n>=40)) return;
+    if(d>0&&reste!=null&&T.n>=reste) return askAlert(reste?"Il ne reste que "+reste+" place"+(reste>1?"s":"")+".":"C'est complet.");
+    qte[i]=Math.max(0,qte[i]+d); peindre();
+  });
+  peindre();
+  host.querySelector("#rs-go").addEventListener("click",function(){
+    var btn=this, hp=host.querySelector("#rs-hp");
+    if(hp&&hp.value){ if(o.robot) o.robot(); return; }
+    var v=function(k){ return String((host.querySelector("#rs-"+k)||{}).value||"").trim(); };
+    var T=total(), tel=v("tel").replace(/[\s.\-()]/g,""), mail=v("email").slice(0,100);
+    if(!T.n) return askAlert("Ajoutez au moins une personne.");
+    if(!v("prenom")) return askAlert("Indiquez le prénom.");
+    if(!v("nom")) return askAlert("Indiquez le nom de la réservation.");
+    if(!/^[+]?[0-9]{9,15}$/.test(tel)) return askAlert("Numéro de téléphone invalide.");
+    if(mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return askAlert("Adresse e-mail invalide.");
+    if(T.m>0&&!mode) return askAlert("Choisissez le mode de paiement.");
+    var q={}, compo=[], premier=-1;
+    qte.forEach(function(n,i){ if(n>0){ q[String(i)]=n; compo.push(n+" "+tarifs[i].nom); if(premier<0) premier=i; } });
+    var data={eventId:String(p.eventId), prenom:v("prenom").slice(0,40), nom:v("nom").slice(0,60), tel:tel,
+      tarifIdx:premier, tarifNom:compo.join(", ").slice(0,40), qte:q, personnes:T.n, montant:T.m,
+      mode:T.m>0?mode:"gratuit", statut:"inscrit", paye:false, present:false, source:o.public?"public":"app"};
+    if(mail) data.email=mail;
+    if(o.auteurUid) data.auteurUid=o.auteurUid;
+    if(o.envoyer) o.envoyer(data,btn);
+  });
+}
 function rendreEvtPublic(el,p,pid){
   var auj=new Date().toISOString().slice(0,10);
   var mes=evtMesBillets(pid), annules=p.annules||[];
@@ -740,10 +824,34 @@ function rendreEvtPublic(el,p,pid){
     return evtBilletHtml(b,p)+evtBoutonsBillet(b,p,pid);
   }).join("")+'</div>':'';
   var ferme=p.actif!==true||(p.limite&&p.limite<auj)||((p.dateFin||p.date||auj)<auj);
-  var complet=p.parJour?(p.places>0&&(p.jours||[]).length>0&&(p.jours||[]).every(function(j){ return ((p.nbJ||{})[j]||0)>=p.places; })):(p.places&&(p.nb||0)>=p.places);
+  var complet=p.resa?(p.places&&(p.nb||0)>=p.places):p.parJour?(p.places>0&&(p.jours||[]).length>0&&(p.jours||[]).every(function(j){ return ((p.nbJ||{})[j]||0)>=p.places; })):(p.places&&(p.nb||0)>=p.places);
   if(ferme||complet){
     el.innerHTML=evtEntete(p)+mesHtml+essaiErreur(complet?"C'est complet ! Contactez le club pour la liste d'attente.":"Les inscriptions sont fermées.")+'<div style="padding:0 16px 24px">'+clubLiensHtml()+'</div>';
     evtDessinerQr(el,pid); return;
+  }
+  if(p.resa){
+    el.innerHTML=evtEntete(p)+mesHtml+'<div style="padding:16px 16px 40px">'+
+      (p.programme?'<div style="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:14px;white-space:pre-line">'+authEsc(p.programme)+'</div>':'')+
+      '<div id="evt-resa"></div>'+
+      '<div style="font-size:11px;color:var(--mut);line-height:1.45;margin-top:10px">Vos coordonnées servent uniquement au club pour organiser l\'événement. Elles ne sont ni publiées ni transmises.</div>'+
+      '<div style="margin-top:24px">'+clubLiensHtml()+'</div></div>';
+    evtDessinerQr(el,pid);
+    evtFormResa(el.querySelector("#evt-resa"),p,{public:true,robot:function(){ el.innerHTML=evtEntete(p)+essaiMerci(""); },envoyer:function(data,btn){
+      btn.disabled=true; btn.textContent="Réservation…";
+      evtInscrire(pid,data).then(function(r){
+        var billet=Object.assign({code:r.code},data);
+        evtGarderBillet(pid,billet);
+        p.nb=(r.page.nb||0)+data.personnes;
+        evtConfirmation(el,p,pid,billet);
+      }).catch(function(err){
+        btn.disabled=false; btn.textContent="Réserver";
+        var c=err&&err.code;
+        if(c==="complet") askAlert(err.reste?"Il ne reste que "+err.reste+" place"+(err.reste>1?"s":"")+".":"Désolé, c'est complet.");
+        else if(c==="ferme") askAlert("Les réservations viennent de fermer.");
+        else askAlert("La réservation n'a pas fonctionné. Réessayez, ou contactez directement le club.");
+      });
+    }});
+    return;
   }
   var tarifs=p.tarifs||[], modes=p.modes||[];
   var tIdx=tarifs.length===1?0:null, mode=modes.length===1?modes[0]:null;
@@ -857,10 +965,10 @@ function evtConfirmation(el,p,pid,b){
     :(Number(b.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:10px">À régler sur place : '+authEsc(evtPrix(b.montant))+' ('+authEsc(EVT_MODES[b.mode]||"")+')</div>':'');
   el.innerHTML=evtEntete(p)+
     '<div style="padding:18px 16px 40px">'+
-      '<div style="text-align:center;font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px">✅ Inscription enregistrée</div>'+
+      '<div style="text-align:center;font-size:18px;font-weight:900;color:var(--txt);margin-bottom:4px">✅ '+(p.resa?"Réservation enregistrée":"Inscription enregistrée")+'</div>'+
       '<div style="text-align:center;font-size:13px;color:var(--mut);line-height:1.5;margin-bottom:14px">Gardez ce billet : il sera scanné à l\'entrée. Enregistrez l\'image ou envoyez-vous le lien.</div>'+
       evtBilletHtml(b,p)+evtBoutonsBillet(b,p,pid)+pay+
-      '<button id="evt-autre" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:14px;font-weight:700;border:none;cursor:pointer">Inscrire une autre personne</button>'+
+      '<button id="evt-autre" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:14px;font-weight:700;border:none;cursor:pointer">'+(p.resa?"Faire une autre réservation":"Inscrire une autre personne")+'</button>'+
     '</div>';
   evtDessinerQr(el,pid);
   document.getElementById("evt-autre").addEventListener("click",function(){ rendreEvtPublic(el,p,pid); window.scrollTo(0,0); });
@@ -878,20 +986,51 @@ function evtCartesParent(){
   wrap.appendChild(t);
   evs.forEach(function(e){
     var d=document.createElement("div"); d.className="event-card"; d.style.borderLeft="4px solid "+eventTypeColor(e.type);
-    var lic=(e.inscr.tarifs||[]).find(function(x){return x.pour==="lic";})||(e.inscr.tarifs||[])[0];
+    var resa=evtResa(e);
+    var lic=resa?null:((e.inscr.tarifs||[]).find(function(x){return x.pour==="lic";})||(e.inscr.tarifs||[])[0]);
     d.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+eventTypeColor(e.type)+'">'+authEsc(eventTypeLabel(e.type))+'</span><span style="font-size:11px;color:var(--mut)">'+authEsc(evtDateTxt(e))+'</span></div>'+
       '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(e.titre||"")+'</div>'+
       (e.lieu?'<div style="font-size:11px;color:var(--mut);margin-top:2px">📍 '+authEsc(e.lieu)+'</div>':'')+
       (lic?'<div style="font-size:12px;color:var(--dkg);font-weight:800;margin-top:4px">'+authEsc(lic.nom+" : "+(lic.prix?evtPrix(lic.prix)+(e.inscr.parJour?" / jour":""):"gratuit")+((e.inscr.parJour&&Number(lic.forfait)>0)?" · forfait "+evtPrix(lic.forfait):""))+'</div>':'')+
-      (e.inscr.parJour?'<div style="font-size:11px;color:var(--mut);margin-top:2px">Choisissez les jours qui vous intéressent</div>':'');
+      (e.inscr.parJour?'<div style="font-size:11px;color:var(--mut);margin-top:2px">Choisissez les jours qui vous intéressent</div>':'')+
+      (resa?'<div style="font-size:12px;color:var(--dkg);font-weight:800;margin-top:4px">'+authEsc((e.inscr.tarifs||[]).map(function(t){ return t.nom+" : "+(t.prix?evtPrix(t.prix):"gratuit"); }).join(" · "))+'</div>':'');
     var b=document.createElement("button");
     b.style.cssText="margin-top:10px;width:100%;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer";
-    b.textContent="Inscrire mon enfant";
-    b.addEventListener("click",function(){ evtInscrireEnfant(e); });
+    b.textContent=resa?"Réserver":"Inscrire mon enfant";
+    b.addEventListener("click",function(){ if(resa) evtReserverApp(e); else evtInscrireEnfant(e); });
     d.appendChild(b);
     wrap.appendChild(d);
   });
   return wrap;
+}
+// Soirée réservée depuis l'appli (parent, coach…) : même formulaire que la page publique.
+function evtReserverApp(e){
+  var pageId=evtPageId(e.id), s=gmSheet(e.titre||eventTypeLabel(e.type)), ins=e.inscr||{};
+  var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:8px"; info.textContent=evtDateTxt(e)+(e.lieu?" · "+e.lieu:"");
+  s.body.appendChild(info);
+  if(ins.programme){ var pg=document.createElement("div"); pg.style.cssText="font-size:12px;color:var(--txt2);line-height:1.5;white-space:pre-line;margin-bottom:10px"; pg.textContent=ins.programme; s.body.appendChild(pg); }
+  var host=document.createElement("div"); s.body.appendChild(host);
+  host.innerHTML='<div style="color:var(--mut);font-size:12px;padding:10px 0">Chargement…</div>';
+  var u=window.ASMB_USER||{}, mail=String(u.email||"");
+  window.fbGetDoc(window.fbDoc(window.fbDb,"evt_pages",pageId)).then(function(sn){
+    var p=sn.exists()?sn.data():Object.assign({eventId:String(e.id),nb:0},ins);
+    evtFormResa(host,p,{tel:String(u.phone||"").replace(/[\s.\-()]/g,""),email:(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)&&mail.indexOf("@joueur.")<0)?mail:"",
+      auteurUid:u.uid||(window.fbAuth&&window.fbAuth.currentUser&&window.fbAuth.currentUser.uid)||"",
+      envoyer:function(data,btn){
+        btn.disabled=true;
+        evtInscrire(pageId,data).then(function(r){
+          var billet=Object.assign({code:r.code},data);
+          evtGarderBillet(pageId,billet);
+          s.body.innerHTML=evtBilletHtml(billet,Object.assign({},r.page))+evtBoutonsBillet(billet,Object.assign({},r.page),pageId)+
+            ((data.mode==="helloasso"&&ins.helloasso)?'<a href="'+authEsc(ins.helloasso)+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
+              (Number(data.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center">À régler sur place : '+authEsc(evtPrix(data.montant))+'</div>':''));
+          evtDessinerQr(s.body,pageId);
+        }).catch(function(err){
+          btn.disabled=false; var c=err&&err.code;
+          askAlert(c==="complet"?(err.reste?"Il ne reste que "+err.reste+" place"+(err.reste>1?"s":"")+".":"Désolé, c'est complet."):c==="ferme"?"Les réservations sont fermées.":"La réservation n'a pas fonctionné. Réessayez dans un instant.");
+        });
+      }});
+  }).catch(function(){ host.innerHTML='<div style="color:var(--red);font-size:12px">Connexion impossible. Réessayez.</div>'; });
 }
 function evtInscrireEnfant(e){
   var enfants=(typeof mesEnfants==="function")?mesEnfants():[];

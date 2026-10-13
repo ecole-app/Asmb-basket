@@ -335,7 +335,8 @@ service cloud.firestore {
                           && request.resource.data.eventId == resource.data.eventId)
         || (resource.data.actif == true
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nb','dernier','nbJ'])
-            && request.resource.data.nb == resource.data.get('nb', 0) + 1
+            && request.resource.data.nb == resource.data.get('nb', 0)
+                 + getAfter(/databases/$(database)/documents/clubs/$(resource.data.clubId)/evt_inscrits/$(request.resource.data.dernier)).data.get('personnes', 1)
             // Choix des jours : les places se comptent par jour (nbJ, côté appli) ; le total n'est pas borné.
             && (resource.data.get('parJour', false) == true || resource.data.get('places', 0) == 0 || request.resource.data.nb <= resource.data.places)
             // nbJ ne peut bouger que pour les jours du billet créé dans la même opération.
@@ -624,8 +625,22 @@ service cloud.firestore {
         function evtPage(eventId) { return /databases/$(database)/documents/evt_pages/$(clubId + '__' + eventId); }
         // Prix du billet : tarif fixe, ou « par jour » (jours choisis parmi ceux de la page,
         // forfait facultatif quand tous les jours sont pris).
+        // Soirée (resa) : quantités par tarif (4 au plus), total de personnes et prix recalculés.
+        function rq(d, k) { return d.qte.get(k, 0); }
+        function rpx(p, i) { return p.tarifs.size() > i ? p.tarifs[i].prix : 0; }
+        function rqOk(d, p, k, i) { return rq(d, k) is int && rq(d, k) >= 0 && rq(d, k) <= 20 && (p.tarifs.size() > i || rq(d, k) == 0); }
+        function evtResaOk(p, d) {
+          return d.get('qte', null) is map && d.qte.keys().hasOnly(['0','1','2','3'])
+            && rqOk(d, p, '0', 0) && rqOk(d, p, '1', 1) && rqOk(d, p, '2', 2) && rqOk(d, p, '3', 3)
+            && d.get('personnes', 0) is int && d.personnes >= 1 && d.personnes <= 40
+            && d.personnes == rq(d, '0') + rq(d, '1') + rq(d, '2') + rq(d, '3')
+            && !('jours' in d)
+            && math.abs(d.montant - (rq(d, '0') * rpx(p, 0) + rq(d, '1') * rpx(p, 1) + rq(d, '2') * rpx(p, 2) + rq(d, '3') * rpx(p, 3))) < 0.01;
+        }
         function evtMontantOk(p, d) {
-          return p.get('parJour', false) != true
+          return p.get('resa', false) == true ? evtResaOk(p, d)
+            : ('qte' in d || 'personnes' in d) ? false
+            : p.get('parJour', false) != true
             ? (!('jours' in d) && d.montant == p.tarifs[d.tarifIdx].prix)
             : (d.get('jours', null) is list && d.jours.size() >= 1 && d.jours.size() <= 14
                && d.jours.toSet().size() == d.jours.size()
@@ -635,15 +650,18 @@ service cloud.firestore {
         }
         allow create: if clubStatus(clubId) == 'active'
           && code.matches('^(STG|TRN|SOI|EVT)-[0-9]{5}$')
-          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','cat','email','mode','statut','paye','present','playerId','auteurUid','source','at'])
+          && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','cat','email','mode','statut','paye','present','playerId','auteurUid','source','at','qte','personnes'])
           && request.resource.data.eventId is string
           && get(evtPage(request.resource.data.eventId)).data.actif == true
           && get(evtPage(request.resource.data.eventId)).data.clubId == clubId
-          && getAfter(evtPage(request.resource.data.eventId)).data.get('nb', 0) == get(evtPage(request.resource.data.eventId)).data.get('nb', 0) + 1
+          && getAfter(evtPage(request.resource.data.eventId)).data.get('nb', 0) == get(evtPage(request.resource.data.eventId)).data.get('nb', 0) + request.resource.data.get('personnes', 1)
           && getAfter(evtPage(request.resource.data.eventId)).data.get('dernier', '') == code
           && request.resource.data.prenom is string && request.resource.data.prenom.size() >= 1 && request.resource.data.prenom.size() <= 40
           && request.resource.data.nom is string && request.resource.data.nom.size() >= 1 && request.resource.data.nom.size() <= 60
-          && request.resource.data.naissance is string && request.resource.data.naissance.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          // Soirée : pas de date de naissance (une réservation de famille).
+          && (get(evtPage(request.resource.data.eventId)).data.get('resa', false) == true
+              ? !('naissance' in request.resource.data)
+              : (request.resource.data.naissance is string && request.resource.data.naissance.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
           && request.resource.data.tel is string && request.resource.data.tel.matches('^[+]?[0-9]{9,15}$')
           && request.resource.data.get('clubOrigine', '') is string && request.resource.data.get('clubOrigine', '').size() <= 60
           && request.resource.data.get('cat', '') is string && request.resource.data.get('cat', '').size() <= 12

@@ -1,5 +1,34 @@
 [
   {
+    "v": "1791911186",
+    "titre": "Soirée : réservation par famille",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "bureau",
+          "coach"
+        ],
+        "texte": "Soirée : les inscriptions deviennent des réservations par famille (adultes, enfants, prix par personne, un seul billet QR pour toute la réservation)."
+      },
+      {
+        "roles": [
+          "parent",
+          "joueur"
+        ],
+        "texte": "Soirée : bouton « Réserver » pour indiquer combien d'adultes et d'enfants viennent."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "bureau",
+          "coach"
+        ],
+        "texte": "Tournoi : plus d'inscription individuelle façon stage, les équipes s'inscrivent par le lien du tournoi."
+      }
+    ]
+  },
+  {
     "v": "1791910868",
     "titre": "Accès coach : retirer n'importe quel compte",
     "points": [
