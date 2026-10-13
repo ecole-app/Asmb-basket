@@ -1,5 +1,21 @@
 [
   {
+    "v": "1791890331",
+    "titre": "iPhone : glisser depuis le bord pour revenir",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Sur iPhone, dans l'appli installée sur l'écran d'accueil : glissez le doigt depuis le bord gauche vers la droite pour revenir en arrière (une flèche apparaît). Mêmes règles que le bouton retour d'Android."
+      }
+    ]
+  },
+  {
     "v": "1791888784",
     "titre": "Bouton retour du téléphone",
     "points": [

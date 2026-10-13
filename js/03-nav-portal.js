@@ -533,18 +533,22 @@ function gmArmerRetour(){
   if(document.documentElement.classList.contains("gm-public")) return;
   if(!(history.state&&history.state.gmGarde)){ try{ history.pushState({gmGarde:1},""); }catch(e){} }
 }
-window.addEventListener("popstate",function(){
-  if(document.documentElement.classList.contains("gm-public")){
-    var fp=gmFenetresOuvertes(); if(fp.length){ gmFermerFenetre(fp[fp.length-1]); gmArmerRetour(); }
-    return;
-  }
+// Un « retour » : renvoie true si quelque chose a été fait (fenêtre fermée,
+// écran précédent, retour à l'Accueil), false si on est déjà à l'Accueil.
+function gmActionRetour(){
   var f=gmFenetresOuvertes();
-  if(f.length){ gmFermerFenetre(f[f.length-1]); gmArmerRetour(); return; }
+  if(f.length){ gmFermerFenetre(f[f.length-1]); return true; }
+  if(document.documentElement.classList.contains("gm-public")) return false;
   var hbk=document.getElementById("hbk");
-  if(hbk&&hbk.classList.contains("show")&&getComputedStyle(hbk).display!=="none"){ hbk.click(); gmArmerRetour(); return; }
+  if(hbk&&hbk.classList.contains("show")&&getComputedStyle(hbk).display!=="none"){ hbk.click(); return true; }
   var nav=document.getElementById("bnav-main");
   var acc=nav&&Array.prototype.filter.call(nav.querySelectorAll(".bni"),function(b){ return b.offsetParent!==null; })[0];
-  if(acc&&!acc.classList.contains("on")&&["auth","role-select","plateforme","club-suspendu"].indexOf(gmEcranCourant())<0){ acc.click(); gmArmerRetour(); return; }
+  if(acc&&!acc.classList.contains("on")&&["auth","role-select","plateforme","club-suspendu"].indexOf(gmEcranCourant())<0){ acc.click(); return true; }
+  return false;
+}
+window.addEventListener("popstate",function(){
+  if(gmActionRetour()){ gmArmerRetour(); return; }
+  if(document.documentElement.classList.contains("gm-public")) return;
   var now=Date.now();
   if(now-GM_RETOUR.sortie<2500) return; // 2e appui rapproché : on laisse fermer
   GM_RETOUR.sortie=now;
@@ -552,5 +556,51 @@ window.addEventListener("popstate",function(){
   // Le garde n'est pas remis tout de suite : le prochain retour ferme l'appli.
   setTimeout(function(){ if(Date.now()-GM_RETOUR.sortie>=2400) gmArmerRetour(); },2500);
 });
+
+// ── iPhone, appli installée : glisser depuis le bord gauche = retour ──
+// Apple ne donne pas le geste retour aux applis web installées ; on le refait :
+// un doigt posé contre le bord gauche, tiré vers la droite. Une flèche suit le
+// doigt ; au-delà du seuil, on lâche = retour (mêmes règles que sur Android).
+function gmIosInstallee(){
+  var ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  var standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
+  return ios&&standalone;
+}
+function gmGlisserRetour(){
+  var BORD=24, SEUIL=80, g=null, fl=null;
+  function fleche(){
+    if(fl) return fl;
+    fl=document.createElement("div");
+    fl.style.cssText="position:fixed;left:0;top:50%;width:44px;height:44px;margin-top:-22px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;z-index:700;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transform:translateX(-50px)";
+    fl.textContent="←"; document.body.appendChild(fl); return fl;
+  }
+  function cacher(){ if(fl){ fl.style.transition="transform .18s,opacity .18s"; fl.style.opacity="0"; fl.style.transform="translateX(-50px)"; } }
+  document.addEventListener("touchstart",function(e){
+    if(e.touches.length!==1){ g=null; return; }
+    var t=e.touches[0];
+    g=(t.clientX<=BORD)?{x:t.clientX,y:t.clientY,t:Date.now(),dx:0,actif:false}:null;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(!g) return;
+    var t=e.touches[0], dx=t.clientX-g.x, dy=Math.abs(t.clientY-g.y);
+    if(!g.actif){
+      if(dy>20&&dy>dx){ g=null; return; } // geste vertical : on laisse défiler
+      if(dx<12) return;
+      g.actif=true;
+    }
+    g.dx=dx;
+    var f=fleche(), k=Math.min(1,dx/SEUIL);
+    f.style.transition="none"; f.style.opacity=String(0.35+0.65*k);
+    f.style.transform="translateX("+Math.round(-50+Math.min(dx,SEUIL)*0.9)+"px) scale("+(k>=1?1.1:0.9)+")";
+    if(e.cancelable) e.preventDefault();
+  },{passive:false});
+  document.addEventListener("touchend",function(){
+    if(!g) return;
+    var ok=g.actif&&g.dx>=SEUIL; g=null; cacher();
+    if(ok) gmActionRetour();
+  },{passive:true});
+  document.addEventListener("touchcancel",function(){ g=null; cacher(); },{passive:true});
+}
+if(gmIosInstallee()) gmGlisserRetour();
 // Chrome ignore les entrées d'historique créées sans geste : on (ré)arme au toucher.
 ["pointerdown","keydown"].forEach(function(t){ document.addEventListener(t,gmArmerRetour,true); });
