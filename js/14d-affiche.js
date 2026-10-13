@@ -558,12 +558,8 @@ function evtAffiche(eid){
   var cv=document.getElementById("af-cv"), ctrl=document.getElementById("af-ctrl");
   function lien(){ return e.inscr?evtLien(e.id):""; }
   var redessinT=null;
-  var cacheF=null, cacheT=null;
-  function redessiner(){
+    function redessiner(){
     clearTimeout(redessinT); redessinT=setTimeout(function(){ afRendre(cv,afContenu(e,st,page,imgs)); alerte(); },30);
-    // Fichier prêt d'avance : le partage doit partir tout de suite au clic, sinon
-    // le téléphone le refuse (le geste de l'utilisateur est « périmé »).
-    cacheF=null; clearTimeout(cacheT); cacheT=setTimeout(function(){ fichier().then(function(f){ cacheF=f; }).catch(function(){}); },500);
   }
   function alerte(){
     var a=document.getElementById("af-alerte"); if(!a) return;
@@ -586,6 +582,20 @@ function evtAffiche(eid){
       } else cv.toBlob(function(b){ b?ok(new File([b],nomFichier("png"),{type:"image/png"})):ko("png"); },"image/png");
     });
   }
+  // Même fichier, fabriqué sans attendre : le partage doit partir dans le clic lui-même,
+  // sinon Windows / le téléphone refusent d'ouvrir la fenêtre de partage.
+  function fichierSync(){
+    afRendre(cv,afContenu(e,st,page,imgs));
+    if(st.format==="a4"){
+      if(!window.jspdf||!window.jspdf.jsPDF) return null;
+      var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+      pdf.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,210,297);
+      return new File([pdf.output("blob")],nomFichier("pdf"),{type:"application/pdf"});
+    }
+    var d=cv.toDataURL("image/png"), bin=atob(d.split(",")[1]), u=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+    return new File([u],nomFichier("png"),{type:"image/png"});
+  }
   function telecharger(f){
     var a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
@@ -594,42 +604,42 @@ function evtAffiche(eid){
     var C=afContenu(e,st,page,imgs);
     return (C.club?C.club+" : ":"")+(C.titre||"")+(C.dates?" ("+C.dates.long+")":"")+(C.complet?" : c'est complet, merci à tous !":(C.restant!=null&&C.restant<=5?" : plus que "+C.restant+" place"+(C.restant>1?"s":"")+" !":""))+(lien()&&!C.complet?" Inscriptions : "+lien():"");
   }
-  // Partage. Sur téléphone : la feuille de partage du téléphone, avec l'image déjà prête
-  // (elle doit partir dans le geste, sinon le téléphone refuse). Sur ordinateur, la feuille
-  // de partage de Windows est peu fiable : on télécharge l'image et on ouvre WhatsApp Web.
-  var MOBILE=(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  // Partage : la fenêtre de partage de l'appareil (Windows, téléphone) avec l'image jointe,
+  // qui ouvre l'appli choisie (WhatsApp...). Sans fenêtre de partage : téléchargement + secours.
+  function peutPartager(f){ try{ return !!(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})); }catch(err){ return false; } }
   function partagerFichier(f, avecTitre, secours){
-    if(MOBILE&&navigator.canShare&&navigator.share&&navigator.canShare({files:[f]})){
-      var data={files:[f],text:message()}; if(avecTitre) data.title=st.titre||e.titre||"Affiche";
-      navigator.share(data).catch(function(err){
-        var n=err&&err.name;
-        if(n==="AbortError"||n==="InvalidStateError") return; // annulé, ou une feuille déjà ouverte
-        secours(f);
-      });
-      return;
-    }
-    secours(f);
+    var data={files:[f],text:message()}; if(avecTitre) data.title=st.titre||e.titre||"Affiche";
+    navigator.share(data).catch(function(err){
+      var n=err&&err.name;
+      if(n==="AbortError"||n==="InvalidStateError") return; // annulé, ou une fenêtre déjà ouverte
+      secours(f);
+    });
   }
-  function viaFichier(fn){
+  function fichierOuAlerte(){
     garder();
-    if(cacheF){ fn(cacheF); return; }
-    fichier().then(function(f){ cacheF=f; fn(f); }).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); });
+    var f=null; try{ f=fichierSync(); }catch(err){}
+    if(!f) askAlert("L'affiche n'a pas pu être créée.");
+    return f;
   }
   function partager(){
-    viaFichier(function(f){ partagerFichier(f,true,function(ff){ telecharger(ff); copyToClipboard(message()); showToast("Image téléchargée et texte copié : collez-les dans votre publication"); }); });
+    var f=fichierOuAlerte(); if(!f) return;
+    var secours=function(ff){ telecharger(ff); copyToClipboard(message()); showToast("Image téléchargée et texte copié : collez-les dans votre publication"); };
+    if(peutPartager(f)) partagerFichier(f,true,secours); else secours(f);
   }
   document.getElementById("af-x").addEventListener("click",function(){ garder(); if(unsub) try{unsub();}catch(err){} o.remove(); });
-  document.getElementById("af-dl").addEventListener("click",function(){ garder(); fichier().then(telecharger).catch(function(){ askAlert("L'affiche n'a pas pu être créée."); }); });
+  document.getElementById("af-dl").addEventListener("click",function(){ var f=fichierOuAlerte(); if(f) telecharger(f); });
   document.getElementById("af-share").addEventListener("click",partager);
   document.getElementById("af-wa").addEventListener("click",function(){
-    if(!MOBILE){
-      // Ordinateur : WhatsApp s'ouvre tout de suite (dans le geste, sinon la fenêtre est bloquée),
-      // l'image est téléchargée pour être glissée dans la conversation.
-      window.open("https://web.whatsapp.com/send?text="+encodeURIComponent(message()),"_blank");
-      viaFichier(function(f){ telecharger(f); showToast("Affiche téléchargée : glissez-la dans la conversation WhatsApp"); });
+    var f=fichierOuAlerte(); if(!f) return;
+    var lienWa="https://wa.me/?text="+encodeURIComponent(message());
+    if(peutPartager(f)){
+      // Fenêtre de partage : choisir WhatsApp, l'affiche part avec le texte et le lien.
+      partagerFichier(f,false,function(ff){ telecharger(ff); window.location.href=lienWa; });
       return;
     }
-    viaFichier(function(f){ partagerFichier(f,false,function(ff){ telecharger(ff); window.location.href="https://wa.me/?text="+encodeURIComponent(message()); }); });
+    // Navigateur sans fenêtre de partage : WhatsApp s'ouvre avec le texte, l'affiche est téléchargée.
+    window.open(lienWa,"_blank");
+    telecharger(f); showToast("Affiche téléchargée : ajoutez-la dans la conversation WhatsApp");
   });
   function garder(){
     var evs=getEvents(), i=evs.findIndex(function(x){return x.id===eid;}); if(i<0) return;

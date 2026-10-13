@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791885946",
+    "titre": "Affiche : partage avec l'image jointe, à chaque clic",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "« WhatsApp » et « Partager » ouvrent la fenêtre de partage de l'ordinateur ou du téléphone, avec l'affiche jointe (choisissez WhatsApp, Instagram…). Ça marche à chaque clic, même juste après une modification."
+      }
+    ]
+  },
+  {
     "v": "1791885604",
     "titre": "Affiche : partage depuis l'ordinateur",
     "points": [
