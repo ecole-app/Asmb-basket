@@ -359,6 +359,41 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Match d'un tournoi : id = code de table de marque (secret, 6 caractères) ──
+    // Lisible seulement avec le code (pas de listing hors staff). Sans compte, la
+    // table ne peut que saisir le score et clôturer ; une fois clôturé, seul le
+    // staff du club peut rouvrir, corriger ou déclarer un forfait.
+    match /trn_matchs/{code} {
+      allow get: if code.matches('^[A-HJ-NP-Z2-9]{6}$');
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+      allow create: if staff(request.resource.data.clubId) && code.matches('^[A-HJ-NP-Z2-9]{6}$');
+      allow update: if (staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId
+                          && request.resource.data.eventId == resource.data.eventId)
+        || (resource.data.statut != 'termine'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sa','sb','statut','clotureLe','majLe'])
+            && request.resource.data.sa is int && request.resource.data.sb is int
+            && request.resource.data.sa >= 0 && request.resource.data.sa <= 250
+            && request.resource.data.sb >= 0 && request.resource.data.sb <= 250
+            && request.resource.data.statut in ['encours', 'termine']);
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
+    // ── Inscription d'une équipe à un tournoi, par le lien public ─────
+    // Possible seulement si le club a ouvert les inscriptions sur la page publique.
+    // Le contact du responsable n'est lisible que par le staff du club.
+    match /trn_inscriptions/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['clubId','eventId','nom','club','cat','contact','tel','email','at'])
+        && request.resource.data.nom is string && request.resource.data.nom.size() > 0 && request.resource.data.nom.size() <= 40
+        && request.resource.data.club is string && request.resource.data.club.size() <= 50
+        && request.resource.data.cat is string && request.resource.data.cat.size() <= 20
+        && request.resource.data.contact is string && request.resource.data.contact.size() <= 60
+        && request.resource.data.tel is string && request.resource.data.tel.size() <= 20
+        && request.resource.data.get('email', '') is string && request.resource.data.get('email', '').size() <= 100
+        && get(/databases/$(database)/documents/trn_pages/$(request.resource.data.clubId + '__' + request.resource.data.eventId)).data.get('inscrOuvertes', false) == true
+        && request.resource.data.cat in get(/databases/$(database)/documents/trn_pages/$(request.resource.data.clubId + '__' + request.resource.data.eventId)).data.get('catsInscr', []);
+      allow read, delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Code bénévole pour l'entrée d'un événement (sans compte) ─────
     // Id = code secret (XXXX-XXXX) transmis par le staff, valable jusqu'au
     // lendemain de l'événement. Le doc contient la liste figée des billets

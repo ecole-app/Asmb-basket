@@ -698,6 +698,54 @@ describe("Planning public d'un tournoi", () => {
   });
 });
 
+describe("Tournoi : table de marque (code du match)", () => {
+  const match = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", matchId: "U13|PA1", nomA: "ASMB 1", nomB: "Firminy", sa: 0, sb: 0, statut: "prevu" }, o);
+  beforeEach(async () => { await setDoc(doc(await as("coachA"), "trn_matchs/K7P2XR"), match()); });
+  it("sans compte : on lit le match avec son code, on saisit le score et on clôture", async () => {
+    const db = await as(null);
+    await assertSucceeds(getDoc(doc(db, "trn_matchs/K7P2XR")));
+    await assertSucceeds(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 12, sb: 8, statut: "encours", majLe: 1 }));
+    await assertSucceeds(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "termine", clotureLe: 2 }));
+    await assertFails(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 31 }));
+  });
+  it("sans compte : pas de liste des codes, ni de changement d'équipe, de club ou de score impossible", async () => {
+    const db = await as(null);
+    await assertFails(getDocs(query(collection(db, "trn_matchs"), where("eventId", "==", "t1"))));
+    await assertFails(updateDoc(doc(db, "trn_matchs/K7P2XR"), { nomA: "Autre" }));
+    await assertFails(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: -2 }));
+    await assertFails(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 10.5 }));
+    await assertFails(updateDoc(doc(db, "trn_matchs/K7P2XR"), { statut: "prevu" }));
+    await assertFails(setDoc(doc(db, "trn_matchs/ZZZZZZ"), match()));
+  });
+  it("le staff liste, rouvre un match clôturé et déclare un forfait ; un autre club non", async () => {
+    await updateDoc(doc(await as(null), "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "termine" });
+    await assertSucceeds(getDocs(query(collection(await as("dirA"), "trn_matchs"), where("clubId", "==", "A"), where("eventId", "==", "t1"))));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "trn_matchs/K7P2XR"), { statut: "encours" }));
+    await assertSucceeds(updateDoc(doc(await as("coachA"), "trn_matchs/K7P2XR"), { sa: 20, sb: 0, statut: "termine", forfait: "b" }));
+    await assertFails(updateDoc(doc(await as("dirB"), "trn_matchs/K7P2XR"), { statut: "encours" }));
+  });
+});
+
+describe("Tournoi : inscription d'une équipe par le lien", () => {
+  const ins = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", nom: "BC Firminy U13", club: "BC Firminy", cat: "U13 M", contact: "Marc D.", tel: "0611223344", email: "", at: 1 }, o);
+  const page = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", titre: "Tournoi", inscrOuvertes: true, catsInscr: ["U13 M", "U11"] }, o);
+  it("ouverte : une équipe s'inscrit sans compte ; seul le staff lit les demandes", async () => {
+    await setDoc(doc(await as("dirA"), "trn_pages/A__t1"), page());
+    await assertSucceeds(setDoc(doc(await as(null), "trn_inscriptions/i1"), ins()));
+    await assertFails(getDoc(doc(await as(null), "trn_inscriptions/i1")));
+    await assertFails(getDoc(doc(await as("parentA"), "trn_inscriptions/i1")));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "trn_inscriptions/i1")));
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "trn_inscriptions/i1")));
+  });
+  it("fermée, catégorie non proposée ou champ en trop : refusé", async () => {
+    await setDoc(doc(await as("dirA"), "trn_pages/A__t1"), page({ inscrOuvertes: false }));
+    await assertFails(setDoc(doc(await as(null), "trn_inscriptions/i2"), ins()));
+    await setDoc(doc(await as("dirA"), "trn_pages/A__t1"), page());
+    await assertFails(setDoc(doc(await as(null), "trn_inscriptions/i3"), ins({ cat: "Seniors" })));
+    await assertFails(setDoc(doc(await as(null), "trn_inscriptions/i4"), ins({ valide: true })));
+  });
+});
+
 describe("Entrée d'un événement : code bénévole", () => {
   const fin = (j) => Timestamp.fromMillis(Date.now() + j * 86400000);
   const entree = (o = {}) => ({ clubId: "A", eventId: "e1", titre: "Camp", liste: [{ c: "STG-12345", p: "Léo", n: "Kaci" }],

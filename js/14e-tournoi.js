@@ -21,7 +21,8 @@ function trnCfg(e){
     equipes:t.equipes||[], cats:t.cats||{}, terrains:Math.max(1,Math.min(12,parseInt(t.terrains,10)||2)),
     debut:t.debut||"09:00", fin:t.fin||"18:00", pause:t.pause||null,
     battement:t.battement!=null?Math.max(0,parseInt(t.battement,10)||0):5, repos:t.repos!==false,
-    matchs:t.matchs||[], genereLe:t.genereLe||null, publieLe:t.publieLe||null, modifLe:t.modifLe||null
+    matchs:t.matchs||[], genereLe:t.genereLe||null, publieLe:t.publieLe||null, modifLe:t.modifLe||null,
+    inscr:t.inscr||{ouvert:false,cats:[]}
   };
 }
 function trnCatsDe(equipes){
@@ -198,7 +199,7 @@ function trnOuvrir(eid){
     var c=cfg();
     zone.innerHTML="";
     var tabs=document.createElement("div"); tabs.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px";
-    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")]].forEach(function(o){
+    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")],["jourj","Jour J"]].forEach(function(o){
       var t=document.createElement("button"); t.type="button"; t.className="cat-filter"+(onglet===o[0]?" on":""); t.textContent=o[1];
       t.addEventListener("click",function(){ onglet=o[0]; rendre(); }); tabs.appendChild(t);
     });
@@ -208,13 +209,15 @@ function trnOuvrir(eid){
       w.textContent="Équipes ou réglages modifiés depuis le dernier planning : pensez à le générer de nouveau.";
       zone.appendChild(w);
     }
-    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else rendrePlanning(c);
+    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof trnJourJ==="function") trnJourJ(zone,eid); } else rendrePlanning(c);
   }
   function champ(lab,el){ var g=document.createElement("div"); g.className="form-group"; var l=document.createElement("label"); l.className="form-label"; l.textContent=lab; g.appendChild(l); g.appendChild(el); return g; }
   function rendreEquipes(c){
     var aide=document.createElement("div"); aide.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
     aide.textContent="Ajoutez les équipes qui jouent, avec leur catégorie. Les équipes d'un même club sont mises dans des poules différentes quand c'est possible.";
     zone.appendChild(aide);
+    var dem=document.createElement("div"); zone.appendChild(dem);
+    if(typeof trnRendreDemandes==="function") trnRendreDemandes(dem,eid,rendre);
     var f=document.createElement("div"); f.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end";
     var nom=document.createElement("input"); nom.className="form-input"; nom.placeholder="ex. ASMB 1"; nom.maxLength=40;
     var club=document.createElement("input"); club.className="form-input"; club.placeholder="Club"; club.maxLength=50; club.value=clubLabel("");
@@ -260,6 +263,12 @@ function trnOuvrir(eid){
     gp.appendChild(champ("Pause de",pd)); gp.appendChild(champ("à",pf)); zone.appendChild(gp);
     function majP(){ gp.style.display=cbP.checked?"grid":"none"; } cbP.addEventListener("change",majP); majP();
     var cbR=coche("Une équipe ne joue jamais deux matchs d'affilée",c.repos);
+    gmSection(zone,"Inscription des équipes par le lien","Les clubs inscrivent leur équipe depuis la page publique du tournoi ; vous acceptez ou refusez chaque demande dans l'onglet Équipes.");
+    var cbI=coche("Les équipes peuvent s'inscrire par le lien",!!c.inscr.ouvert);
+    var catsI=document.createElement("input"); catsI.className="form-input"; catsI.placeholder="ex. U11 M, U13 M, U13 F"; catsI.maxLength=200;
+    catsI.value=(c.inscr.cats&&c.inscr.cats.length?c.inscr.cats:trnCatsDe(c.equipes)).join(", ");
+    var gI=champ("Catégories proposées (séparées par des virgules)",catsI); zone.appendChild(gI);
+    function majI(){ gI.style.display=cbI.checked?"block":"none"; } cbI.addEventListener("change",majI); majI();
     var cats=trnCatsDe(c.equipes), confs={};
     if(cats.length) gmSection(zone,"Format par catégorie","Toujours une phase de poules (tous contre tous), puis la suite que vous choisissez.");
     cats.forEach(function(k){
@@ -299,8 +308,14 @@ function trnOuvrir(eid){
       var pause=null;
       if(cbP.checked){ var a=trnMin(pd.value), z=trnMin(pf.value); if(a==null||z==null||z<=a) return askAlert("La fin de la pause doit être après son début."); pause={debut:pd.value,fin:pf.value}; }
       var cs={}; Object.keys(confs).forEach(function(k){ var x=confs[k]; cs[k]={nbPoules:parseInt(x.selP.value,10),suite:x.selS.value,petiteFinale:x.pfC.checked&&(x.selS.value==="demis"||x.selS.value==="finale"),duree:Math.max(4,parseInt(x.dur.value,10)||20)}; });
-      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,cats:cs});
-      showToast("Réglages du tournoi enregistrés"); onglet="planning"; rendre();
+      var catsL=catsI.value.split(",").map(function(x){ return x.trim().slice(0,20); }).filter(function(x,i,a){ return x&&a.indexOf(x)===i; }).slice(0,20);
+      if(cbI.checked&&!catsL.length) return askAlert("Indiquez au moins une catégorie proposée à l'inscription.");
+      var inscrAvant=!!c.inscr.ouvert;
+      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,cats:cs,inscr:{ouvert:cbI.checked,cats:catsL}});
+      showToast("Réglages du tournoi enregistrés");
+      // Inscriptions ouvertes (ou fermées) : la page publique est mise à jour tout de suite.
+      if(cbI.checked||inscrAvant) trnPublier(eid).then(function(){ if(cbI.checked&&!inscrAvant) trnPartager(eid); }).catch(function(err){ askAlert("Page publique non mise à jour ("+((err&&err.code)||"réseau")+")."); });
+      onglet=c.matchs.length||!cbI.checked?"planning":"equipes"; rendre();
     }));
   }
   function rendrePlanning(c){
@@ -308,7 +323,7 @@ function trnOuvrir(eid){
     row.appendChild(gmBtn(c.matchs.length?"Générer de nouveau":"Générer le planning","primary",function(){
       if(trnCatsDe(c.equipes).every(function(k){ return c.equipes.filter(function(q){ return (q.cat||"Sans catégorie")===k; }).length<2; }))
         return askAlert("Ajoutez au moins 2 équipes dans une catégorie.");
-      (c.matchs.length?askConfirm("Le planning actuel sera remplacé par un nouveau.",{confirmText:"Générer"}):Promise.resolve(true)).then(function(ok){
+      (c.matchs.length?askConfirm("Le planning actuel sera remplacé par un nouveau. Si le tournoi a commencé, les codes et scores des matchs qui n'existent plus seront perdus.",{confirmText:"Générer"}):Promise.resolve(true)).then(function(ok){
         if(!ok) return;
         var g=trnGenerer(c);
         trnSauver(eid,{matchs:g.matchs,poules:g.poules,formats:g.formats,genereLe:Date.now()},true);
@@ -356,9 +371,12 @@ function trnChoisirEquipesClub(eid,teams,apres){
   }));
 }
 // Liste des matchs, groupés par horaire. Les équipes à venir (phases finales) sont écrites
-// en clair (« 1er poule A », « Vainqueur demi-finale 1 »).
+// en clair (« 1er poule A », « Vainqueur demi-finale 1 ») tant qu'on ne les connaît pas.
+// c.resultats / c.resolus (jour J) : scores et équipes qualifiées.
 function trnListeHtml(c,matchs,publique){
   var labels={}; matchs.forEach(function(m){ labels[m.id]=m.label; });
+  var res=c.resultats||{}, resolus=c.resolus||{};
+  function nom(m,cote){ var id=(resolus[m.id]&&resolus[m.id][cote])||m[cote]; return id?trnNom(c,id):trnRefTxt(m[cote==="a"?"aRef":"bRef"],labels); }
   var box=document.createElement("div"), parH={};
   matchs.forEach(function(m){ (parH[m.debut]=parH[m.debut]||[]).push(m); });
   Object.keys(parH).sort(function(a,b){ return trnMin(a)-trnMin(b); }).forEach(function(h){
@@ -366,16 +384,30 @@ function trnListeHtml(c,matchs,publique){
     var hh=document.createElement("div"); hh.style.cssText="width:48px;flex-shrink:0;font-size:13px;font-weight:900;color:var(--dkg);font-variant-numeric:tabular-nums;padding-top:6px"; hh.textContent=h;
     var col=document.createElement("div"); col.style.cssText="flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px";
     parH[h].forEach(function(m){
-      var a=m.a?trnNom(c,m.a):trnRefTxt(m.aRef,labels), b=m.b?trnNom(c,m.b):trnRefTxt(m.bRef,labels);
+      var r=res[m.id], a=nom(m,"a"), b=nom(m,"b"), fini=r&&r.statut==="termine", enc=r&&r.statut==="encours";
+      var ga=fini&&r.sa>r.sb, gb=fini&&r.sb>r.sa;
       var d=document.createElement("div");
-      d.style.cssText="background:var(--card);border:1px solid "+(m.hors?"var(--red)":"var(--bdr)")+";border-radius:10px;padding:7px 10px"+(m.phase==="finale"?";border-left:4px solid #b7791f":"");
-      d.innerHTML='<div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Terrain '+m.terrain+' · '+authEsc(m.cat)+' · '+authEsc(m.label)+(m.hors?' · <span style="color:var(--red)">après l\'heure de fin</span>':'')+'</div>'+
-        '<div style="font-size:13px;font-weight:800;color:var(--txt);margin-top:2px">'+authEsc(a)+' <span style="color:var(--mut);font-weight:600">vs</span> '+authEsc(b)+'</div>';
+      d.style.cssText="background:var(--card);border:1px solid "+(m.hors?"var(--red)":enc?"#d97706":"var(--bdr)")+";border-radius:10px;padding:7px 10px"+(m.phase==="finale"?";border-left:4px solid #b7791f":"");
+      function ligne(n,sc,gagne){ return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:'+(gagne?900:700)+';color:var(--txt)"><span style="min-width:0;overflow-wrap:anywhere">'+authEsc(n)+'</span>'+(r&&r.statut!=="prevu"?'<span style="font-variant-numeric:tabular-nums">'+sc+'</span>':'')+'</div>'; }
+      d.innerHTML='<div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Terrain '+m.terrain+' · '+authEsc(m.cat)+' · '+authEsc(m.label)+
+        (enc?' · <span style="color:#d97706">en cours</span>':fini?' · <span style="color:var(--grn)">terminé</span>':'')+(m.hors?' · <span style="color:var(--red)">après l\'heure de fin</span>':'')+'</div>'+
+        (r&&r.statut!=="prevu"?ligne(a,r.sa,ga)+ligne(b,r.sb,gb)+(r.forfait?'<div style="font-size:11px;color:var(--red)">Forfait de '+authEsc(r.forfait==="a"?a:b)+'</div>':'')
+          :'<div style="font-size:13px;font-weight:800;color:var(--txt);margin-top:2px">'+authEsc(a)+' <span style="color:var(--mut);font-weight:600">vs</span> '+authEsc(b)+'</div>');
       col.appendChild(d);
     });
     g.appendChild(hh); g.appendChild(col); box.appendChild(g);
   });
   return box;
+}
+// Tableau de classement d'une poule (J, G, P, pts, écart).
+function trnClassementHtml(c,po,matchs){
+  var ms=matchs.filter(function(m){ return m.phase==="poule"&&m.poule===po.nom; });
+  var l=(typeof trnClassement==="function")?trnClassement(po.equipes,ms,c.resultats||{}):po.equipes.map(function(id,i){ return {id:id,rang:i+1,j:0,g:0,p:0,pts:0,diff:0}; });
+  var fini=ms.length&&ms.every(function(m){ var r=(c.resultats||{})[m.id]; return r&&r.statut==="termine"; });
+  return '<div style="font-size:11px;font-weight:900;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Poule '+authEsc(po.nom)+(fini?' · terminée':'')+'</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12.5px;color:var(--txt)"><thead><tr style="color:var(--mut);font-size:10px;text-transform:uppercase"><th style="text-align:left;padding:3px 2px">Équipe</th><th>J</th><th>G</th><th>P</th><th>+/-</th><th>Pts</th></tr></thead><tbody>'+
+    l.map(function(x){ return '<tr style="border-top:1px solid var(--bdr)"><td style="padding:5px 2px;font-weight:800">'+x.rang+'. '+authEsc(trnNom(c,x.id))+'</td><td style="text-align:center">'+x.j+'</td><td style="text-align:center">'+x.g+'</td><td style="text-align:center">'+x.p+'</td><td style="text-align:center">'+(x.diff>0?"+":"")+x.diff+'</td><td style="text-align:center;font-weight:900">'+x.pts+'</td></tr>'; }).join("")+
+    '</tbody></table>';
 }
 
 // ── Planning PDF (grille horaires × terrains, à afficher au gymnase) ──
@@ -441,16 +473,18 @@ function trnPublier(eid){
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
     terrains:c.terrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
+    inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
     majLe:Date.now()
   };
-  return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_pages",trnPageId(eid)),page).then(function(){ trnSauver(eid,{publieLe:Date.now()},true); });
+  // merge : les scores et classements (écrits par l'écran Jour J) sont conservés.
+  return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_pages",trnPageId(eid)),page,{merge:true}).then(function(){ trnSauver(eid,{publieLe:Date.now()},true); });
 }
 function trnPartager(eid){
   var e=getEvents().find(function(x){ return x.id===eid; })||{}, url=trnLien(eid);
   var s=gmSheet("Planning en ligne");
   var t=document.createElement("div"); t.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
-  t.textContent="Équipes, coachs et familles voient les poules et le planning sans compte. Affichez le QR code au gymnase. Après chaque modification du planning, rouvrez cette fenêtre pour mettre la page à jour.";
+  t.textContent="Équipes, coachs et familles voient les poules, le planning, les scores et les classements sans compte"+((trnCfg(e).inscr||{}).ouvert?", et les clubs y inscrivent leur équipe":"")+". Affichez le QR code au gymnase. Après chaque modification du planning, rouvrez cette fenêtre pour mettre la page à jour.";
   var qr=document.createElement("div"); qr.style.cssText="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:var(--rs);margin-bottom:10px";
   var box=document.createElement("div"); box.style.cssText="background:var(--card);border:1.5px dashed var(--bdr);border-radius:var(--rs);padding:12px;font-size:12px;word-break:break-all;color:var(--txt);font-family:monospace";
   box.textContent=url;
@@ -481,29 +515,46 @@ function showTrnPublic(pid){
   })();
 }
 function trnRendrePublic(el,p){
-  var c={equipes:p.equipes||[],terrains:p.terrains||1}, cats=Object.keys(p.poules||{});
-  if(!cats.length) cats=trnCatsDe(c.equipes);
-  var choix=cats[0]||"";
+  var cats=Object.keys(p.poules||{});
+  if(!cats.length) cats=trnCatsDe(p.equipes||[]);
+  var choix=cats[0]||"", ecoute=null;
   try{ var mem=localStorage.getItem("gm_trn_cat_"+p.eventId); if(mem&&cats.indexOf(mem)>=0) choix=mem; }catch(e){}
   function rendre(){
+    var c={equipes:p.equipes||[],terrains:p.terrains||1,resultats:p.resultats||{},resolus:p.resolus||{}};
     el.innerHTML=evtEntete(p)+'<div style="padding:14px 16px 40px" id="trn-pub"></div>';
     var z=el.querySelector("#trn-pub");
+    if(p.inscrOuvertes&&(p.catsInscr||[]).length&&typeof trnInscrireEquipe==="function"){
+      var bi=document.createElement("button"); bi.type="button"; bi.textContent="Inscrire une équipe";
+      bi.style.cssText="width:100%;padding:14px;border-radius:var(--rx);border:none;background:var(--dkg);color:#fff;font-size:15px;font-weight:900;cursor:pointer;margin-bottom:12px";
+      bi.addEventListener("click",function(){ trnInscrireEquipe(p); }); z.appendChild(bi);
+    }
+    if(!cats.length){ var v=document.createElement("div"); v.style.cssText="font-size:13px;color:var(--mut);text-align:center;padding:16px 0"; v.textContent="Les poules et le planning seront publiés ici."; z.appendChild(v); return; }
     var f=document.createElement("div"); f.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px";
     cats.forEach(function(k){ var bt=document.createElement("button"); bt.type="button"; bt.className="cat-filter"+(k===choix?" on":""); bt.textContent=k; bt.addEventListener("click",function(){ choix=k; try{ localStorage.setItem("gm_trn_cat_"+p.eventId,k); }catch(e){} rendre(); }); f.appendChild(bt); });
     z.appendChild(f);
+    var ms=(p.matchs||[]).filter(function(m){ return m.cat===choix; });
     var poules=(p.poules||{})[choix]||[];
     if(poules.length){
-      gmSection(z,"Poules");
-      var gg=document.createElement("div"); gg.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px";
-      poules.forEach(function(po){ var card=gmCard(); card.style.margin="0"; card.style.padding="10px 12px";
-        card.innerHTML='<div style="font-size:11px;font-weight:900;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Poule '+authEsc(po.nom)+'</div>'+po.equipes.map(function(id){ return '<div style="font-size:13px;font-weight:700;color:var(--txt);padding:2px 0">'+authEsc(trnNom(c,id))+'</div>'; }).join("");
-        gg.appendChild(card); });
+      gmSection(z,Object.keys(c.resultats).length?"Classements":"Poules");
+      var gg=document.createElement("div"); gg.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px";
+      poules.forEach(function(po){ var card=gmCard(); card.style.margin="0"; card.style.padding="10px 12px"; card.innerHTML=trnClassementHtml(c,po,ms); gg.appendChild(card); });
       z.appendChild(gg);
     }
-    var ms=(p.matchs||[]).filter(function(m){ return m.cat===choix; });
-    gmSection(z,"Planning",ms.length?"Du premier match à "+ms[0].debut+" au dernier vers "+ms[ms.length-1].fin+".":"");
+    gmSection(z,"Matchs",ms.length?"Du premier match à "+ms[0].debut+" au dernier vers "+ms[ms.length-1].fin+"."+(p.resultatsLe?" Mis à jour à "+new Date(p.resultatsLe).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+".":""):"");
     z.appendChild(trnListeHtml(c,ms,true));
     if(p.pause){ var pz=document.createElement("div"); pz.style.cssText="font-size:12px;color:var(--mut);margin-top:10px"; pz.textContent="Pause de "+p.pause.debut+" à "+p.pause.fin+"."; z.appendChild(pz); }
   }
   rendre();
+  // En direct : la page se redessine à chaque score (sans recharger).
+  if(window.fbOnSnapshot&&!ecoute){
+    try{
+      ecoute=window.fbOnSnapshot(window.fbDoc(window.fbDb,"trn_pages",p.clubId+"__"+p.eventId),function(snap){
+        if(!snap.exists()) return;
+        var y=window.scrollY; p=snap.data();
+        cats=Object.keys(p.poules||{}); if(!cats.length) cats=trnCatsDe(p.equipes||[]);
+        if(cats.indexOf(choix)<0) choix=cats[0]||"";
+        rendre(); window.scrollTo(0,y);
+      },function(){});
+    }catch(e){}
+  }
 }

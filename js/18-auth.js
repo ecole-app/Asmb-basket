@@ -449,6 +449,7 @@ function initAuthGate(){
   if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
   if(urlParams.has("entree")){ showEntreeBenevole(urlParams.get("entree")); return; } // bénévole à l'entrée d'un événement : code, pas d'auth
   if(urlParams.has("billet")){ showBilletPublic(urlParams.get("billet"), urlParams.get("evt")); return; }
+  if(urlParams.has("marque")){ showMarque(urlParams.get("marque")); return; } // table de marque d'un tournoi : code du match, pas d'auth
   if(urlParams.has("trn")){ showTrnPublic(urlParams.get("trn")); return; } // planning d'un tournoi : page publique, pas d'auth
   if(urlParams.has("evt")){ showEvtPublic(urlParams.get("evt")); return; } // inscription à un événement : page publique, pas d'auth
   if(urlParams.has("essai")){ showEssaiPublic(urlParams.get("essai")); return; } // séance d'essai : page publique, pas d'auth

@@ -93,3 +93,43 @@ describe("Planning", () => {
     assert.ok(c.trnMin(sans.finReelle) <= c.trnMin(avec.finReelle));
   });
 });
+
+describe("Jour J : classements et qualifiés", () => {
+  const c2 = charger(["js/14e-tournoi.js", "js/14f-tournoi-jourj.js"]);
+  const m = (id, a, b, poule = "A") => ({ id, cat: "U13", phase: "poule", poule, a, b });
+  const fin = (sa, sb, o = {}) => Object.assign({ sa, sb, statut: "termine" }, o);
+  it("victoire 2 pts, défaite 1 pt, forfait 0 pt", () => {
+    const ms = [m("1", "A", "B"), m("2", "B", "C"), m("3", "A", "C")];
+    const l = J(c2.trnClassement(["A", "B", "C"], ms, { 1: fin(30, 20), 2: fin(0, 20, { forfait: "a" }), 3: fin(25, 27) }));
+    const pts = Object.fromEntries(l.map((x) => [x.id, x.pts]));
+    assert.deepEqual(pts, { A: 3, B: 1, C: 4 });
+    assert.deepEqual(l.map((x) => x.id), ["C", "A", "B"]);
+  });
+  it("égalité de points : la confrontation directe départage, avant l'écart général", () => {
+    // A bat B de 1 point, B écrase C, C bat A de 1 : A, B, C à 5 pts ; entre elles, 3 pts chacune → écart entre elles
+    const ms = [m("1", "A", "B"), m("2", "B", "C"), m("3", "C", "A"), m("4", "A", "D"), m("5", "B", "D"), m("6", "C", "D")];
+    const res = { 1: fin(41, 40), 2: fin(60, 30), 3: fin(50, 49), 4: fin(40, 10), 5: fin(40, 39), 6: fin(40, 39) };
+    const l = J(c2.trnClassement(["A", "B", "C", "D"], ms, res));
+    assert.deepEqual(l.map((x) => x.id), ["B", "A", "C", "D"]); // écart entre elles : B +29, A 0, C -29
+    assert.ok(l.every((x, i) => i === 3 || x.pts === 5));
+  });
+  it("demi-finales puis finale : les équipes apparaissent dès qu'on les connaît", () => {
+    const e = Array.from({ length: 8 }, (_, i) => ({ id: "t" + i, nom: "T" + i, club: "C" + i, cat: "U13" }));
+    const cfg = c.trnCfg({ trn: { equipes: e, cats: { U13: { nbPoules: 2, suite: "demis", duree: 20 } } } });
+    const g = J(c2.trnGenerer(cfg)), res = {};
+    assert.equal(Object.keys(J(c2.trnResoudre(g.matchs, g.poules, res))).length, 0);
+    for (const x of g.matchs.filter((x) => x.poule === "A")) res[x.id] = fin(x.a < x.b ? 50 : 40, x.a < x.b ? 40 : 50);
+    let r = J(c2.trnResoudre(g.matchs, g.poules, res));
+    const d1 = g.matchs.find((x) => x.label === "Demi-finale 1"), d2 = g.matchs.find((x) => x.label === "Demi-finale 2"), f = g.matchs.find((x) => x.label === "Finale");
+    const pa = g.poules.U13[0].equipes.slice().sort();
+    assert.equal(r[d1.id].a, pa[0]); assert.equal(r[d1.id].b, null); assert.equal(r[d2.id].b, pa[1]);
+    for (const x of g.matchs.filter((x) => x.poule === "B")) res[x.id] = fin(x.a < x.b ? 50 : 40, x.a < x.b ? 40 : 50);
+    res[d1.id] = fin(60, 50); res[d2.id] = fin(40, 45);
+    r = J(c2.trnResoudre(g.matchs, g.poules, res));
+    assert.equal(r[f.id].a, r[d1.id].a); assert.equal(r[f.id].b, r[d2.id].b);
+  });
+  it("code de match : 6 caractères sans 0/O/1/I/L", () => {
+    for (let i = 0; i < 50; i++) assert.match(c2.trnCodeMatch(), /^[A-HJ-NP-Z2-9]{6}$/);
+    assert.equal(c2.trnCodeNet(" k7p-2xr "), "K7P2XR");
+  });
+});

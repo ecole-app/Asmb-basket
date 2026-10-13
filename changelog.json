@@ -1,5 +1,32 @@
 [
   {
+    "v": "1791907094",
+    "titre": "Tournois : le jour J",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Onglet « Jour J » : chaque match a son code. La table de marque ouvre generalmanagerapp.fr/?marque sans compte, tape le code, compte les points (+1, +2, +3) puis retape le code pour clôturer. Feuille des codes en PDF par terrain ; seul le staff peut rouvrir, corriger ou déclarer un forfait."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Classements calculés tout seuls (2 pts victoire, 1 pt défaite, 0 forfait ; égalités départagées par les confrontations) et équipes qualifiées placées dans les phases finales. La page publique se met à jour en direct tant que l'écran Jour J est ouvert."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Inscriptions des équipes par le lien : à activer dans « Journée et format » avec les catégories proposées ; les demandes arrivent dans l'onglet Équipes (Accepter / Refuser)."
+      }
+    ]
+  },
+  {
     "v": "1791903596",
     "titre": "Nouveau pôle : Basket Santé",
     "points": [
