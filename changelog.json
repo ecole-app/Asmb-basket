@@ -1,5 +1,29 @@
 [
   {
+    "v": "1791887653",
+    "titre": "Compta : plan comptable associatif et numéros de pièce",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Chaque ligne reçoit son compte du plan comptable des associations (756 cotisations, 613 locations, 707 buvette…) et un numéro de pièce continu par journal (BQ banque, CA caisse). Les anciennes lignes sont numérotées automatiquement."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "« ⚙️ Plan comptable » : choisissez l'exercice (année civile ou saison, ex. septembre → août) et adaptez les comptes. Sur une ligne, « Compte comptable » permet un autre compte que l'automatique."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouveau filtre « Exercice » en haut de la compta ; le Bilan AG et l'accueil suivent l'exercice choisi."
+      }
+    ]
+  },
+  {
     "v": "1791886645",
     "titre": "Événements : le billet se garde facilement",
     "points": [

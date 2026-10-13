@@ -39,8 +39,9 @@ function renderDeskHome(){
   k+=deskCarte("Demandes d'essai",essais,essais?"à rappeler par SMS":"Aucune nouvelle demande","ouvrirListeEssais()",essais?"#E8670A":null);
   k+=deskCarte("Cette semaine",semaine.length,matchs?matchs+" match"+(matchs>1?"s":"")+" · "+(semaine.length-matchs)+" autre"+(semaine.length-matchs>1?"s":""):"rendez-vous au planning","gmDeskOuvrir('planning')");
   if(dir&&premium&&typeof getComptabilite==="function"){
-    var y=new Date().getFullYear().toString(), r=0, d=0;
-    getComptabilite().forEach(function(l){ if(l.horsPremium||(l.date||"").indexOf(y)!==0) return; if(l.type==="depense") d+=l.montant||0; else r+=l.montant||0; });
+    var exD=(typeof comptaExerciceCourant==="function")?comptaExerciceCourant():null;
+    var y=exD?exD.label:new Date().getFullYear().toString(), r=0, d=0;
+    getComptabilite().forEach(function(l){ var dt=l.date||""; if(l.horsPremium||(exD?(dt<exD.debut||dt>exD.fin):dt.indexOf(y)!==0)) return; if(l.type==="depense") d+=l.montant||0; else r+=l.montant||0; });
     k+=deskCarte("Résultat "+y,(r-d).toFixed(0)+" €",(r).toFixed(0)+" € de recettes · "+d.toFixed(0)+" € de dépenses","gmDeskOuvrir('comptabilite')",(r-d)<0?"var(--red)":null);
   }
   k+='</div>';

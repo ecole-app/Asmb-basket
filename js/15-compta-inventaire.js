@@ -5,7 +5,11 @@ function saveDocs(d){localStorage.setItem("asmb_docs",JSON.stringify(d));}
 
 // ── COMPTABILITE (reserve dirigeant) ────────────────────────────────
 function getComptabilite(){try{return JSON.parse(localStorage.getItem("asmb_comptabilite")||"[]");}catch(e){return [];}}
-function saveComptabilite(c){localStorage.setItem("asmb_comptabilite",JSON.stringify(c));fsWriteCollection("comptabilite",c);}
+function saveComptabilite(c){
+  // N° de pièce donné à chaque nouvelle ligne, quelle que soit son origine (js/15b-compta-plan.js).
+  if(typeof comptaNumeroter==="function"){ comptaDedoublonnerPieces(c); comptaNumeroter(c); }
+  localStorage.setItem("asmb_comptabilite",JSON.stringify(c));fsWriteCollection("comptabilite",c);
+}
 
 // Taxonomie fixe des catégories (club sportif loi 1901)
 var COMPTA_CATS={
@@ -59,6 +63,13 @@ function buildComptabilite(){
     return;
   }
   var all=getComptabilite();
+  // Lignes arrivées sans n° de pièce (caisse buvette en ligne, autre appareil) : numérotées ici.
+  if(typeof comptaNumeroter==="function" && (comptaDedoublonnerPieces(all)+comptaNumeroter(all))>0) saveComptabilite(all);
+  if(typeof comptaChargerReglages==="function" && !window.__comptaReglagesLus){
+    window.__comptaReglagesLus=true;
+    var avantR=localStorage.getItem("asmb_compta_reglages");
+    comptaChargerReglages().then(function(){ if(localStorage.getItem("asmb_compta_reglages")!==avantR) buildComptabilite(); });
+  }
   document.getElementById("compta-count").textContent=all.length+" ligne"+(all.length>1?"s":"");
 
   // Filtres
@@ -88,6 +99,7 @@ function buildComptabilite(){
   compteSel.innerHTML='<option value="">Tout compte</option>'+COMPTA_COMPTES.map(function(c){return '<option value="'+c+'"'+(COMPTA_FILTERS.compte===c?" selected":"")+'>'+c+'</option>';}).join("");
   compteSel.addEventListener("change",function(){COMPTA_FILTERS.compte=compteSel.value;buildComptabilite();});
   fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);fEl.appendChild(compteSel);fEl.appendChild(pointeSel);
+  if(typeof comptaFiltreExercice==="function") comptaFiltreExercice(fEl,all);
   if(COMPTA_FILTERS.du||COMPTA_FILTERS.au||COMPTA_FILTERS.categorie||COMPTA_FILTERS.moyen||COMPTA_FILTERS.pointe||COMPTA_FILTERS.compte){
     var clearBtn=document.createElement("button");
     clearBtn.textContent="Réinitialiser";
@@ -141,6 +153,7 @@ function buildComptabilite(){
       '<button onclick="openComptaDashboard()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📈 Graphiques</button>'+
       '<button onclick="openBudgetPrev()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📊 Budget</button>'+
       '<button onclick="openBilanAnnuel()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📄 Bilan AG</button>'+
+      '<button onclick="openComptaPlan()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">⚙️ Plan comptable</button>'+
     '</span>'+
   '</div>';
 
@@ -161,6 +174,11 @@ function buildComptabilite(){
     var tiersDiv=document.createElement("div");tiersDiv.style.cssText="font-size:11px;color:var(--txt2);margin-top:2px";
     tiersDiv.textContent=[l.tiers,l.moyen,comptaLigneCompte(l)].filter(Boolean).join(" · ");
     left.appendChild(dateSpan);left.appendChild(motifDiv);left.appendChild(tiersDiv);
+    if(typeof comptaLigneInfos==="function"){
+      var pcgDiv=document.createElement("div");pcgDiv.style.cssText="font-size:10.5px;color:var(--mut);margin-top:3px;font-family:monospace";
+      pcgDiv.textContent=comptaLigneInfos(l);
+      left.appendChild(pcgDiv);
+    }
     var montantDiv=document.createElement("div");
     montantDiv.style.cssText="font-size:15px;font-weight:800;flex-shrink:0;color:"+(l.type==="depense"?"var(--red)":"var(--grn)");
     montantDiv.textContent=(l.type==="depense"?"-":"+")+(l.montant||0).toFixed(2)+" €";
@@ -188,6 +206,7 @@ function setComptaType(type){
     if(prev && COMPTA_CATS[type].indexOf(prev)>=0) catSel.value=prev;
     catSel.removeAttribute("data-keep");
   }
+  if(typeof comptaRemplirCompte==="function") comptaRemplirCompte("");
 }
 function comptaJustifPick(input){
   if(!input.files||!input.files[0])return;
@@ -212,7 +231,7 @@ function showAddComptaLine(editId){
   comptaEditId=editId||null;
   var lines=getComptabilite();
   var existing=comptaEditId?lines.find(function(l){return l.id===comptaEditId;}):null;
-  document.getElementById("compta-modal-title").textContent=existing?"Modifier la ligne":"Nouvelle ligne";
+  document.getElementById("compta-modal-title").textContent=existing?"Modifier la ligne"+(existing.piece?" · "+existing.piece:""):"Nouvelle ligne";
   document.getElementById("cl-date").value=existing?existing.date:new Date().toISOString().slice(0,10);
   document.getElementById("cl-montant").value=existing?existing.montant:"";
   var catSelEl=document.getElementById("cl-categorie");
@@ -240,6 +259,7 @@ function showAddComptaLine(editId){
   if(justifPrev) justifPrev.textContent=comptaJustifDataUrl?"📎 Justificatif joint":"Aucun justificatif joint";
   var justifFile=document.getElementById("cl-justif-file"); if(justifFile) justifFile.value="";
   setComptaType(existing?existing.type:"recette");
+  if(typeof comptaRemplirCompte==="function") comptaRemplirCompte(existing?(existing.compteNum||""):"");
   var delBtn=document.getElementById("compta-delete-btn");
   if(delBtn) delBtn.style.display=existing?"block":"none";
   var cerfaBtn=document.getElementById("compta-cerfa-btn");
@@ -278,9 +298,16 @@ function saveComptaLine(){
     pointe:document.getElementById("cl-pointe").checked,
     justificatif:comptaJustifDataUrl||null
   };
+  var cnEl=document.getElementById("cl-compte-num");
+  if(cnEl && cnEl.value) data.compteNum=cnEl.value;
   if(comptaEditId){
     var idx=lines.findIndex(function(l){return l.id===comptaEditId;});
-    if(idx>=0) lines[idx]=Object.assign({id:comptaEditId},data);
+    // On garde ce que le formulaire n'affiche pas (n° de pièce, rapprochement bancaire…).
+    if(idx>=0){
+      var garde={};
+      ["piece","releveId","viaCode"].forEach(function(k){ if(lines[idx][k]!=null) garde[k]=lines[idx][k]; });
+      lines[idx]=Object.assign({id:comptaEditId},garde,data);
+    }
   } else {
     data.id=Date.now().toString();
     lines.push(data);
@@ -368,8 +395,9 @@ function saveBudgetPrevForm(){
 
 // ── BILAN ANNUEL / RAPPORT AG ────────────────────────────────────
 function openBilanAnnuel(){
-  var year=comptaCurrentYear();
-  var lines=getComptabilite().filter(function(l){return (l.date||"").indexOf(year)===0;});
+  var ex=(typeof comptaExerciceCourant==="function")?comptaExerciceCourant():null;
+  var year=ex?ex.label:comptaCurrentYear();
+  var lines=getComptabilite().filter(function(l){ return ex?((l.date||"")>=ex.debut&&(l.date||"")<=ex.fin):(l.date||"").indexOf(year)===0; });
   var byCat={recette:{},depense:{}};
   var totR=0,totD=0;
   lines.forEach(function(l){

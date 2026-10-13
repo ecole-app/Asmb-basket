@@ -95,6 +95,15 @@ describe("Rôles à l'intérieur d'un club", () => {
     await assertSucceeds(setDoc(doc(db, "clubs/A/comptabilite/c3"), { type: "recette", montant: 5 }));
     await assertFails(getDoc(doc(db, "clubs/A/sponsors/s1")));
   });
+  it("plan comptable : dirigeant et trésorier le règlent, coach et parent n'y ont pas accès", async () => {
+    const plan = { debutMois: 9, comptes: { "recette|Dons": "7541" }, tresorerie: {} };
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/compta_reglages/plan"), plan));
+    await assertSucceeds(setDoc(doc(await as("tresorierA"), "clubs/A/compta_reglages/plan"), plan));
+    await assertSucceeds(getDoc(doc(await as("tresorierA"), "clubs/A/compta_reglages/plan")));
+    await assertFails(getDoc(doc(await as("coachA"), "clubs/A/compta_reglages/plan")));
+    await assertFails(setDoc(doc(await as("parentPermA"), "clubs/A/compta_reglages/plan"), plan));
+    await assertFails(setDoc(doc(await as("dirB"), "clubs/A/compta_reglages/plan"), plan));
+  });
   it("un parent ne profite jamais d'un accès compta, même posé par erreur", async () => {
     const db = await as("parentPermA");
     await assertFails(getDoc(doc(db, "clubs/A/comptabilite/c1")));

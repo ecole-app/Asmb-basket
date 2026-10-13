@@ -502,6 +502,12 @@ service cloud.firestore {
       match /facturation_compteur/{id} {
         allow read, write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
       }
+      // Plan comptable du club (exercice, comptes par catégorie) : même droit
+      // que la compta, pour que le trésorier délégué puisse le régler.
+      match /compta_reglages/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'comptabilite');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'comptabilite');
+      }
       match /backups/{id}      { allow read: if readDirigeant(clubId); allow write: if dirigeant(clubId); }
       match /notes_frais/{id}  { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
       match /annuaire/{id}     { allow read: if readStaff(clubId);     allow write: if staff(clubId); }
