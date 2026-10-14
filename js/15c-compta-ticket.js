@@ -35,7 +35,7 @@ function comptaTicketStatut(txt,couleur){
   var el=document.getElementById("cl-ticket-st"); if(!el) return;
   el.style.display=txt?"block":"none";
   el.style.color=couleur||"var(--mut)";
-  el.textContent=txt||"";
+  el.textContent=txt||""; el.style.whiteSpace="pre-line"; el.style.wordBreak="break-word";
 }
 // Réduit la photo : 1280 px max sur le grand côté, JPEG. Renvoie une data URL.
 function comptaTicketReduire(file,maxPx,qualite){
@@ -63,6 +63,8 @@ function comptaTicketPrompt(){
     "categorie parmi : "+COMPTA_CATS.depense.join(" | ")+". "+
     "Utilise null si une information est illisible.";
 }
+// Erreur avec le détail technique, affiché sous le message pour le diagnostic.
+function comptaTicketErr(detail){ var e=new Error("ia"); e.detail=String(detail||"").slice(0,160); return e; }
 function comptaTicketAppel(dataUrl,corps){
   var ctrl=window.AbortController?new AbortController():null;
   var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
@@ -72,15 +74,15 @@ function comptaTicketAppel(dataUrl,corps){
     headers:{"Content-Type":"application/json","Authorization":"Bearer "+GM_TICKET_CLE,
       "HTTP-Referer":"https://generalmanagerapp.fr","X-Title":"General Manager"},
     body:JSON.stringify(body)})
-  .then(function(r){ return r.json(); })
+  .then(function(r){ return r.text().then(function(x){ var d=null; try{ d=JSON.parse(x); }catch(e){} if(!d) throw comptaTicketErr("HTTP "+r.status+" "+x.slice(0,80)); return d; }); })
   .then(function(d){
     clearTimeout(t);
-    if(d&&d.error) throw new Error("api");
+    if(d&&d.error) throw comptaTicketErr("API "+(d.error.code||"")+" : "+(d.error.message||JSON.stringify(d.error)));
     var txt=(d&&d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||"";
     var res=comptaTicketAnalyser(txt);
-    if(!res) throw new Error("vide");
+    if(!res) throw comptaTicketErr("réponse illisible ("+(d&&d.model||"?")+") : "+(String(txt).slice(0,80)||"vide"));
     return res;
-  },function(e){ clearTimeout(t); throw e; });
+  },function(e){ clearTimeout(t); if(e&&e.name==="AbortError") throw e; throw comptaTicketErr("réseau : "+(e&&e.message||e)); });
 }
 // Extrait et vérifie le JSON renvoyé par l'IA (rien d'aberrant n'est gardé).
 function comptaTicketAnalyser(txt){
@@ -113,10 +115,14 @@ function comptaTicketLire(file){
     // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde la 1280 px.
     return comptaTicketReduire(file,1024,0.6).then(function(petite){
       return comptaTicketAppel(petite,{models:GM_TICKET_MODELES})
-        .catch(function(){
+        .catch(function(e1){
           // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
           comptaTicketStatut("⏳ Nouvelle tentative…");
-          return comptaTicketAppel(petite,{model:"openrouter/free"});
+          return comptaTicketAppel(petite,{model:"openrouter/free"}).catch(function(e2){
+            if(e2&&!e2.detail&&e1&&e1.detail) e2.detail=e1.detail;
+            else if(e2&&e1&&e1.detail&&e2.detail) e2.detail="1) "+e1.detail+" — 2) "+e2.detail;
+            throw e2;
+          });
         });
     });
   }).then(function(r){
@@ -128,7 +134,7 @@ function comptaTicketLire(file){
     comptaTicketStatut(m==="image"?"⚠️ Photo illisible. Réessaie ou complète à la main.":
       m==="hors-ligne"?"⚠️ Pas de connexion : photo jointe, complète à la main.":
       (e&&e.name==="AbortError")?"⏱ Lecture trop longue : photo jointe, complète à la main.":
-      "⚠️ Lecture impossible : photo jointe, complète à la main.","var(--red)");
+      "⚠️ Lecture impossible : photo jointe, complète à la main."+(e&&e.detail?"\n("+e.detail+")":""),"var(--red)");
   }).then(function(){ if(btn) btn.disabled=false; });
 }
 function comptaTicketRemplir(r){

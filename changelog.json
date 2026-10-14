@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791969092",
+    "titre": "Photo de ticket : raison de l'échec affichée",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Compta › photo du ticket : si la lecture échoue, la raison exacte s'affiche sous le message."
+      }
+    ]
+  },
+  {
     "v": "1791968906",
     "titre": "Photo de ticket plus fiable",
     "points": [
