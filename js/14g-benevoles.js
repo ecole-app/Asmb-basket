@@ -130,7 +130,7 @@ function benChoisirPersonne(cb){
 function benSmsTexte(e,m){
   var club=(typeof clubLabel==="function")?clubLabel(""):"";
   var prenom=String(m.nom||"").split(" ")[0];
-  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", tu es bénévole au poste « "+m.poste+" » "+benJourTxt(e)+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour ton aide ! En cas d'empêchement, préviens-nous vite.";
+  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+benJourTxt(e)+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! En cas d'empêchement, prévenez-nous au plus vite.";
 }
 function benSms(e,m,tel){
   var envoyer=function(t){
@@ -148,29 +148,46 @@ function benSms(e,m,tel){
 }
 
 // ── Accueil : « Ce week-end, tu es à la buvette » ───────────────────
+// Rappels sur l'accueil : à J-14, à J-7, puis tous les jours à partir de J-5.
+// La personne peut masquer le rappel du jour (il revient au prochain rappel).
+// Une mission jamais vue s'affiche tout de suite, même hors de ces jours.
+function benJourLocal(d){ d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function benJoursAvant(dateIso){ var a=new Date(benJourLocal()+"T12:00:00"), b=new Date(String(dateIso).slice(0,10)+"T12:00:00"); return Math.round((b-a)/86400000); }
+function benCle(x,k){ return "gm_ben_"+k+"_"+x.e.id+"_"+x.m.id; }
+function benLs(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
 function benMesMissions(){
   var uid=(window.ASMB_USER&&window.ASMB_USER.uid)||""; if(!uid) return [];
-  var auj=new Date().toISOString().slice(0,10), fin=new Date(Date.now()+7*86400000).toISOString().slice(0,10), out=[];
+  var out=[];
   (getEvents()||[]).forEach(function(e){
-    if(!e||e.cancelled||e.statut==="attente"||!e.date||e.date<auj||e.date>fin) return;
-    benListe(e).forEach(function(m){ if(m.uid===uid) out.push({e:e,m:m}); });
+    if(!e||e.cancelled||e.statut==="attente"||!e.date) return;
+    var j=benJoursAvant(e.date); if(j<0||j>14) return;
+    benListe(e).forEach(function(m){ if(m.uid===uid) out.push({e:e,m:m,j:j}); });
   });
   return out.sort(function(a,b){ return (a.e.date+(a.m.heure||a.e.heure||"")).localeCompare(b.e.date+(b.m.heure||b.e.heure||"")); });
 }
+function benARappeler(x){
+  var auj=benJourLocal();
+  if(benLs(benCle(x,"ferme"))===auj) return false;
+  return !benLs(benCle(x,"vu"))||x.j===14||x.j===7||x.j<=5;
+}
+function benMasquer(cle,refId,marge){ benLs(cle,benJourLocal()); benBandeau(refId,marge); }
+function benQuand(j){ return j===0?"aujourd'hui":j===1?"demain":"dans "+j+" jours"; }
 // Bandeau inséré juste avant l'élément refId (accueil parent, coach, dirigeant).
 function benBandeau(refId,marge){
   var ref=document.getElementById(refId); if(!ref||!ref.parentNode) return;
   var id="ben-"+refId, box=document.getElementById(id);
-  var ms=benMesMissions();
+  var ms=benMesMissions().filter(benARappeler);
   if(!ms.length){ if(box) box.remove(); return; }
   if(!box){ box=document.createElement("div"); box.id=id; ref.parentNode.insertBefore(box,ref); }
-  var auj=new Date().toISOString().slice(0,10);
+  ms.forEach(function(x){ benLs(benCle(x,"vu"),"1"); });
+  var j0=ms[0].j;
   box.style.cssText="margin:"+(marge||"0 0 14px")+";padding:14px 16px;border-radius:var(--rs);background:color-mix(in srgb, #E8670A 12%, var(--card));border:1.5px solid #E8670A";
-  box.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#E8670A;margin-bottom:6px">🙋 '+(ms.some(function(x){ return x.e.date===auj; })?"Tu es bénévole aujourd'hui":"Tu es bénévole cette semaine")+'</div>'+
+  box.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#E8670A;margin-bottom:6px">🙋 '+(j0===0?"Vous êtes bénévole aujourd'hui":"Rappel : vous êtes bénévole "+benQuand(j0))+'</div>'+
     ms.map(function(x){
-      var j=x.e.date===auj?"Aujourd'hui":benJourTxt(x.e);
-      return '<div style="margin-top:4px"><div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(x.m.poste)+'</div>'+
-        '<div style="font-size:12px;color:var(--txt2)">'+authEsc(j.charAt(0).toUpperCase()+j.slice(1)+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+" · "+(x.e.titre||eventTypeLabel(x.e.type))+(x.e.lieu?" · "+x.e.lieu:""))+'</div></div>';
+      var j=x.j===0?"Aujourd'hui":benJourTxt(x.e);
+      return '<div style="display:flex;gap:10px;align-items:flex-start;margin-top:6px"><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(x.m.poste)+(x.j>1?' <span style="font-size:11px;font-weight:800;color:#E8670A">· '+benQuand(x.j)+'</span>':'')+'</div>'+
+        '<div style="font-size:12px;color:var(--txt2)">'+authEsc(j.charAt(0).toUpperCase()+j.slice(1)+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+" · "+(x.e.titre||eventTypeLabel(x.e.type))+(x.e.lieu?" · "+x.e.lieu:""))+'</div></div>'+
+        '<button type="button" title="Masquer ce rappel" aria-label="Masquer ce rappel" onclick="benMasquer(\''+benCle(x,"ferme")+'\',\''+refId+'\',\''+(marge||"")+'\')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:none;background:color-mix(in srgb, #E8670A 18%, transparent);color:#E8670A;font-size:13px;font-weight:900;cursor:pointer">✕</button></div>';
     }).join("")+
-    '<div style="font-size:11px;color:var(--mut);margin-top:8px">Un empêchement ? Préviens le club au plus vite.</div>';
+    '<div style="font-size:11px;color:var(--mut);margin-top:8px">Un empêchement ? Prévenez le club au plus vite.</div>';
 }

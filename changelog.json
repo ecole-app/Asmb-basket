@@ -1,5 +1,33 @@
 [
   {
+    "v": "1791946829",
+    "titre": "Page tournoi et rappels bénévoles",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi : nouvelle page publique generalmanagerapp.fr/tournoi : matchs en cours, à venir et résultats, classements, « Mon équipe » (et les autres équipes), mode grand écran pour la télé du gymnase. Le lien et le QR de l'affiche y mènent."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Bénévoles : SMS au vouvoiement."
+      },
+      {
+        "roles": [
+          "parent",
+          "coach",
+          "dirigeant"
+        ],
+        "texte": "Bénévoles : rappel sur l'accueil 14 jours avant, 7 jours avant, puis chaque jour à partir de 5 jours avant ; chaque rappel peut être masqué."
+      }
+    ]
+  },
+  {
     "v": "1791945466",
     "titre": "Bénévoles",
     "points": [

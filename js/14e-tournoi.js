@@ -8,7 +8,8 @@
 //   matchs   planning généré [{id, cat, phase, poule, label, a, b, aRef, bRef, terrain, debut, fin, hors}]
 // Le planning public (sans rien de privé) est copié dans trn_pages/{clubId__eventId},
 // lisible sans compte (lien + QR). Les codes de table de marque (jour J) n'y sont jamais.
-var TRN_URL_BASE="https://generalmanagerapp.fr/?trn=";
+// Page publique dédiée (tournoi/index.html) ; les anciens liens ?trn= restent ouverts par l'appli.
+var TRN_URL_BASE="https://generalmanagerapp.fr/tournoi/?t=";
 var TRN_SUITES={aucune:"Rien : classement des poules",finale:"Finale",demis:"Demi-finales + finale",classement:"Matchs de classement (tout le monde rejoue)"};
 var TRN_LETTRES="ABCDEFGH";
 
