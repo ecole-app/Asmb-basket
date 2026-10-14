@@ -243,7 +243,7 @@ function renderMembers(ch){
 }
 
 async function editMemberLabel(phone,currentLabel){
-  var newLabel=await askPrompt("Nom d'identification", {defaultValue:currentLabel||"", placeholder:"ex: Lucas-U13", confirmText:"Enregistrer"});
+  var newLabel=await askPrompt("Nom d'identification", {defaultValue:currentLabel||"", placeholder:"", confirmText:"Enregistrer"});
   if(newLabel===null)return;
   if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   var chDoc=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels")));

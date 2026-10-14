@@ -95,7 +95,7 @@ function showAuth(step, data){
     h=authHero("Connexion","Espace du club")
       +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
-      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="prenom@email.fr">'
+      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="mail@gmail.com">'
       +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
       +authPassField("auth-pass","••••••••")
       +'<div id="auth-err" style="display:none;color:#C0392B;font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
@@ -114,7 +114,7 @@ function showAuth(step, data){
       +'<div style="padding:26px 22px 28px;display:flex;flex-direction:column;flex:1">'
       +'<p style="font-size:13.5px;color:'+AUTH_MUTTXT+';text-align:center;line-height:1.5">Saisir l\'e-mail : un lien de réinitialisation sera envoyé.</p>'
       +'<label style="'+AUTH_LBL+'">E-mail</label>'
-      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
+      +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="mail@gmail.com">'
       +'<div id="auth-err" style="display:none;color:#C0392B;font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoReset()">Envoyer le lien</button>'
       +'<button style="'+AUTH_BTN2+'" onclick="showAuth(\'login\')">Retour</button>'
@@ -177,7 +177,7 @@ function openChangeEmailModal(){
     '</div>'+
     '<div style="font-size:11px;color:var(--mut);margin-bottom:16px;line-height:1.4">Actuellement : <b>'+authEsc(user.email||"")+'</b><br>Pour des raisons de sécurité, votre mot de passe actuel est requis.</div>'+
     '<label style="'+AUTH_LBL+'">Nouvel e-mail</label>'+
-    '<input id="ce-new-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="nouveau@email.fr">'+
+    '<input id="ce-new-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="mail@gmail.com">'+
     '<label style="'+AUTH_LBL+'">Mot de passe actuel</label>'+
     '<div id="ce-pass-wrap"></div>'+
     '<div id="ce-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'+

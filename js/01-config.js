@@ -56,15 +56,15 @@ function clubCouleur(){
 // Le dirigeant peut coller un lien complet, un nom de domaine ou un @compte :
 // tout est ramené à une adresse https:// avant d'être enregistré.
 var CLUB_LIENS=[
-  {k:"facebook", label:"Facebook", base:"https://www.facebook.com/", ph:"facebook.com/monclub",
+  {k:"facebook", label:"Facebook", base:"https://www.facebook.com/", ph:"",
    svg:'<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v7h4v-7h3l1-4h-4V8z"/>'},
-  {k:"instagram", label:"Instagram", base:"https://www.instagram.com/", ph:"@monclub",
+  {k:"instagram", label:"Instagram", base:"https://www.instagram.com/", ph:"",
    svg:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/>'},
-  {k:"tiktok", label:"TikTok", base:"https://www.tiktok.com/@", ph:"@monclub",
+  {k:"tiktok", label:"TikTok", base:"https://www.tiktok.com/@", ph:"",
    svg:'<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.6 2.4 4.5 5 5"/>'},
-  {k:"site", label:"Site internet", base:"https://", ph:"monclub.fr",
+  {k:"site", label:"Site internet", base:"https://", ph:"",
    svg:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>'},
-  {k:"boutique", label:"Boutique", base:"https://", ph:"lien de la boutique du club",
+  {k:"boutique", label:"Boutique", base:"https://", ph:"",
    svg:'<path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'}
 ];
 // Renvoie "" (vide), l'adresse https normalisée, ou null si la saisie n'est pas un lien.

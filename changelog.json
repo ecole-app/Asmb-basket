@@ -1,5 +1,19 @@
 [
   {
+    "v": "1791951623",
+    "titre": "Champs à remplir vides",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent"
+        ],
+        "texte": "Les champs à remplir ne contiennent plus d'exemples (noms, lieux, horaires) : seuls le téléphone (0612345678) et l'e-mail (mail@gmail.com) gardent un modèle."
+      }
+    ]
+  },
+  {
     "v": "1791949977",
     "titre": "Tournoi : plan du site",
     "points": [
@@ -1685,7 +1699,7 @@
         "roles": [
           "dirigeant"
         ],
-        "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui de votre propre club (ASMB), ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom."
+        "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui d'un autre club, ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom."
       }
     ]
   },
@@ -1884,13 +1898,13 @@
         "roles": [
           "dirigeant"
         ],
-        "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec \"asmb\" dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse."
+        "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec un ancien nom dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse."
       }
     ]
   },
   {
     "v": "1790780467",
-    "titre": "Caisse buvette en ligne (asmb-buvette), reliée en temps réel",
+    "titre": "Caisse buvette en ligne, reliée en temps réel",
     "points": [
       {
         "roles": [
@@ -2259,7 +2273,7 @@
           "coach",
           "parent"
         ],
-        "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine ASMB au violet/indigo, sur toute l'application."
+        "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine d'origine au violet/indigo, sur toute l'application."
       }
     ]
   },

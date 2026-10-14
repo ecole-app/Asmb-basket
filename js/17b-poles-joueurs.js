@@ -6,12 +6,12 @@
 // - Formation et Événements n'ont que des coachs (séances, organisation) ;
 //   Élite, 5x5, 3x3 et Basket Pour Tous ont aussi des joueurs, avec 1 ou 2 infos propres.
 var POLES_JOUEURS={
-  elite:{court:"Élite",champs:[{id:"niveau",label:"Niveau",options:["Débutant","Espoir","Confirmé"]},{id:"objectif",label:"Objectif",ph:"ex. Sélection départementale",max:60}]},
+  elite:{court:"Élite",champs:[{id:"niveau",label:"Niveau",options:["Débutant","Espoir","Confirmé"]},{id:"objectif",label:"Objectif",ph:"",max:60}]},
   competition:{court:"5x5",champs:[{id:"equipe",label:"Équipe",type:"team"}]},
-  "3x3":{court:"3x3",champs:[{id:"equipe",label:"Équipe 3x3",ph:"ex. Les Verts U15",max:40}]},
-  basketpourtous:{court:"Basket Pour Tous",champs:[{id:"groupe",label:"Groupe",ph:"ex. Mercredi 14h",max:40}]},
+  "3x3":{court:"3x3",champs:[{id:"equipe",label:"Équipe 3x3",ph:"",max:40}]},
+  basketpourtous:{court:"Basket Pour Tous",champs:[{id:"groupe",label:"Groupe",ph:"",max:40}]},
   // Basket Santé : aucune donnée de santé sur la fiche, seulement le groupe.
-  basketsante:{court:"Basket Santé",champs:[{id:"groupe",label:"Groupe",ph:"ex. Mardi 10h",max:40}]}
+  basketsante:{court:"Basket Santé",champs:[{id:"groupe",label:"Groupe",ph:"",max:40}]}
 };
 var currentPoleFilter="all";
 

@@ -227,8 +227,8 @@ function openCycleEditModal(cyId){
       '<div style="font-size:15px;font-weight:800;color:var(--txt)">'+(existing?"Modifier le cycle":"Nouveau cycle")+'</div>'+
       '<button id="cyed-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
     '</div>'+
-    '<div class="form-group"><label class="form-label">Nom du cycle</label><input class="form-input" id="cyed-nom" value="'+(existing?authEsc(existing.n):"")+'" placeholder="Ex: Fondamentaux Individuels"></div>'+
-    '<div class="form-group"><label class="form-label">Période</label><input class="form-input" id="cyed-periode" value="'+(existing?authEsc(existing.p):"")+'" placeholder="Ex: Sept. - mi-oct. 2026"></div>'+
+    '<div class="form-group"><label class="form-label">Nom du cycle</label><input class="form-input" id="cyed-nom" value="'+(existing?authEsc(existing.n):"")+'" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Période</label><input class="form-input" id="cyed-periode" value="'+(existing?authEsc(existing.p):"")+'" placeholder=""></div>'+
     '<div class="form-group"><label class="form-label">Couleur</label><select class="form-input" id="cyed-couleur">'+colorOpts+'</select></div>'+
     '<div class="form-group"><label class="form-label">Objectifs (un par ligne)</label><textarea class="form-input" id="cyed-objs" rows="5" placeholder="Un objectif par ligne">'+(existing&&existing.objs?authEsc(existing.objs.join("\n")):"")+'</textarea></div>'+
     '<button id="cyed-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>'+
@@ -296,9 +296,9 @@ function openSeanceEditModal(cyId,seaNum){
       '<div style="font-size:15px;font-weight:800;color:var(--txt)">'+(existing?"Modifier la séance":"Nouvelle séance")+'</div>'+
       '<button id="sed-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>'+
     '</div>'+
-    '<div class="form-group"><label class="form-label">Titre</label><input class="form-input" id="sed-titre" value="'+(existing?authEsc(existing.t):"")+'" placeholder="Ex: Dribble et changement de main"></div>'+
-    '<div class="form-group"><label class="form-label">Objectif</label><input class="form-input" id="sed-obj" value="'+(existing?authEsc(existing.obj):"")+'" placeholder="Ex: Progresser dans la maîtrise du dribble"></div>'+
-    '<div class="form-group"><label class="form-label">Durée</label><input class="form-input" id="sed-dur" value="'+(existing?authEsc(existing.dur):"1h30")+'" placeholder="1h30"></div>'+
+    '<div class="form-group"><label class="form-label">Titre</label><input class="form-input" id="sed-titre" value="'+(existing?authEsc(existing.t):"")+'" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Objectif</label><input class="form-input" id="sed-obj" value="'+(existing?authEsc(existing.obj):"")+'" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Durée</label><input class="form-input" id="sed-dur" value="'+(existing?authEsc(existing.dur):"1h30")+'" placeholder=""></div>'+
     (existing&&!existingContent&&existing.sits&&existing.sits.length
       ? '<div style="font-size:11px;color:var(--mut);background:#e8edf5;border-radius:var(--rx);padding:10px 12px;margin-bottom:12px;line-height:1.4">Cette séance contient '+existing.sits.length+' situation(s) détaillée(s) du contenu d\'origine. Elles sont conservées telles quelles.</div>'
       : '<div class="form-group"><label class="form-label">Contenu de la séance</label><textarea class="form-input" id="sed-contenu" rows="6" placeholder="Décrire le déroulé, les exercices, l\'organisation...">'+authEsc(existingContent)+'</textarea></div>')+
@@ -568,7 +568,7 @@ function buildReglement(){
 async function openReglementEdit(){
   if(!canEditCycles()) return;
   var dep=await askPrompt("Département du club (numéro ou nom)",
-    {defaultValue:getClubDepartement(),placeholder:"Ex : 42 ou Loire",confirmText:"Suivant"});
+    {defaultValue:getClubDepartement(),placeholder:"",confirmText:"Suivant"});
   if(dep===null) return;
   dep=String(dep).trim();
   if(window.CURRENT_CLUB_ID && window.fbUpdateDoc){

@@ -247,9 +247,9 @@ function trnOuvrir(eid){
     var dem=document.createElement("div"); zone.appendChild(dem);
     if(typeof trnRendreDemandes==="function") trnRendreDemandes(dem,eid,rendre);
     var f=document.createElement("div"); f.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end";
-    var nom=document.createElement("input"); nom.className="form-input"; nom.placeholder="ex. ASMB 1"; nom.maxLength=40;
-    var club=document.createElement("input"); club.className="form-input"; club.placeholder="Club"; club.maxLength=50; club.value=clubLabel("");
-    var cat=document.createElement("input"); cat.className="form-input"; cat.placeholder="ex. U13 M"; cat.maxLength=20; cat.setAttribute("list","trn-cats");
+    var nom=document.createElement("input"); nom.className="form-input"; nom.placeholder=""; nom.maxLength=40;
+    var club=document.createElement("input"); club.className="form-input"; club.placeholder=""; club.maxLength=50;
+    var cat=document.createElement("input"); cat.className="form-input"; cat.placeholder=""; cat.maxLength=20; cat.setAttribute("list","trn-cats");
     var dl=document.createElement("datalist"); dl.id="trn-cats";
     dl.innerHTML=trnCatsDe(c.equipes).concat(["U9","U11 M","U11 F","U13 M","U13 F","U15 M","U15 F","U17 M","U17 F","Seniors M","Seniors F"]).filter(function(x,i,a){ return a.indexOf(x)===i; }).map(function(x){ return '<option value="'+authEsc(x)+'">'; }).join("");
     f.appendChild(champ("Équipe",nom)); f.appendChild(champ("Club",club)); f.appendChild(champ("Catégorie",cat)); zone.appendChild(dl); zone.appendChild(f);
@@ -308,7 +308,7 @@ function trnOuvrir(eid){
     var cbR=coche("Une équipe ne joue jamais deux matchs d'affilée",c.repos);
     gmSection(zone,"Inscription des équipes par le lien","Les clubs inscrivent leur équipe depuis la page publique du tournoi ; vous acceptez ou refusez chaque demande dans l'onglet Équipes.");
     var cbI=coche("Les équipes peuvent s'inscrire par le lien",!!c.inscr.ouvert);
-    var catsI=document.createElement("input"); catsI.className="form-input"; catsI.placeholder="ex. U11 M, U13 M, U13 F"; catsI.maxLength=200;
+    var catsI=document.createElement("input"); catsI.className="form-input"; catsI.placeholder=""; catsI.maxLength=200;
     catsI.value=(c.inscr.cats&&c.inscr.cats.length?c.inscr.cats:trnCatsDe(c.equipes)).join(", ");
     var gI=champ("Catégories proposées (séparées par des virgules)",catsI); zone.appendChild(gI);
     function majI(){ gI.style.display=cbI.checked?"block":"none"; } cbI.addEventListener("change",majI); majI();

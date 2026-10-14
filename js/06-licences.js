@@ -1035,7 +1035,7 @@ async function addLicenceAsBenevole(code){
     return;
   }
   var nomComplet=((f.respNom||"").trim())||((f.prenom||"")+" "+(f.nom||"")).trim();
-  var dispo=await askPrompt("Disponibilités / tâches proposées", {placeholder:"Ex: buvette, transport, arbitrage...", confirmText:"Ajouter"});
+  var dispo=await askPrompt("Disponibilités / tâches proposées", {placeholder:"", confirmText:"Ajouter"});
   contacts.push({
     id:Date.now().toString(),
     nom:nomComplet,
@@ -1386,21 +1386,21 @@ function renderFicheForm(lic){
         '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(f.paysNaiss||'')+'" placeholder="Pays"></div>'+
       '</div>'+
       '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville">'+(f.adresse||'')+'</textarea></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="06..."></div>'+
-      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="email@..."></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="mail@gmail.com"></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Responsable légal</div>'+
       '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(f.respNom||'')+'" placeholder="Prénom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="06..."></div>'+
-      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(f.respEmail||'')+'" placeholder="email@..."></div>'+
+      '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder=""></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(f.respEmail||'')+'" placeholder="mail@gmail.com"></div>'+
       '<div style="margin:4px 0 16px" id="resp2-toggle-wrap">'+
         (f.resp2Nom ?
           '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable légal 2</div>'+
           '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(f.resp2Nom||'')+'" placeholder="Prénom Nom"></div>'+
-          '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder="Pere, Mere, Tuteur..."></div>'+
-          '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="06..."></div>'+
-          '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(f.resp2Email||'')+'" placeholder="email@..."></div>'+
+          '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder=""></div>'+
+          '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="0612345678"></div>'+
+          '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(f.resp2Email||'')+'" placeholder="mail@gmail.com"></div>'+
           '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>'
         :
           '<button type="button" onclick="addResp2()" style="padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:1.5px dashed var(--bdr);cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-size:16px">+</span> Ajouter un 2ème responsable légal</button>'
@@ -1408,8 +1408,8 @@ function renderFicheForm(lic){
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Contact en cas d\'urgence</div>'+
       '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prénom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="06..."></div>'+
-      '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="Allergies, traitements, remarques...">'+(f.notes||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="">'+(f.notes||'')+'</textarea></div>'+
       '<div class="form-group"><label class="form-label" for="f-paiementPrevu">Comment pensez-vous régler la licence ?</label>'+
         '<select class="form-input" id="f-paiementPrevu" onchange="var h=document.getElementById(\'f-ordre\');if(h)h.style.display=/^cheque/.test(this.value)?\'block\':\'none\'">'+
           '<option value="">Je verrai avec le club</option>'+
@@ -1442,7 +1442,7 @@ function renderFicheForm(lic){
       '</div>'+
       '<div class="form-group">'+
         '<label class="form-label">Médecin / Établissement</label>'+
-        '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="Dr ...">'+
+        '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="">'+
       '</div>'+
       '<button id="fiche-submit-btn" onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px"> Valider ma fiche</button>'+
     '</div>';
@@ -1492,9 +1492,9 @@ function addResp2(){
   wrap.innerHTML=
     '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable légal 2</div>'+
     '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" placeholder="Prénom Nom"></div>'+
-    '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" placeholder="Pere, Mere, Tuteur..."></div>'+
-    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" placeholder="06..."></div>'+
-    '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" placeholder="email@..."></div>'+
+    '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" placeholder="0612345678"></div>'+
+    '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" placeholder="mail@gmail.com"></div>'+
     '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>';
 }
 function removeResp2(){

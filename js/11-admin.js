@@ -1279,13 +1279,13 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigné</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="06... (pour se pointer seul aux entraînements)"></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="0612345678"></div>'+
     '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder="Ex: 7"></div>'+
+    '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder=""></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
     '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
-    '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+authEsc(p&&p.contact||'')+'" placeholder="06..."></div>'+
+    '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+authEsc(p&&p.contact||'')+'" placeholder="0612345678"></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+authEsc(p&&p.notes||'')+'</textarea></div>'+
     (typeof polesFicheHtml==="function"?polesFicheHtml(p):"");
   wirePlayerCatAutofill();
@@ -1462,8 +1462,8 @@ function openNoteFraisForm(parentModal){
     '</div>'+
     '<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="nf-date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
     '<div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="nf-montant" type="number" step="0.01" placeholder="0.00"></div>'+
-    '<div class="form-group"><label class="form-label">Motif</label><input class="form-input" id="nf-motif" placeholder="Ex: Essence déplacement match"></div>'+
-    '<div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="nf-categorie" list="nf-cat-list" placeholder="Ex: Déplacement, Matériel, Repas..."><datalist id="nf-cat-list"></datalist></div>'+
+    '<div class="form-group"><label class="form-label">Motif</label><input class="form-input" id="nf-motif" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="nf-categorie" list="nf-cat-list" placeholder=""><datalist id="nf-cat-list"></datalist></div>'+
     '<div class="form-group"><label class="form-label">Photo du justificatif</label>'+
       '<input type="file" id="nf-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleNoteFraisPhoto(this)">'+
       '<button type="button" id="nf-photo-btn" style="width:100%;padding:12px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer">📷 Prendre / choisir une photo</button>'+

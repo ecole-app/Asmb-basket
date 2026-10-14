@@ -109,7 +109,7 @@ function renderJourFields(){
         +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Début</label><input class="form-input" id="cr-debut-'+j+'" type="time" value="'+debut+'"></div>'
         +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Fin</label><input class="form-input" id="cr-fin-'+j+'" type="time" value="'+fin+'"></div>'
       +'</div>'
-      +'<div class="form-group" style="margin-bottom:0"><label class="form-label">Salle / Lieu</label><input class="form-input" id="cr-salle-'+j+'" placeholder="Ex: Gymnase Jean Moulin" value="'+authEsc(salle)+'"></div>'
+      +'<div class="form-group" style="margin-bottom:0"><label class="form-label">Salle / Lieu</label><input class="form-input" id="cr-salle-'+j+'" placeholder="" value="'+authEsc(salle)+'"></div>'
     +'</div>';
   }).join("");
 }

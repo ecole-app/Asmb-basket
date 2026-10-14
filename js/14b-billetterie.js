@@ -248,7 +248,7 @@ function evtConfigurer(eid){
 
   gmSection(s.body,"Programme (facultatif)","Affiché sur la page d'inscription.");
   var prog=document.createElement("textarea"); prog.className="form-input"; prog.rows=3; prog.maxLength=600;
-  prog.placeholder=resa?"Ex : apéritif à 19h, repas, DJ, tombola. Menu enfant disponible.":"Ex : 9h-17h, repas du midi compris, prévoir gourde et baskets propres";
+  prog.placeholder="";
   prog.value=i.programme||""; s.body.appendChild(prog);
 
   var row=gmRow(s.body);
@@ -768,7 +768,7 @@ function evtFormResa(host,p,o){
     '<div id="rs-total" style="font-size:15px;font-weight:900;color:var(--dkg);margin:10px 0 16px"></div>'+
     '<div class="form-group"><label class="form-label" for="rs-prenom">Prénom</label><input class="form-input" id="rs-prenom" maxlength="40" autocomplete="given-name"></div>'+
     '<div class="form-group"><label class="form-label" for="rs-nom">Nom de la réservation</label><input class="form-input" id="rs-nom" maxlength="60" autocomplete="family-name"></div>'+
-    '<div class="form-group"><label class="form-label" for="rs-tel">Téléphone</label><input class="form-input" id="rs-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
+    '<div class="form-group"><label class="form-label" for="rs-tel">Téléphone</label><input class="form-input" id="rs-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="0612345678"></div>'+
     '<div class="form-group"><label class="form-label" for="rs-email">E-mail (facultatif)</label><input class="form-input" id="rs-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email"></div>'+
     '<div id="rs-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="rs-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
     (o.public?'<input id="rs-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">':'')+
@@ -878,8 +878,8 @@ function rendreEvtPublic(el,p,pid){
       '<div class="form-group"><label class="form-label" for="evt-naiss">Date de naissance</label><input class="form-input" id="evt-naiss" type="date"></div>'+
       '<div id="evt-club-g"><div class="form-group"><label class="form-label" for="evt-cat">Catégorie</label><select class="form-select" id="evt-cat">'+EVT_CATS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("")+'</select><div style="font-size:11px;color:var(--mut);margin-top:4px">Calculée d\'après la date de naissance, modifiable.</div></div>'+
         '<div class="form-group"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div></div>'+
-      '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
-      '<div class="form-group"><label class="form-label" for="evt-email">E-mail (facultatif)</label><input class="form-input" id="evt-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email" placeholder="prenom@email.fr"></div>'+
+      '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label" for="evt-email">E-mail (facultatif)</label><input class="form-input" id="evt-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email" placeholder="mail@gmail.com"></div>'+
       '<div id="evt-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
       '<input id="evt-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
       '<button id="evt-envoyer" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">M\'inscrire</button>'+

@@ -92,7 +92,7 @@ function configurerEssais(){
     var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!deja[t.id]; cb.style.cssText="width:18px;height:18px;accent-color:var(--dkg)";
     lab.appendChild(cb); lab.appendChild(document.createTextNode(t.name+(t.cat&&t.cat!==t.name?" · "+t.cat:"")));
     var inp=document.createElement("input"); inp.className="form-input"; inp.id="essai-cr-"+t.id;
-    inp.placeholder="Ex : mercredi 14h-15h30, gymnase Jean Jaurès"; inp.maxLength=120;
+    inp.placeholder="Créneaux (jour, heure, lieu)"; inp.maxLength=120;
     inp.value=(deja[t.id]&&deja[t.id].creneaux)||"";
     inp.style.marginTop="8px";
     card.appendChild(lab); card.appendChild(inp); s.body.appendChild(card);
@@ -100,7 +100,7 @@ function configurerEssais(){
   });
   gmSection(s.body,"Message aux familles (facultatif)");
   var msg=document.createElement("textarea"); msg.className="form-input"; msg.id="essai-msg"; msg.rows=2; msg.maxLength=200;
-  msg.placeholder="Ex : prévoir une tenue de sport et une bouteille d'eau";
+  msg.placeholder="";
   msg.value=p.message||"";
   s.body.appendChild(msg);
   var row=gmRow(s.body);
@@ -223,8 +223,8 @@ function repondreEssai(it, fini){
   var chips=document.createElement("div"); chips.style.cssText="display:flex;flex-direction:column;gap:6px";
   var autre=document.createElement("div"); autre.style.cssText="display:flex;gap:8px;margin-top:8px";
   var iD=document.createElement("input"); iD.type="date"; iD.className="form-input"; iD.style.flex="1";
-  var iH=document.createElement("input"); iH.type="text"; iH.className="form-input"; iH.placeholder="14h - 15h30"; iH.style.flex="1"; iH.maxLength=30;
-  var iL=document.createElement("input"); iL.type="text"; iL.className="form-input"; iL.placeholder="Lieu (gymnase…)"; iL.maxLength=80; iL.style.marginTop="8px";
+  var iH=document.createElement("input"); iH.type="text"; iH.className="form-input"; iH.placeholder="Heure"; iH.style.flex="1"; iH.maxLength=30;
+  var iL=document.createElement("input"); iL.type="text"; iL.className="form-input"; iL.placeholder="Lieu"; iL.maxLength=80; iL.style.marginTop="8px";
   autre.appendChild(iD); autre.appendChild(iH);
   var txt=document.createElement("textarea"); txt.className="form-input"; txt.rows=4; txt.style.marginTop="6px";
   function message(){
@@ -355,7 +355,7 @@ function rendreFormEssai(el,p){
       '<div class="form-group"><label class="form-label" for="essai-prenom">Prénom de l\'enfant (ou le vôtre)</label><input class="form-input" id="essai-prenom" maxlength="40" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="essai-naiss">Date de naissance</label><input class="form-input" id="essai-naiss" type="date"></div>'+
       '<div class="form-group"><label class="form-label" for="essai-parent">Votre nom</label><input class="form-input" id="essai-parent" maxlength="60" autocomplete="name"></div>'+
-      '<div class="form-group"><label class="form-label" for="essai-tel">Votre téléphone</label><input class="form-input" id="essai-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78"></div>'+
+      '<div class="form-group"><label class="form-label" for="essai-tel">Votre téléphone</label><input class="form-input" id="essai-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="0612345678"></div>'+
       '<div class="form-group"><label class="form-label" for="essai-msg-f">Un message pour le club (facultatif)</label><textarea class="form-input" id="essai-msg-f" rows="2" maxlength="300"></textarea></div>'+
       '<input id="essai-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
       (p.message?'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">'+authEsc(p.message)+'</div>':'')+

@@ -264,7 +264,7 @@ function renderInviteCompteForm(el, code, inv){
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Vous êtes invité(e) comme <b>'+roleLbl.toLowerCase()+'</b>. Créez votre compte pour accéder au club.</p>'
     +'<label style="'+AUTH_LBL+'">E-mail</label>'
-    +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="prenom@email.fr">'
+    +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="mail@gmail.com">'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
     +authPassField("auth-pass","6 caractères minimum")
     +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
@@ -282,7 +282,7 @@ function renderInviteExistant(el, code, inv, email){
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Connectez-vous avec votre compte : l\'accès <b>'+roleLbl.toLowerCase()+'</b> de '+authEsc(inv.clubName||"ce club")+' s\'ajoutera à votre compte.</p>'
     +'<label style="'+AUTH_LBL+'">E-mail</label>'
-    +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(email||"")+'" placeholder="prenom@email.fr">'
+    +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(email||"")+'" placeholder="mail@gmail.com">'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
     +authPassField("auth-pass","Votre mot de passe")
     +'<div id="auth-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
@@ -603,7 +603,7 @@ async function creerClub(name, sport, extra){
   return id;
 }
 async function createClubFlow(list){
-  var name=await askPrompt("Nom du club",{placeholder:"Ex : BC Saint-Chamond",confirmText:"Suivant"});
+  var name=await askPrompt("Nom du club",{placeholder:"",confirmText:"Suivant"});
   if(!name||!name.trim()) return;
   var sport=await askPrompt("Sport du club",{defaultValue:"basket",confirmText:"Créer le club"});
   if(sport===null) return;
@@ -1357,7 +1357,7 @@ function showClubSuspendu(club){
 // Suspension : date de depart et echeance posees en meme temps que le statut.
 async function suspendreClub(c, list){
   var motif=await askPrompt("Motif communique au club (facultatif)",
-    {defaultValue:c.suspendMotif||"",placeholder:"Ex : cotisation non reglee",confirmText:"Suivant"});
+    {defaultValue:c.suspendMotif||"",placeholder:"",confirmText:"Suivant"});
   if(motif===null) return;
   var ok=await askConfirm("Suspendre "+(c.name||c.id)+" ?\n\nSes membres ne pourront plus accéder à leurs données. Ils verront le motif et disposeront de "+GM_DELAI_REGUL_JOURS+" jours pour régulariser avant que la suppression ne devienne possible.",
     {danger:true,confirmText:"Suspendre"});

@@ -79,7 +79,7 @@ function benOuvrir(eid){
   BEN_POSTES.concat(["Autre…"]).forEach(function(p){ var o=document.createElement("option"); o.value=p; o.textContent=p; poste.appendChild(o); });
   wp.appendChild(poste);
   var wh=document.createElement("div"); wh.className="form-group"; wh.innerHTML='<label class="form-label">Heure</label>';
-  var heure=document.createElement("input"); heure.className="form-input"; heure.placeholder="ex. 14h"; heure.maxLength=12; heure.value=String(e.heure||"").slice(0,12);
+  var heure=document.createElement("input"); heure.className="form-input"; heure.placeholder=""; heure.maxLength=12; heure.value=String(e.heure||"").slice(0,12);
   wh.appendChild(heure); g.appendChild(wp); g.appendChild(wh); s.body.appendChild(g);
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Choisir la personne","primary",function(){
@@ -95,7 +95,7 @@ function benOuvrir(eid){
         askConfirm("Prévenir "+m.nom+" par SMS maintenant ?",{confirmText:"Envoyer le SMS"}).then(function(ok){ if(ok) benSms(ev,m,pers.phone); });
       });
     };
-    if(nomPoste==="Autre…") askPrompt("Nom du poste",{placeholder:"ex. Photos, goûter…",confirmText:"OK"}).then(function(v){ suite(v&&v.trim()); });
+    if(nomPoste==="Autre…") askPrompt("Nom du poste",{placeholder:"",confirmText:"OK"}).then(function(v){ suite(v&&v.trim()); });
     else suite(nomPoste);
   }));
 }
@@ -107,7 +107,7 @@ function benChoisirPersonne(cb){
   s.body.appendChild(q);
   var l=document.createElement("div"); l.innerHTML='<div style="color:var(--mut);font-size:12px;padding:8px 0">Chargement…</div>'; s.body.appendChild(l);
   var autre=gmBtn("Personne sans compte dans l'appli","ghost",function(){
-    askPrompt("Nom de la personne",{placeholder:"ex. Karim B.",confirmText:"OK"}).then(function(v){ v=v&&v.trim(); if(v) choisir({nom:v}); });
+    askPrompt("Nom de la personne",{placeholder:"",confirmText:"OK"}).then(function(v){ v=v&&v.trim(); if(v) choisir({nom:v}); });
   });
   gmRow(s.body).appendChild(autre);
   benChargerComptes().then(function(cs){
@@ -142,9 +142,9 @@ function benSms(e,m,tel){
   if(m.uid) return benChargerComptes().then(function(cs){
     var c=cs.find(function(x){ return x.uid===m.uid; });
     if(c&&c.phone) envoyer(c.phone);
-    else askPrompt("Numéro de "+m.nom,{placeholder:"06…",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
+    else askPrompt("Numéro de "+m.nom,{placeholder:"0612345678",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
   });
-  askPrompt("Numéro de "+m.nom,{placeholder:"06…",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
+  askPrompt("Numéro de "+m.nom,{placeholder:"0612345678",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
 }
 
 // ── Accueil : « Ce week-end, tu es à la buvette » ───────────────────

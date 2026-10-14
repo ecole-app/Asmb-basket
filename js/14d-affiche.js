@@ -734,11 +734,11 @@ function evtAffiche(eid){
     var b=bloc(titre), i=document.createElement("input"); i.className="form-input"; i.maxLength=max; i.placeholder=ph; i.value=st[cle]||"";
     i.addEventListener("input",function(){ st[cle]=i.value; redessiner(); }); b.appendChild(i);
   }
-  champ("Titre","titre",e.titre||"",70);
-  champ("Accroche","accroche",AF_TAGS[e.type]||"Événement",30);
+  champ("Titre","titre","",70);
+  champ("Accroche","accroche","",30);
   (function(){
     var b=bloc("Texte libre"), t=document.createElement("textarea"); t.className="form-input"; t.rows=5; t.maxLength=500;
-    t.placeholder="Ex : Ouvert aux U9 à U15\nRepas tiré du sac\nVendredi de 15h à 19h";
+    t.placeholder="";
     t.style.cssText="resize:vertical;min-height:110px;line-height:1.45;white-space:pre-wrap";
     t.value=st.texte||"";
     t.addEventListener("input",function(){ st.texte=t.value; redessiner(); });
@@ -759,7 +759,7 @@ function evtAffiche(eid){
       var g=document.createElement("div"); g.style.cssText="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px";
       var n=document.createElement("input"); n.className="form-input"; n.placeholder="Nom"; n.maxLength=40; n.value=x.nom||""; n.style.padding="8px 10px";
       n.addEventListener("input",function(){ x.nom=n.value; redessiner(); });
-      var ro=document.createElement("input"); ro.className="form-input"; ro.placeholder="Rôle (ex : joueur pro N1)"; ro.maxLength=50; ro.value=x.role||""; ro.style.padding="8px 10px";
+      var ro=document.createElement("input"); ro.className="form-input"; ro.placeholder="Rôle"; ro.maxLength=50; ro.value=x.role||""; ro.style.padding="8px 10px";
       ro.addEventListener("input",function(){ x.role=ro.value; redessiner(); });
       g.appendChild(n); g.appendChild(ro);
       var del=document.createElement("button"); del.type="button"; del.textContent="✕"; del.setAttribute("aria-label","Retirer");

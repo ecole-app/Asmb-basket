@@ -393,7 +393,7 @@ function showMarque(code){
     el.innerHTML='<div style="max-width:420px;margin:0 auto;padding:40px 20px;text-align:center">'+
       '<div style="font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut)">Table de marque</div>'+
       '<div style="font-size:24px;font-weight:900;color:var(--txt);margin:6px 0 18px">Code du match</div>'+
-      '<input id="mq-code" autocomplete="off" autocapitalize="characters" maxlength="8" placeholder="ex. K7P2XR" style="width:100%;box-sizing:border-box;text-align:center;font-family:monospace;font-size:28px;font-weight:900;letter-spacing:6px;padding:14px;border-radius:14px;border:2px solid var(--bdr);background:var(--card);color:var(--txt)">'+
+      '<input id="mq-code" autocomplete="off" autocapitalize="characters" maxlength="8" placeholder="" style="width:100%;box-sizing:border-box;text-align:center;font-family:monospace;font-size:28px;font-weight:900;letter-spacing:6px;padding:14px;border-radius:14px;border:2px solid var(--bdr);background:var(--card);color:var(--txt)">'+
       (msg?'<div style="color:var(--red);font-size:13px;font-weight:700;margin-top:10px">'+authEsc(msg)+'</div>':'')+
       '<button id="mq-go" style="width:100%;margin-top:14px;padding:15px;border-radius:14px;border:none;background:var(--dkg);color:#fff;font-size:16px;font-weight:900;cursor:pointer">Ouvrir le match</button></div>';
     var i=document.getElementById("mq-code"); i.focus();
@@ -473,7 +473,7 @@ function trnInscrireEquipe(p,apres){
   var cats=(p.catsInscr||[]).filter(Boolean);
   var f=document.createElement("div");
   function champ(id,lab,attrs){ return '<div class="form-group"><label class="form-label" for="'+id+'">'+lab+'</label><input class="form-input" id="'+id+'" '+(attrs||"")+'></div>'; }
-  f.innerHTML=champ("ti-nom","Nom de l'équipe *",'maxlength="40" placeholder="ex. BC Firminy U13"')+champ("ti-club","Club *",'maxlength="50"')+
+  f.innerHTML=champ("ti-nom","Nom de l'équipe *",'maxlength="40" placeholder=""')+champ("ti-club","Club *",'maxlength="50"')+
     '<div class="form-group"><label class="form-label" for="ti-cat">Catégorie *</label><select class="form-select" id="ti-cat">'+cats.map(function(c){ return '<option>'+authEsc(c)+'</option>'; }).join("")+'</select></div>'+
     champ("ti-contact","Responsable *",'maxlength="60" placeholder="Prénom Nom"')+champ("ti-tel","Téléphone *",'type="tel" maxlength="20"')+champ("ti-email","E-mail (facultatif)",'type="email" maxlength="100"');
   s.body.appendChild(f);

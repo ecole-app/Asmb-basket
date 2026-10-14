@@ -1506,7 +1506,7 @@ async function editPlayerLicence(playerId){
   if(!p)return;
   var num=await askPrompt("Numéro de licence", {defaultValue:p.numLicence||"0C", placeholder:p.prenom+" "+p.nom, confirmText:"Suivant"});
   if(num===null)return;
-  var type=await askPrompt("Type de licence", {defaultValue:p.typeLicence||"competition", placeholder:"compétition / loisir", confirmText:"Enregistrer"});
+  var type=await askPrompt("Type de licence", {defaultValue:p.typeLicence||"competition", placeholder:"", confirmText:"Enregistrer"});
   if(type===null)return;
   p.numLicence=num.trim();
   p.typeLicence=(type.trim().toLowerCase().indexOf("loisir")>=0)?"loisir":"competition";

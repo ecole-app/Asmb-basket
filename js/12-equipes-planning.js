@@ -465,9 +465,9 @@ function removeTeamMember(teamId,playerId){
 }
 function toggleTeam(id){var b=document.getElementById("team-body-"+id);if(b)b.style.display=b.style.display==="block"?"none":"block";}
 async function showAddTeam(){
-  var name=await askPrompt("Nom de l'équipe", {placeholder:"ex: U13F", confirmText:"Suivant"});
+  var name=await askPrompt("Nom de l'équipe", {placeholder:"", confirmText:"Suivant"});
   if(!name)return;
-  var cat=await askPrompt("Catégorie", {placeholder:"U7/U9/U11/U13/U15/U17/Senior", confirmText:"Créer"});
+  var cat=await askPrompt("Catégorie", {placeholder:"", confirmText:"Créer"});
   if(!cat)return;
   var teams=getTeams();
   var newTeam={id:Date.now().toString(),name:name,cat:cat,members:[]};
