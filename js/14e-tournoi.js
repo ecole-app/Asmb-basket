@@ -22,7 +22,7 @@ function trnCfg(e){
     equipes:t.equipes||[], cats:t.cats||{}, terrains:Math.max(1,Math.min(12,parseInt(t.terrains,10)||2)),
     debut:t.debut||"09:00", fin:t.fin||"18:00", pause:t.pause||null,
     battement:t.battement!=null?Math.max(0,parseInt(t.battement,10)||0):5, repos:t.repos!==false,
-    typesTerrains:trnTypesTerrains(t.typesTerrains,Math.max(1,Math.min(12,parseInt(t.terrains,10)||2))),
+    plan:t.plan||null, typesTerrains:trnTypesTerrains(t.typesTerrains,Math.max(1,Math.min(12,parseInt(t.terrains,10)||2))),
     matchs:t.matchs||[], genereLe:t.genereLe||null, publieLe:t.publieLe||null, modifLe:t.modifLe||null,
     inscr:t.inscr||{ouvert:false,cats:[]}
   };
@@ -222,7 +222,7 @@ function trnOuvrir(eid){
     var c=cfg();
     zone.innerHTML="";
     var tabs=document.createElement("div"); tabs.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px";
-    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")],["jourj","Jour J"+((typeof hasPremium==="function"&&!hasPremium())?" 🔒":"")]].forEach(function(o){
+    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")],["plan","Plan du site"+((c.plan||{}).lat?" ✓":"")],["jourj","Jour J"+((typeof hasPremium==="function"&&!hasPremium())?" 🔒":"")]].forEach(function(o){
       var t=document.createElement("button"); t.type="button"; t.className="cat-filter"+(onglet===o[0]?" on":""); t.textContent=o[1];
       t.addEventListener("click",function(){ onglet=o[0]; rendre(); }); tabs.appendChild(t);
     });
@@ -237,7 +237,7 @@ function trnOuvrir(eid){
       w.textContent="Équipes ou réglages modifiés depuis le dernier planning : pensez à le générer de nouveau.";
       zone.appendChild(w);
     }
-    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof hasPremium==="function"&&!hasPremium()) trnJourJPremium(zone); else if(typeof trnJourJ==="function") trnJourJ(zone,eid,rendre); } else rendrePlanning(c);
+    if(onglet==="plan"){ if(typeof trnPlanEditer==="function") trnPlanEditer(zone,eid); } else if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof hasPremium==="function"&&!hasPremium()) trnJourJPremium(zone); else if(typeof trnJourJ==="function") trnJourJ(zone,eid,rendre); } else rendrePlanning(c);
   }
   function champ(lab,el){ var g=document.createElement("div"); g.className="form-group"; var l=document.createElement("label"); l.className="form-label"; l.textContent=lab; g.appendChild(l); g.appendChild(el); return g; }
   function rendreEquipes(c){
@@ -513,7 +513,7 @@ function trnPublier(eid){
     clubId:window.CURRENT_CLUB_ID, eventId:String(e.id), titre:String(e.titre||"Tournoi").slice(0,100), date:e.date||"", dateFin:e.dateFin||"",
     heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120), adresse:String(e.adresse||"").slice(0,140), type:"tournoi",
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
-    terrains:c.terrains, typesTerrains:c.typesTerrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
+    terrains:c.terrains, typesTerrains:c.typesTerrains, plan:c.plan||null, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
     jourJ:(typeof hasPremium!=='function'||hasPremium()), inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),

@@ -123,6 +123,18 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 .foot b{color:var(--ink2)}
 .load{padding:60px 16px;text-align:center;color:var(--mut)}
 
+/* Plan du site */
+.carte{isolation:isolate;position:relative;height:62vh;min-height:320px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--chip);margin-top:12px}
+.lieux{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.go{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.go a{flex:1;min-width:140px;text-align:center;text-decoration:none;font-weight:800;font-size:14px;padding:12px;border-radius:12px;background:var(--club);color:var(--club-ink)}
+.go a.alt{background:var(--chip);color:var(--ink)}
+.ou{border:none;background:none;padding:0 0 0 2px;font-size:12px;cursor:pointer}
+.trn-pin-wrap{background:none;border:none}
+.trn-pin{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#141824;font:900 15px/1 var(--f-body);box-shadow:0 2px 8px rgba(0,0,0,.45);border:3px solid #fff}
+.trn-pin.ter{background:var(--club);color:var(--club-ink)}
+.trn-pin.on{outline:3px solid var(--live);outline-offset:2px}
+
 /* ── Grand écran (télé / vidéoprojecteur) : tableau d'affichage, toujours sombre ── */
 .tv{position:fixed;inset:0;z-index:50;background:#07090E;color:#F4F5F8;display:grid;grid-template-rows:auto 1fr auto;padding:2.2vh 2.4vw;gap:2vh;font-family:var(--f-body);overflow:hidden}
 .tv[hidden]{display:none}
@@ -173,6 +185,7 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
       <button class="tab on" data-tab="matchs" role="tab">Matchs</button>
       <button class="tab" data-tab="classements" role="tab">Classements</button>
       <button class="tab" data-tab="equipe" role="tab">Mon équipe</button>
+      <button class="tab" data-tab="plan" role="tab" id="tab-plan" hidden>Plan</button>
     </nav>
   </div>
 </header>
@@ -317,6 +330,45 @@ var TRN=(function(){
   function mixte(){ var t=types(); return t.some(function(x){ return x!==t[0]; }); }
   function terTxt(t){ return "Terrain "+t+(mixte()?" · "+(types()[t-1]==="ext"?"extérieur":"intérieur"):""); }
   function terType(t){ return mixte()?(types()[t-1]==="ext"?"☀️ ext.":"🏠 int."):""; }
+  // ── Plan du site (Leaflet chargé à la demande, fonds IGN) ──
+  var PLAN_TYPES={terrain:["🏀","Terrain"],buvette:["🥤","Buvette"],accueil:["ℹ️","Accueil"],entree:["🚪","Entrée"],vestiaires:["👕","Vestiaires"],toilettes:["🚻","Toilettes"],parking:["🅿️","Parking"],secours:["⛑️","Secours"]};
+  var plCarte=null, repLL={}, focus=null;
+  function aPlan(){ return !!(P.plan&&P.plan.lat); }
+  function planNom(p){ return p.t==="terrain"?terTxt(p.n):(PLAN_TYPES[p.t]||["",""])[1]; }
+  function terPlace(n){ return aPlan()&&(P.plan.points||[]).some(function(p){ return p.t==="terrain"&&p.n===Number(n); }); }
+  function leaflet(){
+    if(window.L&&window.L.map) return Promise.resolve(window.L);
+    return new Promise(function(ok,ko){
+      var l=document.createElement("link"); l.rel="stylesheet"; l.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(l);
+      var s=document.createElement("script"); s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.onload=function(){ ok(window.L); }; s.onerror=ko; document.head.appendChild(s);
+    });
+  }
+  function vuePlan(){
+    var pl=P.plan, pts=pl.points||[];
+    var dest=pts.filter(function(p){ return p.t==="entree"; })[0]||pts.filter(function(p){ return p.t==="parking"; })[0]||pl;
+    var ll=dest.lat+","+dest.lng;
+    return '<div class="go"><a href="https://www.google.com/maps/dir/?api=1&destination='+ll+'" target="_blank" rel="noopener">🧭 Itinéraire (Google Maps)</a><a class="alt" href="https://waze.com/ul?ll='+ll+'&navigate=yes" target="_blank" rel="noopener">Waze</a></div>'+
+      '<div class="plCarte" id="pl-plCarte"><div class="load">Chargement de la plCarte…</div></div>'+
+      '<div class="lieux">'+pts.map(function(p,i){ return '<button class="chip" data-lieu="'+i+'">'+(p.t==="terrain"?"🏀 ":(PLAN_TYPES[p.t]||[""])[0]+" ")+esc(planNom(p))+'</button>'; }).join("")+'</div>';
+  }
+  function initCarte(){
+    var el=document.getElementById("pl-plCarte"); if(!el) return;
+    leaflet().then(function(L){
+      el.innerHTML=""; var pl=P.plan;
+      plCarte=L.map(el).setView([pl.lat,pl.lng],pl.zoom||18);
+      function ign(layer,fmt){ return "https://data.geopf.fr/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE=normal&TILEMATRIXSET=PM&FORMAT="+fmt+"&LAYER="+layer+"&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"; }
+      var fond=pl.fond==="plan"?L.tileLayer(ign("GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2","image/png"),{maxZoom:21,maxNativeZoom:18,attribution:"© IGN"}):L.tileLayer(ign("ORTHOIMAGERY.ORTHOPHOTOS","image/jpeg"),{maxZoom:21,maxNativeZoom:19,attribution:"© IGN"});
+      var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:21,maxNativeZoom:19,attribution:"© OpenStreetMap"});
+      fond.addTo(plCarte); fond.on("tileerror",function(){ if(!plCarte.hasLayer(osm)){ plCarte.removeLayer(fond); osm.addTo(plCarte); } });
+      repLL={};
+      (pl.points||[]).forEach(function(p,i){
+        var txt=p.t==="terrain"?String(p.n):(PLAN_TYPES[p.t]||["•"])[0];
+        var m=L.marker([p.lat,p.lng],{icon:L.divIcon({className:"trn-pin-wrap",iconSize:[36,36],iconAnchor:[18,18],html:'<div class="trn-pin'+(p.t==="terrain"?" ter":"")+'">'+esc(txt)+'</div>'})}).addTo(plCarte);
+        m.bindPopup('<b>'+esc(planNom(p))+'</b>'); repLL[i]=m; if(p.t==="terrain") repLL["t"+p.n]=m;
+      });
+      setTimeout(function(){ plCarte.invalidateSize(); if(focus&&repLL[focus]){ plCarte.setView(repLL[focus].getLatLng(),Math.max(plCarte.getZoom(),18)); repLL[focus].openPopup(); } focus=null; },150);
+    }).catch(function(){ el.innerHTML='<div class="load">Carte indisponible. Vérifiez la connexion.</div>'; });
+  }
   function favori(){ return ls("gm_trn_fav_"+PID)||""; }
 
   // ── Rendu ──
@@ -355,7 +407,7 @@ var TRN=(function(){
     }
     var pill=st==="live"?'<span class="pill live">EN COURS</span>':st==="fin"?(m.phase==="finale"&&/finale/i.test(m.label)&&!/petite|demi|quart/i.test(m.label)?'<span class="pill fin2">🏆 FINALE</span>':'<span class="pill fin">TERMINÉ</span>'):"";
     return '<article class="m'+(st==="live"?" live":"")+((fav&&(aId===fav||bId===fav))?" fav":"")+'">'+
-      '<div><div class="m-h num">'+esc(m.debut||"")+'</div><div class="m-t">Terrain '+esc(m.terrain)+'</div>'+(terType(m.terrain)?'<div class="m-t">'+terType(m.terrain)+'</div>':'')+'</div>'+
+      '<div><div class="m-h num">'+esc(m.debut||"")+'</div><div class="m-t">Terrain '+esc(m.terrain)+(terPlace(m.terrain)?'<button class="ou" data-ou="'+esc(m.terrain)+'" title="Voir sur le plan" aria-label="Voir le terrain sur le plan">📍</button>':'')+'</div>'+(terType(m.terrain)?'<div class="m-t">'+terType(m.terrain)+'</div>':'')+'</div>'+
       '<div class="m-body"><div class="m-k">'+(opts.sansCat?"":esc(m.cat)+' · ')+esc(m.label||"")+' '+pill+'</div>'+
       ligne(a,m.aRef,r&&r.sa,ga,gb)+ligne(b,m.bRef,r&&r.sb,gb,ga)+
       (r&&r.forfait&&st==="fin"?'<div class="ff">Forfait de '+esc(r.forfait==="a"?a:b)+'</div>':'')+
@@ -439,10 +491,15 @@ var TRN=(function(){
     calculer(); teinte(); entete();
     document.getElementById("tv-open").hidden=P.jourJ===false;
     document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on",b.dataset.tab===tab); b.setAttribute("aria-selected",b.dataset.tab===tab); });
+    document.getElementById("tab-plan").hidden=!aPlan();
+    if(tab==="plan"&&!aPlan()) tab="matchs";
     var app=document.getElementById("app"), y=window.scrollY;
-    app.innerHTML=(tab==="classements"?vueClassements():tab==="equipe"?vueEquipe():vueMatchs())+
+    if(tab==="plan"&&plCarte&&document.getElementById("pl-carte")) return; // la carte n'est pas redessinée à chaque score
+    if(plCarte){ try{ plCarte.remove(); }catch(e){} plCarte=null; }
+    app.innerHTML=(tab==="plan"?vuePlan():tab==="classements"?vueClassements():tab==="equipe"?vueEquipe():vueMatchs())+
       '<p class="foot">Planning et résultats publiés par <b>'+esc(P.nom||"le club")+'</b> avec General Manager</p>';
     window.scrollTo(0,y);
+    if(tab==="plan") initCarte();
     if(!document.getElementById("tv").hidden) tvRendre();
   }
 
@@ -501,6 +558,8 @@ var TRN=(function(){
   document.addEventListener("click",function(ev){
     var b=ev.target.closest("button"); if(!b) return;
     if(b.dataset.tab){ tab=b.dataset.tab; ls("gm_trn_tab",tab); rendre(); window.scrollTo(0,0); return; }
+    if(b.dataset.ou!==undefined){ focus="t"+b.dataset.ou; tab="plan"; rendre(); window.scrollTo(0,0); return; }
+    if(b.dataset.lieu!==undefined){ var m=repLL[b.dataset.lieu]; if(m&&plCarte){ plCarte.setView(m.getLatLng(),Math.max(plCarte.getZoom(),18)); m.openPopup(); } return; }
     if(b.dataset.cat!==undefined){ catF=b.dataset.cat; rendre(); return; }
     if(b.dataset.ter!==undefined){ terF=b.dataset.ter; rendre(); return; }
     if(b.dataset.catc!==undefined){ catC=b.dataset.catc; rendre(); return; }

@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791949977",
+    "titre": "Tournoi : plan du site",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi › Plan du site : cherchez l'adresse, la carte (vue satellite ou plan) se centre dessus, puis placez les terrains, la buvette, l'accueil, les toilettes, le parking…"
+      },
+      {
+        "roles": [
+          "parent",
+          "joueur"
+        ],
+        "texte": "Page du tournoi : onglet « Plan » avec itinéraire Google Maps / Waze, et « 📍 » sur chaque match pour trouver son terrain."
+      }
+    ]
+  },
+  {
     "v": "1791949329",
     "titre": "Tournoi : terrains intérieurs ou extérieurs",
     "points": [

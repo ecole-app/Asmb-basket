@@ -398,3 +398,9 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .gm-boot-sp{width:28px;height:28px;border-radius:50%;border:3px solid var(--bdr);border-top-color:var(--dkg);animation:gmBootTourne .8s linear infinite}
 @keyframes gmBootTourne{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.gm-boot-sp{animation-duration:2.4s}}
+
+/* Plan du site d'un tournoi (Leaflet) : repères ronds, terrains numérotés */
+.trn-pin-wrap{background:none;border:none}
+.trn-pin{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#141824;font:900 15px/1 system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.45);border:3px solid #fff}
+.trn-pin.ter{background:var(--dkg,#1A2E5A);color:#fff}
+.trn-pin.on{outline:3px solid #E8670A;outline-offset:2px}
