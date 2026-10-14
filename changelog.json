@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791970117",
+    "titre": "Photo de ticket lue par Gemini",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Compta › photo du ticket : la lecture passe d'abord par Gemini (Google, via Firebase), plus rapide et plus fiable ; les IA gratuites restent en secours."
+      }
+    ]
+  },
+  {
     "v": "1791969368",
     "titre": "Photo de ticket : IA de secours qui lit les images",
     "points": [

@@ -14,6 +14,9 @@ var GM_TICKET_CLE=["sk-or-v1-fb2133c6cec2e24fa49f1fb3","8a5d121b2979eadc557a61dd
 // tomber sur un modèle texte seul (ex. un filtre de sécurité) qui ne lit rien.
 var GM_TICKET_MODELES=["qwen/qwen3.8-27b:free","google/gemma-4-26b-a4b-it:free"];
 var GM_TICKET_SECOURS=["google/gemma-4-31b-it:free","thinkingmachines/inkling-small:free","nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"];
+// Gemini via Firebase AI Logic (API « Gemini Developer » activée dans la console
+// Firebase) : même point d'accès que le SDK firebase-ai, sans clé à part.
+var GM_GEMINI_MODELES=["gemini-2.5-flash","gemini-2.5-flash-lite"];
 var GM_TICKET_DELAI=30000; // par essai (2 essais max)
 
 // Bouton de la barre : ouvre une nouvelle ligne (dépense) puis l'appareil photo.
@@ -105,6 +108,56 @@ function comptaTicketAnalyser(txt){
   if(["CB","Espèces","Chèque","Virement"].indexOf(d.moyen)>=0) out.moyen=d.moyen;
   return (out.montant||out.date||out.fournisseur)?out:null;
 }
+// Lecture par Gemini (Firebase AI Logic). Essaie chaque modèle de la liste.
+function comptaTicketGemini(dataUrl){
+  if(!window.fbApiKey||!window.fbProjectId) return Promise.reject(comptaTicketErr("Gemini : Firebase non chargé"));
+  var b64=String(dataUrl).split(",")[1]||"";
+  var corps={contents:[{role:"user",parts:[{inlineData:{mimeType:"image/jpeg",data:b64}},{text:comptaTicketPrompt()}]}],
+    generationConfig:{temperature:0,maxOutputTokens:600,responseMimeType:"application/json",thinkingConfig:{thinkingBudget:0}}};
+  function essai(i,derniere){
+    if(i>=GM_GEMINI_MODELES.length) return Promise.reject(derniere||comptaTicketErr("Gemini : aucun modèle"));
+    var mod=GM_GEMINI_MODELES[i];
+    var ctrl=window.AbortController?new AbortController():null;
+    var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
+    var jeton=typeof window.fbAppCheckToken==="function"?window.fbAppCheckToken():Promise.resolve("");
+    return jeton.then(function(ac){
+      var h={"Content-Type":"application/json","x-goog-api-key":window.fbApiKey,"x-goog-api-client":"gl-js/ fire/10.7.1"};
+      if(ac) h["X-Firebase-AppCheck"]=ac;
+      return fetch("https://firebasevertexai.googleapis.com/v1beta/projects/"+encodeURIComponent(window.fbProjectId)+"/models/"+mod+":generateContent",
+        {method:"POST",headers:h,body:JSON.stringify(corps),signal:ctrl?ctrl.signal:undefined});
+    }).then(function(r){ return r.text().then(function(x){ var d=null; try{ d=JSON.parse(x); }catch(e){} return {st:r.status,d:d,x:x}; }); })
+    .then(function(o){
+      clearTimeout(t);
+      if(o.st!==200||!o.d||o.d.error){
+        var m=(o.d&&o.d.error&&o.d.error.message)||o.x.slice(0,100);
+        throw comptaTicketErr("Gemini "+o.st+" ("+mod+") : "+m);
+      }
+      var parts=(o.d.candidates&&o.d.candidates[0]&&o.d.candidates[0].content&&o.d.candidates[0].content.parts)||[];
+      var txt=parts.map(function(p){ return p.text||""; }).join("");
+      var res=comptaTicketAnalyser(txt);
+      if(!res) throw comptaTicketErr("Gemini illisible ("+mod+") : "+(txt.slice(0,80)||"vide"));
+      return res;
+    },function(e){ clearTimeout(t); throw (e&&e.detail)?e:comptaTicketErr("Gemini réseau ("+mod+") : "+(e&&e.name==="AbortError"?"trop long":(e&&e.message||e))); })
+    .catch(function(e){
+      // 403 = AI Logic pas activé : inutile d'essayer l'autre modèle.
+      if(e&&/Gemini 403/.test(e.detail||"")) throw e;
+      return essai(i+1,e);
+    });
+  }
+  return essai(0,null);
+}
+function comptaTicketOpenRouter(petite){
+      return comptaTicketAppel(petite,{models:GM_TICKET_MODELES})
+        .catch(function(e1){
+          // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
+          comptaTicketStatut("⏳ Nouvelle tentative…");
+          return comptaTicketAppel(petite,{models:GM_TICKET_SECOURS}).catch(function(e2){
+            if(e2&&!e2.detail&&e1&&e1.detail) e2.detail=e1.detail;
+            else if(e2&&e1&&e1.detail&&e2.detail) e2.detail="1) "+e1.detail+" — 2) "+e2.detail;
+            throw e2;
+          });
+        });
+}
 function comptaTicketLire(file){
   if(file.type&&file.type.indexOf("image")!==0){ askAlert("Choisissez une photo du ticket."); return; }
   comptaTicketStatut("⏳ Lecture du ticket… (jusqu'à 1 minute)");
@@ -116,16 +169,14 @@ function comptaTicketLire(file){
     if(!navigator.onLine) throw new Error("hors-ligne");
     // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde la 1280 px.
     return comptaTicketReduire(file,1024,0.6).then(function(petite){
-      return comptaTicketAppel(petite,{models:GM_TICKET_MODELES})
-        .catch(function(e1){
-          // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
-          comptaTicketStatut("⏳ Nouvelle tentative…");
-          return comptaTicketAppel(petite,{models:GM_TICKET_SECOURS}).catch(function(e2){
-            if(e2&&!e2.detail&&e1&&e1.detail) e2.detail=e1.detail;
-            else if(e2&&e1&&e1.detail&&e2.detail) e2.detail="1) "+e1.detail+" — 2) "+e2.detail;
-            throw e2;
-          });
+      // 1) Gemini (Firebase), 2) OpenRouter, 3) OpenRouter secours.
+      return comptaTicketGemini(petite).catch(function(eg){
+        comptaTicketStatut("⏳ Nouvelle tentative…");
+        return comptaTicketOpenRouter(petite).catch(function(e2){
+          if(e2&&eg&&eg.detail) e2.detail=eg.detail+" — "+(e2.detail||"OpenRouter");
+          throw e2;
         });
+      });
     });
   }).then(function(r){
     comptaTicketRemplir(r);

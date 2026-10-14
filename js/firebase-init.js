@@ -1,7 +1,7 @@
 /* ===== firebase-init.js — Initialisation Firebase (module ES6) ===== */
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as acGetToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
@@ -17,6 +17,8 @@ const firebaseConfig = {
 };
 
 const fbApp = initializeApp(firebaseConfig);
+window.fbApiKey = firebaseConfig.apiKey;
+window.fbProjectId = firebaseConfig.projectId;
 
 // ═══ APP CHECK (anti-bot / anti-brute-force) ══════════════════════
 // Protège Firestore contre les scripts qui n'exécutent pas l'appli réelle
@@ -29,10 +31,12 @@ const fbApp = initializeApp(firebaseConfig);
 const GM_APPCHECK_SITE_KEY = "6Le30N8tAAAAAGUJks6zaN09Rbn8B6L-cQRC5Jwp";
 try{
   if(GM_APPCHECK_SITE_KEY && GM_APPCHECK_SITE_KEY.indexOf("REMPLACER")!==0){
-    initializeAppCheck(fbApp, {
+    const gmAppCheck = initializeAppCheck(fbApp, {
       provider: new ReCaptchaEnterpriseProvider(GM_APPCHECK_SITE_KEY),
       isTokenAutoRefreshEnabled: true
     });
+    // Jeton App Check pour les appels REST (Gemini via Firebase AI Logic).
+    window.fbAppCheckToken = function(){ return acGetToken(gmAppCheck,false).then(function(r){ return r&&r.token||""; }).catch(function(){ return ""; }); };
   } else {
     console.log("App Check inactif : clé Fraud Defense non configurée (voir APP_CHECK_SETUP.md)");
   }
