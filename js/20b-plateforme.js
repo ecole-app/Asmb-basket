@@ -992,7 +992,7 @@ async function deleteClubFlow(c, list){
     if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
 
     try{ await window.fbDeleteDoc(window.fbDoc(window.fbDb,"essai_pages",c.id)); }catch(e){}
-    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live"];
+    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes"];
     for(var g=0;g<globales.length;g++){
       var ng=await purgeGlobalePourClub(c.id,globales[g]);
       if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }

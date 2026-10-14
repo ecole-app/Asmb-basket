@@ -1,5 +1,39 @@
 [
   {
+    "v": "1791952898",
+    "titre": "Tournoi : joueurs, points et fautes",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi : chaque équipe a ses joueurs (numéro + prénom). Les équipes du club sont remplies avec les numéros de maillot ; bouton « 👕 Joueurs » pour modifier."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Inscription par le lien : le responsable saisit ses joueurs et reçoit un code « Mon équipe » pour les modifier jusqu'au premier match."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Table de marque : +1 / +2 / +3 puis le numéro du joueur, bouton Faute (5 fautes = joueur exclu), « Annuler la dernière action »."
+      },
+      {
+        "roles": [
+          "parent",
+          "joueur"
+        ],
+        "texte": "Page du tournoi : points et fautes des joueurs de chaque équipe, meilleurs marqueurs par catégorie."
+      }
+    ]
+  },
+  {
     "v": "1791951623",
     "titre": "Champs à remplir vides",
     "points": [

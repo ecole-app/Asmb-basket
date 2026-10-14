@@ -214,6 +214,7 @@ function trnJourJPremium(zone){
 }
 function trnOuvrir(eid){
   var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
+  if(typeof trnSyncJoueurs==="function") trnSyncJoueurs(eid).then(function(ch){ if(ch&&document.body.contains(zone)) rendre(); });
   var s=gmSheet("Tournoi · "+(e.titre||"Tournoi")), b=s.body;
   var zone=document.createElement("div"); b.appendChild(zone);
   var onglet="equipes";
@@ -270,6 +271,8 @@ function trnOuvrir(eid){
       eq.forEach(function(q){
         var l=document.createElement("div"); l.style.cssText="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)";
         l.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc(q.nom)+'</div><div style="font-size:11.5px;color:var(--mut)">'+authEsc(q.club||"")+(q.source==="lien"?" · inscrite par le lien":"")+'</div></div>';
+        var nj=(q.joueurs||[]).length, bj=gmBtn("👕 "+(nj?nj+" joueur"+(nj>1?"s":""):"Joueurs"),"soft",function(){ if(typeof trnEquipeJoueurs==="function") trnEquipeJoueurs(eid,q.id,rendre); });
+        bj.style.flex="0 0 auto"; l.appendChild(bj);
         var x=gmBtn("Retirer","danger",function(){ askConfirm("Retirer « "+q.nom+" » du tournoi ?",{danger:true,confirmText:"Retirer"}).then(function(ok){ if(!ok) return; trnSauver(eid,{equipes:cfg().equipes.filter(function(z){ return z.id!==q.id; })}); rendre(); }); });
         l.appendChild(x); card.appendChild(l);
       });
@@ -408,7 +411,7 @@ function trnChoisirEquipesClub(eid,teams,apres){
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Ajouter","primary",function(){
     var c=trnCfg(getEvents().find(function(z){ return z.id===eid; })), eq=c.equipes.slice();
-    coches.forEach(function(o,i){ if(o.x.checked) eq.push({id:"q"+Date.now().toString(36)+i,nom:String(o.t.name||"Équipe").slice(0,40),club:clubLabel(""),cat:String(o.t.cat||"").slice(0,20)||"Sans catégorie",source:"club"}); });
+    coches.forEach(function(o,i){ if(o.x.checked) eq.push({id:"q"+Date.now().toString(36)+i,nom:String(o.t.name||"Équipe").slice(0,40),club:clubLabel(""),cat:String(o.t.cat||"").slice(0,20)||"Sans catégorie",source:"club",joueurs:(typeof trnJoueursClub==="function")?trnJoueursClub(o.t):[],joueursLe:Date.now()}); });
     trnSauver(eid,eq===c.equipes?{}:{equipes:eq}); s.modal.remove(); apres();
   }));
 }
@@ -513,7 +516,7 @@ function trnPublier(eid){
     clubId:window.CURRENT_CLUB_ID, eventId:String(e.id), titre:String(e.titre||"Tournoi").slice(0,100), date:e.date||"", dateFin:e.dateFin||"",
     heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120), adresse:String(e.adresse||"").slice(0,140), type:"tournoi",
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
-    terrains:c.terrains, typesTerrains:c.typesTerrains, plan:c.plan||null, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
+    terrains:c.terrains, typesTerrains:c.typesTerrains, plan:c.plan||null, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||"",joueurs:(q.joueurs||[]).map(function(j){ return {n:j.n||"",p:j.p||""}; })}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
     jourJ:(typeof hasPremium!=='function'||hasPremium()), inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
@@ -553,6 +556,8 @@ function showTrnPublic(pid){
       if(typeof applyClubColor==="function") applyClubColor();
       try{ document.title=(p.titre||"Tournoi")+" · "+(p.nom||""); }catch(e){}
       trnRendrePublic(el,p);
+      // Lien « Inscrire une équipe » de la page /tournoi : le formulaire s'ouvre directement.
+      try{ if(new URLSearchParams(location.search).has("inscrire")&&p.inscrOuvertes&&typeof trnInscrireEquipe==="function") trnInscrireEquipe(p); }catch(e){}
     }).catch(function(){ el.innerHTML=essaiErreur("Connexion impossible. Réessayez dans un instant."); });
   })();
 }

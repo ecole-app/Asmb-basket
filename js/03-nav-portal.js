@@ -31,7 +31,7 @@ var ROOTS=["portal","plan","admin-login","inscription","communaute","auth","role
 // billet, entrée bénévole, séance d'essai) : AUCUN élément de l'appli du club
 // n'y apparaît (ni barre du bas, ni en-tête, ni bouton retour). Sinon un visiteur
 // se retrouve dans l'espace du club en touchant « Accueil ».
-var SCR_PUBLICS=["evt","billet","entree","essai","trn","marque"];
+var SCR_PUBLICS=["evt","billet","entree","essai","trn","marque","trnequipe"];
 // Écrans qui ne sont pas dans un club : jamais de menu latéral du club.
 var GM_SCR_HORS_CLUB=["plateforme","auth","role-select"];
 function gmModePublic(on){

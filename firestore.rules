@@ -373,7 +373,8 @@ service cloud.firestore {
       allow update: if (staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId
                           && request.resource.data.eventId == resource.data.eventId)
         || (resource.data.statut != 'termine'
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sa','sb','statut','clotureLe','majLe'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sa','sb','statut','clotureLe','majLe','stats'])
+            && (!('stats' in request.resource.data) || (request.resource.data.stats is map && request.resource.data.stats.size() <= 2))
             && request.resource.data.sa is int && request.resource.data.sb is int
             && request.resource.data.sa >= 0 && request.resource.data.sa <= 250
             && request.resource.data.sb >= 0 && request.resource.data.sb <= 250
@@ -387,7 +388,8 @@ service cloud.firestore {
     // (le code ne sert plus à rien une fois le match clôturé). Ainsi les
     // résultats et classements s'affichent même sans l'écran « Jour J » ouvert.
     match /trn_live/{id} {
-      function liveCles(lid, d) { return d.keys().hasOnly(['clubId','eventId','matchId','sa','sb','forfait','code','le'])
+      function liveCles(lid, d) { return d.keys().hasOnly(['clubId','eventId','matchId','sa','sb','forfait','code','le','stats'])
+        && (!('stats' in d) || (d.stats is map && d.stats.size() <= 2))
         && d.clubId is string && d.eventId is string && d.matchId is string
         && lid == d.clubId + '__' + d.eventId + '__' + d.matchId.replace('/', '_')
         && d.sa is int && d.sb is int && d.sa >= 0 && d.sa <= 250 && d.sb >= 0 && d.sb <= 250; }
@@ -408,11 +410,32 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Joueurs d'une équipe inscrite par le lien : id = code « Mon équipe » ──
+    // Le responsable (sans compte) lit et modifie ses joueurs avec son code, tant que
+    // le tournoi n'a pas commencé (verrou posé par le staff). Pas de listing public.
+    match /trn_equipes/{code} {
+      function equipeJoueursOk(d) { return d.joueurs is list && d.joueurs.size() <= 15; }
+      allow get: if code.matches('^[A-HJ-NP-Z2-9]{6}$');
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+      allow create: if code.matches('^[A-HJ-NP-Z2-9]{6}$') && (staff(request.resource.data.clubId)
+        || (request.resource.data.keys().hasOnly(['clubId','eventId','inscId','nom','cat','joueurs','majLe'])
+            && equipeJoueursOk(request.resource.data)
+            && request.resource.data.nom is string && request.resource.data.nom.size() <= 40
+            && get(/databases/$(database)/documents/trn_pages/$(request.resource.data.clubId + '__' + request.resource.data.eventId)).data.get('inscrOuvertes', false) == true));
+      allow update: if (staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId)
+        || (resource.data.get('verrou', false) == false
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joueurs','majLe'])
+            && equipeJoueursOk(request.resource.data));
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Inscription d'une équipe à un tournoi, par le lien public ─────
     // Possible seulement si le club a ouvert les inscriptions sur la page publique.
     // Le contact du responsable n'est lisible que par le staff du club.
     match /trn_inscriptions/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['clubId','eventId','nom','club','cat','contact','tel','email','at'])
+      allow create: if request.resource.data.keys().hasOnly(['clubId','eventId','nom','club','cat','contact','tel','email','at','joueurs','code'])
+        && (!('joueurs' in request.resource.data) || (request.resource.data.joueurs is list && request.resource.data.joueurs.size() <= 15))
+        && (!('code' in request.resource.data) || (request.resource.data.code is string && request.resource.data.code.matches('^[A-HJ-NP-Z2-9]{6}$')))
         && request.resource.data.nom is string && request.resource.data.nom.size() > 0 && request.resource.data.nom.size() <= 40
         && request.resource.data.club is string && request.resource.data.club.size() <= 50
         && request.resource.data.cat is string && request.resource.data.cat.size() <= 20

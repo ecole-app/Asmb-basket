@@ -298,7 +298,7 @@ var TRN=(function(){
   var D={};
   function calculer(){
     var res=Object.assign({},P.resultats||{}), maj=Number(P.resultatsLe)||0;
-    Object.keys(LIVE).forEach(function(mid){ var l=LIVE[mid]; res[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; maj=Math.max(maj,Number(l.le)||0); });
+    Object.keys(LIVE).forEach(function(mid){ var l=LIVE[mid]; res[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; if(l.stats) res[mid].stats=l.stats; maj=Math.max(maj,Number(l.le)||0); });
     var matchs=(P.matchs||[]).slice().sort(function(a,b){ return (min(a.debut)-min(b.debut))||(a.terrain-b.terrain); });
     var ap=trnAppliquerAbsentes(matchs,P.poules||{},res,P.absentes||[]); res=ap.res;
     var resolus=Object.assign({},P.resolus||{},ap.resolus);
@@ -369,6 +369,36 @@ var TRN=(function(){
       setTimeout(function(){ plCarte.invalidateSize(); if(focus&&repLL[focus]){ plCarte.setView(repLL[focus].getLatLng(),Math.max(plCarte.getZoom(),18)); repLL[focus].openPopup(); } focus=null; },150);
     }).catch(function(){ el.innerHTML='<div class="load">Carte indisponible. Vérifiez la connexion.</div>'; });
   }
+  // Points et fautes des joueurs d'une équipe, tous matchs confondus (table de marque).
+  function statsEquipe(id){
+    var t={};
+    D.matchs.forEach(function(m){
+      var r=D.res[m.id]; if(!r||!r.stats) return;
+      var c=idEq(m,"a")===id?"a":idEq(m,"b")===id?"b":null; if(!c) return;
+      var s=r.stats[c]||{}; Object.keys(s).forEach(function(n){ var x=t[n]||(t[n]={p:0,f:0,mj:0}); x.p+=Number(s[n].p)||0; x.f+=Number(s[n].f)||0; x.mj++; });
+    });
+    return t;
+  }
+  function joueursDe(id){ return ((D.eqs[id]||{}).joueurs||[]).filter(function(j){ return j.n||j.p; }); }
+  function vueJoueurs(id){
+    var js=joueursDe(id), st=statsEquipe(id);
+    if(!js.length) return "";
+    var l=js.slice().sort(function(a,b){ return ((st[b.n]||{}).p||0)-((st[a.n]||{}).p||0)||(parseInt(a.n,10)||99)-(parseInt(b.n,10)||99); });
+    return '<h2 class="sec">Joueurs <small>points et fautes</small></h2><div class="cl"><table class="tbl"><thead><tr><th>Joueur</th><th>Pts</th><th>Fautes</th></tr></thead><tbody>'+
+      l.map(function(j){ var x=st[j.n]||{p:0,f:0}; return '<tr><td><span class="rk">'+esc(j.n||"–")+'</span>'+esc(j.p)+'</td><td class="pts">'+x.p+'</td><td>'+x.f+'</td></tr>'; }).join("")+'</tbody></table></div>';
+  }
+  function topMarqueurs(cat){
+    var all=[];
+    (P.equipes||[]).filter(function(q){ return q.cat===cat; }).forEach(function(q){
+      var st=statsEquipe(q.id), noms={}; joueursDe(q.id).forEach(function(j){ noms[j.n]=j.p; });
+      Object.keys(st).forEach(function(n){ if(n==="?"||!st[n].p) return; all.push({n:n,p:noms[n]||"",eq:q.nom,pts:st[n].p}); });
+    });
+    all.sort(function(a,b){ return b.pts-a.pts; });
+    if(!all.length) return "";
+    return '<h2 class="sec">Meilleurs marqueurs</h2><div class="cl"><table class="tbl"><thead><tr><th>Joueur</th><th>Équipe</th><th>Pts</th></tr></thead><tbody>'+
+      all.slice(0,10).map(function(x,i){ return '<tr><td><span class="rk'+(i<3?" q":"")+'">'+(i+1)+'</span>n°'+esc(x.n)+' '+esc(x.p)+'</td><td style="text-align:left;font-weight:600">'+esc(x.eq)+'</td><td class="pts">'+x.pts+'</td></tr>'; }).join("")+'</tbody></table></div>';
+  }
+  function codeEquipeConnu(){ try{ return (JSON.parse(localStorage.getItem("gm_trn_codes")||"{}")||{})[PID]||""; }catch(e){ return ""; } }
   function favori(){ return ls("gm_trn_fav_"+PID)||""; }
 
   // ── Rendu ──
@@ -425,7 +455,7 @@ var TRN=(function(){
     var live=[], avenir=[], fin=[];
     ms.forEach(function(m){ var s=statut(m); (s==="live"?live:s==="fin"?fin:avenir).push(m); });
     fin.reverse();
-    var h=filtres();
+    var h=(P.inscrOuvertes&&(P.catsInscr||[]).length?'<a href="/?trn='+encodeURIComponent(PID)+'&inscrire=1" style="display:block;text-align:center;text-decoration:none;font-weight:900;font-size:15px;padding:14px;border-radius:12px;background:var(--club);color:var(--club-ink);margin-bottom:12px">Inscrire une équipe</a>':'')+filtres();
     if(!ms.length) return h+'<p class="empty">Le planning sera publié ici.</p>';
     if(live.length) h+='<h2 class="sec live">En cours <small>'+live.length+' match'+(live.length>1?"s":"")+'</small></h2><div class="grid">'+live.map(function(m){ return carte(m); }).join("")+'</div>';
     h+='<h2 class="sec">À venir <small>'+(avenir.length?avenir.length+" match"+(avenir.length>1?"s":""):"")+'</small></h2>';
@@ -453,6 +483,7 @@ var TRN=(function(){
     var poules=(P.poules||{})[catC]||[];
     if(poules.length) h+='<h2 class="sec">Poules</h2><div class="grid">'+poules.map(function(po){ return tablePoule(catC,po,favori()); }).join("")+'</div>';
     if(fin.length) h+='<h2 class="sec">Phase finale</h2><div class="grid">'+fin.map(function(m){ return carte(m,{sansCat:true}); }).join("")+'</div>';
+    h+=topMarqueurs(catC);
     return h;
   }
   function vueEquipe(){
@@ -462,7 +493,7 @@ var TRN=(function(){
       var parCat={}; tous.forEach(function(q){ (parCat[q.cat||"Équipes"]=parCat[q.cat||"Équipes"]||[]).push(q); });
       return '<h2 class="sec" style="margin-top:6px">Choisis ton équipe <small>pour ne voir que ses matchs</small></h2>'+
         Object.keys(parCat).map(function(c){ return '<h3 style="font:700 13px var(--f-body);color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px">'+esc(c)+'</h3><div class="teams">'+
-          parCat[c].map(function(q){ return '<button class="tbtn" data-voir="'+esc(q.id)+'">'+esc(q.nom)+badgeAbs(q.id)+(q.club?'<small>'+esc(q.club)+'</small>':'')+'</button>'; }).join("")+'</div>'; }).join("");
+          parCat[c].map(function(q){ return '<button class="tbtn" data-voir="'+esc(q.id)+'">'+esc(q.nom)+badgeAbs(q.id)+(q.club?'<small>'+esc(q.club)+'</small>':'')+'</button>'; }).join("")+'</div>'; }).join("")+'<p style="margin-top:16px"><a class="chip" style="text-decoration:none;display:inline-block" href="/?trnequipe='+esc(codeEquipeConnu())+'">✏️ Responsable d\'équipe : modifier mes joueurs</a></p>';
     }
     var q=D.eqs[id];
     if(!q) return choix();
@@ -481,6 +512,9 @@ var TRN=(function(){
     h+='<h2 class="sec">Ses matchs <small>'+ms.length+'</small></h2><div class="grid">'+ms.map(function(m){ return carte(m); }).join("")+'</div>';
     var po=((P.poules||{})[q.cat]||[]).filter(function(x){ return (x.equipes||[]).indexOf(id)>=0; })[0];
     if(po) h+='<h2 class="sec">Sa poule</h2><div class="grid">'+tablePoule(q.cat,po,id)+'</div>';
+    h+=vueJoueurs(id);
+    var cq=codeEquipeConnu();
+    h+='<p style="margin-top:12px"><a class="chip" style="text-decoration:none;display:inline-block" href="/?trnequipe='+esc(cq)+'">✏️ Responsable d\'équipe : modifier mes joueurs</a></p>';
     h+='<h2 class="sec">Voir une autre équipe</h2><select class="pick" id="pick"><option value="">Choisir une équipe…</option>'+
       (D.cats.length?D.cats:[""]).map(function(c){ var l=tous.filter(function(x){ return !c||x.cat===c; }); return (c?'<optgroup label="'+esc(c)+'">':'')+l.map(function(x){ return '<option value="'+esc(x.id)+'"'+(x.id===id?' selected':'')+'>'+esc(x.nom)+(x.id===fav?" ★":"")+'</option>'; }).join("")+(c?'</optgroup>':''); }).join("")+'</select>'+
       (vue&&fav&&vue!==fav?'<p style="margin-top:10px"><button class="chip on" data-voir="'+esc(fav)+'">← Revenir à mon équipe</button></p>':'');

@@ -23,6 +23,7 @@ function trnLiveId(clubId,eventId,matchId){ return String(clubId)+"__"+String(ev
 function trnLiveEcrire(x,sa,sb,extra){
   if(!window.fbSetDoc||!x||!x.matchId) return Promise.resolve();
   var d=Object.assign({clubId:String(x.clubId),eventId:String(x.eventId),matchId:String(x.matchId),sa:sa,sb:sb,le:Date.now()},extra||{});
+  if(!d.stats&&x.stats&&typeof x.stats==="object") d.stats=x.stats;
   return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId)),d).catch(function(){});
 }
 function trnLiveRetirer(x){
@@ -137,6 +138,12 @@ function trnNomMatch(c,m,cote,resolus){
 }
 // Crée un code par match (une seule fois), met à jour horaires et noms, retire les
 // matchs disparus du planning s'ils n'ont pas encore de score.
+// Joueurs (numéro + prénom) d'une équipe du match, pour la table de marque.
+function trnJoueursMatch(c,m,cote,resolus){
+  var id=(resolus&&resolus[m.id]&&resolus[m.id][cote])||m[cote];
+  var q=id&&c.equipes.filter(function(x){ return x.id===id; })[0];
+  return ((q&&q.joueurs)||[]).map(function(j){ return {n:String(j.n||""),p:String(j.p||"")}; }).slice(0,15);
+}
 function trnPreparerCodes(eid,resolus){
   var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return Promise.reject({code:"introuvable"});
   var c=trnCfg(e);
@@ -144,10 +151,11 @@ function trnPreparerCodes(eid,resolus){
     var parMatch={}; exist.forEach(function(x){ parMatch[x.matchId]=x; });
     var ops=[];
     c.matchs.forEach(function(m){
-      var info={cat:m.cat,label:m.label,terrain:m.terrain,debut:m.debut,nomA:trnNomMatch(c,m,"a",resolus).slice(0,60),nomB:trnNomMatch(c,m,"b",resolus).slice(0,60)};
+      var info={cat:m.cat,label:m.label,terrain:m.terrain,debut:m.debut,nomA:trnNomMatch(c,m,"a",resolus).slice(0,60),nomB:trnNomMatch(c,m,"b",resolus).slice(0,60),
+        joueursA:trnJoueursMatch(c,m,"a",resolus),joueursB:trnJoueursMatch(c,m,"b",resolus)};
       var x=parMatch[m.id];
       if(!x){ var code=trnCodeMatch(); ops.push(["set",code,Object.assign({clubId:window.CURRENT_CLUB_ID,eventId:String(eid),matchId:m.id,sa:0,sb:0,statut:"prevu",creeLe:Date.now()},info)]); }
-      else if(Object.keys(info).some(function(k){ return x[k]!==info[k]; })) ops.push(["update",x._code,info]);
+      else if(Object.keys(info).some(function(k){ return JSON.stringify(x[k]==null?null:x[k])!==JSON.stringify(info[k]); })) ops.push(["update",x._code,info]);
     });
     var ids={}; c.matchs.forEach(function(m){ ids[m.id]=1; });
     exist.forEach(function(x){ if(!ids[x.matchId]&&x.statut==="prevu") ops.push(["delete",x._code]); });
@@ -183,12 +191,14 @@ function trnJourJ(zone,eid,refaire){
   var bAbs=gmBtn("🚫 Équipe absente ou partie","danger",function(){ trnDeclarerAbsente(eid,codes,rendre); });
   rowAbs.appendChild(bAppel); rowAbs.appendChild(bAbs);
   var ecrits={};
-  function res(){ var r={}; codes.forEach(function(x){ r[x.matchId]={sa:x.sa||0,sb:x.sb||0,statut:x.statut,forfait:x.forfait||""}; }); return r; }
+  function res(){ var r={}; codes.forEach(function(x){ r[x.matchId]={sa:x.sa||0,sb:x.sb||0,statut:x.statut,forfait:x.forfait||""}; if(x.stats) r[x.matchId].stats=x.stats; }); return r; }
+  var verrouille=false;
   function rendre(){
     var e2=getEvents().find(function(x){ return x.id===eid; })||e, cc=trnCfg(e2), abs=trnAbsentes(e2);
     var ap=trnAppliquerAbsentes(cc.matchs,(e2.trn&&e2.trn.poules)||{},res(),abs), r=ap.res, resolus=ap.resolus;
     var commence=codes.some(function(x){ return x.statut!=="prevu"; });
     bAppel.style.display=commence?"none":""; bAbs.style.display=commence?"":"none";
+    if(commence&&!verrouille&&typeof trnVerrouillerJoueurs==="function"){ verrouille=true; trnVerrouillerJoueurs(eid); }
     // Forfaits des absentes pas encore enregistrés (ex. finale où l'équipe vient de se qualifier).
     codes.forEach(function(x){
       var v=r[x.matchId]; if(!v||!v.auto||x.statut==="termine"||ecrits[x._code]) return;
@@ -231,7 +241,7 @@ function trnJourJ(zone,eid,refaire){
     }
   }
   function erreur(err){ askAlert("Action impossible ("+((err&&err.code)||"réseau")+"). Réessayez."); }
-  trnPreparerCodes(eid,null).then(function(l){
+  (typeof trnSyncJoueurs==="function"?trnSyncJoueurs(eid):Promise.resolve()).then(function(){ return trnPreparerCodes(eid,null); }).then(function(l){
     codes=l; rendre();
     if(!window.fbOnSnapshot) return;
     unsub=window.fbOnSnapshot(window.fbQuery(window.fbCollection(window.fbDb,"trn_matchs"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID),window.fbWhere("eventId","==",String(eid))),function(snap){
@@ -413,39 +423,73 @@ function showMarque(code){
     })();
   }
   function feuille(k,m){
-    var sa=Number(m.sa)||0, sb=Number(m.sb)||0, envoi=null, envoye=JSON.stringify([sa,sb]);
+    // Score + points et fautes par joueur. stats = {a:{"7":{p:12,f:2}}, b:{…}} ; "?" = sans numéro.
+    var sa=Number(m.sa)||0, sb=Number(m.sb)||0, envoi=null, envoye="";
+    var stats={a:Object.assign({},(m.stats&&m.stats.a)||{}),b:Object.assign({},(m.stats&&m.stats.b)||{})};
+    var J={a:(m.joueursA||[]).filter(function(j){ return j.n; }),b:(m.joueursB||[]).filter(function(j){ return j.n; })};
+    var attente=null, hist=[];
+    envoye=JSON.stringify([sa,sb,stats]);
+    function st(c,n){ return stats[c][n]||(stats[c][n]={p:0,f:0}); }
+    function appliquer(c,act,n){
+      n=n||"?";
+      if(act==="f"){ st(c,n).f++; }
+      else { var v=Number(act); if(c==="a") sa=Math.min(250,sa+v); else sb=Math.min(250,sb+v); st(c,n).p+=v; }
+      hist.push({c:c,act:act,n:n}); attente=null; rendre(); envoyer();
+    }
+    function annuler(){
+      var h=hist.pop(); if(!h) return;
+      var x=stats[h.c][h.n]; if(!x) return;
+      if(h.act==="f") x.f=Math.max(0,x.f-1);
+      else { var v=Number(h.act); if(h.c==="a") sa=Math.max(0,sa-v); else sb=Math.max(0,sb-v); x.p=Math.max(0,x.p-v); }
+      attente=null; rendre(); envoyer();
+    }
     function rendre(){
       var fini=m.statut==="termine";
-      el.innerHTML='<div style="max-width:560px;margin:0 auto;padding:18px 16px 40px">'+
+      el.innerHTML='<div style="max-width:720px;margin:0 auto;padding:18px 16px 40px">'+
         '<div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);text-align:center">'+authEsc((m.debut||"")+" · Terrain "+(m.terrain||"")+" · "+(m.cat||"")+" · "+(m.label||""))+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">'+cote("a",m.nomA,sa,fini)+cote("b",m.nomB,sb,fini)+'</div>'+
-        '<div id="mq-etat" style="text-align:center;font-size:12px;color:var(--mut);margin-top:12px">'+(fini?"":"Score enregistré au fur et à mesure.")+'</div>'+
-        (fini?'<div style="text-align:center;margin-top:16px;padding:14px;border-radius:14px;background:color-mix(in srgb, var(--grn) 12%, transparent);color:var(--grn);font-weight:900">✓ Match clôturé : '+sa+' – '+sb+'</div><div style="text-align:center;font-size:12px;color:var(--mut);margin-top:8px">Une erreur ? Seul le responsable du tournoi peut rouvrir le match.</div>'
-          :'<button id="mq-clore" style="width:100%;margin-top:18px;padding:16px;border-radius:14px;border:none;background:var(--dkg);color:#fff;font-size:16px;font-weight:900;cursor:pointer">Clôturer le match</button>')+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">'+cote("a",m.nomA,sa,fini)+cote("b",m.nomB,sb,fini)+'</div>'+
+        (fini?'':'<button id="mq-undo" style="width:100%;margin-top:10px;padding:12px;border-radius:14px;border:none;background:var(--bdr);color:var(--txt);font-size:14px;font-weight:800;cursor:pointer"'+(hist.length?'':' disabled')+'>↩ Annuler la dernière action</button>')+
+        '<div id="mq-etat" style="text-align:center;font-size:12px;color:var(--mut);margin-top:10px">'+(fini?"":"Score enregistré au fur et à mesure.")+'</div>'+
+        (fini?'<div style="text-align:center;margin-top:16px;padding:14px;border-radius:14px;background:color-mix(in srgb, var(--grn) 12%, transparent);color:var(--grn);font-weight:900">✓ Match clôturé : '+sa+' – '+sb+'</div><div style="text-align:center;font-size:12px;color:var(--mut);margin-top:6px">Une erreur ? Le responsable du tournoi peut corriger le score.</div>'
+          :'<button id="mq-clore" style="width:100%;margin-top:14px;padding:16px;border-radius:14px;border:none;background:var(--dkg);color:#fff;font-size:16px;font-weight:900;cursor:pointer">Clôturer le match</button>')+
         '<button id="mq-autre" style="width:100%;margin-top:10px;padding:13px;border-radius:14px;border:none;background:var(--bdr);color:var(--txt);font-size:14px;font-weight:700;cursor:pointer">Saisir un autre match</button></div>';
-      el.querySelectorAll("[data-pts]").forEach(function(b){
+      el.querySelectorAll("[data-act]").forEach(function(b){
         b.addEventListener("click",function(){
-          var c=b.dataset.cote, v=parseInt(b.dataset.pts,10);
-          if(c==="a") sa=Math.max(0,Math.min(250,sa+v)); else sb=Math.max(0,Math.min(250,sb+v));
-          rendre(); envoyer();
+          var c=b.dataset.cote, act=b.dataset.act;
+          if(!J[c].length) return appliquer(c,act,"?");
+          attente=(attente&&attente.c===c&&attente.act===act)?null:{c:c,act:act}; rendre();
         });
       });
+      el.querySelectorAll("[data-num]").forEach(function(b){ b.addEventListener("click",function(){ if(attente) appliquer(attente.c,attente.act,b.dataset.num); }); });
+      var u=document.getElementById("mq-undo"); if(u) u.addEventListener("click",annuler);
       var cl=document.getElementById("mq-clore"); if(cl) cl.addEventListener("click",clore);
       document.getElementById("mq-autre").addEventListener("click",function(){ saisieCode(""); });
     }
     function cote(c,nom,v,fini){
-      var btn=function(p,txt,fond){ return '<button data-cote="'+c+'" data-pts="'+p+'" style="flex:1;padding:14px 0;border-radius:12px;border:none;background:'+fond+';color:'+(p<0?"var(--txt)":"#fff")+';font-size:17px;font-weight:900;cursor:pointer">'+txt+'</button>'; };
-      return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:12px;text-align:center">'+
+      var btn=function(act,txt,fond,fg){ var on=attente&&attente.c===c&&attente.act===act;
+        return '<button data-cote="'+c+'" data-act="'+act+'" style="flex:1;padding:13px 0;border-radius:12px;border:'+(on?"3px solid #E8670A":"none")+';background:'+fond+';color:'+(fg||"#fff")+';font-size:16px;font-weight:900;cursor:pointer">'+txt+'</button>'; };
+      var choix="";
+      if(attente&&attente.c===c){
+        choix='<div style="margin-top:8px;padding:8px;border-radius:12px;background:color-mix(in srgb, #E8670A 12%, transparent)"><div style="font-size:11.5px;font-weight:800;color:#E8670A;margin-bottom:6px">'+(attente.act==="f"?"Faute de qui ?":"Qui a marqué +"+attente.act+" ?")+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">'+
+          J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=x.f>=5;
+            return '<button data-num="'+authEsc(j.n)+'"'+(out?' disabled':'')+' style="min-width:44px;padding:9px 8px;border-radius:10px;border:none;background:'+(out?"var(--bdr)":"var(--card)")+';color:var(--txt);font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15)">'+authEsc(j.n)+'</button>'; }).join("")+
+          '<button data-num="?" style="padding:9px 10px;border-radius:10px;border:none;background:var(--card);color:var(--mut);font-size:12px;font-weight:800;cursor:pointer">Sans n°</button></div></div>';
+      }
+      var liste=J[c].length?'<div style="margin-top:8px;text-align:left">'+J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=x.f>=5, dots="";
+          for(var i=0;i<5;i++) dots+='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:2px;background:'+(i<x.f?(x.f>=4?"var(--red)":"#E8670A"):"var(--bdr)")+'"></span>';
+          return '<div style="display:flex;align-items:center;gap:6px;padding:4px 2px;border-top:1px solid var(--bdr);font-size:12.5px;color:var(--txt);opacity:'+(out?".45":"1")+'"><b style="width:24px;text-align:right">'+authEsc(j.n)+'</b><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(j.p)+'</span><b>'+x.p+'</b><span>'+dots+'</span></div>'; }).join("")+'</div>':'';
+      return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:12px;text-align:center;min-width:0">'+
         '<div style="font-size:14px;font-weight:900;color:var(--txt);min-height:36px;display:flex;align-items:center;justify-content:center">'+authEsc(nom||"")+'</div>'+
-        '<div style="font-size:56px;font-weight:900;color:var(--dkg);font-variant-numeric:tabular-nums;line-height:1.1">'+v+'</div>'+
-        (fini?'':'<div style="display:flex;gap:6px;margin-top:8px">'+btn(1,"+1","var(--ltg)")+btn(2,"+2","var(--dkg)")+btn(3,"+3","var(--dkg)")+'</div><div style="display:flex;margin-top:6px">'+btn(-1,"−1","var(--bdr)")+'</div>')+'</div>';
+        '<div style="font-size:52px;font-weight:900;color:var(--dkg);font-variant-numeric:tabular-nums;line-height:1.1">'+v+'</div>'+
+        (fini?'':'<div style="display:flex;gap:6px;margin-top:8px">'+btn("1","+1","var(--ltg)")+btn("2","+2","var(--dkg)")+btn("3","+3","var(--dkg)")+'</div><div style="display:flex;margin-top:6px">'+btn("f","Faute","var(--bdr)","var(--txt)")+'</div>'+choix)+
+        liste+'</div>';
     }
     function envoyer(){
       clearTimeout(envoi);
       envoi=setTimeout(function(){
-        var cle=JSON.stringify([sa,sb]); if(cle===envoye) return;
-        window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,statut:"encours",majLe:Date.now()}).then(function(){
-          envoye=cle; m.statut="encours"; var x=document.getElementById("mq-etat"); if(x) x.textContent="Score enregistré ("+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+").";
+        var cle=JSON.stringify([sa,sb,stats]); if(cle===envoye) return;
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,stats:stats,statut:"encours",majLe:Date.now()}).then(function(){
+          envoye=cle; m.statut="encours"; var x=document.getElementById("mq-etat"); if(x){ x.style.color="var(--mut)"; x.textContent="Score enregistré ("+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+")."; }
         }).catch(function(){ var x=document.getElementById("mq-etat"); if(x){ x.style.color="var(--red)"; x.textContent="Pas de connexion : le score sera renvoyé au prochain point."; } envoye=""; });
       },800);
     }
@@ -455,9 +499,9 @@ function showMarque(code){
         if(v==null) return;
         if(trnCodeNet(v)!==k) return askAlert("Ce n'est pas le code de ce match. Le match n'est pas clôturé.");
         clearTimeout(envoi);
-        window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,statut:"termine",clotureLe:Date.now(),majLe:Date.now()}).then(function(){
-          m.statut="termine"; rendre(); showToast("Match clôturé");
-          trnLiveEcrire(m,sa,sb,{code:k});
+        window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,stats:stats,statut:"termine",clotureLe:Date.now(),majLe:Date.now()}).then(function(){
+          m.statut="termine"; m.stats=stats; rendre(); showToast("Match clôturé");
+          trnLiveEcrire(m,sa,sb,{code:k,stats:stats});
         }).catch(function(){ askAlert("Clôture impossible : vérifiez la connexion et réessayez."); });
       });
     }
@@ -477,14 +521,30 @@ function trnInscrireEquipe(p,apres){
     '<div class="form-group"><label class="form-label" for="ti-cat">Catégorie *</label><select class="form-select" id="ti-cat">'+cats.map(function(c){ return '<option>'+authEsc(c)+'</option>'; }).join("")+'</select></div>'+
     champ("ti-contact","Responsable *",'maxlength="60" placeholder="Prénom Nom"')+champ("ti-tel","Téléphone *",'type="tel" maxlength="20"')+champ("ti-email","E-mail (facultatif)",'type="email" maxlength="100"');
   s.body.appendChild(f);
+  // Joueurs : numéro + prénom (modifiables ensuite avec le code « Mon équipe »).
+  var ed=null;
+  if(typeof trnEditeurJoueurs==="function"){
+    gmSection(s.body,"Joueurs","Numéro et prénom (pas de nom de famille). Vous pourrez les modifier jusqu'au premier match.");
+    ed=trnEditeurJoueurs(s.body,[]);
+  }
   gmRow(s.body).appendChild(gmBtn("Envoyer l'inscription","primary",function(btn){
     function v(id){ return String((document.getElementById(id)||{}).value||"").trim(); }
     var d={clubId:p.clubId,eventId:p.eventId,nom:v("ti-nom").slice(0,40),club:v("ti-club").slice(0,50),cat:v("ti-cat").slice(0,20),contact:v("ti-contact").slice(0,60),tel:v("ti-tel").slice(0,20),email:v("ti-email").slice(0,100),at:Date.now()};
     if(!d.nom||!d.club||!d.cat||!d.contact||!d.tel) return askAlert("Remplissez les champs marqués d'une étoile.");
     if(!/^[0-9 +.]{8,20}$/.test(d.tel)) return askAlert("Numéro de téléphone invalide.");
+    if(ed){ var dbl=ed.doublons(); if(dbl.length) return askAlert("Numéro en double : "+dbl.join(", ")+"."); d.joueurs=ed.lire(); d.code=trnCodeMatch(); }
     btn.disabled=true;
-    window.fbAddDoc(window.fbCollection(window.fbDb,"trn_inscriptions"),d).then(function(){
-      s.body.innerHTML='<div style="text-align:center;padding:20px 6px"><div style="font-size:18px;font-weight:900;color:var(--txt)">✅ Demande envoyée</div><div style="font-size:13px;color:var(--txt2);margin-top:8px;line-height:1.5">Le club valide les équipes et publie les poules et le planning sur cette page. Vous serez contacté au '+authEsc(d.tel)+' si besoin.</div></div>';
+    window.fbAddDoc(window.fbCollection(window.fbDb,"trn_inscriptions"),d).then(function(ref){
+      var lien=d.code?TRN_EQUIPE_URL+d.code:"";
+      if(d.code) window.fbSetDoc(window.fbDoc(window.fbDb,"trn_equipes",d.code),{clubId:d.clubId,eventId:d.eventId,inscId:(ref&&ref.id)||"",nom:d.nom,cat:d.cat,joueurs:d.joueurs,majLe:Date.now()}).catch(function(){});
+      s.body.innerHTML='<div style="text-align:center;padding:20px 6px"><div style="font-size:18px;font-weight:900;color:var(--txt)">✅ Demande envoyée</div><div style="font-size:13px;color:var(--txt2);margin-top:8px;line-height:1.5">Le club valide les équipes et publie les poules et le planning sur cette page. Vous serez contacté au '+authEsc(d.tel)+' si besoin.</div>'+
+        (d.code?'<div style="margin-top:16px;padding:14px;border-radius:14px;background:var(--card);border:1.5px dashed var(--bdr)"><div style="font-size:12px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.6px">Code « Mon équipe »</div><div style="font-family:monospace;font-size:28px;font-weight:900;letter-spacing:5px;color:var(--dkg);margin:4px 0">'+authEsc(d.code)+'</div><div style="font-size:12px;color:var(--txt2)">Gardez-le : il sert à modifier vos joueurs jusqu\'au premier match.</div></div>':'')+'</div>';
+      if(d.code){
+        var r=gmRow(s.body), txt="Tournoi : mon code équipe "+d.nom+" = "+d.code+" ("+lien+")";
+        r.appendChild(gmBtn("M'envoyer par WhatsApp","primary",function(){ window.open("https://wa.me/?text="+encodeURIComponent(txt),"_blank"); }));
+        r.appendChild(gmBtn("Copier le lien","soft",function(){ if(typeof copyToClipboard==="function") copyToClipboard(lien); }));
+        try{ var mem=JSON.parse(localStorage.getItem("gm_trn_codes")||"{}"); mem[p.clubId+"__"+p.eventId]=d.code; localStorage.setItem("gm_trn_codes",JSON.stringify(mem)); }catch(e){}
+      }
       if(apres) apres();
     }).catch(function(){ btn.disabled=false; askAlert("Envoi impossible : les inscriptions sont peut-être fermées. Contactez le club."); });
   }));
@@ -503,13 +563,18 @@ function trnRendreDemandes(box,eid,apres){
     l.forEach(function(x){
       var card=gmCard(); card.style.padding="10px 12px";
       card.innerHTML='<div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc(x.nom)+' <span style="font-weight:700;color:var(--mut);font-size:12px">· '+authEsc(x.cat)+'</span></div>'+
-        '<div style="font-size:12px;color:var(--txt2);margin-top:2px">'+authEsc(x.club)+' · '+authEsc(x.contact)+' · '+authEsc(x.tel)+(x.email?' · '+authEsc(x.email):'')+'</div>';
+        '<div style="font-size:12px;color:var(--txt2);margin-top:2px">'+authEsc(x.club)+' · '+authEsc(x.contact)+' · '+authEsc(x.tel)+(x.email?' · '+authEsc(x.email):'')+(x.joueurs&&x.joueurs.length?' · 👕 '+x.joueurs.length+' joueur'+(x.joueurs.length>1?'s':''):'')+'</div>';
       var r=gmRow(card); r.style.marginTop="8px";
       r.appendChild(gmBtn("Accepter","primary",function(){
         var c=trnCfg(getEvents().find(function(z){ return z.id===eid; })), eq=c.equipes.slice();
-        eq.push({id:"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,4),nom:x.nom,club:x.club,cat:x.cat,source:"lien",contact:x.contact,tel:x.tel,email:x.email||""});
+        var nq={id:"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,4),nom:x.nom,club:x.club,cat:x.cat,source:"lien",contact:x.contact,tel:x.tel,email:x.email||""};
+        if(x.joueurs&&typeof trnJoueursNet==="function"){ nq.joueurs=trnJoueursTri(trnJoueursNet(x.joueurs)); nq.joueursLe=x.at||Date.now(); }
+        if(x.code){ nq.code=String(x.code).slice(0,6); window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_equipes",nq.code),{equipeId:nq.id}).catch(function(){}); }
+        eq.push(nq);
         trnSauver(eid,{equipes:eq});
-        window.fbDeleteDoc(window.fbDoc(window.fbDb,"trn_inscriptions",x._id)).catch(function(){}).then(apres);
+        // Liste éventuellement modifiée depuis par le responsable (code « Mon équipe »).
+        window.fbDeleteDoc(window.fbDoc(window.fbDb,"trn_inscriptions",x._id)).catch(function(){})
+          .then(function(){ return typeof trnSyncJoueurs==="function"?trnSyncJoueurs(eid):null; }).then(apres,apres);
       }));
       r.appendChild(gmBtn("Refuser","danger",function(){
         askConfirm("Refuser l'équipe « "+x.nom+" » ? Pensez à prévenir "+x.contact+" ("+x.tel+").",{danger:true,confirmText:"Refuser"}).then(function(ok){
