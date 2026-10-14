@@ -212,6 +212,8 @@ function buildCalendrier(){
           var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'';
           var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
           var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
+          var nbBen=(typeof benListe==="function")?benListe(e).length:0;
+          var benBtn=(isCoachOrDir&&e.type!=="entrainement"&&typeof benOuvrir==="function")?'<button onclick="benOuvrir(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">🙋 Bénévoles'+(nbBen?' ('+nbBen+')':'')+'</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
             ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
             '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>')
@@ -220,7 +222,7 @@ function buildCalendrier(){
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0">'+
             '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+eventTypeLabel(e.type)+'</span>'+
             '<div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
-            '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+icsBtn+carBtn+coachBtns+'</div>'+
+            '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+icsBtn+carBtn+coachBtns+benBtn+'</div>'+
             (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
           '</div>';
         });

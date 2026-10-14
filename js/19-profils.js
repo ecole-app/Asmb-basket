@@ -1136,6 +1136,7 @@ function buildParentHome(){
   var allTeams=getTeams();
   var myTeams=allTeams.filter(function(t){return teamIds.indexOf(t.id)>=0;});
   renderMatchdayBanner("parent-matchday-banner",myTeams.map(function(t){return t.name;}));
+  if(typeof benBandeau==="function") benBandeau("parent-matchday-banner");
   if(!myTeams.length){openTeamPicker(false);return;}
   var activeId=getActiveTeamId();
   if(!myTeams.find(function(t){return t.id===activeId;}))activeId=myTeams[0].id;
@@ -1462,6 +1463,7 @@ function buildCoachEquipe(){
   fillTodayHero("coach-next-event","coach-eq-name",team);
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
   renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);
+  if(typeof benBandeau==="function") benBandeau("coach-matchday-banner","12px 0 0");
   buildCoachDashboard(document.getElementById("coach-presence-summary"));
   if(typeof renderEssaisCoach==="function") renderEssaisCoach(team);
 

@@ -1,5 +1,26 @@
 [
   {
+    "v": "1791945466",
+    "titre": "Bénévoles",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Planning › « 🙋 Bénévoles » sur un match ou un événement : placez des personnes sur les postes (buvette, table de marque, chrono, arbitrage…) et prévenez-les par SMS pré-rempli au nom du club."
+      },
+      {
+        "roles": [
+          "parent",
+          "coach",
+          "dirigeant"
+        ],
+        "texte": "Accueil : un bandeau « Tu es bénévole cette semaine » indique le poste, le jour et l'heure."
+      }
+    ]
+  },
+  {
     "v": "1791945299",
     "titre": "Bilan de saison pour les subventions",
     "points": [

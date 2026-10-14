@@ -203,6 +203,7 @@ function makeCard(p,onclick){
 }
 
 function buildPortal(){
+  if(typeof benBandeau==="function") benBandeau("dashboard-dirigeant","0 12px 14px");
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
   activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
   buildDashboard();
