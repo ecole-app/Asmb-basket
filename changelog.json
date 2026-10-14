@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791962089",
+    "titre": "Tournoi : fautes et meilleurs marqueurs au choix",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi › Journée et format : pour chaque catégorie, choisissez à combien de fautes un joueur est exclu (2 à 6, ou pas d'exclusion), à côté de la durée des matchs."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le classement des meilleurs marqueurs n'apparaît sur la page du tournoi que si vous cochez l'option."
+      }
+    ]
+  },
+  {
     "v": "1791952898",
     "titre": "Tournoi : joueurs, points et fautes",
     "points": [

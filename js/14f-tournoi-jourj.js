@@ -152,7 +152,7 @@ function trnPreparerCodes(eid,resolus){
     var ops=[];
     c.matchs.forEach(function(m){
       var info={cat:m.cat,label:m.label,terrain:m.terrain,debut:m.debut,nomA:trnNomMatch(c,m,"a",resolus).slice(0,60),nomB:trnNomMatch(c,m,"b",resolus).slice(0,60),
-        joueursA:trnJoueursMatch(c,m,"a",resolus),joueursB:trnJoueursMatch(c,m,"b",resolus)};
+        joueursA:trnJoueursMatch(c,m,"a",resolus),joueursB:trnJoueursMatch(c,m,"b",resolus),fautesMax:trnConfCat(c,m.cat).fautes};
       var x=parMatch[m.id];
       if(!x){ var code=trnCodeMatch(); ops.push(["set",code,Object.assign({clubId:window.CURRENT_CLUB_ID,eventId:String(eid),matchId:m.id,sa:0,sb:0,statut:"prevu",creeLe:Date.now()},info)]); }
       else if(Object.keys(info).some(function(k){ return JSON.stringify(x[k]==null?null:x[k])!==JSON.stringify(info[k]); })) ops.push(["update",x._code,info]);
@@ -427,7 +427,7 @@ function showMarque(code){
     var sa=Number(m.sa)||0, sb=Number(m.sb)||0, envoi=null, envoye="";
     var stats={a:Object.assign({},(m.stats&&m.stats.a)||{}),b:Object.assign({},(m.stats&&m.stats.b)||{})};
     var J={a:(m.joueursA||[]).filter(function(j){ return j.n; }),b:(m.joueursB||[]).filter(function(j){ return j.n; })};
-    var attente=null, hist=[];
+    var attente=null, hist=[], FMAX=(m.fautesMax==null)?5:Number(m.fautesMax)||0; // 0 = pas d'exclusion
     envoye=JSON.stringify([sa,sb,stats]);
     function st(c,n){ return stats[c][n]||(stats[c][n]={p:0,f:0}); }
     function appliquer(c,act,n){
@@ -471,12 +471,13 @@ function showMarque(code){
       var choix="";
       if(attente&&attente.c===c){
         choix='<div style="margin-top:8px;padding:8px;border-radius:12px;background:color-mix(in srgb, #E8670A 12%, transparent)"><div style="font-size:11.5px;font-weight:800;color:#E8670A;margin-bottom:6px">'+(attente.act==="f"?"Faute de qui ?":"Qui a marqué +"+attente.act+" ?")+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">'+
-          J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=x.f>=5;
+          J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=FMAX>0&&x.f>=FMAX;
             return '<button data-num="'+authEsc(j.n)+'"'+(out?' disabled':'')+' style="min-width:44px;padding:9px 8px;border-radius:10px;border:none;background:'+(out?"var(--bdr)":"var(--card)")+';color:var(--txt);font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15)">'+authEsc(j.n)+'</button>'; }).join("")+
           '<button data-num="?" style="padding:9px 10px;border-radius:10px;border:none;background:var(--card);color:var(--mut);font-size:12px;font-weight:800;cursor:pointer">Sans n°</button></div></div>';
       }
-      var liste=J[c].length?'<div style="margin-top:8px;text-align:left">'+J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=x.f>=5, dots="";
-          for(var i=0;i<5;i++) dots+='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:2px;background:'+(i<x.f?(x.f>=4?"var(--red)":"#E8670A"):"var(--bdr)")+'"></span>';
+      var liste=J[c].length?'<div style="margin-top:8px;text-align:left">'+J[c].map(function(j){ var x=stats[c][j.n]||{p:0,f:0}, out=FMAX>0&&x.f>=FMAX, dots="";
+          if(FMAX>0){ for(var i=0;i<FMAX;i++) dots+='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:2px;background:'+(i<x.f?(x.f>=FMAX-1?"var(--red)":"#E8670A"):"var(--bdr)")+'"></span>'; }
+          else dots='<span style="font-size:11px;color:var(--mut)">'+x.f+' f.</span>';
           return '<div style="display:flex;align-items:center;gap:6px;padding:4px 2px;border-top:1px solid var(--bdr);font-size:12.5px;color:var(--txt);opacity:'+(out?".45":"1")+'"><b style="width:24px;text-align:right">'+authEsc(j.n)+'</b><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(j.p)+'</span><b>'+x.p+'</b><span>'+dots+'</span></div>'; }).join("")+'</div>':'';
       return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:12px;text-align:center;min-width:0">'+
         '<div style="font-size:14px;font-weight:900;color:var(--txt);min-height:36px;display:flex;align-items:center;justify-content:center">'+authEsc(nom||"")+'</div>'+

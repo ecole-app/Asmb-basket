@@ -483,7 +483,7 @@ var TRN=(function(){
     var poules=(P.poules||{})[catC]||[];
     if(poules.length) h+='<h2 class="sec">Poules</h2><div class="grid">'+poules.map(function(po){ return tablePoule(catC,po,favori()); }).join("")+'</div>';
     if(fin.length) h+='<h2 class="sec">Phase finale</h2><div class="grid">'+fin.map(function(m){ return carte(m,{sansCat:true}); }).join("")+'</div>';
-    h+=topMarqueurs(catC);
+    if(P.topMarqueurs) h+=topMarqueurs(catC);
     return h;
   }
   function vueEquipe(){

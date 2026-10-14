@@ -22,7 +22,7 @@ function trnCfg(e){
     equipes:t.equipes||[], cats:t.cats||{}, terrains:Math.max(1,Math.min(12,parseInt(t.terrains,10)||2)),
     debut:t.debut||"09:00", fin:t.fin||"18:00", pause:t.pause||null,
     battement:t.battement!=null?Math.max(0,parseInt(t.battement,10)||0):5, repos:t.repos!==false,
-    plan:t.plan||null, typesTerrains:trnTypesTerrains(t.typesTerrains,Math.max(1,Math.min(12,parseInt(t.terrains,10)||2))),
+    plan:t.plan||null, topMarqueurs:!!t.topMarqueurs, typesTerrains:trnTypesTerrains(t.typesTerrains,Math.max(1,Math.min(12,parseInt(t.terrains,10)||2))),
     matchs:t.matchs||[], genereLe:t.genereLe||null, publieLe:t.publieLe||null, modifLe:t.modifLe||null,
     inscr:t.inscr||{ouvert:false,cats:[]}
   };
@@ -43,7 +43,9 @@ function trnConfCat(cfg,cat){
   var n=cfg.equipes.filter(function(q){ return (q.cat||"Sans catégorie")===cat; }).length;
   var c=cfg.cats[cat]||{};
   var nbP=parseInt(c.nbPoules,10)||(n>=8?2:1);
-  return {nbPoules:Math.max(1,Math.min(nbP,Math.max(1,Math.floor(n/2)))), suite:c.suite||"aucune", petiteFinale:!!c.petiteFinale, duree:Math.max(4,parseInt(c.duree,10)||20)};
+  // fautes : nombre de fautes qui exclut un joueur (5 par défaut, 0 = pas d'exclusion).
+  var fa=parseInt(c.fautes,10); fa=isNaN(fa)?5:Math.max(0,Math.min(10,fa));
+  return {nbPoules:Math.max(1,Math.min(nbP,Math.max(1,Math.floor(n/2)))), suite:c.suite||"aucune", petiteFinale:!!c.petiteFinale, duree:Math.max(4,parseInt(c.duree,10)||20), fautes:fa};
 }
 // Formats possibles selon le nombre de poules et la taille de la plus petite.
 function trnSuitesPossibles(nbPoules,taillePlusPetite,nbEquipes){
@@ -309,6 +311,7 @@ function trnOuvrir(eid){
     gp.appendChild(champ("Pause de",pd)); gp.appendChild(champ("à",pf)); zone.appendChild(gp);
     function majP(){ gp.style.display=cbP.checked?"grid":"none"; } cbP.addEventListener("change",majP); majP();
     var cbR=coche("Une équipe ne joue jamais deux matchs d'affilée",c.repos);
+    var cbM=coche("Afficher le classement des meilleurs marqueurs sur la page du tournoi",!!c.topMarqueurs);
     gmSection(zone,"Inscription des équipes par le lien","Les clubs inscrivent leur équipe depuis la page publique du tournoi ; vous acceptez ou refusez chaque demande dans l'onglet Équipes.");
     var cbI=coche("Les équipes peuvent s'inscrire par le lien",!!c.inscr.ouvert);
     var catsI=document.createElement("input"); catsI.className="form-input"; catsI.placeholder=""; catsI.maxLength=200;
@@ -329,6 +332,9 @@ function trnOuvrir(eid){
       selP.value=String(cc.nbPoules);
       var selS=document.createElement("select"); selS.className="form-input";
       var dur=inp("number",cc.duree,{min:4,max:80});
+      var selF=document.createElement("select"); selF.className="form-input";
+      [[0,"Pas d'exclusion"],[2,"2 fautes"],[3,"3 fautes"],[4,"4 fautes"],[5,"5 fautes"],[6,"6 fautes"]].forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; selF.appendChild(op); });
+      selF.value=String(cc.fautes);
       var pfL=document.createElement("label"); pfL.style.cssText="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--txt2);cursor:pointer;margin-top:4px";
       var pfC=document.createElement("input"); pfC.type="checkbox"; pfC.checked=cc.petiteFinale; pfC.style.cssText="width:17px;height:17px;accent-color:var(--dkg)";
       pfL.appendChild(pfC); pfL.appendChild(document.createTextNode("Petite finale (3e place)"));
@@ -343,9 +349,9 @@ function trnOuvrir(eid){
         info.textContent="Poules de "+tailles.join(", ")+" équipes · "+nbM+" matchs de poule";
       }
       selP.addEventListener("change",majS); selS.addEventListener("change",majS); majS();
-      gg.appendChild(champ("Poules",selP)); gg.appendChild(champ("Après les poules",selS)); gg.appendChild(champ("Durée d'un match (min)",dur));
+      gg.appendChild(champ("Poules",selP)); gg.appendChild(champ("Après les poules",selS)); gg.appendChild(champ("Durée d'un match (min)",dur)); gg.appendChild(champ("Joueur exclu à",selF));
       card.appendChild(gg); card.appendChild(pfL); card.appendChild(info); zone.appendChild(card);
-      confs[k]={selP:selP,selS:selS,dur:dur,pfC:pfC};
+      confs[k]={selP:selP,selS:selS,dur:dur,pfC:pfC,selF:selF};
     });
     var row=gmRow(zone);
     row.appendChild(gmBtn("Enregistrer","primary",function(){
@@ -353,11 +359,11 @@ function trnOuvrir(eid){
       if(d==null||f==null||f<=d) return askAlert("L'heure de fin doit être après l'heure de début.");
       var pause=null;
       if(cbP.checked){ var a=trnMin(pd.value), z=trnMin(pf.value); if(a==null||z==null||z<=a) return askAlert("La fin de la pause doit être après son début."); pause={debut:pd.value,fin:pf.value}; }
-      var cs={}; Object.keys(confs).forEach(function(k){ var x=confs[k]; cs[k]={nbPoules:parseInt(x.selP.value,10),suite:x.selS.value,petiteFinale:x.pfC.checked&&(x.selS.value==="demis"||x.selS.value==="finale"),duree:Math.max(4,parseInt(x.dur.value,10)||20)}; });
+      var cs={}; Object.keys(confs).forEach(function(k){ var x=confs[k]; cs[k]={nbPoules:parseInt(x.selP.value,10),suite:x.selS.value,petiteFinale:x.pfC.checked&&(x.selS.value==="demis"||x.selS.value==="finale"),duree:Math.max(4,parseInt(x.dur.value,10)||20),fautes:parseInt(x.selF.value,10)||0}; });
       var catsL=catsI.value.split(",").map(function(x){ return x.trim().slice(0,20); }).filter(function(x,i,a){ return x&&a.indexOf(x)===i; }).slice(0,20);
       if(cbI.checked&&!catsL.length) return askAlert("Indiquez au moins une catégorie proposée à l'inscription.");
       var inscrAvant=!!c.inscr.ouvert;
-      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),typesTerrains:types.slice(),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,cats:cs,inscr:{ouvert:cbI.checked,cats:catsL}});
+      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),typesTerrains:types.slice(),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,topMarqueurs:cbM.checked,cats:cs,inscr:{ouvert:cbI.checked,cats:catsL}});
       showToast("Réglages du tournoi enregistrés");
       // Inscriptions ouvertes (ou fermées) : la page publique est mise à jour tout de suite.
       if(cbI.checked||inscrAvant) trnPublier(eid).then(function(){ if(cbI.checked&&!inscrAvant) trnPartager(eid); }).catch(function(err){ askAlert("Page publique non mise à jour ("+((err&&err.code)||"réseau")+")."); });
@@ -518,7 +524,7 @@ function trnPublier(eid){
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
     terrains:c.terrains, typesTerrains:c.typesTerrains, plan:c.plan||null, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||"",joueurs:(q.joueurs||[]).map(function(j){ return {n:j.n||"",p:j.p||""}; })}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
-    jourJ:(typeof hasPremium!=='function'||hasPremium()), inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
+    jourJ:(typeof hasPremium!=='function'||hasPremium()), topMarqueurs:!!c.topMarqueurs, inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
     majLe:Date.now()
   };
