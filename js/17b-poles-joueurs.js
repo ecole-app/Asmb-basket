@@ -64,6 +64,7 @@ function poleRendreEquipe(poleId,avant){
     if(!js.length) h+='<div style="font-size:12px;color:var(--mut);padding:6px 0">'+(gere?"Ajoutez les joueurs suivis dans ce pôle.":"Aucun joueur pour l'instant.")+'</div>';
     js.forEach(function(p){
       var info=poleInfosTxt(poleId,p.poles[poleId]);
+      if(p.poles[poleId].statut==="pause") info=["⏸ En pause",info].filter(Boolean).join(" · ");
       h+='<div data-pid="'+authEsc(String(p.id))+'" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--bdr)'+(gere?';cursor:pointer':'')+'">'+
         '<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc((p.prenom||"")+" "+(p.nom||""))+'</div>'+
         '<div style="font-size:11.5px;color:var(--mut)">'+authEsc([p.cat,info].filter(Boolean).join(" · "))+'</div></div>'+(gere?'<span style="color:var(--mut)">›</span>':'')+'</div>';
@@ -76,7 +77,10 @@ function poleRendreEquipe(poleId,avant){
     if(b&&b.dataset.act==="coachs") return poleChoisirCoachs(poleId,function(){ poleRendreEquipe(poleId,avant); });
     if(b&&b.dataset.act==="ajout") return poleChoisirJoueurs(poleId,function(){ poleRendreEquipe(poleId,avant); });
     var r=e.target.closest("[data-pid]");
-    if(r&&peutGererPole(poleId)) poleModifierJoueur(poleId,r.dataset.pid,function(){ poleRendreEquipe(poleId,avant); });
+    if(r&&peutGererPole(poleId)){
+      var re=function(){ poleRendreEquipe(poleId,avant); };
+      if(typeof poleFicheJoueur==="function") poleFicheJoueur(poleId,r.dataset.pid,re); else poleModifierJoueur(poleId,r.dataset.pid,re);
+    }
   };
 }
 

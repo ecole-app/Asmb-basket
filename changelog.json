@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791982351",
+    "titre": "Pôles : fiche profil sportif",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Pôles › touchez un joueur : sa fiche en 4 onglets. Général (assiduité, séances, matchs, ancienneté, équipes), Paiements (licence + cotisation du pôle et versements, recette en compta), Infos (suivi du pôle, notes du coach, appel/SMS des parents), Réglages (pause, date d'entrée, retrait)."
+      }
+    ]
+  },
+  {
     "v": "1791982102",
     "titre": "Abonnement : geler, relancer, résilier",
     "points": [
