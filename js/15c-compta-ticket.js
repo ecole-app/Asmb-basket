@@ -10,8 +10,10 @@
 // ══════════════════════════════════════════════════════════════
 var GM_TICKET_URL="https://openrouter.ai/api/v1/chat/completions";
 var GM_TICKET_CLE=["sk-or-v1-fb2133c6cec2e24fa49f1fb3","8a5d121b2979eadc557a61dd0801f12c8e8b19e7"].join("");
-// Modèles rapides qui lisent les images ; « openrouter/free » en secours.
+// Modèles gratuits qui lisent les images. Pas de « openrouter/free » : il peut
+// tomber sur un modèle texte seul (ex. un filtre de sécurité) qui ne lit rien.
 var GM_TICKET_MODELES=["qwen/qwen3.8-27b:free","google/gemma-4-26b-a4b-it:free"];
+var GM_TICKET_SECOURS=["google/gemma-4-31b-it:free","thinkingmachines/inkling-small:free","nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"];
 var GM_TICKET_DELAI=30000; // par essai (2 essais max)
 
 // Bouton de la barre : ouvre une nouvelle ligne (dépense) puis l'appareil photo.
@@ -68,7 +70,7 @@ function comptaTicketErr(detail){ var e=new Error("ia"); e.detail=String(detail|
 function comptaTicketAppel(dataUrl,corps){
   var ctrl=window.AbortController?new AbortController():null;
   var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
-  var body=Object.assign({max_tokens:400,temperature:0,messages:[{role:"user",content:[
+  var body=Object.assign({max_tokens:1200,temperature:0,messages:[{role:"user",content:[
     {type:"image_url",image_url:{url:dataUrl}},{type:"text",text:comptaTicketPrompt()}]}]},corps);
   return fetch(GM_TICKET_URL,{method:"POST",signal:ctrl?ctrl.signal:undefined,
     headers:{"Content-Type":"application/json","Authorization":"Bearer "+GM_TICKET_CLE,
@@ -118,7 +120,7 @@ function comptaTicketLire(file){
         .catch(function(e1){
           // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
           comptaTicketStatut("⏳ Nouvelle tentative…");
-          return comptaTicketAppel(petite,{model:"openrouter/free"}).catch(function(e2){
+          return comptaTicketAppel(petite,{models:GM_TICKET_SECOURS}).catch(function(e2){
             if(e2&&!e2.detail&&e1&&e1.detail) e2.detail=e1.detail;
             else if(e2&&e1&&e1.detail&&e2.detail) e2.detail="1) "+e1.detail+" — 2) "+e2.detail;
             throw e2;

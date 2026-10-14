@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791969368",
+    "titre": "Photo de ticket : IA de secours qui lit les images",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Compta › photo du ticket : quand les IA principales sont saturées, le relais passe par 3 autres IA capables de lire une photo."
+      }
+    ]
+  },
+  {
     "v": "1791969092",
     "titre": "Photo de ticket : raison de l'échec affichée",
     "points": [
