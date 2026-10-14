@@ -1,5 +1,21 @@
 [
   {
+    "v": "1792005642",
+    "titre": "Tournoi : vainqueur en vert sur le grand écran",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Tournoi : sur le grand écran, dans les derniers résultats, l'équipe gagnante et son score s'affichent en vert."
+      }
+    ]
+  },
+  {
     "v": "1792004806",
     "titre": "Tournoi : grand écran clair ou sombre",
     "points": [

@@ -136,10 +136,11 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 .trn-pin.on{outline:3px solid var(--live);outline-offset:2px}
 
 /* ── Grand écran (télé / vidéoprojecteur) : tableau d'affichage, toujours sombre ── */
-.tv{--tv-bg:#07090E;--tv-ink:#F4F5F8;--tv-card:#121722;--tv-mut:#8E96AB;--tv-acc:#FFB070;--tv-ok:#7BD69B;--tv-line:#222939;--tv-edge:#2A3142;--tv-btn:#1B2130;--tv-btn-ink:#AEB4C3;--tv-score:#FFFFFF;--tv-bright:brightness(1.6);
+.tv{--tv-bg:#07090E;--tv-ink:#F4F5F8;--tv-card:#121722;--tv-mut:#8E96AB;--tv-acc:#FFB070;--tv-ok:#7BD69B;--tv-line:#222939;--tv-edge:#2A3142;--tv-btn:#1B2130;--tv-btn-ink:#AEB4C3;--tv-score:#FFFFFF;--tv-bright:brightness(1.6);--tv-win:#7BD69B;
   position:fixed;inset:0;z-index:50;background:var(--tv-bg);color:var(--tv-ink);display:grid;grid-template-rows:auto 1fr auto;padding:2.2vh 2.4vw;gap:2vh;font-family:var(--f-body);overflow:hidden}
 .tv[hidden]{display:none}
-.tv.clair{--tv-bg:#F3F4F7;--tv-ink:#141824;--tv-card:#FFFFFF;--tv-mut:#5C6479;--tv-acc:#B4540A;--tv-ok:#1F7A45;--tv-line:#E1E4EB;--tv-edge:#CBD1DD;--tv-btn:#E3E6ED;--tv-btn-ink:#3C4357;--tv-score:#141824;--tv-bright:none}
+.tv.clair{--tv-bg:#F3F4F7;--tv-ink:#141824;--tv-card:#FFFFFF;--tv-mut:#5C6479;--tv-acc:#B4540A;--tv-ok:#1F7A45;--tv-line:#E1E4EB;--tv-edge:#CBD1DD;--tv-btn:#E3E6ED;--tv-btn-ink:#3C4357;--tv-score:#141824;--tv-bright:none;--tv-win:#1F7A45}
+.tv .gag{color:var(--tv-win)}
 .tv-top{display:flex;align-items:center;gap:1.4vw}
 .tv-top .logo{width:6vh;height:6vh;border-radius:1.2vh;font-size:2.6vh;background:var(--club);color:var(--club-ink)}
 .tv-t{font-family:var(--f-disp);font-weight:800;font-size:4.4vh;text-transform:uppercase;line-height:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -566,7 +567,8 @@ var TRN=(function(){
     var derniers=D.matchs.filter(function(m){ return statut(m)==="fin"; }).slice(-3).reverse();
     document.getElementById("tv-next").innerHTML=(suite.length?suite.map(function(m){
       return '<div class="tv-r"><div class="h">'+esc(m.debut)+'</div><div class="v">'+esc(nomEq(m,"a")||refTxt(m.aRef))+' – '+esc(nomEq(m,"b")||refTxt(m.bRef))+'<small>'+esc(terTxt(m.terrain))+' · '+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join(""):"")+
-      derniers.map(function(m){ var r=D.res[m.id]; return '<div class="tv-r" style="opacity:.75"><div class="h" style="color:var(--tv-ok);font-size:2.4vh">FINI</div><div class="v">'+esc(nomEq(m,"a"))+' <span class="s">'+r.sa+' – '+r.sb+'</span> '+esc(nomEq(m,"b"))+'<small>'+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join("");
+      derniers.map(function(m){ var r=D.res[m.id]; var ga=r.sa>r.sb, gb=r.sb>r.sa; function gag(ok,t){ return ok?'<span class="gag">'+t+'</span>':t; }
+        return '<div class="tv-r" style="opacity:.75"><div class="h" style="color:var(--tv-ok);font-size:2.4vh">FINI</div><div class="v">'+gag(ga,esc(nomEq(m,"a")))+' <span class="s">'+gag(ga,r.sa)+' – '+gag(gb,r.sb)+'</span> '+gag(gb,esc(nomEq(m,"b")))+'<small>'+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join("");
     // Classement : une poule à la fois, qui défile toutes les 12 s.
     var pp=[]; D.cats.forEach(function(c){ ((P.poules||{})[c]||[]).forEach(function(po){ pp.push([c,po]); }); });
     if(!pp.length){ document.getElementById("tv-std").innerHTML=""; document.getElementById("tv-std-h").textContent=""; return; }
