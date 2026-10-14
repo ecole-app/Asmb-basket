@@ -1,5 +1,17 @@
 [
   {
+    "v": "1792010058",
+    "titre": "Version Indépendant : séances et réservations",
+    "points": [
+      {
+        "roles": [
+          "client"
+        ],
+        "texte": "Ton appli : préviens ton coach en un geste (« Je viens » / « Je ne peux pas ») et réserve les séances ouvertes, avec les places restantes."
+      }
+    ]
+  },
+  {
     "v": "1792005642",
     "titre": "Tournoi : vainqueur en vert sur le grand écran",
     "points": [

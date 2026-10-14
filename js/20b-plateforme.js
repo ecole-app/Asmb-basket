@@ -437,6 +437,7 @@ function openPlateforme(){
   s.body.appendChild(aboBox);
   var list=document.createElement("div");
   s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
+  s.body.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
   list.style.marginTop="14px";
   s.body.appendChild(list);
   loadClubsList(list);
@@ -477,7 +478,9 @@ function showPlateformeHome(opts){
   var list=document.createElement("div");
   var act=document.createElement("div");
   act.style.cssText="margin:12px 12px 0";
+  act.style.cssText+=";display:flex;gap:8px;flex-wrap:wrap";
   act.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
+  act.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
   el.appendChild(list);
@@ -562,7 +565,7 @@ function renderClubCard(c, list){
   card.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">'
     +plateformeClubLogoHtml(c,40)
     +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
-    +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.sport||"")+' \u00b7 '+authEsc(c.id)
+    +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(c.type==="independant"?'<b style="color:#0E7C7B">Indépendant</b> \u00b7 ':'')+authEsc(c.sport||"")+' \u00b7 '+authEsc(c.id)
     +' \u00b7 <b style="color:'+etatCol+'">'+etat+'</b>'+delai+'</div></div></div>'
     +(c.suspendMotif?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic">'+authEsc(c.suspendMotif)+'</div>':'');
   var row=gmRow(card);
@@ -762,7 +765,8 @@ var GM_PURGE_MINUTES=30;
 var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
  "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
- "sponsors","facturation_compteur","push_subscriptions"];
+ "sponsors","facturation_compteur","push_subscriptions",
+ "indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
 // actif de la session ne se substitue a celui qu'on purge.
@@ -1001,7 +1005,7 @@ async function deleteClubFlow(c, list){
     if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
 
     try{ await window.fbDeleteDoc(window.fbDoc(window.fbDb,"essai_pages",c.id)); }catch(e){}
-    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes"];
+    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes","indep_liens"];
     for(var g=0;g<globales.length;g++){
       var ng=await purgeGlobalePourClub(c.id,globales[g]);
       if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }

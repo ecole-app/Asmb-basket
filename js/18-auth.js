@@ -285,6 +285,7 @@ function loadClubProfile(clubId){
   window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(snap){
     if(snap && snap.exists()){
       window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
+      try{ localStorage.setItem("gm_type_"+clubId, snap.data().type||"club"); }catch(e){}
       if(typeof applyClubLabels==="function") applyClubLabels();
       // Suspendu ou supprime : on n'ejecte plus vers l'ecran de connexion, le club
       // doit pouvoir lire le motif et le delai dont il dispose pour regulariser.
@@ -331,7 +332,8 @@ function loadClubProfile(clubId){
       if(typeof applyClubLabels==="function") applyClubLabels();
     }
     var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
-    if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels && !window.SUPPORT_MODE){ window.fbInitClubChannels(clubId); }
+    if(roles.indexOf("dirigeant")>=0 && window.fbInitClubChannels && !window.SUPPORT_MODE
+       && !(window.CURRENT_CLUB && window.CURRENT_CLUB.type==="independant")){ window.fbInitClubChannels(clubId); }
   }).catch(function(e){ console.log("loadClubProfile:", e&&e.code||e); });
 }
 
@@ -385,7 +387,8 @@ function finishAuthedUser(user, u, isUpdate){
     return;
   }
   var roles=u.roles||[];
-  var profile = roles.indexOf("dirigeant")>=0 ? "dirigeant"
+  var profile = roles.indexOf("client")>=0 ? "client"
+              : roles.indexOf("dirigeant")>=0 ? "dirigeant"
               : roles.indexOf("coach")>=0 ? "coach"
               : roles.indexOf("parent")>=0 ? "parent"
               : "parent";
@@ -408,6 +411,11 @@ function finishAuthedUser(user, u, isUpdate){
     localStorage.setItem("asmb_coach_teams", JSON.stringify(u.linkedTeamIds));
     if(u.linkedTeamIds.indexOf(getCoachTeam())<0){ localStorage.setItem("asmb_coach_team", u.linkedTeamIds[0]); }
   }
+  // Indépendant (micro-entreprise) : appli à part (js/24-independant.js). Le
+  // reste du routage ci-dessous (portail du club, synchro) ne la concerne pas.
+  if(typeof indRoute==="function" && indRoute(u, isUpdate, function(){ routerClub(); })) return;
+  routerClub();
+  function routerClub(){
   // Super admin : l'accueil est la Plateforme (clubs), jamais le portail d'un
   // club — décidé AVANT tout routage, pour ne jamais afficher le portail (même
   // une fraction de seconde) puis le remplacer. Ne concerne QUE ce compte (ou
@@ -440,6 +448,7 @@ function finishAuthedUser(user, u, isUpdate){
       if(!gmb.firstChild) gmb.innerHTML=gmLogoHtml(30);
     }
   }catch(e){}
+  }
 }
 
 // Gate au démarrage : remplace l'appel direct à initProfile
@@ -447,6 +456,7 @@ function initAuthGate(){
   var urlParams=new URLSearchParams(window.location.search);
   if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
   if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
+  if(urlParams.has("rejoindre")){ indRejoindre(urlParams.get("rejoindre")); return; } // client d'un indépendant : lien de l'indépendant
   if(urlParams.has("entree")){ showEntreeBenevole(urlParams.get("entree")); return; } // bénévole à l'entrée d'un événement : code, pas d'auth
   if(urlParams.has("billet")){ showBilletPublic(urlParams.get("billet"), urlParams.get("evt")); return; }
   if(urlParams.has("marque")){ showMarque(urlParams.get("marque")); return; } // table de marque d'un tournoi : code du match, pas d'auth

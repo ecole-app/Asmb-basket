@@ -35,6 +35,17 @@ export async function seed() {
     await set("clubs/L", { name: "Club L", status: "active", plan: "limite", modulesLimites: { buvette: false } });
     await set("clubs/G", { name: "Club G", status: "active", plan: "standard", aboGelFin: Date.now() + 30 * 86400000 });
     await set("clubs/asmb", { name: "ASMB", status: "active" });
+    // Indépendant (micro-entreprise) : son compte « dirigeant » et deux clients.
+    await set("clubs/I", { name: "KS Training", type: "independant", status: "active", plan: "trial" });
+    await set("users/dirI", { clubId: "I", roles: ["dirigeant"] });
+    await set("users/cliI", { clubId: "I", roles: ["client"] });
+    await set("users/cli2I", { clubId: "I", roles: ["client"] });
+    await set("indep_liens/ABCD-EFGH", { clubId: "I", clubName: "KS Training", actif: true, createdBy: "dirI" });
+    await set("indep_liens/KPQR-STUV", { clubId: "I", clubName: "KS Training", actif: false, createdBy: "dirI" });
+    await set("indep_liens/AAAA-BBBB", { clubId: "A", clubName: "Club A", actif: true, createdBy: "dirA" });
+    await set("clubs/I/indep_clients/cli2I", { prenom: "Nadia", nom: "A", tel: "0612345678" });
+    await set("clubs/I/indep_creneaux/cr1", { titre: "Cross-training", jour: 2, heure: "18:30", places: 12, habitues: ["cliI"], actif: true });
+    await set("clubs/I/indep_resas/cr1_2026-10-20__cli2I", { seance: "cr1_2026-10-20", date: "2026-10-20", uid: "cli2I", statut: "vient", nom: "Nadia A." });
 
     await set("users/dirA", { clubId: "A", roles: ["dirigeant"], phone: "0600000001" });
     await set("users/coachA", { clubId: "A", roles: ["coach"], phone: "0600000002" });
