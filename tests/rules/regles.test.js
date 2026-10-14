@@ -782,7 +782,7 @@ describe("Tournoi : table de marque (code du match)", () => {
   });
 });
 
-describe("Tournoi : résultat publié à la clôture (trn_live)", () => {
+describe("Tournoi : résultat publié en cours et à la clôture (trn_live)", () => {
   const match = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", matchId: "U13|PA1", nomA: "ASMB 1", nomB: "Firminy", sa: 0, sb: 0, statut: "prevu" }, o);
   const live = (o = {}) => Object.assign({ clubId: "A", eventId: "t1", matchId: "U13|PA1", sa: 30, sb: 24, code: "K7P2XR", le: 1 }, o);
   const ID = "trn_live/A__t1__U13|PA1";
@@ -803,6 +803,18 @@ describe("Tournoi : résultat publié à la clôture (trn_live)", () => {
     await assertFails(setDoc(doc(db, ID), live({ code: "ZZZZZZ" })));
     await assertFails(setDoc(doc(db, ID), live({ forfait: "b" })));
     await assertFails(setDoc(doc(db, "trn_live/B__t1__U13|PA1"), live({ clubId: "B" })));
+  });
+  it("score en cours : publié seulement si le match est en cours avec le même score, puis remplacé à la clôture", async () => {
+    const db = await as(null);
+    await assertFails(setDoc(doc(db, ID), live({ sa: 6, sb: 1, statut: "encours" })));
+    await updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 6, sb: 1, statut: "encours" });
+    await assertSucceeds(setDoc(doc(db, ID), live({ sa: 6, sb: 1, statut: "encours" })));
+    await assertFails(setDoc(doc(db, ID), live({ sa: 9, sb: 1, statut: "encours" })));
+    await assertFails(setDoc(doc(db, ID), live({ sa: 6, sb: 1, statut: "termine" })));
+    await assertFails(setDoc(doc(db, ID), live({ sa: 6, sb: 1, statut: "encours", forfait: "a" })));
+    await assertSucceeds(updateDoc(doc(db, "trn_matchs/K7P2XR"), { sa: 30, sb: 24, statut: "termine" }));
+    await assertSucceeds(setDoc(doc(db, ID), live()));
+    await assertFails(setDoc(doc(db, ID), live({ statut: "encours" })));
   });
   it("le staff corrige, déclare un forfait et retire ; un autre club non", async () => {
     await assertSucceeds(setDoc(doc(await as("dirA"), ID), { clubId: "A", eventId: "t1", matchId: "U13|PA1", sa: 20, sb: 0, forfait: "b", le: 2 }));

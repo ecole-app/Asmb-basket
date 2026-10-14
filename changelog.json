@@ -1,5 +1,21 @@
 [
   {
+    "v": "1792004434",
+    "titre": "Tournoi : score en direct sur la page publique",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Tournoi : pendant un match, le score saisi à la table de marque s'affiche tout de suite sur la page publique (« EN COURS »), même si l'écran Jour J n'est pas ouvert. Le résultat final remplace le score en cours à la clôture."
+      }
+    ]
+  },
+  {
     "v": "1791991771",
     "titre": "Communauté : voir les membres d'un canal",
     "points": [

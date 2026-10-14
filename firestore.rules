@@ -389,8 +389,11 @@ service cloud.firestore {
     // la règle vérifie que trn_matchs/{code} est bien clôturé avec le même score
     // (le code ne sert plus à rien une fois le match clôturé). Ainsi les
     // résultats et classements s'affichent même sans l'écran « Jour J » ouvert.
+    // Pendant le match, la table de marque publie aussi le score en cours avec
+    // statut:'encours' : la règle exige alors trn_matchs/{code} en cours, même score.
     match /trn_live/{id} {
-      function liveCles(lid, d) { return d.keys().hasOnly(['clubId','eventId','matchId','sa','sb','forfait','code','le','stats'])
+      function liveCles(lid, d) { return d.keys().hasOnly(['clubId','eventId','matchId','sa','sb','forfait','code','le','stats','statut'])
+        && (!('statut' in d) || d.statut == 'encours')
         && (!('stats' in d) || (d.stats is map && d.stats.size() <= 2))
         && d.clubId is string && d.eventId is string && d.matchId is string
         && lid == d.clubId + '__' + d.eventId + '__' + d.matchId.replace('/', '_')
@@ -398,7 +401,7 @@ service cloud.firestore {
       function liveTable(d) { return d.code is string && d.code.matches('^[A-HJ-NP-Z2-9]{6}$')
         && !('forfait' in d)
         && existsAfter(/databases/$(database)/documents/trn_matchs/$(d.code))
-        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.statut == 'termine'
+        && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.statut == d.get('statut', 'termine')
         && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.clubId == d.clubId
         && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.eventId == d.eventId
         && getAfter(/databases/$(database)/documents/trn_matchs/$(d.code)).data.matchId == d.matchId

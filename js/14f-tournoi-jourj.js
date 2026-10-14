@@ -26,6 +26,12 @@ function trnLiveEcrire(x,sa,sb,extra){
   if(!d.stats&&x.stats&&typeof x.stats==="object") d.stats=x.stats;
   return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId)),d).catch(function(){});
 }
+// Score en cours (sans stats) : la page publique l'affiche « EN COURS » pendant le match, sans l'écran Jour J ouvert.
+function trnLiveEncours(x,sa,sb,code){
+  if(!window.fbSetDoc||!x||!x.matchId) return Promise.resolve();
+  var d={clubId:String(x.clubId),eventId:String(x.eventId),matchId:String(x.matchId),sa:sa,sb:sb,code:String(code),statut:"encours",le:Date.now()};
+  return window.fbSetDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId)),d).catch(function(){});
+}
 function trnLiveRetirer(x){
   if(!window.fbDeleteDoc||!x||!x.matchId) return Promise.resolve();
   return window.fbDeleteDoc(window.fbDoc(window.fbDb,"trn_live",trnLiveId(x.clubId,x.eventId,x.matchId))).catch(function(){});
@@ -490,7 +496,7 @@ function showMarque(code){
       envoi=setTimeout(function(){
         var cle=JSON.stringify([sa,sb,stats]); if(cle===envoye) return;
         window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",k),{sa:sa,sb:sb,stats:stats,statut:"encours",majLe:Date.now()}).then(function(){
-          envoye=cle; m.statut="encours"; var x=document.getElementById("mq-etat"); if(x){ x.style.color="var(--mut)"; x.textContent="Score enregistré ("+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+")."; }
+          envoye=cle; m.statut="encours"; trnLiveEncours(m,sa,sb,k); var x=document.getElementById("mq-etat"); if(x){ x.style.color="var(--mut)"; x.textContent="Score enregistré ("+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+")."; }
         }).catch(function(){ var x=document.getElementById("mq-etat"); if(x){ x.style.color="var(--red)"; x.textContent="Pas de connexion : le score sera renvoyé au prochain point."; } envoye=""; });
       },800);
     }

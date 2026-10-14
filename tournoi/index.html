@@ -298,7 +298,7 @@ var TRN=(function(){
   var D={};
   function calculer(){
     var res=Object.assign({},P.resultats||{}), maj=Number(P.resultatsLe)||0;
-    Object.keys(LIVE).forEach(function(mid){ var l=LIVE[mid]; res[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; if(l.stats) res[mid].stats=l.stats; maj=Math.max(maj,Number(l.le)||0); });
+    Object.keys(LIVE).forEach(function(mid){ var l=LIVE[mid]; res[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:l.statut==="encours"?"encours":"termine",forfait:l.forfait||""}; if(l.stats) res[mid].stats=l.stats; maj=Math.max(maj,Number(l.le)||0); });
     var matchs=(P.matchs||[]).slice().sort(function(a,b){ return (min(a.debut)-min(b.debut))||(a.terrain-b.terrain); });
     var ap=trnAppliquerAbsentes(matchs,P.poules||{},res,P.absentes||[]); res=ap.res;
     var resolus=Object.assign({},P.resolus||{},ap.resolus);
