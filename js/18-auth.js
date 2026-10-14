@@ -314,7 +314,10 @@ function loadClubProfile(clubId){
           var dayKey="gm_trial_remind_"+clubId+"_"+(new Date().toDateString());
           if(!localStorage.getItem(dayKey)){
             localStorage.setItem(dayKey,"1");
+            var indepE=(snap.data().type==="independant");
             setTimeout(function(){
+              if(indepE){ askAlert((je===0?"Ton essai gratuit se termine aujourd'hui.":"Ton essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+".")
+                +" Contacte-nous pour garder l'accès à ton appli. Rien n'est supprimé : tes séances et tes clients sont conservés."); return; }
               askAlert((je===0
                 ? "Votre essai gratuit se termine aujourd'hui. Contactez-nous pour passer en club actif et garder l'accès."
                 : "Votre essai gratuit se termine dans "+je+" jour"+(je===1?"":"s")+". Contactez-nous pour passer en club actif et garder l'accès.")

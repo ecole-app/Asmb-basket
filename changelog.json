@@ -1,5 +1,21 @@
 [
   {
+    "v": "1792014399",
+    "titre": "Documents légaux mis à jour",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Les CGU, les CGV et la politique de confidentialité couvrent aussi la nouvelle version Indépendant (pour les coachs à leur compte). Rien ne change pour votre club."
+      }
+    ]
+  },
+  {
     "v": "1792010058",
     "titre": "Version Indépendant : séances et réservations",
     "points": [

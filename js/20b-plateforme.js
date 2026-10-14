@@ -152,7 +152,7 @@ function showInviteResult(code, role, clubName){
   var s=gmSheet("Invitation créée");
   var info=document.createElement("div");
   info.style.cssText="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:12px";
-  info.textContent="Envoyez ce lien "+(role==="dirigeant"?"au dirigeant":role==="coach"?"au coach":role==="parent"?"au parent":"à la personne")+(clubName?" de "+clubName:"")
+  info.textContent="Envoyez ce lien "+(role==="independant"?"à l'indépendant":role==="dirigeant"?"au dirigeant":role==="coach"?"au coach":role==="parent"?"au parent":"à la personne")+(clubName?(role==="independant"?" (« "+clubName+" »)":" de "+clubName):"")
     +". Il/elle crée son compte en l'ouvrant. Valable 7 jours, utilisable une seule fois.";
   var box=document.createElement("div");
   box.style.cssText="background:var(--card);border:1.5px dashed var(--bdr);border-radius:var(--rs);padding:12px;font-size:12px;word-break:break-all;color:var(--txt);font-family:monospace";
@@ -229,11 +229,36 @@ var DPA_TEXT_HTML=
  +'<p><b>Article 6 — Durée et fin du contrat</b><br>Le présent contrat s\'applique pendant toute la durée d\'utilisation de l\'application par le Club. Il prend fin automatiquement à la suppression du Club sur la plateforme, moment auquel l\'ensemble de ses données est irréversiblement supprimé.</p>'
  +'<p style="text-align:center"><a href="legal/contrat-sous-traitance.html" target="_blank" style="color:var(--dkg);font-weight:700">Version complète (nouvel onglet)</a></p>';
 
+// Version Indépendant (micro-entreprise) du contrat, voir legal/contrat-sous-traitance-independant.html.
+// Modifier l'un doit modifier l'autre.
+var DPA_INDEP_HTML=
+  '<p><b>Entre les soussignés</b><br>Le Responsable du traitement : l\'indépendant identifié dans son espace (nom de l\'activité, titulaire du compte), ci-après « l\'Indépendant ». Le Sous-traitant : Sid-Ahmed HACHEMI, éditeur de l\'application General Manager, ci-après « l\'Éditeur ».</p>'
+ +'<p><b>Article 1 — Objet</b><br>Le présent contrat définit les conditions dans lesquelles l\'Éditeur effectue, pour le compte de l\'Indépendant, les opérations de traitement de données à caractère personnel décrites ci-après, dans le cadre de la fourniture de l\'application General Manager (version Indépendant).</p>'
+ +'<p><b>Article 2 — Description du traitement</b><br>Hébergement, stockage, mise à disposition et sauvegarde des données saisies par l\'Indépendant et ses clients (fiches clients, séances, réservations, présences, notes de l\'Indépendant). Catégories de données : identité, date de naissance, téléphone et e-mail des clients, informations facultatives qu\'un client choisit de communiquer (blessure, objectif), réservations et présences, notes de l\'Indépendant. Personnes concernées : clients de l\'Indépendant (personnes majeures) et l\'Indépendant. Durée : pendant toute la durée d\'utilisation de l\'application par l\'Indépendant.</p>'
+ +'<p><b>Article 3 — Obligations de l\'Éditeur</b></p>'
+ +'<ul style="margin:0 0 10px;padding-left:18px">'
+ +'<li>traiter les données uniquement sur instruction documentée de l\'Indépendant, et pour les seules finalités du présent contrat ;</li>'
+ +'<li>garantir la confidentialité des données : aucun accès aux données de l\'Indépendant, sauf code d\'accès support temporaire (48h, lecture seule, révocable) qu\'il génère et communique lui-même ;</li>'
+ +'<li>mettre en œuvre des mesures de sécurité adaptées (cloisonnement strict entre utilisateurs de la plateforme, chaque client ne voit que sa fiche, notes de l\'Indépendant jamais visibles des clients, comptes clients créés uniquement avec le lien de l\'Indépendant) ;</li>'
+ +'<li>ne recourir à un sous-traitant ultérieur que dans les conditions de l\'article 4 ;</li>'
+ +'<li>notifier l\'Indépendant dans les meilleurs délais après avoir pris connaissance d\'une violation de données le concernant ;</li>'
+ +'<li>assister l\'Indépendant pour répondre aux demandes d\'exercice des droits des personnes concernées et pour ses obligations envers la CNIL ;</li>'
+ +'<li>supprimer ou restituer, au choix de l\'Indépendant, l\'intégralité des données à la fin de la relation contractuelle, sauf obligation légale de conservation.</li>'
+ +'</ul>'
+ +'<p><b>Article 4 — Sous-traitants ultérieurs</b><br>L\'Indépendant autorise de façon générale l\'Éditeur à recourir à Google Ireland Limited (Firebase — hébergement base de données et comptes) et GitHub, Inc. (hébergement du code). L\'Éditeur informera l\'Indépendant de tout changement, permettant à l\'Indépendant de s\'y opposer.</p>'
+ +'<p><b>Article 5 — Obligations de l\'Indépendant</b><br>Fournir des instructions licites et documentées ; ne collecter que les données nécessaires à son activité et ne partager son lien d\'invitation qu\'avec ses clients ; répondre lui-même, en tant que responsable du traitement, aux demandes d\'exercice de droits de ses clients ; informer ses clients de cette répartition des responsabilités.</p>'
+ +'<p><b>Article 6 — Durée et fin du contrat</b><br>Le présent contrat s\'applique pendant toute la durée d\'utilisation de l\'application par l\'Indépendant. Il prend fin automatiquement à la suppression de son espace sur la plateforme, moment auquel l\'ensemble de ses données est irréversiblement supprimé.</p>'
+ +'<p style="text-align:center"><a href="legal/contrat-sous-traitance-independant.html" target="_blank" style="color:var(--dkg);font-weight:700">Version complète (nouvel onglet)</a></p>';
+// Invitation du titulaire d'un espace Indépendant (posé par la Plateforme sur l'invitation).
+function inviteIndep(inv){ return !!(inv && inv.structure==="independant"); }
+function inviteRoleLbl(inv){ return inviteIndep(inv)?"Indépendant":(inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach")); }
+
 function renderInviteDirigeantContrat(el, code, inv){
-  el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"),"Dirigeant")
+  var indep=inviteIndep(inv);
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")),indep?"Indépendant":"Dirigeant")
     +'<div style="padding:16px 18px 22px;display:flex;flex-direction:column;flex:1">'
-    +'<p style="font-size:12.5px;color:var(--txt2);text-align:center;line-height:1.4;margin-bottom:10px">En activant '+authEsc(inv.clubName||"ce club")+', vous acceptez le contrat de sous-traitance RGPD ci-dessous. Faites défiler jusqu\'au bout pour continuer.</p>'
-    +'<div id="dpa-scroll" style="max-height:50vh;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+DPA_TEXT_HTML+'</div>'
+    +'<p style="font-size:12.5px;color:var(--txt2);text-align:center;line-height:1.4;margin-bottom:10px">En activant '+authEsc(inv.clubName||(indep?"votre espace":"ce club"))+', vous acceptez le contrat de sous-traitance RGPD ci-dessous. Faites défiler jusqu\'au bout pour continuer.</p>'
+    +'<div id="dpa-scroll" style="max-height:50vh;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+(indep?DPA_INDEP_HTML:DPA_TEXT_HTML)+'</div>'
     +'<button id="dpa-accept-btn" disabled style="'+AUTH_BTN+';opacity:.4;cursor:not-allowed">Continuer (lisez jusqu\'en bas)</button>'
     +'</div>';
   var box=document.getElementById("dpa-scroll");
@@ -259,10 +284,12 @@ function renderInviteForm(el, code, inv){
 }
 
 function renderInviteCompteForm(el, code, inv){
-  var roleLbl=inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach");
-  el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"), roleLbl)
+  var roleLbl=inviteRoleLbl(inv), indep=inviteIndep(inv);
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Vous êtes invité(e) comme <b>'+roleLbl.toLowerCase()+'</b>. Créez votre compte pour accéder au club.</p>'
+    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">'
+    +(indep?'Votre espace <b>Indépendant</b> est prêt. Créez votre compte pour gérer vos séances et vos clients.'
+           :'Vous êtes invité(e) comme <b>'+roleLbl.toLowerCase()+'</b>. Créez votre compte pour accéder au club.')+'</p>'
     +'<label style="'+AUTH_LBL+'">E-mail</label>'
     +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="mail@gmail.com">'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
@@ -277,10 +304,11 @@ function renderInviteCompteForm(el, code, inv){
 }
 // Compte déjà existant (même e-mail) : on se connecte, et l'accès de l'invitation s'ajoute à ce compte.
 function renderInviteExistant(el, code, inv, email){
-  var roleLbl=inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach");
-  el.innerHTML=authHero(authEsc(inv.clubName||"Votre club"), roleLbl)
+  var roleLbl=inviteRoleLbl(inv), indep=inviteIndep(inv);
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
-    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Connectez-vous avec votre compte : l\'accès <b>'+roleLbl.toLowerCase()+'</b> de '+authEsc(inv.clubName||"ce club")+' s\'ajoutera à votre compte.</p>'
+    +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Connectez-vous avec votre compte : '
+    +(indep?'l\'espace Indépendant '+authEsc(inv.clubName||"")+' s\'ajoutera à votre compte.':'l\'accès <b>'+roleLbl.toLowerCase()+'</b> de '+authEsc(inv.clubName||"ce club")+' s\'ajoutera à votre compte.')+'</p>'
     +'<label style="'+AUTH_LBL+'">E-mail</label>'
     +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(email||"")+'" placeholder="mail@gmail.com">'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
@@ -336,7 +364,7 @@ function acceptInviteExistant(code, inv){
   }).catch(function(e){
     var c=e&&e.code||"";
     if(btn){ btn.disabled=false; btn.textContent="Me connecter et rejoindre"; }
-    if(c==="autre-club"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr("Ce compte est déjà rattaché à un autre club. Un compte ne peut appartenir qu'à un club : utilisez une autre adresse e-mail."); }
+    if(c==="autre-club"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr(inviteIndep(inv)?"Ce compte est déjà rattaché à un club ou à une autre activité. Utilisez une autre adresse e-mail.":"Ce compte est déjà rattaché à un autre club. Un compte ne peut appartenir qu'à un club : utilisez une autre adresse e-mail."); }
     else if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-login-credentials") authErr("E-mail ou mot de passe incorrect.");
     else if(c==="auth/too-many-requests") authErr("Trop d'essais. Réessayez dans quelques minutes, ou utilisez « Mot de passe oublié ».");
     else if(c==="permission-denied") authErr("Invitation déjà utilisée ou expirée.");
@@ -573,8 +601,9 @@ function renderClubCard(c, list){
   if(own){
     row.appendChild(gmBtn("Entrer dans le club","primary",function(){ enterOwnClub(c); }));
   }
-  row.appendChild(gmBtn("Inviter un dirigeant",own?"soft":"primary",function(){
-    createClubInvite(c.id, c.name, "dirigeant").then(function(code){ showInviteResult(code,"dirigeant",c.name); })
+  var indepC=(c.type==="independant");
+  row.appendChild(gmBtn(indepC?"Inviter l'indépendant":"Inviter un dirigeant",own?"soft":"primary",function(){
+    createClubInvite(c.id, c.name, "dirigeant", null, indepC?{structure:"independant"}:null).then(function(code){ showInviteResult(code,indepC?"independant":"dirigeant",c.name); })
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
   if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }

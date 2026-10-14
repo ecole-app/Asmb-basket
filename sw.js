@@ -119,7 +119,8 @@ const PRECACHE = [
   './legal/confidentialite.html',
   './legal/cgu.html',
   './legal/cgv.html',
-  './legal/contrat-sous-traitance.html'
+  './legal/contrat-sous-traitance.html',
+  './legal/contrat-sous-traitance-independant.html'
 ];
 
 self.addEventListener('install', function (event) {

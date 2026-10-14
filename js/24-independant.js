@@ -771,8 +771,8 @@ async function createIndepFlow(list){
   name=name.trim();
   try{
     var id=await creerClub(name, sport, {type:"independant", couleur:IND_COULEUR.toLowerCase()});
-    var code=await createClubInvite(id, name, "dirigeant");
+    var code=await createClubInvite(id, name, "dirigeant", null, {structure:"independant"});
     loadClubsList(list);
-    showInviteResult(code,"dirigeant",name);
+    showInviteResult(code,"independant",name);
   }catch(e){ askAlert("Erreur lors de la création : "+((e&&e.code)||e)); }
 }
