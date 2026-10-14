@@ -208,7 +208,7 @@ function askComptaVerrouillee(){
     });
 }
 function askPremiumRequis(fonction){
-  askAlert("« "+fonction+" » fait partie du Pack Premium (300 €/an). Vos données sont conservées. Contactez-nous pour passer en Premium.");
+  askAlert("« "+fonction+" » fait partie du Pack Premium ("+(typeof prixPremium==="function"?prixPremium():"300\u00a0€/an")+"). Vos données sont conservées. Contactez-nous pour passer en Premium.");
 }
 function hasModulePermission(id){
   if(!window.ASMB_USER) return false;

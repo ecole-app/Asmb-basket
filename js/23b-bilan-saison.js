@@ -85,6 +85,7 @@ function bilanCalcul(saison){
 }
 // Participants : billets comptés sur la page publique (stage, soirée…) ou équipes (tournoi).
 function bilanParticipants(evts){
+  if(typeof hasPremium==="function"&&!hasPremium()) return Promise.resolve(evts.map(function(){ return ""; }));
   return Promise.all(evts.map(function(e){
     if(e.type==="tournoi"){ var n=((e.trn&&e.trn.equipes)||[]).length; return Promise.resolve(n?n+" équipe"+(n>1?"s":""):""); }
     if(!window.fbGetDoc||!window.fbDb||typeof evtPageId!=="function") return Promise.resolve("");

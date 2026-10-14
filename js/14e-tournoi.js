@@ -190,6 +190,20 @@ function trnSauver(eid,maj,sansModif){
 }
 function trnNom(cfg,id){ var q=cfg.equipes.filter(function(x){ return x.id===id; })[0]; return q?q.nom:"?"; }
 
+// Pack Standard : le jour J (table de marque, scores en direct, grand écran, absences) est Premium.
+function trnJourJPremium(zone){
+  var d=document.createElement("div");
+  d.style.cssText="background:color-mix(in srgb, #b7791f 10%, var(--card));border:1.5px solid #b7791f;border-radius:var(--rs);padding:16px";
+  d.innerHTML='<div style="font-size:16px;font-weight:900;color:var(--txt)">🔒 Le jour J du tournoi est dans le Pack Premium</div>'+
+    '<ul style="margin:10px 0 0 18px;font-size:13px;color:var(--txt2);line-height:1.6">'+
+    '<li>Codes de table de marque : chaque match saisi sur un téléphone</li>'+
+    '<li>Scores et classements en direct sur la page du tournoi</li>'+
+    '<li>Mode grand écran pour la télé du gymnase</li>'+
+    '<li>Appel des équipes et forfaits automatiques</li></ul>'+
+    '<div style="font-size:12px;color:var(--mut);margin-top:10px">Vos équipes, poules et planning restent disponibles en Standard (onglets précédents et page publique).</div>';
+  zone.appendChild(d);
+  gmRow(zone).appendChild(gmBtn("Passer en Premium","primary",function(){ askPremiumRequis("Jour J du tournoi"); }));
+}
 function trnOuvrir(eid){
   var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
   var s=gmSheet("Tournoi · "+(e.titre||"Tournoi")), b=s.body;
@@ -200,7 +214,7 @@ function trnOuvrir(eid){
     var c=cfg();
     zone.innerHTML="";
     var tabs=document.createElement("div"); tabs.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px";
-    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")],["jourj","Jour J"]].forEach(function(o){
+    [["equipes","Équipes ("+c.equipes.length+")"],["format","Journée et format"],["planning","Planning"+(c.matchs.length?" ("+c.matchs.length+")":"")],["jourj","Jour J"+((typeof hasPremium==="function"&&!hasPremium())?" 🔒":"")]].forEach(function(o){
       var t=document.createElement("button"); t.type="button"; t.className="cat-filter"+(onglet===o[0]?" on":""); t.textContent=o[1];
       t.addEventListener("click",function(){ onglet=o[0]; rendre(); }); tabs.appendChild(t);
     });
@@ -215,7 +229,7 @@ function trnOuvrir(eid){
       w.textContent="Équipes ou réglages modifiés depuis le dernier planning : pensez à le générer de nouveau.";
       zone.appendChild(w);
     }
-    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof trnJourJ==="function") trnJourJ(zone,eid,rendre); } else rendrePlanning(c);
+    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof hasPremium==="function"&&!hasPremium()) trnJourJPremium(zone); else if(typeof trnJourJ==="function") trnJourJ(zone,eid,rendre); } else rendrePlanning(c);
   }
   function champ(lab,el){ var g=document.createElement("div"); g.className="form-group"; var l=document.createElement("label"); l.className="form-label"; l.textContent=lab; g.appendChild(l); g.appendChild(el); return g; }
   function rendreEquipes(c){
@@ -478,7 +492,7 @@ function trnPublier(eid){
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
     terrains:c.terrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
-    inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
+    jourJ:(typeof hasPremium!=='function'||hasPremium()), inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
     majLe:Date.now()
   };

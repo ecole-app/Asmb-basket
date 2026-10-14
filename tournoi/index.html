@@ -431,6 +431,7 @@ var TRN=(function(){
   function rendre(){
     if(!P) return;
     calculer(); teinte(); entete();
+    document.getElementById("tv-open").hidden=P.jourJ===false;
     document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on",b.dataset.tab===tab); b.setAttribute("aria-selected",b.dataset.tab===tab); });
     var app=document.getElementById("app"), y=window.scrollY;
     app.innerHTML=(tab==="classements"?vueClassements():tab==="equipe"?vueEquipe():vueMatchs())+
@@ -509,7 +510,7 @@ var TRN=(function(){
   return {
     horloge:null,
     init:function(pid){ PID=pid; tab=ls("gm_trn_tab")||"matchs"; if(tab==="equipe"&&!ls("gm_trn_fav_"+pid)) tab="matchs"; },
-    donnees:function(page,live){ var premier=!P; P=page; if(live) LIVE=live; rendre(); if(premier&&location.hash==="#ecran") tvOuvrir(); },
+    donnees:function(page,live){ var premier=!P; P=page; if(live) LIVE=live; rendre(); if(premier&&location.hash==="#ecran"&&P.jourJ!==false) tvOuvrir(); },
     live:function(live){ LIVE=live||{}; rendre(); },
     erreur:function(msg){ document.getElementById("app").innerHTML='<div class="load">'+esc(msg)+'</div>'; }
   };

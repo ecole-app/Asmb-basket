@@ -17,6 +17,11 @@ var EVT_TYPES_INSCR=["stage","soiree","formation","autre"];
 // Affiche : tous les événements sauf matchs et entraînements.
 var EVT_TYPES_AFFICHE=["stage","tournoi","soiree","formation","autre"];
 // Soirée : réservation par famille (adultes, enfants…), un seul billet pour la réservation.
+// Standard / Premium (événements) : en Standard, 2 tarifs au plus, pas de jours au choix,
+// pas de HelloAsso ni de suivi « payé » (donc pas d'écriture en compta). Ce qui existe déjà
+// est conservé et continue de marcher sur la page publique.
+function evtPrem(){ return typeof hasPremium!=="function"||hasPremium(); }
+var EVT_TARIFS_STANDARD=2;
 function evtResa(x){ return !!x&&(x.resa===true||x.type==="soiree"); }
 var EVT_RESA_MAX=20;
 var EVT_MODES={especes:"Espèces",cheque:"Chèque",cb:"CB sur place",helloasso:"HelloAsso"};
@@ -163,13 +168,15 @@ function evtConfigurer(eid){
   var jr=resa?[]:evtJoursPlage(e.date,e.dateFin), parJour=!!(i.parJour&&jr.length>1);
   var lj=document.createElement("label");
   lj.style.cssText="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--card);cursor:"+(jr.length>1?"pointer":"default")+(jr.length>1?"":";opacity:.7");
-  var cbJ=document.createElement("input"); cbJ.type="checkbox"; cbJ.checked=parJour; cbJ.disabled=jr.length<2; cbJ.style.cssText="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0;margin-top:1px";
+  var prem=evtPrem(), jLock=!prem&&!parJour;
+  var cbJ=document.createElement("input"); cbJ.type="checkbox"; cbJ.checked=parJour; cbJ.disabled=jr.length<2||jLock; cbJ.style.cssText="width:20px;height:20px;accent-color:var(--dkg);flex-shrink:0;margin-top:1px";
   var tj=document.createElement("div");
-  tj.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">Les familles choisissent leurs jours</div>'+
+  tj.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">Les familles choisissent leurs jours'+(jLock?' <span style="font-size:11px;color:#b7791f">🔒 Premium</span>':'')+'</div>'+
     '<div style="font-size:12px;color:var(--mut);line-height:1.4;margin-top:2px">'+(jr.length>1
       ? authEsc("Du "+evtJourTxt(jr[0])+" au "+evtJourTxt(jr[jr.length-1])+" ("+jr.length+" jours) : chacun coche les jours qui l'intéressent, ou prend tous les jours. Le tarif devient « par jour », avec un forfait facultatif pour tous les jours.")
       : "Pour proposer plusieurs jours, mettez une date de fin à l'événement (« du … au … »), puis revenez ici.")+'</div>';
   lj.appendChild(cbJ); lj.appendChild(tj); if(!resa) s.body.appendChild(lj);
+  if(jLock&&jr.length>1) lj.addEventListener("click",function(ev){ ev.preventDefault(); askPremiumRequis("Inscription jour par jour"); });
   cbJ.addEventListener("change",function(){ parJour=cbJ.checked; peindreTarifs(); iP.placeholder=parJour?"Places par jour (vide = illimité)":"Places (vide = illimité)"; });
   gmSection(s.body,"Tarifs",resa?"Prix par personne (4 tarifs au plus) : la famille choisit combien de places de chaque tarif. « Gratuit » possible.":"Prix différents pour les licenciés du club et les extérieurs, ou « Gratuit ». Avec le choix des jours, le prix est par jour.");
   var tBox=document.createElement("div"); s.body.appendChild(tBox);
@@ -203,9 +210,10 @@ function evtConfigurer(eid){
       tBox.appendChild(r);
     });
     if(tarifs.length<(resa?4:6)){
-      var add=document.createElement("button"); add.type="button"; add.textContent="+ Ajouter un tarif";
-      add.style.cssText="border:none;background:none;color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;padding:4px 0";
-      add.addEventListener("click",function(){ tarifs.push({nom:"",prix:"",pour:"tous"}); peindreTarifs(); majModes(); });
+      var tLock=!prem&&tarifs.length>=EVT_TARIFS_STANDARD;
+      var add=document.createElement("button"); add.type="button"; add.textContent="+ Ajouter un tarif"+(tLock?" 🔒 Premium":"");
+      add.style.cssText="border:none;background:none;color:"+(tLock?"#b7791f":"var(--dkg)")+";font-size:12px;font-weight:700;cursor:pointer;padding:4px 0";
+      add.addEventListener("click",function(){ if(tLock) return askPremiumRequis("Plus de "+EVT_TARIFS_STANDARD+" tarifs"); tarifs.push({nom:"",prix:"",pour:"tous"}); peindreTarifs(); majModes(); });
       tBox.appendChild(add);
     }
   }
@@ -219,7 +227,9 @@ function evtConfigurer(eid){
   Object.keys(EVT_MODES).forEach(function(k){
     var l=document.createElement("label"); l.style.cssText="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--txt);padding:6px 10px;border:1px solid var(--bdr);border-radius:20px;cursor:pointer";
     var c=document.createElement("input"); c.type="checkbox"; c.checked=modes.indexOf(k)>=0; c.style.accentColor="var(--dkg)";
-    l.appendChild(c); l.appendChild(document.createTextNode(EVT_MODES[k])); mBox.appendChild(l); mCbs[k]=c;
+    var verrou=k==="helloasso"&&!prem&&!c.checked;
+    l.appendChild(c); l.appendChild(document.createTextNode(EVT_MODES[k]+(verrou?" 🔒":""))); mBox.appendChild(l); mCbs[k]=c;
+    if(verrou){ c.disabled=true; l.style.opacity=".75"; l.addEventListener("click",function(ev){ ev.preventDefault(); askPremiumRequis("Paiement HelloAsso"); }); }
   });
   paySec.appendChild(mBox);
   var ha=document.createElement("input"); ha.className="form-input"; ha.type="url"; ha.maxLength=300;
@@ -327,7 +337,7 @@ function evtTableau(eid){
       head.innerHTML=
         '<div style="display:flex;gap:8px;margin-bottom:10px">'+
           (resa?evtStat(pers+(places?" / "+places:""),"personne"+(pers>1?"s":"")+" · "+actifs.length+" résa"):evtStat(actifs.length+(places?" / "+places:""),"inscrit"+(actifs.length>1?"s":"")))+
-          evtStat(evtPrix(encaisse),"encaissé"+(attendu>encaisse?" sur "+evtPrix(attendu):""))+
+          (evtPrem()?evtStat(evtPrix(encaisse),"encaissé"+(attendu>encaisse?" sur "+evtPrix(attendu):"")):evtStat(evtPrix(attendu),"attendus"))+
           evtStat(actifs.filter(function(x){return x.present;}).length,"présent"+(actifs.filter(function(x){return x.present;}).length>1?"s":""))+
         '</div>'+
         '<div style="font-size:12px;color:var(--mut);margin-bottom:4px">'+authEsc(evtDateTxt(e))+(e.lieu?" · "+authEsc(e.lieu):"")+
@@ -439,13 +449,14 @@ function evtListe(list, items, e, page, repeindre){
       else if(x.playerId) pill("Licencié ✓","var(--ltg)");
       else if(evtEstLicTarif(x,page)) pill("À vérifier","#E8670A");
       else pill("Extérieur","var(--bdr)","var(--txt2)");
-      if(Number(x.montant)>0) pill(x.paye?"Payé":"À payer",x.paye?"var(--grn)":"rgba(192,57,43,.12)",x.paye?"#fff":"var(--red)");
+      if(Number(x.montant)>0){ if(evtPrem()||x.paye) pill(x.paye?"Payé":"À payer",x.paye?"var(--grn)":"rgba(192,57,43,.12)",x.paye?"#fff":"var(--red)"); }
       else pill("Gratuit","var(--bdr)","var(--txt2)");
     }
     h.appendChild(g); h.appendChild(pills); card.appendChild(h);
     if(x.statut!=="annule"){
       var r=gmRow(card);
       if(!(Number(x.montant)>0)){}
+      else if(!x.paye&&!evtPrem()) r.appendChild(gmBtn("🔒 Paiement reçu","ghost",function(){ askPremiumRequis("Suivi des paiements et écriture en compta"); }));
       else if(!x.paye) r.appendChild(gmBtn("Paiement reçu","primary",function(b){ b.disabled=true; evtMarquerPaye(x,e,true).then(repeindre).catch(function(err){ b.disabled=false; askAlert("Erreur : "+((err&&err.code)||err)); }); }));
       else r.appendChild(gmBtn("Annuler le paiement","ghost",function(b){ b.disabled=true; evtMarquerPaye(x,e,false).then(repeindre).catch(function(){ b.disabled=false; }); }));
       if(!x.playerId && evtEstLicTarif(x,page)) r.appendChild(gmBtn("Relier","soft",function(){ evtRelier(x, repeindre); }));

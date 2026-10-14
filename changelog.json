@@ -1,5 +1,23 @@
 [
   {
+    "v": "1791948531",
+    "titre": "Événements : Standard et Premium",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Pack Standard : création d'événements, affiche, inscriptions et réservations avec billet QR, entrée, bénévoles, planning des tournois et page publique."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Pack Premium : jour J des tournois (table de marque, scores en direct, grand écran, absences), paiement HelloAsso et suivi « payé » avec écriture en compta, plus de 2 tarifs, inscription jour par jour, participants dans le bilan de saison."
+      }
+    ]
+  },
+  {
     "v": "1791947505",
     "titre": "Tournoi : équipes absentes",
     "points": [
