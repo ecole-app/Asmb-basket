@@ -1,5 +1,21 @@
 [
   {
+    "v": "1792004806",
+    "titre": "Tournoi : grand écran clair ou sombre",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Tournoi : le grand écran peut passer en mode clair ou sombre avec le bouton en haut à droite. Le choix est gardé sur l'appareil (sombre par défaut)."
+      }
+    ]
+  },
+  {
     "v": "1792004434",
     "titre": "Tournoi : score en direct sur la page publique",
     "points": [

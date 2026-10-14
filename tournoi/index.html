@@ -136,40 +136,42 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 .trn-pin.on{outline:3px solid var(--live);outline-offset:2px}
 
 /* ── Grand écran (télé / vidéoprojecteur) : tableau d'affichage, toujours sombre ── */
-.tv{position:fixed;inset:0;z-index:50;background:#07090E;color:#F4F5F8;display:grid;grid-template-rows:auto 1fr auto;padding:2.2vh 2.4vw;gap:2vh;font-family:var(--f-body);overflow:hidden}
+.tv{--tv-bg:#07090E;--tv-ink:#F4F5F8;--tv-card:#121722;--tv-mut:#8E96AB;--tv-acc:#FFB070;--tv-ok:#7BD69B;--tv-line:#222939;--tv-edge:#2A3142;--tv-btn:#1B2130;--tv-btn-ink:#AEB4C3;--tv-score:#FFFFFF;--tv-bright:brightness(1.6);
+  position:fixed;inset:0;z-index:50;background:var(--tv-bg);color:var(--tv-ink);display:grid;grid-template-rows:auto 1fr auto;padding:2.2vh 2.4vw;gap:2vh;font-family:var(--f-body);overflow:hidden}
 .tv[hidden]{display:none}
+.tv.clair{--tv-bg:#F3F4F7;--tv-ink:#141824;--tv-card:#FFFFFF;--tv-mut:#5C6479;--tv-acc:#B4540A;--tv-ok:#1F7A45;--tv-line:#E1E4EB;--tv-edge:#CBD1DD;--tv-btn:#E3E6ED;--tv-btn-ink:#3C4357;--tv-score:#141824;--tv-bright:none}
 .tv-top{display:flex;align-items:center;gap:1.4vw}
 .tv-top .logo{width:6vh;height:6vh;border-radius:1.2vh;font-size:2.6vh;background:var(--club);color:var(--club-ink)}
 .tv-t{font-family:var(--f-disp);font-weight:800;font-size:4.4vh;text-transform:uppercase;line-height:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.tv-c{margin-left:auto;font-family:var(--f-disp);font-weight:700;font-size:5.4vh;color:#FFB070;font-variant-numeric:tabular-nums}
-.tv-x{background:#1B2130;border:none;color:#AEB4C3;font-size:2vh;font-weight:700;border-radius:999px;padding:1vh 1.6vh}
+.tv-c{margin-left:auto;font-family:var(--f-disp);font-weight:700;font-size:5.4vh;color:var(--tv-acc);font-variant-numeric:tabular-nums}
+.tv-x{background:var(--tv-btn);border:none;color:var(--tv-btn-ink);font-size:2vh;font-weight:700;border-radius:999px;padding:1vh 1.6vh}
 .tv-main{display:grid;grid-template-columns:1.35fr 1fr;gap:2vw;min-height:0}
 .tv-col{display:flex;flex-direction:column;gap:1.4vh;min-height:0}
-.tv-h{font-family:var(--f-disp);font-weight:800;font-size:2.6vh;letter-spacing:.3vh;text-transform:uppercase;color:#8E96AB}
+.tv-h{font-family:var(--f-disp);font-weight:800;font-size:2.6vh;letter-spacing:.3vh;text-transform:uppercase;color:var(--tv-mut)}
 .tv-courts{display:grid;gap:1.4vh;grid-auto-rows:1fr;flex:1;min-height:0}
-.court{background:#121722;border-radius:1.6vh;padding:1.6vh 2vh;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;column-gap:2vh;min-height:0;border-left:.8vh solid #2A3142}
+.court{background:var(--tv-card);border-radius:1.6vh;padding:1.6vh 2vh;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;column-gap:2vh;min-height:0;border-left:.8vh solid var(--tv-edge)}
 .court.live{border-left-color:var(--live)}
-.court .ct{grid-column:1/3;font-size:1.9vh;font-weight:700;color:#8E96AB;text-transform:uppercase;letter-spacing:.2vh;display:flex;gap:1vh;align-items:center}
+.court .ct{grid-column:1/3;font-size:1.9vh;font-weight:700;color:var(--tv-mut);text-transform:uppercase;letter-spacing:.2vh;display:flex;gap:1vh;align-items:center}
 .court .tm{display:flex;flex-direction:column;justify-content:center;gap:.6vh;min-width:0}
 .court .tm div{font-family:var(--f-disp);font-weight:700;font-size:4.6vh;line-height:1.05;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .court .sc{display:flex;flex-direction:column;justify-content:center;gap:.6vh;text-align:right}
-.court .sc div{font-family:var(--f-disp);font-weight:800;font-size:6vh;line-height:1.05;color:#FFFFFF;font-variant-numeric:tabular-nums}
-.court .wait{font-size:2.2vh;color:#8E96AB;align-self:center}
+.court .sc div{font-family:var(--f-disp);font-weight:800;font-size:6vh;line-height:1.05;color:var(--tv-score);font-variant-numeric:tabular-nums}
+.court .wait{font-size:2.2vh;color:var(--tv-mut);align-self:center}
 .tv-list{display:flex;flex-direction:column;gap:.9vh}
-.tv-r{display:grid;grid-template-columns:9vh 1fr;gap:1.4vh;align-items:center;background:#121722;border-radius:1.2vh;padding:1.1vh 1.6vh}
-.tv-r .h{font-family:var(--f-disp);font-weight:800;font-size:3.4vh;color:#FFB070;font-variant-numeric:tabular-nums}
+.tv-r{display:grid;grid-template-columns:9vh 1fr;gap:1.4vh;align-items:center;background:var(--tv-card);border-radius:1.2vh;padding:1.1vh 1.6vh}
+.tv-r .h{font-family:var(--f-disp);font-weight:800;font-size:3.4vh;color:var(--tv-acc);font-variant-numeric:tabular-nums}
 .tv-r .v{font-size:2.5vh;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tv-r .v small{display:block;font-size:1.7vh;color:#8E96AB;font-weight:600}
+.tv-r .v small{display:block;font-size:1.7vh;color:var(--tv-mut);font-weight:600}
 .tv-r .v .s{font-family:var(--f-disp);font-weight:800;font-size:2.9vh}
-.tv-std{background:#121722;border-radius:1.6vh;padding:1.6vh 2vh;flex:1;min-height:0;overflow:hidden}
+.tv-std{background:var(--tv-card);border-radius:1.6vh;padding:1.6vh 2vh;flex:1;min-height:0;overflow:hidden}
 .tv-std table{width:100%;border-collapse:collapse}
-.tv-std th{font-size:1.6vh;color:#8E96AB;text-transform:uppercase;font-weight:700;text-align:center;padding:.4vh}
+.tv-std th{font-size:1.6vh;color:var(--tv-mut);text-transform:uppercase;font-weight:700;text-align:center;padding:.4vh}
 .tv-std th:first-child{text-align:left}
-.tv-std td{font-size:2.5vh;padding:.7vh .4vh;border-top:1px solid #222939;text-align:center;font-variant-numeric:tabular-nums}
+.tv-std td{font-size:2.5vh;padding:.7vh .4vh;border-top:1px solid var(--tv-line);text-align:center;font-variant-numeric:tabular-nums}
 .tv-std td:first-child{text-align:left;font-weight:700}
-.tv-std td.p{font-family:var(--f-disp);font-weight:800;font-size:3vh;color:#FFB070}
-.tv-bar{height:.6vh;background:#1B2130;border-radius:999px;overflow:hidden}
-.tv-bar i{display:block;height:100%;width:0;background:var(--club);filter:brightness(1.6)}
+.tv-std td.p{font-family:var(--f-disp);font-weight:800;font-size:3vh;color:var(--tv-acc)}
+.tv-bar{height:.6vh;background:var(--tv-btn);border-radius:999px;overflow:hidden}
+.tv-bar i{display:block;height:100%;width:0;background:var(--club);filter:var(--tv-bright)}
 @media (max-aspect-ratio: 1/1){ .tv-main{grid-template-columns:1fr} .tv-col.side{display:none} }
 @media (prefers-reduced-motion: reduce){ .dot{animation:none} .tv-bar i{transition:none!important} }
 </style>
@@ -192,7 +194,7 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 <main class="wrap" id="app"><div class="load">Chargement du tournoi…</div></main>
 
 <section class="tv" id="tv" hidden aria-label="Grand écran">
-  <div class="tv-top"><div class="logo" id="tv-logo"></div><div class="tv-t" id="tv-titre"></div><div class="tv-c num" id="tv-clock"></div><button class="tv-x" id="tv-close" type="button">Quitter</button></div>
+  <div class="tv-top"><div class="logo" id="tv-logo"></div><div class="tv-t" id="tv-titre"></div><div class="tv-c num" id="tv-clock"></div><button class="tv-x" id="tv-theme" type="button">Mode clair</button><button class="tv-x" id="tv-close" type="button">Quitter</button></div>
   <div class="tv-main">
     <div class="tv-col"><div class="tv-h">Sur les terrains</div><div class="tv-courts" id="tv-courts"></div></div>
     <div class="tv-col side"><div class="tv-h">À suivre</div><div class="tv-list" id="tv-next"></div><div class="tv-h" id="tv-std-h" style="margin-top:1vh"></div><div class="tv-std" id="tv-std"></div></div>
@@ -557,14 +559,14 @@ var TRN=(function(){
       var sc=cur&&r&&r.statut==="encours";
       h+='<div class="court'+(cur?" live":"")+'"><div class="ct">'+esc(terTxt(t))+' · '+esc(m.cat)+' · '+esc(m.label)+(cur?' <span class="pill live">EN COURS</span>':' · à '+esc(m.debut))+'</div>'+
         '<div class="tm"><div>'+esc(nomEq(m,"a")||refTxt(m.aRef))+'</div><div>'+esc(nomEq(m,"b")||refTxt(m.bRef))+'</div></div>'+
-        '<div class="sc">'+(sc?'<div>'+esc(r.sa)+'</div><div>'+esc(r.sb)+'</div>':(cur?'<div style="font-size:3vh;color:#FFB070">⏱</div>':''))+'</div></div>';
+        '<div class="sc">'+(sc?'<div>'+esc(r.sa)+'</div><div>'+esc(r.sb)+'</div>':(cur?'<div style="font-size:3vh;color:var(--tv-acc)">⏱</div>':''))+'</div></div>';
     }
     document.getElementById("tv-courts").innerHTML=h;
     var suite=D.matchs.filter(function(m){ return statut(m)==="avenir"&&!affiches[m.id]; }).slice(0,4);
     var derniers=D.matchs.filter(function(m){ return statut(m)==="fin"; }).slice(-3).reverse();
     document.getElementById("tv-next").innerHTML=(suite.length?suite.map(function(m){
       return '<div class="tv-r"><div class="h">'+esc(m.debut)+'</div><div class="v">'+esc(nomEq(m,"a")||refTxt(m.aRef))+' – '+esc(nomEq(m,"b")||refTxt(m.bRef))+'<small>'+esc(terTxt(m.terrain))+' · '+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join(""):"")+
-      derniers.map(function(m){ var r=D.res[m.id]; return '<div class="tv-r" style="opacity:.75"><div class="h" style="color:#7BD69B;font-size:2.4vh">FINI</div><div class="v">'+esc(nomEq(m,"a"))+' <span class="s">'+r.sa+' – '+r.sb+'</span> '+esc(nomEq(m,"b"))+'<small>'+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join("");
+      derniers.map(function(m){ var r=D.res[m.id]; return '<div class="tv-r" style="opacity:.75"><div class="h" style="color:var(--tv-ok);font-size:2.4vh">FINI</div><div class="v">'+esc(nomEq(m,"a"))+' <span class="s">'+r.sa+' – '+r.sb+'</span> '+esc(nomEq(m,"b"))+'<small>'+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join("");
     // Classement : une poule à la fois, qui défile toutes les 12 s.
     var pp=[]; D.cats.forEach(function(c){ ((P.poules||{})[c]||[]).forEach(function(po){ pp.push([c,po]); }); });
     if(!pp.length){ document.getElementById("tv-std").innerHTML=""; document.getElementById("tv-std-h").textContent=""; return; }
@@ -574,8 +576,14 @@ var TRN=(function(){
       trnClassement(x[1].equipes,ms2,D.res).map(function(s){ return '<tr><td>'+s.rang+'. '+esc((D.eqs[s.id]||{}).nom)+'</td><td>'+s.j+'</td><td>'+s.g+'</td><td>'+s.p+'</td><td>'+(s.diff>0?"+":"")+s.diff+'</td><td class="p">'+s.pts+'</td></tr>'; }).join("")+'</tbody></table>';
   }
   var wake=null;
+  // Thème du grand écran : sombre par défaut, clair au choix (mémorisé sur cet appareil).
+  function tvTheme(clair){
+    var tv=document.getElementById("tv"), b=document.getElementById("tv-theme");
+    tv.classList.toggle("clair",!!clair);
+    if(b){ b.textContent=clair?"Mode sombre":"Mode clair"; b.setAttribute("aria-pressed",clair?"true":"false"); }
+  }
   function tvOuvrir(){
-    var tv=document.getElementById("tv"); tv.hidden=false; tvCat=0; tvT0=Date.now();
+    var tv=document.getElementById("tv"); tv.hidden=false; tvCat=0; tvT0=Date.now(); tvTheme(ls("gm_trn_tv_theme")==="clair");
     try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){}); }catch(e){}
     try{ if(navigator.wakeLock) navigator.wakeLock.request("screen").then(function(w){ wake=w; }).catch(function(){}); }catch(e){}
     tvRendre();
@@ -607,6 +615,7 @@ var TRN=(function(){
     if(b.dataset.voir!==undefined){ vue=b.dataset.voir; if(!favori()) ls("gm_trn_fav_"+PID,vue); rendre(); window.scrollTo(0,0); return; }
     if(b.dataset.fav!==undefined){ ls("gm_trn_fav_"+PID,favori()===b.dataset.fav?null:b.dataset.fav); rendre(); return; }
     if(b.id==="tv-open"){ tvOuvrir(); return; }
+    if(b.id==="tv-theme"){ var c=!document.getElementById("tv").classList.contains("clair"); tvTheme(c); ls("gm_trn_tv_theme",c?"clair":"sombre"); return; }
     if(b.id==="tv-close"){ tvFermer(); return; }
   });
   document.addEventListener("change",function(ev){ if(ev.target.id==="pick"&&ev.target.value){ vue=ev.target.value; rendre(); window.scrollTo(0,0); } });
