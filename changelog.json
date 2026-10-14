@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791965064",
+    "titre": "Tournoi : meilleur marqueur à la moyenne",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le classement des meilleurs marqueurs se fait maintenant sur la moyenne de points par match, avec un 🏆 pour le premier de chaque catégorie."
+      }
+    ]
+  },
+  {
     "v": "1791962089",
     "titre": "Tournoi : fautes et meilleurs marqueurs au choix",
     "points": [

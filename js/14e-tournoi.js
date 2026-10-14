@@ -311,7 +311,7 @@ function trnOuvrir(eid){
     gp.appendChild(champ("Pause de",pd)); gp.appendChild(champ("à",pf)); zone.appendChild(gp);
     function majP(){ gp.style.display=cbP.checked?"grid":"none"; } cbP.addEventListener("change",majP); majP();
     var cbR=coche("Une équipe ne joue jamais deux matchs d'affilée",c.repos);
-    var cbM=coche("Afficher le classement des meilleurs marqueurs sur la page du tournoi",!!c.topMarqueurs);
+    var cbM=coche("Afficher le classement des meilleurs marqueurs (moyenne de points par match) sur la page du tournoi",!!c.topMarqueurs);
     gmSection(zone,"Inscription des équipes par le lien","Les clubs inscrivent leur équipe depuis la page publique du tournoi ; vous acceptez ou refusez chaque demande dans l'onglet Équipes.");
     var cbI=coche("Les équipes peuvent s'inscrire par le lien",!!c.inscr.ouvert);
     var catsI=document.createElement("input"); catsI.className="form-input"; catsI.placeholder=""; catsI.maxLength=200;

@@ -387,16 +387,23 @@ var TRN=(function(){
     return '<h2 class="sec">Joueurs <small>points et fautes</small></h2><div class="cl"><table class="tbl"><thead><tr><th>Joueur</th><th>Pts</th><th>Fautes</th></tr></thead><tbody>'+
       l.map(function(j){ var x=st[j.n]||{p:0,f:0}; return '<tr><td><span class="rk">'+esc(j.n||"–")+'</span>'+esc(j.p)+'</td><td class="pts">'+x.p+'</td><td>'+x.f+'</td></tr>'; }).join("")+'</tbody></table></div>';
   }
+  // Matchs de l'équipe avec feuille de points saisie (sert de base à la moyenne).
+  function matchsStats(id){
+    var n=0;
+    D.matchs.forEach(function(m){ var r=D.res[m.id]; if(r&&r.stats&&(idEq(m,"a")===id||idEq(m,"b")===id)) n++; });
+    return n;
+  }
+  // Classement par moyenne de points par match (le meilleur peut gagner un prix).
   function topMarqueurs(cat){
     var all=[];
     (P.equipes||[]).filter(function(q){ return q.cat===cat; }).forEach(function(q){
-      var st=statsEquipe(q.id), noms={}; joueursDe(q.id).forEach(function(j){ noms[j.n]=j.p; });
-      Object.keys(st).forEach(function(n){ if(n==="?"||!st[n].p) return; all.push({n:n,p:noms[n]||"",eq:q.nom,pts:st[n].p}); });
+      var st=statsEquipe(q.id), noms={}, nm=matchsStats(q.id); joueursDe(q.id).forEach(function(j){ noms[j.n]=j.p; });
+      Object.keys(st).forEach(function(n){ if(n==="?"||!st[n].p||!nm) return; all.push({n:n,p:noms[n]||"",eq:q.nom,pts:st[n].p,mj:nm,moy:st[n].p/nm}); });
     });
-    all.sort(function(a,b){ return b.pts-a.pts; });
+    all.sort(function(a,b){ return b.moy-a.moy||b.pts-a.pts; });
     if(!all.length) return "";
-    return '<h2 class="sec">Meilleurs marqueurs</h2><div class="cl"><table class="tbl"><thead><tr><th>Joueur</th><th>Équipe</th><th>Pts</th></tr></thead><tbody>'+
-      all.slice(0,10).map(function(x,i){ return '<tr><td><span class="rk'+(i<3?" q":"")+'">'+(i+1)+'</span>n°'+esc(x.n)+' '+esc(x.p)+'</td><td style="text-align:left;font-weight:600">'+esc(x.eq)+'</td><td class="pts">'+x.pts+'</td></tr>'; }).join("")+'</tbody></table></div>';
+    return '<h2 class="sec">Meilleurs marqueurs <small>moyenne par match</small></h2><div class="cl"><table class="tbl"><thead><tr><th>Joueur</th><th>Équipe</th><th>Matchs</th><th>Moy.</th></tr></thead><tbody>'+
+      all.slice(0,10).map(function(x,i){ return '<tr><td><span class="rk'+(i<3?" q":"")+'">'+(i===0?"🏆":i+1)+'</span>n°'+esc(x.n)+' '+esc(x.p)+'</td><td style="text-align:left;font-weight:600">'+esc(x.eq)+'</td><td>'+x.mj+'</td><td class="pts">'+(Math.round(x.moy*10)/10).toString().replace(".",",")+'</td></tr>'; }).join("")+'</tbody></table></div>';
   }
   function codeEquipeConnu(){ try{ return (JSON.parse(localStorage.getItem("gm_trn_codes")||"{}")||{})[PID]||""; }catch(e){ return ""; } }
   function favori(){ return ls("gm_trn_fav_"+PID)||""; }
