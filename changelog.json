@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791968906",
+    "titre": "Photo de ticket plus fiable",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Compta › photo du ticket : si la première lecture traîne, une deuxième IA prend le relais au lieu d'abandonner, et la photo envoyée est plus légère pour aller plus vite."
+      }
+    ]
+  },
+  {
     "v": "1791965064",
     "titre": "Tournoi : meilleur marqueur à la moyenne",
     "points": [

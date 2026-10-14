@@ -12,7 +12,7 @@ var GM_TICKET_URL="https://openrouter.ai/api/v1/chat/completions";
 var GM_TICKET_CLE=["sk-or-v1-fb2133c6cec2e24fa49f1fb3","8a5d121b2979eadc557a61dd0801f12c8e8b19e7"].join("");
 // Modèles rapides qui lisent les images ; « openrouter/free » en secours.
 var GM_TICKET_MODELES=["qwen/qwen3.8-27b:free","google/gemma-4-26b-a4b-it:free"];
-var GM_TICKET_DELAI=20000;
+var GM_TICKET_DELAI=30000; // par essai (2 essais max)
 
 // Bouton de la barre : ouvre une nouvelle ligne (dépense) puis l'appareil photo.
 function comptaTicketNouveau(){
@@ -103,15 +103,22 @@ function comptaTicketAnalyser(txt){
 }
 function comptaTicketLire(file){
   if(file.type&&file.type.indexOf("image")!==0){ askAlert("Choisissez une photo du ticket."); return; }
-  comptaTicketStatut("⏳ Lecture du ticket…");
+  comptaTicketStatut("⏳ Lecture du ticket… (jusqu'à 1 minute)");
   var btn=document.getElementById("cl-ticket-btn"); if(btn) btn.disabled=true;
   comptaTicketReduire(file,1280,0.7).then(function(dataUrl){
     // La photo est jointe tout de suite, même si la lecture échoue.
     comptaJustifDataUrl=dataUrl;
     var prev=document.getElementById("cl-justif-preview"); if(prev) prev.textContent="📎 Photo du ticket (jointe)";
     if(!navigator.onLine) throw new Error("hors-ligne");
-    return comptaTicketAppel(dataUrl,{models:GM_TICKET_MODELES})
-      .catch(function(e){ if(e&&e.name==="AbortError") throw e; return comptaTicketAppel(dataUrl,{model:"openrouter/free"}); });
+    // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde la 1280 px.
+    return comptaTicketReduire(file,1024,0.6).then(function(petite){
+      return comptaTicketAppel(petite,{models:GM_TICKET_MODELES})
+        .catch(function(){
+          // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
+          comptaTicketStatut("⏳ Nouvelle tentative…");
+          return comptaTicketAppel(petite,{model:"openrouter/free"});
+        });
+    });
   }).then(function(r){
     comptaTicketRemplir(r);
     var manque=[]; if(!r.date) manque.push("la date"); if(!r.montant) manque.push("le montant");
