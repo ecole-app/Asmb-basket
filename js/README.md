@@ -64,6 +64,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |
 | `22-push.js` | Notifications push (inscription de l'appareil) |
 | `23-export.js` | Exports Excel (.xlsx) : compta, licences, sponsors, inventaire |
+| `23b-bilan-saison.js` | Bilan de saison en PDF (subventions ANS/mairie, AG) : licenciés par catégorie × genre, tranche d'âge et commune (tirée de l'adresse), équipes, pôles, événements avec participants (evt_pages), compta de l'exercice en Premium. Bouton « 📊 Bilan » de l'écran Licences. |
 | `21-main.js` | Thème, initialisation, **démarrage de l'app** (doit rester en dernier) |
 
 ## Points d'attention connus

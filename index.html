@@ -405,12 +405,13 @@
 
   <!-- ═══ LICENCES (admin) ═══ -->
   <div class="scr" id="scr-licences">
-    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
       <div>
         <div style="font-size:16px;font-weight:800;color:var(--txt)">Licences</div>
         <div style="font-size:11px;color:var(--mut)" id="lic-count">0 fiche</div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto">
+        <button onclick="openBilanSaison()" title="Bilan de saison pour les subventions" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">📊 Bilan</button>
         <button onclick="exportLicencesXlsx()" style="padding:9px 12px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Excel</button>
         <button onclick="showNewLicence()" style="padding:9px 16px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">+ Nouvelle fiche</button>
       </div>
@@ -1885,6 +1886,7 @@
 <script src="js/20b-plateforme.js"></script>
 <script src="js/22-push.js"></script>
 <script src="js/23-export.js"></script>
+<script src="js/23b-bilan-saison.js"></script>
 <script src="js/21-main.js"></script>
 </body>
 </html>

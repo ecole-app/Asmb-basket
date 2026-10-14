@@ -106,6 +106,8 @@ const PRECACHE = [
   './js/20b-plateforme.js',
   './js/21-main.js',
   './js/22-push.js',
+  './js/23-export.js',
+  './js/23b-bilan-saison.js',
   './legal/mentions-legales.html',
   './legal/confidentialite.html',
   './legal/cgu.html',
