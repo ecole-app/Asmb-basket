@@ -52,6 +52,8 @@ function comptaChargerReglages(){
 }
 function comptaSauverReglages(r){
   var propre={debutMois:r.debutMois, comptes:r.comptes||{}, tresorerie:r.tresorerie||{}, maj:Date.now()};
+  // Bilan (js/15d) : soldes de départ et saisies par exercice conservés.
+  try{ var ancien=JSON.parse(localStorage.getItem("asmb_compta_reglages")||"null")||{}; if(ancien.soldesInit) propre.soldesInit=ancien.soldesInit; if(ancien.bilans) propre.bilans=ancien.bilans; }catch(e){}
   localStorage.setItem("asmb_compta_reglages",JSON.stringify(propre));
   if(window.SUPPORT_MODE||!window.fbDb||!window.fbSetDoc) return Promise.resolve();
   return window.fbSetDoc(window.fbDoc(window.fbDb,"compta_reglages","plan"),propre);
@@ -331,6 +333,7 @@ function openComptaComptes(){
   var row=gmRow(b); row.style.marginTop="14px";
   function exChoisi(){ return exs.filter(function(e){ return e.cle===sel.value; })[0]; }
   row.appendChild(gmBtn("📄 Compte de résultat (PDF)","primary",function(){ comptaCompteResultatPdf(exChoisi()); }));
+  row.appendChild(gmBtn("📘 Bilan et annexe","primary",function(){ if(typeof openComptaBilan==="function") openComptaBilan(exChoisi()); }));
   row.appendChild(gmBtn("🧾 Export FEC","soft",function(){ comptaExportFec(exChoisi()); }));
   var aide=document.createElement("div"); aide.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.5;margin-top:12px";
   aide.textContent="Le FEC (fichier des écritures comptables) est le format officiel que lisent les logiciels des experts-comptables et l'administration fiscale. Le compte de résultat suit le plan comptable des associations, avec l'exercice précédent pour comparer.";
