@@ -158,6 +158,29 @@ function comptaTicketOpenRouter(petite){
           });
         });
 }
+// Lecture IA d'une photo de ticket, partagée (compta, notes de frais).
+// statut(txt) affiche l'avancement. Renvoie {date,montant,fournisseur,...}.
+function gmTicketIA(file,statut){
+  if(!navigator.onLine) return Promise.reject(new Error("hors-ligne"));
+  // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde sa propre version.
+  return comptaTicketReduire(file,1024,0.6).then(function(petite){
+    // 1) Gemini (Firebase), 2) OpenRouter, 3) OpenRouter secours.
+    return comptaTicketGemini(petite).catch(function(eg){
+      if(statut) statut("⏳ Nouvelle tentative…");
+      return comptaTicketOpenRouter(petite).catch(function(e2){
+        if(e2&&eg&&eg.detail) e2.detail=eg.detail+" — "+(e2.detail||"OpenRouter");
+        throw e2;
+      });
+    });
+  });
+}
+function gmTicketMsgErreur(e){
+  var m=e&&e.message;
+  return m==="image"?"⚠️ Photo illisible. Réessaie ou complète à la main.":
+    m==="hors-ligne"?"⚠️ Pas de connexion : photo jointe, complète à la main.":
+    (e&&e.name==="AbortError")?"⏱ Lecture trop longue : photo jointe, complète à la main.":
+    "⚠️ Lecture impossible : photo jointe, complète à la main."+(e&&e.detail?"\n("+e.detail+")":"");
+}
 function comptaTicketLire(file){
   if(file.type&&file.type.indexOf("image")!==0){ askAlert("Choisissez une photo du ticket."); return; }
   comptaTicketStatut("⏳ Lecture du ticket… (jusqu'à 1 minute)");
@@ -167,27 +190,13 @@ function comptaTicketLire(file){
     comptaJustifDataUrl=dataUrl;
     var prev=document.getElementById("cl-justif-preview"); if(prev) prev.textContent="📎 Photo du ticket (jointe)";
     if(!navigator.onLine) throw new Error("hors-ligne");
-    // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde la 1280 px.
-    return comptaTicketReduire(file,1024,0.6).then(function(petite){
-      // 1) Gemini (Firebase), 2) OpenRouter, 3) OpenRouter secours.
-      return comptaTicketGemini(petite).catch(function(eg){
-        comptaTicketStatut("⏳ Nouvelle tentative…");
-        return comptaTicketOpenRouter(petite).catch(function(e2){
-          if(e2&&eg&&eg.detail) e2.detail=eg.detail+" — "+(e2.detail||"OpenRouter");
-          throw e2;
-        });
-      });
-    });
+    return gmTicketIA(file,comptaTicketStatut);
   }).then(function(r){
     comptaTicketRemplir(r);
     var manque=[]; if(!r.date) manque.push("la date"); if(!r.montant) manque.push("le montant");
     comptaTicketStatut(manque.length?"⚠️ Ticket lu en partie : vérifie "+manque.join(" et ")+".":"✓ Ticket lu : vérifie puis enregistre.",manque.length?"var(--org,#c77700)":"var(--grn)");
   }).catch(function(e){
-    var m=e&&e.message;
-    comptaTicketStatut(m==="image"?"⚠️ Photo illisible. Réessaie ou complète à la main.":
-      m==="hors-ligne"?"⚠️ Pas de connexion : photo jointe, complète à la main.":
-      (e&&e.name==="AbortError")?"⏱ Lecture trop longue : photo jointe, complète à la main.":
-      "⚠️ Lecture impossible : photo jointe, complète à la main."+(e&&e.detail?"\n("+e.detail+")":""),"var(--red)");
+    comptaTicketStatut(gmTicketMsgErreur(e),"var(--red)");
   }).then(function(){ if(btn) btn.disabled=false; });
 }
 function comptaTicketRemplir(r){

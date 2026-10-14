@@ -1,5 +1,19 @@
 [
   {
+    "v": "1791981395",
+    "titre": "Notes de frais : la photo du ticket remplit la note",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "bureau"
+        ],
+        "texte": "Notes de frais : prenez le ticket en photo, la date, le montant, le motif et la catégorie se remplissent tout seuls (à vérifier avant d'enregistrer)."
+      }
+    ]
+  },
+  {
     "v": "1791981305",
     "titre": "Événements : export Excel des inscrits",
     "points": [

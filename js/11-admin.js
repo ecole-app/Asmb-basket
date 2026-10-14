@@ -1466,8 +1466,9 @@ function openNoteFraisForm(parentModal){
     '<div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="nf-categorie" list="nf-cat-list" placeholder=""><datalist id="nf-cat-list"></datalist></div>'+
     '<div class="form-group"><label class="form-label">Photo du justificatif</label>'+
       '<input type="file" id="nf-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleNoteFraisPhoto(this)">'+
-      '<button type="button" id="nf-photo-btn" style="width:100%;padding:12px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer">📷 Prendre / choisir une photo</button>'+
+      '<button type="button" id="nf-photo-btn" style="width:100%;padding:12px;border-radius:var(--rs);background:var(--card);border:1.5px dashed var(--bdr);color:var(--dkg);font-size:13px;font-weight:700;cursor:pointer">📷 Photo du ticket (remplit la note)</button>'+
       '<div id="nf-photo-preview" style="margin-top:8px"></div>'+
+      '<div id="nf-ticket-st" style="display:none;font-size:12.5px;font-weight:700;margin-top:6px;white-space:pre-line;word-break:break-word"></div>'+
     '</div>'+
     '<button id="nf-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>';
   modal.appendChild(inner);
@@ -1495,10 +1496,30 @@ function handleNoteFraisPhoto(input){
     noteFraisPhotoData=dataUrl;
     preview.innerHTML='<img src="'+dataUrl+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px">';
     btn.textContent="📷 Changer la photo";btn.disabled=false;
+    noteFraisLireTicket(file);
   }).catch(function(){
     btn.textContent="📷 Prendre / choisir une photo";btn.disabled=false;
     askAlert("Erreur lors du traitement de la photo.");
   });
+}
+// Lecture du ticket par l'IA (même moteur que la compta) : pré-remplit date,
+// montant, motif et catégorie. Rien n'est écrasé si le champ est déjà rempli,
+// sauf la date du jour posée par défaut.
+function noteFraisLireTicket(file){
+  var st=document.getElementById("nf-ticket-st");
+  function statut(t,c){ if(!st) return; st.style.display=t?"block":"none"; st.style.color=c||"var(--mut)"; st.textContent=t||""; }
+  if(typeof gmTicketIA!=="function") return;
+  statut("⏳ Lecture du ticket… (jusqu'à 1 minute)");
+  gmTicketIA(file,statut).then(function(r){
+    if(!document.getElementById("nf-date")) return;
+    var d=document.getElementById("nf-date"), m=document.getElementById("nf-montant"), mo=document.getElementById("nf-motif"), c=document.getElementById("nf-categorie");
+    if(r.date) d.value=r.date;
+    if(r.montant!=null&&!m.value) m.value=r.montant.toFixed(2);
+    if(!mo.value.trim()) mo.value=r.description?(r.description+(r.fournisseur?" ("+r.fournisseur+")":"")):(r.fournisseur?"Achat "+r.fournisseur:"");
+    if(r.categorie&&!c.value.trim()) c.value=r.categorie;
+    var manque=[]; if(!r.date) manque.push("la date"); if(!r.montant) manque.push("le montant");
+    statut(manque.length?"⚠️ Ticket lu en partie : vérifie "+manque.join(" et ")+".":"✓ Ticket lu : vérifie puis enregistre.",manque.length?"var(--org,#c77700)":"var(--grn)");
+  }).catch(function(e){ statut(gmTicketMsgErreur(e),"var(--red)"); });
 }
 function saveNoteFrais(modal,parentModal){
   var date=document.getElementById("nf-date").value;
