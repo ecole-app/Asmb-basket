@@ -103,6 +103,47 @@ function exportLicencesXlsx(){
   ]);
 }
 
+// ── INSCRITS D'UN ÉVÉNEMENT (stage, soirée, formation…) ───────────────
+// Une ligne par inscription (annulées en fin de liste), + une feuille par jour
+// si l'événement se réserve « jours au choix ».
+function exportEvtInscritsXlsx(e,items,page){
+  if(typeof isStaffUser==="function" && !isStaffUser()){ askAlert("Accès non autorisé."); return; }
+  if(!items||!items.length){ askAlert("Aucun inscrit à exporter."); return; }
+  var resa=typeof evtResa==="function"&&evtResa(e);
+  var parJ=!!(e.inscr&&e.inscr.parJour);
+  var jours=parJ?((page&&page.jours)||[]):[];
+  var tri=items.slice().sort(function(a,b){
+    var an=a.statut==="annule"?1:0, bn=b.statut==="annule"?1:0;
+    return an-bn||evtNorm(a.nom).localeCompare(evtNorm(b.nom))||evtNorm(a.prenom).localeCompare(evtNorm(b.prenom));
+  });
+  function dateInscr(x){ var d=x.at&&x.at.toDate?x.at.toDate():null; return d?d.toLocaleDateString("fr-FR"):""; }
+  function statutLic(x){ return resa?"":x.playerId?"Licencié":(evtEstLicTarif(x,page)?"À vérifier":"Extérieur"); }
+  function paiement(x){ return x.statut==="annule"?"":Number(x.montant)>0?(x.paye?"Payé":"À payer"):"Gratuit"; }
+  var entetes=["Billet","Statut","Nom","Prénom","Naissance","Âge","Catégorie","Téléphone","Email","Tarif"]
+    .concat(resa?["Personnes"]:[]).concat(parJ?["Jours"]:[])
+    .concat(["Montant (€)","Mode","Paiement","Présent","Licence","Club d'origine","Inscrit le"]);
+  var lignes=tri.map(function(x){
+    return [x._id||"",x.statut==="annule"?"Annulé":"Inscrit",(x.nom||"").toUpperCase(),x.prenom||"",x.naissance||"",
+      (typeof essaiAge==="function"?String(essaiAge(x.naissance)||""):""),evtCat(x)||"",x.tel||"",x.email||"",x.tarifNom||""]
+      .concat(resa?[Number(x.personnes)>0?Number(x.personnes):1]:[])
+      .concat(parJ?[(x.jours||[]).map(function(j){ return evtJourTxt(j); }).join(", ")]:[])
+      .concat([Number(x.montant)||0,EVT_MODES[x.mode]||"",paiement(x),x.present?"Oui":"",statutLic(x),x.clubOrigine||"",dateInscr(x)]);
+  });
+  var actifs=tri.filter(function(x){ return x.statut!=="annule"; });
+  var tot=0,enc=0,pers=0; actifs.forEach(function(x){ tot+=Number(x.montant)||0; if(x.paye) enc+=Number(x.montant)||0; pers+=Number(x.personnes)>0?Number(x.personnes):1; });
+  var resume=[["Événement",e.titre||""],["Date",typeof evtDateTxt==="function"?evtDateTxt(e):(e.date||"")],["Lieu",e.lieu||""],
+    [resa?"Réservations":"Inscrits",actifs.length]].concat(resa?[["Personnes",pers]]:[])
+    .concat([["Annulés",tri.length-actifs.length],["Montant attendu (€)",tot],["Encaissé (€)",enc],["Présents",actifs.filter(function(x){return x.present;}).length]]);
+  var feuilles=[{nom:resa?"Réservations":"Inscrits",entetes:entetes,lignes:lignes},{nom:"Résumé",entetes:["Indicateur","Valeur"],lignes:resume}];
+  jours.forEach(function(j){
+    var du=actifs.filter(function(x){ return (x.jours||[]).indexOf(j)>=0; });
+    feuilles.push({nom:evtJourTxt(j),entetes:["Nom","Prénom","Catégorie","Téléphone","Présent"],
+      lignes:du.map(function(x){ return [(x.nom||"").toUpperCase(),x.prenom||"",evtCat(x)||"",x.tel||"",(x.presentJ&&x.presentJ[j])?"Oui":""]; })});
+  });
+  var nomEvt=evtNorm(e.titre||"evenement").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,30)||"evenement";
+  exporterXlsx(clubSlug()+"_"+nomEvt+"_inscrits_"+exportDateStr()+".xlsx",feuilles);
+}
+
 // ── SPONSORS (respecte l'onglet et la recherche affichés) ────────────
 function exportSponsorsXlsx(){
   if(typeof hasModulePermission==="function" && !hasModulePermission("sponsors")){ askAlert("Accès non autorisé."); return; }

@@ -306,6 +306,11 @@ function evtTableau(eid){
   row.appendChild(gmBtn("Affiche","soft",function(){ s.modal.remove(); evtAffiche(eid); }));
   row.appendChild(gmBtn("Code bénévole","soft",function(){ evtCodesBenevoles(eid); }));
   row.appendChild(gmBtn("Réglages","soft",function(){ s.modal.remove(); evtConfigurer(eid); }));
+  var exp={items:null,page:null};
+  row.appendChild(gmBtn("📊 Excel","soft",function(){
+    if(!exp.items){ showToast("Liste en cours de chargement…"); return; }
+    exportEvtInscritsXlsx(e,exp.items,exp.page);
+  }));
   var list=document.createElement("div"); list.style.marginTop="12px";
   list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Chargement…</div>';
   s.body.appendChild(list);
@@ -318,6 +323,7 @@ function evtTableau(eid){
     var items=[]; r[1].forEach(function(d){ var v=d.data(); v._id=d.id; items.push(v); });
     items.sort(function(a,b){ return ((a.at&&a.at.toMillis)?a.at.toMillis():0)-((b.at&&b.at.toMillis)?b.at.toMillis():0); });
     if(!evtResa(e)) evtRapprocher(items);
+    exp.items=items; exp.page=page;
     if(typeof entreeReporter==="function") entreeReporter(eid, items.filter(function(x){return x.statut!=="annule";})).then(function(){ peindre(); });
     var jourSel=null;
     function peindre(){

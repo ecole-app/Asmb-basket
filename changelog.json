@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791981305",
+    "titre": "Événements : export Excel des inscrits",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Événements › bouton « 📊 Excel » : la liste des inscrits ou réservations (contacts, tarif, paiement, présence), un résumé, et une feuille par jour pour les stages à jours au choix."
+      }
+    ]
+  },
+  {
     "v": "1791970117",
     "titre": "Photo de ticket lue par Gemini",
     "points": [
