@@ -770,7 +770,9 @@ function dmTouch(dmId,text){
 // Nom affiché d'un compte : fiche d'inscription (numéro) sinon e-mail.
 function dmNameForPhone(){
   var map={};
-  (typeof getLicences==="function"?getLicences():[]).forEach(function(l){
+  (typeof getLicences==="function"?getLicences():[]).forEach(function(lic){
+    // Les coordonnées vivent dans la fiche d'inscription (lic.fiche) ; anciens formats à plat acceptés.
+    var l=Object.assign({},lic,lic&&lic.fiche||{});
     var nom=((l.prenom||"")+" "+(l.nom||"")).trim();
     var n=function(t){ return String(t||"").replace(/\s+/g,""); };
     if(l.telephone) map[n(l.telephone)]=nom;

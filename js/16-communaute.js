@@ -237,7 +237,7 @@ function renderMembers(ch){
     var phone=typeof m==="string"?m:m.phone;
     var label=typeof m==="string"?null:m.label;
     var div=document.createElement("div");div.className="member-card";
-    div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0">'+(label?'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+label+'</div><div style="font-size:11px;color:var(--mut)">'+phone+'</div>':'<div style="font-size:13px;font-weight:600;color:var(--txt)">'+phone+'</div>')+'</div><div style="display:flex;flex-direction:column;gap:5px"><button onclick="editMemberLabel(\''+phone+'\',\''+(label||"").replace(/'/g,"")+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button><button onclick="removeMemberFromChannel(\''+phone+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button></div>';
+    div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0">'+(label?'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(label)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(phone)+'</div>':'<div style="font-size:13px;font-weight:600;color:var(--txt)">'+authEsc(phone)+'</div>')+'</div><div style="display:flex;flex-direction:column;gap:5px"><button onclick="editMemberLabel(\''+authEsc(String(phone).replace(/[^+0-9]/g,""))+'\',\''+authEsc((label||"").replace(/['\\]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button><button onclick="removeMemberFromChannel(\''+authEsc(String(phone).replace(/[^+0-9]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button></div>';
     el.appendChild(div);
   });
 }
@@ -566,7 +566,7 @@ async function openChannel(ch){
   window.__chatChannelsCache=window.__chatChannelsCache||[];
   document.getElementById("chat-icon").textContent=ch.icon;
   document.getElementById("chat-name").textContent=ch.name;
-  document.getElementById("chat-desc").textContent=ch.desc;
+  document.getElementById("chat-desc").textContent=(ch.desc?ch.desc+" · ":"")+"Voir les membres ›";
   var pollBtn=document.getElementById("poll-btn");
   if(pollBtn)pollBtn.style.display=window.asmbCoachMode?"flex":"none";
   var carBtn=document.getElementById("carpool-btn");
@@ -589,6 +589,82 @@ async function openChannel(ch){
   chatStartReads(ch.id);
   // Marquer comme lu
   localStorage.setItem("asmb_lastread_"+ch.id, Date.now().toString());
+}
+
+// ── MEMBRES D'UN CANAL (toucher le nom en haut de la discussion) ─────
+// Reprend les vraies règles d'accès : canal réservé = sa liste + les
+// dirigeants ; canal ouvert = tout le club, sauf les coachs non rattachés
+// à l'équipe quand le canal n'est pas « tout le club ». Le staff voit les
+// comptes un par un ; une famille voit la composition et qui a déjà écrit.
+function chatNomCompte(u,noms){
+  var tel=String(u.phone||"").replace(/\s+/g,"");
+  var n=((u.prenom||"")+" "+(u.nom||"")).trim()||u.displayName||noms[tel];
+  return n||String(u.email||"").split("@")[0]||u.phone||"Compte";
+}
+function chatRoleCompte(u){
+  var r=u.roles||[];
+  return r.indexOf("dirigeant")>=0?"Dirigeants":r.indexOf("coach")>=0?"Coachs":r.indexOf("bureau")>=0?"Bureau":r.indexOf("joueur")>=0?"Joueurs":"Familles";
+}
+var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Familles","Joueurs"];
+function chatMembresCanal(){
+  if(currentConvKind!=="channel"||!currentChannelData) return;
+  var ch=currentChannelData, restreint=(ch.members||[]).length>0;
+  var s=gmSheet((ch.icon?ch.icon+" ":"")+(ch.name||"Canal")+" · membres");
+  var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+  intro.textContent=restreint?"Canal réservé : seuls les membres ci-dessous et les dirigeants y ont accès."
+    :(ch.clubWide||!ch.teamId?"Canal ouvert à tout le club.":"Canal de l'équipe : ouvert aux familles et joueurs du club, et aux coachs de cette équipe.");
+  var zone=document.createElement("div"); zone.innerHTML='<div style="font-size:12px;color:var(--mut);padding:8px 0">Chargement…</div>';
+  s.body.appendChild(intro); s.body.appendChild(zone);
+  function groupes(par){
+    var h="";
+    CHAT_ORDRE_ROLES.concat(Object.keys(par).filter(function(k){ return CHAT_ORDRE_ROLES.indexOf(k)<0; })).forEach(function(g){
+      var l=par[g]; if(!l||!l.length) return;
+      l.sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+      h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);margin:12px 0 4px">'+authEsc(g)+' · '+l.length+'</div>'+
+        l.map(function(m){ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+authEsc(m.nom.charAt(0).toUpperCase())+'</div><div style="flex:1;min-width:0;font-size:13.5px;font-weight:700;color:var(--txt)">'+authEsc(m.nom)+(m.moi?' <span style="font-weight:600;color:var(--mut)">(vous)</span>':'')+(m.info?'<div style="font-size:11px;font-weight:500;color:var(--mut)">'+authEsc(m.info)+'</div>':'')+'</div></div>'; }).join("");
+    });
+    return h;
+  }
+  function ontEcrit(){
+    var p=(typeof channelKnownPseudos!=="undefined"?channelKnownPseudos:[]).filter(Boolean);
+    return p.length?'<div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);margin:14px 0 6px">Ont déjà écrit ici</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+      p.map(function(x){ return '<span style="font-size:12px;font-weight:700;padding:5px 10px;border-radius:20px;background:var(--bdr);color:var(--txt2)">'+authEsc(x)+'</span>'; }).join("")+'</div>':"";
+  }
+  var staffVue=(typeof isStaffUser==="function"&&isStaffUser());
+  if(!staffVue){
+    // Famille / joueur : pas d'accès à la liste des comptes du club.
+    var h="";
+    if(restreint){
+      var par={"Membres":[]};
+      ch.members.forEach(function(m){ var lab=typeof m==="string"?null:m.label; par.Membres.push({nom:lab||"Membre",moi:(typeof myPhone!=="undefined"&&myPhone&&(typeof m==="string"?m:m.phone)===myPhone)}); });
+      h=groupes(par)+'<div style="font-size:12px;color:var(--mut);margin-top:8px">+ les dirigeants du club</div>';
+    } else h='<div style="font-size:13px;color:var(--txt);line-height:1.5">Dirigeants, coachs, familles et joueurs du club.</div>';
+    zone.innerHTML=h+ontEcrit();
+    return;
+  }
+  var noms=(typeof dmNameForPhone==="function")?dmNameForPhone():{};
+  var moi=(typeof myUid==="function")?myUid():null;
+  window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
+    var par={}, total=0;
+    var tels={}; (ch.members||[]).forEach(function(m){ var t=String(typeof m==="string"?m:m.phone).replace(/\s+/g,""); tels[t]=(typeof m==="string"?null:m.label)||true; });
+    snap.forEach(function(d){
+      var u=d.data()||{}, r=u.roles||[], g=chatRoleCompte(u), tel=String(u.phone||"").replace(/\s+/g,"");
+      var ok;
+      if(r.indexOf("dirigeant")>=0) ok=true;
+      else if(restreint) ok=!!tels[tel];
+      else if(r.indexOf("coach")>=0&&r.indexOf("bureau")<0) ok=!!(ch.clubWide||!ch.teamId||(u.linkedTeamIds||[]).indexOf(ch.teamId)>=0);
+      else ok=true;
+      if(!ok) return;
+      var lab=(tel&&typeof tels[tel]==="string")?tels[tel]:"";
+      if(tel) delete tels[tel];
+      (par[g]=par[g]||[]).push({nom:chatNomCompte(u,noms),moi:d.id===moi,info:lab});
+      total++;
+    });
+    // Numéros autorisés qui n'ont pas encore de compte dans l'appli.
+    Object.keys(tels).forEach(function(t){ if(!t) return; (par["Pas encore de compte"]=par["Pas encore de compte"]||[]).push({nom:(typeof tels[t]==="string"?tels[t]:noms[t])||t,info:t}); });
+    zone.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--txt)">'+total+' compte'+(total>1?"s":"")+' ont accès</div>'+groupes(par)+ontEcrit()+
+      (restreint&&localStorage.getItem("asmb_profile")==="dirigeant"?'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Ajouter ou retirer des membres : Admin › Communauté › ce canal.</div>':'');
+  }).catch(function(e){ zone.innerHTML='<div style="color:var(--red);font-size:12.5px">Liste indisponible ('+authEsc((e&&e.code)||"réseau")+').</div>'+ontEcrit(); });
 }
 
 // ── INDICATEUR "EN TRAIN D'ECRIRE" ──────────────────────────────

@@ -1,5 +1,21 @@
 [
   {
+    "v": "1791991771",
+    "titre": "Communauté : voir les membres d'un canal",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "parent",
+          "joueur",
+          "bureau"
+        ],
+        "texte": "Communauté : touchez le nom du canal en haut de la discussion pour voir qui y a accès, rangé par rôle (dirigeants, bureau, coachs, familles, joueurs), et qui y a déjà écrit."
+      }
+    ]
+  },
+  {
     "v": "1791982667",
     "titre": "Compta : bilan et annexe",
     "points": [

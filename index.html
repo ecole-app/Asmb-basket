@@ -842,7 +842,7 @@
   <div class="scr" id="scr-chat" style="flex-direction:column;height:100%">
     <div id="chat-hdr" style="padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0">
       <div id="chat-icon" style="font-size:22px"></div>
-      <div style="flex:1;min-width:0"><div id="chat-name" style="font-size:14px;font-weight:800;color:var(--txt)"></div><div id="chat-desc" style="font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
+      <div id="chat-titre" role="button" tabindex="0" onclick="chatMembresCanal()" onkeydown="if(event.key==='Enter')chatMembresCanal()" style="flex:1;min-width:0;cursor:pointer"><div id="chat-name" style="font-size:14px;font-weight:800;color:var(--txt)"></div><div id="chat-desc" style="font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
       <button onclick="toggleChatSearch()" title="Rechercher" style="width:32px;height:32px;border-radius:50%;background:none;border:none;color:var(--mut);font-size:16px;cursor:pointer;flex-shrink:0">🔍</button>
       <button id="chat-mute-btn" onclick="toggleChannelMute()" title="Notifications de ce canal" style="width:32px;height:32px;border-radius:50%;background:none;border:none;color:var(--mut);font-size:16px;cursor:pointer;flex-shrink:0">🔔</button>
     </div>
