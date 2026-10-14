@@ -22,9 +22,17 @@ function trnCfg(e){
     equipes:t.equipes||[], cats:t.cats||{}, terrains:Math.max(1,Math.min(12,parseInt(t.terrains,10)||2)),
     debut:t.debut||"09:00", fin:t.fin||"18:00", pause:t.pause||null,
     battement:t.battement!=null?Math.max(0,parseInt(t.battement,10)||0):5, repos:t.repos!==false,
+    typesTerrains:trnTypesTerrains(t.typesTerrains,Math.max(1,Math.min(12,parseInt(t.terrains,10)||2))),
     matchs:t.matchs||[], genereLe:t.genereLe||null, publieLe:t.publieLe||null, modifLe:t.modifLe||null,
     inscr:t.inscr||{ouvert:false,cats:[]}
   };
+}
+// Terrains intérieurs ou extérieurs : ["int","ext",…], un par terrain (intérieur par défaut).
+function trnTypesTerrains(l,n){ var o=[]; for(var i=0;i<n;i++) o.push((l&&l[i])==="ext"?"ext":"int"); return o; }
+// « Terrain 2 · extérieur » quand le gymnase mélange les deux, sinon « Terrain 2 ».
+function trnTerrainTxt(types,t,court){
+  types=types||[]; var mixte=types.some(function(x){ return x!==types[0]; });
+  return (court?"T":"Terrain ")+t+(mixte?(court?(types[t-1]==="ext"?" ext.":" int."):" · "+(types[t-1]==="ext"?"extérieur":"intérieur")):"");
 }
 function trnCatsDe(equipes){
   var vus={}, out=[];
@@ -276,6 +284,21 @@ function trnOuvrir(eid){
     var deb=inp("time",c.debut), fin=inp("time",c.fin), ter=inp("number",c.terrains,{min:1,max:12}), bat=inp("number",c.battement,{min:0,max:60});
     g.appendChild(champ("Début",deb)); g.appendChild(champ("Fin au plus tard",fin)); g.appendChild(champ("Terrains",ter)); g.appendChild(champ("Battement (min)",bat));
     zone.appendChild(g);
+    // Intérieur / extérieur pour chaque terrain (un appui change).
+    var types=c.typesTerrains.slice(), tBox=document.createElement("div"); tBox.style.cssText="display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px";
+    function peindreTypes(){
+      var n=Math.max(1,Math.min(12,parseInt(ter.value,10)||1)); types=trnTypesTerrains(types,n);
+      tBox.innerHTML="";
+      types.forEach(function(ty,i){
+        var b=document.createElement("button"); b.type="button";
+        b.textContent="Terrain "+(i+1)+" : "+(ty==="ext"?"☀️ Extérieur":"🏠 Intérieur");
+        b.style.cssText="padding:8px 12px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;border:1.5px solid "+(ty==="ext"?"#E8670A":"var(--bdr)")+";background:"+(ty==="ext"?"rgba(232,103,10,.12)":"var(--card)")+";color:"+(ty==="ext"?"#E8670A":"var(--txt)");
+        b.addEventListener("click",function(){ types[i]=types[i]==="ext"?"int":"ext"; peindreTypes(); });
+        tBox.appendChild(b);
+      });
+    }
+    ter.addEventListener("input",peindreTypes); peindreTypes();
+    zone.appendChild(tBox);
     function coche(txt,val){ var l=document.createElement("label"); l.style.cssText="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--txt);margin:4px 0 8px;cursor:pointer"; var x=document.createElement("input"); x.type="checkbox"; x.checked=val; x.style.cssText="width:18px;height:18px;accent-color:var(--dkg)"; l.appendChild(x); l.appendChild(document.createTextNode(txt)); zone.appendChild(l); return x; }
     var cbP=coche("Pause de midi",!!c.pause);
     var gp=document.createElement("div"); gp.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px";
@@ -331,7 +354,7 @@ function trnOuvrir(eid){
       var catsL=catsI.value.split(",").map(function(x){ return x.trim().slice(0,20); }).filter(function(x,i,a){ return x&&a.indexOf(x)===i; }).slice(0,20);
       if(cbI.checked&&!catsL.length) return askAlert("Indiquez au moins une catégorie proposée à l'inscription.");
       var inscrAvant=!!c.inscr.ouvert;
-      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,cats:cs,inscr:{ouvert:cbI.checked,cats:catsL}});
+      trnSauver(eid,{debut:deb.value,fin:fin.value,pause:pause,terrains:Math.max(1,Math.min(12,parseInt(ter.value,10)||1)),typesTerrains:types.slice(),battement:Math.max(0,parseInt(bat.value,10)||0),repos:cbR.checked,cats:cs,inscr:{ouvert:cbI.checked,cats:catsL}});
       showToast("Réglages du tournoi enregistrés");
       // Inscriptions ouvertes (ou fermées) : la page publique est mise à jour tout de suite.
       if(cbI.checked||inscrAvant) trnPublier(eid).then(function(){ if(cbI.checked&&!inscrAvant) trnPartager(eid); }).catch(function(err){ askAlert("Page publique non mise à jour ("+((err&&err.code)||"réseau")+")."); });
@@ -408,7 +431,7 @@ function trnListeHtml(c,matchs,publique){
       var d=document.createElement("div");
       d.style.cssText="background:var(--card);border:1px solid "+(m.hors?"var(--red)":enc?"#d97706":"var(--bdr)")+";border-radius:10px;padding:7px 10px"+(m.phase==="finale"?";border-left:4px solid #b7791f":"");
       function ligne(n,sc,gagne){ return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:'+(gagne?900:700)+';color:var(--txt)"><span style="min-width:0;overflow-wrap:anywhere">'+authEsc(n)+'</span>'+(r&&r.statut!=="prevu"?'<span style="font-variant-numeric:tabular-nums">'+sc+'</span>':'')+'</div>'; }
-      d.innerHTML='<div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Terrain '+m.terrain+' · '+authEsc(m.cat)+' · '+authEsc(m.label)+
+      d.innerHTML='<div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">'+authEsc(trnTerrainTxt(c.typesTerrains,m.terrain))+' · '+authEsc(m.cat)+' · '+authEsc(m.label)+
         (enc?' · <span style="color:#d97706">en cours</span>':fini?' · <span style="color:var(--grn)">terminé</span>':'')+(m.hors?' · <span style="color:var(--red)">après l\'heure de fin</span>':'')+'</div>'+
         (r&&r.statut!=="prevu"?ligne(a,r.sa,ga)+ligne(b,r.sb,gb)+(r.forfait?'<div style="font-size:11px;color:var(--red)">Forfait de '+authEsc(r.forfait==="a"?a:b)+'</div>':'')
           :'<div style="font-size:13px;font-weight:800;color:var(--txt);margin-top:2px">'+authEsc(a)+' <span style="color:var(--mut);font-weight:600">vs</span> '+authEsc(b)+'</div>');
@@ -450,7 +473,7 @@ function trnPdf(eid){
     doc.setFillColor.apply(doc,rgb); doc.rect(xH,y-5,W-24,7,"F");
     doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(255,255,255);
     doc.text("Heure",xH+2,y);
-    for(var t=0;t<T;t++) doc.text("Terrain "+(t+1),xH+wH+t*wT+2,y);
+    for(var t=0;t<T;t++) doc.text(trnTerrainTxt(c.typesTerrains,t+1),xH+wH+t*wT+2,y);
     y+=5;
   }
   ligneTitre();
@@ -490,7 +513,7 @@ function trnPublier(eid){
     clubId:window.CURRENT_CLUB_ID, eventId:String(e.id), titre:String(e.titre||"Tournoi").slice(0,100), date:e.date||"", dateFin:e.dateFin||"",
     heure:e.heure||"", lieu:String(e.lieu||"").slice(0,120), adresse:String(e.adresse||"").slice(0,140), type:"tournoi",
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
-    terrains:c.terrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
+    terrains:c.terrains, typesTerrains:c.typesTerrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
     jourJ:(typeof hasPremium!=='function'||hasPremium()), inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
@@ -552,7 +575,7 @@ function trnRendrePublic(el,p){
   }
   function rendre(){
     var sc=scores();
-    var c={equipes:p.equipes||[],terrains:p.terrains||1,resultats:sc.r,resolus:sc.resolus};
+    var c={equipes:p.equipes||[],terrains:p.terrains||1,typesTerrains:p.typesTerrains||[],resultats:sc.r,resolus:sc.resolus};
     el.innerHTML=evtEntete(p)+'<div style="padding:14px 16px 40px" id="trn-pub"></div>';
     var z=el.querySelector("#trn-pub");
     if(p.inscrOuvertes&&(p.catsInscr||[]).length&&typeof trnInscrireEquipe==="function"){

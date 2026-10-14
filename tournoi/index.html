@@ -312,6 +312,11 @@ var TRN=(function(){
     if(auj&&min(m.debut)!=null&&t>=min(m.debut)&&t<(min(m.fin)||min(m.debut)+20)) return "live";
     return "avenir";
   }
+  // Terrains intérieurs / extérieurs (copie de trnTerrainTxt, js/14e-tournoi.js).
+  function types(){ return P.typesTerrains||[]; }
+  function mixte(){ var t=types(); return t.some(function(x){ return x!==t[0]; }); }
+  function terTxt(t){ return "Terrain "+t+(mixte()?" · "+(types()[t-1]==="ext"?"extérieur":"intérieur"):""); }
+  function terType(t){ return mixte()?(types()[t-1]==="ext"?"☀️ ext.":"🏠 int."):""; }
   function favori(){ return ls("gm_trn_fav_"+PID)||""; }
 
   // ── Rendu ──
@@ -331,7 +336,8 @@ var TRN=(function(){
     document.getElementById("titre").textContent=P.titre||"Tournoi";
     document.getElementById("tv-titre").textContent=(P.titre||"Tournoi");
     var d=""; try{ d=new Date(String(P.date).slice(0,10)+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}); }catch(e){}
-    document.getElementById("meta").textContent=[d,P.lieu].filter(Boolean).join(" · ");
+    var tt=P.typesTerrains||[], ext=tt.length&&tt.every(function(x){ return x==="ext"; });
+    document.getElementById("meta").textContent=[d,P.lieu,ext?"terrains extérieurs":""].filter(Boolean).join(" · ");
     document.title=(P.titre||"Tournoi")+" · "+(P.nom||"");
     var direct=document.getElementById("direct");
     var auj=jourISO(maintenant())===String(P.date||"").slice(0,10);
@@ -349,7 +355,7 @@ var TRN=(function(){
     }
     var pill=st==="live"?'<span class="pill live">EN COURS</span>':st==="fin"?(m.phase==="finale"&&/finale/i.test(m.label)&&!/petite|demi|quart/i.test(m.label)?'<span class="pill fin2">🏆 FINALE</span>':'<span class="pill fin">TERMINÉ</span>'):"";
     return '<article class="m'+(st==="live"?" live":"")+((fav&&(aId===fav||bId===fav))?" fav":"")+'">'+
-      '<div><div class="m-h num">'+esc(m.debut||"")+'</div><div class="m-t">Terrain '+esc(m.terrain)+'</div></div>'+
+      '<div><div class="m-h num">'+esc(m.debut||"")+'</div><div class="m-t">Terrain '+esc(m.terrain)+'</div>'+(terType(m.terrain)?'<div class="m-t">'+terType(m.terrain)+'</div>':'')+'</div>'+
       '<div class="m-body"><div class="m-k">'+(opts.sansCat?"":esc(m.cat)+' · ')+esc(m.label||"")+' '+pill+'</div>'+
       ligne(a,m.aRef,r&&r.sa,ga,gb)+ligne(b,m.bRef,r&&r.sb,gb,ga)+
       (r&&r.forfait&&st==="fin"?'<div class="ff">Forfait de '+esc(r.forfait==="a"?a:b)+'</div>':'')+
@@ -359,7 +365,7 @@ var TRN=(function(){
     var h='<div class="filters">';
     if(D.cats.length>1) h+='<div class="chips">'+[""].concat(D.cats).map(function(c){ return '<button class="chip'+(c===catF?" on":"")+'" data-cat="'+esc(c)+'">'+esc(c||"Toutes catégories")+'</button>'; }).join("")+'</div>';
     var n=Number(P.terrains)||1;
-    if(n>1){ var t=[""]; for(var i=1;i<=n;i++) t.push(String(i)); h+='<div class="chips">'+t.map(function(x){ return '<button class="chip'+(x===terF?" on":"")+'" data-ter="'+x+'">'+(x?"Terrain "+x:"Tous les terrains")+'</button>'; }).join("")+'</div>'; }
+    if(n>1){ var t=[""]; for(var i=1;i<=n;i++) t.push(String(i)); h+='<div class="chips">'+t.map(function(x){ return '<button class="chip'+(x===terF?" on":"")+'" data-ter="'+x+'">'+(x?esc(terTxt(Number(x))):"Tous les terrains")+'</button>'; }).join("")+'</div>'; }
     return h+'</div>';
   }
   function vueMatchs(){
@@ -416,7 +422,7 @@ var TRN=(function(){
       var st=statut(prochain), adv=idEq(prochain,"a")===id?(nomEq(prochain,"b")||refTxt(prochain.bRef)):(nomEq(prochain,"a")||refTxt(prochain.aRef));
       var now=maintenant(), t=now.getHours()*60+now.getMinutes(), dans=min(prochain.debut)-t, auj=jourISO(now)===String(P.date||"").slice(0,10);
       h+='<div class="next"><div class="k">'+(st==="live"?"● Match en cours":"Prochain match"+(auj&&dans>0&&dans<180?" · dans "+(dans>=60?Math.floor(dans/60)+" h "+String(dans%60).padStart(2,"0"):dans+" min"):""))+'</div>'+
-        '<div class="vs">contre '+esc(adv)+'</div><div class="w">'+esc(prochain.debut)+' · Terrain '+esc(prochain.terrain)+' · '+esc(prochain.label)+'</div></div>';
+        '<div class="vs">contre '+esc(adv)+'</div><div class="w">'+esc(prochain.debut)+' · '+esc(terTxt(prochain.terrain))+' · '+esc(prochain.label)+'</div></div>';
     } else if(ms.length){
       h+='<div class="next"><div class="k">Tous ses matchs sont joués</div><div class="vs">Merci et bravo !</div></div>';
     }
@@ -449,9 +455,9 @@ var TRN=(function(){
       var ms=D.matchs.filter(function(m){ return String(m.terrain)===String(t); });
       var cur=ms.filter(function(m){ return statut(m)==="live"; })[0], nxt=ms.filter(function(m){ return statut(m)==="avenir"; })[0];
       var m=cur||nxt, r=m&&D.res[m.id]; if(m) affiches[m.id]=1;
-      if(!m){ h+='<div class="court"><div class="ct">Terrain '+t+'</div><div class="wait">Plus de match sur ce terrain.</div></div>'; continue; }
+      if(!m){ h+='<div class="court"><div class="ct">'+esc(terTxt(t))+'</div><div class="wait">Plus de match sur ce terrain.</div></div>'; continue; }
       var sc=cur&&r&&r.statut==="encours";
-      h+='<div class="court'+(cur?" live":"")+'"><div class="ct">Terrain '+t+' · '+esc(m.cat)+' · '+esc(m.label)+(cur?' <span class="pill live">EN COURS</span>':' · à '+esc(m.debut))+'</div>'+
+      h+='<div class="court'+(cur?" live":"")+'"><div class="ct">'+esc(terTxt(t))+' · '+esc(m.cat)+' · '+esc(m.label)+(cur?' <span class="pill live">EN COURS</span>':' · à '+esc(m.debut))+'</div>'+
         '<div class="tm"><div>'+esc(nomEq(m,"a")||refTxt(m.aRef))+'</div><div>'+esc(nomEq(m,"b")||refTxt(m.bRef))+'</div></div>'+
         '<div class="sc">'+(sc?'<div>'+esc(r.sa)+'</div><div>'+esc(r.sb)+'</div>':(cur?'<div style="font-size:3vh;color:#FFB070">⏱</div>':''))+'</div></div>';
     }
@@ -459,7 +465,7 @@ var TRN=(function(){
     var suite=D.matchs.filter(function(m){ return statut(m)==="avenir"&&!affiches[m.id]; }).slice(0,4);
     var derniers=D.matchs.filter(function(m){ return statut(m)==="fin"; }).slice(-3).reverse();
     document.getElementById("tv-next").innerHTML=(suite.length?suite.map(function(m){
-      return '<div class="tv-r"><div class="h">'+esc(m.debut)+'</div><div class="v">'+esc(nomEq(m,"a")||refTxt(m.aRef))+' – '+esc(nomEq(m,"b")||refTxt(m.bRef))+'<small>Terrain '+esc(m.terrain)+' · '+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join(""):"")+
+      return '<div class="tv-r"><div class="h">'+esc(m.debut)+'</div><div class="v">'+esc(nomEq(m,"a")||refTxt(m.aRef))+' – '+esc(nomEq(m,"b")||refTxt(m.bRef))+'<small>'+esc(terTxt(m.terrain))+' · '+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join(""):"")+
       derniers.map(function(m){ var r=D.res[m.id]; return '<div class="tv-r" style="opacity:.75"><div class="h" style="color:#7BD69B;font-size:2.4vh">FINI</div><div class="v">'+esc(nomEq(m,"a"))+' <span class="s">'+r.sa+' – '+r.sb+'</span> '+esc(nomEq(m,"b"))+'<small>'+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join("");
     // Classement : une poule à la fois, qui défile toutes les 12 s.
     var pp=[]; D.cats.forEach(function(c){ ((P.poules||{})[c]||[]).forEach(function(po){ pp.push([c,po]); }); });

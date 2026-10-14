@@ -206,7 +206,7 @@ function trnJourJ(zone,eid,refaire){
       var coul=x.statut==="termine"?"var(--grn)":x.statut==="encours"?"#d97706":"var(--bdr)";
       d.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+coul+";border-radius:10px;padding:8px 10px;margin-top:6px";
       var nA=trnNomMatch(cc,m,"a",resolus), nB=trnNomMatch(cc,m,"b",resolus);
-      d.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="min-width:0"><div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase">'+authEsc(m.debut+" · T"+m.terrain+" · "+m.cat+" · "+m.label)+'</div>'+
+      d.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="min-width:0"><div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase">'+authEsc(m.debut+" · "+trnTerrainTxt(cc.typesTerrains,m.terrain,true)+" · "+m.cat+" · "+m.label)+'</div>'+
         '<div style="font-size:13px;font-weight:800;color:var(--txt)">'+authEsc(nA)+' <span style="color:var(--mut)">'+(x.statut==="prevu"?"vs":(x.sa+" – "+x.sb))+'</span> '+authEsc(nB)+(x.forfait?' <span style="color:var(--red);font-size:11px">(forfait '+authEsc(x.forfait==="a"?nA:nB)+')</span>':'')+'</div></div>'+
         '<div style="text-align:right;flex-shrink:0"><div style="font-family:monospace;font-size:15px;font-weight:900;letter-spacing:1.5px;color:var(--dkg)">'+authEsc(x._code)+'</div>'+
         '<div style="font-size:10.5px;font-weight:800;color:'+coul+'">'+(x.statut==="termine"?"Clôturé":x.statut==="encours"?"En cours":"À venir")+'</div></div></div>';
@@ -366,7 +366,7 @@ function trnCodesPdf(eid,codes){
     var ms=c.matchs.filter(function(m){ return m.terrain===t&&parM[m.id]; }); if(!ms.length) continue;
     if(!premier) doc.addPage(); premier=false;
     var y=18;
-    doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor.apply(doc,rgb); doc.text((e.titre||"Tournoi")+" - Terrain "+t,14,y); y+=7;
+    doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor.apply(doc,rgb); doc.text((e.titre||"Tournoi")+" - "+trnTerrainTxt(trnCfg(e).typesTerrains,t),14,y); y+=7;
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110,110,110);
     doc.text("Codes de la table de marque : "+TRN_MARQUE_URL.replace("https://","")+"  -  à ne pas afficher au public",14,y); y+=10;
     ms.forEach(function(m){

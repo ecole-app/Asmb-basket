@@ -1,5 +1,18 @@
 [
   {
+    "v": "1791949329",
+    "titre": "Tournoi : terrains intérieurs ou extérieurs",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi › Journée et format : chaque terrain peut être intérieur ou extérieur. C'est indiqué sur le planning, le PDF, les codes de table de marque et la page publique du tournoi."
+      }
+    ]
+  },
+  {
     "v": "1791948531",
     "titre": "Événements : Standard et Premium",
     "points": [
