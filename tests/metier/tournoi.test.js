@@ -133,3 +133,36 @@ describe("Jour J : classements et qualifiés", () => {
     assert.equal(c2.trnCodeNet(" k7p-2xr "), "K7P2XR");
   });
 });
+
+describe("Équipe absente : forfait général", () => {
+  const j = charger(["js/14e-tournoi.js", "js/14f-tournoi-jourj.js"]);
+  const e4 = eq(4, "U11");
+  const conf = cfg(e4, { cats: { U11: { nbPoules: 1, suite: "finale", duree: 15 } } });
+  const g = j.trnGenerer(conf);
+  const poule = g.matchs.filter((m) => m.phase === "poule");
+  it("ses matchs non joués sont perdus 20-0 et elle a 0 point par forfait", () => {
+    const abs = e4[3].id, res = {};
+    // un match déjà joué avant son départ reste tel quel
+    const joue = poule.find((m) => m.a === abs || m.b === abs);
+    res[joue.id] = { sa: 30, sb: 10, statut: "termine" };
+    const ap = J(j.trnAppliquerAbsentes(g.matchs, g.poules, res, [abs]));
+    assert.deepEqual(ap.res[joue.id], { sa: 30, sb: 10, statut: "termine" });
+    poule.filter((m) => m !== joue && (m.a === abs || m.b === abs)).forEach((m) => {
+      const r = ap.res[m.id], cote = m.a === abs ? "a" : "b";
+      assert.equal(r.forfait, cote); assert.equal(cote === "a" ? r.sb : r.sa, 20);
+    });
+  });
+  it("qualifiée en finale : l'adversaire gagne par forfait", () => {
+    const abs = e4[0].id, res = {};
+    // l'équipe absente a tout gagné en poule, puis s'en va
+    poule.forEach((m) => { res[m.id] = m.a === abs ? { sa: 20, sb: 0, statut: "termine" } : m.b === abs ? { sa: 0, sb: 20, statut: "termine" } : { sa: 10, sb: 8, statut: "termine" }; });
+    const ap = J(j.trnAppliquerAbsentes(g.matchs, g.poules, res, [abs]));
+    const f = g.matchs.find((m) => m.label === "Finale"), r = ap.res[f.id], qui = ap.resolus[f.id];
+    assert.ok(qui.a === abs || qui.b === abs);
+    assert.equal(r.statut, "termine"); assert.equal(r.forfait, qui.a === abs ? "a" : "b");
+  });
+  it("sans absente : rien ne change", () => {
+    const ap = J(j.trnAppliquerAbsentes(g.matchs, g.poules, {}, []));
+    assert.deepEqual(ap.res, {});
+  });
+});

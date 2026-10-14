@@ -215,7 +215,7 @@ function trnOuvrir(eid){
       w.textContent="Équipes ou réglages modifiés depuis le dernier planning : pensez à le générer de nouveau.";
       zone.appendChild(w);
     }
-    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof trnJourJ==="function") trnJourJ(zone,eid); } else rendrePlanning(c);
+    if(onglet==="equipes") rendreEquipes(c); else if(onglet==="format") rendreFormat(c); else if(onglet==="jourj"){ if(typeof trnJourJ==="function") trnJourJ(zone,eid,rendre); } else rendrePlanning(c);
   }
   function champ(lab,el){ var g=document.createElement("div"); g.className="form-group"; var l=document.createElement("label"); l.className="form-label"; l.textContent=lab; g.appendChild(l); g.appendChild(el); return g; }
   function rendreEquipes(c){
@@ -478,7 +478,7 @@ function trnPublier(eid){
     nom:club.name||"", logo:club.logo||null, couleur:club.couleur||null, couleur2:club.couleur2||null,
     terrains:c.terrains, pause:c.pause, equipes:c.equipes.map(function(q){ return {id:q.id,nom:q.nom,club:q.club||"",cat:q.cat||""}; }),
     poules:(e.trn&&e.trn.poules)||{}, formats:(e.trn&&e.trn.formats)||{},
-    inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20),
+    inscrOuvertes:!!c.inscr.ouvert, catsInscr:(c.inscr.cats||[]).slice(0,20), absentes:((e.trn&&e.trn.absentes)||[]).slice(0,60),
     matchs:c.matchs.map(function(m){ var o={id:m.id,cat:m.cat,phase:m.phase,label:m.label,terrain:m.terrain,debut:m.debut,fin:m.fin,a:m.a||null,b:m.b||null}; if(m.poule) o.poule=m.poule; if(m.aRef) o.aRef=m.aRef; if(m.bRef) o.bRef=m.bRef; return o; }),
     majLe:Date.now()
   };
@@ -530,7 +530,10 @@ function trnRendrePublic(el,p){
     var r=Object.assign({},p.resultats||{}), maj=Number(p.resultatsLe)||0;
     Object.keys(live).forEach(function(mid){ var l=live[mid]; r[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; maj=Math.max(maj,Number(l.le)||0); });
     var res=Object.assign({},p.resolus||{});
-    try{ if(typeof trnResoudre==="function") Object.assign(res,trnResoudre(p.matchs||[],p.poules||{},r)); }catch(e){}
+    try{
+      if(typeof trnAppliquerAbsentes==="function"){ var ap=trnAppliquerAbsentes(p.matchs||[],p.poules||{},r,p.absentes||[]); r=ap.res; Object.assign(res,ap.resolus); }
+      else if(typeof trnResoudre==="function") Object.assign(res,trnResoudre(p.matchs||[],p.poules||{},r));
+    }catch(e){}
     return {r:r,resolus:res,maj:maj};
   }
   function rendre(){

@@ -1,5 +1,25 @@
 [
   {
+    "v": "1791947505",
+    "titre": "Tournoi : équipes absentes",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Tournoi, onglet Jour J : « 📋 Appel des équipes » avant le premier match (les absentes sont retirées, le planning et les codes sont refaits) ; une fois le tournoi commencé, « 🚫 Équipe absente ou partie » donne forfait 20-0 sur tous ses matchs restants, phases finales comprises."
+      },
+      {
+        "roles": [
+          "parent",
+          "joueur"
+        ],
+        "texte": "Page du tournoi : badge « Absente » et forfaits affichés, classement à jour."
+      }
+    ]
+  },
+  {
     "v": "1791946829",
     "titre": "Page tournoi et rappels bénévoles",
     "points": [

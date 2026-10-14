@@ -99,6 +99,30 @@ function trnResoudre(matchs,poules,res){
   return connus;
 }
 
+// Équipes absentes (forfait général) : tout match non clôturé où elles jouent
+// compte comme un forfait 20-0, y compris les phases finales dès que l'équipe
+// y est qualifiée. Calcul « virtuel » : la page publique et le classement sont
+// justes même si personne n'a encore enregistré le forfait. (Recopié dans tournoi/index.html.)
+function trnAppliquerAbsentes(matchs,poules,res,absentes){
+  var abs={}; (absentes||[]).forEach(function(id){ abs[id]=1; });
+  var r=Object.assign({},res||{}), resolus=trnResoudre(matchs,poules,r);
+  if(!Object.keys(abs).length) return {res:r,resolus:resolus};
+  for(var tour=0;tour<6;tour++){
+    var change=false;
+    matchs.forEach(function(m){
+      var x=r[m.id]; if(x&&x.statut==="termine") return;
+      var a=(resolus[m.id]&&resolus[m.id].a)||m.a, b=(resolus[m.id]&&resolus[m.id].b)||m.b;
+      if(!(a&&abs[a])&&!(b&&abs[b])) return;
+      var fa=!!(a&&abs[a]);
+      r[m.id]={sa:fa?0:20,sb:fa?20:0,statut:"termine",forfait:fa?"a":"b",auto:true}; change=true;
+    });
+    if(!change) break;
+    resolus=trnResoudre(matchs,poules,r);
+  }
+  return {res:r,resolus:resolus};
+}
+function trnAbsentes(e){ return ((e&&e.trn&&e.trn.absentes)||[]).slice(); }
+
 // ── Staff : préparer les codes de table de marque ─────────────────────
 function trnListerCodes(eid){
   return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"trn_matchs"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID),window.fbWhere("eventId","==",String(eid)))).then(function(snap){
@@ -139,7 +163,7 @@ function trnPreparerCodes(eid,resolus){
 }
 
 // ── Staff : onglet « Jour J » (dans la fenêtre Tournoi) ────────────────
-function trnJourJ(zone,eid){
+function trnJourJ(zone,eid,refaire){
   var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
   var c=trnCfg(e);
   if(!c.matchs.length){ var v=document.createElement("div"); v.style.cssText="font-size:12.5px;color:var(--mut);line-height:1.5"; v.textContent="Générez d'abord le planning (onglet Planning)."; zone.appendChild(v); return; }
@@ -153,9 +177,25 @@ function trnJourJ(zone,eid){
   var codes=[], unsub=null, pousse=null, dernier="";
   row.appendChild(gmBtn("Table de marque : lien + QR","primary",function(){ trnPartagerMarque(); }));
   row.appendChild(gmBtn("Codes à imprimer (PDF)","soft",function(){ trnCodesPdf(eid,codes); }));
+  // Équipes absentes : appel avant le premier match, forfait général ensuite.
+  var rowAbs=gmRow(zone); rowAbs.style.marginTop="6px";
+  var bAppel=gmBtn("📋 Appel des équipes","soft",function(){ trnAppel(eid,codes,refaire); });
+  var bAbs=gmBtn("🚫 Équipe absente ou partie","danger",function(){ trnDeclarerAbsente(eid,codes,rendre); });
+  rowAbs.appendChild(bAppel); rowAbs.appendChild(bAbs);
+  var ecrits={};
   function res(){ var r={}; codes.forEach(function(x){ r[x.matchId]={sa:x.sa||0,sb:x.sb||0,statut:x.statut,forfait:x.forfait||""}; }); return r; }
   function rendre(){
-    var e2=getEvents().find(function(x){ return x.id===eid; })||e, cc=trnCfg(e2), r=res(), resolus=trnResoudre(cc.matchs,(e2.trn&&e2.trn.poules)||{},r);
+    var e2=getEvents().find(function(x){ return x.id===eid; })||e, cc=trnCfg(e2), abs=trnAbsentes(e2);
+    var ap=trnAppliquerAbsentes(cc.matchs,(e2.trn&&e2.trn.poules)||{},res(),abs), r=ap.res, resolus=ap.resolus;
+    var commence=codes.some(function(x){ return x.statut!=="prevu"; });
+    bAppel.style.display=commence?"none":""; bAbs.style.display=commence?"":"none";
+    // Forfaits des absentes pas encore enregistrés (ex. finale où l'équipe vient de se qualifier).
+    codes.forEach(function(x){
+      var v=r[x.matchId]; if(!v||!v.auto||x.statut==="termine"||ecrits[x._code]) return;
+      ecrits[x._code]=1;
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"trn_matchs",x._code),{sa:v.sa,sb:v.sb,statut:"termine",forfait:v.forfait,clotureLe:Date.now()})
+        .then(function(){ trnLiveEcrire(x,v.sa,v.sb,{forfait:v.forfait}); }).catch(function(){ delete ecrits[x._code]; });
+    });
     var parM={}; codes.forEach(function(x){ parM[x.matchId]=x; });
     var nbT=codes.filter(function(x){ return x.statut==="termine"; }).length, nbE=codes.filter(function(x){ return x.statut==="encours"; }).length;
     etat.textContent=codes.length?(nbT+" match"+(nbT>1?"s":"")+" terminé"+(nbT>1?"s":"")+" · "+nbE+" en cours · "+(codes.length-nbT-nbE)+" à venir"):"Codes en préparation…";
@@ -199,6 +239,89 @@ function trnJourJ(zone,eid){
       var l2=[]; snap.forEach(function(d){ var x=d.data(); x._code=d.id; l2.push(x); }); codes=l2; rendre();
     },function(){});
   }).catch(function(err){ etat.textContent="Préparation des codes impossible ("+((err&&err.code)||"réseau")+")."; });
+}
+// ── Appel avant le premier match : les absentes sont retirées, le planning est refait ──
+function trnAppel(eid,codes,refaire){
+  var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
+  if((codes||[]).some(function(x){ return x.statut!=="prevu"; })) return askAlert("Le tournoi a commencé : utilisez « Équipe absente ou partie ».");
+  var c=trnCfg(e), s=gmSheet("Appel des équipes");
+  var t=document.createElement("div"); t.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+  t.textContent="Décochez les équipes qui ne sont pas venues. Elles seront retirées et le planning refait avec les équipes présentes (nouveaux codes de table de marque).";
+  s.body.appendChild(t);
+  var coches=[];
+  trnCatsDe(c.equipes).forEach(function(cat){
+    gmSection(s.body,cat);
+    c.equipes.filter(function(q){ return (q.cat||"Sans catégorie")===cat; }).forEach(function(q){
+      var l=document.createElement("label"); l.style.cssText="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);font-size:14px;font-weight:700;color:var(--txt);cursor:pointer";
+      var i=document.createElement("input"); i.type="checkbox"; i.checked=true; i.style.cssText="width:20px;height:20px";
+      var n=document.createElement("span"); n.style.flex="1"; n.textContent=q.nom;
+      var st=document.createElement("span"); st.style.cssText="font-size:11px;font-weight:800";
+      function maj(){ st.textContent=i.checked?"Présente":"Absente"; st.style.color=i.checked?"var(--grn)":"var(--red)"; l.style.opacity=i.checked?"1":".65"; }
+      i.addEventListener("change",maj); maj();
+      l.appendChild(i); l.appendChild(n); l.appendChild(st); s.body.appendChild(l);
+      coches.push({q:q,i:i});
+    });
+  });
+  gmRow(s.body).appendChild(gmBtn("Valider l'appel","primary",function(){
+    var absentes=coches.filter(function(o){ return !o.i.checked; }).map(function(o){ return o.q; });
+    if(!absentes.length){ s.modal.remove(); showToast("Toutes les équipes sont là"); return; }
+    var restantes=c.equipes.filter(function(q){ return absentes.indexOf(q)<0; });
+    var seules=trnCatsDe(c.equipes).filter(function(k){ return restantes.filter(function(q){ return (q.cat||"Sans catégorie")===k; }).length===1; });
+    askConfirm(absentes.length+" équipe"+(absentes.length>1?"s absentes":" absente")+" : "+absentes.map(function(q){ return q.nom; }).join(", ")+". Le planning est refait et les codes de table de marque changent (réimprimez la feuille des codes)."+
+      (seules.length?" Attention : il ne reste qu'une équipe en "+seules.join(", ")+", sa catégorie n'aura pas de match.":""),{confirmText:"Refaire le planning"}).then(function(ok){
+      if(!ok) return;
+      var c2=Object.assign({},c,{equipes:restantes}), g=trnGenerer(c2);
+      trnSauver(eid,{equipes:restantes,absentesAppel:(e.trn.absentesAppel||[]).concat(absentes.map(function(q){ return {id:q.id,nom:q.nom,cat:q.cat||""}; })),matchs:g.matchs,poules:g.poules,formats:g.formats,genereLe:Date.now()},true);
+      s.modal.remove();
+      // Anciens codes supprimés (aucun match n'a commencé), puis nouveaux codes et page publique.
+      trnListerCodes(eid).then(function(exist){
+        var bb=window.fbWriteBatch(); exist.forEach(function(x){ bb.delete(window.fbDoc(window.fbDb,"trn_matchs",x._code)); });
+        return exist.length?bb.commit():null;
+      }).then(function(){ return trnPreparerCodes(eid,null); }).then(function(){ return trnPublier(eid); }).then(function(){
+        showToast("Planning refait : "+g.matchs.length+" matchs, fin vers "+g.finReelle);
+        if(g.hors) askAlert(g.hors+" match"+(g.hors>1?"s finissent":" finit")+" après "+c.fin+" (fin réelle : "+g.finReelle+").");
+        if(typeof refaire==="function") refaire();
+      }).catch(function(err){ askAlert("Planning refait, mais les codes n'ont pas pu être mis à jour ("+((err&&err.code)||"réseau")+"). Rouvrez l'onglet Jour J."); if(typeof refaire==="function") refaire(); });
+    });
+  }));
+}
+// ── Tournoi commencé : forfait général d'une équipe (ses matchs restants perdus 20-0) ──
+function trnDeclarerAbsente(eid,codes,apres){
+  var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
+  var c=trnCfg(e), abs=trnAbsentes(e), s=gmSheet("Équipe absente ou partie");
+  var t=document.createElement("div"); t.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+  t.textContent="Les matchs déjà joués restent. Tous ses matchs restants (phases finales comprises) sont perdus par forfait 20-0 : 0 point au classement, l'adversaire gagne.";
+  s.body.appendChild(t);
+  trnCatsDe(c.equipes).forEach(function(cat){
+    gmSection(s.body,cat);
+    c.equipes.filter(function(q){ return (q.cat||"Sans catégorie")===cat; }).forEach(function(q){
+      var d=document.createElement("div"); d.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border-radius:10px;border:1px solid var(--bdr);background:var(--card)";
+      var n=document.createElement("div"); n.style.cssText="flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--txt)"; n.textContent=q.nom;
+      d.appendChild(n);
+      if(abs.indexOf(q.id)>=0){
+        var tag=document.createElement("span"); tag.style.cssText="font-size:11px;font-weight:800;color:var(--red)"; tag.textContent="Absente";
+        d.appendChild(tag);
+        d.appendChild(gmBtn("Annuler","ghost",function(){
+          askConfirm("« "+q.nom+" » est revenue ? Les forfaits déjà enregistrés restent : corrigez les scores un par un si besoin.",{confirmText:"Elle rejoue"}).then(function(ok){
+            if(!ok) return; trnSauver(eid,{absentes:trnAbsentes(getEvents().find(function(x){ return x.id===eid; })).filter(function(id){ return id!==q.id; })},true);
+            trnPublier(eid).catch(function(){}); s.modal.remove(); showToast(q.nom+" rejoue"); if(typeof apres==="function") apres();
+          });
+        }));
+      } else {
+        d.appendChild(gmBtn("Absente","danger",function(){
+          askConfirm("Forfait général de « "+q.nom+" » : tous ses matchs restants sont perdus 20-0.",{danger:true,confirmText:"Déclarer forfait"}).then(function(ok){
+            if(!ok) return;
+            var e2=getEvents().find(function(x){ return x.id===eid; });
+            trnSauver(eid,{absentes:trnAbsentes(e2).concat([q.id])},true);
+            trnPublier(eid).catch(function(){});
+            s.modal.remove(); showToast("Forfait général : "+q.nom); if(typeof apres==="function") apres();
+            // Les forfaits des matchs déjà connus sont enregistrés par l'écran Jour J (resynchro).
+          });
+        }));
+      }
+      s.body.appendChild(d);
+    });
+  });
 }
 function trnCorriger(x,nA,nB){
   var s=gmSheet("Score · "+x.label), g=document.createElement("div"); g.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px";

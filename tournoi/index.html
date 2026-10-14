@@ -76,6 +76,7 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 .pill{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;letter-spacing:.4px}
 .pill.live{background:var(--live);color:#fff}
 .pill.fin{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.pill.abs{background:color-mix(in srgb,#c0392b 16%,transparent);color:#c0392b;vertical-align:middle}
 .pill.fin2{background:color-mix(in srgb,var(--or) 20%,transparent);color:var(--or)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:4px}
 .row .n{min-width:0;overflow-wrap:anywhere;font-weight:600;font-size:15px}
@@ -261,17 +262,38 @@ var TRN=(function(){
     return connus;
   }
 
+  // Équipes absentes : copie de trnAppliquerAbsentes (js/14f-tournoi-jourj.js).
+  function trnAppliquerAbsentes(matchs,poules,res,absentes){
+    var abs={}; (absentes||[]).forEach(function(id){ abs[id]=1; });
+    var r=Object.assign({},res||{}), resolus=trnResoudre(matchs,poules,r);
+    if(!Object.keys(abs).length) return {res:r,resolus:resolus};
+    for(var tour=0;tour<6;tour++){
+      var change=false;
+      matchs.forEach(function(m){
+        var x=r[m.id]; if(x&&x.statut==="termine") return;
+        var a=(resolus[m.id]&&resolus[m.id].a)||m.a, b=(resolus[m.id]&&resolus[m.id].b)||m.b;
+        if(!(a&&abs[a])&&!(b&&abs[b])) return;
+        var fa=!!(a&&abs[a]);
+        r[m.id]={sa:fa?0:20,sb:fa?20:0,statut:"termine",forfait:fa?"a":"b",auto:true}; change=true;
+      });
+      if(!change) break;
+      resolus=trnResoudre(matchs,poules,r);
+    }
+    return {res:r,resolus:resolus};
+  }
   // ── Données dérivées ──
   var D={};
   function calculer(){
     var res=Object.assign({},P.resultats||{}), maj=Number(P.resultatsLe)||0;
     Object.keys(LIVE).forEach(function(mid){ var l=LIVE[mid]; res[mid]={sa:Number(l.sa)||0,sb:Number(l.sb)||0,statut:"termine",forfait:l.forfait||""}; maj=Math.max(maj,Number(l.le)||0); });
     var matchs=(P.matchs||[]).slice().sort(function(a,b){ return (min(a.debut)-min(b.debut))||(a.terrain-b.terrain); });
-    var resolus=Object.assign({},P.resolus||{},trnResoudre(matchs,P.poules||{},res));
+    var ap=trnAppliquerAbsentes(matchs,P.poules||{},res,P.absentes||[]); res=ap.res;
+    var resolus=Object.assign({},P.resolus||{},ap.resolus);
+    var absentes={}; (P.absentes||[]).forEach(function(id){ absentes[id]=1; });
     var eqs={}; (P.equipes||[]).forEach(function(q){ eqs[q.id]=q; });
     var labels={}; matchs.forEach(function(m){ labels[m.id]=m.label; });
     var cats=Object.keys(P.poules||{}); if(!cats.length){ (P.equipes||[]).forEach(function(q){ if(q.cat&&cats.indexOf(q.cat)<0) cats.push(q.cat); }); }
-    D={res:res,maj:maj,matchs:matchs,resolus:resolus,eqs:eqs,labels:labels,cats:cats};
+    D={res:res,maj:maj,matchs:matchs,resolus:resolus,eqs:eqs,labels:labels,cats:cats,absentes:absentes};
   }
   function idEq(m,c){ return (D.resolus[m.id]&&D.resolus[m.id][c])||m[c]||null; }
   function refTxt(r){
@@ -280,6 +302,7 @@ var TRN=(function(){
     return (r.r==="vainq"?"Vainqueur ":"Perdant ")+String(D.labels[r.match]||"match").toLowerCase();
   }
   function nomEq(m,c){ var id=idEq(m,c); return id?(D.eqs[id]?D.eqs[id].nom:"?"):null; }
+  function badgeAbs(id){ return D.absentes&&D.absentes[id]?' <span class="pill abs">ABSENTE</span>':''; }
   // Statut : terminé (score), en cours (score saisi, ou dans le créneau horaire), à venir.
   function statut(m){
     var r=D.res[m.id];
@@ -359,7 +382,7 @@ var TRN=(function(){
     var fini=ms.length&&ms.every(function(m){ var r=D.res[m.id]; return r&&r.statut==="termine"; });
     var qual=D.matchs.some(function(m){ return m.cat===cat&&m.phase==="finale"; });
     return '<div class="cl"><h3>Poule '+esc(po.nom)+(fini?'<small>✓ terminée</small>':'')+'</h3><table class="tbl"><thead><tr><th>Équipe</th><th>J</th><th>G</th><th>P</th><th>+/-</th><th>Pts</th></tr></thead><tbody>'+
-      l.map(function(x){ var q=D.eqs[x.id]||{}; return '<tr'+(x.id===moi?' class="me"':'')+'><td><span class="rk'+(qual&&fini&&x.rang<=2?" q":"")+'">'+x.rang+'</span>'+esc(q.nom||"?")+'</td><td>'+x.j+'</td><td>'+x.g+'</td><td>'+x.p+'</td><td>'+(x.diff>0?"+":"")+x.diff+'</td><td class="pts">'+x.pts+'</td></tr>'; }).join("")+
+      l.map(function(x){ var q=D.eqs[x.id]||{}; return '<tr'+(x.id===moi?' class="me"':'')+'><td><span class="rk'+(qual&&fini&&x.rang<=2?" q":"")+'">'+x.rang+'</span>'+esc(q.nom||"?")+badgeAbs(x.id)+'</td><td>'+x.j+'</td><td>'+x.g+'</td><td>'+x.p+'</td><td>'+(x.diff>0?"+":"")+x.diff+'</td><td class="pts">'+x.pts+'</td></tr>'; }).join("")+
       '</tbody></table></div>';
   }
   function vueClassements(){
@@ -381,13 +404,13 @@ var TRN=(function(){
       var parCat={}; tous.forEach(function(q){ (parCat[q.cat||"Équipes"]=parCat[q.cat||"Équipes"]||[]).push(q); });
       return '<h2 class="sec" style="margin-top:6px">Choisis ton équipe <small>pour ne voir que ses matchs</small></h2>'+
         Object.keys(parCat).map(function(c){ return '<h3 style="font:700 13px var(--f-body);color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px">'+esc(c)+'</h3><div class="teams">'+
-          parCat[c].map(function(q){ return '<button class="tbtn" data-voir="'+esc(q.id)+'">'+esc(q.nom)+(q.club?'<small>'+esc(q.club)+'</small>':'')+'</button>'; }).join("")+'</div>'; }).join("");
+          parCat[c].map(function(q){ return '<button class="tbtn" data-voir="'+esc(q.id)+'">'+esc(q.nom)+badgeAbs(q.id)+(q.club?'<small>'+esc(q.club)+'</small>':'')+'</button>'; }).join("")+'</div>'; }).join("");
     }
     var q=D.eqs[id];
     if(!q) return choix();
     var ms=D.matchs.filter(function(m){ return idEq(m,"a")===id||idEq(m,"b")===id; });
     var prochain=ms.filter(function(m){ return statut(m)!=="fin"; })[0];
-    var h='<div class="team-hd"><div style="min-width:0"><div class="nm">'+esc(q.nom)+'</div><div class="sub">'+esc([q.club,q.cat].filter(Boolean).join(" · "))+'</div></div>'+
+    var h='<div class="team-hd"><div style="min-width:0"><div class="nm">'+esc(q.nom)+badgeAbs(id)+'</div><div class="sub">'+esc([q.club,q.cat].filter(Boolean).join(" · "))+'</div></div>'+
       '<button class="star'+(id===fav?" on":"")+'" data-fav="'+esc(id)+'">'+(id===fav?"★ Mon équipe":"☆ C'est mon équipe")+'</button></div>';
     if(prochain){
       var st=statut(prochain), adv=idEq(prochain,"a")===id?(nomEq(prochain,"b")||refTxt(prochain.bRef)):(nomEq(prochain,"a")||refTxt(prochain.aRef));
