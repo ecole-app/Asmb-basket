@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791982511",
+    "titre": "Version ordinateur : menu à votre main",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur : « Personnaliser » en bas du menu pour masquer ou réordonner les rubriques, « Réduire le menu » pour ne garder que les icônes, les équipes en cartes avec leur effectif, et la messagerie sur 2 colonnes (canaux à gauche, discussion à droite)."
+      }
+    ]
+  },
+  {
     "v": "1791982351",
     "titre": "Pôles : fiche profil sportif",
     "points": [

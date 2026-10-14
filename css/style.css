@@ -285,6 +285,32 @@ html.gm-desk #poleCards>.card,html.gm-desk #adminCards>.admin-card{margin:0}
 .gs-item:focus-visible{outline:3px solid var(--ltg);outline-offset:1px}
 .gs-lbl{flex:1;min-width:0}
 .gs-badge{min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+/* Version ordinateur, étape 2 : pied du menu, menu replié (icônes seules) */
+.gs-pied{margin-top:auto;padding-top:12px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:2px}
+.gs-outil{color:var(--mut);font-size:13px}
+html.gm-desk.gm-desk-mini .gm-side{width:72px;padding:14px 8px 18px}
+html.gm-desk.gm-desk-mini body{padding-left:72px}
+html.gm-desk.gm-desk-mini .gs-club{justify-content:center;padding:4px 0 12px}
+html.gm-desk.gm-desk-mini .gs-club-txt,html.gm-desk.gm-desk-mini .gs-lbl{display:none}
+html.gm-desk.gm-desk-mini .gs-grp{font-size:0;padding:0;margin:8px 10px;height:1px;background:var(--bdr)}
+html.gm-desk.gm-desk-mini .gs-item{justify-content:center;padding:0;position:relative}
+html.gm-desk.gm-desk-mini .gs-badge{position:absolute;top:4px;right:6px;min-width:16px;height:16px;font-size:9.5px;padding:0 4px}
+/* Équipes en cartes (effectif déplié) */
+html.gm-desk #teamList{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;padding:16px 24px 48px!important;align-items:start}
+html.gm-desk #teamList .team-card{margin:0;border-top:4px solid var(--tc,var(--dkg))}
+html.gm-desk #teamList .empty-state{grid-column:1/-1}
+/* Messagerie sur 2 colonnes : canaux à gauche, discussion à droite */
+html.gm-desk.gm-chat2 .main{display:flex;overflow:hidden}
+html.gm-desk.gm-chat2 .main>#scr-communaute{display:block!important;flex:0 0 340px;width:340px;max-width:none;margin:0;height:100%;overflow-y:auto;border-right:1px solid var(--bdr)}
+html.gm-desk.gm-chat2 .main>#scr-communaute #channel-list{padding-bottom:24px!important}
+html.gm-desk.gm-chat2 .main>#scr-chat.on{flex:1;min-width:0;max-width:none;margin:0;height:100%}
+html.gm-desk.gm-chat2 #chat-input-bar,html.gm-desk.gm-chat2 #chat-reply-bar{left:600px!important}
+html.gm-desk.gm-chat2 #chat-mention-list{left:612px!important}
+html.gm-desk #chat-input-bar{bottom:0!important}
+html.gm-desk #chat-reply-bar{bottom:58px!important}
+html.gm-desk #chat-mention-list{bottom:70px!important}
+html.gm-desk.gm-desk-mini.gm-chat2 #chat-input-bar,html.gm-desk.gm-desk-mini.gm-chat2 #chat-reply-bar{left:412px!important}
+html.gm-desk.gm-desk-mini.gm-chat2 #chat-mention-list{left:424px!important}
 /* Version ordinateur : accueil du dirigeant (js/03c-bureau-accueil.js) */
 #desk-home{display:none}
 html.gm-desk #desk-home{display:block;padding:30px 32px 48px}

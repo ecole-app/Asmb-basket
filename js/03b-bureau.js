@@ -57,6 +57,8 @@ function gmDeskSync(){
   var on=!!(GM_DESK_MQ&&GM_DESK_MQ.matches) && gmDeskEstDirigeant();
   var avant=gmDeskOn();
   document.documentElement.classList.toggle("gm-desk", on);
+  document.documentElement.classList.toggle("gm-desk-mini", on&&gmDeskPrefs().mini);
+  if(!on) document.documentElement.classList.remove("gm-chat2");
   if(avant!==on){
     var scr=document.querySelector(".scr.on"), f=scr&&GM_DESK_REDESSIN[scr.id.replace(/^scr-/,"")];
     if(f&&typeof window[f]==="function") try{ window[f](); }catch(e){}
@@ -71,7 +73,69 @@ if(GM_DESK_MQ){
   else if(GM_DESK_MQ.addListener) GM_DESK_MQ.addListener(gmDeskSync);
 }
 
+// Préférences du menu (par appareil) : ordre dans chaque groupe, rubriques
+// masquées, menu replié (icônes seules).
+var GM_DESK_FIXES=["accueil","admin","parametres"]; // jamais masquables
+function gmDeskPrefs(){
+  try{ var o=JSON.parse(localStorage.getItem("gm_desk_prefs")||"{}")||{}; return {ordre:o.ordre||[],masques:o.masques||[],mini:!!o.mini}; }
+  catch(e){ return {ordre:[],masques:[],mini:false}; }
+}
+function gmDeskPrefsSave(p){ try{ localStorage.setItem("gm_desk_prefs",JSON.stringify(p)); }catch(e){} }
+// Rubriques dans l'ordre choisi, groupes conservés (l'ordre ne change qu'à l'intérieur d'un groupe).
+function gmDeskItemsOrdonnes(){
+  var pr=gmDeskPrefs(), grps=[];
+  GM_DESK_ITEMS.forEach(function(it){ if(grps.indexOf(it.grp)<0) grps.push(it.grp); });
+  function rang(it){ var i=pr.ordre.indexOf(it.id); return i<0?1000+GM_DESK_ITEMS.indexOf(it):i; }
+  return GM_DESK_ITEMS.slice().sort(function(a,b){ return grps.indexOf(a.grp)-grps.indexOf(b.grp)||rang(a)-rang(b); });
+}
+function gmDeskMini(on){
+  var pr=gmDeskPrefs(); pr.mini=(on===undefined)?!pr.mini:!!on; gmDeskPrefsSave(pr);
+  document.documentElement.classList.toggle("gm-desk-mini",pr.mini&&gmDeskOn());
+  gmDeskRender();
+}
+function gmDeskPersonnaliser(){
+  var s=gmSheet("Personnaliser le menu");
+  var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+  intro.textContent="Décochez les rubriques à masquer et réordonnez-les avec les flèches. Réglage propre à cet ordinateur.";
+  var list=document.createElement("div");
+  s.body.appendChild(intro); s.body.appendChild(list);
+  var pr=gmDeskPrefs(), items=gmDeskItemsOrdonnes().filter(gmDeskVisibleDroits), masques=pr.masques.slice();
+  function peindre(){
+    list.innerHTML=""; var grp=null;
+    items.forEach(function(it,i){
+      if(it.grp!==grp){ grp=it.grp; var g=document.createElement("div"); g.style.cssText="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mut);padding:12px 0 4px"; g.textContent=grp; list.appendChild(g); }
+      var r=document.createElement("div"); r.style.cssText="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr)";
+      var fixe=GM_DESK_FIXES.indexOf(it.id)>=0;
+      var x=document.createElement("input"); x.type="checkbox"; x.checked=masques.indexOf(it.id)<0; x.disabled=fixe; x.setAttribute("aria-label","Afficher "+it.label);
+      x.style.cssText="width:18px;height:18px;accent-color:var(--dkg);flex-shrink:0";
+      x.addEventListener("change",function(){ if(x.checked) masques=masques.filter(function(m){ return m!==it.id; }); else masques.push(it.id); });
+      var l=document.createElement("div"); l.style.cssText="flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--txt)"; l.textContent=it.label+(fixe?" (toujours affichée)":"");
+      r.appendChild(x); r.appendChild(l);
+      [["↑",-1],["↓",1]].forEach(function(a){
+        var j=i+a[1], ok=items[j]&&items[j].grp===it.grp;
+        var b=document.createElement("button"); b.type="button"; b.textContent=a[0]; b.disabled=!ok; b.setAttribute("aria-label",(a[1]<0?"Monter ":"Descendre ")+it.label);
+        b.style.cssText="width:34px;height:34px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:15px;font-weight:800;cursor:"+(ok?"pointer":"default")+";opacity:"+(ok?1:.35);
+        b.addEventListener("click",function(){ if(!ok) return; var t=items[i]; items[i]=items[j]; items[j]=t; peindre(); });
+        r.appendChild(b);
+      });
+      list.appendChild(r);
+    });
+  }
+  peindre();
+  var row=gmRow(s.body);
+  row.appendChild(gmBtn("Enregistrer","primary",function(){
+    var p=gmDeskPrefs(); p.ordre=items.map(function(it){ return it.id; }); p.masques=masques.filter(function(m){ return GM_DESK_FIXES.indexOf(m)<0; });
+    gmDeskPrefsSave(p); s.modal.remove(); gmDeskRender(); showToast("Menu enregistré");
+  }));
+  row.appendChild(gmBtn("Par défaut","soft",function(){
+    var p=gmDeskPrefs(); p.ordre=[]; p.masques=[]; gmDeskPrefsSave(p); s.modal.remove(); gmDeskRender(); showToast("Menu par défaut");
+  }));
+}
 function gmDeskVisible(it){
+  if(gmDeskPrefs().masques.indexOf(it.id)>=0 && GM_DESK_FIXES.indexOf(it.id)<0) return false;
+  return gmDeskVisibleDroits(it);
+}
+function gmDeskVisibleDroits(it){
   if(it.mod){
     if(typeof ADMIN_MODULES==="undefined" || !ADMIN_MODULES.some(function(m){return m.id===it.mod;})) return false;
     if(typeof hasModulePermission==="function" && !hasModulePermission(it.mod)) return false;
@@ -96,7 +160,14 @@ function gmDeskOuvrir(id){
 }
 // Appelé par showScr : la rubrique de l'écran affiché s'allume.
 function gmDeskEcran(scr){
-  if(!document.documentElement.classList.contains("gm-desk")) return;
+  if(!document.documentElement.classList.contains("gm-desk")){ document.documentElement.classList.remove("gm-chat2"); return; }
+  // Messagerie sur 2 colonnes : la liste des canaux reste à gauche de la discussion.
+  var deux=(scr==="chat");
+  document.documentElement.classList.toggle("gm-chat2",deux);
+  if(deux&&typeof buildCommunaute==="function"){
+    var cl=document.getElementById("channel-list");
+    if(cl&&!cl.querySelector("[onclick],button,.ch-item,.channel-item")) try{ buildCommunaute(); }catch(e){}
+  }
   var it=GM_DESK_ITEMS.find(function(x){ return x.scr.indexOf(scr)>=0; });
   if(it) GM_DESK_ACTIF=it.id;
   gmDeskRender();
@@ -109,13 +180,16 @@ function gmDeskRender(){
     '<div class="gs-club-txt"><div class="gs-club-nom">'+authEsc(nom||"Mon club")+'</div>'+
     '<div class="gs-club-sub">Saison '+authEsc((typeof getCurrentSeason==="function")?getCurrentSeason():"")+'</div></div></div><nav class="gs-nav" aria-label="Menu du club">';
   var grp=null;
-  GM_DESK_ITEMS.filter(gmDeskVisible).forEach(function(it){
+  var mini=gmDeskPrefs().mini;
+  gmDeskItemsOrdonnes().filter(gmDeskVisible).forEach(function(it){
     if(it.grp!==grp){ grp=it.grp; h+='<div class="gs-grp">'+authEsc(grp)+'</div>'; }
     var n=gmDeskBadge(it);
-    h+='<button type="button" class="gs-item'+(it.id===GM_DESK_ACTIF?" on":"")+'" onclick="gmDeskOuvrir(\''+it.id+'\')"'+(it.id===GM_DESK_ACTIF?' aria-current="page"':'')+'>'+
+    h+='<button type="button" class="gs-item'+(it.id===GM_DESK_ACTIF?" on":"")+'" onclick="gmDeskOuvrir(\''+it.id+'\')"'+(it.id===GM_DESK_ACTIF?' aria-current="page"':'')+(mini?' title="'+authEsc(it.label)+'" aria-label="'+authEsc(it.label)+'"':'')+'>'+
       '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(GM_DESK_SVG[it.ic]||"")+'</svg>'+
       '<span class="gs-lbl">'+authEsc(it.label)+'</span>'+(n?'<span class="gs-badge">'+n+'</span>':'')+'</button>';
   });
-  h+='</nav>';
+  h+='</nav><div class="gs-pied">'+
+    '<button type="button" class="gs-item gs-outil" onclick="gmDeskPersonnaliser()" title="Personnaliser le menu" aria-label="Personnaliser le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="gs-lbl">Personnaliser</span></button>'+
+    '<button type="button" class="gs-item gs-outil" onclick="gmDeskMini()" title="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-label="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-expanded="'+(!mini)+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(mini?'<path d="m10 6 6 6-6 6"/>':'<path d="m14 6-6 6 6 6"/>')+'</svg><span class="gs-lbl">Réduire le menu</span></button></div>';
   side.innerHTML=h;
 }

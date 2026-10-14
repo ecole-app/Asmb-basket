@@ -340,7 +340,7 @@ function buildTeams(){
     var col=CAT_COLORS[t.cat]||"#1A2E5A";
     var members=players.filter(function(p){return (t.members||[]).includes(p.id);});
     var plural=members.length>1?"s":"";
-    var d=document.createElement("div");d.className="team-card";
+    var d=document.createElement("div");d.className="team-card";d.style.setProperty("--tc",col);
 
     // Header
     var hdr=document.createElement("div");hdr.className="team-hdr";
@@ -395,6 +395,7 @@ function buildTeams(){
     d.appendChild(hdr);d.appendChild(body);
     el.appendChild(d);
   });
+  gmDeskOuvrirEquipes();
 }
 function openAddTeamMember(teamId){
   var team=getTeams().find(function(t){return t.id===teamId;});
@@ -462,6 +463,11 @@ function removeTeamMember(teamId,playerId){
   team.members=(team.members||[]).filter(function(id){return id!==playerId;});
   saveTeams(teams);
   buildTeams();
+}
+// Version ordinateur : équipes en cartes, effectif déplié d'office.
+function gmDeskOuvrirEquipes(){
+  if(!document.documentElement.classList.contains("gm-desk")) return;
+  document.querySelectorAll("#teamList .team-body").forEach(function(b){ if(!b.dataset.vu){ b.dataset.vu="1"; b.style.display="block"; } });
 }
 function toggleTeam(id){var b=document.getElementById("team-body-"+id);if(b)b.style.display=b.style.display==="block"?"none":"block";}
 async function showAddTeam(){
