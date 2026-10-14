@@ -97,6 +97,8 @@ function isLimite(){
   if(window.SUPPORT_MODE) return false;
   if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return false;
   if(c.plan==="limite") return true;
+  // Abonnement gelé par le dirigeant (Paramètres › Abonnement).
+  if(typeof aboGelActif==="function" && aboGelActif(c)) return true;
   // Essai terminé mais pas encore traité depuis la Plateforme : même régime.
   if(c.plan==="trial" && typeof joursEssaiRestants==="function"){
     var je=joursEssaiRestants(c); return je!==null && je<=0;
@@ -132,6 +134,11 @@ function limiteEcritureAutorisee(coll){
   return !!(k && limiteOuvert(k));
 }
 function askModuleFerme(nom){
+  if(typeof aboGelActif==="function" && aboGelActif()){
+    askConfirm("Votre abonnement est gelé jusqu'au "+aboDateTxt(aboGelActif().fin)+" : le module « "+nom+" » est fermé pendant le gel. Toutes vos données sont conservées.\n\nLe dirigeant peut relancer l'abonnement à tout moment depuis Paramètres › Abonnement.",
+      {title:"Module « "+nom+" » fermé",confirmText:"Télécharger mes données"}).then(function(ok){ if(ok) openExportDonnees(); });
+    return;
+  }
   askConfirm("Votre club est en accès limité : le module « "+nom+" » n'est pas disponible pour l'instant. Toutes vos données sont conservées et réapparaîtront dès la réactivation.\n\nPack Standard : 200\u00a0€/an\nPack Premium (comptabilité incluse) : 300\u00a0€/an\n\nContactez-nous pour réactiver votre club.",
     {title:"Module « "+nom+" » fermé",confirmText:"Télécharger mes données"}).then(function(ok){ if(ok) openExportDonnees(); });
 }
@@ -491,7 +498,10 @@ function buildAdminHome(){
  if(isLimite()){
    var lim=document.createElement("div");
    lim.style.cssText="margin:0 12px 14px;background:#8a4500;color:#fff;border-radius:var(--rs);padding:12px 14px";
-   lim.innerHTML='<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Vos données sont conservées. Contactez-nous pour réactiver le club.</div>';
+   var gelA=(typeof aboGelActif==="function")&&aboGelActif();
+   lim.innerHTML=gelA
+     ?'<div style="font-size:13px;font-weight:800">⏸ Abonnement gelé jusqu\'au '+aboDateTxt(gelA.fin)+'</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Accès limité pendant le gel. Relancez quand vous voulez : Paramètres › Abonnement.</div>'
+     :'<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Vos données sont conservées. Contactez-nous pour réactiver le club.</div>';
    el.appendChild(lim);
    var exp=document.createElement("div");exp.className="admin-card";
    exp.onclick=openExportDonnees;

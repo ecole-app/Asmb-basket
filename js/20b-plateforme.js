@@ -427,6 +427,10 @@ function openPlateforme(){
   avisBox.style.marginBottom="12px";
   s.body.appendChild(avisBox);
   loadAvisPlateforme(avisBox);
+  var aboNotifBox=document.createElement("div");
+  aboNotifBox.style.marginBottom="12px";
+  window.__gmAboNotifBox=aboNotifBox;
+  s.body.appendChild(aboNotifBox);
   var aboBox=document.createElement("div");
   aboBox.style.marginBottom="12px";
   window.__gmAboBox=aboBox;
@@ -504,7 +508,10 @@ function loadClubsList(list){
     // Pas de cron côté serveur : on vérifie les essais expirés à chaque
     // ouverture de cet écran par le super admin, pas en continu.
     expirerEssaisPerimes(clubs).then(function(){
+      return typeof aboTraiterGels==="function"?aboTraiterGels(clubs):null;
+    }).then(function(){
       paint();
+      if(window.__gmAboNotifBox && typeof renderAboNotifs==="function") renderAboNotifs(window.__gmAboNotifBox, clubs, list);
       if(window.__gmAboBox) renderAvisReconduction(window.__gmAboBox, clubs, list);
     });
   }).catch(function(e){
@@ -550,6 +557,8 @@ function renderClubCard(c, list){
     var je=joursEssaiRestants(c);
     if(je!==null) delai=' \u00b7 <span style="color:#E8670A">essai : '+je+' j restant'+(je===1?'':'s')+'</span>';
   }
+  var aboE=(!supprime && typeof aboEtatCourt==="function")?aboEtatCourt(c):"";
+  if(aboE) delai+=' \u00b7 '+aboE;
   card.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">'
     +plateformeClubLogoHtml(c,40)
     +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
@@ -1177,6 +1186,7 @@ function aboJours(c){ var e=aboEcheance(c); return e ? Math.ceil((e.getTime()-Da
 function aboARappeler(c){
   if(!(c.plan==="standard"||c.plan==="premium")) return false;
   if(c.status==="deleted"||c.status==="purging") return false;
+  if(c.aboResiliation) return false; // le club a résilié : pas d'avis de reconduction
   var j=aboJours(c);
   if(j===null) return false;
   if(j<0) return true;

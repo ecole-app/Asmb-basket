@@ -39,6 +39,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `06b-reinscription.js` | Réinscription en ligne : ouverture par le club, carte et fiche pré-remplie côté parent, import auto en licence |
 | `07-presences.js` | Pointage des présences, envoi groupé aux familles |
 | `08-parametres.js` | Écran Paramètres et sa personnalisation |
+| `08b-abonnement.js` | Paramètres › Abonnement (dirigeant) : geler 1 à 3 mois (= accès limité, `aboGelActif()` lu par `isLimite()`), relancer, résilier à l'échéance, avec double confirmation (dialogue + mot à taper). Champs `aboGels`/`aboGelFin`/`aboResiliation`/`aboNotif` sur `clubs/{id}` (liste blanche dirigeant). Côté Plateforme : bandeau des changements (`renderAboNotifs`), report de l'échéance après un gel (`aboTraiterGels`). |
 | `09-ui-modales.js` | Modales maison : `askConfirm`, `askPrompt`, `askAlert` |
 | `10-annuaire-galerie.js` | Annuaire, bénévoles, galerie photos, sauvegarde, données démo |
 | `11-admin.js` | Espace Admin, accès coach, fiches reçues, notes de frais, reclassement |

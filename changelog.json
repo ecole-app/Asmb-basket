@@ -1,5 +1,17 @@
 [
   {
+    "v": "1791982102",
+    "titre": "Abonnement : geler, relancer, résilier",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Paramètres › Abonnement : votre pack, l'échéance, et trois actions avec double confirmation : geler 1 à 3 mois (accès limité pendant le gel, échéance repoussée d'autant), relancer à tout moment, ou résilier (effet à l'échéance, tout reste ouvert d'ici là)."
+      }
+    ]
+  },
+  {
     "v": "1791981395",
     "titre": "Notes de frais : la photo du ticket remplit la note",
     "points": [

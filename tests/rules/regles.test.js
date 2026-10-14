@@ -134,6 +134,22 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), { polesCoachs: m }));
     await assertFails(updateDoc(doc(await as("dirB"), "clubs/A"), { polesCoachs: m }));
   });
+  it("abonnement : le dirigeant gèle, relance et résilie lui-même ; personne d'autre", async () => {
+    const fin = Date.now() + 60 * 86400000;
+    const gel = { aboGels: [{ debut: Date.now(), fin, mois: 2, par: "dirA" }], aboGelFin: fin, aboNotif: { t: "gel", le: Date.now(), vu: false, detail: "2 mois" } };
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), gel));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { aboGelFin: 0, aboNotif: { t: "relance", le: Date.now(), vu: false } }));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { aboResiliation: { le: Date.now(), par: "dirA", motif: "", effet: null }, aboNotif: { t: "resiliation", le: Date.now(), vu: false } }));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { aboResiliation: null, aboNotif: { t: "annulation", le: Date.now(), vu: false } }));
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), gel));
+    await assertFails(updateDoc(doc(await as("dirB"), "clubs/A"), gel));
+    // Le dirigeant ne peut pas marquer lui-même la notification « vue », ni glisser un faux type.
+    await assertFails(updateDoc(doc(await as("dirA"), "clubs/A"), { aboNotif: { t: "gel", le: 1, vu: true } }));
+    await assertFails(updateDoc(doc(await as("dirA"), "clubs/A"), { aboGelFin: "demain" }));
+    await assertSucceeds(updateDoc(doc(await as(SUPER_ADMIN), "clubs/A"), { "aboNotif.vu": true }));
+    // Une notification déjà vue ne bloque pas les autres réglages du dirigeant.
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { couleur: "#1f844b" }));
+  });
   it("le dirigeant ne touche pas au pack, au statut, au propriétaire ni à l'échéance", async () => {
     const db = await as("dirA");
     await assertFails(updateDoc(doc(db, "clubs/A"), { plan: "paid" }));
@@ -353,6 +369,10 @@ describe("Caisse buvette (sans compte, avec code du jour)", () => {
   it("enregistre une vente dans le journal", async () => {
     const db = await as(null);
     await assertSucceeds(setDoc(doc(db, "clubs/A/buvette_ventes/x"), { id: "x", viaCode: "BUVA", benevole: "Sam", date: "2026-10-11", t: 1, mode: "especes", total: 4, lignes: [] }));
+  });
+  it("abonnement gelé : caisse buvette fermée pendant le gel", async () => {
+    const db = await as(null);
+    await assertFails(updateDoc(doc(db, "clubs/G/inventaire/buv1"), { qte: 4, viaCode: "BUVG" }));
   });
   it("club en accès limité sans module buvette : caisse fermée", async () => {
     const db = await as(null);

@@ -122,7 +122,9 @@ service cloud.firestore {
     // "Caisse buvette" a été gardé par la plateforme.
     function buvetteOuverte(clubId) {
       let c = get(/databases/$(database)/documents/clubs/$(clubId)).data;
-      return c.get('plan', '') != 'limite' || c.get('modulesLimites', {}).get('buvette', false) == true;
+      // Abonnement gelé par le dirigeant (aboGelFin dans le futur) = accès limité.
+      let gele = c.get('aboGelFin', 0) is number && c.get('aboGelFin', 0) > request.time.toMillis();
+      return (c.get('plan', '') != 'limite' && !gele) || c.get('modulesLimites', {}).get('buvette', false) == true;
     }
     function buvetteCodeValid(clubId, code) {
       return code is string && code != ''
@@ -477,6 +479,15 @@ service cloud.firestore {
     }
 
     // ── Clubs ───────────────────────────────────────────────────────
+    // Abonnement géré par le dirigeant (Paramètres › Abonnement) : gel,
+    // relance, résiliation. Il ne touche jamais au pack ni à l'échéance.
+    // Seuls les champs réellement modifiés sont vérifiés (k = clés changées).
+    function aboChampsValides(d, k) {
+      return (!k.hasAny(['aboGels']) || (d.aboGels is list && d.aboGels.size() <= 30))
+        && (!k.hasAny(['aboGelFin']) || d.aboGelFin is number)
+        && (!k.hasAny(['aboResiliation']) || d.aboResiliation == null || d.aboResiliation is map)
+        && (!k.hasAny(['aboNotif']) || (d.aboNotif is map && d.aboNotif.get('vu', false) == false));
+    }
     match /clubs/{clubId} {
       allow read: if member(clubId) || superAdmin();
       allow create, delete: if superAdmin();
@@ -487,7 +498,9 @@ service cloud.firestore {
       // listé ici (couvert par tests/rules).
       allow update: if (dirigeant(clubId)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances','polesCoachs']))
+               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances','polesCoachs',
+                         'aboGels','aboGelFin','aboResiliation','aboNotif'])
+          && aboChampsValides(request.resource.data, request.resource.data.diff(resource.data).affectedKeys()))
         || superAdmin();
 
       // Session support ouverte par le super admin avec un code valide du club

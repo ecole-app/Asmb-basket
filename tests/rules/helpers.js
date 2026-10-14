@@ -33,6 +33,7 @@ export async function seed() {
     await set("clubs/B", { name: "Club B", status: "active", plan: "standard" });
     await set("clubs/S", { name: "Club S", status: "suspended", plan: "standard" });
     await set("clubs/L", { name: "Club L", status: "active", plan: "limite", modulesLimites: { buvette: false } });
+    await set("clubs/G", { name: "Club G", status: "active", plan: "standard", aboGelFin: Date.now() + 30 * 86400000 });
     await set("clubs/asmb", { name: "ASMB", status: "active" });
 
     await set("users/dirA", { clubId: "A", roles: ["dirigeant"], phone: "0600000001" });
@@ -62,11 +63,13 @@ export async function seed() {
     await set("clubs/A/dms/dirA__parentA", { memberUids: ["dirA", "parentA"], members: [], lastMsg: "" });
     await set("clubs/A/dms/dirA__parentA/messages/d1", { senderUid: "dirA", text: "Bonjour", ts: Timestamp.now() });
     await set("clubs/S/roster/x", { nom: "X" });
+    await set("clubs/G/inventaire/buv1", { categorie: "buvette", nom: "Eau", prix: 1, qte: 5 });
     await set("clubs/L/inventaire/buv1", { categorie: "buvette", nom: "Eau", prix: 1, qte: 5 });
 
     await set("buvette_codes/BUVA", { clubId: "A", expiresAt: futur() });
     await set("buvette_codes/BUVOLD", { clubId: "A", expiresAt: passe() });
     await set("buvette_codes/BUVL", { clubId: "L", expiresAt: futur() });
+    await set("buvette_codes/BUVG", { clubId: "G", expiresAt: futur() });
     await set("club_invites/INVCOACH", { clubId: "A", role: "coach", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
     await set("club_invites/INVPARENT", { clubId: "A", role: "parent", tel: "0633333333", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
     await set("club_invites/INVOLD", { clubId: "A", role: "coach", usedBy: null, expiresAt: passe(), createdBy: "dirA" });

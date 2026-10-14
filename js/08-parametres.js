@@ -398,6 +398,7 @@ var PARAMS_GROUPES=[
   {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","relances","facturation","cerfa"]},
+  {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees","@danger"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
 ];
@@ -411,6 +412,11 @@ function paramsResume(id){
   }
   if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · "+(clubLiens().length?clubLiens().length+" lien"+(clubLiens().length>1?"s":""):"réseaux")+" · QR codes";
   if(id==="argent") return "Paiement licences · relances · factures · CERFA";
+  if(id==="abonnement"){
+    var c2=window.CURRENT_CLUB||{}, pk=(typeof aboPackTxt==="function")?aboPackTxt(c2):{nom:""};
+    var g=(typeof aboGelActif==="function")&&aboGelActif(c2);
+    return "Pack "+pk.nom+(g?" · gelé":(c2.aboResiliation?" · résiliation programmée":""))+" · geler, résilier";
+  }
   if(id==="donnees") return "Saison "+getCurrentSeason()+" · sauvegarde auto";
   if(id==="demo") return "Données fictives pour tester";
   return "";
@@ -422,6 +428,7 @@ function paramsNoeuds(scr,key){
     var sec=cont.previousElementSibling;
     return (sec&&sec.classList.contains("sec"))?[sec,cont]:[cont];
   }
+  if(key==="@abonnement") return (typeof aboBlocParam==="function")?[aboBlocParam()]:[];
   if(key==="@danger"){
     var out=[], secs=scr.querySelectorAll(".sec");
     for(var i=0;i<secs.length;i++){
@@ -488,6 +495,7 @@ function buildParamsAccordeon(){
     grp.style.display=vis?"":"none";
     var r=grp.querySelector(".pgrp-res"); if(r) r.textContent=paramsResume(g.id);
   });
+  if(typeof aboPeindre==="function") aboPeindre();
   var nf=scr.querySelector('.param-block[data-sec="notesfrais"]'); if(nf) nf.style.display=isStaff?"":"none";
 }
 // Palette des couleurs repliée derrière une ligne qui montre les couleurs choisies.
