@@ -12,7 +12,7 @@
 // génère soi-même : Firebase Console → ⚙️ Paramètres du projet → Cloud
 // Messaging → onglet "Web configuration" → "Générer une paire de clés".
 // À remplacer une fois générée (voir PUSH_SETUP.md).
-var GM_FCM_VAPID_KEY = "REMPLACER_PAR_LA_CLE_WEB_PUSH_FIREBASE";
+var GM_FCM_VAPID_KEY = "BN47W4jilNVt6DpQF25IlUsIbgduMQFjO84WEN2LGbdjUY1uRaun3wpRzuuh2U6TUNCXDdx398W9LA1zX1zP9B0";
 
 function pushSupported(){
   return "serviceWorker" in navigator && "Notification" in window && !!window.fbMsgGetToken;

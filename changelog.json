@@ -1,5 +1,20 @@
 [
   {
+    "v": "1792073237",
+    "titre": "Notifications push activées",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "bureau",
+          "parent"
+        ],
+        "texte": "Tu peux maintenant autoriser les notifications dans Paramètres › Notifications pour être prévenu des nouveaux messages même appli fermée."
+      }
+    ]
+  },
+  {
     "v": "1792060063",
     "titre": "Écrans vides plus clairs, Paramètres rangés, Boutique & réseaux",
     "points": [
