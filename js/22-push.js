@@ -14,6 +14,43 @@
 // À remplacer une fois générée (voir PUSH_SETUP.md).
 var GM_FCM_VAPID_KEY = "BN47W4jilNVt6DpQF25IlUsIbgduMQFjO84WEN2LGbdjUY1uRaun3wpRzuuh2U6TUNCXDdx398W9LA1zX1zP9B0";
 
+// iPhone/iPad : les notifications n'existent que si l'appli est installée sur
+// l'écran d'accueil (iOS 16.4+). Dans Safari « normal », on explique comment faire.
+function pushIosAInstaller(){
+  var ua=navigator.userAgent||"";
+  var ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  if(!ios) return false;
+  var installee=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
+  return !installee;
+}
+try{ if(pushIosAInstaller()) document.documentElement.classList.add("gm-ios-web"); }catch(e){}
+
+function pushTutoIphone(){
+  var modal=document.createElement("div");
+  modal.className="alert-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto";
+  var box=document.createElement("div");
+  box.style.cssText="background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+  box.addEventListener("click",function(e){ e.stopPropagation(); });
+  box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);text-align:center;margin-bottom:4px">📲 Installer l\'appli sur ton iPhone</div>'+
+    '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:14px">Sur iPhone, les notifications ne marchent que si l\'appli est sur ton écran d\'accueil. 30 secondes :</div>'+
+    '<ol class="ios-tuto">'+
+    '<li>Ouvre cette page dans <b>Safari</b> (pas dans WhatsApp, Instagram ou un autre navigateur).</li>'+
+    '<li>Touche le bouton <b>Partager</b> : le carré avec une flèche vers le haut, en bas de l\'écran.</li>'+
+    '<li>Fais défiler le menu et touche <b>Sur l\'écran d\'accueil</b>.</li>'+
+    '<li>Touche <b>Ajouter</b> en haut à droite.</li>'+
+    '<li>Ferme Safari et ouvre l\'appli <b>depuis l\'icône</b> sur ton écran d\'accueil.</li>'+
+    '<li>Va dans <b>Paramètres › Notifications</b> et touche <b>Autoriser</b>.</li>'+
+    '</ol>'+
+    '<div style="font-size:11px;color:var(--mut);margin:10px 0 14px;line-height:1.4">Il faut iOS 16.4 ou plus récent. Si « Sur l\'écran d\'accueil » n\'apparaît pas, mets à jour ton iPhone.</div>';
+  var ok=document.createElement("button");
+  ok.textContent="J'ai compris";
+  ok.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+  function fin(){ modal.remove(); }
+  ok.addEventListener("click",fin); modal.addEventListener("click",fin);
+  box.appendChild(ok); modal.appendChild(box); document.body.appendChild(modal);
+}
+
 function pushSupported(){
   return "serviceWorker" in navigator && "Notification" in window && !!window.fbMsgGetToken;
 }
@@ -25,6 +62,7 @@ function pushStatus(){
 }
 
 async function enablePushNotifications(){
+  if(pushIosAInstaller()){ pushTutoIphone(); return; }
   if(GM_FCM_VAPID_KEY.indexOf("REMPLACER")>=0){ askAlert("Notifications pas encore configurées côté serveur."); return; }
   if(!("serviceWorker" in navigator) || !("Notification" in window)){ askAlert("Les notifications ne sont pas disponibles sur cet appareil/navigateur."); return; }
   if(!window.CURRENT_CLUB_ID || !window.ASMB_USER){ askAlert("Connexion en cours, réessayez dans un instant."); return; }

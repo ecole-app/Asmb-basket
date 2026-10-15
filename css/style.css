@@ -552,3 +552,9 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .ind-pal{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
 .ind-pal button{aspect-ratio:1;border-radius:8px;border:2px solid transparent;cursor:pointer;padding:0}
 .ind-pal button.on{border-color:var(--txt);box-shadow:0 0 0 2px var(--card) inset}
+
+/* Aide iPhone (notifications) : visible seulement sur iPhone/iPad hors appli installée */
+.push-ios-hint{display:none;font-size:12px;font-weight:700;color:var(--dkg);background:var(--bg,#f4f6f4);border:1px dashed var(--dkg);border-radius:10px;padding:10px 12px;margin:10px 0;cursor:pointer;line-height:1.4}
+.gm-ios-web .push-ios-hint{display:block}
+.ios-tuto{margin:0;padding-left:20px;font-size:13px;color:var(--txt);line-height:1.5}
+.ios-tuto li{margin-bottom:8px}

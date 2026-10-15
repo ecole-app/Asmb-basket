@@ -1,5 +1,20 @@
 [
   {
+    "v": "1792077407",
+    "titre": "Notifications sur iPhone : tuto d'installation",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach",
+          "bureau",
+          "parent"
+        ],
+        "texte": "Sur iPhone, un tutoriel explique comment ajouter l'appli à l'écran d'accueil pour recevoir les notifications. Il s'ouvre en touchant « Autoriser les notifications », et un lien d'aide est visible dans les réglages de notifications."
+      }
+    ]
+  },
+  {
     "v": "1792073237",
     "titre": "Notifications push activées",
     "points": [
