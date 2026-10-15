@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792105041",
+  "titre": "Pôles Premium visibles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Accueil : 3x3 et Basket Santé restent visibles en bas, verrouillés, pour les clubs sans Premium."
+   }
+  ]
+ },
+ {
   "v": "1792104486",
   "titre": "Pôles selon la formule",
   "points": [

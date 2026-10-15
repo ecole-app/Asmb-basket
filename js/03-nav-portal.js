@@ -212,6 +212,15 @@ function buildPortal(){
   if(typeof benBandeau==="function") benBandeau("dashboard-dirigeant","0 12px 14px");
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
   activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
+  // Pôles Premium : visibles mais verrouillés, tout en bas (donner envie de passer Premium)
+  if(typeof polesVerrouilles==="function" && ((window.ASMB_USER&&window.ASMB_USER.roles)||[]).indexOf("dirigeant")>=0){
+    polesVerrouilles().forEach(function(p){
+      var c=makeCard(Object.assign({},p,{sub:"🔒 Premium · "+(p.sub||"")}),null);
+      c.classList.add("locked"); c.style.cursor="pointer";
+      c.onclick=function(){ askAlert(p.name+" fait partie de la formule Premium.\n\nElle est ouverte pendant l'essai de 30 jours. Contactez-nous pour passer en Premium : vos données restent conservées."); };
+      el.appendChild(c);
+    });
+  }
   buildDashboard();
   if(typeof renderDeskHome==="function") renderDeskHome();
 }

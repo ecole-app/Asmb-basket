@@ -204,6 +204,14 @@ function activePoles(){
   return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
 }
 
+// Pôles Premium pas encore ouverts pour ce club (essai fini ou Standard) : affichés
+// verrouillés, en dernier, à l'accueil du dirigeant.
+function polesVerrouilles(){
+  var c=window.CURRENT_CLUB;
+  var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
+  if(!c || c.id===boot || (typeof hasPremium==="function" && hasPremium())) return [];
+  return POLES.filter(function(p){ return PREMIUM_POLES.indexOf(p.id)>=0; });
+}
 function isPoleActive(poleId){
   return activePoles().some(function(p){ return p.id===poleId; });
 }
