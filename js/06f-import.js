@@ -46,6 +46,101 @@ function impParseCsv(txt){
   if(cur!==""||row.length){ row.push(cur); rows.push(row); }
   return rows;
 }
+// ── PDF (texte, pas un scan) : pdf.js chargé à la demande ───────────
+var PDFJS_URL=window.PDFJS_URL_OVERRIDE||"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+var PDFJS_WORKER=window.PDFJS_WORKER_OVERRIDE||"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+var pdfjsLoading=null;
+function chargerPdfjs(){
+  if(window.pdfjsLib) return Promise.resolve();
+  if(pdfjsLoading) return pdfjsLoading;
+  pdfjsLoading=new Promise(function(resolve,reject){
+    var s=document.createElement("script"); s.src=PDFJS_URL;
+    s.onload=function(){ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_WORKER; }catch(e){} resolve(); };
+    s.onerror=function(){pdfjsLoading=null;reject(new Error("Chargement du lecteur PDF impossible"));};
+    document.head.appendChild(s);
+  });
+  return pdfjsLoading;
+}
+// Regroupe les morceaux de texte d'une page en lignes (même hauteur), triés de gauche à droite.
+function impPdfLignesPage(items){
+  var morceaux=items.filter(function(t){return t.str&&t.str.trim();}).map(function(t){
+    return {s:t.str.trim(),x:t.transform[4],y:t.transform[5],w:t.width||0};
+  });
+  morceaux.sort(function(a,b){return b.y-a.y||a.x-b.x;});
+  var lignes=[];
+  morceaux.forEach(function(m){
+    var l=lignes[lignes.length-1];
+    if(l&&Math.abs(l.y-m.y)<=3) l.items.push(m); else lignes.push({y:m.y,items:[m]});
+  });
+  lignes.forEach(function(l){ l.items.sort(function(a,b){return a.x-b.x;}); });
+  return lignes;
+}
+// Cellules d'une ligne : coupe là où l'écart entre deux morceaux est grand.
+function impPdfCellulesParEcart(items){
+  var cells=[], cur=null, finPrec=0;
+  items.forEach(function(m){
+    if(cur&&m.x-finPrec<=6) cur.s+=" "+m.s; else { cur={s:m.s,x:m.x}; cells.push(cur); }
+    finPrec=m.x+m.w;
+  });
+  return cells;
+}
+// Cellules d'une ligne rangées selon les colonnes (x de départ) repérées sur l'en-tête.
+function impPdfCellulesParColonnes(items, bornes){
+  var cells=bornes.map(function(){return "";});
+  items.forEach(function(m){
+    var k=0; for(var i=0;i<bornes.length;i++){ if(m.x>=bornes[i]-4) k=i; }
+    cells[k]=(cells[k]?cells[k]+" ":"")+m.s;
+  });
+  return cells;
+}
+function impPdfEstEntete(cells){
+  var n=0;
+  cells.forEach(function(c){
+    var h=impNorm(c.s!=null?c.s:c);
+    IMP_CHAMPS.forEach(function(ch){ if(ch.syn.indexOf(h)>=0) n++; });
+  });
+  return n>=2;
+}
+// pages = tableau de lignes ({items}) → rows (1re ligne = en-têtes, réels ou « Colonne n »)
+function impPdfVersTableau(pages){
+  var toutes=[]; pages.forEach(function(p){ p.forEach(function(l){ toutes.push(l); }); });
+  var ent=-1;
+  for(var i=0;i<Math.min(toutes.length,25);i++){ if(impPdfEstEntete(impPdfCellulesParEcart(toutes[i].items))){ ent=i; break; } }
+  var rows=[];
+  if(ent>=0){
+    var cellsEnt=impPdfCellulesParEcart(toutes[ent].items), bornes=cellsEnt.map(function(c){return c.x;});
+    var entetes=cellsEnt.map(function(c){return c.s;});
+    var cleEnt=entetes.map(impNorm).join("|");
+    rows.push(entetes);
+    toutes.slice(ent+1).forEach(function(l){
+      var cells=impPdfCellulesParColonnes(l.items,bornes);
+      if(cells.map(impNorm).join("|")===cleEnt) return;            // en-tête répété sur chaque page
+      if(cells.filter(function(c){return c;}).length<2) return;    // n° de page, titre…
+      rows.push(cells);
+    });
+  } else {
+    var lignes=toutes.map(function(l){return impPdfCellulesParEcart(l.items).map(function(c){return c.s;});}).filter(function(c){return c.length>=2;});
+    var max=lignes.reduce(function(m,c){return Math.max(m,c.length);},0), h=[];
+    for(var k=0;k<max;k++) h.push("Colonne "+(k+1));
+    rows.push(h); lignes.forEach(function(c){ rows.push(c); });
+  }
+  return rows;
+}
+function impLirePdf(buf){
+  return chargerPdfjs().then(function(){
+    return window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+  }).then(function(doc){
+    var pages=[], p=Promise.resolve();
+    for(var n=1;n<=doc.numPages;n++){
+      (function(num){ p=p.then(function(){ return doc.getPage(num).then(function(pg){ return pg.getTextContent(); }).then(function(tc){ pages.push(impPdfLignesPage(tc.items)); }); }); })(n);
+    }
+    return p.then(function(){
+      var rows=impPdfVersTableau(pages);
+      if(rows.length<2) throw new Error("Aucun texte exploitable : le PDF est peut-être une image scannée. Utilise un export CSV ou Excel.");
+      return rows;
+    });
+  });
+}
 function impLireFichier(file){
   return new Promise(function(resolve,reject){
     var rd=new FileReader();
@@ -58,7 +153,8 @@ function impLireFichier(file){
           var ws=wb.Sheets[wb.SheetNames[0]];
           resolve(XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:"yyyy-mm-dd",defval:""}));
         }).catch(reject);
-      } else resolve(impParseCsv(impDecoder(buf)));
+      } else if(/\.pdf$/.test(nom)) impLirePdf(buf).then(resolve,reject);
+      else resolve(impParseCsv(impDecoder(buf)));
     };
     rd.readAsArrayBuffer(file);
   });
@@ -176,8 +272,8 @@ function impRendre(){
   var el=document.getElementById("imp-inner"); if(!el) return;
   if(!IMP_ETAT.entetes.length){
     el.innerHTML=impEntete()+
-      '<div style="font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:12px">Choisis un fichier CSV ou Excel (.xlsx), par exemple l\'export FBI. Les colonnes sont reconnues automatiquement, tu pourras les corriger avant de valider.</div>'+
-      '<input type="file" id="imp-file" accept=".csv,.txt,.xlsx,.xls" style="width:100%;font-size:13px">'+
+      '<div style="font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:12px">Choisis un fichier CSV, Excel (.xlsx) ou PDF (texte, pas un scan), par exemple l\'export FBI. Les colonnes sont reconnues automatiquement, tu pourras les corriger avant de valider.</div>'+
+      '<input type="file" id="imp-file" accept=".csv,.txt,.xlsx,.xls,.pdf" style="width:100%;font-size:13px">'+
       '<div id="imp-msg" style="font-size:12px;color:var(--mut);margin-top:10px"></div>';
     document.getElementById("imp-file").addEventListener("change",impChoisi);
     return;

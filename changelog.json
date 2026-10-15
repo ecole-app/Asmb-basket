@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792089943",
+  "titre": "Import des licences depuis un PDF",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Importer accepte aussi les PDF contenant un tableau en texte (pas un scan) : les colonnes sont repérées à partir de l'en-tête, puis aperçu avant validation."
+   }
+  ]
+ },
+ {
   "v": "1792089864",
   "titre": "Coachs dans les licences et suppression de fiche",
   "points": [
