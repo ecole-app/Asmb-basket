@@ -470,10 +470,33 @@ function gmDeskOuvrirEquipes(){
   document.querySelectorAll("#teamList .team-body").forEach(function(b){ if(!b.dataset.vu){ b.dataset.vu="1"; b.style.display="block"; } });
 }
 function toggleTeam(id){var b=document.getElementById("team-body-"+id);if(b)b.style.display=b.style.display==="block"?"none":"block";}
+// Liste de choix des catégories (U6 → Senior) au lieu d'un champ libre.
+function choisirCategorieEquipe(){
+  return new Promise(function(resolve){
+    var modal=document.createElement("div");
+    modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:flex-end";
+    var inner=document.createElement("div");
+    inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+    inner.addEventListener("click",function(e){e.stopPropagation();});
+    inner.innerHTML='<div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:12px">Catégorie de l\'équipe</div><div id="cat-eq-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>';
+    modal.appendChild(inner);
+    function fin(v){ modal.remove(); resolve(v); }
+    modal.addEventListener("click",function(){fin(null);});
+    document.body.appendChild(modal);
+    var grid=inner.querySelector("#cat-eq-grid");
+    TEAM_CATS.forEach(function(c){
+      var b=document.createElement("button");
+      b.textContent=c;
+      b.style.cssText="padding:10px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
+      b.addEventListener("click",function(){fin(c);});
+      grid.appendChild(b);
+    });
+  });
+}
 async function showAddTeam(){
   var name=await askPrompt("Nom de l'équipe", {placeholder:"", confirmText:"Suivant"});
   if(!name)return;
-  var cat=await askPrompt("Catégorie", {placeholder:"", confirmText:"Créer"});
+  var cat=await choisirCategorieEquipe();
   if(!cat)return;
   var teams=getTeams();
   var newTeam={id:Date.now().toString(),name:name,cat:cat,members:[]};

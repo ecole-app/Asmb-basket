@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792088967",
+  "titre": "Catégories d'équipe de U6 à Senior",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "À la création d'une équipe, la catégorie se choisit dans une liste : U6 à U21, Senior, Loisir et 3x3 (fini le champ libre)."
+   }
+  ]
+ },
+ {
   "v": "1792087118",
   "titre": "Pass'Sport et Pass'Région",
   "points": [

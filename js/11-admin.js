@@ -256,7 +256,9 @@ var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)"
 var currentCatFilter="all";
 // ── Genre (F/M) : helpers partagés par Joueurs, Licences, PDF et Excel ──
 var currentGenreFilter="all"; // "all" | "F" | "M" | "NR" (non renseigné)
-var CAT_ORDER=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
+// Catégories proposées à la création d'une équipe (U6 → Senior, + Loisir et 3x3).
+var TEAM_CATS=["U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16","U17","U18","U19","U20","U21","Senior","Loisir","3x3"];
+var CAT_ORDER=TEAM_CATS.slice();
 function catRank(c){var i=CAT_ORDER.indexOf(c);return i<0?99:i;}
 function genreRank(g){return g==="F"?0:g==="M"?1:2;}
 function genreNorm(g){return g==="F"||g==="M"?g:"NR";}
