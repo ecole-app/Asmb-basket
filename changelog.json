@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792096096",
+  "titre": "Nouveaux dirigeants dans la cloche",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : la cloche signale quand un dirigeant a validé son compte avec le lien d'invitation (et une alerte push une fois les fonctions redéployées)."
+   }
+  ]
+ },
+ {
   "v": "1792095425",
   "titre": "Cloche Plateforme",
   "points": [

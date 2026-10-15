@@ -513,6 +513,38 @@ function gmDiagCard(){
   return d;
 }
 
+// Dirigeants qui ont validé leur compte via le lien d'invitation envoyé par SMS.
+// « Vu » est gardé sur cet appareil (les règles ne permettent pas d'écrire sur l'invitation).
+function pfVusLire(){ try{ return JSON.parse(localStorage.getItem("gm_pf_join_vus")||"[]"); }catch(e){ return []; } }
+async function loadRejoints(box){
+  box.innerHTML="";
+  var snap;
+  try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"club_invites"),window.fbWhere("createdBy","==",window.ASMB_USER.uid))); }catch(e){ return; }
+  var vus=pfVusLire(), lim=Date.now()-30*86400000, a=[];
+  snap.forEach(function(d){
+    var v=d.data()||{}, t=gmDate(v.usedAt);
+    if(v.role==="dirigeant" && v.usedBy && vus.indexOf(d.id)<0 && (!t||t.getTime()>lim)) a.push({id:d.id,club:v.clubName||v.clubId,t:t});
+  });
+  a.sort(function(x,y){ return ((y.t&&y.t.getTime())||0)-((x.t&&x.t.getTime())||0); });
+  pfNotifN("join",a.length);
+  if(!a.length) return;
+  var head=document.createElement("div");
+  head.style.cssText="background:#1f844b;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
+  head.textContent="🎉 "+a.length+" dirigeant"+(a.length>1?"s":"")+" a"+(a.length>1?"ont":"")+" validé son compte";
+  box.appendChild(head);
+  a.forEach(function(x){
+    var card=gmCard();
+    card.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--txt)">'+authEsc(x.club)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin:2px 0 6px">Compte dirigeant créé'+(x.t?" · "+x.t.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
+    card.appendChild(gmBtn("Vu","soft",function(){
+      var v=pfVusLire(); v.push(x.id);
+      try{ localStorage.setItem("gm_pf_join_vus",JSON.stringify(v)); }catch(e){}
+      loadRejoints(box);
+    }));
+    box.appendChild(card);
+  });
+}
+
 // ── Cloche des notifications de la Plateforme ──────────────────────
 // Compteurs : demandes d'essai, avis, changements d'abonnement, comptes à supprimer.
 function pfNotifN(k,n){
@@ -520,11 +552,12 @@ function pfNotifN(k,n){
   window.__gmN[k]=n; pfMajCloche();
 }
 function pfMajCloche(){
-  var N=window.__gmN||{}, t=(N.dem||0)+(N.avis||0)+(N.abo||0)+(N.cpt||0);
+  var N=window.__gmN||{}, t=(N.dem||0)+(N.avis||0)+(N.abo||0)+(N.cpt||0)+(N.join||0);
   var b=document.getElementById("pf-cloche-n"), tx=document.getElementById("pf-cloche-txt");
   if(b){ b.style.display=t?"flex":"none"; b.textContent=t; }
   if(tx){
     var p=[];
+    if(N.join) p.push(N.join+" nouveau"+(N.join>1?"x":"")+" dirigeant"+(N.join>1?"s":""));
     if(N.dem) p.push(N.dem+" demande"+(N.dem>1?"s":"")+" d'essai");
     if(N.avis) p.push(N.avis+" avis");
     if(N.abo) p.push(N.abo+" abonnement"+(N.abo>1?"s":""));
@@ -563,13 +596,14 @@ function showPlateformeHome(opts){
   el.innerHTML="";
   el.appendChild(pfClocheCarte());
   var nbox={};
-  [["cpt","__gmComptesBox"],["dem","__gmDemBox"],["avis",null],["abo","__gmAboNotifBox"],["reco","__gmAboBox"]].forEach(function(k){
+  [["cpt","__gmComptesBox"],["join",null],["dem","__gmDemBox"],["avis",null],["abo","__gmAboNotifBox"],["reco","__gmAboBox"]].forEach(function(k){
     var b=document.createElement("div"); b.style.cssText="margin:12px 12px 0"; nbox[k[0]]=b;
     if(k[1]) window[k[1]]=b;
     el.appendChild(b);
   });
-  window.__gmN={dem:0,avis:0,abo:0,cpt:0}; pfMajCloche();
+  window.__gmN={dem:0,avis:0,abo:0,cpt:0,join:0}; pfMajCloche();
   loadComptesASupprimer(nbox.cpt);
+  loadRejoints(nbox.join);
   loadDemandesEssai(nbox.dem);
   loadAvisPlateforme(nbox.avis);
   majBadgeDemandes();

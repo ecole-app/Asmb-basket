@@ -5,7 +5,7 @@
    n'a besoin d'appeler cette fonction (voir js/22-push.js et sendMsg dans
    js/16-communaute.js). */
 
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
@@ -132,5 +132,31 @@ exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) 
     if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
       await ref.delete();
     }
+  }
+});
+
+// Un dirigeant valide son compte avec le lien d'invitation : alerte Plateforme.
+exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", async (event) => {
+  const avant = event.data && event.data.before.data();
+  const apres = event.data && event.data.after.data();
+  if (!avant || !apres || avant.usedBy || !apres.usedBy || apres.role !== "dirigeant") return;
+  let ref = db.collection("plateforme_push").doc(SUPER_ADMIN_UID);
+  let snap = await ref.get();
+  if (!(snap.exists && snap.data() && snap.data().token)) {
+    ref = db.collection("clubs").doc(CLUB_ORIGINE).collection("push_subscriptions").doc(SUPER_ADMIN_UID);
+    snap = await ref.get();
+  }
+  const token = snap.exists && snap.data() && snap.data().token;
+  if (!token) return;
+  try {
+    await admin.messaging().send({
+      token,
+      notification: { title: "Compte dirigeant validé", body: String(apres.clubName || "Un club") + " : le dirigeant vient de créer son compte" },
+      data: { url: "./" },
+      webpush: { fcmOptions: { link: "./" } }
+    });
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") await ref.delete();
   }
 });
