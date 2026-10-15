@@ -291,3 +291,29 @@ function applyChatTextSize(size){
 }
 document.addEventListener("DOMContentLoaded",function(){ applyChatTextSize(); });
 
+
+// ── Écran vide explicatif ────────────────────────────────────────────
+// Un écran sans données dit ce qu'on y met, à quoi ça sert, et propose le
+// premier geste. gmVide({icone,titre,texte,bouton:{label,action}}) ->
+// chaîne HTML (action = code JS, échappé par l'appelant si besoin).
+var GM_VIDE_SVG={
+  equipe:'<path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z"/>',
+  joueurs:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.3 3.3-5 6.5-5s5.8 1.7 6.5 5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.2 2.3 3.5 5"/>',
+  licence:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.5 1.7-2 3-2s2.4.5 3 2M15 10h3M15 13h3"/>',
+  agenda:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  euro:'<path d="M17 6.5A7 7 0 1 0 17 17.5"/><path d="M4 10h9M4 14h9"/>',
+  carton:'<path d="M3 8h18v12H3zM3 8l2-4h14l2 4M12 4v4"/>',
+  sponsor:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z"/>',
+  loupe:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'
+};
+function gmVide(o){
+  o=o||{};
+  var esc=(typeof authEsc==="function")?authEsc:function(x){ return String(x==null?"":x); };
+  var ic=GM_VIDE_SVG[o.icone]||GM_VIDE_SVG.loupe;
+  return '<div class="gm-vide">'+
+    '<div class="gm-vide-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ic+'</svg></div>'+
+    '<div class="gm-vide-t">'+esc(o.titre||"")+'</div>'+
+    (o.texte?'<div class="gm-vide-x">'+esc(o.texte)+'</div>':'')+
+    (o.bouton?'<button type="button" class="gm-vide-b" onclick="'+o.bouton.action+'">'+esc(o.bouton.label)+'</button>':'')+
+    '</div>';
+}

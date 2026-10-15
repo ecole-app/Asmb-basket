@@ -168,6 +168,14 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 .status-pending{background:rgba(232,103,10,.15);color:#E8670A}
 .status-no{background:rgba(192,57,43,.15);color:#C0392B}
 .empty-state{text-align:center;padding:40px 20px;color:var(--mut)}
+/* Écran vide explicatif (gmVide, js/09-ui-modales.js) */
+.gm-vide{text-align:center;padding:36px 22px;max-width:420px;margin:0 auto}
+.gm-vide-ic{width:60px;height:60px;margin:0 auto 14px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--dkg)}
+.gm-vide-t{font-size:16px;font-weight:800;color:var(--txt)}
+.gm-vide-x{font-size:13px;color:var(--mut);line-height:1.5;margin-top:6px}
+.gm-vide-b{margin-top:16px;padding:11px 20px;border-radius:12px;border:none;background:var(--dkg);color:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.gm-vide-b:focus-visible{outline:3px solid var(--ltg);outline-offset:2px}
+html.gm-desk .gm-vide{padding:56px 22px;max-width:480px}
 .empty-state-icon{font-size:40px;margin-bottom:10px}
 
 
@@ -295,6 +303,16 @@ html.gm-desk.gm-desk-mini .gs-club-txt,html.gm-desk.gm-desk-mini .gs-lbl{display
 html.gm-desk.gm-desk-mini .gs-grp{font-size:0;padding:0;margin:8px 10px;height:1px;background:var(--gs-bdr,var(--bdr))}
 html.gm-desk.gm-desk-mini .gs-item{justify-content:center;padding:0;position:relative}
 html.gm-desk.gm-desk-mini .gs-badge{position:absolute;top:4px;right:6px;min-width:16px;height:16px;font-size:9.5px;padding:0 4px}
+.gm-souris{display:none}
+html.gm-desk .gm-souris{display:inline}
+html.gm-desk .gm-tactile{display:none}
+/* Version ordinateur : paramètres en liste 2 colonnes, bloc ouvert en pleine largeur */
+html.gm-desk #params-groupes{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;max-width:1100px;margin:0 auto}
+html.gm-desk #params-groupes .pgrp{margin-bottom:0}
+html.gm-desk #params-groupes .pgrp.ouvert{grid-column:1/-1}
+.pgrp[data-grp="danger"]{border-color:rgba(192,57,43,.35)!important}
+.pgrp[data-grp="danger"] .pgrp-ic{background:rgba(192,57,43,.1)!important}
+.pgrp[data-grp="danger"] .pgrp-tit{color:var(--red)}
 /* Version ordinateur, étape 3 : thèmes (html[data-desk-theme], réglage par appareil).
    Ils ne changent que les neutres et le menu ; la teinte de marque (--dkg/--ltg) reste celle du
    club quand il en a choisi une (classe html.gm-clubcolor, posée par applyClubColor). */

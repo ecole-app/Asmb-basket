@@ -1,5 +1,30 @@
 [
   {
+    "v": "1792060063",
+    "titre": "Écrans vides plus clairs, Paramètres rangés, Boutique & réseaux",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Un écran sans données explique maintenant ce qu'on y met et propose le premier geste : équipes, planning, joueurs, licences, comptabilité, buvette & stock, sponsors."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Paramètres : « Zone dangereuse » est un bloc à part, en rouge, et les blocs s'affichent sur deux colonnes sur ordinateur."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Nouvelle rubrique « Boutique & réseaux » dans le menu ordinateur : elle ouvre directement les liens du club."
+      }
+    ]
+  },
+  {
     "v": "1792059584",
     "titre": "Plateforme : plus de saut de mise en page au rechargement",
     "points": [

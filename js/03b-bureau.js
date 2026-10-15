@@ -24,6 +24,7 @@ var GM_DESK_ITEMS=[
   {id:"sponsors", label:"Sponsors", grp:"Gestion", ic:"star", mod:"sponsors", scr:["sponsors"]},
   {id:"documents", label:"Documents", grp:"Gestion", ic:"file", mod:"documents", scr:["documents"]},
   {id:"notesfrais", label:"Notes de frais", grp:"Gestion", ic:"receipt", mod:"notesfrais", scr:[]},
+  {id:"boutique", label:"Boutique & réseaux", grp:"Gestion", ic:"sac", scr:[], go:function(){ paramsOuvrirGroupe("club","liens"); }},
   {id:"admin", label:"Toutes les rubriques", grp:"Réglages", ic:"grid", scr:["admin","admin-comm","channel-detail"], go:function(){ navTo("admin"); }},
   {id:"parametres", label:"Paramètres", grp:"Réglages", ic:"gear", scr:["parametres"], go:function(){ stack=["portal"]; openParametres(); }}
 ];
@@ -42,6 +43,7 @@ var GM_DESK_SVG={
   file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
   receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  sac:'<path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>'
 };
 

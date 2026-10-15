@@ -40,7 +40,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `07-presences.js` | Pointage des présences, envoi groupé aux familles |
 | `08-parametres.js` | Écran Paramètres et sa personnalisation |
 | `08b-abonnement.js` | Paramètres › Abonnement (dirigeant) : geler 1 à 3 mois (= accès limité, `aboGelActif()` lu par `isLimite()`), relancer, résilier à l'échéance, avec double confirmation (dialogue + mot à taper). Champs `aboGels`/`aboGelFin`/`aboResiliation`/`aboNotif` sur `clubs/{id}` (liste blanche dirigeant). Côté Plateforme : bandeau des changements (`renderAboNotifs`), report de l'échéance après un gel (`aboTraiterGels`). |
-| `09-ui-modales.js` | Modales maison : `askConfirm`, `askPrompt`, `askAlert` |
+| `09-ui-modales.js` | Modales maison : `askConfirm`, `askPrompt`, `askAlert` | Aussi `gmVide({icone,titre,texte,bouton})` : écran vide explicatif (ce qu'on met dans l'écran + premier geste), utilisé par équipes, planning, joueurs, licences, compta, inventaire, sponsors.
 | `10-annuaire-galerie.js` | Annuaire, bénévoles, galerie photos, sauvegarde, données démo |
 | `11-admin.js` | Espace Admin, accès coach, fiches reçues, notes de frais, reclassement |
 | `12-equipes-planning.js` | Équipes, effectifs, planning, historique de présence |

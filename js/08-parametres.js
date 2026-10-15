@@ -399,7 +399,8 @@ var PARAMS_GROUPES=[
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","relances","facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
-  {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees","@danger"]},
+  {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees"]},
+  {id:"danger", ic:"⚠️", titre:"Zone dangereuse", dir:true, secs:["@danger"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
 ];
 function paramsResume(id){
@@ -418,6 +419,7 @@ function paramsResume(id){
     return "Pack "+pk.nom+(g?" · gelé":(c2.aboResiliation?" · résiliation programmée":""))+" · geler, résilier";
   }
   if(id==="donnees") return "Saison "+getCurrentSeason()+" · sauvegarde auto";
+  if(id==="danger") return "Réinitialiser les données du club ou la comptabilité (irréversible)";
   if(id==="demo") return "Données fictives pour tester";
   return "";
 }
@@ -464,8 +466,8 @@ function buildParamsAccordeon(){
       btn.type="button";
       btn.setAttribute("aria-expanded","false");
       btn.style.cssText="width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;padding:14px;min-height:60px;cursor:pointer;text-align:left;color:var(--txt);font:inherit";
-      btn.innerHTML='<span style="width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">'+g.ic+'</span>'+
-        '<span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:800">'+g.titre+'</span><span class="pgrp-res" style="display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span></span>'+
+      btn.innerHTML='<span class="pgrp-ic" style="width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">'+g.ic+'</span>'+
+        '<span style="flex:1;min-width:0"><span class="pgrp-tit" style="display:block;font-size:15px;font-weight:800">'+g.titre+'</span><span class="pgrp-res" style="display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span></span>'+
         '<span class="pgrp-chev" style="color:var(--mut);font-size:16px;transition:transform .2s">›</span>';
       var cont=document.createElement("div");
       cont.className="pgrp-cont";
@@ -473,6 +475,7 @@ function buildParamsAccordeon(){
       btn.addEventListener("click",function(){
         var open=cont.style.display==="none";
         cont.style.display=open?"block":"none";
+        grp.classList.toggle("ouvert",open);   // ordinateur : le bloc ouvert prend les 2 colonnes
         btn.setAttribute("aria-expanded",open?"true":"false");
         btn.querySelector(".pgrp-chev").style.transform=open?"rotate(90deg)":"";
       });
@@ -686,3 +689,17 @@ function sendFeedback(prefix){
   });
 }
 
+
+// Ouvre Paramètres sur un bloc précis (ex. « Boutique & réseaux » du menu ordinateur).
+// secId : section à faire défiler dans le bloc une fois ouvert.
+function paramsOuvrirGroupe(id,secId){
+  if(typeof stack!=="undefined"){ stack=["portal"]; }
+  openParametres();
+  setTimeout(function(){
+    var grp=document.querySelector('#params-groupes [data-grp="'+id+'"]'); if(!grp) return;
+    var btn=grp.querySelector("button");
+    if(btn && btn.getAttribute("aria-expanded")!=="true") btn.click();
+    var cible=secId?grp.querySelector('.param-block[data-sec="'+secId+'"]'):grp;
+    if(cible&&cible.scrollIntoView) try{ cible.scrollIntoView({block:"start",behavior:"smooth"}); }catch(e){}
+  },60);
+}

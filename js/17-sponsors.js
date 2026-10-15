@@ -39,7 +39,7 @@ function buildSponsors(){
   var el=document.getElementById("sp-list");if(!el)return;
   el.innerHTML="";
   if(!list.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun sponsor</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Sponsor pour ajouter un prospect ou un partenaire</div></div>';
+    el.innerHTML=gmVide({icone:"sponsor",titre:"Aucun sponsor",texte:"Suivez vos partenaires : contact, montant, contreparties promises et relances à faire.",bouton:{label:"+ Ajouter un sponsor",action:"showAddSponsor()"}});
     return;
   }
   var today=new Date().toISOString().slice(0,10);

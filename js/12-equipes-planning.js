@@ -334,7 +334,7 @@ function saveTeams(t){localStorage.setItem("asmb_teams",JSON.stringify(t));fsWri
 function buildTeams(){
   var teams=getTeams(),players=getPlayers();
   var el=document.getElementById("teamList");if(!el)return;
-  if(!teams.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune équipe</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Équipe</div></div>';return;}
+  if(!teams.length){el.innerHTML=gmVide({icone:"equipe",titre:"Aucune équipe",texte:"Une équipe regroupe des joueurs d'une même catégorie : elle sert aux convocations, aux présences et au planning.",bouton:{label:"+ Créer une équipe",action:"showAddTeam()"}});return;}
   el.innerHTML="";
   teams.forEach(function(t){
     var col=CAT_COLORS[t.cat]||"#1A2E5A";
@@ -585,7 +585,7 @@ function showDayEvents(dateStr){
 function buildPlanning(){
   var events=getVisibleEvents();
   var el=document.getElementById("planningList");if(!el)return;
-  if(!events.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun événement</div><div style="font-size:11px;margin-top:4px">Appuyez sur + Événement</div></div>';return;}
+  if(!events.length){el.innerHTML=gmVide({icone:"agenda",titre:"Aucun événement",texte:"Matchs, entraînements, tournois et soirées du club : les familles et les coachs les voient dans leur appli.",bouton:{label:"+ Créer un événement",action:"showAddEvent()"}});return;}
   el.innerHTML="";
   // Sort by date
   events.sort(function(a,b){return a.date>b.date?1:-1;});

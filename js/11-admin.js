@@ -1207,7 +1207,7 @@ function renderPlayers(){
   var el=document.getElementById("playerList");if(!el)return;
   var eff=effectifsParCatGenre(filtered,function(p){return p.cat;},function(p){return p.genre;}).all;
   document.getElementById("insc-count").textContent=(filtered.length===players.length?players.length:filtered.length+" sur "+players.length)+" joueur"+(players.length>1?"s":"")+(filtered.length?" · "+effectifTexte(eff):"");
-  if(!filtered.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(q?"Aucun résultat":"Aucun joueur")+'</div><div style="font-size:11px;margin-top:4px">'+(q?"Essayez un autre nom":"Appuyez sur + Ajouter")+'</div></div>';return;}
+  if(!filtered.length){el.innerHTML=q?gmVide({icone:"loupe",titre:"Aucun résultat",texte:"Aucun joueur ne correspond à cette recherche. Essayez un autre nom ou enlevez les filtres."}):gmVide({icone:"joueurs",titre:"Aucun joueur",texte:"Les joueurs arrivent tout seuls quand vous validez une fiche d'inscription. Vous pouvez aussi en ajouter un à la main.",bouton:{label:"+ Ajouter un joueur",action:"showAddPlayer()"}});return;}
   el.innerHTML="";
   if(typeof gmDeskOn==="function"&&gmDeskOn()){ joueursTableau(el,filtered); return; }
   filtered.forEach(function(p){

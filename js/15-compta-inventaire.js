@@ -161,7 +161,7 @@ function buildComptabilite(){
 
   var listEl=document.getElementById("compta-list");
   listEl.innerHTML="";
-  if(!filtered.length){listEl.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucune ligne</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Ligne pour ajouter</div></div>';return;}
+  if(!filtered.length){listEl.innerHTML=gmVide({icone:"euro",titre:"Aucune ligne",texte:"Recettes et dépenses du club. Les licences, la buvette et les notes de frais s'écrivent ici toutes seules.",bouton:{label:"+ Ajouter une ligne",action:"showAddComptaLine()"}});return;}
   if(typeof gmDeskOn==="function"&&gmDeskOn()){ comptaTableau(listEl,filtered); return; }
   filtered.forEach(function(l){
     var row=document.createElement("div");
@@ -582,7 +582,7 @@ function buildInventaire(){
   var items=invFilteredList();
   list.innerHTML="";
   if(!items.length){
-    list.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun article</div><div style="font-size:11px;margin-top:4px">Utilisez le bouton + Article</div></div>';
+    list.innerHTML=gmVide({icone:"carton",titre:"Aucun article",texte:"Boissons et confiseries de la buvette, ballons et matériel : le stock se met à jour à chaque vente.",bouton:{label:"+ Ajouter un article",action:"showAddInvItem()"}});
     return;
   }
   items.forEach(function(it){

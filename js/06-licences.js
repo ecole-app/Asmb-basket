@@ -471,7 +471,7 @@ function buildLicences(){
 
   el.innerHTML="";
   if(!lics.length){
-    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">'+(licShowImpayesOnly?"Aucun impayé":"Aucune fiche envoyée")+'</div><div style="font-size:11px;margin-top:4px">'+(licShowImpayesOnly?"Toutes les familles sont à jour":"Appuyez sur + Nouvelle fiche")+'</div></div>';
+    el.innerHTML=licShowImpayesOnly?gmVide({icone:"euro",titre:"Aucun impayé",texte:"Toutes les familles sont à jour du montant attendu pour la licence."}):gmVide({icone:"licence",titre:"Aucune fiche envoyée",texte:"Envoyez un code à une famille : elle remplit sa fiche en ligne, vous la validez et le joueur est créé.",bouton:{label:"+ Nouvelle fiche",action:"showNewLicence()"}});
     return;
   }
   // Tri : date décroissante par défaut, ou catégorie → genre → nom (bouton « Cat. / genre »)
