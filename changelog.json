@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792107242",
+  "titre": "Test des alertes Plateforme",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : un bouton Tester envoie une notification de test et affiche si l'appareil est bien enregistré."
+   }
+  ]
+ },
+ {
   "v": "1792105559",
   "titre": "RIB pour les abonnements",
   "points": [

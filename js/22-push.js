@@ -157,3 +157,33 @@ async function pfPushSync(){
     await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
   }catch(e){ console.log("pfPushSync:",e); }
 }
+
+// Diagnostic affiché sous la cloche : l'appareil est-il enregistré côté Plateforme ?
+// « Tester » demande à la fonction d'envoyer une vraie notif et affiche son résultat.
+async function pfPushDiag(el){
+  if(!el) return;
+  var etat="";
+  try{
+    var s=await window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid));
+    etat=(s&&s.exists&&s.exists())?"Un appareil est enregistré pour les alertes.":"Aucun appareil enregistré : appuie sur « Activer les alertes ».";
+  }catch(e){ etat="Lecture impossible (règles Firestore publiées ?)."; }
+  el.textContent=etat;
+}
+async function pfPushTester(btn){
+  var el=document.getElementById("pf-push-diag");
+  btn.disabled=true; var txt=btn.textContent; btn.textContent="Envoi…";
+  try{
+    var ref=await window.fbAddDoc(window.fbCollection(window.fbDb,"plateforme_ping"),{at:new Date()});
+    var res=null;
+    for(var i=0;i<10&&!res;i++){
+      await new Promise(function(r){ setTimeout(r,1000); });
+      var s=await window.fbGetDoc(ref);
+      var d=s&&s.exists&&s.exists()?s.data():null;
+      if(d&&typeof d.ok==="boolean") res=d;
+    }
+    if(!res) el.textContent="Pas de réponse du serveur : les fonctions sont-elles déployées (firebase deploy --only functions) ?";
+    else if(res.ok) el.textContent="Envoyé ✓ : la notif doit apparaître sur l'appareil enregistré. Si rien n'arrive, c'est le téléphone (notifications du navigateur ou de l'appli bloquées).";
+    else el.textContent="Échec : "+res.erreur;
+  }catch(e){ el.textContent="Erreur : "+((e&&e.code)||e); }
+  btn.disabled=false; btn.textContent=txt;
+}

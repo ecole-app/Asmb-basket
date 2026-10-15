@@ -1078,3 +1078,11 @@ describe("RIB de la Plateforme", () => {
     await assertFails(setDoc(doc(await as("dirA"), "plateforme_config/rib"), { iban: "x" }));
   });
 });
+
+describe("Test d'alerte Plateforme", () => {
+  it("seul le super admin crée un test, avec le seul champ at", async () => {
+    await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date() }));
+    await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), x: 1 }));
+    await assertFails(addDoc(collection(await as("dirA"), "plateforme_ping"), { at: new Date() }));
+  });
+});

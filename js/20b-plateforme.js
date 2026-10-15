@@ -599,7 +599,19 @@ function pfClocheCarte(){
     var btn=document.getElementById("pf-push-btn"); if(!btn) return;
     if(typeof pfPushEtat==="function") pfPushEtat(btn);
   },0);
-  return c;
+  // Diagnostic des alertes : état de l'appareil + bouton de test
+  var wrap=document.createElement("div");
+  wrap.appendChild(c);
+  var dg=document.createElement("div");
+  dg.style.cssText="margin:6px 14px 0;font-size:12px;color:var(--txt2);display:flex;gap:8px;align-items:center;flex-wrap:wrap";
+  dg.innerHTML='<span id="pf-push-diag" style="flex:1;min-width:0">…</span>';
+  var t=document.createElement("button"); t.type="button"; t.textContent="Tester";
+  t.style.cssText="padding:6px 12px;border-radius:99px;border:none;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer";
+  t.addEventListener("click",function(){ if(typeof pfPushTester==="function") pfPushTester(t); });
+  dg.appendChild(t); wrap.appendChild(dg);
+  setTimeout(function(){ if(typeof pfPushDiag==="function") pfPushDiag(document.getElementById("pf-push-diag")); },300);
+  wrap._carte=c;
+  return wrap;
 }
 
 // Accueil du super admin : la plateforme, pas l'espace d'un club.
@@ -618,8 +630,8 @@ function showPlateformeHome(opts){
     return false;
   }
   el.innerHTML="";
-  var cloche=pfClocheCarte();
-  el.appendChild(cloche);
+  var clocheW=pfClocheCarte(), cloche=clocheW._carte||clocheW;
+  el.appendChild(clocheW);
   // Panneau déroulant (comme la cloche de Twitch) : fermé par défaut, s'ouvre au toucher.
   var panneau=document.createElement("div");
   panneau.id="pf-panneau"; panneau.style.cssText="display:none;margin:0 0 4px";

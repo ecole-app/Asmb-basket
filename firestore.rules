@@ -260,6 +260,12 @@ service cloud.firestore {
       allow write: if superAdmin();
     }
 
+    // ── Test d'alerte push (bouton « Tester » de la Plateforme) ──
+    match /plateforme_ping/{id} {
+      allow create: if superAdmin() && request.resource.data.keys().hasOnly(['at']);
+      allow read: if superAdmin();
+    }
+
     // ── Alertes push de la Plateforme (un abonnement par appareil du super admin) ──
     match /plateforme_push/{uid} {
       allow read, write: if superAdmin() && request.auth.uid == uid;

@@ -160,3 +160,24 @@ exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", asy
     if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") await ref.delete();
   }
 });
+
+// Test d'alerte demandé depuis la Plateforme (bouton « Tester ») : envoie une vraie notif
+// à l'appareil enregistré et écrit le résultat sur le document, pour le diagnostic.
+exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (event) => {
+  const ref = event.data && event.data.ref;
+  if (!ref) return;
+  const sub = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
+  const token = sub.exists && sub.data() && sub.data().token;
+  if (!token) { await ref.update({ ok: false, erreur: "aucun appareil enregistré" }); return; }
+  try {
+    await admin.messaging().send({
+      token,
+      notification: { title: "Test d'alerte", body: "Si tu vois ceci, les alertes Plateforme fonctionnent." },
+      data: { url: "./" },
+      webpush: { fcmOptions: { link: "./" } }
+    });
+    await ref.update({ ok: true });
+  } catch (e) {
+    await ref.update({ ok: false, erreur: String((e && (e.code || e.message)) || e).slice(0, 200) });
+  }
+});
