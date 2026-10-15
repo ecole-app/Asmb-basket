@@ -304,6 +304,15 @@ function impRendre(){
   var verif=res.aVerifier.slice(0,5).map(function(x){
     return '<div style="font-size:11px;color:var(--mut)">Ligne '+x.n+' : '+authEsc((x.prenom+" "+x.nom).trim()||"(vide)")+' — '+authEsc(x.raison)+'</div>';
   }).join("");
+  // Aperçu fiche par fiche (15 premières nouvelles fiches) : ce qui sera rempli
+  var apercu=res.nouvelles.slice(0,15).map(function(d){
+    var av=d.photo?'<img src="'+d.photo+'" alt="" style="width:40px;height:50px;object-fit:cover;border-radius:6px;flex:none">'
+      :'<div style="width:40px;height:50px;border-radius:6px;background:var(--bdr);flex:none"></div>';
+    var infos=[d.naissance?d.naissance.split("-").reverse().join("/"):"",d.genre,d.categorie,d.numLicence,d.nationalite].filter(Boolean).map(authEsc).join(" · ");
+    return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">'+av+
+      '<div style="min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(d.prenom)+' '+authEsc(d.nom)+(d.role&&d.role!=="joueur"?' <span style="font-size:10px;color:var(--mut)">('+authEsc(d.role)+')</span>':'')+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);overflow-wrap:anywhere">'+infos+'</div></div></div>';
+  }).join("");
   el.innerHTML=impEntete()+
     '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">Fichier : '+authEsc(IMP_ETAT.fichier)+' · '+IMP_ETAT.lignes.length+' lignes</div>'+
     '<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:6px">Colonnes</div>'+maps+
@@ -315,6 +324,7 @@ function impRendre(){
       (verif?'<div style="margin-top:6px">'+verif+(res.aVerifier.length>5?'<div style="font-size:11px;color:var(--mut)">… et '+(res.aVerifier.length-5)+' autres</div>':'')+'</div>':'')+
       (maxNew<peutNew?'<div style="margin-top:6px;color:var(--red);font-size:12px">Limite de licences du pack : seules '+maxNew+' fiches seront créées.</div>':'')+
     '</div>'+
+    (apercu?'<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:2px">Fiches qui seront créées'+(res.nouvelles.length>15?' (15 premières)':'')+'</div><div style="margin-bottom:12px">'+apercu+'</div>':'')+
     '<button onclick="impValider()" '+((maxNew||res.maj.length)?'':'disabled ')+'style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;'+((maxNew||res.maj.length)?'':'opacity:.5')+'">Importer</button>'+
     '<button onclick="IMP_ETAT.entetes=[];impRendre()" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:none;cursor:pointer">Choisir un autre fichier</button>';
 }

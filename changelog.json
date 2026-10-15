@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792093873",
+  "titre": "Aperçu fiche par fiche à l'import",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Avant de valider un import (CSV, Excel ou trombinoscope PDF), la liste des fiches à créer s'affiche avec photo, nom, naissance, genre, catégorie et n° de licence."
+   }
+  ]
+ },
+ {
   "v": "1792090189",
   "titre": "Import d'un trombinoscope PDF (FBI)",
   "points": [
