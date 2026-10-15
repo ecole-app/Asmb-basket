@@ -480,6 +480,7 @@ function openPlateforme(){
   window.__gmDemBox=demBox;
   s.body.appendChild(demBox);
   loadDemandesEssai(demBox);
+  majBadgeDemandes();
   var avisBox=document.createElement("div");
   avisBox.style.marginBottom="12px";
   s.body.appendChild(avisBox);
@@ -917,10 +918,13 @@ async function listerMembres(clubId){
 // Le dirigeant choisit lui-même nom, sport, ville et couleurs. Valider crée le
 // club en essai avec ces choix, prépare son invitation dirigeant (liée à son
 // numéro) et ouvre un SMS pré-rempli. Rien ne part tout seul.
+var __gmDemSeq=0;
 async function loadDemandesEssai(box){
-  box.innerHTML="";
+  var seq=++__gmDemSeq;   // deux chargements rapprochés : seul le dernier affiche
   var snap;
   try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"demandes_essai"),window.fbWhere("statut","==","nouvelle"))); }catch(e){ return; }
+  if(seq!==__gmDemSeq) return;
+  box.innerHTML="";
   var dem=[]; snap.forEach(function(d){ dem.push(Object.assign({id:d.id},d.data())); });
   dem.sort(function(a,b){ return (gmDate(a.at)||0)-(gmDate(b.at)||0); });
   if(!dem.length) return;
@@ -1018,6 +1022,8 @@ function majBadgeDemandes(){
       window.__gmDemandesN=n;
       var b=document.getElementById("gm-pf-badge");
       if(b){ b.style.display=n?"flex":"none"; b.textContent=n; }
+      // Plateforme ouverte : la liste des demandes se rafraîchit sans recharger la page
+      if(window.__gmDemBox&&document.body.contains(window.__gmDemBox)) loadDemandesEssai(window.__gmDemBox);
     },function(){});
   }catch(e){}
 }

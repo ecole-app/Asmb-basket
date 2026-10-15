@@ -102,3 +102,30 @@ exports.onDmMessage = onDocumentCreated(
     if (cleanup.length) await Promise.all(cleanup);
   }
 );
+
+// Nouvelle demande d'essai déposée depuis le site : notifie le super admin (compte
+// General Manager, club d'origine) sur son téléphone. Rien d'autre n'est envoyé.
+const SUPER_ADMIN_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2";
+const CLUB_ORIGINE = "asmb";
+exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) => {
+  const d = event.data && event.data.data();
+  if (!d) return;
+  const subs = db.collection("clubs").doc(CLUB_ORIGINE).collection("push_subscriptions");
+  const snap = await subs.doc(SUPER_ADMIN_UID).get();
+  const token = snap.exists && snap.data() && snap.data().token;
+  if (!token) return;
+  const quoi = [d.club, d.nom].filter(Boolean).join(" · ").slice(0, 100);
+  try {
+    await admin.messaging().send({
+      token,
+      notification: { title: "Nouvelle demande d'essai", body: quoi || "Un club vient de remplir le formulaire" },
+      data: { url: "./" },
+      webpush: { fcmOptions: { link: "./" } }
+    });
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
+      await subs.doc(SUPER_ADMIN_UID).delete();
+    }
+  }
+});
