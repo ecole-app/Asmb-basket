@@ -535,7 +535,7 @@ async function loadRejoints(box){
     var lst=document.createElement("div"); lst.style.display="none";
     vieux.forEach(function(x){
       var r=document.createElement("div"); r.style.cssText="font-size:12px;color:var(--txt2);padding:6px 2px;border-bottom:1px solid var(--bdr)";
-      r.textContent="🎉 "+x.club+" · compte dirigeant créé"+(x.t?" · "+x.t.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"");
+      r.textContent=x.club+" · compte dirigeant créé"+(x.t?" · "+x.t.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"");
       lst.appendChild(r);
     });
     var bt=gmBtn("Anciennes ("+vieux.length+") ▾","soft",function(){

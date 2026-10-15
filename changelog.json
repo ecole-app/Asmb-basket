@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792103456",
+  "titre": "Anciennes notifications épurées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : texte des anciennes notifications simplifié."
+   }
+  ]
+ },
+ {
   "v": "1792103382",
   "titre": "Anciennes notifications détaillées",
   "points": [
