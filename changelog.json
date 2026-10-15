@@ -1,5 +1,17 @@
 [
   {
+    "v": "1792059584",
+    "titre": "Plateforme : plus de saut de mise en page au rechargement",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur, la Plateforme garde la même largeur et le même alignement pendant le chargement, sans se décaler à la fin."
+      }
+    ]
+  },
+  {
     "v": "1792059371",
     "titre": "Plateforme : couleurs GM et liste instantanée",
     "points": [

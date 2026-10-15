@@ -396,6 +396,11 @@ html.gm-public .main>#desk-home{display:none!important}
 /* Écrans hors club (plateforme du super admin, connexion, choix du profil) et pages
    publiques : pas de menu latéral du club sur ordinateur. */
 html.gm-public .gm-side,html.gm-horsclub .gm-side{display:none!important}
+/* La Plateforme garde la même mise en page avant et après le démarrage de la version ordinateur (sinon la page saute) */
+@media (min-width:1024px){
+  html.gm-horsclub .hdr{padding-left:24px;padding-right:24px}
+  html:not(.gm-desk) .main>#scr-plateforme.on{max-width:1180px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box}
+}
 html.gm-public body,html.gm-horsclub body{padding-left:0!important}
 
 /* ── iPhone (Safari) ──
