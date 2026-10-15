@@ -652,6 +652,7 @@ function showPlateformeHome(opts){
   act.style.cssText+=";display:flex;gap:8px;flex-wrap:wrap";
   act.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   act.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
+  act.appendChild(gmBtn("RIB","ghost",function(){ pfRibOuvrir(); }));
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
   el.appendChild(list);

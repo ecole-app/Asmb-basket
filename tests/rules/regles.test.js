@@ -1067,3 +1067,14 @@ describe("Alertes push de la Plateforme", () => {
     await assertFails(getDoc(doc(await as(null), "plateforme_push/" + SUPER_ADMIN)));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("RIB de la Plateforme", () => {
+  it("le super admin l'écrit, les dirigeants le lisent, les autres non", async () => {
+    await assertSucceeds(setDoc(doc(await as(SUPER_ADMIN), "plateforme_config/rib"), { iban: "FR7630006000011234567890189" }));
+    await assertSucceeds(getDoc(doc(await as("dirA"), "plateforme_config/rib")));
+    await assertFails(getDoc(doc(await as("parentA"), "plateforme_config/rib")));
+    await assertFails(getDoc(doc(await as(null), "plateforme_config/rib")));
+    await assertFails(setDoc(doc(await as("dirA"), "plateforme_config/rib"), { iban: "x" }));
+  });
+});

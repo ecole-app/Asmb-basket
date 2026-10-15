@@ -80,6 +80,7 @@ function aboPeindre(box){
   var pied=document.createElement("div"); pied.style.cssText="font-size:12px;color:var(--mut);margin-top:10px;line-height:1.5";
   pied.innerHTML='Vos données restent exportables à tout moment : <a href="#" id="abo-export" style="color:var(--dkg);font-weight:700">Exporter mes données</a> · <a href="legal/cgv.html" target="_blank" style="color:var(--dkg);font-weight:700">CGV</a>';
   box.appendChild(row); box.appendChild(pied);
+  if(!own) aboRibAfficher(box,row,c);
   var ex=box.querySelector("#abo-export");
   if(ex) ex.addEventListener("click",function(ev){ ev.preventDefault(); if(typeof openExportDonnees==="function") openExportDonnees(); });
 }
@@ -219,5 +220,118 @@ function renderAboNotifs(box, clubs, list){
         .catch(function(err){ b.disabled=false; askAlert("Erreur : "+((err&&err.code)||err)); });
     }));
     box.appendChild(card);
+  });
+}
+
+// ═══ RIB DE LA PLATEFORME ═════════════════════════════════════════════
+// Saisi une fois par le super admin (Plateforme › RIB), stocké dans plateforme_config/rib
+// (jamais dans le code public), lisible par les dirigeants connectés : affiché dans
+// Paramètres › Abonnement avec un bouton « Copier » par ligne (aucune ressaisie, aucune erreur).
+function ribIbanNet(s){ return String(s||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase(); }
+function ribIbanFmt(s){ return ribIbanNet(s).replace(/(.{4})/g,"$1 ").trim(); }
+function ribIbanValide(s){
+  var n=ribIbanNet(s);
+  if(!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(n)) return false;
+  if(n.indexOf("FR")===0 && n.length!==27) return false;
+  var r=n.slice(4)+n.slice(0,4), reste=0;
+  for(var i=0;i<r.length;i++){
+    var c=r.charAt(i), v=/[A-Z]/.test(c)?String(c.charCodeAt(0)-55):c;
+    for(var j=0;j<v.length;j++) reste=(reste*10+parseInt(v.charAt(j),10))%97;
+  }
+  return reste===1;
+}
+function ribBicNet(s){ return String(s||"").replace(/\s+/g,"").toUpperCase(); }
+function ribBicValide(s){ return /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(ribBicNet(s)); }
+
+function ribCopier(txt,quoi){
+  var ok=function(){ if(typeof showToast==="function") showToast((quoi||"Texte")+" copié ✓"); };
+  var secours=function(){
+    try{
+      var t=document.createElement("textarea"); t.value=txt; t.style.cssText="position:fixed;opacity:0";
+      document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); ok();
+    }catch(e){ if(typeof askAlert==="function") askAlert(txt); }
+  };
+  try{ navigator.clipboard.writeText(txt).then(ok,secours); }catch(e){ secours(); }
+}
+function ribCharger(){
+  if(window.__gmRib!==undefined) return Promise.resolve(window.__gmRib);
+  return window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","rib")).then(function(s){
+    window.__gmRib=(s&&s.exists&&s.exists())?(s.data()||null):null; return window.__gmRib;
+  }).catch(function(){ return null; });
+}
+// Carte « Payer par virement » : une ligne par information, chacune avec son bouton Copier.
+function ribCarte(rib,reference){
+  var card=document.createElement("div");
+  card.style.cssText="background:var(--bg);border-radius:var(--rs);padding:12px 14px;margin:0 0 10px";
+  var t=document.createElement("div"); t.style.cssText="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:8px";
+  t.textContent="Payer par virement"; card.appendChild(t);
+  function ligne(lib,val,aff){
+    if(!val) return;
+    var r=document.createElement("div"); r.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)";
+    var g=document.createElement("div"); g.style.cssText="flex:1;min-width:0";
+    var a=document.createElement("div"); a.style.cssText="font-size:11px;color:var(--mut)"; a.textContent=lib;
+    var b=document.createElement("div"); b.style.cssText="font-size:13px;font-weight:700;color:var(--txt);word-break:break-all"; b.textContent=aff||val;
+    g.appendChild(a); g.appendChild(b); r.appendChild(g);
+    var c=document.createElement("button"); c.type="button"; c.textContent="Copier";
+    c.style.cssText="flex:none;padding:6px 12px;border-radius:99px;border:none;background:color-mix(in srgb, var(--ltg) 14%, transparent);color:var(--dkg);font-size:12px;font-weight:800;cursor:pointer";
+    c.addEventListener("click",function(){ ribCopier(val,lib); });
+    r.appendChild(c); card.appendChild(r);
+  }
+  ligne("Titulaire",rib.titulaire);
+  ligne("IBAN",ribIbanNet(rib.iban),ribIbanFmt(rib.iban));
+  ligne("BIC",ribBicNet(rib.bic));
+  ligne("Banque",rib.banque);
+  ligne("Référence à indiquer",reference);
+  return card;
+}
+// Affichage dans Paramètres › Abonnement (clubs payants ou en essai, pas le club d'origine).
+function aboRibAfficher(box,row,c){
+  ribCharger().then(function(rib){
+    if(!rib||!rib.iban||!box.isConnected) return;
+    var old=box.querySelector("#abo-rib"); if(old) old.remove();
+    var card=ribCarte(rib,"GM "+(c.name||c.id||""));
+    card.id="abo-rib";
+    box.insertBefore(card,row);
+  });
+}
+// Saisie côté Plateforme (super admin) : contrôle de l'IBAN et du BIC avant d'enregistrer.
+function pfRibOuvrir(){
+  if(typeof isSuperAdmin!=="function"||!isSuperAdmin()) return;
+  var s=gmSheet("RIB de General Manager");
+  var rib=window.__gmRib||{};
+  function champ(lib,id,val,ph){
+    var w=document.createElement("div"); w.style.marginBottom="10px";
+    w.innerHTML='<label for="'+id+'" style="display:block;font-size:12px;font-weight:700;color:var(--txt2);margin-bottom:4px">'+lib+'</label>'+
+      '<input id="'+id+'" type="text" autocomplete="off" autocapitalize="characters" placeholder="'+ph+'" style="width:100%;padding:11px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:14px">'+
+      '<div id="'+id+'-m" style="font-size:12px;margin-top:3px;min-height:16px"></div>';
+    w.querySelector("input").value=val||"";
+    s.body.appendChild(w); return w.querySelector("input");
+  }
+  var ti=champ("Titulaire du compte","rib-tit",rib.titulaire,"Nom de ton entreprise");
+  var ib=champ("IBAN","rib-iban",ribIbanFmt(rib.iban),"FR76 …");
+  var bi=champ("BIC","rib-bic",rib.bic,"ex. AGRIFRPP");
+  var ba=champ("Banque (facultatif)","rib-ban",rib.banque,"");
+  var go=gmBtn("Enregistrer","primary",function(){});
+  function maj(){
+    var mi=document.getElementById("rib-iban-m"), mb=document.getElementById("rib-bic-m");
+    var iok=ribIbanValide(ib.value), bok=ribBicValide(bi.value);
+    mi.textContent=!ib.value?"":(iok?"✓ IBAN valide":"✖ IBAN incorrect (vérifie les chiffres)"); mi.style.color=iok?"var(--grn)":"var(--red)";
+    mb.textContent=!bi.value?"":(bok?"✓ BIC valide":"✖ BIC incorrect (8 ou 11 caractères)"); mb.style.color=bok?"var(--grn)":"var(--red)";
+    var pret=iok&&bok&&ti.value.trim().length>=2;
+    go.disabled=!pret; go.style.opacity=pret?"1":".5";
+  }
+  ib.addEventListener("input",function(){ ib.value=ribIbanFmt(ib.value); maj(); });
+  bi.addEventListener("input",function(){ bi.value=ribBicNet(bi.value); maj(); });
+  ti.addEventListener("input",maj);
+  go.addEventListener("click",function(){
+    var d={titulaire:ti.value.trim().slice(0,80),iban:ribIbanNet(ib.value),bic:ribBicNet(bi.value),banque:ba.value.trim().slice(0,60),maj:Date.now()};
+    window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_config","rib"),d).then(function(){
+      window.__gmRib=d; s.modal.remove(); if(typeof showToast==="function") showToast("RIB enregistré ✓");
+    }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  });
+  s.body.appendChild(go);
+  maj();
+  ribCharger().then(function(r){
+    if(r&&r.iban){ var ap=document.createElement("div"); ap.style.marginTop="14px"; ap.appendChild(ribCarte(r,"")); s.body.appendChild(ap); }
   });
 }

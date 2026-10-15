@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792105559",
+  "titre": "RIB pour les abonnements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Abonnement : le RIB de General Manager s'affiche avec un bouton Copier par ligne (IBAN, BIC, titulaire, référence)."
+   }
+  ]
+ },
+ {
   "v": "1792105041",
   "titre": "Pôles Premium visibles",
   "points": [

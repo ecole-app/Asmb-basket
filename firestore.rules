@@ -253,6 +253,13 @@ service cloud.firestore {
             && uid != "7f2br1aTiJVWHTEbqVePbMLD0uc2");
     }
 
+    // ── Réglages de la Plateforme (RIB pour les virements d'abonnement) ──
+    // Écrits par le super admin seul ; lus par les dirigeants connectés (écran Abonnement).
+    match /plateforme_config/{id} {
+      allow read: if superAdmin() || (signedIn() && hasRole('dirigeant'));
+      allow write: if superAdmin();
+    }
+
     // ── Alertes push de la Plateforme (un abonnement par appareil du super admin) ──
     match /plateforme_push/{uid} {
       allow read, write: if superAdmin() && request.auth.uid == uid;
