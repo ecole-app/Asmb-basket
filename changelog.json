@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792103206",
+  "titre": "Cloche déroulante",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : les notifications s'ouvrent en touchant la cloche (panneau déroulant) au lieu d'occuper l'écran."
+   }
+  ]
+ },
+ {
   "v": "1792103018",
   "titre": "Alertes Plateforme fiabilisées",
   "points": [

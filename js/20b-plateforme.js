@@ -572,10 +572,10 @@ function pfMajCloche(){
 }
 function pfClocheCarte(){
   var c=document.createElement("div");
-  c.style.cssText="margin:14px 12px 0;padding:12px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);display:flex;align-items:center;gap:10px";
+  c.style.cssText="margin:14px 12px 0;padding:12px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);display:flex;align-items:center;gap:10px;cursor:pointer";
   c.innerHTML='<div style="position:relative;font-size:24px;line-height:1">🔔<span id="pf-cloche-n" style="display:none;position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center">0</span></div>'+
     '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800;color:var(--txt)">Notifications</div><div id="pf-cloche-txt" style="font-size:12px;color:var(--txt2)">Rien de nouveau</div></div>'+
-    '<button id="pf-push-btn" style="padding:8px 10px;border-radius:var(--rx);border:none;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Activer les alertes</button>';
+    '<span id="pf-cloche-fl" style="font-size:14px;color:var(--mut)">▾</span><button id="pf-push-btn" style="padding:8px 10px;border-radius:var(--rx);border:none;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Activer les alertes</button>';
   setTimeout(function(){
     var btn=document.getElementById("pf-push-btn"); if(!btn) return;
     if(typeof pfPushEtat==="function") pfPushEtat(btn);
@@ -599,12 +599,23 @@ function showPlateformeHome(opts){
     return false;
   }
   el.innerHTML="";
-  el.appendChild(pfClocheCarte());
+  var cloche=pfClocheCarte();
+  el.appendChild(cloche);
+  // Panneau déroulant (comme la cloche de Twitch) : fermé par défaut, s'ouvre au toucher.
+  var panneau=document.createElement("div");
+  panneau.id="pf-panneau"; panneau.style.cssText="display:none;margin:0 0 4px";
+  cloche.addEventListener("click",function(e){
+    if(e.target.closest&&e.target.closest("#pf-push-btn")) return;
+    var ouvert=panneau.style.display!=="none";
+    panneau.style.display=ouvert?"none":"block";
+    var f=document.getElementById("pf-cloche-fl"); if(f) f.textContent=ouvert?"▾":"▴";
+  });
+  el.appendChild(panneau);
   var nbox={};
   [["cpt","__gmComptesBox"],["join",null],["dem","__gmDemBox"],["avis",null],["abo","__gmAboNotifBox"],["reco","__gmAboBox"]].forEach(function(k){
     var b=document.createElement("div"); b.style.cssText="margin:12px 12px 0"; nbox[k[0]]=b;
     if(k[1]) window[k[1]]=b;
-    el.appendChild(b);
+    panneau.appendChild(b);
   });
   window.__gmN={dem:0,avis:0,abo:0,cpt:0,join:0}; pfMajCloche();
   loadComptesASupprimer(nbox.cpt);
