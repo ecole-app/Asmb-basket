@@ -1,5 +1,23 @@
 [
   {
+    "v": "1792047531",
+    "titre": "Version Indépendant : les enfants mineurs",
+    "points": [
+      {
+        "roles": [
+          "client"
+        ],
+        "texte": "Parent : inscris ton enfant (moins de 18 ans) avec ton propre accès, avec l'autorisation parentale. Tu réserves et préviens pour lui comme pour toi, depuis « Ma fiche » pour en ajouter d'autres."
+      },
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Tes clients mineurs apparaissent avec la mention « Mineur », le nom et le téléphone de leur parent, et l'autorisation parentale. Ils sont habitués et pointés comme les autres."
+      }
+    ]
+  },
+  {
     "v": "1792014399",
     "titre": "Documents légaux mis à jour",
     "points": [

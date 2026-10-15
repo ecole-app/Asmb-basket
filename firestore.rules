@@ -717,17 +717,36 @@ service cloud.firestore {
             && d.get('naissance', '') is string && d.get('naissance', '').size() <= 10
             && d.get('tel', '') is string && d.get('tel', '').size() <= 20
             && d.get('email', '') is string && d.get('email', '').size() <= 100
+            && d.get('note', '') is string && d.get('note', '').size() <= 300
+            && d.get('parentSeul', false) is bool;
+        }
+        // Enfant mineur : fiche créée par son parent (compte adulte, rôle client).
+        // Identifiant « e_xxxx » (jamais un uid de compte), parentUid = le parent,
+        // autorisation parentale cochée et horodatée. Aucun compte pour l'enfant.
+        function enfantOk(d) {
+          return d.prenom is string && d.prenom.size() >= 1 && d.prenom.size() <= 40
+            && d.nom is string && d.nom.size() >= 1 && d.nom.size() <= 40
+            && d.naissance is string && d.naissance.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
             && d.get('note', '') is string && d.get('note', '').size() <= 300;
         }
-        allow read: if readDirigeant(clubId) || (member(clubId) && request.auth.uid == uid);
+        allow read: if readDirigeant(clubId)
+          || (member(clubId) && (request.auth.uid == uid || resource.data.get('parentUid', '') == request.auth.uid));
         allow create: if dirigeant(clubId)
           || (member(clubId) && hasRole('client') && request.auth.uid == uid
-              && request.resource.data.keys().hasOnly(['prenom','nom','naissance','tel','email','note','createdAt'])
-              && ficheOk(request.resource.data) && request.resource.data.createdAt == request.time);
+              && request.resource.data.keys().hasOnly(['prenom','nom','naissance','tel','email','note','parentSeul','createdAt'])
+              && ficheOk(request.resource.data) && request.resource.data.createdAt == request.time)
+          || (member(clubId) && hasRole('client') && uid.matches('^e_[a-z0-9]{6,30}$')
+              && request.resource.data.keys().hasOnly(['prenom','nom','naissance','note','parentUid','mineur','autorisation','createdAt'])
+              && request.resource.data.parentUid == request.auth.uid
+              && request.resource.data.mineur == true && request.resource.data.autorisation == true
+              && enfantOk(request.resource.data) && request.resource.data.createdAt == request.time);
         allow update: if dirigeant(clubId)
           || (member(clubId) && request.auth.uid == uid
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['prenom','nom','naissance','tel','email','note'])
-              && ficheOk(request.resource.data));
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['prenom','nom','naissance','tel','email','note','parentSeul'])
+              && ficheOk(request.resource.data))
+          || (member(clubId) && hasRole('client') && resource.data.get('parentUid', '') == request.auth.uid
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['prenom','nom','naissance','note'])
+              && enfantOk(request.resource.data));
         allow delete: if dirigeant(clubId);
       }
       // Notes de l'indépendant sur un client : jamais visibles du client.
@@ -745,15 +764,20 @@ service cloud.firestore {
             && d.statut in ['vient', 'absent']
             && d.get('nom', '') is string && d.get('nom', '').size() <= 60;
         }
+        // La personne réservée est le client lui-même ou l'un de SES enfants.
+        function parentDe(clubId, pid) {
+          return pid is string && pid.matches('^e_[a-z0-9]{6,30}$')
+            && get(/databases/$(database)/documents/clubs/$(clubId)/indep_clients/$(pid)).data.get('parentUid', '') == request.auth.uid;
+        }
         allow read: if readMember(clubId);
         allow create: if dirigeant(clubId)
           || (member(clubId) && hasRole('client')
               && request.resource.data.keys().hasOnly(['seance','date','uid','statut','nom','at'])
-              && request.resource.data.uid == request.auth.uid
-              && id == request.resource.data.seance + '__' + request.auth.uid
+              && (request.resource.data.uid == request.auth.uid || parentDe(clubId, request.resource.data.uid))
+              && id == request.resource.data.seance + '__' + request.resource.data.uid
               && resaOk(request.resource.data) && request.resource.data.at == request.time);
         allow update: if dirigeant(clubId)
-          || (member(clubId) && hasRole('client') && resource.data.uid == request.auth.uid
+          || (member(clubId) && hasRole('client') && (resource.data.uid == request.auth.uid || parentDe(clubId, resource.data.uid))
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statut','nom','at'])
               && resaOk(request.resource.data) && request.resource.data.at == request.time);
         allow delete: if dirigeant(clubId);

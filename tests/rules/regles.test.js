@@ -973,6 +973,43 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertFails(getDocs(collection(await as(null), "indep_liens")));
     await assertSucceeds(getDocs(query(collection(await as("dirI"), "indep_liens"), where("clubId", "==", "I"))));
   });
+  it("mineurs : le parent crée la fiche de son enfant (autorisation cochée), la modifie et la lit ; les autres non", async () => {
+    const par = await as("parI");
+    const enf = (o = {}) => Object.assign({ prenom: "Yanis", nom: "B", naissance: "2016-09-30", note: "Asthme léger", parentUid: "parI", mineur: true, autorisation: true, createdAt: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(par, "clubs/I/indep_clients/e_yanis03"), enf()));
+    await assertSucceeds(updateDoc(doc(par, "clubs/I/indep_clients/e_lina01"), { note: "Allergie aux noix" }));
+    await assertFails(updateDoc(doc(par, "clubs/I/indep_clients/e_lina01"), { parentUid: "cli2I" }));
+    await assertFails(updateDoc(doc(par, "clubs/I/indep_clients/e_lina01"), { actif: false }));
+    await assertFails(updateDoc(doc(par, "clubs/I/indep_clients/e_tom002"), { note: "x" }));
+    await assertSucceeds(getDoc(doc(par, "clubs/I/indep_clients/e_lina01")));
+    await assertSucceeds(getDocs(query(collection(par, "clubs/I/indep_clients"), where("parentUid", "==", "parI"))));
+    await assertFails(getDoc(doc(par, "clubs/I/indep_clients/e_tom002")));
+    await assertFails(getDoc(doc(await as("cliI"), "clubs/I/indep_clients/e_lina01")));
+    await assertSucceeds(getDoc(doc(await as("dirI"), "clubs/I/indep_clients/e_lina01")));
+    await assertFails(getDoc(doc(await as("dirA"), "clubs/I/indep_clients/e_lina01")));
+  });
+  it("mineurs : refusé sans autorisation parentale, pour le compte d'un autre, hors format d'identifiant ou avec un champ en trop", async () => {
+    const par = await as("parI");
+    const enf = (o = {}) => Object.assign({ prenom: "Yanis", nom: "B", naissance: "2016-09-30", note: "", parentUid: "parI", mineur: true, autorisation: true, createdAt: serverTimestamp() }, o);
+    await assertFails(setDoc(doc(par, "clubs/I/indep_clients/e_yanis03"), enf({ autorisation: false })));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_clients/e_yanis03"), enf({ parentUid: "cli2I" })));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_clients/cli9I"), enf()));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_clients/e_yanis03"), enf({ naissance: "" })));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_clients/e_yanis03"), enf({ tel: "0600000000" })));
+    await assertFails(setDoc(doc(await as(null), "clubs/I/indep_clients/e_yanis03"), enf()));
+    await assertFails(setDoc(doc(await as("dirA"), "clubs/I/indep_clients/e_yanis03"), enf()));
+  });
+  it("mineurs : le parent réserve et prévient pour ses enfants, jamais pour ceux d'un autre ni pour la présence", async () => {
+    const par = await as("parI");
+    const resa = (o = {}) => Object.assign({ seance: "cr1_2026-10-20", date: "2026-10-20", uid: "e_lina01", statut: "vient", nom: "Lina B.", at: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(par, "clubs/I/indep_resas/cr1_2026-10-20__e_lina01"), resa()));
+    await assertSucceeds(setDoc(doc(par, "clubs/I/indep_resas/cr1_2026-10-20__e_lina01"), { statut: "absent", at: serverTimestamp() }, { merge: true }));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_resas/cr1_2026-10-20__e_lina01"), { present: true }, { merge: true }));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_resas/cr1_2026-10-20__e_tom002"), resa({ uid: "e_tom002", nom: "Tom A." })));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_resas/cr1_2026-10-20__e_lina01x"), resa({ uid: "e_lina01x" })));
+    await assertFails(setDoc(doc(await as("cliI"), "clubs/I/indep_resas/cr1_2026-10-20__e_lina01"), resa()));
+    await assertSucceeds(setDoc(doc(await as("dirI"), "clubs/I/indep_resas/cr1_2026-10-20__e_lina01"), { present: true }, { merge: true }));
+  });
   it("l'indépendant ne change pas le type de sa structure", async () => {
     await assertFails(updateDoc(doc(await as("dirI"), "clubs/I"), { type: "club" }));
     await assertSucceeds(updateDoc(doc(await as("dirI"), "clubs/I"), { name: "KS Training Pro" }));

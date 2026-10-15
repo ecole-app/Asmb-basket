@@ -44,6 +44,11 @@ export async function seed() {
     await set("indep_liens/KPQR-STUV", { clubId: "I", clubName: "KS Training", actif: false, createdBy: "dirI" });
     await set("indep_liens/AAAA-BBBB", { clubId: "A", clubName: "Club A", actif: true, createdBy: "dirA" });
     await set("clubs/I/indep_clients/cli2I", { prenom: "Nadia", nom: "A", tel: "0612345678" });
+    // Parent avec un enfant mineur (fiche sans compte, id « e_… »), et un enfant d'un autre client.
+    await set("users/parI", { clubId: "I", roles: ["client"] });
+    await set("clubs/I/indep_clients/parI", { prenom: "Sonia", nom: "B", tel: "0611223344", parentSeul: true });
+    await set("clubs/I/indep_clients/e_lina01", { prenom: "Lina", nom: "B", naissance: "2015-05-02", parentUid: "parI", mineur: true, autorisation: true });
+    await set("clubs/I/indep_clients/e_tom002", { prenom: "Tom", nom: "A", naissance: "2014-01-09", parentUid: "cli2I", mineur: true, autorisation: true });
     await set("clubs/I/indep_creneaux/cr1", { titre: "Cross-training", jour: 2, heure: "18:30", places: 12, habitues: ["cliI"], actif: true });
     await set("clubs/I/indep_resas/cr1_2026-10-20__cli2I", { seance: "cr1_2026-10-20", date: "2026-10-20", uid: "cli2I", statut: "vient", nom: "Nadia A." });
 

@@ -13,11 +13,17 @@
 //  indep_resas/{seance__uid}  {seance, date, uid, statut:"vient"|"absent", present, nom}
 //                       un habitué est compté présent sauf réservation « absent »
 //  indep_clients/{uid}  fiche du client (lui et l'indépendant seulement)
+//  indep_clients/e_xxx  fiche d'un ENFANT MINEUR, sans compte : créée par son parent
+//                       {prenom, nom, naissance, note, parentUid, mineur:true, autorisation:true}.
+//                       Le compte reste toujours celui d'un adulte ; un parent qui n'inscrit que
+//                       ses enfants a parentSeul:true sur sa propre fiche (il n'est pas « client »).
+//                       Un enfant est une « personne » comme une autre : son id sert dans les
+//                       habitués d'un créneau et dans les réservations (seance__e_xxx).
 //  indep_notes/{uid}    notes privées de l'indépendant
 //  indep_liens/{CODE}   (global) lien d'invitation réutilisable, désactivable
 
 var IND={role:null, uid:null, clubId:null, club:{}, tab:"accueil", creneaux:[], seances:{}, resas:{},
-  clients:{}, clientsCharges:false, fiche:null, ficheChargee:false, liens:[], unsubs:[], feuille:null, rendu:false};
+  clients:{}, clientsCharges:false, fiche:null, ficheChargee:false, enfants:{}, liens:[], unsubs:[], feuille:null, rendu:false};
 var IND_COULEUR="#0E7C7B";
 var IND_HORIZON=28;   // jours de séances affichés à l'avance
 var IND_PASSE=14;     // jours d'historique chargés
@@ -116,6 +122,9 @@ function indEcouter(){
     ecoute(window.fbDoc(db,"indep_clients",IND.uid),function(s){
       IND.fiche=s.exists()?s.data():null; IND.ficheChargee=true; indRendre();
     });
+    ecoute(window.fbQuery(window.fbCollection(db,"indep_clients"),window.fbWhere("parentUid","==",IND.uid)),function(sn){
+      var m={}; sn.forEach(function(d){ m[d.id]=Object.assign({id:d.id},d.data()); }); IND.enfants=m; indRendre();
+    });
   }
 }
 
@@ -171,9 +180,35 @@ function indNom(uid,secours){
   return secours||"Client";
 }
 function indMonNom(){ var f=IND.fiche||{}; return ((f.prenom||"")+(f.nom?" "+f.nom.charAt(0)+".":"")).trim().slice(0,60); }
+// Participants de l'indépendant : adultes + enfants mineurs. Un parent qui n'inscrit que
+// ses enfants (parentSeul) n'est pas un participant : il apparaît sous la fiche de l'enfant.
 function indClientsActifs(){
-  return Object.keys(IND.clients).map(function(k){ return IND.clients[k]; }).filter(function(c){ return c.actif!==false; })
+  return Object.keys(IND.clients).map(function(k){ return IND.clients[k]; }).filter(function(c){ return c.actif!==false && !c.parentSeul; })
     .sort(function(a,b){ return ((a.prenom||"")+(a.nom||"")).localeCompare((b.prenom||"")+(b.nom||"")); });
+}
+function indEstMineur(c){ return !!(c && c.mineur); }
+function indParentDe(c){ return (c && c.parentUid && IND.clients[c.parentUid]) || null; }
+function indEnfantsDe(uid){
+  return Object.keys(IND.clients).map(function(k){ return IND.clients[k]; }).filter(function(c){ return c.parentUid===uid && c.actif!==false; });
+}
+// Côté client (parent) : les personnes pour qui il réserve = lui (sauf compte « parent seul ») + ses enfants.
+function indPersonnes(){
+  var l=[], f=IND.fiche;
+  if(f && !f.parentSeul) l.push({id:IND.uid, prenom:f.prenom||"Moi", nom:f.nom||"", moi:true});
+  Object.keys(IND.enfants).map(function(k){ return IND.enfants[k]; })
+    .filter(function(e){ return e.actif!==false; })
+    .sort(function(a,b){ return (a.prenom||"").localeCompare(b.prenom||""); })
+    .forEach(function(e){ l.push({id:e.id, prenom:e.prenom||"Enfant", nom:e.nom||"", enfant:true}); });
+  return l;
+}
+function indPersonne(pid){
+  var l=indPersonnes();
+  for(var i=0;i<l.length;i++) if(l[i].id===pid) return l[i];
+  return null;
+}
+function indNomPersonne(pid){
+  var p=indPersonne(pid); if(!p) return indMonNom()||"Client";
+  return (p.prenom+(p.nom?" "+p.nom.charAt(0)+".":"")).trim().slice(0,60);
 }
 
 // ── Rendu ────────────────────────────────────────────────────────────
@@ -301,7 +336,7 @@ function indSeanceCoach(s){
     else droite=x.statut==="vient"?'<span class="ind-pill ok">Vient</span>':'<span class="ind-pill no">Absent</span>';
     var c=IND.clients[x.uid]||{};
     return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(c.prenom||x.nom,c.nom))+'</div><div class="t"><strong>'+indEsc(indNom(x.uid,x.nom))+'</strong><span>'
-      +(x.statut==="absent"?"A prévenu de son absence":(x.habitue?"Habitué":"Inscrit à cette séance"))+'</span></div>'+droite+'</div>';
+      +(x.statut==="absent"?"A prévenu de son absence":(x.habitue?"Habitué":"Inscrit à cette séance"))+(indEstMineur(c)?" · Mineur":"")+'</span></div>'+droite+'</div>';
   }
   h+='<div class="ind-k">'+(passe?"Présences · habitués":"Habitués")+'</div>';
   h+=hab.length?'<div class="ind-c ind-list">'+hab.map(ligne).join("")+'</div>':'<div class="ind-c ind-vide">Aucun habitué sur ce créneau.</div>';
@@ -350,7 +385,7 @@ function indAjoutSeance(sid){
   sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
   if(!l.length){ sh.body.innerHTML='<div class="ind-c ind-vide">Tous tes clients sont déjà inscrits, ou tu n\'as pas encore de client.</div>'; return; }
   sh.body.innerHTML='<div class="ind-c ind-list">'+l.map(function(c){
-    return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(c.prenom,c.nom))+'</div><div class="t"><strong>'+indEsc((c.prenom||"")+" "+(c.nom||""))+'</strong></div>'
+    return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(c.prenom,c.nom))+'</div><div class="t"><strong>'+indEsc((c.prenom||"")+" "+(c.nom||""))+'</strong>'+(c.mineur?'<span>Mineur</span>':'')+'</div>'
       +'<button type="button" class="ind-btn p mini" data-uid="'+indEsc(c.uid)+'">Ajouter</button></div>';
   }).join("")+'</div>';
   sh.body.addEventListener("click",function(e){
@@ -378,7 +413,7 @@ function indCreneauForm(id){
     +'<label>Prix de la séance (€)<input id="ind-cr-prix" type="number" inputmode="decimal" min="0" step="0.5" value="'+indEsc(c.prix||"")+'"></label></div>'
     +'<label class="case"><input type="checkbox" id="ind-cr-ouvert"'+(c.ouvert?" checked":"")+'>Ouvert aux inscriptions à la séance (en plus des habitués)</label>'
     +'<div style="font-size:12px;font-weight:800;color:var(--txt2);margin-top:4px">Habitués (inscrits d\'office chaque semaine)</div>'
-    +(clients.length?clients.map(function(x){ return '<label class="case"><input type="checkbox" class="ind-cr-hab" value="'+indEsc(x.uid)+'"'+(hab[x.uid]?" checked":"")+'>'+indEsc((x.prenom||"")+" "+(x.nom||""))+'</label>'; }).join("")
+    +(clients.length?clients.map(function(x){ return '<label class="case"><input type="checkbox" class="ind-cr-hab" value="'+indEsc(x.uid)+'"'+(hab[x.uid]?" checked":"")+'>'+indEsc((x.prenom||"")+" "+(x.nom||"")+(x.mineur?" (mineur)":""))+'</label>'; }).join("")
       :'<p class="ind-note">Invite d\'abord tes clients (onglet Clients) : tu pourras ensuite les cocher ici.</p>')
     +'<div class="err" id="ind-cr-err"></div>'
     +'<div class="actions">'+(id?'<button type="button" class="rouge" id="ind-cr-stop">Arrêter ce créneau</button>':'<button type="button" class="non" id="ind-cr-annul">Annuler</button>')
@@ -467,7 +502,9 @@ function indVueClients(){
   else if(!cl.length) h+='<div class="ind-c ind-vide">Pas encore de client. Partage ton lien : ils apparaissent ici dès qu\'ils ont créé leur accès.</div>';
   else h+='<div class="ind-c ind-list">'+cl.map(function(c){
     var age=indAge(c.naissance), crs=IND.creneaux.filter(function(x){ return x.actif!==false && (x.habitues||[]).indexOf(c.uid)>=0; });
-    var sous=[age!==null?age+" ans":"", crs.length?crs.map(function(x){ return IND_JOURS_C[Number(x.jour)]+" "+(x.heure||""); }).join(", "):"Pas d'habitude"].filter(Boolean).join(" · ");
+    var par=indParentDe(c);
+    var sous=[age!==null?age+" ans":"", c.mineur?"Mineur"+(par?" · parent : "+(par.prenom||"")+" "+(par.nom||""):""):"",
+      crs.length?crs.map(function(x){ return IND_JOURS_C[Number(x.jour)]+" "+(x.heure||""); }).join(", "):"Pas d'habitude"].filter(Boolean).join(" · ");
     return '<div class="ind-row tap" data-act="client" data-uid="'+indEsc(c.uid)+'" role="button" tabindex="0" style="cursor:pointer"><div class="ind-av">'+indEsc(indInitiales(c.prenom,c.nom))+'</div>'
       +'<div class="t"><strong>'+indEsc((c.prenom||"")+" "+(c.nom||""))+'</strong><span>'+indEsc(sous)+'</span></div><span aria-hidden="true" style="color:var(--im)">›</span></div>';
   }).join("")+'</div>';
@@ -497,13 +534,24 @@ function indClientFiche(uid){
   sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
   var age=indAge(c.naissance), tel=String(c.tel||"").replace(/[^+0-9]/g,"");
   var crs=IND.creneaux.filter(function(x){ return x.actif!==false; });
-  sh.body.innerHTML='<div class="ind-c ind-list">'
-    +'<div class="ind-row"><div class="t"><strong>Âge</strong><span>'+(age!==null?age+" ans · né(e) le "+indEsc(indDate(c.naissance).toLocaleDateString("fr-FR")):"Non renseigné")+'</span></div></div>'
-    +'<div class="ind-row"><div class="t"><strong>Téléphone</strong><span>'+indEsc(c.tel||"Non renseigné")+'</span></div>'
+  var par=indParentDe(c), ptel=par?String(par.tel||"").replace(/[^+0-9]/g,""):"";
+  var lignes='<div class="ind-row"><div class="t"><strong>Âge</strong><span>'+(age!==null?age+" ans · né(e) le "+indEsc(indDate(c.naissance).toLocaleDateString("fr-FR")):"Non renseigné")+(c.mineur?" · mineur":"")+'</span></div></div>';
+  if(c.mineur){
+    // Enfant sans compte : on joint son parent (téléphone, e-mail) et on rappelle l'autorisation parentale.
+    var ts=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate():null;
+    lignes+='<div class="ind-row"><div class="t"><strong>Parent</strong><span>'+indEsc(par?((par.prenom||"")+" "+(par.nom||"")+(par.tel?" · "+par.tel:"")):"Fiche du parent introuvable")+'</span>'
+      +(par&&par.email?'<span>'+indEsc(par.email)+'</span>':'')+'</div>'
+      +(ptel?'<a class="ind-btn s mini" style="text-decoration:none" href="tel:'+indEsc(ptel)+'">Appeler</a>':'')+'</div>'
+      +'<div class="ind-row"><div class="t"><strong>Autorisation parentale</strong><span>Donnée par le parent'+(ts?" le "+indEsc(ts.toLocaleDateString("fr-FR")):"")+'</span></div></div>';
+  } else {
+    lignes+='<div class="ind-row"><div class="t"><strong>Téléphone</strong><span>'+indEsc(c.tel||"Non renseigné")+'</span></div>'
       +(tel?'<a class="ind-btn s mini" style="text-decoration:none" href="tel:'+indEsc(tel)+'">Appeler</a>':'')+'</div>'
-    +'<div class="ind-row"><div class="t"><strong>E-mail</strong><span>'+indEsc(c.email||"Non renseigné")+'</span></div></div>'
-    +(c.note?'<div class="ind-row"><div class="t"><strong>À savoir (écrit par le client)</strong><span>'+indEsc(c.note)+'</span></div></div>':'')
-    +'</div>'
+      +'<div class="ind-row"><div class="t"><strong>E-mail</strong><span>'+indEsc(c.email||"Non renseigné")+'</span></div></div>';
+    var enf=indEnfantsDe(uid);
+    if(enf.length) lignes+='<div class="ind-row"><div class="t"><strong>Ses enfants</strong><span>'+indEsc(enf.map(function(e){ return (e.prenom||"")+(indAge(e.naissance)!==null?" ("+indAge(e.naissance)+" ans)":""); }).join(", "))+'</span></div></div>';
+  }
+  if(c.note) lignes+='<div class="ind-row"><div class="t"><strong>À savoir ('+(c.mineur?"écrit par le parent":"écrit par le client")+')</strong><span>'+indEsc(c.note)+'</span></div></div>';
+  sh.body.innerHTML='<div class="ind-c ind-list">'+lignes+'</div>'
     +'<div class="ind-k">Habitué de</div>'
     +(crs.length?'<div class="ind-c ind-f" style="gap:6px">'+crs.map(function(x){
       return '<label class="case"><input type="checkbox" data-cr="'+indEsc(x.id)+'"'+((x.habitues||[]).indexOf(uid)>=0?" checked":"")+'>'+indEsc(IND_JOURS[Number(x.jour)]+" "+(x.heure||"")+" · "+(x.titre||""))+'</label>';
@@ -511,7 +559,7 @@ function indClientFiche(uid){
     +'<div class="ind-k">Notes privées (lui ne les voit pas)</div>'
     +'<div class="ind-f"><textarea id="ind-cl-notes" maxlength="1000" placeholder="Objectifs, niveau, blessures…"></textarea>'
     +'<div class="actions"><button type="button" class="ok" id="ind-cl-save">Enregistrer les notes</button></div></div>'
-    +'<button type="button" class="ind-btn d" style="margin-top:14px" id="ind-cl-retirer">Retirer ce client</button>';
+    +'<button type="button" class="ind-btn d" style="margin-top:14px" id="ind-cl-retirer">'+(c.mineur?"Retirer cet enfant":"Retirer ce client")+'</button>';
   var ta=sh.body.querySelector("#ind-cl-notes");
   window.fbGetDoc(window.fbDoc(indDb(),"indep_notes",uid)).then(function(s){ if(s.exists()&&!ta.value) ta.value=s.data().texte||""; }).catch(function(){});
   sh.body.querySelector("#ind-cl-save").addEventListener("click",function(){
@@ -524,13 +572,31 @@ function indClientFiche(uid){
     });
   });
   sh.body.querySelector("#ind-cl-retirer").addEventListener("click",function(){
-    askConfirm("Son accès à l'appli est supprimé et il sort de tes créneaux. Sa fiche est gardée dans ton historique.",{title:"Retirer "+(c.prenom||"ce client")+" ?",confirmText:"Retirer",danger:true}).then(function(ok){
+    // Personnes retirées : le client + ses enfants ; un enfant seul, sauf si c'était le dernier d'un
+    // compte « parent seul » (alors le compte du parent n'a plus d'objet et est retiré avec lui).
+    var retirees=[uid], compteAretirer=null;
+    if(c.mineur){
+      var pr=indParentDe(c);
+      if(pr && pr.parentSeul && indEnfantsDe(c.parentUid).filter(function(e){ return e.uid!==uid; }).length===0){ compteAretirer=c.parentUid; }
+    } else {
+      indEnfantsDe(uid).forEach(function(e){ retirees.push(e.uid); }); compteAretirer=uid;
+    }
+    var texte=c.mineur
+      ?("Il sort de tes créneaux. Sa fiche est gardée dans ton historique."+(compteAretirer?" Son parent n'a plus d'enfant inscrit : son accès à l'appli est aussi supprimé.":""))
+      :("Son accès à l'appli est supprimé et il sort de tes créneaux."+(retirees.length>1?" Ses enfants inscrits sont retirés aussi.":"")+" Sa fiche est gardée dans ton historique.");
+    askConfirm(texte,{title:"Retirer "+(c.prenom||(c.mineur?"cet enfant":"ce client"))+" ?",confirmText:"Retirer",danger:true}).then(function(ok){
       if(!ok) return;
       var b=window.fbWriteBatch();
-      IND.creneaux.forEach(function(x){ if((x.habitues||[]).indexOf(uid)>=0) b.update(window.fbDoc(indDb(),"indep_creneaux",x.id),{habitues:window.fbArrayRemove(uid)}); });
-      b.update(window.fbDoc(indDb(),"indep_clients",uid),{actif:false, retireLe:Date.now()});
-      b.delete(window.fbDoc(indDb(),"users",uid));
-      b.commit().then(function(){ sh.modal.remove(); showToast("Client retiré"); }).catch(indErr);
+      IND.creneaux.forEach(function(x){
+        var dedans=retirees.filter(function(p){ return (x.habitues||[]).indexOf(p)>=0; });
+        if(dedans.length) b.update(window.fbDoc(indDb(),"indep_creneaux",x.id),{habitues:window.fbArrayRemove.apply(null,dedans)});
+      });
+      retirees.forEach(function(p){ b.update(window.fbDoc(indDb(),"indep_clients",p),{actif:false, retireLe:Date.now()}); });
+      if(compteAretirer){
+        if(compteAretirer!==uid) b.update(window.fbDoc(indDb(),"indep_clients",compteAretirer),{actif:false, retireLe:Date.now()});
+        b.delete(window.fbDoc(indDb(),"users",compteAretirer));
+      }
+      b.commit().then(function(){ sh.modal.remove(); showToast(c.mineur?"Enfant retiré":"Client retiré"); }).catch(indErr);
     });
   });
 }
@@ -569,65 +635,97 @@ function indReglages(){
 }
 
 // ── Client : Accueil ────────────────────────────────────────────────
-function indMesSeances(de,a){
+// Un parent réserve pour lui et pour chacun de ses enfants : ces fonctions prennent
+// l'identifiant de la personne (pid), par défaut le compte lui-même.
+function indMesSeances(de,a,pid){
+  pid=pid||IND.uid;
   return indSeances(de,a).filter(function(s){
-    if((s.habitues||[]).indexOf(IND.uid)>=0) return true;
-    var r=IND.resas[s.id+"__"+IND.uid]; return !!(r && r.statut==="vient");
+    if((s.habitues||[]).indexOf(pid)>=0) return true;
+    var r=IND.resas[s.id+"__"+pid]; return !!(r && r.statut==="vient");
   });
 }
-function indMonStatut(s){
-  var r=IND.resas[s.id+"__"+IND.uid];
+function indMonStatut(s,pid){
+  pid=pid||IND.uid;
+  var r=IND.resas[s.id+"__"+pid];
   if(r) return r.statut;
-  return (s.habitues||[]).indexOf(IND.uid)>=0?"vient":null;
+  return (s.habitues||[]).indexOf(pid)>=0?"vient":null;
 }
-function indBlocMaSeance(s, grand){
-  var st=indMonStatut(s), fini=indCommencee(s), n=indNbVenants(s);
+function indBlocMaSeance(s, grand, pid){
+  pid=pid||IND.uid;
+  var st=indMonStatut(s,pid), fini=indCommencee(s), n=indNbVenants(s);
   var h='<div class="ind-c"><div class="ind-row"><div class="t"><strong>'+indEsc(indQuand(s.date)+" · "+(s.heure||"")+" · "+s.titre)+'</strong><span>'
     +indEsc([s.lieu, s.places?n+" / "+s.places+" inscrits":n+" inscrit"+(n>1?"s":"")].filter(Boolean).join(" · "))+'</span></div>'
     +(s.annulee?'<span class="ind-pill no">Annulée</span>':(fini?(st==="vient"?'<span class="ind-pill ok">Je viens</span>':st==="absent"?'<span class="ind-pill no">Absent</span>':''):''))+'</div>';
   if(s.annulee) h+=(s.motif?'<p class="ind-note" style="margin-top:8px">Motif : '+indEsc(s.motif)+'</p>':'');
   else if(!fini && (grand||st)){
-    h+='<div class="ind-btns" style="margin-top:10px"><button type="button" class="ind-btn '+(st==="vient"?"p":"s")+'" data-act="resa" data-v="vient" data-id="'+indEsc(s.id)+'" aria-pressed="'+(st==="vient")+'">'+(st==="vient"?"✓ Je viens":"Je viens")+'</button>'
-      +'<button type="button" class="ind-btn '+(st==="absent"?"d":"s")+'" data-act="resa" data-v="absent" data-id="'+indEsc(s.id)+'" aria-pressed="'+(st==="absent")+'">'+(st==="absent"?"✕ Je ne peux pas":"Je ne peux pas")+'</button></div>';
+    h+='<div class="ind-btns" style="margin-top:10px"><button type="button" class="ind-btn '+(st==="vient"?"p":"s")+'" data-act="resa" data-v="vient" data-pid="'+indEsc(pid)+'" data-id="'+indEsc(s.id)+'" aria-pressed="'+(st==="vient")+'">'+(st==="vient"?"✓ Je viens":"Je viens")+'</button>'
+      +'<button type="button" class="ind-btn '+(st==="absent"?"d":"s")+'" data-act="resa" data-v="absent" data-pid="'+indEsc(pid)+'" data-id="'+indEsc(s.id)+'" aria-pressed="'+(st==="absent")+'">'+(st==="absent"?"✕ Je ne peux pas":"Je ne peux pas")+'</button></div>';
   }
   return h+'</div>';
 }
 function indVueAccueilClient(){
-  var a=indAuj(), mes=indMesSeances(a,indAjout(a,21)).filter(function(s){ return !indCommencee(s)||s.date===a; }), h="";
-  if(!mes.length){
-    h+='<div class="ind-c ind-vide">Aucune séance prévue pour toi.<br>Réserve une séance ouverte, ou demande à ton coach de t\'ajouter comme habitué.</div>'
-      +'<button type="button" class="ind-btn p" data-act="tab" data-v="reserver">Réserver une séance</button>';
-    return h;
+  var a=indAuj(), pers=indPersonnes(), multi=pers.length>1, h="", total=0;
+  if(!pers.length){
+    return '<div class="ind-c ind-vide">Aucun enfant inscrit pour l\'instant.</div>'
+      +'<button type="button" class="ind-btn p" data-act="enfant-ajout">Inscrire un enfant</button>';
   }
-  h+='<div class="ind-k">Ma prochaine séance</div>'+indBlocMaSeance(mes[0],true);
-  if(mes.length>1) h+='<div class="ind-k">Ensuite</div>'+mes.slice(1,8).map(function(s){ return indBlocMaSeance(s,false); }).join("");
-  h+='<p class="ind-note">Tu ne peux pas venir ? Préviens ici avant le début : ta place est libérée pour un autre client.</p>';
+  pers.forEach(function(p){
+    var mes=indMesSeances(a,indAjout(a,21),p.id).filter(function(s){ return !indCommencee(s)||s.date===a; });
+    if(!mes.length){ if(multi) h+='<div class="ind-k">'+indEsc(p.prenom)+'</div><div class="ind-c ind-vide">Aucune séance prévue.</div>'; return; }
+    total+=mes.length;
+    h+='<div class="ind-k">'+(multi?indEsc(p.prenom)+' · prochaine séance':'Ma prochaine séance')+'</div>'+indBlocMaSeance(mes[0],true,p.id);
+    if(mes.length>1) h+='<div class="ind-k">Ensuite'+(multi?' · '+indEsc(p.prenom):'')+'</div>'+mes.slice(1,multi?4:8).map(function(s){ return indBlocMaSeance(s,false,p.id); }).join("");
+  });
+  if(!total){
+    return '<div class="ind-c ind-vide">Aucune séance prévue'+(multi?'':' pour toi')+'.<br>Réserve une séance ouverte, ou demande à ton coach d\'ajouter '+(multi?'vos participants':'comme habitué')+'.</div>'
+      +'<button type="button" class="ind-btn p" data-act="tab" data-v="reserver">Réserver une séance</button>';
+  }
+  h+='<p class="ind-note">Un empêchement ? Préviens ici avant le début : la place est libérée pour un autre client.</p>';
   return h;
 }
 // ── Client : Réserver ───────────────────────────────────────────────
 function indVueReserver(){
-  var a=indAuj(), l=indSeances(a,indAjout(a,IND_HORIZON)).filter(function(s){
-    return s.ouvert && !s.annulee && !indCommencee(s) && (s.habitues||[]).indexOf(IND.uid)<0;
+  var a=indAuj(), pers=indPersonnes(), multi=pers.length>1;
+  if(!pers.length) return '<div class="ind-c ind-vide">Inscris d\'abord un enfant (bouton en haut à droite › Ma fiche) pour réserver une séance.</div>';
+  var l=indSeances(a,indAjout(a,IND_HORIZON)).filter(function(s){
+    return s.ouvert && !s.annulee && !indCommencee(s) && pers.some(function(p){ return (s.habitues||[]).indexOf(p.id)<0; });
   });
   if(!l.length) return '<div class="ind-c ind-vide">Aucune séance ouverte à la réservation pour l\'instant.</div>';
-  return '<div class="ind-k">Séances ouvertes</div><div class="ind-c ind-list">'+l.map(function(s){
-    var st=indMonStatut(s), n=indNbVenants(s), reste=s.places?s.places-n:null, btn;
-    if(st==="vient") btn='<button type="button" class="ind-btn s mini" data-act="resa" data-v="absent" data-id="'+indEsc(s.id)+'">Annuler</button>';
-    else if(reste!==null && reste<=0) btn='<span class="ind-pill no">Complet</span>';
-    else btn='<button type="button" class="ind-btn p mini" data-act="resa" data-v="vient" data-id="'+indEsc(s.id)+'">Réserver</button>';
-    var sous=[s.lieu, (reste!==null&&reste>0)?reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":""):"", indPrix(s.prix)].filter(Boolean).join(" · ");
-    return '<div class="ind-row"><div class="t"><strong>'+indEsc(indQuand(s.date)+" · "+(s.heure||"")+" · "+s.titre)+'</strong><span>'+indEsc(sous)+'</span></div>'
-      +(st==="vient"?'<span class="ind-pill ok">Réservé</span>':'')+btn+'</div>';
-  }).join("")+'</div>';
+  function bouton(s,p,reste){
+    var st=indMonStatut(s,p.id);
+    if(st==="vient") return '<span class="ind-pill ok">Réservé</span><button type="button" class="ind-btn s mini" data-act="resa" data-v="absent" data-pid="'+indEsc(p.id)+'" data-id="'+indEsc(s.id)+'">Annuler</button>';
+    if(reste!==null && reste<=0) return '<span class="ind-pill no">Complet</span>';
+    return '<button type="button" class="ind-btn p mini" data-act="resa" data-v="vient" data-pid="'+indEsc(p.id)+'" data-id="'+indEsc(s.id)+'">Réserver</button>';
+  }
+  function sousTitre(s,reste){
+    return [s.lieu, (reste!==null&&reste>0)?reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":""):"", indPrix(s.prix)].filter(Boolean).join(" · ");
+  }
+  var h='<div class="ind-k">Séances ouvertes</div>';
+  if(!multi){
+    return h+'<div class="ind-c ind-list">'+l.map(function(s){
+      var n=indNbVenants(s), reste=s.places?s.places-n:null;
+      return '<div class="ind-row"><div class="t"><strong>'+indEsc(indQuand(s.date)+" · "+(s.heure||"")+" · "+s.titre)+'</strong><span>'+indEsc(sousTitre(s,reste))+'</span></div>'+bouton(s,pers[0],reste)+'</div>';
+    }).join("")+'</div>';
+  }
+  // Plusieurs personnes (parent + enfants) : une ligne par personne sous chaque séance.
+  return h+l.map(function(s){
+    var n=indNbVenants(s), reste=s.places?s.places-n:null;
+    return '<div class="ind-c"><div class="ind-row"><div class="t"><strong>'+indEsc(indQuand(s.date)+" · "+(s.heure||"")+" · "+s.titre)+'</strong><span>'+indEsc(sousTitre(s,reste))+'</span></div></div>'
+      +pers.filter(function(p){ return (s.habitues||[]).indexOf(p.id)<0; }).map(function(p){
+        return '<div class="ind-row" style="margin-top:8px"><div class="t"><strong style="font-weight:700">'+indEsc(p.prenom)+'</strong></div>'+bouton(s,p,reste)+'</div>';
+      }).join("")+'</div>';
+  }).join("");
 }
-function indResa(sid,statut){
+function indResa(sid,statut,pid){
+  pid=pid||IND.uid;
   var s=indSeanceParId(sid); if(!s) return;
+  if(pid!==IND.uid && !IND.enfants[pid]) return;
   if(s.annulee) return askAlert("Cette séance est annulée.");
   if(indCommencee(s)) return askAlert("La séance a déjà commencé : préviens ton coach directement.");
-  if(statut==="vient" && indMonStatut(s)!=="vient" && indComplet(s)) return askAlert("Désolé, la séance est complète.");
-  var k=sid+"__"+IND.uid, d={seance:sid, date:s.date, uid:IND.uid, statut:statut, nom:indMonNom()||"Client", at:window.fbServerTimestamp()};
+  if(statut==="vient" && indMonStatut(s,pid)!=="vient" && indComplet(s)) return askAlert("Désolé, la séance est complète.");
+  var k=sid+"__"+pid, d={seance:sid, date:s.date, uid:pid, statut:statut, nom:indNomPersonne(pid), at:window.fbServerTimestamp()};
   var avant=IND.resas[k];
-  IND.resas[k]=Object.assign({},avant||{},{seance:sid, date:s.date, uid:IND.uid, statut:statut}); indRendre();
+  IND.resas[k]=Object.assign({},avant||{},{seance:sid, date:s.date, uid:pid, statut:statut}); indRendre();
   window.fbSetDoc(window.fbDoc(indDb(),"indep_resas",k),d,{merge:true}).then(function(){
     showToast(statut==="vient"?"C'est noté, à bientôt !":"Ton coach est prévenu");
   }).catch(function(e){ if(avant) IND.resas[k]=avant; else delete IND.resas[k]; indRendre(); indErr(e); });
@@ -643,31 +741,101 @@ function indFicheChamps(f){
   f=f||{};
   return '<div class="deux"><label>Prénom<input id="ind-fi-prenom" maxlength="40" autocomplete="given-name" value="'+indEsc(f.prenom||"")+'"></label>'
     +'<label>Nom<input id="ind-fi-nom" maxlength="40" autocomplete="family-name" value="'+indEsc(f.nom||"")+'"></label></div>'
-    +'<div class="deux"><label>Date de naissance<input id="ind-fi-naiss" type="date" max="'+indAuj()+'" value="'+indEsc(f.naissance||"")+'"></label>'
+    +'<div class="deux"><label><span id="ind-fi-naiss-l">Date de naissance</span><input id="ind-fi-naiss" type="date" max="'+indAuj()+'" value="'+indEsc(f.naissance||"")+'"></label>'
     +'<label>Téléphone<input id="ind-fi-tel" type="tel" maxlength="20" autocomplete="tel" value="'+indEsc(f.tel||"")+'"></label></div>'
     +'<label>À savoir pour le coach (facultatif)<textarea id="ind-fi-note" maxlength="300" placeholder="Blessure, objectif, niveau…">'+indEsc(f.note||"")+'</textarea></label>';
 }
-function indFicheLire(f,email){
+// opts.moi === false : compte de parent qui n'inscrit que ses enfants (date de naissance facultative).
+function indFicheLire(f,email,opts){
+  var moi=!(opts&&opts.moi===false);
   var d={prenom:f.querySelector("#ind-fi-prenom").value.trim().slice(0,40), nom:f.querySelector("#ind-fi-nom").value.trim().slice(0,40),
     naissance:f.querySelector("#ind-fi-naiss").value||"", tel:f.querySelector("#ind-fi-tel").value.trim().slice(0,20),
-    email:String(email||"").slice(0,100), note:f.querySelector("#ind-fi-note").value.trim().slice(0,300)};
+    email:String(email||"").slice(0,100), note:f.querySelector("#ind-fi-note").value.trim().slice(0,300), parentSeul:!moi};
   if(!d.prenom||!d.nom) return {err:"Indique ton prénom et ton nom."};
-  if(!d.naissance) return {err:"Indique ta date de naissance."};
+  if(moi && !d.naissance) return {err:"Indique ta date de naissance."};
+  if(d.naissance){
+    var a=indAge(d.naissance);
+    if(a===null) return {err:"Date de naissance invalide."};
+    if(a<18) return {err:"Les moins de 18 ans sont inscrits par leur parent : demande-lui de créer l'accès et de t'inscrire."};
+  }
   if(d.tel.replace(/[^0-9]/g,"").length<9) return {err:"Indique un numéro de téléphone valide."};
   return {d:d};
+}
+// Fiche d'un enfant mineur (inscrit par son parent).
+function indEnfantChamps(e, avecAutorisation){
+  e=e||{};
+  return '<div class="deux"><label>Prénom de l\'enfant<input id="ind-en-prenom" maxlength="40" value="'+indEsc(e.prenom||"")+'"></label>'
+    +'<label>Nom<input id="ind-en-nom" maxlength="40" value="'+indEsc(e.nom||"")+'"></label></div>'
+    +'<label>Date de naissance de l\'enfant<input id="ind-en-naiss" type="date" max="'+indAuj()+'" value="'+indEsc(e.naissance||"")+'"></label>'
+    +'<label>À savoir pour le coach (facultatif)<textarea id="ind-en-note" maxlength="300" placeholder="Blessure, allergie, niveau…">'+indEsc(e.note||"")+'</textarea></label>'
+    +(avecAutorisation?'<label class="case"><input type="checkbox" id="ind-en-auto">Je suis le parent ou le représentant légal de cet enfant et je l\'autorise à participer aux séances. Les informations saisies ne sont visibles que par le coach.</label>':'');
+}
+function indEnfantLire(f, exigerAutorisation){
+  var d={prenom:f.querySelector("#ind-en-prenom").value.trim().slice(0,40), nom:f.querySelector("#ind-en-nom").value.trim().slice(0,40),
+    naissance:f.querySelector("#ind-en-naiss").value||"", note:f.querySelector("#ind-en-note").value.trim().slice(0,300)};
+  if(!d.prenom||!d.nom) return {err:"Indique le prénom et le nom de l'enfant."};
+  if(!d.naissance) return {err:"Indique la date de naissance de l'enfant."};
+  var a=indAge(d.naissance);
+  if(a===null) return {err:"Date de naissance de l'enfant invalide."};
+  if(a>=18) return {err:"À partir de 18 ans, la personne crée son propre accès avec le lien de son coach."};
+  if(exigerAutorisation){
+    var c=f.querySelector("#ind-en-auto");
+    if(!c||!c.checked) return {err:"L'autorisation parentale est obligatoire pour inscrire un enfant."};
+  }
+  return {d:d};
+}
+function indCreerEnfant(parentUid, d){
+  var id=indId("e_");
+  return window.fbSetDoc(window.fbDoc(indDb(),"indep_clients",id),{prenom:d.prenom, nom:d.nom, naissance:d.naissance, note:d.note,
+    parentUid:parentUid, mineur:true, autorisation:true, createdAt:window.fbServerTimestamp()});
+}
+function indEnfantForm(id){
+  var e=id?IND.enfants[id]:null;
+  if(id&&!e) return;
+  var sh=gmSheet(e?"Fiche de "+(e.prenom||"mon enfant"):"Inscrire un enfant");
+  sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
+  var f0=IND.fiche||{};
+  sh.body.innerHTML='<form class="ind-f" id="ind-en-f" novalidate>'+indEnfantChamps(e||{nom:f0.nom||""}, !e)
+    +'<p class="ind-note">'+(e?'Pour retirer un enfant, préviens ton coach.':'Ton enfant n\'a pas de compte : c\'est toi qui réserves ses séances et qui préviens en cas d\'absence.')+'</p>'
+    +'<div class="err" id="ind-en-err"></div><div class="actions"><button type="submit" class="ok">Enregistrer</button></div></form>';
+  var f=sh.body.querySelector("#ind-en-f");
+  f.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    var r=indEnfantLire(f,!e); if(r.err){ f.querySelector("#ind-en-err").textContent=r.err; return; }
+    var p=e?window.fbUpdateDoc(window.fbDoc(indDb(),"indep_clients",id),r.d):indCreerEnfant(IND.uid,r.d);
+    p.then(function(){ sh.modal.remove(); showToast(e?"Fiche enregistrée":"Enfant inscrit"); }).catch(indErr);
+  });
+}
+function indMesEnfantsHtml(){
+  var l=Object.keys(IND.enfants).map(function(k){ return IND.enfants[k]; }).filter(function(e){ return e.actif!==false; });
+  var h='<div class="ind-k">Mes enfants</div>';
+  if(l.length) h+='<div class="ind-c ind-list">'+l.map(function(e){
+    var a=indAge(e.naissance);
+    return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(e.prenom,e.nom))+'</div><div class="t"><strong>'+indEsc((e.prenom||"")+" "+(e.nom||""))+'</strong><span>'+(a!==null?a+" ans":"")+'</span></div>'
+      +'<button type="button" class="ind-btn s mini" data-act="enfant-edit" data-id="'+indEsc(e.id)+'">Modifier</button></div>';
+  }).join("")+'</div>';
+  return h+'<button type="button" class="ind-btn s" data-act="enfant-ajout">+ Inscrire un enfant</button>';
 }
 function indMaFiche(){
   var f0=IND.fiche, sh=gmSheet(f0?"Ma fiche":"Complète ta fiche");
   sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
+  sh.body.addEventListener("click",indClic);
   var email=(window.ASMB_USER&&window.ASMB_USER.email)||"";
   sh.body.innerHTML='<form class="ind-f" id="ind-fi-f" novalidate>'+indFicheChamps(f0)
+    +'<label class="case"><input type="checkbox" id="ind-fi-moi"'+(f0&&f0.parentSeul?"":" checked")+'>Je participe aux séances moi-même</label>'
     +'<p class="ind-note">Connexion : '+indEsc(email)+'</p><div class="err" id="ind-fi-err"></div>'
-    +'<div class="actions"><button type="submit" class="ok">Enregistrer</button></div>'
-    +'<button type="button" class="ind-btn s" id="ind-fi-out" style="margin-top:8px">Se déconnecter</button></form>';
+    +'<div class="actions"><button type="submit" class="ok">Enregistrer</button></div></form>'
+    +'<div id="ind-fi-enfants" class="ind-f" style="margin-top:14px"></div>'
+    +'<button type="button" class="ind-btn s" id="ind-fi-out" style="margin-top:8px">Se déconnecter</button>';
+  var zone=sh.body.querySelector("#ind-fi-enfants");
+  function peindreEnfants(){ if(f0) zone.innerHTML=indMesEnfantsHtml(); else zone.innerHTML=""; }
+  peindreEnfants();
+  if(f0) IND.feuille={s:sh, peindre:peindreEnfants};
   var f=sh.body.querySelector("#ind-fi-f");
   f.addEventListener("submit",function(e){
     e.preventDefault();
-    var r=indFicheLire(f,email); if(r.err){ f.querySelector("#ind-fi-err").textContent=r.err; return; }
+    var moi=f.querySelector("#ind-fi-moi").checked;
+    var r=indFicheLire(f,email,{moi:moi}); if(r.err){ f.querySelector("#ind-fi-err").textContent=r.err; return; }
     var ref=window.fbDoc(indDb(),"indep_clients",IND.uid);
     var p=f0?window.fbUpdateDoc(ref,r.d):window.fbSetDoc(ref,Object.assign({},r.d,{createdAt:window.fbServerTimestamp()}));
     p.then(function(){ sh.modal.remove(); showToast("Fiche enregistrée"); }).catch(indErr);
@@ -686,12 +854,14 @@ function indClic(e){
   if(act==="client") return indClientFiche(el.dataset.uid);
   if(act==="reglages") return indReglages();
   if(act==="ma-fiche") return indMaFiche();
+  if(act==="enfant-ajout") return indEnfantForm(null);
+  if(act==="enfant-edit") return indEnfantForm(id);
   if(act==="presence") return indPresence(id, el.dataset.uid);
   if(act==="annuler-seance") return indAnnulerSeance(id);
   if(act==="retablir-seance") return indRetablirSeance(id);
   if(act==="suppr-seance") return indSupprSeance(id);
   if(act==="ajout-seance") return indAjoutSeance(id);
-  if(act==="resa") return indResa(id, el.dataset.v);
+  if(act==="resa") return indResa(id, el.dataset.v, el.dataset.pid);
   if(act==="lien-creer") return indCreerLien();
   if(act==="lien-couper") return indCouperLien();
   if(act==="lien-copier"){ var l=indLienActif(); if(l) copyToClipboard(indLienUrl(l.code)); return; }
@@ -717,14 +887,30 @@ function indRejoindre(code){
       if(!s.exists()||!s.data().actif) return cadre("","Invitation","Lien expiré",'<div class="ind-c ind-vide">Ce lien n\'est plus valable. Demande le nouveau lien à ton coach.</div>');
       var l=s.data();
       cadre(l.couleur,"Rejoindre",l.clubName||"Mes séances",
-        '<div class="ind-c"><div class="ind-row"><div class="ind-av">'+indEsc(indInitiales((l.clubName||"").split(" ")[0],(l.clubName||"").split(" ")[1]))+'</div><div class="t"><strong>'+indEsc(l.clubName||"Ton coach")+' t\'invite</strong><span>Crée ton accès pour réserver tes séances et prévenir ton coach si tu ne peux pas venir.</span></div></div></div>'
-        +'<form class="ind-f ind-c" id="ind-rj-f" novalidate>'+indFicheChamps({})
+        '<div class="ind-c"><div class="ind-row"><div class="ind-av">'+indEsc(indInitiales((l.clubName||"").split(" ")[0],(l.clubName||"").split(" ")[1]))+'</div><div class="t"><strong>'+indEsc(l.clubName||"Ton coach")+' t\'invite</strong><span>Crée ton accès pour réserver les séances et prévenir ton coach en cas d\'absence. Parent : tu peux inscrire ton enfant.</span></div></div></div>'
+        +'<form class="ind-f ind-c" id="ind-rj-f" novalidate>'
+        +'<div style="font-size:12px;font-weight:800;color:var(--txt2)">Je m\'inscris pour</div>'
+        +'<label class="case"><input type="radio" name="ind-qui" value="moi" checked>Moi</label>'
+        +'<label class="case"><input type="radio" name="ind-qui" value="enfant">Mon enfant (moins de 18 ans)</label>'
+        +'<label class="case"><input type="radio" name="ind-qui" value="les2">Moi et mon enfant</label>'
+        +'<div style="font-size:12px;font-weight:800;color:var(--txt2);margin-top:4px" id="ind-rj-t1">Tes informations</div>'
+        +indFicheChamps({})
+        +'<div id="ind-rj-enfant" hidden class="ind-f"><div style="font-size:12px;font-weight:800;color:var(--txt2);margin-top:4px">Ton enfant</div>'+indEnfantChamps({}, true)
+        +'<p class="ind-note">Tu pourras ajouter d\'autres enfants ensuite, dans « Ma fiche ».</p></div>'
         +'<label>E-mail (pour te connecter)<input id="ind-rj-mail" type="email" inputmode="email" autocapitalize="off" autocomplete="email" maxlength="100"></label>'
         +'<label>Mot de passe<input id="ind-rj-pass" type="password" autocomplete="new-password" minlength="6" placeholder="6 caractères minimum"></label>'
         +'<div class="err" id="ind-rj-err" role="alert"></div>'
         +'<div class="actions"><button type="submit" class="ok" style="background:var(--ia)" id="ind-rj-btn">Créer mon accès</button></div>'
         +'<p class="ind-note" style="text-align:center">Déjà un accès ? <a href="'+indEsc(location.origin+location.pathname)+'" style="color:inherit;font-weight:800">Me connecter</a></p></form>');
       var f=document.getElementById("ind-rj-f");
+      function majQui(){
+        var qui=f.querySelector("input[name=ind-qui]:checked").value;
+        f.querySelector("#ind-rj-enfant").hidden=(qui==="moi");
+        f.querySelector("#ind-rj-t1").textContent=qui==="enfant"?"Tes informations (parent)":"Tes informations";
+        f.querySelector("#ind-fi-naiss-l").textContent=qui==="enfant"?"Ta date de naissance (facultatif)":"Date de naissance";
+      }
+      f.querySelectorAll("input[name=ind-qui]").forEach(function(r){ r.addEventListener("change",majQui); });
+      majQui();
       f.addEventListener("submit",function(e){ e.preventDefault(); indRejoindreEnvoyer(f, code, l); });
     }).catch(function(){ cadre("","Invitation","Oups",'<div class="ind-c ind-vide">Impossible de vérifier le lien. Réessaie dans un instant.</div>'); });
   })();
@@ -732,8 +918,11 @@ function indRejoindre(code){
 function indRejoindreEnvoyer(f, code, l){
   var err=f.querySelector("#ind-rj-err"), btn=f.querySelector("#ind-rj-btn");
   var email=f.querySelector("#ind-rj-mail").value.trim(), pass=f.querySelector("#ind-rj-pass").value;
-  var r=indFicheLire(f,email);
+  var qui=f.querySelector("input[name=ind-qui]:checked").value;
+  var r=indFicheLire(f,email,{moi:qui!=="enfant"});
   if(r.err){ err.textContent=r.err; return; }
+  var enf=null;
+  if(qui!=="moi"){ enf=indEnfantLire(f,true); if(enf.err){ err.textContent=enf.err; return; } }
   if(email.indexOf("@")<1){ err.textContent="Indique une adresse e-mail valide."; return; }
   if(pass.length<6){ err.textContent="Mot de passe : 6 caractères minimum."; return; }
   err.textContent=""; btn.disabled=true; btn.textContent="Création de ton accès…";
@@ -746,7 +935,14 @@ function indRejoindreEnvoyer(f, code, l){
     compteOk=true;
     window.CURRENT_CLUB_ID=l.clubId;
     return window.fbSetDoc(window.fbDoc(window.fbDb,"indep_clients",cree.uid),Object.assign({},r.d,{createdAt:window.fbServerTimestamp()}))
-      .catch(function(e){ console.log("fiche client (sera complétée dans l'appli):",e&&e.code); });
+      .then(function(){
+        if(!enf) return;
+        // L'enfant est inscrit par son parent (autorisation parentale cochée) ; sans compte.
+        var id=indId("e_");
+        return window.fbSetDoc(window.fbDoc(window.fbDb,"indep_clients",id),{prenom:enf.d.prenom, nom:enf.d.nom, naissance:enf.d.naissance, note:enf.d.note,
+          parentUid:cree.uid, mineur:true, autorisation:true, createdAt:window.fbServerTimestamp()});
+      })
+      .catch(function(e){ console.log("fiche (sera complétée dans l'appli):",e&&e.code); });
   }).then(function(){
     try{ localStorage.setItem("gm_type_"+l.clubId,"independant"); }catch(e){}
     location.href=location.origin+location.pathname;

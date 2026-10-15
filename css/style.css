@@ -482,6 +482,7 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .ind-lien{font-size:12.5px;background:var(--ib);border:1px dashed var(--il);border-radius:10px;padding:8px 10px;text-align:center;color:var(--it2);word-break:break-all;margin-top:8px}
 /* Formulaires (dans l'appli et dans les fenêtres du bas) */
 .ind-f{display:flex;flex-direction:column;gap:10px}
+.ind-f[hidden]{display:none}
 .ind-f label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:var(--txt2)}
 .ind-f input,.ind-f select,.ind-f textarea{font:inherit;font-size:15px;font-weight:500;padding:11px 12px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);width:100%;min-width:0}
 .ind-f textarea{min-height:70px;resize:vertical}
