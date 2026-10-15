@@ -13,6 +13,8 @@ var IMP_CHAMPS=[
   {id:"adresse",label:"Adresse",syn:["adresse","adresse1","rue","adressepostale"]},
   {id:"categorie",label:"Catégorie",syn:["categorie","cat","categoriejeu","categoriedage"]},
   {id:"role",label:"Fonction / rôle",syn:["fonction","role","qualite","typedelicencie","typedepratiquant"]},
+  {id:"nationalite",label:"Nationalité",syn:["nationalite","pays"]},
+  {id:"assurance",label:"Assurance",syn:["assurance","formuleassurance"]},
   {id:"numLicence",label:"N° de licence",syn:["numerodelicence","ndelicence","numlicence","nlicence","licence","nolicence","numerolicence"]}
 ];
 var IMP_ETAT={entetes:[],lignes:[],map:{},fichier:""};
@@ -130,11 +132,14 @@ function impLirePdf(buf){
   return chargerPdfjs().then(function(){
     return window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
   }).then(function(doc){
-    var pages=[], p=Promise.resolve();
+    var pages=[], brutes=[], p=Promise.resolve();
     for(var n=1;n<=doc.numPages;n++){
-      (function(num){ p=p.then(function(){ return doc.getPage(num).then(function(pg){ return pg.getTextContent(); }).then(function(tc){ pages.push(impPdfLignesPage(tc.items)); }); }); })(n);
+      (function(num){ p=p.then(function(){ return doc.getPage(num).then(function(pg){
+        return pg.getTextContent().then(function(tc){ brutes.push({page:pg,items:tc.items}); pages.push(impPdfLignesPage(tc.items)); });
+      }); }); })(n);
     }
     return p.then(function(){
+      if(typeof impTrombiDetecte==="function" && impTrombiDetecte(brutes)) return impTrombiLire(brutes);
       var rows=impPdfVersTableau(pages);
       if(rows.length<2) throw new Error("Aucun texte exploitable : le PDF est peut-être une image scannée. Utilise un export CSV ou Excel.");
       return rows;
@@ -195,7 +200,7 @@ function impAutoMap(entetes){
   return map;
 }
 // Analyse les lignes avec la correspondance de colonnes choisie.
-function impAnalyser(entetes, lignes, map, existantes){
+function impAnalyser(entetes, lignes, map, existantes, photos){
   var idx={}; (existantes||[]).forEach(function(l){
     var f=l.fiche; if(f&&f.nom&&f.naissance) idx[impCle(f.nom,f.prenom,f.naissance)]=l;
   });
@@ -210,14 +215,15 @@ function impAnalyser(entetes, lignes, map, existantes){
     if(vus[cle]){ res.aVerifier.push({n:n+2,raison:"doublon dans le fichier",nom:nom,prenom:prenom}); return; }
     vus[cle]=true;
     var d={nom:nom,prenom:prenom,naissance:nais,genre:impGenre(g("genre")),email:g("email"),
-      telephone:g("telephone"),adresse:g("adresse"),categorie:g("categorie"),numLicence:g("numLicence"),role:impRole(g("role"))};
+      telephone:g("telephone"),adresse:g("adresse"),categorie:g("categorie"),numLicence:g("numLicence"),role:impRole(g("role")),
+      nationalite:g("nationalite"),assurance:g("assurance"),photo:(photos&&photos[n])||""};
     var ex=idx[cle];
     if(ex) res.maj.push({donnees:d,licence:ex}); else res.nouvelles.push(d);
   });
   return res;
 }
 // ── Application ─────────────────────────────────────────────────────
-var IMP_CHAMPS_FICHE={genre:"genre",email:"emailLic",telephone:"telephone",adresse:"adresse",numLicence:"numLicenceFFBB"};
+var IMP_CHAMPS_FICHE={genre:"genre",email:"emailLic",telephone:"telephone",adresse:"adresse",numLicence:"numLicenceFFBB",nationalite:"nationalite",assurance:"assuranceFFBB"};
 function impAppliquer(res, lics, saison){
   var nbMaj=0, nbNew=0;
   res.maj.forEach(function(x){
@@ -228,6 +234,7 @@ function impAppliquer(res, lics, saison){
       var v=x.donnees[k], cle=IMP_CHAMPS_FICHE[k];
       if(v && !f[cle]){ f[cle]=v; change=true; }
     });
+    if(x.donnees.photo && !f.photo){ f.photo=x.donnees.photo; change=true; }
     if(change) nbMaj++;
   });
   res.nouvelles.forEach(function(d,i){
@@ -239,6 +246,7 @@ function impAppliquer(res, lics, saison){
     }
     var fiche={genre:d.genre,prenom:d.prenom,nom:d.nom,naissance:d.naissance,adresse:d.adresse,
       telephone:d.telephone,emailLic:d.email,numLicenceFFBB:d.numLicence,importee:true,
+      nationalite:d.nationalite||"",assuranceFFBB:d.assurance||"",photo:d.photo||null,
       soumisLe:new Date().toLocaleDateString("fr-FR")};
     lics.push({
       id:(Date.now()+i).toString(), code:genCode(), email:d.email, nomDest:(d.prenom+" "+d.nom).trim(),
@@ -279,7 +287,7 @@ function impRendre(){
     return;
   }
   var saison=getCurrentSeason();
-  var res=impAnalyser(IMP_ETAT.entetes,IMP_ETAT.lignes,IMP_ETAT.map,getLicences().filter(function(l){return !l.saison||l.saison===saison;}));
+  var res=impAnalyser(IMP_ETAT.entetes,IMP_ETAT.lignes,IMP_ETAT.map,getLicences().filter(function(l){return !l.saison||l.saison===saison;}),IMP_ETAT.photos);
   IMP_ETAT.res=res;
   var opts=function(sel){
     return '<option value="-1"'+(sel<0?" selected":"")+'>— ignorer —</option>'+
@@ -314,10 +322,11 @@ function impChoisi(){
   var f=this.files&&this.files[0]; if(!f) return;
   var msg=document.getElementById("imp-msg"); if(msg) msg.textContent="Lecture…";
   impLireFichier(f).then(function(rows){
+    var photos=rows.photos||null;
     rows=rows.filter(function(r){return r.some(function(x){return String(x).trim();});});
     if(rows.length<2){ if(msg) msg.textContent="Fichier vide ou illisible."; return; }
     IMP_ETAT.entetes=rows[0].map(function(x){return String(x).trim();});
-    IMP_ETAT.lignes=rows.slice(1); IMP_ETAT.fichier=f.name;
+    IMP_ETAT.lignes=rows.slice(1); IMP_ETAT.fichier=f.name; IMP_ETAT.photos=photos;
     IMP_ETAT.map=impAutoMap(IMP_ETAT.entetes);
     impRendre();
   }).catch(function(e){ if(msg) msg.textContent="Erreur : "+((e&&e.message)||e); });

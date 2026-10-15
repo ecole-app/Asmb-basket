@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792090189",
+  "titre": "Import d'un trombinoscope PDF (FBI)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Importer lit directement un trombinoscope FBI en PDF : nom, prénom, naissance, genre, n° de licence, catégorie, nationalité, assurance et photo de chaque carte remplissent la fiche licence."
+   }
+  ]
+ },
+ {
   "v": "1792089943",
   "titre": "Import des licences depuis un PDF",
   "points": [

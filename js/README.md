@@ -40,6 +40,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `06f-import.js` | Import des licences depuis un CSV / Excel / PDF texte (pdf.js à la demande ; dont export FBI) : colonnes reconnues + corrigeables, aperçu, doublon = nom + prénom + naissance, fiches créées en « reçue » |
 | `06g-photos.js` | Import en lot des photos (images ou ZIP, ex. FBI) : rattachement par n° de licence ou nom dans le nom du fichier, aperçu, réduction à 320 px |
 | `06h-roles.js` | Rôle d'une fiche licence (joueur / coach / autre : ni joueur, ni compté dans la limite du pack) et suppression de fiche ; `licEstJoueur()` est dans 11-admin.js |
+| `06i-trombi-pdf.js` | Lecture d'un trombinoscope PDF FBI (une carte par licencié) : texte de chaque carte + photo découpée ; alimente l'import 06f |
 | `06b-reinscription.js` | Réinscription en ligne : ouverture par le club, carte et fiche pré-remplie côté parent, import auto en licence |
 | `07-presences.js` | Pointage des présences, envoi groupé aux familles |
 | `08-parametres.js` | Écran Paramètres et sa personnalisation |
