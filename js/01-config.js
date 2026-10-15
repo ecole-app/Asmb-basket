@@ -187,13 +187,13 @@ function clubSlug(){
 // joueur) n'est pas un pole : c'est une brique transverse du socle, jamais
 // retiree. Elite Academy reste propre au club d'origine : le suivi
 // individualise demande une autre structure, il n'est pas proposable en option.
-const BASE_POLES=["formation","competition","evenement"];
+const BASE_POLES=["formation","competition","evenement","3x3","basketpourtous","basketsante"];   // tous les pôles, sauf Élite Academy (réservée au club d'origine)
 const OPTION_POLES=["3x3","basketpourtous","basketsante"];   // activables plus tard, club par club
 
 // Poles reellement affiches pour le club actif.
 function activePoles(){
   var c=window.CURRENT_CLUB;
-  var ids=(c && Array.isArray(c.poles) && c.poles.length) ? c.poles : null;
+  var ids=null;   // la liste stockée sur le club est ignorée : tout club a tous les pôles (sauf Élite)
   if(!ids){
     // Club d'origine cree avant ce reglage : il conserve tous ses poles.
     var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";

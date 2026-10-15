@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792104174",
+  "titre": "Tous les pôles pour tous les clubs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tous les clubs ont maintenant 3x3, Basket Pour Tous et Basket Santé en plus de Formation, Compétition et Événements. Élite Academy reste réservée à ASMB."
+   }
+  ]
+ },
+ {
   "v": "1792103456",
   "titre": "Anciennes notifications épurées",
   "points": [
