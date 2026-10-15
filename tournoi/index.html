@@ -159,12 +159,14 @@ h1{font-family:var(--f-disp);font-weight:800;font-size:clamp(30px,7vw,46px);line
 .court .sc div{font-family:var(--f-disp);font-weight:800;font-size:6vh;line-height:1.05;color:var(--tv-score);font-variant-numeric:tabular-nums}
 .court .wait{font-size:2.2vh;color:var(--tv-mut);align-self:center}
 .tv-list{display:flex;flex-direction:column;gap:.9vh}
+.tv-col.side .tv-list{flex:1;min-height:0;overflow:hidden}
+.tv-list>*{flex:none}
 .tv-r{display:grid;grid-template-columns:9vh 1fr;gap:1.4vh;align-items:center;background:var(--tv-card);border-radius:1.2vh;padding:1.1vh 1.6vh}
 .tv-r .h{font-family:var(--f-disp);font-weight:800;font-size:3.4vh;color:var(--tv-acc);font-variant-numeric:tabular-nums}
 .tv-r .v{font-size:2.5vh;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tv-r .v small{display:block;font-size:1.7vh;color:var(--tv-mut);font-weight:600}
 .tv-r .v .s{font-family:var(--f-disp);font-weight:800;font-size:2.9vh}
-.tv-std{background:var(--tv-card);border-radius:1.6vh;padding:1.6vh 2vh;flex:1;min-height:0;overflow:hidden}
+.tv-std{background:var(--tv-card);border-radius:1.6vh;padding:1.6vh 2vh;flex:0 0 auto;max-height:42vh;overflow:hidden}
 .tv-std table{width:100%;border-collapse:collapse}
 .tv-std th{font-size:1.6vh;color:var(--tv-mut);text-transform:uppercase;font-weight:700;text-align:center;padding:.4vh}
 .tv-std th:first-child{text-align:left}
@@ -563,8 +565,8 @@ var TRN=(function(){
         '<div class="sc">'+(sc?'<div>'+esc(r.sa)+'</div><div>'+esc(r.sb)+'</div>':(cur?'<div style="font-size:3vh;color:var(--tv-acc)">⏱</div>':''))+'</div></div>';
     }
     document.getElementById("tv-courts").innerHTML=h;
-    var suite=D.matchs.filter(function(m){ return statut(m)==="avenir"&&!affiches[m.id]; }).slice(0,4);
-    var derniers=D.matchs.filter(function(m){ return statut(m)==="fin"; }).slice(-3).reverse();
+    var suite=D.matchs.filter(function(m){ return statut(m)==="avenir"&&!affiches[m.id]; }).slice(0,12);
+    var derniers=D.matchs.filter(function(m){ return statut(m)==="fin"; }).slice(-5).reverse();
     document.getElementById("tv-next").innerHTML=(suite.length?suite.map(function(m){
       return '<div class="tv-r"><div class="h">'+esc(m.debut)+'</div><div class="v">'+esc(nomEq(m,"a")||refTxt(m.aRef))+' – '+esc(nomEq(m,"b")||refTxt(m.bRef))+'<small>'+esc(terTxt(m.terrain))+' · '+esc(m.cat)+' · '+esc(m.label)+'</small></div></div>'; }).join(""):"")+
       derniers.map(function(m){ var r=D.res[m.id]; var ga=r.sa>r.sb, gb=r.sb>r.sa; function gag(ok,t){ return ok?'<span class="gag">'+t+'</span>':t; }
@@ -578,6 +580,21 @@ var TRN=(function(){
       trnClassement(x[1].equipes,ms2,D.res).map(function(s){ return '<tr><td>'+s.rang+'. '+esc((D.eqs[s.id]||{}).nom)+'</td><td>'+s.j+'</td><td>'+s.g+'</td><td>'+s.p+'</td><td>'+(s.diff>0?"+":"")+s.diff+'</td><td class="p">'+s.pts+'</td></tr>'; }).join("")+'</tbody></table>';
   }
   var wake=null;
+  // « À suivre » défile tout seul (pause en haut et en bas) quand il y a plus de matchs que de place.
+  var tvSc={y:0,pause:2500,fin:0,last:0,raf:0};
+  function tvDefiler(ts){
+    var el=document.getElementById("tv-next");
+    if(!el||document.getElementById("tv").hidden){ tvSc.raf=0; return; }
+    var dt=Math.min(ts-(tvSc.last||ts),100); tvSc.last=ts;
+    var max=el.scrollHeight-el.clientHeight;
+    if(max>2){
+      if(tvSc.pause>0) tvSc.pause-=dt;
+      else if(tvSc.fin){ tvSc.y=0; tvSc.fin=0; tvSc.pause=2500; }
+      else { tvSc.y+=dt*0.03; if(tvSc.y>=max){ tvSc.y=max; tvSc.fin=1; tvSc.pause=3000; } }
+      el.scrollTop=tvSc.y;
+    } else { tvSc.y=0; el.scrollTop=0; }
+    tvSc.raf=requestAnimationFrame(tvDefiler);
+  }
   // Thème du grand écran : sombre par défaut, clair au choix (mémorisé sur cet appareil).
   function tvTheme(clair){
     var tv=document.getElementById("tv"), b=document.getElementById("tv-theme");
@@ -589,6 +606,7 @@ var TRN=(function(){
     try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){}); }catch(e){}
     try{ if(navigator.wakeLock) navigator.wakeLock.request("screen").then(function(w){ wake=w; }).catch(function(){}); }catch(e){}
     tvRendre();
+    tvSc.y=0; tvSc.pause=2500; tvSc.fin=0; tvSc.last=0; cancelAnimationFrame(tvSc.raf); tvSc.raf=requestAnimationFrame(tvDefiler);
     clearInterval(tvTimer);
     tvTimer=setInterval(function(){
       var p=(Date.now()-tvT0)/12000;
@@ -599,7 +617,7 @@ var TRN=(function(){
     if(location.hash!=="#ecran") try{ history.replaceState(null,"","#ecran"); }catch(e){}
   }
   function tvFermer(){
-    document.getElementById("tv").hidden=true; clearInterval(tvTimer);
+    document.getElementById("tv").hidden=true; clearInterval(tvTimer); cancelAnimationFrame(tvSc.raf);
     try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
     try{ if(wake) wake.release(); }catch(e){} wake=null;
     try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
