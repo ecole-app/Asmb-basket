@@ -264,7 +264,7 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 
 /* ═══ Version ordinateur (dirigeant, ≥ 1024 px) : menu latéral, voir js/03b-bureau.js ═══ */
 .gm-side{display:none}
-html.gm-desk .gm-side{display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:260px;background:var(--sf);border-right:1px solid var(--bdr);padding:18px 12px 24px;box-sizing:border-box;overflow-y:auto;z-index:60}
+html.gm-desk .gm-side{display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:260px;background:var(--gs-bg,var(--sf));background-image:var(--gs-img,none);border-right:1px solid var(--gs-bdr,var(--bdr));padding:18px 12px 24px;box-sizing:border-box;overflow-y:auto;z-index:60}
 html.gm-desk body{padding-left:260px}
 html.gm-desk #bnav-main{display:none!important}
 html.gm-desk .main{padding-right:0!important}
@@ -272,29 +272,60 @@ html.gm-desk .main>.scr.on{max-width:1180px;margin-left:auto;margin-right:auto;w
 html.gm-desk .hdr{padding-left:24px;padding-right:24px}
 html.gm-desk #poleCards,html.gm-desk #adminCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;padding:0 12px 16px}
 html.gm-desk #poleCards>.card,html.gm-desk #adminCards>.admin-card{margin:0}
-.gs-club{display:flex;align-items:center;gap:12px;padding:4px 8px 16px;border-bottom:1px solid var(--bdr);margin-bottom:4px}
+.gs-club{display:flex;align-items:center;gap:12px;padding:4px 8px 16px;border-bottom:1px solid var(--gs-bdr,var(--bdr));margin-bottom:4px}
 .gs-club-txt{min-width:0}
-.gs-club-nom{font-size:16px;font-weight:800;color:var(--txt);line-height:1.15;text-transform:uppercase;overflow-wrap:anywhere}
-.gs-club-sub{font-size:11.5px;color:var(--ltg);font-weight:700;margin-top:3px}
+.gs-club-nom{font-size:16px;font-weight:800;color:var(--gs-title,var(--txt));line-height:1.15;text-transform:uppercase;overflow-wrap:anywhere}
+.gs-club-sub{font-size:11.5px;color:var(--gs-sub,var(--ltg));font-weight:700;margin-top:3px}
 .gs-nav{display:flex;flex-direction:column;gap:2px}
-.gs-grp{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);padding:14px 12px 4px}
-.gs-item{display:flex;align-items:center;gap:12px;width:100%;min-height:42px;padding:0 12px;border:none;background:none;border-radius:10px;cursor:pointer;font:inherit;font-size:14px;font-weight:600;color:var(--txt2);text-align:left}
-.gs-item:hover{background:var(--bg);color:var(--txt)}
-.gs-item.on{background:color-mix(in srgb,var(--dkg) 13%,transparent);color:var(--txt);font-weight:800}
-.gs-item.on svg{color:var(--dkg)}
+.gs-grp{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gs-grp,var(--mut));padding:14px 12px 4px}
+.gs-item{display:flex;align-items:center;gap:12px;width:100%;min-height:42px;padding:0 12px;border:none;background:none;border-radius:10px;cursor:pointer;font:inherit;font-size:14px;font-weight:600;color:var(--gs-txt,var(--txt2));text-align:left}
+.gs-item:hover{background:var(--gs-hover,var(--bg));color:var(--gs-hov-txt,var(--txt))}
+.gs-item.on{background:var(--gs-act-bg,color-mix(in srgb,var(--dkg) 13%,transparent));color:var(--gs-act-txt,var(--txt));font-weight:800}
+.gs-item.on svg{color:var(--gs-act-ic,var(--dkg))}
 .gs-item:focus-visible{outline:3px solid var(--ltg);outline-offset:1px}
 .gs-lbl{flex:1;min-width:0}
-.gs-badge{min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.gs-badge{min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--gs-badge,var(--dkg));color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
 /* Version ordinateur, étape 2 : pied du menu, menu replié (icônes seules) */
-.gs-pied{margin-top:auto;padding-top:12px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:2px}
+.gs-pied{margin-top:auto;padding-top:12px;border-top:1px solid var(--gs-bdr,var(--bdr));display:flex;flex-direction:column;gap:2px}
 .gs-outil{color:var(--mut);font-size:13px}
 html.gm-desk.gm-desk-mini .gm-side{width:72px;padding:14px 8px 18px}
 html.gm-desk.gm-desk-mini body{padding-left:72px}
 html.gm-desk.gm-desk-mini .gs-club{justify-content:center;padding:4px 0 12px}
 html.gm-desk.gm-desk-mini .gs-club-txt,html.gm-desk.gm-desk-mini .gs-lbl{display:none}
-html.gm-desk.gm-desk-mini .gs-grp{font-size:0;padding:0;margin:8px 10px;height:1px;background:var(--bdr)}
+html.gm-desk.gm-desk-mini .gs-grp{font-size:0;padding:0;margin:8px 10px;height:1px;background:var(--gs-bdr,var(--bdr))}
 html.gm-desk.gm-desk-mini .gs-item{justify-content:center;padding:0;position:relative}
 html.gm-desk.gm-desk-mini .gs-badge{position:absolute;top:4px;right:6px;min-width:16px;height:16px;font-size:9.5px;padding:0 4px}
+/* Version ordinateur, étape 3 : thèmes (html[data-desk-theme], réglage par appareil).
+   Ils ne changent que les neutres et le menu ; la teinte de marque (--dkg/--ltg) reste celle du
+   club quand il en a choisi une (classe html.gm-clubcolor, posée par applyClubColor). */
+.desk-only{display:none}
+html.gm-desk .desk-only{display:block}
+html.gm-desk[data-desk-theme="clair"]:not([data-theme="dark"]){--bg:#F3F5F9;--sf:#FFFFFF;--card:#FFFFFF;--bdr:#E1E4EB;--mut:#6B7390;--txt:#141824;--txt2:#3C4357}
+html.gm-desk[data-desk-theme="sombre"]{color-scheme:dark;--bg:#14161C;--sf:#1C1F28;--card:#1C1F28;--bdr:#2A2F3B;--mut:#8A91A6;--txt:#EEF0F5;--txt2:#C3C8D6;--shadow:rgba(0,0,0,.4);
+  --gs-bg:#000;--gs-bdr:#1D1F26;--gs-title:#fff;--gs-sub:#9AA0B3;--gs-grp:#8A91A6;--gs-txt:#B8BDCC;--gs-hover:#14161C;--gs-hov-txt:#fff;--gs-act-bg:#1E222C;--gs-act-txt:#fff;--gs-act-ic:#fff}
+html.gm-desk[data-desk-theme="parquet"]{--gs-bg:#7B4E24;--gs-img:repeating-linear-gradient(90deg,rgba(0,0,0,.07) 0,rgba(0,0,0,.07) 2px,transparent 2px,transparent 34px);--gs-bdr:rgba(0,0,0,.25);--gs-title:#FFF6E3;--gs-sub:#F0DDBA;--gs-grp:#E8D3AC;--gs-txt:#F6E7CC;--gs-hover:rgba(0,0,0,.16);--gs-hov-txt:#fff;--gs-act-bg:#5E3A19;--gs-act-txt:#fff;--gs-act-ic:#fff;--gs-badge:#B8481A}
+html.gm-desk[data-desk-theme="parquet"]:not([data-theme="dark"]){--bg:#F7EEDD;--sf:#FFFBF3;--card:#FFFBF3;--bdr:#E6D5B8;--mut:#7A664B;--txt:#2A1C0E;--txt2:#4A3A26}
+html.gm-desk[data-desk-theme="parquet"]:not(.gm-clubcolor){--dkg:#B8481A;--ltg:#B8481A}
+html.gm-desk[data-desk-theme="club"]{--gs-bg:var(--dkg);--gs-bdr:rgba(255,255,255,.2);--gs-title:#fff;--gs-sub:rgba(255,255,255,.82);--gs-grp:rgba(255,255,255,.74);--gs-txt:#fff;--gs-hover:rgba(255,255,255,.12);--gs-hov-txt:#fff;--gs-act-bg:rgba(255,255,255,.22);--gs-act-txt:#fff;--gs-act-ic:#fff;--gs-badge:#D4382C}
+html.gm-desk[data-desk-theme="club"]:not([data-theme="dark"]){--bg:color-mix(in srgb,var(--dkg) 6%,#fff);--sf:#FFFFFF;--card:#FFFFFF;--bdr:color-mix(in srgb,var(--dkg) 14%,#fff)}
+html.gm-desk[data-desk-theme="tableau"]{color-scheme:dark;--bg:#0A0C0A;--sf:#111611;--card:#111611;--bdr:#263026;--mut:#8C968C;--txt:#F2F5F0;--txt2:#C9D1C9;--shadow:rgba(0,0,0,.5);--r:10px;--rs:8px;--rx:6px;
+  --gs-bg:#101410;--gs-bdr:#263026;--gs-title:#FFB000;--gs-sub:#8C968C;--gs-grp:#8C968C;--gs-txt:#B4BDB4;--gs-hover:#1A211A;--gs-hov-txt:#fff;--gs-act-bg:#FFB000;--gs-act-txt:#111;--gs-act-ic:#111;--gs-badge:#D4382C}
+html.gm-desk[data-desk-theme="tableau"]:not(.gm-clubcolor){--dkg:#A35F00;--ltg:#FFB000}
+html.gm-desk[data-desk-theme="tableau"].gm-clubcolor{--gs-act-bg:var(--dkg);--gs-act-txt:#fff;--gs-act-ic:#fff;--gs-title:var(--ltg)}
+html.gm-desk[data-desk-theme="sombre"]:not(.gm-clubcolor){--hdrgrad:linear-gradient(135deg,#000,#1C1F28)}
+html.gm-desk[data-desk-theme="parquet"]:not(.gm-clubcolor){--hdrgrad:linear-gradient(135deg,#7B4E24,#5E3A19)}
+html.gm-desk[data-desk-theme="tableau"]:not(.gm-clubcolor){--hdrgrad:linear-gradient(135deg,#101410,#1A211A)}
+html.gm-desk[data-desk-theme="club"]:not(.gm-clubcolor){--dkg:#1B5C28;--ltg:#1B5C28;--hdrgrad:linear-gradient(135deg,#1B5C28,#134420)}
+html.gm-desk[data-desk-theme="sombre"].gm-clubcolor,html.gm-desk[data-desk-theme="tableau"].gm-clubcolor{--dkg:var(--club-dk,var(--dkg))}
+.dt-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.dt-sw{padding:10px;border-radius:12px;border:2px solid var(--bdr);background:var(--bg);cursor:pointer;text-align:left;font:inherit;color:var(--txt);display:flex;flex-direction:column;gap:6px}
+.dt-sw.on{border-color:var(--dkg)}
+.dt-sw:focus-visible{outline:3px solid var(--ltg);outline-offset:1px}
+.dt-mini{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--bdr)}
+.dt-mini i{display:block;width:30%}
+.dt-mini b{display:block;flex:1}
+.dt-sw span{font-size:12.5px;font-weight:800}
+.dt-sw small{font-size:10.5px;color:var(--mut);line-height:1.3}
 /* Équipes en cartes (effectif déplié) */
 html.gm-desk #teamList{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;padding:16px 24px 48px!important;align-items:start}
 html.gm-desk #teamList .team-card{margin:0;border-top:4px solid var(--tc,var(--dkg))}

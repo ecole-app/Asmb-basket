@@ -15,7 +15,7 @@ function buildParametres(){
   }
   var gd=document.getElementById("gp-dark");
   if(gd)gd.checked=document.documentElement.getAttribute("data-theme")==="dark";
-  buildVisualThemePicker();
+  buildVisualThemePicker(); if(typeof gmDeskThemeBuild==="function") gmDeskThemeBuild();
   buildPaletteClub();
   var toggle=document.getElementById("notif-toggle");
   if(toggle)toggle.checked=(typeof pushStatus==="function")?pushStatus()==="granted":localStorage.getItem("asmb_notif")==="on";

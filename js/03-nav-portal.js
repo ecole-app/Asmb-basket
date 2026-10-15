@@ -136,6 +136,9 @@ function applyClubColor(){
   try{
     var old=document.getElementById("club-colors");
     var c=clubCouleur();
+    document.documentElement.classList.toggle("gm-clubcolor",!!c);
+    // Version teintée pour les thèmes ordinateur sombres (même idée que le mode sombre des thèmes).
+    if(c) document.documentElement.style.setProperty("--club-dk",gmMix(c,0.3)); else document.documentElement.style.removeProperty("--club-dk");
     if(!c){ if(old) old.remove(); return; }
     var st=old||document.createElement("style");
     st.id="club-colors";

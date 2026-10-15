@@ -58,6 +58,7 @@ function gmDeskSync(){
   var avant=gmDeskOn();
   document.documentElement.classList.toggle("gm-desk", on);
   document.documentElement.classList.toggle("gm-desk-mini", on&&gmDeskPrefs().mini);
+  gmDeskThemeApply();
   if(!on) document.documentElement.classList.remove("gm-chat2");
   if(avant!==on){
     var scr=document.querySelector(".scr.on"), f=scr&&GM_DESK_REDESSIN[scr.id.replace(/^scr-/,"")];
@@ -192,4 +193,42 @@ function gmDeskRender(){
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskPersonnaliser()" title="Personnaliser le menu" aria-label="Personnaliser le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="gs-lbl">Personnaliser</span></button>'+
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskMini()" title="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-label="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-expanded="'+(!mini)+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(mini?'<path d="m10 6 6 6-6 6"/>':'<path d="m14 6-6 6 6 6"/>')+'</svg><span class="gs-lbl">Réduire le menu</span></button></div>';
   side.innerHTML=h;
+}
+
+// ── Thèmes de la version ordinateur (par appareil, gm_desk_theme) ─────
+// « Par défaut » garde l'habillage visuel choisi dans Paramètres ; les autres
+// n'agissent que sur grand écran (html[data-desk-theme], css/style.css).
+var GM_DESK_THEMES={
+  defaut:{label:"Par défaut",desc:"L'habillage de l'appli",menu:"#ffffff",fond:"#f6f7fb",acc:"#5b5bf0"},
+  clair:{label:"Clair",desc:"Menu blanc, fond gris clair",menu:"#ffffff",fond:"#f3f5f9",acc:"#1A2E5A"},
+  sombre:{label:"Sombre",desc:"Menu noir, fond sombre",menu:"#000000",fond:"#14161c",acc:"#23863F"},
+  parquet:{label:"Parquet",desc:"Menu en bois, fond crème",menu:"#7B4E24",fond:"#f7eedd",acc:"#B8481A"},
+  club:{label:"Aux couleurs du club",desc:"Menu et boutons à votre couleur",menu:"#1B5C28",fond:"#f2f6f2",acc:"#1B5C28"},
+  tableau:{label:"Tableau de marque",desc:"Noir et ambre, style scoreboard",menu:"#101410",fond:"#0a0c0a",acc:"#FFB000"}
+};
+function gmDeskTheme(){
+  var t=null; try{ t=localStorage.getItem("gm_desk_theme"); }catch(e){}
+  return GM_DESK_THEMES[t]?t:"defaut";
+}
+function gmDeskThemeApply(){
+  var t=gmDeskTheme(), h=document.documentElement;
+  if(gmDeskOn()&&t!=="defaut") h.setAttribute("data-desk-theme",t); else h.removeAttribute("data-desk-theme");
+}
+function gmDeskThemeSet(t){
+  if(!GM_DESK_THEMES[t]) t="defaut";
+  try{ localStorage.setItem("gm_desk_theme",t); }catch(e){}
+  gmDeskThemeApply(); gmDeskThemeBuild();
+  if(typeof paramsResume==="function"&&document.getElementById("params-resume-apparence")) document.getElementById("params-resume-apparence").textContent=paramsResume("apparence");
+}
+// Sélecteur dans Paramètres › Apparence (visible seulement sur ordinateur).
+function gmDeskThemeBuild(){
+  var box=document.getElementById("desk-theme-picker"); if(!box) return;
+  var cur=gmDeskTheme(); box.innerHTML="";
+  Object.keys(GM_DESK_THEMES).forEach(function(k){
+    var th=GM_DESK_THEMES[k], b=document.createElement("button");
+    b.type="button"; b.className="dt-sw"+(k===cur?" on":""); b.setAttribute("aria-pressed",k===cur?"true":"false");
+    b.innerHTML='<div class="dt-mini" aria-hidden="true"><i style="background:'+th.menu+'"></i><b style="background:'+th.fond+'"></b><i style="width:14%;background:'+th.acc+'"></i></div><span>'+authEsc(th.label)+'</span><small>'+authEsc(th.desc)+'</small>';
+    b.addEventListener("click",function(){ gmDeskThemeSet(k); });
+    box.appendChild(b);
+  });
 }

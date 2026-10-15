@@ -1,5 +1,17 @@
 [
   {
+    "v": "1792057092",
+    "titre": "Version ordinateur : 5 thèmes",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Sur ordinateur, Paramètres › Apparence : choisis le thème du menu et du fond (Clair, Sombre, Parquet, Aux couleurs du club, Tableau de marque). Réglage propre à l'ordinateur, le téléphone ne change pas. Ta couleur de club reste appliquée."
+      }
+    ]
+  },
+  {
     "v": "1792049639",
     "titre": "Pass bénévole (lien ou QR)",
     "points": [
