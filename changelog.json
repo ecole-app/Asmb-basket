@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792089420",
+  "titre": "Import des licences (CSV / Excel)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Importer : charge un fichier CSV ou Excel (export FBI compris). Les colonnes sont reconnues et corrigeables, un aperçu montre les nouvelles fiches, les existantes et les lignes à vérifier avant de valider."
+   }
+  ]
+ },
+ {
   "v": "1792089073",
   "titre": "Catégories U6 à Senior aussi dans les pôles",
   "points": [
