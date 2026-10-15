@@ -1112,12 +1112,17 @@ function validerLicence(){
   var f=lics[idx].fiche;
   if(f && licEstJoueur(lics[idx])){
     var players=getPlayers();
-    var exists=players.find(function(p){return p.email===f.emailLic;});
+    var nn=function(s){return String(s||"").trim().toLowerCase();};
+    var exists=players.find(function(p){
+      if(f.emailLic) return p.email===f.emailLic;
+      return nn(p.nom)===nn(f.nom)&&nn(p.prenom)===nn(f.prenom)&&(p.naissance||"")===(f.naissance||"");
+    });
     if(!exists){
       players.push({id:Date.now().toString(),prenom:f.prenom,nom:f.nom,naissance:f.naissance,cat:lics[idx].categorie,poste:"---",licence:"ok",contact:f.telephone,respTel:f.respTel||"",resp2Tel:f.resp2Tel||"",notes:f.notes||"",photo:f.photo||null,photoAutorisee:f.photoAutorisee===true});
       savePlayers(players);
     }
   }
+  if(typeof licEquipePlacer==="function") licEquipePlacer(lics[idx]);
   if(!licEstJoueur(lics[idx])){ showToast("Licence validée"); return; }
   showToast("Licence validée, joueur ajouté aux inscriptions");
   proposerAccesFamille(lics[idx]);

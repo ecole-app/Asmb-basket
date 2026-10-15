@@ -214,7 +214,7 @@ function impAnalyser(entetes, lignes, map, existantes, photos){
     var cle=impCle(nom,prenom,nais);
     if(vus[cle]){ res.aVerifier.push({n:n+2,raison:"doublon dans le fichier",nom:nom,prenom:prenom}); return; }
     vus[cle]=true;
-    var d={nom:nom,prenom:prenom,naissance:nais,genre:impGenre(g("genre")),email:g("email"),
+    var d={n:n,nom:nom,prenom:prenom,naissance:nais,genre:impGenre(g("genre")),email:g("email"),
       telephone:g("telephone"),adresse:g("adresse"),categorie:g("categorie"),numLicence:g("numLicence"),role:impRole(g("role")),
       nationalite:g("nationalite"),assurance:g("assurance"),photo:(photos&&photos[n])||""};
     var ex=idx[cle];
@@ -224,7 +224,16 @@ function impAnalyser(entetes, lignes, map, existantes, photos){
 }
 // ── Application ─────────────────────────────────────────────────────
 var IMP_CHAMPS_FICHE={genre:"genre",email:"emailLic",telephone:"telephone",adresse:"adresse",numLicence:"numLicenceFFBB",nationalite:"nationalite",assurance:"assuranceFFBB"};
-function impAppliquer(res, lics, saison){
+// Catégorie d'une fiche importée : celle du fichier si connue, sinon calculée depuis la naissance.
+function impCat(d){
+  var catFichier=(d.categorie||"").toUpperCase().replace(/\s+/g,"");
+  if(CATS_LIC.indexOf(catFichier)>=0) return catFichier;
+  if(typeof categorieFromNaissance==="function"){
+    var c=categorieFromNaissance(d.naissance,d.genre); if(c&&CATS_LIC.indexOf(c)>=0) return c;
+  }
+  return null;
+}
+function impAppliquer(res, lics, saison, eq){
   var nbMaj=0, nbNew=0;
   res.maj.forEach(function(x){
     var cible=lics.find(function(l){return l.id===x.licence.id;});
@@ -238,12 +247,7 @@ function impAppliquer(res, lics, saison){
     if(change) nbMaj++;
   });
   res.nouvelles.forEach(function(d,i){
-    var cat=null;
-    var catFichier=(d.categorie||"").toUpperCase().replace(/\s+/g,"");
-    if(CATS_LIC.indexOf(catFichier)>=0) cat=catFichier;
-    else if(typeof categorieFromNaissance==="function"){
-      var c=categorieFromNaissance(d.naissance,d.genre); if(c&&CATS_LIC.indexOf(c)>=0) cat=c;
-    }
+    var cat=impCat(d);
     var fiche={genre:d.genre,prenom:d.prenom,nom:d.nom,naissance:d.naissance,adresse:d.adresse,
       telephone:d.telephone,emailLic:d.email,numLicenceFFBB:d.numLicence,importee:true,
       nationalite:d.nationalite||"",assuranceFFBB:d.assurance||"",photo:d.photo||null,
@@ -253,6 +257,7 @@ function impAppliquer(res, lics, saison){
       statut:"recue", createdAt:Date.now(), ouvertLe:null, fiche:fiche, categorie:cat, saison:saison
     });
     if(d.role&&d.role!=="joueur") lics[lics.length-1].role=d.role;
+    if(eq&&eq[d.n]&&(!d.role||d.role==="joueur")) lics[lics.length-1].equipe=eq[d.n];
     nbNew++;
   });
   return {nbNew:nbNew,nbMaj:nbMaj};
@@ -305,13 +310,19 @@ function impRendre(){
     return '<div style="font-size:11px;color:var(--mut)">Ligne '+x.n+' : '+authEsc((x.prenom+" "+x.nom).trim()||"(vide)")+' — '+authEsc(x.raison)+'</div>';
   }).join("");
   // Aperçu fiche par fiche (15 premières nouvelles fiches) : ce qui sera rempli
+  var cats={}; res.nouvelles.forEach(function(d){ var c=impCat(d); if(c&&(!d.role||d.role==="joueur")) cats[c]=(cats[c]||0)+1; });
+  var lots=Object.keys(cats).map(function(c){
+    return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span style="font-size:12px;color:var(--txt2)">'+authEsc(c)+' ('+cats[c]+') : tous en équipe</span>'+
+      [1,2,3].map(function(n){return '<button onclick="impEqTous(\''+authEsc(c)+'\','+n+')" style="min-width:30px;padding:5px 9px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">'+n+'</button>';}).join("")+'</div>';
+  }).join("");
   var apercu=res.nouvelles.slice(0,15).map(function(d){
     var av=d.photo?'<img src="'+d.photo+'" alt="" style="width:40px;height:50px;object-fit:cover;border-radius:6px;flex:none">'
       :'<div style="width:40px;height:50px;border-radius:6px;background:var(--bdr);flex:none"></div>';
     var infos=[d.naissance?d.naissance.split("-").reverse().join("/"):"",d.genre,d.categorie,d.numLicence,d.nationalite].filter(Boolean).map(authEsc).join(" · ");
     return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">'+av+
-      '<div style="min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(d.prenom)+' '+authEsc(d.nom)+(d.role&&d.role!=="joueur"?' <span style="font-size:10px;color:var(--mut)">('+authEsc(d.role)+')</span>':'')+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);overflow-wrap:anywhere">'+infos+'</div></div></div>';
+      '<div style="min-width:0;flex:1"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(d.prenom)+' '+authEsc(d.nom)+(d.role&&d.role!=="joueur"?' <span style="font-size:10px;color:var(--mut)">('+authEsc(d.role)+')</span>':'')+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);overflow-wrap:anywhere">'+infos+'</div></div>'+
+      ((!d.role||d.role==="joueur")&&impCat(d)?'<button onclick="impEqCycle('+d.n+')" title="Équipe 1, 2, 3… (touche pour changer)" style="flex:none;padding:6px 10px;border-radius:20px;border:1.5px solid '+((IMP_ETAT.eq&&IMP_ETAT.eq[d.n])?'var(--dkg)':'var(--bdr)')+';background:'+((IMP_ETAT.eq&&IMP_ETAT.eq[d.n])?'var(--dkg)':'var(--card)')+';color:'+((IMP_ETAT.eq&&IMP_ETAT.eq[d.n])?'#fff':'var(--mut)')+';font-size:11px;font-weight:700;cursor:pointer">'+((IMP_ETAT.eq&&IMP_ETAT.eq[d.n])?'Éq. '+IMP_ETAT.eq[d.n]:'Éq. —')+'</button>':'')+'</div>';
   }).join("");
   el.innerHTML=impEntete()+
     '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">Fichier : '+authEsc(IMP_ETAT.fichier)+' · '+IMP_ETAT.lignes.length+' lignes</div>'+
@@ -324,6 +335,7 @@ function impRendre(){
       (verif?'<div style="margin-top:6px">'+verif+(res.aVerifier.length>5?'<div style="font-size:11px;color:var(--mut)">… et '+(res.aVerifier.length-5)+' autres</div>':'')+'</div>':'')+
       (maxNew<peutNew?'<div style="margin-top:6px;color:var(--red);font-size:12px">Limite de licences du pack : seules '+maxNew+' fiches seront créées.</div>':'')+
     '</div>'+
+    (lots?'<div style="margin-bottom:10px">'+lots+'</div>':'')+
     (apercu?'<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:2px">Fiches qui seront créées'+(res.nouvelles.length>15?' (15 premières)':'')+'</div><div style="margin-bottom:12px">'+apercu+'</div>':'')+
     '<button onclick="impValider()" '+((maxNew||res.maj.length)?'':'disabled ')+'style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;'+((maxNew||res.maj.length)?'':'opacity:.5')+'">Importer</button>'+
     '<button onclick="IMP_ETAT.entetes=[];impRendre()" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:none;cursor:pointer">Choisir un autre fichier</button>';
@@ -336,7 +348,7 @@ function impChoisi(){
     rows=rows.filter(function(r){return r.some(function(x){return String(x).trim();});});
     if(rows.length<2){ if(msg) msg.textContent="Fichier vide ou illisible."; return; }
     IMP_ETAT.entetes=rows[0].map(function(x){return String(x).trim();});
-    IMP_ETAT.lignes=rows.slice(1); IMP_ETAT.fichier=f.name; IMP_ETAT.photos=photos;
+    IMP_ETAT.lignes=rows.slice(1); IMP_ETAT.fichier=f.name; IMP_ETAT.photos=photos; IMP_ETAT.eq={};
     IMP_ETAT.map=impAutoMap(IMP_ETAT.entetes);
     impRendre();
   }).catch(function(e){ if(msg) msg.textContent="Erreur : "+((e&&e.message)||e); });
@@ -351,8 +363,24 @@ async function impValider(){
   var ok=await askConfirm("Créer "+res.nouvelles.length+" fiche(s) et compléter "+res.maj.length+" fiche(s) existante(s) ?");
   if(!ok) return;
   var lics=getLicences();
-  var r=impAppliquer(res,lics,getCurrentSeason());
+  var r=impAppliquer(res,lics,getCurrentSeason(),IMP_ETAT.eq);
   saveLicences(lics);
   impFermer(); buildLicences(); if(typeof buildAdminHome==="function") buildAdminHome();
   askAlert(r.nbNew+" fiche(s) créée(s), "+r.nbMaj+" complétée(s). Les fiches importées sont en « reçue » : ouvre-les pour les valider.");
+}
+
+// Équipe 1, 2, 3… : une pastille par fiche (touche = suivante) et un réglage « tous » par catégorie.
+function impEqCycle(n){
+  IMP_ETAT.eq=IMP_ETAT.eq||{};
+  var e=(IMP_ETAT.eq[n]||0)+1; if(e>EQ_NB_IMP) e=0;
+  if(e) IMP_ETAT.eq[n]=e; else delete IMP_ETAT.eq[n];
+  impRendre();
+}
+var EQ_NB_IMP=4;
+function impEqTous(cat,num){
+  IMP_ETAT.eq=IMP_ETAT.eq||{};
+  (IMP_ETAT.res?IMP_ETAT.res.nouvelles:[]).forEach(function(d){
+    if(impCat(d)===cat&&(!d.role||d.role==="joueur")) IMP_ETAT.eq[d.n]=num;
+  });
+  impRendre();
 }

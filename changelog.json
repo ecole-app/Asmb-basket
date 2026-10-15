@@ -1,5 +1,23 @@
 [
  {
+  "v": "1792094391",
+  "titre": "Équipe 1, 2, 3 des joueurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "À l'import, une pastille « Éq. 1/2/3 » par joueur (et un réglage « tous en équipe n » par catégorie). Sur la fiche licence, des pastilles 1 à 4 pour choisir l'équipe. À la validation, le joueur est placé dans « U11 Équipe 2 » (créée si besoin)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Correctif : un joueur sans e-mail n'est plus confondu avec un autre à la validation de sa licence."
+   }
+  ]
+ },
+ {
   "v": "1792093873",
   "titre": "Aperçu fiche par fiche à l'import",
   "points": [
