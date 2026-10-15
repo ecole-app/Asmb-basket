@@ -530,8 +530,13 @@ async function loadRejoints(box){
   if(!a.length) return;
   var head=document.createElement("div");
   head.style.cssText="background:#1f844b;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
-  head.textContent="🎉 "+a.length+" dirigeant"+(a.length>1?"s":"")+" a"+(a.length>1?"ont":"")+" validé son compte";
+  head.textContent="🎉 "+a.length+" dirigeant"+(a.length>1?"s":"")+(a.length>1?" ont":" a")+" validé son compte";
   box.appendChild(head);
+  if(a.length>1) box.appendChild(gmBtn("Tout marquer vu","soft",function(){
+    var v=pfVusLire(); a.forEach(function(x){ v.push(x.id); });
+    try{ localStorage.setItem("gm_pf_join_vus",JSON.stringify(v)); }catch(e){}
+    loadRejoints(box);
+  }));
   a.forEach(function(x){
     var card=gmCard();
     card.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--txt)">'+authEsc(x.club)+'</div>'+

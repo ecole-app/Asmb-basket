@@ -119,7 +119,7 @@ function refreshPushButton(){
 // pas à un club : les demandes d'essai arrivent même hors du club ASMB.
 function pfPushEtat(btn){
   var st=pushStatus();
-  if(st==="granted"){ btn.textContent="🔕 Couper"; btn.onclick=pfPushOff; }
+  if(st==="granted"){ btn.textContent="🔕 Couper"; btn.onclick=pfPushOff; pfPushSync(); }
   else if(st==="denied"){ btn.textContent="Bloquées"; btn.disabled=true; }
   else { btn.textContent="Activer les alertes"; btn.onclick=pfPushOn; }
 }
@@ -144,4 +144,16 @@ async function pfPushOff(){
     showToast("Alertes Plateforme coupées");
     var b=document.getElementById("pf-push-btn"); if(b){ b.textContent="Activer les alertes"; b.onclick=pfPushOn; }
   }catch(e){}
+}
+
+// Permission déjà accordée (ex. pour le club) : on enregistre quand même cet appareil
+// côté Plateforme, et on rafraîchit le jeton à chaque ouverture.
+async function pfPushSync(){
+  try{
+    if(!pushSupported()||!window.ASMB_USER||GM_FCM_VAPID_KEY.indexOf("REMPLACER")>=0) return;
+    var reg=await navigator.serviceWorker.ready;
+    var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
+    if(!token) return;
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
+  }catch(e){ console.log("pfPushSync:",e); }
 }

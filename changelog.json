@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792103018",
+  "titre": "Alertes Plateforme fiabilisées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : l'appareil s'enregistre automatiquement pour les alertes push, et « Tout marquer vu » vide la liste des nouveaux dirigeants."
+   }
+  ]
+ },
+ {
   "v": "1792096096",
   "titre": "Nouveaux dirigeants dans la cloche",
   "points": [
