@@ -113,3 +113,35 @@ function refreshPushButton(){
     btn.onclick=enablePushNotifications;
   }
 }
+
+// ── Alertes Plateforme (super admin) ────────────────────────────────
+// Abonnement push rattaché à la Plateforme (collection globale plateforme_push),
+// pas à un club : les demandes d'essai arrivent même hors du club ASMB.
+function pfPushEtat(btn){
+  var st=pushStatus();
+  if(st==="granted"){ btn.textContent="🔕 Couper"; btn.onclick=pfPushOff; }
+  else if(st==="denied"){ btn.textContent="Bloquées"; btn.disabled=true; }
+  else { btn.textContent="Activer les alertes"; btn.onclick=pfPushOn; }
+}
+async function pfPushOn(){
+  if(pushIosAInstaller()){ pushTutoIphone(); return; }
+  if(!pushSupported()){ askAlert("Les notifications ne sont pas disponibles sur cet appareil/navigateur."); return; }
+  if(!window.ASMB_USER){ askAlert("Connexion en cours, réessayez dans un instant."); return; }
+  try{
+    var perm=await Notification.requestPermission();
+    if(perm!=="granted"){ showToast("Notifications non activées."); return; }
+    var reg=await navigator.serviceWorker.ready;
+    var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
+    if(!token){ askAlert("Impossible d'obtenir un abonnement push."); return; }
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
+    showToast("Alertes Plateforme activées ✓");
+    var b=document.getElementById("pf-push-btn"); if(b) pfPushEtat(b);
+  }catch(e){ askAlert("Impossible d'activer les alertes : "+((e&&e.message)||e)); }
+}
+async function pfPushOff(){
+  try{
+    await window.fbDeleteDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid)).catch(function(){});
+    showToast("Alertes Plateforme coupées");
+    var b=document.getElementById("pf-push-btn"); if(b){ b.textContent="Activer les alertes"; b.onclick=pfPushOn; }
+  }catch(e){}
+}

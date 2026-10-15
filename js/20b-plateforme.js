@@ -513,6 +513,38 @@ function gmDiagCard(){
   return d;
 }
 
+// ── Cloche des notifications de la Plateforme ──────────────────────
+// Compteurs : demandes d'essai, avis, changements d'abonnement, comptes à supprimer.
+function pfNotifN(k,n){
+  window.__gmN=window.__gmN||{dem:0,avis:0,abo:0,cpt:0};
+  window.__gmN[k]=n; pfMajCloche();
+}
+function pfMajCloche(){
+  var N=window.__gmN||{}, t=(N.dem||0)+(N.avis||0)+(N.abo||0)+(N.cpt||0);
+  var b=document.getElementById("pf-cloche-n"), tx=document.getElementById("pf-cloche-txt");
+  if(b){ b.style.display=t?"flex":"none"; b.textContent=t; }
+  if(tx){
+    var p=[];
+    if(N.dem) p.push(N.dem+" demande"+(N.dem>1?"s":"")+" d'essai");
+    if(N.avis) p.push(N.avis+" avis");
+    if(N.abo) p.push(N.abo+" abonnement"+(N.abo>1?"s":""));
+    if(N.cpt) p.push(N.cpt+" compte"+(N.cpt>1?"s":"")+" à supprimer");
+    tx.textContent=p.length?p.join(" · "):"Rien de nouveau";
+  }
+}
+function pfClocheCarte(){
+  var c=document.createElement("div");
+  c.style.cssText="margin:14px 12px 0;padding:12px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);display:flex;align-items:center;gap:10px";
+  c.innerHTML='<div style="position:relative;font-size:24px;line-height:1">🔔<span id="pf-cloche-n" style="display:none;position:absolute;top:-8px;right:-12px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center">0</span></div>'+
+    '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800;color:var(--txt)">Notifications</div><div id="pf-cloche-txt" style="font-size:12px;color:var(--txt2)">Rien de nouveau</div></div>'+
+    '<button id="pf-push-btn" style="padding:8px 10px;border-radius:var(--rx);border:none;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Activer les alertes</button>';
+  setTimeout(function(){
+    var btn=document.getElementById("pf-push-btn"); if(!btn) return;
+    if(typeof pfPushEtat==="function") pfPushEtat(btn);
+  },0);
+  return c;
+}
+
 // Accueil du super admin : la plateforme, pas l'espace d'un club.
 // opts.force : affiche l'écran même si le compte n'est pas super admin, avec le
 // diagnostic d'UID (accès manuel par ?plateforme, pour ne jamais rester bloqué).
@@ -529,6 +561,18 @@ function showPlateformeHome(opts){
     return false;
   }
   el.innerHTML="";
+  el.appendChild(pfClocheCarte());
+  var nbox={};
+  [["cpt","__gmComptesBox"],["dem","__gmDemBox"],["avis",null],["abo","__gmAboNotifBox"],["reco","__gmAboBox"]].forEach(function(k){
+    var b=document.createElement("div"); b.style.cssText="margin:12px 12px 0"; nbox[k[0]]=b;
+    if(k[1]) window[k[1]]=b;
+    el.appendChild(b);
+  });
+  window.__gmN={dem:0,avis:0,abo:0,cpt:0}; pfMajCloche();
+  loadComptesASupprimer(nbox.cpt);
+  loadDemandesEssai(nbox.dem);
+  loadAvisPlateforme(nbox.avis);
+  majBadgeDemandes();
   var intro=document.createElement("div");
   intro.style.cssText="margin:14px 12px 0;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.45";
   intro.textContent=GM_INTRO;
@@ -927,6 +971,7 @@ async function loadDemandesEssai(box){
   box.innerHTML="";
   var dem=[]; snap.forEach(function(d){ dem.push(Object.assign({id:d.id},d.data())); });
   dem.sort(function(a,b){ return (gmDate(a.at)||0)-(gmDate(b.at)||0); });
+  pfNotifN("dem",dem.length);
   if(!dem.length) return;
   var head=document.createElement("div");
   head.style.cssText="background:var(--dkg);color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
@@ -989,6 +1034,7 @@ async function loadAvisPlateforme(box){
   var snap;
   try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"avis_plateforme"),window.fbWhere("statut","==","nouveau"))); }catch(e){ return; }
   var avis=[]; snap.forEach(function(d){ avis.push(Object.assign({id:d.id},d.data())); });
+  pfNotifN("avis",avis.length);
   if(!avis.length) return;
   avis.sort(function(a,b){ return (gmDate(b.ts)||0)-(gmDate(a.ts)||0); });
   var head=document.createElement("div");
@@ -1020,6 +1066,7 @@ function majBadgeDemandes(){
     __gmDemUnsub=window.fbOnSnapshot(window.fbQuery(window.fbCollection(window.fbDb,"demandes_essai"),window.fbWhere("statut","==","nouvelle")),function(snap){
       var n=snap.size||0;
       window.__gmDemandesN=n;
+      pfNotifN("dem",n);
       var b=document.getElementById("gm-pf-badge");
       if(b){ b.style.display=n?"flex":"none"; b.textContent=n; }
       // Plateforme ouverte : la liste des demandes se rafraîchit sans recharger la page
@@ -1036,6 +1083,7 @@ async function loadComptesASupprimer(box){
   var snap;
   try{ snap=await window.fbGetDocs(window.fbCollection(window.fbDb,"comptes_a_supprimer")); }catch(e){ return; }
   var tasks=[]; snap.forEach(function(d){ var t=d.data()||{}; if(!t.fait) tasks.push(Object.assign({id:d.id},t)); });
+  pfNotifN("cpt",tasks.length);
   if(!tasks.length) return;
   var head=document.createElement("div");
   head.style.cssText="background:var(--red);color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";

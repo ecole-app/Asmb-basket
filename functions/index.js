@@ -110,8 +110,13 @@ const CLUB_ORIGINE = "asmb";
 exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) => {
   const d = event.data && event.data.data();
   if (!d) return;
-  const subs = db.collection("clubs").doc(CLUB_ORIGINE).collection("push_subscriptions");
-  const snap = await subs.doc(SUPER_ADMIN_UID).get();
+  // Abonnement Plateforme (global) ; à défaut, ancien abonnement du club d'origine.
+  let ref = db.collection("plateforme_push").doc(SUPER_ADMIN_UID);
+  let snap = await ref.get();
+  if (!(snap.exists && snap.data() && snap.data().token)) {
+    ref = db.collection("clubs").doc(CLUB_ORIGINE).collection("push_subscriptions").doc(SUPER_ADMIN_UID);
+    snap = await ref.get();
+  }
   const token = snap.exists && snap.data() && snap.data().token;
   if (!token) return;
   const quoi = [d.club, d.nom].filter(Boolean).join(" · ").slice(0, 100);
@@ -125,7 +130,7 @@ exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) 
   } catch (e) {
     const code = e && e.code;
     if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
-      await subs.doc(SUPER_ADMIN_UID).delete();
+      await ref.delete();
     }
   }
 });

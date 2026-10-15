@@ -253,6 +253,11 @@ service cloud.firestore {
             && uid != "7f2br1aTiJVWHTEbqVePbMLD0uc2");
     }
 
+    // ── Alertes push de la Plateforme (un abonnement par appareil du super admin) ──
+    match /plateforme_push/{uid} {
+      allow read, write: if superAdmin() && request.auth.uid == uid;
+    }
+
     // ── Comptes de connexion à supprimer à la main (club supprimé) ──
     match /comptes_a_supprimer/{id} {
       allow read, write: if superAdmin();

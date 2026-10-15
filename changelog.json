@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792095425",
+  "titre": "Cloche Plateforme",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : une cloche 🔔 en haut de l'écran regroupe les nouvelles demandes d'essai, avis, changements d'abonnement et comptes à supprimer. Les alertes push se règlent depuis la Plateforme, indépendamment du club ASMB."
+   }
+  ]
+ },
+ {
   "v": "1792094928",
   "titre": "Demandes d'essai en direct",
   "points": [

@@ -199,6 +199,7 @@ function aboTraiterGels(clubs){
 function renderAboNotifs(box, clubs, list){
   box.innerHTML="";
   var a=clubs.filter(function(c){ return c.aboNotif&&!c.aboNotif.vu&&c.status!=="deleted"; });
+  if(typeof pfNotifN==="function") pfNotifN("abo",a.length);
   if(!a.length) return;
   var head=document.createElement("div");
   head.style.cssText="background:#8a4500;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";

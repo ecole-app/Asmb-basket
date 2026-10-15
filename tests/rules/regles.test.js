@@ -1057,3 +1057,13 @@ describe("Pass bénévole (ben_pass)", () => {
     await assertFails(setDoc(doc(await as("dirB"), "clubs/A/benevoles/v2"), { nom: "X" }));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Alertes push de la Plateforme", () => {
+  it("le super admin gère son abonnement, personne d'autre", async () => {
+    await assertSucceeds(setDoc(doc(await as(SUPER_ADMIN), "plateforme_push/" + SUPER_ADMIN), { token: "t" }));
+    await assertSucceeds(getDoc(doc(await as(SUPER_ADMIN), "plateforme_push/" + SUPER_ADMIN)));
+    await assertFails(setDoc(doc(await as("dirA"), "plateforme_push/dirA"), { token: "t" }));
+    await assertFails(getDoc(doc(await as(null), "plateforme_push/" + SUPER_ADMIN)));
+  });
+});
