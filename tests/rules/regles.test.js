@@ -1023,8 +1023,8 @@ describe("Pass bénévole (ben_pass)", () => {
 
   it("le staff crée un pass, pas un parent ni un autre club", async () => {
     await assertSucceeds(setDoc(doc(await as("coachA"), "ben_pass/WXYZ-2345-6789"), pass()));
-    await assertFails(setDoc(doc(await as("parentA"), "ben_pass/WXYZ-2345-6789"), pass()));
-    await assertFails(setDoc(doc(await as("dirB"), "ben_pass/WXYZ-2345-6789"), pass()));
+    await assertFails(setDoc(doc(await as("parentA"), "ben_pass/QRST-2345-6789"), pass()));
+    await assertFails(setDoc(doc(await as("dirB"), "ben_pass/KLMN-2345-6789"), pass()));
   });
   it("un code mal formé ou un champ en trop est refusé", async () => {
     await assertFails(setDoc(doc(await as("dirA"), "ben_pass/abc"), pass()));
@@ -1048,7 +1048,7 @@ describe("Pass bénévole (ben_pass)", () => {
   });
   it("le staff met à jour les missions mais ne change pas de club", async () => {
     await assertSucceeds(updateDoc(doc(await as("coachA"), "ben_pass/" + CODE), { missions: [] }));
-    await assertFails(updateDoc(doc(await as("dirB"), "ben_pass/" + CODE), { missions: [] }));
+    await assertFails(updateDoc(doc(await as("dirB"), "ben_pass/" + CODE), { missions: [{ id: "x", poste: "Autre" }] }));
     await assertFails(updateDoc(doc(await as("dirA"), "ben_pass/" + CODE), { clubId: "B" }));
   });
   it("carnet de bénévoles réservé au staff du club", async () => {
