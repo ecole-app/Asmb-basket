@@ -554,12 +554,29 @@ function enterOwnClub(c){
   document.querySelectorAll(".gm-sheet").forEach(function(m){ m.remove(); });
   initProfile();
 }
+// Dernière liste connue, gardée sur cet appareil : affichée tout de suite à l'ouverture,
+// puis remplacée par la liste à jour (les dates Firestore sont rejouées en {toMillis, toDate}).
+function pfCacheLire(){
+  try{
+    return JSON.parse(localStorage.getItem("gm_pf_clubs")||"null",function(k,v){
+      if(v&&typeof v==="object"&&typeof v.__ts==="number"){ var ms=v.__ts; return {seconds:Math.floor(ms/1000),nanoseconds:0,toMillis:function(){ return ms; },toDate:function(){ return new Date(ms); }}; }
+      return v;
+    });
+  }catch(e){ return null; }
+}
+function pfCacheEcrire(clubs){
+  try{ localStorage.setItem("gm_pf_clubs",JSON.stringify(clubs,function(k,v){ return (v&&typeof v==="object"&&typeof v.toMillis==="function")?{__ts:v.toMillis()}:v; })); }catch(e){}
+}
 function loadClubsList(list){
-  list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Chargement…</div>';
+  var vieux=pfCacheLire();
+  if(vieux&&vieux.length){
+    list.innerHTML=""; vieux.forEach(function(c){ try{ list.appendChild(renderClubCard(c, list)); }catch(e){} });
+  } else list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Chargement…</div>';
   window.fbGetDocs(window.fbCollection(window.fbDb,"clubs")).then(function(snap){
     var clubs=[];
     snap.forEach(function(d){ clubs.push(Object.assign({id:d.id}, d.data())); });
     clubs.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
+    pfCacheEcrire(clubs);
     var paint=function(){
       list.innerHTML="";
       if(!clubs.length){ list.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Aucun club.</div>'; return; }

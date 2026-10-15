@@ -1,5 +1,17 @@
 [
   {
+    "v": "1792059371",
+    "titre": "Plateforme : couleurs GM et liste instantanée",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "La Plateforme, la connexion et le choix du rôle gardent les couleurs General Manager au lieu de celles du club du compte. La liste des clubs de la Plateforme s'affiche tout de suite (dernière liste connue), puis se met à jour."
+      }
+    ]
+  },
+  {
     "v": "1792057092",
     "titre": "Version ordinateur : 5 thèmes",
     "points": [

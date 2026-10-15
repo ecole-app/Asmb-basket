@@ -43,7 +43,10 @@ function showScr(id){
  // Premier écran choisi par le routage (connexion, accueil, page publique) : fin du démarrage.
  document.documentElement.classList.remove("gm-boot");
  if(SCR_PUBLICS.indexOf(id)>=0) gmModePublic(true);
- document.documentElement.classList.toggle("gm-horsclub", GM_SCR_HORS_CLUB.indexOf(id)>=0);
+ var horsClub=GM_SCR_HORS_CLUB.indexOf(id)>=0, etaitHors=document.documentElement.classList.contains("gm-horsclub");
+ document.documentElement.classList.toggle("gm-horsclub", horsClub);
+ // Plateforme, connexion et choix du rôle n'appartiennent à aucun club : couleurs GM, pas celles du club du compte.
+ if(horsClub!==etaitHors && typeof applyClubColor==="function") applyClubColor();
  document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on");});
  var el=document.getElementById("scr-"+id);
  if(el)el.classList.add("on");
@@ -135,7 +138,7 @@ function clubThemeVars(c,c2){
 function applyClubColor(){
   try{
     var old=document.getElementById("club-colors");
-    var c=clubCouleur();
+    var c=document.documentElement.classList.contains("gm-horsclub")?null:clubCouleur();
     document.documentElement.classList.toggle("gm-clubcolor",!!c);
     // Version teintée pour les thèmes ordinateur sombres (même idée que le mode sombre des thèmes).
     if(c) document.documentElement.style.setProperty("--club-dk",gmMix(c,0.3)); else document.documentElement.style.removeProperty("--club-dk");
