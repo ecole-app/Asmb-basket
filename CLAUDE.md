@@ -50,6 +50,8 @@ Messages en français, sans casser le style des commits existants.
 
 ## Accès délégué (comptabilité, inventaire, sponsors)
 
+Profils du bureau (`BUREAU_TITRES`, js/11-admin.js) : Trésorier et Secrétaire (un seul par club), Membre du bureau (plusieurs). Attribués par le dirigeant seul (`users/{uid}.titre`) ; ils pré-cochent des accès de départ tirés de la grille « Qui fait quoi », l'accès réel reste celui des cases. Seuls comptabilité, inventaire et sponsors ont une barrière côté règles ; les autres cases pilotent l'affichage.
+
 Le dirigeant peut donner l'accès à un module admin à un compte bureau/coach
 (`users/{uid}.permissions.<id>=true`). Toute nouvelle fonction d'un de ces modules doit
 respecter ça des deux côtés : `hasPermission(clubId,'<id>')` dans `firestore.rules` **et**

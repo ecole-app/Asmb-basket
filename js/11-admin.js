@@ -37,9 +37,17 @@ var BUREAU_GROUPS=[
   {label:"Sportif",ids:["equipes","planning","inscriptions"]},
   {label:"Administratif",ids:["licences","documents","communaute","avis","fiches","comptabilite","notesfrais","inventaire"]}
 ];
-// Titres exclusifs (un seul par club à la fois) : ils ne font que pré-cocher
-// des cases pour gagner du temps — l'accès réel reste celui des cases.
-var BUREAU_TITRES={tresorier:{label:"Trésorier",autoCheck:["comptabilite","inventaire"]},secretaire:{label:"Secrétaire",autoCheck:[]}};
+// Profils du bureau : seul le dirigeant les attribue (users/{uid}.titre n'est écrit que
+// par lui, voir firestore.rules). Trésorier et secrétaire : un seul par club (exclusif) ;
+// « Membre du bureau » : autant que nécessaire. Un profil ne fait que pré-cocher des
+// accès de départ (tirés de la grille « Qui fait quoi » du dirigeant) : l'accès réel reste
+// celui des cases, que le dirigeant ajuste personne par personne.
+var BUREAU_TITRES={
+  tresorier:{label:"Trésorier",exclusif:true,autoCheck:["comptabilite","inventaire","sponsors","notesfrais","documents"]},
+  secretaire:{label:"Secrétaire",exclusif:true,autoCheck:["licences","inscriptions","fiches","equipes","planning","documents","communaute"]},
+  bureau:{label:"Membre du bureau",exclusif:false,autoCheck:["planning","communaute"]}
+};
+function bureauProfilLabel(titre){ return (titre&&BUREAU_TITRES[titre])?BUREAU_TITRES[titre].label:""; }
 // ═══ PACKS (Standard / Premium) ═══════════════════════════════════════
 // Le champ clubs/{id}.plan n'est modifiable que par le super admin (voir
 // firestore.rules). "standard" = pack de base ; "premium", "paid" (ancien
@@ -703,7 +711,8 @@ function renderAccesList(list,users,phoneToName){
   var titreRegistry={}; // _uid -> {repaint:fn}
   function nameFor(ou){ return phoneToName[(ou.phone||"").replace(/\s+/g,"")]||ou.email||ou.phone||"ce compte"; }
   function setTitreImmediate(u, val, onDone){
-    var holder=val?users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;}):null;
+    var exclusif=!!(val&&BUREAU_TITRES[val]&&BUREAU_TITRES[val].exclusif!==false);
+    var holder=exclusif?users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;}):null;
     var go=function(){
       var batch=window.fbWriteBatch?window.fbWriteBatch():null;
       var writes;
@@ -745,7 +754,8 @@ function renderAccesList(list,users,phoneToName){
     }
     var sub=document.createElement("div");
     sub.style.cssText="font-size:11px;color:var(--mut);margin-bottom:10px";
-    sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
+    function subTxt(roles){ return (u.phone||"")+((roles&&roles.length)?(" · "+roles.join(", ")):" · aucun rôle")+(bureauProfilLabel(u.titre)?" · "+bureauProfilLabel(u.titre):""); }
+    sub.textContent=subTxt(u.roles);
     card.appendChild(sub);
     // Le numéro rattache le compte aux enfants (rattachements/{tel}) : seul le
     // staff le change (firestore.rules), jamais le titulaire du compte.
@@ -763,7 +773,7 @@ function renderAccesList(list,users,phoneToName){
           u.phone=tel;
           // Même numéro sur la fiche d'inscription et dans les canaux.
           if(ancien&&tel&&typeof remplacerTelephoneClub==="function") remplacerTelephoneClub(ancien,tel,{skipUsers:true});
-          sub.textContent=(u.phone||"")+((u.roles&&u.roles.length)?(" · "+u.roles.join(", ")):" · aucun rôle");
+          sub.textContent=subTxt(u.roles);
         }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
       });
     });
@@ -825,7 +835,7 @@ function renderAccesList(list,users,phoneToName){
     // ── Titre exclusif (trésorier / secrétaire) ──────
     var titreTl=document.createElement("div");
     titreTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px";
-    titreTl.textContent="Titre (un seul par club)";
+    titreTl.textContent="Profil (un seul trésorier et un seul secrétaire par club)";
     bureauBox.appendChild(titreTl);
     var titreWrap=document.createElement("div");
     titreWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px";
@@ -843,25 +853,31 @@ function renderAccesList(list,users,phoneToName){
       titreChips[key]=chip;
       chip.addEventListener("click",function(e){
         e.stopPropagation();
-        var val=key==="aucun"?null:key;
+        var val=key==="aucun"?null:key, ancien=state.titre;
         if(val===state.titre) return;
         titreWrap.style.opacity=".6";titreWrap.style.pointerEvents="none";
         setTitreImmediate(u,val,function(ok){
           titreWrap.style.opacity="";titreWrap.style.pointerEvents="";
           if(!ok) return;
           state.titre=val;
-          if(val && BUREAU_TITRES[val].autoCheck){
-            BUREAU_TITRES[val].autoCheck.forEach(function(id){state.permissions[id]=true;});
-            paintPerms();
-          }
+          // Le profil quitté retire ses accès de départ, le nouveau pose les siens
+          // (brouillon : ils ne s'appliquent qu'au clic sur « Enregistrer »).
+          if(ancien && BUREAU_TITRES[ancien]) BUREAU_TITRES[ancien].autoCheck.forEach(function(id){state.permissions[id]=false;});
+          if(val && BUREAU_TITRES[val]) BUREAU_TITRES[val].autoCheck.forEach(function(id){state.permissions[id]=true;});
+          paintPerms();
+          sub.textContent=subTxt(state.roles);
           paintTitre();updateSuggestion();
         });
       });
       titreWrap.appendChild(chip);
     });
     paintTitre();
-    titreRegistry[u._uid]={repaint:function(){state.titre=u.titre;paintTitre();updateSuggestion();}};
+    titreRegistry[u._uid]={repaint:function(){state.titre=u.titre;sub.textContent=subTxt(state.roles);paintTitre();updateSuggestion();}};
     bureauBox.appendChild(titreWrap);
+    var titreAide=document.createElement("div");
+    titreAide.style.cssText="font-size:10.5px;color:var(--mut);margin:-6px 0 12px;line-height:1.4";
+    titreAide.textContent="Un profil coche des accès de départ. Ajustez-les case par case ci-dessous, puis « Enregistrer ».";
+    bureauBox.appendChild(titreAide);
     // ── Cases à cocher, module par module. Seules Comptabilité et Inventaire
     // sont vraiment bloquées côté règles Firestore pour un non-dirigeant ;
     // les autres cases pilotent uniquement ce qui s'affiche dans l'appli. ──
@@ -934,7 +950,7 @@ function renderAccesList(list,users,phoneToName){
         return syncCoachChannels(u,state.teams);
       }).then(function(){
         save.textContent="\u2713 Enregistré";
-        sub.textContent=(u.phone||"")+" · "+(state.roles.join(", ")||"aucun rôle");
+        sub.textContent=subTxt(state.roles);
         u.permissions=Object.assign({},state.permissions);
         setTimeout(function(){save.textContent="Enregistrer";},1500);
       }).catch(function(err){ if(err==="annule"){ save.textContent="Enregistrer"; state.roles.indexOf("dirigeant")<0&&state.roles.push("dirigeant"); return; } save.textContent="Erreur";askAlert((err&&err.code)||err);});

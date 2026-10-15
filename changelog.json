@@ -1,5 +1,17 @@
 [
   {
+    "v": "1792049373",
+    "titre": "Profils Trésorier, Secrétaire et Membre du bureau",
+    "points": [
+      {
+        "roles": [
+          "dirigeant"
+        ],
+        "texte": "Accès coach : choisis un profil (Trésorier, Secrétaire, Membre du bureau) pour pré-cocher les bons accès, puis ajuste case par case. Trésorier et secrétaire : un seul par club. Le profil est aussi proposé dès l'invitation."
+      }
+    ]
+  },
+  {
     "v": "1792047531",
     "titre": "Version Indépendant : les enfants mineurs",
     "points": [

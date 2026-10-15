@@ -123,7 +123,35 @@ function openBureauPermissionPicker(onConfirm, role){
     ? "Cochez ce que cette personne pourra voir dans « Gestion ». Un membre du bureau n'a aucune équipe à gérer : seul ce qui est coché lui sera visible. Vous pourrez revenir dessus à tout moment depuis « Accès coach »."
     : "Cochez ce que cette personne pourra voir en plus, dans « Gestion », en plus de son accès sportif (Équipe, Formation, Compétition, Événements) qui reste toujours disponible. Vous pourrez revenir dessus à tout moment depuis « Accès coach ».";
   s.body.appendChild(intro);
-  var perms={};
+  var perms={}, permChecks={}, profil=null;
+  // Profils de départ (Trésorier, Secrétaire, Membre du bureau) : ils pré-cochent les accès ;
+  // le profil lui-même (titre) se confirme ensuite dans « Accès coach », une fois le compte créé.
+  var pTl=document.createElement("div");
+  pTl.style.cssText="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px";
+  pTl.textContent="Partir d'un profil";
+  s.body.appendChild(pTl);
+  var pWrap=document.createElement("div");
+  pWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px";
+  var pChips={};
+  function paintProfil(){
+    Object.keys(pChips).forEach(function(k){
+      var on=profil===(k==="aucun"?null:k);
+      pChips[k].style.cssText="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"transparent")+";color:"+(on?"#fff":"var(--mut)");
+    });
+  }
+  [["aucun","Aucun"]].concat(Object.keys(BUREAU_TITRES).map(function(k){return [k,BUREAU_TITRES[k].label];})).forEach(function(pair){
+    var chip=document.createElement("button"); chip.type="button"; chip.textContent=pair[1]; pChips[pair[0]]=chip;
+    chip.addEventListener("click",function(){
+      var val=pair[0]==="aucun"?null:pair[0];
+      if(profil&&BUREAU_TITRES[profil]) BUREAU_TITRES[profil].autoCheck.forEach(function(id){ perms[id]=false; if(permChecks[id]) permChecks[id].checked=false; });
+      profil=val;
+      if(val) BUREAU_TITRES[val].autoCheck.forEach(function(id){ perms[id]=true; if(permChecks[id]) permChecks[id].checked=true; });
+      paintProfil();
+    });
+    pWrap.appendChild(chip);
+  });
+  paintProfil();
+  s.body.appendChild(pWrap);
   BUREAU_GROUPS.forEach(function(group){
     var ids=group.ids.filter(function(id){return BUREAU_GRANTABLE.indexOf(id)>=0;});
     if(!ids.length) return;
@@ -134,6 +162,7 @@ function openBureauPermissionPicker(onConfirm, role){
       var chk=document.createElement("input");chk.type="checkbox";
       chk.style.cssText="width:16px;height:16px;accent-color:var(--dkg)";
       chk.addEventListener("change",function(){perms[id]=chk.checked;});
+      permChecks[id]=chk;
       lbl.appendChild(chk);lbl.appendChild(document.createTextNode(BUREAU_GRANTABLE_LABELS[id]));
       s.body.appendChild(lbl);
     });
