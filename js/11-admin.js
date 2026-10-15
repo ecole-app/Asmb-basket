@@ -173,9 +173,12 @@ function openExportDonnees(){
   });
 }
 // Licences de la saison en cours (les saisons archivées ne comptent pas).
+// Rôle d'une fiche licence : "joueur" (défaut), "coach" ou "autre" (bureau, arbitre...).
+// Coach et autre restent dans les licences mais ne sont ni joueurs, ni dans la limite du pack.
+function licEstJoueur(l){ return !l||!l.role||l.role==="joueur"; }
 function nbLicencesSaison(){
   var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
-  return getLicences().filter(function(l){return !cur||(l.saison||cur)===cur;}).length;
+  return getLicences().filter(function(l){return licEstJoueur(l)&&(!cur||(l.saison||cur)===cur);}).length;
 }
 // Garde unique de la limite de licences (Pack Standard). Appelée AVANT toute
 // création (nouvelle licence, renouvellement) : alerte dès 270, refus à 300.
@@ -199,7 +202,7 @@ function verifierLimiteLicences(sansAlerte){
 function licencesDepasseLimite(nouvelle){
   if(hasPremium()) return false;
   var cur=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
-  function n(list){ return (list||[]).filter(function(l){return !cur||(l.saison||cur)===cur;}).length; }
+  function n(list){ return (list||[]).filter(function(l){return licEstJoueur(l)&&(!cur||(l.saison||cur)===cur);}).length; }
   var nNew=n(nouvelle), nOld=n(getLicences());
   return nNew>nOld && nNew>limiteLicencesClub();
 }

@@ -12,6 +12,7 @@ var IMP_CHAMPS=[
   {id:"telephone",label:"Téléphone",syn:["telephone","tel","mobile","portable","telmobile","telephonemobile","gsm"]},
   {id:"adresse",label:"Adresse",syn:["adresse","adresse1","rue","adressepostale"]},
   {id:"categorie",label:"Catégorie",syn:["categorie","cat","categoriejeu","categoriedage"]},
+  {id:"role",label:"Fonction / rôle",syn:["fonction","role","qualite","typedelicencie","typedepratiquant"]},
   {id:"numLicence",label:"N° de licence",syn:["numerodelicence","ndelicence","numlicence","nlicence","licence","nolicence","numerolicence"]}
 ];
 var IMP_ETAT={entetes:[],lignes:[],map:{},fichier:""};
@@ -80,6 +81,13 @@ function impGenre(v){
   if(/^(m|masculin|homme|garcon|male|mr|monsieur)/.test(s)) return "M";
   return "";
 }
+// "Entraîneur", "Technicien" → coach ; "Dirigeant", "Arbitre"… → autre ; sinon joueur.
+function impRole(v){
+  var s=impNorm(v); if(!s) return "joueur";
+  if(/entraineur|coach|technicien|educateur|animateur/.test(s)) return "coach";
+  if(/dirigeant|arbitre|officiel|benevole|bureau|president|tresorier|secretaire/.test(s)) return "autre";
+  return "joueur";
+}
 function impCle(nom,prenom,naiss){ return impNorm(nom)+"|"+impNorm(prenom)+"|"+naiss; }
 function impAutoMap(entetes){
   var map={};
@@ -106,7 +114,7 @@ function impAnalyser(entetes, lignes, map, existantes){
     if(vus[cle]){ res.aVerifier.push({n:n+2,raison:"doublon dans le fichier",nom:nom,prenom:prenom}); return; }
     vus[cle]=true;
     var d={nom:nom,prenom:prenom,naissance:nais,genre:impGenre(g("genre")),email:g("email"),
-      telephone:g("telephone"),adresse:g("adresse"),categorie:g("categorie"),numLicence:g("numLicence")};
+      telephone:g("telephone"),adresse:g("adresse"),categorie:g("categorie"),numLicence:g("numLicence"),role:impRole(g("role"))};
     var ex=idx[cle];
     if(ex) res.maj.push({donnees:d,licence:ex}); else res.nouvelles.push(d);
   });
@@ -140,6 +148,7 @@ function impAppliquer(res, lics, saison){
       id:(Date.now()+i).toString(), code:genCode(), email:d.email, nomDest:(d.prenom+" "+d.nom).trim(),
       statut:"recue", createdAt:Date.now(), ouvertLe:null, fiche:fiche, categorie:cat, saison:saison
     });
+    if(d.role&&d.role!=="joueur") lics[lics.length-1].role=d.role;
     nbNew++;
   });
   return {nbNew:nbNew,nbMaj:nbMaj};
@@ -196,6 +205,7 @@ function impRendre(){
     '<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:6px">Colonnes</div>'+maps+
     '<div style="margin:12px 0;padding:12px;border-radius:var(--rs);background:var(--card);border:1px solid var(--bdr);font-size:13px;color:var(--txt);line-height:1.6">'+
       '<b>'+peutNew+'</b> nouvelle'+(peutNew>1?"s":"")+' fiche'+(peutNew>1?"s":"")+'<br>'+
+      (res.nouvelles.some(function(x){return x.role!=="joueur";})?'dont <b>'+res.nouvelles.filter(function(x){return x.role!=="joueur";}).length+'</b> coach / autre (hors joueurs)<br>':'')+
       '<b>'+res.maj.length+'</b> déjà existante'+(res.maj.length>1?"s":"")+' (complétées si des infos manquent)<br>'+
       '<b>'+res.aVerifier.length+'</b> ligne'+(res.aVerifier.length>1?"s":"")+' à vérifier (non importées)'+
       (verif?'<div style="margin-top:6px">'+verif+(res.aVerifier.length>5?'<div style="font-size:11px;color:var(--mut)">… et '+(res.aVerifier.length-5)+' autres</div>':'')+'</div>':'')+

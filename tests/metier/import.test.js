@@ -55,3 +55,19 @@ describe("Analyse", () => {
     assert.equal(lic.fiche.emailLic, "a@b.fr");
   });
 });
+
+describe("Rôle à l'import et limite du pack", () => {
+  it("fonction → rôle", () => {
+    assert.equal(c.impRole("Entraîneur"), "coach");
+    assert.equal(c.impRole("Technicien"), "coach");
+    assert.equal(c.impRole("Arbitre"), "autre");
+    assert.equal(c.impRole("Joueur"), "joueur");
+    assert.equal(c.impRole(""), "joueur");
+  });
+  it("les coachs ne comptent pas dans la limite du pack", async () => {
+    const { charger: ch } = await import("./contexte.js");
+    const a = ch(["js/11-admin.js", "js/20b-plateforme.js"], { BOOTSTRAP_CLUB_ID: "asmb" });
+    a.licences = [{ saison: "2026-2027" }, { saison: "2026-2027", role: "coach" }, { saison: "2026-2027", role: "autre" }];
+    assert.equal(a.nbLicencesSaison(), 1);
+  });
+});

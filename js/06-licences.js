@@ -679,7 +679,7 @@ function renderLicenceDetail(lic){
         '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
         '</div>';
     }
-    if(typeof aidesBlockHtml==="function") paiementHtml+=aidesBlockHtml(lic);
+    if(typeof aidesBlockHtml==="function"&&licEstJoueur(lic)) paiementHtml+=aidesBlockHtml(lic);
     paiementHtml+=renderImpayesBlock(lic);
   }
 
@@ -707,6 +707,7 @@ function renderLicenceDetail(lic){
 
   el.innerHTML=
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+steps+'</div>'+
+    (typeof licRoleHtml==="function"?licRoleHtml(lic):'')+
     '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;margin-bottom:12px">'+
       '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Code</div>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
@@ -1097,7 +1098,7 @@ function validerLicence(){
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===currentLicCode;});
   if(idx<0)return;
-  if(!lics[idx].categorie){askAlert("Assignez une catégorie avant de valider");return;}
+  if(!lics[idx].categorie && licEstJoueur(lics[idx])){askAlert("Assignez une catégorie avant de valider");return;}
   var f0=lics[idx].fiche||{};
   if(f0.surclassement && (!f0.certificat || !f0.certDate)){
     askAlert("Surclassement coché sur cette fiche : le certificat médical (fichier + date) est obligatoire avant de valider.");
@@ -1107,9 +1108,9 @@ function validerLicence(){
   saveLicences(lics);
   renderLicenceDetail(lics[idx]);
   buildLicences();
-  // Ajouter dans les joueurs si pas déjà là
+  // Ajouter dans les joueurs si pas déjà là (jamais pour un coach / autre)
   var f=lics[idx].fiche;
-  if(f){
+  if(f && licEstJoueur(lics[idx])){
     var players=getPlayers();
     var exists=players.find(function(p){return p.email===f.emailLic;});
     if(!exists){
@@ -1117,6 +1118,7 @@ function validerLicence(){
       savePlayers(players);
     }
   }
+  if(!licEstJoueur(lics[idx])){ showToast("Licence validée"); return; }
   showToast("Licence validée, joueur ajouté aux inscriptions");
   proposerAccesFamille(lics[idx]);
 }

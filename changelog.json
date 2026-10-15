@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792089864",
+  "titre": "Coachs dans les licences et suppression de fiche",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur une fiche licence : choisir « Joueur / Coach / Autre » (un coach n'est plus dans les joueurs ni dans la limite de licences) et bouton « Supprimer la fiche ». À l'import, une colonne fonction/rôle « entraîneur » met la fiche en coach."
+   }
+  ]
+ },
+ {
   "v": "1792089544",
   "titre": "Import des photos (trombinoscope)",
   "points": [
