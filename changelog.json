@@ -1,2926 +1,2944 @@
 [
-  {
-    "v": "1792077407",
-    "titre": "Notifications sur iPhone : tuto d'installation",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "bureau",
-          "parent"
-        ],
-        "texte": "Sur iPhone, un tutoriel explique comment ajouter l'appli à l'écran d'accueil pour recevoir les notifications. Il s'ouvre en touchant « Autoriser les notifications », et un lien d'aide est visible dans les réglages de notifications."
-      }
-    ]
-  },
-  {
-    "v": "1792073237",
-    "titre": "Notifications push activées",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "bureau",
-          "parent"
-        ],
-        "texte": "Tu peux maintenant autoriser les notifications dans Paramètres › Notifications pour être prévenu des nouveaux messages même appli fermée."
-      }
-    ]
-  },
-  {
-    "v": "1792060063",
-    "titre": "Écrans vides plus clairs, Paramètres rangés, Boutique & réseaux",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Un écran sans données explique maintenant ce qu'on y met et propose le premier geste : équipes, planning, joueurs, licences, comptabilité, buvette & stock, sponsors."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Paramètres : « Zone dangereuse » est un bloc à part, en rouge, et les blocs s'affichent sur deux colonnes sur ordinateur."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle rubrique « Boutique & réseaux » dans le menu ordinateur : elle ouvre directement les liens du club."
-      }
-    ]
-  },
-  {
-    "v": "1792059584",
-    "titre": "Plateforme : plus de saut de mise en page au rechargement",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur, la Plateforme garde la même largeur et le même alignement pendant le chargement, sans se décaler à la fin."
-      }
-    ]
-  },
-  {
-    "v": "1792059371",
-    "titre": "Plateforme : couleurs GM et liste instantanée",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "La Plateforme, la connexion et le choix du rôle gardent les couleurs General Manager au lieu de celles du club du compte. La liste des clubs de la Plateforme s'affiche tout de suite (dernière liste connue), puis se met à jour."
-      }
-    ]
-  },
-  {
-    "v": "1792057092",
-    "titre": "Version ordinateur : 5 thèmes",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur, Paramètres › Apparence : choisis le thème du menu et du fond (Clair, Sombre, Parquet, Aux couleurs du club, Tableau de marque). Réglage propre à l'ordinateur, le téléphone ne change pas. Ta couleur de club reste appliquée."
-      }
-    ]
-  },
-  {
-    "v": "1792049639",
-    "titre": "Pass bénévole (lien ou QR)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Bénévoles : crée un bénévole avec pass, il reçoit un lien (ou QR) perso où il voit ses missions à venir et confirme ou signale un empêchement, sans créer de compte. Tu vois sa réponse dans la liste des postes."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le SMS de mission contient le lien du pass. Tu peux désactiver ou réactiver un pass à tout moment (bouton « Mes bénévoles »)."
-      }
-    ]
-  },
-  {
-    "v": "1792049373",
-    "titre": "Profils Trésorier, Secrétaire et Membre du bureau",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Accès coach : choisis un profil (Trésorier, Secrétaire, Membre du bureau) pour pré-cocher les bons accès, puis ajuste case par case. Trésorier et secrétaire : un seul par club. Le profil est aussi proposé dès l'invitation."
-      }
-    ]
-  },
-  {
-    "v": "1792047531",
-    "titre": "Version Indépendant : les enfants mineurs",
-    "points": [
-      {
-        "roles": [
-          "client"
-        ],
-        "texte": "Parent : inscris ton enfant (moins de 18 ans) avec ton propre accès, avec l'autorisation parentale. Tu réserves et préviens pour lui comme pour toi, depuis « Ma fiche » pour en ajouter d'autres."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Tes clients mineurs apparaissent avec la mention « Mineur », le nom et le téléphone de leur parent, et l'autorisation parentale. Ils sont habitués et pointés comme les autres."
-      }
-    ]
-  },
-  {
-    "v": "1792014399",
-    "titre": "Documents légaux mis à jour",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Les CGU, les CGV et la politique de confidentialité couvrent aussi la nouvelle version Indépendant (pour les coachs à leur compte). Rien ne change pour votre club."
-      }
-    ]
-  },
-  {
-    "v": "1792010058",
-    "titre": "Version Indépendant : séances et réservations",
-    "points": [
-      {
-        "roles": [
-          "client"
-        ],
-        "texte": "Ton appli : préviens ton coach en un geste (« Je viens » / « Je ne peux pas ») et réserve les séances ouvertes, avec les places restantes."
-      }
-    ]
-  },
-  {
-    "v": "1792005642",
-    "titre": "Tournoi : vainqueur en vert sur le grand écran",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Tournoi : sur le grand écran, dans les derniers résultats, l'équipe gagnante et son score s'affichent en vert."
-      }
-    ]
-  },
-  {
-    "v": "1792004806",
-    "titre": "Tournoi : grand écran clair ou sombre",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Tournoi : le grand écran peut passer en mode clair ou sombre avec le bouton en haut à droite. Le choix est gardé sur l'appareil (sombre par défaut)."
-      }
-    ]
-  },
-  {
-    "v": "1792004434",
-    "titre": "Tournoi : score en direct sur la page publique",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Tournoi : pendant un match, le score saisi à la table de marque s'affiche tout de suite sur la page publique (« EN COURS »), même si l'écran Jour J n'est pas ouvert. Le résultat final remplace le score en cours à la clôture."
-      }
-    ]
-  },
-  {
-    "v": "1791991771",
-    "titre": "Communauté : voir les membres d'un canal",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Communauté : touchez le nom du canal en haut de la discussion pour voir qui y a accès, rangé par rôle (dirigeants, bureau, coachs, familles, joueurs), et qui y a déjà écrit."
-      }
-    ]
-  },
-  {
-    "v": "1791982667",
-    "titre": "Compta : bilan et annexe",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Comptabilité › Comptes annuels › « 📘 Bilan et annexe » (Premium) : bilan simplifié actif/passif avec le solde de chaque banque et caisse, créances et dettes pré-remplies, et une annexe (méthodes, faits marquants, bénévolat valorisé) en PDF prêt pour l'AG. Renseignez une fois le solde de départ de vos comptes."
-      }
-    ]
-  },
-  {
-    "v": "1791982511",
-    "titre": "Version ordinateur : menu à votre main",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur : « Personnaliser » en bas du menu pour masquer ou réordonner les rubriques, « Réduire le menu » pour ne garder que les icônes, les équipes en cartes avec leur effectif, et la messagerie sur 2 colonnes (canaux à gauche, discussion à droite)."
-      }
-    ]
-  },
-  {
-    "v": "1791982351",
-    "titre": "Pôles : fiche profil sportif",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Pôles › touchez un joueur : sa fiche en 4 onglets. Général (assiduité, séances, matchs, ancienneté, équipes), Paiements (licence + cotisation du pôle et versements, recette en compta), Infos (suivi du pôle, notes du coach, appel/SMS des parents), Réglages (pause, date d'entrée, retrait)."
-      }
-    ]
-  },
-  {
-    "v": "1791982102",
-    "titre": "Abonnement : geler, relancer, résilier",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Paramètres › Abonnement : votre pack, l'échéance, et trois actions avec double confirmation : geler 1 à 3 mois (accès limité pendant le gel, échéance repoussée d'autant), relancer à tout moment, ou résilier (effet à l'échéance, tout reste ouvert d'ici là)."
-      }
-    ]
-  },
-  {
-    "v": "1791981395",
-    "titre": "Notes de frais : la photo du ticket remplit la note",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "bureau"
-        ],
-        "texte": "Notes de frais : prenez le ticket en photo, la date, le montant, le motif et la catégorie se remplissent tout seuls (à vérifier avant d'enregistrer)."
-      }
-    ]
-  },
-  {
-    "v": "1791981305",
-    "titre": "Événements : export Excel des inscrits",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Événements › bouton « 📊 Excel » : la liste des inscrits ou réservations (contacts, tarif, paiement, présence), un résumé, et une feuille par jour pour les stages à jours au choix."
-      }
-    ]
-  },
-  {
-    "v": "1791970117",
-    "titre": "Photo de ticket lue par Gemini",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Compta › photo du ticket : la lecture passe d'abord par Gemini (Google, via Firebase), plus rapide et plus fiable ; les IA gratuites restent en secours."
-      }
-    ]
-  },
-  {
-    "v": "1791969368",
-    "titre": "Photo de ticket : IA de secours qui lit les images",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Compta › photo du ticket : quand les IA principales sont saturées, le relais passe par 3 autres IA capables de lire une photo."
-      }
-    ]
-  },
-  {
-    "v": "1791969092",
-    "titre": "Photo de ticket : raison de l'échec affichée",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Compta › photo du ticket : si la lecture échoue, la raison exacte s'affiche sous le message."
-      }
-    ]
-  },
-  {
-    "v": "1791968906",
-    "titre": "Photo de ticket plus fiable",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Compta › photo du ticket : si la première lecture traîne, une deuxième IA prend le relais au lieu d'abandonner, et la photo envoyée est plus légère pour aller plus vite."
-      }
-    ]
-  },
-  {
-    "v": "1791965064",
-    "titre": "Tournoi : meilleur marqueur à la moyenne",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le classement des meilleurs marqueurs se fait maintenant sur la moyenne de points par match, avec un 🏆 pour le premier de chaque catégorie."
-      }
-    ]
-  },
-  {
-    "v": "1791962089",
-    "titre": "Tournoi : fautes et meilleurs marqueurs au choix",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi › Journée et format : pour chaque catégorie, choisissez à combien de fautes un joueur est exclu (2 à 6, ou pas d'exclusion), à côté de la durée des matchs."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le classement des meilleurs marqueurs n'apparaît sur la page du tournoi que si vous cochez l'option."
-      }
-    ]
-  },
-  {
-    "v": "1791952898",
-    "titre": "Tournoi : joueurs, points et fautes",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi : chaque équipe a ses joueurs (numéro + prénom). Les équipes du club sont remplies avec les numéros de maillot ; bouton « 👕 Joueurs » pour modifier."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Inscription par le lien : le responsable saisit ses joueurs et reçoit un code « Mon équipe » pour les modifier jusqu'au premier match."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Table de marque : +1 / +2 / +3 puis le numéro du joueur, bouton Faute (5 fautes = joueur exclu), « Annuler la dernière action »."
-      },
-      {
-        "roles": [
-          "parent",
-          "joueur"
-        ],
-        "texte": "Page du tournoi : points et fautes des joueurs de chaque équipe, meilleurs marqueurs par catégorie."
-      }
-    ]
-  },
-  {
-    "v": "1791951623",
-    "titre": "Champs à remplir vides",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les champs à remplir ne contiennent plus d'exemples (noms, lieux, horaires) : seuls le téléphone (0612345678) et l'e-mail (mail@gmail.com) gardent un modèle."
-      }
-    ]
-  },
-  {
-    "v": "1791949977",
-    "titre": "Tournoi : plan du site",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi › Plan du site : cherchez l'adresse, la carte (vue satellite ou plan) se centre dessus, puis placez les terrains, la buvette, l'accueil, les toilettes, le parking…"
-      },
-      {
-        "roles": [
-          "parent",
-          "joueur"
-        ],
-        "texte": "Page du tournoi : onglet « Plan » avec itinéraire Google Maps / Waze, et « 📍 » sur chaque match pour trouver son terrain."
-      }
-    ]
-  },
-  {
-    "v": "1791949329",
-    "titre": "Tournoi : terrains intérieurs ou extérieurs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi › Journée et format : chaque terrain peut être intérieur ou extérieur. C'est indiqué sur le planning, le PDF, les codes de table de marque et la page publique du tournoi."
-      }
-    ]
-  },
-  {
-    "v": "1791948531",
-    "titre": "Événements : Standard et Premium",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Pack Standard : création d'événements, affiche, inscriptions et réservations avec billet QR, entrée, bénévoles, planning des tournois et page publique."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Pack Premium : jour J des tournois (table de marque, scores en direct, grand écran, absences), paiement HelloAsso et suivi « payé » avec écriture en compta, plus de 2 tarifs, inscription jour par jour, participants dans le bilan de saison."
-      }
-    ]
-  },
-  {
-    "v": "1791947505",
-    "titre": "Tournoi : équipes absentes",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi, onglet Jour J : « 📋 Appel des équipes » avant le premier match (les absentes sont retirées, le planning et les codes sont refaits) ; une fois le tournoi commencé, « 🚫 Équipe absente ou partie » donne forfait 20-0 sur tous ses matchs restants, phases finales comprises."
-      },
-      {
-        "roles": [
-          "parent",
-          "joueur"
-        ],
-        "texte": "Page du tournoi : badge « Absente » et forfaits affichés, classement à jour."
-      }
-    ]
-  },
-  {
-    "v": "1791946829",
-    "titre": "Page tournoi et rappels bénévoles",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi : nouvelle page publique generalmanagerapp.fr/tournoi : matchs en cours, à venir et résultats, classements, « Mon équipe » (et les autres équipes), mode grand écran pour la télé du gymnase. Le lien et le QR de l'affiche y mènent."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Bénévoles : SMS au vouvoiement."
-      },
-      {
-        "roles": [
-          "parent",
-          "coach",
-          "dirigeant"
-        ],
-        "texte": "Bénévoles : rappel sur l'accueil 14 jours avant, 7 jours avant, puis chaque jour à partir de 5 jours avant ; chaque rappel peut être masqué."
-      }
-    ]
-  },
-  {
-    "v": "1791945466",
-    "titre": "Bénévoles",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Planning › « 🙋 Bénévoles » sur un match ou un événement : placez des personnes sur les postes (buvette, table de marque, chrono, arbitrage…) et prévenez-les par SMS pré-rempli au nom du club."
-      },
-      {
-        "roles": [
-          "parent",
-          "coach",
-          "dirigeant"
-        ],
-        "texte": "Accueil : un bandeau « Tu es bénévole cette semaine » indique le poste, le jour et l'heure."
-      }
-    ]
-  },
-  {
-    "v": "1791945299",
-    "titre": "Bilan de saison pour les subventions",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Licences › « 📊 Bilan » : un PDF prêt pour les dossiers de subvention (ANS, mairie, département) et l'AG : licenciés par catégorie, genre, âge et commune, équipes, pôles, événements avec participants et, en Premium, la compta de l'exercice."
-      }
-    ]
-  },
-  {
-    "v": "1791926652",
-    "titre": "Tournoi : résultats en direct sans l'écran Jour J",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tournoi : dès qu'une table de marque clôture un match, le score, les classements et les équipes qualifiées apparaissent sur la page publique, même si personne n'a l'écran « Jour J » ouvert."
-      }
-    ]
-  },
-  {
-    "v": "1791922174",
-    "titre": "Plateforme sans menu du club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Version ordinateur : l'écran Plateforme (et la connexion) n'affiche plus le menu latéral du club."
-      }
-    ]
-  },
-  {
-    "v": "1791912160",
-    "titre": "Compta : photo de ticket",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Compta : bouton « 📷 Ticket » : prenez le ticket en photo, la date, le montant, le fournisseur et la catégorie sont remplis tout seuls. Vous vérifiez puis enregistrez ; la photo est jointe en justificatif."
-      }
-    ]
-  },
-  {
-    "v": "1791911186",
-    "titre": "Soirée : réservation par famille",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "bureau",
-          "coach"
-        ],
-        "texte": "Soirée : les inscriptions deviennent des réservations par famille (adultes, enfants, prix par personne, un seul billet QR pour toute la réservation)."
-      },
-      {
-        "roles": [
-          "parent",
-          "joueur"
-        ],
-        "texte": "Soirée : bouton « Réserver » pour indiquer combien d'adultes et d'enfants viennent."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "bureau",
-          "coach"
-        ],
-        "texte": "Tournoi : plus d'inscription individuelle façon stage, les équipes s'inscrivent par le lien du tournoi."
-      }
-    ]
-  },
-  {
-    "v": "1791910868",
-    "titre": "Accès coach : retirer n'importe quel compte",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans « Accès coach », le bouton « Retirer l'accès » apparaît sur tous les comptes du club, y compris les autres dirigeants (jamais sur votre propre compte)."
-      }
-    ]
-  },
-  {
-    "v": "1791910542",
-    "titre": "Inscriptions et affiche pour tous les événements",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Tous les événements du club (stage, tournoi, soirée, formation, autre) ont maintenant les inscriptions en ligne (lien, QR, billets, entrée) et un bouton « 🖼️ Affiche » directement sur leur carte. Les matchs et entraînements gardent leurs convocations."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Sur un tournoi, le bouton des inscriptions individuelles s'appelle « Billetterie » (entrées payantes) ; les équipes s'inscrivent par l'outil 🏆 Tournoi."
-      }
-    ]
-  },
-  {
-    "v": "1791910411",
-    "titre": "Tournois : affiche",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Bouton « 🖼️ Affiche » dans l'outil Tournoi : même éditeur d'affiche que les événements (modèles, formats, logo, photo, partage WhatsApp). Les catégories s'affichent toutes seules et le QR code mène à la page du tournoi : inscription des équipes, puis poules, planning et résultats."
-      }
-    ]
-  },
-  {
-    "v": "1791909926",
-    "titre": "Tournois : création depuis le pôle Événements",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "« + Tournoi » (pôles Événements et 3x3) crée maintenant un vrai tournoi du calendrier et ouvre directement l'outil Tournoi (équipes, format, planning, jour J)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Les tournois notés avant à la main ont un bouton « 🏆 Organiser » qui les transforme en vrai tournoi. Le bloc « Coachs du pôle » passe en haut de la page Événements."
-      }
-    ]
-  },
-  {
-    "v": "1791907512",
-    "titre": "Ouverture de l'appli sans clignotement",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "À l'ouverture, un écran de chargement s'affiche le temps de vérifier la connexion : on ne voit plus l'accueil du club apparaître une seconde avant l'écran de connexion."
-      }
-    ]
-  },
-  {
-    "v": "1791907094",
-    "titre": "Tournois : le jour J",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Onglet « Jour J » : chaque match a son code. La table de marque ouvre generalmanagerapp.fr/?marque sans compte, tape le code, compte les points (+1, +2, +3) puis retape le code pour clôturer. Feuille des codes en PDF par terrain ; seul le staff peut rouvrir, corriger ou déclarer un forfait."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Classements calculés tout seuls (2 pts victoire, 1 pt défaite, 0 forfait ; égalités départagées par les confrontations) et équipes qualifiées placées dans les phases finales. La page publique se met à jour en direct tant que l'écran Jour J est ouvert."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Inscriptions des équipes par le lien : à activer dans « Journée et format » avec les catégories proposées ; les demandes arrivent dans l'onglet Équipes (Accepter / Refuser)."
-      }
-    ]
-  },
-  {
-    "v": "1791903596",
-    "titre": "Nouveau pôle : Basket Santé",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Basket Santé devient un pôle à part (séances adaptées, reprise d'activité, seniors, sport sur ordonnance), avec ses coachs, ses joueurs et leur groupe. Basket Pour Tous garde le loisir, le handicap et le basket adapté."
-      }
-    ]
-  },
-  {
-    "v": "1791903493",
-    "titre": "Pôles : coachs et joueurs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans chaque pôle, « Choisir les coachs » : vous désignez les coachs qui gèrent le pôle (Formation et Événements : coachs seulement)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Élite, 5x5, 3x3 et Basket Pour Tous : les coachs du pôle y ajoutent leurs joueurs et renseignent leurs infos (niveau et objectif pour l'Élite, équipe, groupe…). Les pôles apparaissent en pastilles sur la fiche joueur, et la liste Joueurs se filtre par pôle."
-      }
-    ]
-  },
-  {
-    "v": "1791898793",
-    "titre": "Tournois : poules, phases finales et planning automatique",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Sur un événement de type Tournoi, bouton « 🏆 Tournoi » : ajoutez les équipes (ou vos équipes du club en un clic), réglez la journée (horaires, pause de midi, terrains, battement) et le format de chaque catégorie : poules puis finale, demi-finales, matchs de classement ou rien."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "« Générer le planning » donne à chaque match un terrain et un horaire, sans qu'une équipe enchaîne deux matchs, et prévient si la journée est trop courte. Planning en PDF (grille horaires × terrains) et page publique avec lien et QR code pour les équipes et les familles."
-      }
-    ]
-  },
-  {
-    "v": "1791894879",
-    "titre": "Sur ordinateur : tableaux pour la compta, les licences et les joueurs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur grand écran, Comptabilité, Licences et Joueurs s'affichent en tableaux lisibles d'un coup d'œil (pièce, compte, statut, paiement…). Un clic sur une ligne l'ouvre."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur, les fenêtres (ligne de compta, fiche, réglages) s'ouvrent au centre de l'écran au lieu de monter du bas. Rien ne change sur téléphone."
-      }
-    ]
-  },
-  {
-    "v": "1791890331",
-    "titre": "iPhone : glisser depuis le bord pour revenir",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Sur iPhone, dans l'appli installée sur l'écran d'accueil : glissez le doigt depuis le bord gauche vers la droite pour revenir en arrière (une flèche apparaît). Mêmes règles que le bouton retour d'Android."
-      }
-    ]
-  },
-  {
-    "v": "1791888784",
-    "titre": "Bouton retour du téléphone",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur",
-          "bureau"
-        ],
-        "texte": "Le bouton retour d'Android (Samsung…) ne ferme plus l'appli : il ferme la fenêtre ouverte, revient à l'écran précédent, puis à l'Accueil. À l'Accueil, un 2e appui quitte l'appli."
-      }
-    ]
-  },
-  {
-    "v": "1791887999",
-    "titre": "Compta : rapprochement bancaire",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "« 🏦 Relevé bancaire » : importez le relevé de votre banque (CSV ou OFX). L'appli retrouve les lignes correspondantes (même montant, date proche) : un clic pour tout pointer."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Une opération sans ligne dans la compta ? Associez-la à une ligne existante, ou créez-la directement (déjà pointée). Les frais bancaires vont tout seuls au compte 627. Réimporter le même relevé ne pointe jamais deux fois."
-      }
-    ]
-  },
-  {
-    "v": "1791887793",
-    "titre": "Compta : compte de résultat et export FEC",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "« 📑 Comptes annuels » : compte de résultat de l'exercice au format des associations, comparé à l'exercice précédent, en PDF prêt pour l'AG (ligne d'approbation et signatures)."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Export FEC : le fichier officiel des écritures comptables, lu par les logiciels des experts-comptables et par les impôts. Le SIREN du club (Paramètres › Facturation) est repris dans le nom du fichier."
-      }
-    ]
-  },
-  {
-    "v": "1791887653",
-    "titre": "Compta : plan comptable associatif et numéros de pièce",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Chaque ligne reçoit son compte du plan comptable des associations (756 cotisations, 613 locations, 707 buvette…) et un numéro de pièce continu par journal (BQ banque, CA caisse). Les anciennes lignes sont numérotées automatiquement."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "« ⚙️ Plan comptable » : choisissez l'exercice (année civile ou saison, ex. septembre → août) et adaptez les comptes. Sur une ligne, « Compte comptable » permet un autre compte que l'automatique."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau filtre « Exercice » en haut de la compta ; le Bilan AG et l'accueil suivent l'exercice choisi."
-      }
-    ]
-  },
-  {
-    "v": "1791886645",
-    "titre": "Événements : le billet se garde facilement",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Après l'inscription, « Enregistrer l'image » sauvegarde le billet (QR code, code, nom, jours) dans les photos ou les téléchargements."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "« M'envoyer par WhatsApp / SMS » : le lien reçu réaffiche le billet et son QR code sur n'importe quel téléphone, même si la page a été fermée."
-      }
-    ]
-  },
-  {
-    "v": "1791885946",
-    "titre": "Affiche : partage avec l'image jointe, à chaque clic",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "« WhatsApp » et « Partager » ouvrent la fenêtre de partage de l'ordinateur ou du téléphone, avec l'affiche jointe (choisissez WhatsApp, Instagram…). Ça marche à chaque clic, même juste après une modification."
-      }
-    ]
-  },
-  {
-    "v": "1791885604",
-    "titre": "Affiche : partage depuis l'ordinateur",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Sur ordinateur, « WhatsApp » ouvre WhatsApp Web avec le texte et le lien, et télécharge l'affiche à glisser dans la conversation. « Partager » télécharge l'affiche et copie le texte. Sur téléphone, la feuille de partage s'ouvre à chaque clic."
-      }
-    ]
-  },
-  {
-    "v": "1791885356",
-    "titre": "iPhone : la barre du bas ne cache plus les fenêtres",
-    "points": [
-      {
-        "roles": [],
-        "texte": "Sur iPhone, la barre du bas (Accueil, Communauté, Admin) passait par-dessus les fenêtres et cachait le bouton « Enregistrer ». Corrigé pour toutes les fenêtres."
-      }
-    ]
-  },
-  {
-    "v": "1791885210",
-    "titre": "Inscription aux événements : e-mail",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Nouvelle case « E-mail (facultatif) » sur la fiche d'inscription d'un événement. Pour un parent connecté, l'e-mail de son compte est repris. Il apparaît dans la liste des inscrits."
-      }
-    ]
-  },
-  {
-    "v": "1791885166",
-    "titre": "iPhone : fenêtres et formulaires corrigés",
-    "points": [
-      {
-        "roles": [],
-        "texte": "Sur iPhone, le bas des fenêtres (et le bouton « Enregistrer ») ne passe plus sous la barre de Safari. Dans la fiche d'un événement, le bouton reste toujours visible en bas. Les champs ne font plus zoomer l'écran."
-      }
-    ]
-  },
-  {
-    "v": "1791884951",
-    "titre": "Mise à jour : fini le bandeau en boucle",
-    "points": [
-      {
-        "roles": [],
-        "texte": "« Mettre à jour » télécharge vraiment les nouveaux fichiers avant de recharger. Le bandeau ne réapparaît plus en boucle pour une même version."
-      }
-    ]
-  },
-  {
-    "v": "1791884569",
-    "titre": "Événements : adresse du lieu",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Nouveau champ « Adresse du lieu » dans le formulaire d'événement. Elle s'affiche sur une ligne sous le lieu : carte de l'événement, page d'inscription et affiche."
-      }
-    ]
-  },
-  {
-    "v": "1791884288",
-    "titre": "Accès coach : passer la main avant de quitter son rôle de dirigeant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Un dirigeant peut quitter son rôle seulement si un autre dirigeant du club est déjà en place. Sinon, l'appli demande d'en nommer un d'abord (contrôlé aussi côté serveur)."
-      }
-    ]
-  },
-  {
-    "v": "1791884091",
-    "titre": "Billet annulé et rôle de dirigeant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Quand le club annule une inscription, la famille voit « Inscription annulée par le club » à la place du billet : plus de QR code ni de code."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Un dirigeant peut de nouveau se retirer son propre rôle (avec confirmation). Seul le compte principal de la plateforme le garde toujours."
-      }
-    ]
-  },
-  {
-    "v": "1791883949",
-    "titre": "Affiche : texte libre, programme, accroche, QR code",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Texte libre sur plusieurs lignes : les retours à la ligne et les espaces s'affichent tels quels sur l'affiche."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Nouvelles cases dans « Ce qui s'affiche » : Accroche (à cocher ou non) et Programme (repris des réglages des inscriptions)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "QR code : « Déplacer / redimensionner » pour le faire glisser sur l'affiche et changer sa taille."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "WhatsApp et Partager fonctionnent à chaque clic (l'image est préparée à l'avance)."
-      }
-    ]
-  },
-  {
-    "v": "1791883789",
-    "titre": "Accès coach : impossible de se retirer son propre rôle de dirigeant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans « Accès coach », un dirigeant ne peut plus se retirer lui-même son rôle de dirigeant (protégé aussi côté serveur). Le compte principal du club retrouve automatiquement son rôle à la connexion."
-      }
-    ]
-  },
-  {
-    "v": "1791880993",
-    "titre": "Lien d'inscription : page publique isolée",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Le lien d'un événement ouvre uniquement la page d'inscription : plus de barre de navigation ni d'en-tête du club autour. Pareil pour le billet, l'entrée bénévole et la page « Venir essayer »."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Après l'inscription, la page affiche le billet seul : QR code, code à présenter le jour J et montant à régler."
-      }
-    ]
-  },
-  {
-    "v": "1791880476",
-    "titre": "Événements : catégorie de l'enfant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Inscription d'un extérieur : choix de la catégorie (calculée d'après la date de naissance, modifiable). Pour un licencié du club, la catégorie vient de sa fiche. Elle apparaît dans la liste des inscrits et sur la feuille du jour."
-      }
-    ]
-  },
-  {
-    "v": "1791880312",
-    "titre": "Invitations : compte déjà existant et retrait d'accès",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Sur la page d'invitation, « Me connecter avec mon compte » : si l'e-mail a déjà un compte, l'accès de l'invitation s'ajoute à ce compte (un parent qui devient aussi coach, par exemple). Lien déjà utilisé : bouton « Me connecter »."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Accès coach : bouton « Retirer l'accès » pour un compte du club. La personne peut ensuite retrouver un accès avec la même adresse e-mail grâce à une nouvelle invitation."
-      }
-    ]
-  },
-  {
-    "v": "1791880033",
-    "titre": "Événements : qui vient chaque jour",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Dans les inscrits d'un stage à jours au choix : onglets par jour (avec le nombre d'inscrits) et « Feuille du jour » en PDF avec les présents attendus, à imprimer."
-      }
-    ]
-  },
-  {
-    "v": "1791879800",
-    "titre": "Événements : jours au choix et modification complète",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Stage sur plusieurs jours : dans les réglages des inscriptions, option « Les familles choisissent leurs jours ». Prix par jour, forfait facultatif pour tous les jours, places par jour."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les familles cochent les jours qui les intéressent (ou tous les jours) et voient le total se calculer. Le billet affiche les jours réservés."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Entrée : choix du jour, liste et scan par jour ; un billet scanné un jour non réservé est refusé."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "« Modifier » sur un événement rouvre le formulaire complet, prérempli."
-      }
-    ]
-  },
-  {
-    "v": "1791879176",
-    "titre": "Événements : inscriptions sur ordinateur et dates",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le bouton « Ouvrir les inscriptions » apparaît aussi sur la version ordinateur."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Une date de fin avant la date de début est refusée, et déplacer un événement décale sa date de fin."
-      }
-    ]
-  },
-  {
-    "v": "1791878470",
-    "titre": "Version ordinateur : nouvel accueil",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur, l'accueil devient un tableau de bord pleine largeur : chiffres clés (licenciés, paiements, essais, semaine, résultat), « À faire » avec un bouton pour chaque action, inscriptions en cours, prochains rendez-vous et raccourcis. Sur téléphone, rien ne change."
-      }
-    ]
-  },
-  {
-    "v": "1791877776",
-    "titre": "Licences : paiement par chèque",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Paiement « Chèque » en 1 à 4 fois : n°, banque, émetteur, montant et date d'encaissement de chaque chèque. Le total se répartit tout seul."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "« Remise en banque » dans Licences : les chèques encaissables sont cochés, bordereau PDF à joindre au dépôt, puis « Marquer comme déposés » ajoute une recette par chèque en compta, à la date du dépôt."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Sur la fiche d'inscription, indiquez comment vous comptez régler (chèque en 1, 2 ou 3 fois, espèces, virement…) ; l'ordre des chèques est rappelé."
-      }
-    ]
-  },
-  {
-    "v": "1791877211",
-    "titre": "Événements : l'affiche",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Bouton « Affiche » dans les inscriptions : 6 modèles (Dégradé, Couleur pleine, Sport, Photo plein écran, Épurée, Calendrier), en post carré, story ou A4 à imprimer (PDF). Logo et couleurs du club, QR code d'inscription, tarifs, sponsors sous l'affiche."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Intervenants mis en avant avec leur photo, nom et rôle. Partage direct sur WhatsApp."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Les places restantes se mettent à jour toutes seules : à 5 places, l'appli propose de republier l'affiche ; à 0, elle passe en « Complet »."
-      }
-    ]
-  },
-  {
-    "v": "1791875682",
-    "titre": "Événements : l'entrée, comme un pass",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Bouton « Entrée » dans les inscriptions : la liste à cocher, une recherche, et en bas « Scanner un billet ». Vert = entrée validée, orange = déjà entré, rouge = billet inconnu. Les paiements sur place s'encaissent au même endroit."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "« Code bénévole » : un bénévole sans compte tient l'entrée avec un lien et un code envoyés par WhatsApp ou SMS. Il voit la liste (sans les numéros) et scanne les billets. Ses entrées et paiements sont reportés automatiquement."
-      }
-    ]
-  },
-  {
-    "v": "1791875103",
-    "titre": "Événements : tarif gratuit",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Réglages des inscriptions : bouton « Gratuit » sur chaque tarif. Si tout est gratuit, plus de mode de paiement à choisir, ni pour vous ni pour les inscrits."
-      }
-    ]
-  },
-  {
-    "v": "1791874739",
-    "titre": "Événements : inscriptions en ligne et billets",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Stage/camp, tournoi et nouvelle « Soirée » : bouton « Ouvrir les inscriptions » sur l'événement. Tarifs licencié / extérieur, espèces, chèque, CB sur place ou lien HelloAsso, nombre de places et date limite."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Un lien et un QR code à partager : les extérieurs s'inscrivent sans compte. Chaque inscrit reçoit un billet avec QR code (STG-12345, TRN-…, SOI-…)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Suivi des inscrits : licenciés reconnus automatiquement (sinon « À vérifier »), « Paiement reçu » ajoute la recette en comptabilité."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Onglet Événements : inscrivez votre enfant en un geste aux stages, tournois et soirées du club."
-      }
-    ]
-  },
-  {
-    "v": "1791842463",
-    "titre": "Version ordinateur (dirigeant)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sur ordinateur, un menu fixe à gauche remplace la barre du bas : Accueil, Communauté, Planning, Équipes, Joueurs, Formation, Licences (avec le nombre de fiches à valider), Comptabilité, Buvette, Sponsors, Documents… Le contenu prend toute la largeur. Rien ne change sur téléphone."
-      }
-    ]
-  },
-  {
-    "v": "1791842190",
-    "titre": "Séances d'essai",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Licences › Séances d'essai : ouvrez une page « Venir essayer » (lien + QR code) avec vos équipes et créneaux. Les familles demandent une séance sans créer de compte ; vous répondez par SMS en choisissant l'entraînement, puis « Inscrire » crée la fiche et envoie le lien d'inscription."
-      },
-      {
-        "roles": [
-          "coach"
-        ],
-        "texte": "Équipe : les séances d'essai prévues pour votre équipe s'affichent avec le prénom et l'âge de l'enfant."
-      }
-    ]
-  },
-  {
-    "v": "1791827574",
-    "titre": "Offre gratuite pour les petits clubs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle offre gratuite pour les clubs jusqu'à 60 licenciés : tout le contenu du Pack Standard. À la 61e licence, l'appli propose le passage au Standard. Le Premium leur est proposé à 200 €/an."
-      }
-    ]
-  },
-  {
-    "v": "1791827014",
-    "titre": "Réseaux sociaux et boutique du club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Paramètres › Mon club › Réseaux et boutique : ajoutez Facebook, Instagram, TikTok, le site et la boutique du club (un @compte suffit pour Instagram et TikTok)."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Nouveau « Suivre le club » en bas de l'Accueil : les réseaux et la boutique du club en un clic."
-      }
-    ]
-  },
-  {
-    "v": "1791742473",
-    "titre": "Accès famille par SMS et réinscription en ligne",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "En validant une licence, l'appli propose tout de suite d'envoyer l'accès à la famille par SMS (message prêt, qui commence par le nom du club). Si la famille a déjà un compte, rien à envoyer : l'enfant apparaît chez elle."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Licences : nouveau bloc « Réinscriptions en ligne » pour les ouvrir pour la saison suivante. Les demandes des familles arrivent automatiquement comme fiches reçues."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Quand le club ouvre les réinscriptions, une carte « Réinscrire » apparaît sur l'Accueil, avec la fiche de l'an dernier déjà remplie. Pas de code à saisir."
-      }
-    ]
-  },
-  {
-    "v": "1791737960",
-    "titre": "Lien d'inscription direct",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le mail d'inscription contient maintenant un lien qui ouvre directement la fiche de la famille, sans recopier le code. Adresse et QR code passent sur generalmanagerapp.fr."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Écran d'inscription : « Entrez le code envoyé par votre club », exemple de code neutre."
-      }
-    ]
-  },
-  {
-    "v": "1791737358",
-    "titre": "Onglet Inscription retiré du dirigeant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "L'onglet « Inscription » disparaît de la barre du bas du dirigeant : les familles remplissent leur fiche via le lien ou le QR code du club, et le dirigeant gère tout dans Admin → Licences."
-      }
-    ]
-  },
-  {
-    "v": "1791735121",
-    "titre": "Paramètres rangés",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les Paramètres sont rangés en blocs repliables (Mon compte, Apparence, Mon club, Argent & documents, Données & saison), tous fermés à l'ouverture."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Couleurs du club dans un menu déroulant. « Avis et suggestions » (dirigeants, coachs et parents) arrive directement à l'équipe General Manager."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Notes de frais : réservées au dirigeant et aux coachs. Le mail groupé « Communication » est retiré."
-      }
-    ]
-  },
-  {
-    "v": "1791704047",
-    "titre": "2 couleurs de club et demandes d'essai",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Couleurs du club : choisissez 1 ou 2 couleurs. La 2e devient l'accent et termine les dégradés, dans tous les thèmes visuels."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Plateforme : les demandes d'essai envoyées depuis le site arrivent dans la Plateforme (pastille sur le bouton). « Valider » crée le club avec ses couleurs et ouvre un SMS pré-rempli avec le lien d'accès du dirigeant."
-      }
-    ]
-  },
-  {
-    "v": "1791703451",
-    "titre": "Communauté façon WhatsApp",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Appui long sur un message : réagir, répondre, copier, modifier (pendant 2 minutes), transférer, infos, supprimer. Glisser un message vers la droite pour y répondre."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Coches de lecture : ✓ envoyé, ✓✓ lu par certains, ✓✓ bleu lu par tous. « Infos » montre qui a lu."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Messages supprimés : « Ce message a été supprimé », ou « Supprimé par un admin » quand le coach ou le dirigeant le retire."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Séparateurs Aujourd'hui / Hier, bouton « nouveaux messages », liens cliquables."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Discussions privées avec un parent ou un membre du club (jamais avec un compte joueur)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "La convocation dans le canal et les boutons Présent/Absent de l'accueil sont maintenant la même réponse."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Le premier onglet s'appelle Accueil."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Changer un numéro sur la fiche d'inscription met à jour le compte du parent (et inversement)."
-      }
-    ]
-  },
-  {
-    "v": "1791699588",
-    "titre": "Numéro de téléphone modifiable par le club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Accès : bouton « Modifier le numéro » sur chaque compte. Le titulaire ne peut plus changer son numéro lui-même (il sert à le relier à ses enfants)."
-      }
-    ]
-  },
-  {
-    "v": "1791644576",
-    "titre": "Échéances d'abonnement et avis de reconduction",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Plateforme : chaque club Standard ou Premium a une date d'échéance (12 mois, modifiable). Trois mois avant, une alerte orange rappelle d'envoyer l'avis de reconduction : e-mail pré-rempli au dirigeant, puis « Avis envoyé » et « Renouvelé (+12 mois) »."
-      }
-    ]
-  },
-  {
-    "v": "1791567944",
-    "titre": "Rappel des comptes à supprimer",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Plateforme : après la suppression d'un club, une alerte rouge liste les comptes de connexion à supprimer dans la console Firebase, jusqu'à ce que tu les marques « fait »."
-      }
-    ]
-  },
-  {
-    "v": "1791567716",
-    "titre": "Retrait du bouton de suppression de licence",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le bouton « Supprimer cette licence » est retiré."
-      }
-    ]
-  },
-  {
-    "v": "1791567017",
-    "titre": "Suppression d'un club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Plateforme : un club peut être supprimé directement (sans suspension ni délai de 7 jours), après saisie de son nom."
-      }
-    ]
-  },
-  {
-    "v": "1791565848",
-    "titre": "Licences en accès limité",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Un club en accès limité peut saisir, modifier et valider des licences (jusqu'à 300 par saison)."
-      }
-    ]
-  },
-  {
-    "v": "1791565259",
-    "titre": "Accès limité",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau statut « Accès limité » pour un club sans abonnement : seuls les modules choisis par la plateforme restent ouverts, en consultation. Rien n'est supprimé et tout revient dès l'abonnement."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "« Exporter mes données » (Excel, PDF, sauvegarde complète) reste toujours disponible."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Fin de l'essai gratuit sans abonnement : le club passe en accès limité au lieu d'être suspendu."
-      }
-    ]
-  },
-  {
-    "v": "1791547003",
-    "titre": "Compta : rien ne se perd pendant le verrouillage",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Compta verrouillée (Pack Standard ou essai terminé) : les paiements de licences, notes de frais remboursées, ventes buvette et mouvements de stock continuent d'être enregistrés en arrière-plan. Au passage en Premium, même des mois plus tard, tout s'ajoute à la comptabilité existante."
-      }
-    ]
-  },
-  {
-    "v": "1791546567",
-    "titre": "Packs : fin d'essai, buvette et limite de licences",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Pendant les 30 jours d'essai, tout est ouvert. Ensuite, sans Pack Premium, la comptabilité est verrouillée : rien n'est perdu, tout ce qui a été saisi reste téléchargeable en PDF (archive complète)."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Pack Standard : limite de 300 licences par saison verrouillée sur tous les chemins (nouvelles licences et renouvellements), avec alerte dès 270."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Inventaire > Buvette : nouveau bouton « Journées » avec le PDF de chaque journée de caisse (ventes par article, espèces/CB, détail par bénévole), quel que soit le pack."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Formations animées : chaque animation correspond maintenant à l'intitulé de sa situation (une quarantaine de schémas corrigés, dessins faits main réutilisés quand l'exercice est le même)."
-      }
-    ]
-  },
-  {
-    "v": "1791543688",
-    "titre": "Packs Standard et Premium",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Deux packs : Standard et Premium. Le Premium débloque la comptabilité complète, les reçus fiscaux, le bilan comptable PDF, les factures sponsors, les formations animées et le lien buvette / comptabilité."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Au-delà de 300 licences, le Pack Premium est nécessaire pour en ajouter (alerte dès 270, renouvellements jamais bloqués)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Nouveau : bilan comptable en PDF depuis la comptabilité."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "bureau"
-        ],
-        "texte": "Caisse buvette : onglet Récap avec export PDF/Excel pour les bénévoles (en Standard, les ventes ne vont pas en comptabilité)."
-      }
-    ]
-  },
-  {
-    "v": "1791226346",
-    "titre": "Conditions générales de vente",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle page « CGV » (conditions générales de vente de la plateforme : essai gratuit de 30 jours, paiement par virement, suspension, résiliation), accessible depuis le pied de page à côté des CGU et de la confidentialité."
-      }
-    ]
-  },
-  {
-    "v": "1791216539",
-    "titre": "Bandeau d'accueil arrondi (Carnet, Bento)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Dans les thèmes Carnet et Bento, le bandeau d'accueil est maintenant une carte aux bords arrondis, alignée avec les autres cartes."
-      }
-    ]
-  },
-  {
-    "v": "1791216042",
-    "titre": "Thème Carnet : bandeau lisible, dégradé sur toutes les couleurs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Thème Carnet : le bandeau d'accueil (texte blanc sur fond clair) était illisible ; il prend maintenant un dégradé de la couleur du club. Le fond dégradé pastel est adapté à chacune des 50 couleurs."
-      }
-    ]
-  },
-  {
-    "v": "1791200459",
-    "titre": "Thème Épuré : bandeau lisible et couleur du club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Thème Épuré : le bandeau d'accueil était presque illisible (texte blanc sur fond blanc). Il est maintenant noir par défaut, ou de la couleur du club si elle est choisie, avec la barre du haut qui reste blanche. Les boutons et accents prennent aussi la couleur du club."
-      }
-    ]
-  },
-  {
-    "v": "1791200068",
-    "titre": "Thème Feuille : fond à la couleur du club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Dans le thème Feuille de match, le fond crème, les cartes et l'encre prennent la teinte de la couleur du club (clair et sombre)."
-      }
-    ]
-  },
-  {
-    "v": "1791199787",
-    "titre": "Couleur du club : fonds et textes teintés",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Avec une couleur de club choisie, les thèmes se teintent entièrement : fond de Bento, fonds et textes de Classique, fonds de Carnet (clair et sombre), en-tête de Feuille. Plus de violet ou de bleu d'origine qui reste visible."
-      }
-    ]
-  },
-  {
-    "v": "1791199562",
-    "titre": "Couleur du club dans tous les thèmes",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "La couleur choisie par le dirigeant s'applique maintenant à tous les thèmes visuels (Classique, Épuré, Bento, Feuille, Carnet, Éditorial), sans changer leur style : chaque thème garde ses formes et ses neutres, seule sa teinte de marque change."
-      }
-    ]
-  },
-  {
-    "v": "1791199274",
-    "titre": "Couleurs du club et logo General Manager",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau : Paramètres > Couleurs du club. Choisis la couleur de ton club dans une palette de 50 teintes ; elle s'applique à l'en-tête, aux boutons et aux PDF pour tous tes membres (thème Moderne). Sans choix, l'appli garde les couleurs General Manager."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Les PDF (planning, liste des licenciés, reçus, factures) reprennent la couleur du club."
-      }
-    ]
-  },
-  {
-    "v": "1791194179",
-    "titre": "Animation du « feu tricolore » corrigée",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Les exercices où le coach montre une couleur et où les joueurs choisissent leur action (tirer, passer, dribbler) ont maintenant leur propre animation : le coach brandit la couleur, le groupe réagit. Avant, c'était un simple schéma de tir."
-      }
-    ]
-  },
-  {
-    "v": "1791193884",
-    "titre": "Filles / Garçons : filtres, tri et exports",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Inscriptions (Joueurs) et Licences : nouveau filtre Filles / Garçons, tri par catégorie puis genre, et effectifs filles/garçons affichés par catégorie. Filtres U18 et U21 ajoutés sur les Joueurs."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "PDF de la liste des licenciés : colonne Genre, regroupement par catégorie puis Filles / Garçons, et tableau récapitulatif des effectifs. Export Excel des licences : tri catégorie/genre et nouvel onglet « Effectifs »."
-      }
-    ]
-  },
-  {
-    "v": "1791193434",
-    "titre": "Messages automatiques du chat : affichage corrigé",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Les messages automatiques (rappel de présence, événement créé/annulé/modifié, alerte météo, absence signalée) s'affichaient avec des balises <b> et <br> visibles. Ils sont maintenant lisibles, avec retours à la ligne."
-      }
-    ]
-  },
-  {
-    "v": "1791176856",
-    "titre": "Exports Excel : comptabilité, licences, sponsors, inventaire",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Nouveau bouton « Excel » sur Comptabilité (écritures + synthèse par catégorie), Licences (fiches avec suivi des paiements et relances), Sponsors et Inventaire. L'export respecte les filtres affichés à l'écran et les accès délégués. Le bouton CSV reste disponible en Comptabilité."
-      }
-    ]
-  },
-  {
-    "v": "1791118203",
-    "titre": "Relances impayés : seuil de suspension configurable",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle section Paramètres > Relances impayés (licences) : choisissez vous-même le nombre de relances sans paiement avant que le bouton « Suspendre la licence » n'apparaisse (3 par défaut)."
-      }
-    ]
-  },
-  {
-    "v": "1791117348",
-    "titre": "Licences : suivi des impayés et relances",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Sur une fiche licence, vous pouvez fixer un montant attendu pour suivre le reste à payer. Boutons « Relancer » (SMS/email, message prêt à envoyer) avec historique des relances. Après 3 relances sans paiement, un bouton « Suspendre la licence » apparaît (jamais automatique, c'est vous qui décidez) : le licencié n'est alors plus convocable aux événements et son accès espace licencié est coupé jusqu'à réactivation. Un filtre « Voir les impayés » a été ajouté en haut de la liste des licences. La validation d'une licence n'a jamais été, et n'est toujours pas, bloquée par le paiement."
-      }
-    ]
-  },
-  {
-    "v": "1791111014",
-    "titre": "Sponsors : génération de factures numérotées",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle section Paramètres > Facturation (sponsors/partenaires) : renseignez l'adresse et le SIRET (facultatif) du club. Par défaut, pas de TVA (franchise en base, art. 293 B du CGI) — une case permet de l'activer avec un taux si votre club y est assujetti. Depuis la fiche d'un sponsor, bouton « Générer une facture » : désignation + montant HT, numérotation automatique et continue (FAC-00001, FAC-00002...), PDF prêt à envoyer. L'accès suit la même délégation que Sponsors (comptable/bureau autorisé peut aussi facturer)."
-      }
-    ]
-  },
-  {
-    "v": "1791094170",
-    "titre": "Nouveau module : Sponsors & Partenaires",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvel onglet Admin > Sponsors & Partenaires : fiches prospects/actifs/expirés avec contact, montant de convention, dates, logo, document de convention et date de relance (badge si dépassée). L'historique des paiements liés (catégorie « Sponsors/Partenaires » en Comptabilité) s'affiche directement sur la fiche. L'accès peut être délégué à un trésorier/bureau comme pour la Comptabilité et l'Inventaire."
-      }
-    ]
-  },
-  {
-    "v": "1791092567",
-    "titre": "Comptabilité : génération des reçus fiscaux (CERFA)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle section Paramètres > Reçus fiscaux (CERFA) : renseignez une fois l'adresse, l'objet et le n° RNA/récépissé du club, puis activez. Une fois activé, chaque ligne de type Dons en Comptabilité propose un bouton « Générer le reçu fiscal » qui produit un PDF prêt à remettre au donateur."
-      }
-    ]
-  },
-  {
-    "v": "1791090404",
-    "titre": "Sécurité : support de Firebase App Check (anti-bot)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le code support App Check (reCAPTCHA v3) pour protéger les codes buvette/invitation/inscription et le formulaire public contre les scripts automatisés. Inactif tant que la clé n'est pas configurée côté console Firebase — voir APP_CHECK_SETUP.md pour les 3 étapes restantes (gratuit, ~10 min)."
-      }
-    ]
-  },
-  {
-    "v": "1791015301",
-    "titre": "Correctif sécurité : liste des joueurs (Inscriptions) non échappée",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Oubliée lors du sweep précédent : la liste des joueurs dans Admin > Inscriptions (prénom, nom, catégorie, naissance, poste) s'affichait sans échappement HTML, et l'identifiant du joueur était injecté directement dans les boutons Historique/Modifier/Suppr. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs. Aucune action requise."
-      }
-    ]
-  },
-  {
-    "v": "1790928548",
-    "titre": "Planning : plusieurs entraînements par semaine pour une même équipe",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Dans « Nouveau créneau », tous les jours de la semaine sont maintenant sélectionnables en même temps (plus besoin d'en créer un à chaque fois). Chaque jour coché a son propre horaire et sa propre salle/lieu, pour les équipes qui s'entraînent par exemple le mardi ET le jeudi dans des gymnases différents."
-      }
-    ]
-  },
-  {
-    "v": "1790928265",
-    "titre": "Correctif sécurité : audit complet anti-XSS",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Sweep complet de l'app après la correction d'hier sur Communauté : fiche d'inscription publique (gros morceau — nom, adresse, contacts, photo, certificat), noms de joueurs, titres d'événements, canaux, documents, contacts annuaire, lignes comptables, séances de formation éditées par un coach, et plus — tout passe maintenant par l'échappement HTML déjà utilisé ailleurs. Aucune action requise."
-      }
-    ]
-  },
-  {
-    "v": "1790927580",
-    "titre": "Correctif sécurité : messages/sondages Communauté non échappés",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Un message, un message épinglé ou un sondage (question/options) pouvait contenir du code HTML exécuté chez tous les autres membres du canal, au lieu de s'afficher comme du texte. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs dans l'app. Aucune action requise."
-      }
-    ]
-  },
-  {
-    "v": "1790927441",
-    "titre": "Notifications push : tout reste dans Firebase",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Changement technique : l'envoi des notifications passe maintenant par une Cloud Function Firebase (déclenchée automatiquement à chaque message) plutôt que par un service externe. Un compte de moins à gérer, et la notif part même si la personne qui poste ferme l'app juste après. Reste à faire côté compte avant que ce soit actif : voir PUSH_SETUP.md (passage en plan Blaze + clé Web Push + déploiement de la fonction)."
-      }
-    ]
-  },
-  {
-    "v": "1790890089",
-    "titre": "Vraies notifications push pour les nouveaux messages",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "bureau",
-          "parent",
-          "joueur"
-        ],
-        "texte": "Le bouton « Autoriser les notifications » dans Paramètres active maintenant un vrai abonnement push : un nouveau message dans Communauté peut notifier même app fermée. (Nécessite l'activation finale côté dirigeant technique — voir PUSH_SETUP.md ; reste inactif tant que ce n'est pas branché.)"
-      }
-    ]
-  },
-  {
-    "v": "1790883392",
-    "titre": "Nettoyage : retrait de l'ancien outil de migration Firestore",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le bloc « Migration vers Firestore » dans Paramètres datait d'avant le passage 100% cloud et ne servait plus à rien. Retiré."
-      }
-    ]
-  },
-  {
-    "v": "1790882235",
-    "titre": "Essai gratuit : rappel, prolongation et passage en payant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Rappel automatique dans les 3 derniers jours de l'essai gratuit, pour ne pas être suspendu par surprise."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Depuis la Plateforme, deux nouveaux boutons sur un club en essai : « Passer en payant » (arrête le compte à rebours) et « Prolonger l'essai » (ajoute des jours)."
-      }
-    ]
-  },
-  {
-    "v": "1790881872",
-    "titre": "Club d'essai : expiration automatique après 30 jours",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Tout club créé depuis la Plateforme démarre maintenant avec un essai gratuit de 30 jours, affiché sous forme de compte à rebours sur sa fiche. Passé ce délai, le club se suspend automatiquement (avec les mêmes 7 jours de régularisation qu'une suspension manuelle) — pratique pour envoyer un accès test limité à un dirigeant sans avoir à suspendre soi-même."
-      }
-    ]
-  },
-  {
-    "v": "1790843536",
-    "titre": "Plateforme : plus de logo d'un club sur l'écran de tous les clubs",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui d'un autre club, ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom."
-      }
-    ]
-  },
-  {
-    "v": "1790843103",
-    "titre": "Nouveau rôle « Membre du bureau »",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Un parent ne peut plus recevoir d'accès bureau (Comptabilité, Licences…), même par erreur : ce bloc n'apparaît que pour un compte Coach ou « Membre du bureau ». Nouveau bouton « Inviter un membre du bureau » dans Accès & invitations, pour quelqu'un qui aide à la gestion sans entraîner d'équipe."
-      },
-      {
-        "roles": [
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau profil « Membre du bureau » disponible à la connexion pour les comptes concernés : sans équipe, avec uniquement Communauté et ce que le dirigeant a coché."
-      }
-    ]
-  },
-  {
-    "v": "1790842533",
-    "titre": "Accès coach : le titre (trésorier/secrétaire) se transfère immédiatement",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Cliquer sur Trésorier ou Secrétaire pour quelqu'un l'enregistre tout de suite (plus besoin d'appuyer sur Enregistrer). Si le titre est déjà pris, une confirmation propose de le transférer directement de l'ancien détenteur au nouveau, sans étape intermédiaire."
-      }
-    ]
-  },
-  {
-    "v": "1790842268",
-    "titre": "Accès bureau : l'onglet se nomme « Gestion »",
-    "points": [
-      {
-        "roles": [
-          "coach"
-        ],
-        "texte": "L'onglet qui apparaît quand le dirigeant t'accorde un accès bureau s'appelle maintenant « Gestion » (plus clair que « Admin », qui donnait l'impression d'un accès total)."
-      }
-    ]
-  },
-  {
-    "v": "1790836654",
-    "titre": "Accès bureau : tous les modules admin, module par module",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "La case à cocher ne se limite plus à Comptabilité/Inventaire : au moment où vous créez le lien d'invitation d'un coach, une modale « Accès bureau » liste tous les modules admin (Licences, Équipes, Planning, Documents, Communauté, Avis, Fiches reçues, Comptabilité, Notes de frais, Inventaire). Vous cochez ce que la personne pourra voir dès la création de son compte. Vous pouvez aussi revenir dessus à tout moment pour un compte existant depuis « Accès coach »."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "À noter : seules Comptabilité et Inventaire sont aussi bloquées côté serveur si elles sont décochées. Pour les autres modules, la case pilote ce qui s'affiche dans l'appli mais pas (encore) l'accès aux données en cas d'accès direct à la base - à faire dans une passe séparée si besoin."
-      },
-      {
-        "roles": [
-          "coach"
-        ],
-        "texte": "Si le dirigeant t'accorde au moins un accès bureau, un onglet « Admin » apparaît dans ta barre de navigation, en plus de tes onglets sportifs habituels qui ne changent pas."
-      }
-    ]
-  },
-  {
-    "v": "1790835973",
-    "titre": "Accès bureau : retouche visuelle",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans « Accès coach », le titre, les cases d'accès et l'étiquette de suggestion de rôle sont maintenant regroupés dans un encart dédié, plus lisible qu'avant."
-      }
-    ]
-  },
-  {
-    "v": "1790832270",
-    "titre": "Accès bureau : comptabilité et inventaire réservés par le dirigeant",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans « Accès coach », chaque compte a maintenant un titre (Trésorier / Secrétaire, un seul par club) et des cases à cocher pour donner l'accès à la Comptabilité et à l'Inventaire buvette. Choisir un titre pré-coche les cases utiles, mais c'est bien ce qui est coché qui donne l'accès. Une étiquette en haut suggère le rôle (Coach, Membre du bureau...) selon ce qui est coché."
-      },
-      {
-        "roles": [
-          "coach"
-        ],
-        "texte": "Si le dirigeant t'accorde l'accès à la Comptabilité ou à l'Inventaire, ces écrans apparaissent dans ton admin en plus de ton accès sportif habituel, qui ne change pas."
-      }
-    ]
-  },
-  {
-    "v": "1790830815",
-    "titre": "Correction : l'écran Documents ne s'ouvrait pas au premier clic",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Bug corrigé : cliquer sur « Documents » depuis l'admin ne faisait rien la première fois, et ressortait ensuite au mauvais moment avec le bouton Retour. L'écran s'ouvre maintenant normalement dès le premier clic."
-      }
-    ]
-  },
-  {
-    "v": "1790829838",
-    "titre": "Nouvel écran d'entrée dans l'appli",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "L'écran de connexion (et mot de passe oublié) a été redessiné : fond encre avec le nom General Manager, un seul accent ambre pour le bouton. Aucun changement dans la façon de se connecter, juste l'habillage."
-      }
-    ]
-  },
-  {
-    "v": "1790827761",
-    "titre": "Comptabilité : un tableau de bord avec des graphiques",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau bouton « 📈 Graphiques » en haut de la Comptabilité : recettes et dépenses mois par mois sur les 12 derniers mois, et répartition par catégorie (Cotisations, Buvette, Matériel...). De quoi repérer d'un coup d'œil où va l'argent du club."
-      }
-    ]
-  },
-  {
-    "v": "1790794713",
-    "titre": "Comptabilité : plusieurs comptes / caisses au lieu d'un seul solde",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Chaque ligne comptable peut maintenant être rattachée à un compte (Banque, Caisse espèces, Caisse buvette, Autre). Un filtre par compte et un solde détaillé par compte apparaissent en haut de la Comptabilité. Les anciennes lignes sont classées automatiquement selon leur moyen de paiement, rien à corriger à la main. Les ventes de la caisse buvette en ligne et les mouvements de stock buvette sont désormais affectés au bon compte tout seuls."
-      }
-    ]
-  },
-  {
-    "v": "1790793064",
-    "titre": "Code buvette permanent, pour les clubs qui gardent les mêmes bénévoles",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans Accès caisse buvette, deux choix maintenant : « Code du jour » (comme avant, pratique quand ça change selon les dates) ou « Code permanent » (valable jusqu'à révocation — utile si ce sont toujours les mêmes personnes qui tiennent la buvette, pas besoin d'en redemander un à chaque fois)."
-      }
-    ]
-  },
-  {
-    "v": "1790792489",
-    "titre": "La caisse buvette demande le nom du bénévole",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Avant d'ouvrir la caisse avec le code, le bénévole doit maintenant indiquer son nom et prénom. Il apparaît en haut de l'écran pendant toute la session et sur chaque ligne comptable créée (colonne Tiers), pour savoir qui a encaissé quoi."
-      }
-    ]
-  },
-  {
-    "v": "1790782485",
-    "titre": "Le doré n'est plus figé : tous les écrans suivent le thème choisi",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Licences, profils, admin, annuaire, équipes, animations, communauté... une centaine d'endroits gardaient encore la touche dorée d'origine même sur un autre thème que Classique. Ils suivent maintenant la couleur d'accent du thème actif, comme le reste de l'appli."
-      }
-    ]
-  },
-  {
-    "v": "1790780888",
-    "titre": "La caisse buvette passe sur generalmanagerapp.fr",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec un ancien nom dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse."
-      }
-    ]
-  },
-  {
-    "v": "1790780467",
-    "titre": "Caisse buvette en ligne, reliée en temps réel",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Dans Inventaire → onglet Buvette, le bouton « 🔑 Accès caisse » génère un code court valable jusqu'à ce soir. Transmis à un bénévole, il ouvre la caisse en ligne (site séparé) sur son téléphone ou une tablette, sans qu'il ait besoin d'un compte. Chaque vente qu'il encaisse décrémente le stock et crée automatiquement la ligne comptable correspondante, visible immédiatement dans la Comptabilité du club."
-      }
-    ]
-  },
-  {
-    "v": "1790769837",
-    "titre": "Lien direct entre la buvette et la comptabilité",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Chaque article de buvette peut avoir un prix d'achat et un prix de vente. Sur la fiche de l'article, les boutons + 1 / − 1 sont remplacés par « ↓ Achat » et « ↑ Vente » : ils mettent à jour le stock et créent automatiquement la ligne correspondante en comptabilité (dépense « Achats buvette » ou recette « Buvette/Événements »), montant et quantité pré-remplis mais modifiables. Les articles de matériel gardent les boutons + 1 / − 1 classiques."
-      }
-    ]
-  },
-  {
-    "v": "1790700112",
-    "titre": "Barre de navigation élargissable (thèmes Bento Glass et Carnet illustré)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Sur les thèmes où la navigation est sur le côté (Bento Glass, Carnet illustré), un appui long dessus l'élargit pour afficher le nom de chaque onglet en plus de l'icône. Un autre appui long la remet en version compacte. Le choix est mémorisé."
-      }
-    ]
-  },
-  {
-    "v": "1790697980",
-    "titre": "Correction : le mode sombre ne fonctionnait plus avec les nouveaux thèmes",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Depuis l'ajout des thèmes visuels, activer le mode sombre n'avait plus d'effet une fois un autre thème que Moderne choisi (Classique, Épuré, Feuille de match, Carnet illustré, Éditorial ont maintenant leur propre version sombre). Bento Glass reste identique quel que soit le mode : c'est déjà un thème sombre par nature."
-      }
-    ]
-  },
-  {
-    "v": "1790697643",
-    "titre": "Bannières d'accueil désormais adaptées au thème choisi",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les grandes bannières (accueil, jour de match) suivaient toujours le dégradé doré/marine même en changeant de thème visuel — elles utilisent maintenant la couleur du thème choisi, comme le reste de l'appli."
-      }
-    ]
-  },
-  {
-    "v": "1790697380",
-    "titre": "6 thèmes visuels en plus du thème par défaut",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau réglage « Thème visuel » dans Paramètres · Apparence : Classique (doré/marine d'origine), Épuré (minimal), Bento Glass (fond violet, navigation sur le côté), Feuille de match (look carnet, onglets en haut), Carnet illustré (pastel, navigation flottante) et Éditorial (bloc couleur, navigation en pilule)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Chaque thème change vraiment l'habillage complet (couleurs, formes des cartes, position de la navigation), pas juste une couleur d'accent."
-      }
-    ]
-  },
-  {
-    "v": "1790683836",
-    "titre": "Comptabilité complète pour le club",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Les catégories de recettes/dépenses sont maintenant une liste fixe adaptée à un club sportif (Cotisations/Licences, Subventions, Sponsors, Buvette, Dons... / Affiliation/Licences fédérales, Location salle, Matériel, Déplacements, Arbitrage/Formations, Assurances, Frais admin...) au lieu d'un texte libre."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Chaque ligne comptable peut avoir un justificatif joint (photo ou PDF du reçu, 700 Ko max)."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle case « Pointé » sur chaque ligne pour le rapprochement bancaire, avec un solde pointé affiché en plus du solde total, et un filtre pointé/non pointé."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau bouton « Budget » : définissez un montant prévisionnel par catégorie pour l'année et suivez le réalisé en face."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau bouton « Bilan AG » : rapport financier de l'année (recettes et dépenses par catégorie, résultat net) prêt à imprimer ou exporter en PDF pour l'Assemblée Générale."
-      }
-    ]
-  },
-  {
-    "v": "1790675282",
-    "titre": "Nouveau look de l'application",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau look pour l'application : cartes plus arrondies, couleurs plus modernes."
-      }
-    ]
-  },
-  {
-    "v": "1790667688",
-    "titre": "Mise à jour du 29 septembre (5)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Le badge « Arbitre » utilise maintenant l'icône main qui repousse (🫷) — pas d'emoji sifflet dans le standard actuel."
-      }
-    ]
-  },
-  {
-    "v": "1790667432",
-    "titre": "Mise à jour du 29 septembre (4)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau libellé « OTM » (officiel table de marque) dans la liste des badges."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Le badge « Arbitre » a désormais l'icône d'un sifflet."
-      }
-    ]
-  },
-  {
-    "v": "1790667278",
-    "titre": "Mise à jour du 29 septembre (3)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Le pseudo dans le chat se choisit maintenant une fois pour toutes dans Paramètres · Communauté (limité à 20 caractères), au lieu de le retaper à chaque message."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Cliquer sur le nom de l'auteur d'un message ouvre une fiche avec ses vraies infos (nom, prénom, équipe), en plus du pseudo affiché."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Depuis cette fiche, possibilité d'attribuer un libellé (Dirigeant, Coach, Trésorier, Secrétaire, Bénévole, Arbitre...) à n'importe quel membre, y compris soi-même. Le libellé s'affiche à côté du pseudo dans les messages suivants."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveaux réglages dans Paramètres · Communauté : son de notification, et taille du texte des messages (normal/grand)."
-      }
-    ]
-  },
-  {
-    "v": "1790665631",
-    "titre": "Mise à jour du 29 septembre (2)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau bouton ⚙️ sur l'écran Communauté : un panneau de paramètres simplifié (autoriser les notifications, archiver les vieux messages) s'ouvre en fenêtre plutôt qu'un nouvel écran."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Option pour masquer automatiquement les messages de plus de 30 ou 90 jours à l'ouverture d'un canal (rien n'est supprimé, un bouton permet de tout réafficher)."
-      }
-    ]
-  },
-  {
-    "v": "1790659880",
-    "titre": "Mise à jour du 29 septembre",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Dans un canal de discussion : possibilité de répondre à un message précis (il s'affiche en citation, cliquable pour le retrouver)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Mentionnez quelqu'un avec « @ » : une liste s'affiche pour choisir la personne, et elle reçoit une notification même si elle a coupé les notifications du canal."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Possibilité de modifier ses propres messages après envoi (repère « modifié »)."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau bouton 🔍 pour rechercher dans les messages d'un canal."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau bouton 🔔 pour couper les notifications d'un canal précis, sans toucher aux autres."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Le partage de fichiers dans un canal accepte maintenant les PDF (en plus des photos), jusqu'à 700 Ko."
-      }
-    ]
-  },
-  {
-    "v": "1790628783",
-    "titre": "Mise à jour du 28 septembre (17)",
-    "points": [
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Un message est posté dans le canal de l'équipe quand un parent quitte le suivi, pour que coach et dirigeant le voient."
-      }
-    ]
-  },
-  {
-    "v": "1790628294",
-    "titre": "Mise à jour du 28 septembre (16)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouvelle carte « Évolution de l'assiduité » sur le tableau de bord : courbe de présence par semaine (sur les vraies données enregistrées), dans le style cartes arrondies avec les couleurs du club."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "La carte « Prochain événement » a désormais une icône, à la manière des applis de gestion de club."
-      }
-    ]
-  },
-  {
-    "v": "1790619994",
-    "titre": "Mise à jour du 28 septembre (15)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Le bouton pour changer de profil apparaît maintenant aussi pour un dirigeant ou un coach qui est aussi parent d'un joueur licencié (même si « parent » n'a jamais été coché explicitement sur son compte) — il reste caché pour les comptes à un seul rôle."
-      }
-    ]
-  },
-  {
-    "v": "1790619896",
-    "titre": "Mise à jour du 28 septembre (14)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Correction : le bouton pour changer de profil (dirigeant/coach/parent) disparaissait une fois basculé en vue parent, ce qui bloquait le retour en dirigeant."
-      }
-    ]
-  },
-  {
-    "v": "1790619600",
-    "titre": "Mise à jour du 28 septembre (13)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Retour à l'habillage doré/marine d'origine (le nouveau violet/indigo ne convainc pas)."
-      }
-    ]
-  },
-  {
-    "v": "1790619066",
-    "titre": "Mise à jour du 28 septembre (12)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine d'origine au violet/indigo, sur toute l'application."
-      }
-    ]
-  },
-  {
-    "v": "1790618812",
-    "titre": "Mise à jour du 28 septembre (11)",
-    "points": [
-      {
-        "roles": [
-          "coach",
-          "parent"
-        ],
-        "texte": "Correction : le bouton retour était masqué sur l'écran de sélection d'équipe (ex : « Modifier mon équipe » depuis les réglages coach), on ne pouvait plus revenir en arrière."
-      }
-    ]
-  },
-  {
-    "v": "1790618311",
-    "titre": "Mise à jour du 28 septembre (10)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Première touche de la nouvelle identité visuelle : cartes plus arrondies et accent violet/indigo (au lieu du doré/marine) pour les éléments communs à l'application (navigation, prochain événement)."
-      }
-    ]
-  },
-  {
-    "v": "1790588575",
-    "titre": "Mise à jour du 28 septembre (9)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Recherche par nom dans la liste des licenciés."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les confirmations anodines (présences enregistrées, message envoyé...) s'affichent maintenant en petit message discret au lieu d'une fenêtre à fermer."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les écrans de chargement affichent une petite animation au lieu d'un texte figé."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Supprimer un événement, un joueur, une équipe ou un document propose désormais quelques secondes pour annuler."
-      }
-    ]
-  },
-  {
-    "v": "1790588263",
-    "titre": "Mise à jour du 28 septembre (8)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Toutes les fenêtres de confirmation et d'erreur utilisent maintenant le même style que le reste de l'application, au lieu des popups grises du navigateur."
-      }
-    ]
-  },
-  {
-    "v": "1790587905",
-    "titre": "Mise à jour du 28 septembre (7)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Nouveau réglage « Paiement des licences » : renseignez le lien de votre formulaire HelloAsso (ou équivalent) — vous gardez la main sur votre compte et vos virements."
-      },
-      {
-        "roles": [
-          "parent"
-        ],
-        "texte": "Un bouton « Payer ma licence » apparaît sur votre espace tant que le club n'a pas enregistré votre paiement, si le club a activé un lien de paiement en ligne."
-      }
-    ]
-  },
-  {
-    "v": "1790587700",
-    "titre": "Mise à jour du 28 septembre (6)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Nouveau : proposez un covoiturage pour un match ou un entraînement depuis un canal de discussion (bouton 🚗), et réservez une place en un clic."
-      }
-    ]
-  },
-  {
-    "v": "1790586147",
-    "titre": "Mise à jour du 28 septembre (5)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le tableau de bord affiche désormais une alerte si deux licenciés portent le même nom et prénom, pour vérifier que photo/téléphone/accès parent correspondent à la bonne personne."
-      }
-    ]
-  },
-  {
-    "v": "1790585654",
-    "titre": "Mise à jour du 28 septembre (4)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Le rapprochement entre une fiche licence et un joueur du club tolère maintenant les différences de majuscules/minuscules, d'accents et d'espaces dans le nom/prénom."
-      }
-    ]
-  },
-  {
-    "v": "1790582482",
-    "titre": "Mise à jour du 28 septembre (3)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "Corrigé : la réinitialisation des données d'un club pouvait affecter des données d'autres clubs. C'est maintenant totalement cloisonné."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les erreurs de connexion (réactions, votes, sondages, messages) affichent maintenant un message clair au lieu d'échouer silencieusement."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Corrigé un bug d'affichage dans les animations et dans les notifications de rappel d'événement."
-      },
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "L'import de joueurs par fichier CSV gère maintenant correctement les noms contenant une virgule."
-      }
-    ]
-  },
-  {
-    "v": "1790580708",
-    "titre": "Mise à jour du 28 septembre (2)",
-    "points": [
-      {
-        "roles": [
-          "dirigeant",
-          "coach"
-        ],
-        "texte": "Corrigé : créer un événement en cochant « Tout le club » faisait planter l'écran."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Correction de nombreuses fautes d'orthographe et d'accents dans l'application."
-      }
-    ]
-  },
-  {
-    "v": "1790576570",
-    "titre": "Mise à jour du 28 septembre",
-    "points": [
-      {
-        "roles": [
-          "dirigeant"
-        ],
-        "texte": "En activant un nouveau club, vous devez maintenant lire et accepter le contrat qui protège les données de vos licenciés, avant de créer votre compte."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "coach",
-          "parent"
-        ],
-        "texte": "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "parent"
-        ],
-        "texte": "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé."
-      },
-      {
-        "roles": [
-          "dirigeant",
-          "parent"
-        ],
-        "texte": "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord."
-      }
-    ]
-  }
+ {
+  "v": "1792087118",
+  "titre": "Pass'Sport et Pass'Région",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Aides : active Pass'Sport et/ou Pass'Région. Les familles peuvent saisir leur code sur la fiche d'inscription (Pass'Région seulement pour les lycéens/apprentis)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'aide compte dans le paiement de la licence, avec une ligne en compta qui porte le numéro du code. Liste des codes à saisir sur Le Compte Asso, avec alerte à 10 et 5 jours du 31/12."
+   }
+  ]
+ },
+ {
+  "v": "1792077407",
+  "titre": "Notifications sur iPhone : tuto d'installation",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Sur iPhone, un tutoriel explique comment ajouter l'appli à l'écran d'accueil pour recevoir les notifications. Il s'ouvre en touchant « Autoriser les notifications », et un lien d'aide est visible dans les réglages de notifications."
+   }
+  ]
+ },
+ {
+  "v": "1792073237",
+  "titre": "Notifications push activées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Tu peux maintenant autoriser les notifications dans Paramètres › Notifications pour être prévenu des nouveaux messages même appli fermée."
+   }
+  ]
+ },
+ {
+  "v": "1792060063",
+  "titre": "Écrans vides plus clairs, Paramètres rangés, Boutique & réseaux",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un écran sans données explique maintenant ce qu'on y met et propose le premier geste : équipes, planning, joueurs, licences, comptabilité, buvette & stock, sponsors."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres : « Zone dangereuse » est un bloc à part, en rouge, et les blocs s'affichent sur deux colonnes sur ordinateur."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle rubrique « Boutique & réseaux » dans le menu ordinateur : elle ouvre directement les liens du club."
+   }
+  ]
+ },
+ {
+  "v": "1792059584",
+  "titre": "Plateforme : plus de saut de mise en page au rechargement",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, la Plateforme garde la même largeur et le même alignement pendant le chargement, sans se décaler à la fin."
+   }
+  ]
+ },
+ {
+  "v": "1792059371",
+  "titre": "Plateforme : couleurs GM et liste instantanée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La Plateforme, la connexion et le choix du rôle gardent les couleurs General Manager au lieu de celles du club du compte. La liste des clubs de la Plateforme s'affiche tout de suite (dernière liste connue), puis se met à jour."
+   }
+  ]
+ },
+ {
+  "v": "1792057092",
+  "titre": "Version ordinateur : 5 thèmes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, Paramètres › Apparence : choisis le thème du menu et du fond (Clair, Sombre, Parquet, Aux couleurs du club, Tableau de marque). Réglage propre à l'ordinateur, le téléphone ne change pas. Ta couleur de club reste appliquée."
+   }
+  ]
+ },
+ {
+  "v": "1792049639",
+  "titre": "Pass bénévole (lien ou QR)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bénévoles : crée un bénévole avec pass, il reçoit un lien (ou QR) perso où il voit ses missions à venir et confirme ou signale un empêchement, sans créer de compte. Tu vois sa réponse dans la liste des postes."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le SMS de mission contient le lien du pass. Tu peux désactiver ou réactiver un pass à tout moment (bouton « Mes bénévoles »)."
+   }
+  ]
+ },
+ {
+  "v": "1792049373",
+  "titre": "Profils Trésorier, Secrétaire et Membre du bureau",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Accès coach : choisis un profil (Trésorier, Secrétaire, Membre du bureau) pour pré-cocher les bons accès, puis ajuste case par case. Trésorier et secrétaire : un seul par club. Le profil est aussi proposé dès l'invitation."
+   }
+  ]
+ },
+ {
+  "v": "1792047531",
+  "titre": "Version Indépendant : les enfants mineurs",
+  "points": [
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Parent : inscris ton enfant (moins de 18 ans) avec ton propre accès, avec l'autorisation parentale. Tu réserves et préviens pour lui comme pour toi, depuis « Ma fiche » pour en ajouter d'autres."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Tes clients mineurs apparaissent avec la mention « Mineur », le nom et le téléphone de leur parent, et l'autorisation parentale. Ils sont habitués et pointés comme les autres."
+   }
+  ]
+ },
+ {
+  "v": "1792014399",
+  "titre": "Documents légaux mis à jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Les CGU, les CGV et la politique de confidentialité couvrent aussi la nouvelle version Indépendant (pour les coachs à leur compte). Rien ne change pour votre club."
+   }
+  ]
+ },
+ {
+  "v": "1792010058",
+  "titre": "Version Indépendant : séances et réservations",
+  "points": [
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Ton appli : préviens ton coach en un geste (« Je viens » / « Je ne peux pas ») et réserve les séances ouvertes, avec les places restantes."
+   }
+  ]
+ },
+ {
+  "v": "1792005642",
+  "titre": "Tournoi : vainqueur en vert sur le grand écran",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Tournoi : sur le grand écran, dans les derniers résultats, l'équipe gagnante et son score s'affichent en vert."
+   }
+  ]
+ },
+ {
+  "v": "1792004806",
+  "titre": "Tournoi : grand écran clair ou sombre",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Tournoi : le grand écran peut passer en mode clair ou sombre avec le bouton en haut à droite. Le choix est gardé sur l'appareil (sombre par défaut)."
+   }
+  ]
+ },
+ {
+  "v": "1792004434",
+  "titre": "Tournoi : score en direct sur la page publique",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Tournoi : pendant un match, le score saisi à la table de marque s'affiche tout de suite sur la page publique (« EN COURS »), même si l'écran Jour J n'est pas ouvert. Le résultat final remplace le score en cours à la clôture."
+   }
+  ]
+ },
+ {
+  "v": "1791991771",
+  "titre": "Communauté : voir les membres d'un canal",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Communauté : touchez le nom du canal en haut de la discussion pour voir qui y a accès, rangé par rôle (dirigeants, bureau, coachs, familles, joueurs), et qui y a déjà écrit."
+   }
+  ]
+ },
+ {
+  "v": "1791982667",
+  "titre": "Compta : bilan et annexe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Comptabilité › Comptes annuels › « 📘 Bilan et annexe » (Premium) : bilan simplifié actif/passif avec le solde de chaque banque et caisse, créances et dettes pré-remplies, et une annexe (méthodes, faits marquants, bénévolat valorisé) en PDF prêt pour l'AG. Renseignez une fois le solde de départ de vos comptes."
+   }
+  ]
+ },
+ {
+  "v": "1791982511",
+  "titre": "Version ordinateur : menu à votre main",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur : « Personnaliser » en bas du menu pour masquer ou réordonner les rubriques, « Réduire le menu » pour ne garder que les icônes, les équipes en cartes avec leur effectif, et la messagerie sur 2 colonnes (canaux à gauche, discussion à droite)."
+   }
+  ]
+ },
+ {
+  "v": "1791982351",
+  "titre": "Pôles : fiche profil sportif",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Pôles › touchez un joueur : sa fiche en 4 onglets. Général (assiduité, séances, matchs, ancienneté, équipes), Paiements (licence + cotisation du pôle et versements, recette en compta), Infos (suivi du pôle, notes du coach, appel/SMS des parents), Réglages (pause, date d'entrée, retrait)."
+   }
+  ]
+ },
+ {
+  "v": "1791982102",
+  "titre": "Abonnement : geler, relancer, résilier",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Abonnement : votre pack, l'échéance, et trois actions avec double confirmation : geler 1 à 3 mois (accès limité pendant le gel, échéance repoussée d'autant), relancer à tout moment, ou résilier (effet à l'échéance, tout reste ouvert d'ici là)."
+   }
+  ]
+ },
+ {
+  "v": "1791981395",
+  "titre": "Notes de frais : la photo du ticket remplit la note",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau"
+    ],
+    "texte": "Notes de frais : prenez le ticket en photo, la date, le montant, le motif et la catégorie se remplissent tout seuls (à vérifier avant d'enregistrer)."
+   }
+  ]
+ },
+ {
+  "v": "1791981305",
+  "titre": "Événements : export Excel des inscrits",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Événements › bouton « 📊 Excel » : la liste des inscrits ou réservations (contacts, tarif, paiement, présence), un résumé, et une feuille par jour pour les stages à jours au choix."
+   }
+  ]
+ },
+ {
+  "v": "1791970117",
+  "titre": "Photo de ticket lue par Gemini",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta › photo du ticket : la lecture passe d'abord par Gemini (Google, via Firebase), plus rapide et plus fiable ; les IA gratuites restent en secours."
+   }
+  ]
+ },
+ {
+  "v": "1791969368",
+  "titre": "Photo de ticket : IA de secours qui lit les images",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta › photo du ticket : quand les IA principales sont saturées, le relais passe par 3 autres IA capables de lire une photo."
+   }
+  ]
+ },
+ {
+  "v": "1791969092",
+  "titre": "Photo de ticket : raison de l'échec affichée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta › photo du ticket : si la lecture échoue, la raison exacte s'affiche sous le message."
+   }
+  ]
+ },
+ {
+  "v": "1791968906",
+  "titre": "Photo de ticket plus fiable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Compta › photo du ticket : si la première lecture traîne, une deuxième IA prend le relais au lieu d'abandonner, et la photo envoyée est plus légère pour aller plus vite."
+   }
+  ]
+ },
+ {
+  "v": "1791965064",
+  "titre": "Tournoi : meilleur marqueur à la moyenne",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le classement des meilleurs marqueurs se fait maintenant sur la moyenne de points par match, avec un 🏆 pour le premier de chaque catégorie."
+   }
+  ]
+ },
+ {
+  "v": "1791962089",
+  "titre": "Tournoi : fautes et meilleurs marqueurs au choix",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi › Journée et format : pour chaque catégorie, choisissez à combien de fautes un joueur est exclu (2 à 6, ou pas d'exclusion), à côté de la durée des matchs."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le classement des meilleurs marqueurs n'apparaît sur la page du tournoi que si vous cochez l'option."
+   }
+  ]
+ },
+ {
+  "v": "1791952898",
+  "titre": "Tournoi : joueurs, points et fautes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi : chaque équipe a ses joueurs (numéro + prénom). Les équipes du club sont remplies avec les numéros de maillot ; bouton « 👕 Joueurs » pour modifier."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Inscription par le lien : le responsable saisit ses joueurs et reçoit un code « Mon équipe » pour les modifier jusqu'au premier match."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Table de marque : +1 / +2 / +3 puis le numéro du joueur, bouton Faute (5 fautes = joueur exclu), « Annuler la dernière action »."
+   },
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Page du tournoi : points et fautes des joueurs de chaque équipe, meilleurs marqueurs par catégorie."
+   }
+  ]
+ },
+ {
+  "v": "1791951623",
+  "titre": "Champs à remplir vides",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les champs à remplir ne contiennent plus d'exemples (noms, lieux, horaires) : seuls le téléphone (0612345678) et l'e-mail (mail@gmail.com) gardent un modèle."
+   }
+  ]
+ },
+ {
+  "v": "1791949977",
+  "titre": "Tournoi : plan du site",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi › Plan du site : cherchez l'adresse, la carte (vue satellite ou plan) se centre dessus, puis placez les terrains, la buvette, l'accueil, les toilettes, le parking…"
+   },
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Page du tournoi : onglet « Plan » avec itinéraire Google Maps / Waze, et « 📍 » sur chaque match pour trouver son terrain."
+   }
+  ]
+ },
+ {
+  "v": "1791949329",
+  "titre": "Tournoi : terrains intérieurs ou extérieurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi › Journée et format : chaque terrain peut être intérieur ou extérieur. C'est indiqué sur le planning, le PDF, les codes de table de marque et la page publique du tournoi."
+   }
+  ]
+ },
+ {
+  "v": "1791948531",
+  "titre": "Événements : Standard et Premium",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pack Standard : création d'événements, affiche, inscriptions et réservations avec billet QR, entrée, bénévoles, planning des tournois et page publique."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pack Premium : jour J des tournois (table de marque, scores en direct, grand écran, absences), paiement HelloAsso et suivi « payé » avec écriture en compta, plus de 2 tarifs, inscription jour par jour, participants dans le bilan de saison."
+   }
+  ]
+ },
+ {
+  "v": "1791947505",
+  "titre": "Tournoi : équipes absentes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi, onglet Jour J : « 📋 Appel des équipes » avant le premier match (les absentes sont retirées, le planning et les codes sont refaits) ; une fois le tournoi commencé, « 🚫 Équipe absente ou partie » donne forfait 20-0 sur tous ses matchs restants, phases finales comprises."
+   },
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Page du tournoi : badge « Absente » et forfaits affichés, classement à jour."
+   }
+  ]
+ },
+ {
+  "v": "1791946829",
+  "titre": "Page tournoi et rappels bénévoles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi : nouvelle page publique generalmanagerapp.fr/tournoi : matchs en cours, à venir et résultats, classements, « Mon équipe » (et les autres équipes), mode grand écran pour la télé du gymnase. Le lien et le QR de l'affiche y mènent."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bénévoles : SMS au vouvoiement."
+   },
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "Bénévoles : rappel sur l'accueil 14 jours avant, 7 jours avant, puis chaque jour à partir de 5 jours avant ; chaque rappel peut être masqué."
+   }
+  ]
+ },
+ {
+  "v": "1791945466",
+  "titre": "Bénévoles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Planning › « 🙋 Bénévoles » sur un match ou un événement : placez des personnes sur les postes (buvette, table de marque, chrono, arbitrage…) et prévenez-les par SMS pré-rempli au nom du club."
+   },
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "Accueil : un bandeau « Tu es bénévole cette semaine » indique le poste, le jour et l'heure."
+   }
+  ]
+ },
+ {
+  "v": "1791945299",
+  "titre": "Bilan de saison pour les subventions",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Licences › « 📊 Bilan » : un PDF prêt pour les dossiers de subvention (ANS, mairie, département) et l'AG : licenciés par catégorie, genre, âge et commune, équipes, pôles, événements avec participants et, en Premium, la compta de l'exercice."
+   }
+  ]
+ },
+ {
+  "v": "1791926652",
+  "titre": "Tournoi : résultats en direct sans l'écran Jour J",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournoi : dès qu'une table de marque clôture un match, le score, les classements et les équipes qualifiées apparaissent sur la page publique, même si personne n'a l'écran « Jour J » ouvert."
+   }
+  ]
+ },
+ {
+  "v": "1791922174",
+  "titre": "Plateforme sans menu du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Version ordinateur : l'écran Plateforme (et la connexion) n'affiche plus le menu latéral du club."
+   }
+  ]
+ },
+ {
+  "v": "1791912160",
+  "titre": "Compta : photo de ticket",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Compta : bouton « 📷 Ticket » : prenez le ticket en photo, la date, le montant, le fournisseur et la catégorie sont remplis tout seuls. Vous vérifiez puis enregistrez ; la photo est jointe en justificatif."
+   }
+  ]
+ },
+ {
+  "v": "1791911186",
+  "titre": "Soirée : réservation par famille",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "Soirée : les inscriptions deviennent des réservations par famille (adultes, enfants, prix par personne, un seul billet QR pour toute la réservation)."
+   },
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Soirée : bouton « Réserver » pour indiquer combien d'adultes et d'enfants viennent."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "Tournoi : plus d'inscription individuelle façon stage, les équipes s'inscrivent par le lien du tournoi."
+   }
+  ]
+ },
+ {
+  "v": "1791910868",
+  "titre": "Accès coach : retirer n'importe quel compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « Accès coach », le bouton « Retirer l'accès » apparaît sur tous les comptes du club, y compris les autres dirigeants (jamais sur votre propre compte)."
+   }
+  ]
+ },
+ {
+  "v": "1791910542",
+  "titre": "Inscriptions et affiche pour tous les événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tous les événements du club (stage, tournoi, soirée, formation, autre) ont maintenant les inscriptions en ligne (lien, QR, billets, entrée) et un bouton « 🖼️ Affiche » directement sur leur carte. Les matchs et entraînements gardent leurs convocations."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur un tournoi, le bouton des inscriptions individuelles s'appelle « Billetterie » (entrées payantes) ; les équipes s'inscrivent par l'outil 🏆 Tournoi."
+   }
+  ]
+ },
+ {
+  "v": "1791910411",
+  "titre": "Tournois : affiche",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bouton « 🖼️ Affiche » dans l'outil Tournoi : même éditeur d'affiche que les événements (modèles, formats, logo, photo, partage WhatsApp). Les catégories s'affichent toutes seules et le QR code mène à la page du tournoi : inscription des équipes, puis poules, planning et résultats."
+   }
+  ]
+ },
+ {
+  "v": "1791909926",
+  "titre": "Tournois : création depuis le pôle Événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "« + Tournoi » (pôles Événements et 3x3) crée maintenant un vrai tournoi du calendrier et ouvre directement l'outil Tournoi (équipes, format, planning, jour J)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les tournois notés avant à la main ont un bouton « 🏆 Organiser » qui les transforme en vrai tournoi. Le bloc « Coachs du pôle » passe en haut de la page Événements."
+   }
+  ]
+ },
+ {
+  "v": "1791907512",
+  "titre": "Ouverture de l'appli sans clignotement",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "À l'ouverture, un écran de chargement s'affiche le temps de vérifier la connexion : on ne voit plus l'accueil du club apparaître une seconde avant l'écran de connexion."
+   }
+  ]
+ },
+ {
+  "v": "1791907094",
+  "titre": "Tournois : le jour J",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Onglet « Jour J » : chaque match a son code. La table de marque ouvre generalmanagerapp.fr/?marque sans compte, tape le code, compte les points (+1, +2, +3) puis retape le code pour clôturer. Feuille des codes en PDF par terrain ; seul le staff peut rouvrir, corriger ou déclarer un forfait."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Classements calculés tout seuls (2 pts victoire, 1 pt défaite, 0 forfait ; égalités départagées par les confrontations) et équipes qualifiées placées dans les phases finales. La page publique se met à jour en direct tant que l'écran Jour J est ouvert."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Inscriptions des équipes par le lien : à activer dans « Journée et format » avec les catégories proposées ; les demandes arrivent dans l'onglet Équipes (Accepter / Refuser)."
+   }
+  ]
+ },
+ {
+  "v": "1791903596",
+  "titre": "Nouveau pôle : Basket Santé",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Basket Santé devient un pôle à part (séances adaptées, reprise d'activité, seniors, sport sur ordonnance), avec ses coachs, ses joueurs et leur groupe. Basket Pour Tous garde le loisir, le handicap et le basket adapté."
+   }
+  ]
+ },
+ {
+  "v": "1791903493",
+  "titre": "Pôles : coachs et joueurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans chaque pôle, « Choisir les coachs » : vous désignez les coachs qui gèrent le pôle (Formation et Événements : coachs seulement)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Élite, 5x5, 3x3 et Basket Pour Tous : les coachs du pôle y ajoutent leurs joueurs et renseignent leurs infos (niveau et objectif pour l'Élite, équipe, groupe…). Les pôles apparaissent en pastilles sur la fiche joueur, et la liste Joueurs se filtre par pôle."
+   }
+  ]
+ },
+ {
+  "v": "1791898793",
+  "titre": "Tournois : poules, phases finales et planning automatique",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur un événement de type Tournoi, bouton « 🏆 Tournoi » : ajoutez les équipes (ou vos équipes du club en un clic), réglez la journée (horaires, pause de midi, terrains, battement) et le format de chaque catégorie : poules puis finale, demi-finales, matchs de classement ou rien."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "« Générer le planning » donne à chaque match un terrain et un horaire, sans qu'une équipe enchaîne deux matchs, et prévient si la journée est trop courte. Planning en PDF (grille horaires × terrains) et page publique avec lien et QR code pour les équipes et les familles."
+   }
+  ]
+ },
+ {
+  "v": "1791894879",
+  "titre": "Sur ordinateur : tableaux pour la compta, les licences et les joueurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur grand écran, Comptabilité, Licences et Joueurs s'affichent en tableaux lisibles d'un coup d'œil (pièce, compte, statut, paiement…). Un clic sur une ligne l'ouvre."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, les fenêtres (ligne de compta, fiche, réglages) s'ouvrent au centre de l'écran au lieu de monter du bas. Rien ne change sur téléphone."
+   }
+  ]
+ },
+ {
+  "v": "1791890331",
+  "titre": "iPhone : glisser depuis le bord pour revenir",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Sur iPhone, dans l'appli installée sur l'écran d'accueil : glissez le doigt depuis le bord gauche vers la droite pour revenir en arrière (une flèche apparaît). Mêmes règles que le bouton retour d'Android."
+   }
+  ]
+ },
+ {
+  "v": "1791888784",
+  "titre": "Bouton retour du téléphone",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Le bouton retour d'Android (Samsung…) ne ferme plus l'appli : il ferme la fenêtre ouverte, revient à l'écran précédent, puis à l'Accueil. À l'Accueil, un 2e appui quitte l'appli."
+   }
+  ]
+ },
+ {
+  "v": "1791887999",
+  "titre": "Compta : rapprochement bancaire",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "« 🏦 Relevé bancaire » : importez le relevé de votre banque (CSV ou OFX). L'appli retrouve les lignes correspondantes (même montant, date proche) : un clic pour tout pointer."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Une opération sans ligne dans la compta ? Associez-la à une ligne existante, ou créez-la directement (déjà pointée). Les frais bancaires vont tout seuls au compte 627. Réimporter le même relevé ne pointe jamais deux fois."
+   }
+  ]
+ },
+ {
+  "v": "1791887793",
+  "titre": "Compta : compte de résultat et export FEC",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "« 📑 Comptes annuels » : compte de résultat de l'exercice au format des associations, comparé à l'exercice précédent, en PDF prêt pour l'AG (ligne d'approbation et signatures)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Export FEC : le fichier officiel des écritures comptables, lu par les logiciels des experts-comptables et par les impôts. Le SIREN du club (Paramètres › Facturation) est repris dans le nom du fichier."
+   }
+  ]
+ },
+ {
+  "v": "1791887653",
+  "titre": "Compta : plan comptable associatif et numéros de pièce",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque ligne reçoit son compte du plan comptable des associations (756 cotisations, 613 locations, 707 buvette…) et un numéro de pièce continu par journal (BQ banque, CA caisse). Les anciennes lignes sont numérotées automatiquement."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "« ⚙️ Plan comptable » : choisissez l'exercice (année civile ou saison, ex. septembre → août) et adaptez les comptes. Sur une ligne, « Compte comptable » permet un autre compte que l'automatique."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau filtre « Exercice » en haut de la compta ; le Bilan AG et l'accueil suivent l'exercice choisi."
+   }
+  ]
+ },
+ {
+  "v": "1791886645",
+  "titre": "Événements : le billet se garde facilement",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Après l'inscription, « Enregistrer l'image » sauvegarde le billet (QR code, code, nom, jours) dans les photos ou les téléchargements."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "« M'envoyer par WhatsApp / SMS » : le lien reçu réaffiche le billet et son QR code sur n'importe quel téléphone, même si la page a été fermée."
+   }
+  ]
+ },
+ {
+  "v": "1791885946",
+  "titre": "Affiche : partage avec l'image jointe, à chaque clic",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "« WhatsApp » et « Partager » ouvrent la fenêtre de partage de l'ordinateur ou du téléphone, avec l'affiche jointe (choisissez WhatsApp, Instagram…). Ça marche à chaque clic, même juste après une modification."
+   }
+  ]
+ },
+ {
+  "v": "1791885604",
+  "titre": "Affiche : partage depuis l'ordinateur",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur ordinateur, « WhatsApp » ouvre WhatsApp Web avec le texte et le lien, et télécharge l'affiche à glisser dans la conversation. « Partager » télécharge l'affiche et copie le texte. Sur téléphone, la feuille de partage s'ouvre à chaque clic."
+   }
+  ]
+ },
+ {
+  "v": "1791885356",
+  "titre": "iPhone : la barre du bas ne cache plus les fenêtres",
+  "points": [
+   {
+    "roles": [],
+    "texte": "Sur iPhone, la barre du bas (Accueil, Communauté, Admin) passait par-dessus les fenêtres et cachait le bouton « Enregistrer ». Corrigé pour toutes les fenêtres."
+   }
+  ]
+ },
+ {
+  "v": "1791885210",
+  "titre": "Inscription aux événements : e-mail",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouvelle case « E-mail (facultatif) » sur la fiche d'inscription d'un événement. Pour un parent connecté, l'e-mail de son compte est repris. Il apparaît dans la liste des inscrits."
+   }
+  ]
+ },
+ {
+  "v": "1791885166",
+  "titre": "iPhone : fenêtres et formulaires corrigés",
+  "points": [
+   {
+    "roles": [],
+    "texte": "Sur iPhone, le bas des fenêtres (et le bouton « Enregistrer ») ne passe plus sous la barre de Safari. Dans la fiche d'un événement, le bouton reste toujours visible en bas. Les champs ne font plus zoomer l'écran."
+   }
+  ]
+ },
+ {
+  "v": "1791884951",
+  "titre": "Mise à jour : fini le bandeau en boucle",
+  "points": [
+   {
+    "roles": [],
+    "texte": "« Mettre à jour » télécharge vraiment les nouveaux fichiers avant de recharger. Le bandeau ne réapparaît plus en boucle pour une même version."
+   }
+  ]
+ },
+ {
+  "v": "1791884569",
+  "titre": "Événements : adresse du lieu",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouveau champ « Adresse du lieu » dans le formulaire d'événement. Elle s'affiche sur une ligne sous le lieu : carte de l'événement, page d'inscription et affiche."
+   }
+  ]
+ },
+ {
+  "v": "1791884288",
+  "titre": "Accès coach : passer la main avant de quitter son rôle de dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un dirigeant peut quitter son rôle seulement si un autre dirigeant du club est déjà en place. Sinon, l'appli demande d'en nommer un d'abord (contrôlé aussi côté serveur)."
+   }
+  ]
+ },
+ {
+  "v": "1791884091",
+  "titre": "Billet annulé et rôle de dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Quand le club annule une inscription, la famille voit « Inscription annulée par le club » à la place du billet : plus de QR code ni de code."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un dirigeant peut de nouveau se retirer son propre rôle (avec confirmation). Seul le compte principal de la plateforme le garde toujours."
+   }
+  ]
+ },
+ {
+  "v": "1791883949",
+  "titre": "Affiche : texte libre, programme, accroche, QR code",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Texte libre sur plusieurs lignes : les retours à la ligne et les espaces s'affichent tels quels sur l'affiche."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouvelles cases dans « Ce qui s'affiche » : Accroche (à cocher ou non) et Programme (repris des réglages des inscriptions)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "QR code : « Déplacer / redimensionner » pour le faire glisser sur l'affiche et changer sa taille."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "WhatsApp et Partager fonctionnent à chaque clic (l'image est préparée à l'avance)."
+   }
+  ]
+ },
+ {
+  "v": "1791883789",
+  "titre": "Accès coach : impossible de se retirer son propre rôle de dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « Accès coach », un dirigeant ne peut plus se retirer lui-même son rôle de dirigeant (protégé aussi côté serveur). Le compte principal du club retrouve automatiquement son rôle à la connexion."
+   }
+  ]
+ },
+ {
+  "v": "1791880993",
+  "titre": "Lien d'inscription : page publique isolée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Le lien d'un événement ouvre uniquement la page d'inscription : plus de barre de navigation ni d'en-tête du club autour. Pareil pour le billet, l'entrée bénévole et la page « Venir essayer »."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Après l'inscription, la page affiche le billet seul : QR code, code à présenter le jour J et montant à régler."
+   }
+  ]
+ },
+ {
+  "v": "1791880476",
+  "titre": "Événements : catégorie de l'enfant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Inscription d'un extérieur : choix de la catégorie (calculée d'après la date de naissance, modifiable). Pour un licencié du club, la catégorie vient de sa fiche. Elle apparaît dans la liste des inscrits et sur la feuille du jour."
+   }
+  ]
+ },
+ {
+  "v": "1791880312",
+  "titre": "Invitations : compte déjà existant et retrait d'accès",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Sur la page d'invitation, « Me connecter avec mon compte » : si l'e-mail a déjà un compte, l'accès de l'invitation s'ajoute à ce compte (un parent qui devient aussi coach, par exemple). Lien déjà utilisé : bouton « Me connecter »."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Accès coach : bouton « Retirer l'accès » pour un compte du club. La personne peut ensuite retrouver un accès avec la même adresse e-mail grâce à une nouvelle invitation."
+   }
+  ]
+ },
+ {
+  "v": "1791880033",
+  "titre": "Événements : qui vient chaque jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans les inscrits d'un stage à jours au choix : onglets par jour (avec le nombre d'inscrits) et « Feuille du jour » en PDF avec les présents attendus, à imprimer."
+   }
+  ]
+ },
+ {
+  "v": "1791879800",
+  "titre": "Événements : jours au choix et modification complète",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stage sur plusieurs jours : dans les réglages des inscriptions, option « Les familles choisissent leurs jours ». Prix par jour, forfait facultatif pour tous les jours, places par jour."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les familles cochent les jours qui les intéressent (ou tous les jours) et voient le total se calculer. Le billet affiche les jours réservés."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Entrée : choix du jour, liste et scan par jour ; un billet scanné un jour non réservé est refusé."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "« Modifier » sur un événement rouvre le formulaire complet, prérempli."
+   }
+  ]
+ },
+ {
+  "v": "1791879176",
+  "titre": "Événements : inscriptions sur ordinateur et dates",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le bouton « Ouvrir les inscriptions » apparaît aussi sur la version ordinateur."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Une date de fin avant la date de début est refusée, et déplacer un événement décale sa date de fin."
+   }
+  ]
+ },
+ {
+  "v": "1791878470",
+  "titre": "Version ordinateur : nouvel accueil",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, l'accueil devient un tableau de bord pleine largeur : chiffres clés (licenciés, paiements, essais, semaine, résultat), « À faire » avec un bouton pour chaque action, inscriptions en cours, prochains rendez-vous et raccourcis. Sur téléphone, rien ne change."
+   }
+  ]
+ },
+ {
+  "v": "1791877776",
+  "titre": "Licences : paiement par chèque",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Paiement « Chèque » en 1 à 4 fois : n°, banque, émetteur, montant et date d'encaissement de chaque chèque. Le total se répartit tout seul."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "« Remise en banque » dans Licences : les chèques encaissables sont cochés, bordereau PDF à joindre au dépôt, puis « Marquer comme déposés » ajoute une recette par chèque en compta, à la date du dépôt."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Sur la fiche d'inscription, indiquez comment vous comptez régler (chèque en 1, 2 ou 3 fois, espèces, virement…) ; l'ordre des chèques est rappelé."
+   }
+  ]
+ },
+ {
+  "v": "1791877211",
+  "titre": "Événements : l'affiche",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bouton « Affiche » dans les inscriptions : 6 modèles (Dégradé, Couleur pleine, Sport, Photo plein écran, Épurée, Calendrier), en post carré, story ou A4 à imprimer (PDF). Logo et couleurs du club, QR code d'inscription, tarifs, sponsors sous l'affiche."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Intervenants mis en avant avec leur photo, nom et rôle. Partage direct sur WhatsApp."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les places restantes se mettent à jour toutes seules : à 5 places, l'appli propose de republier l'affiche ; à 0, elle passe en « Complet »."
+   }
+  ]
+ },
+ {
+  "v": "1791875682",
+  "titre": "Événements : l'entrée, comme un pass",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bouton « Entrée » dans les inscriptions : la liste à cocher, une recherche, et en bas « Scanner un billet ». Vert = entrée validée, orange = déjà entré, rouge = billet inconnu. Les paiements sur place s'encaissent au même endroit."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "« Code bénévole » : un bénévole sans compte tient l'entrée avec un lien et un code envoyés par WhatsApp ou SMS. Il voit la liste (sans les numéros) et scanne les billets. Ses entrées et paiements sont reportés automatiquement."
+   }
+  ]
+ },
+ {
+  "v": "1791875103",
+  "titre": "Événements : tarif gratuit",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Réglages des inscriptions : bouton « Gratuit » sur chaque tarif. Si tout est gratuit, plus de mode de paiement à choisir, ni pour vous ni pour les inscrits."
+   }
+  ]
+ },
+ {
+  "v": "1791874739",
+  "titre": "Événements : inscriptions en ligne et billets",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stage/camp, tournoi et nouvelle « Soirée » : bouton « Ouvrir les inscriptions » sur l'événement. Tarifs licencié / extérieur, espèces, chèque, CB sur place ou lien HelloAsso, nombre de places et date limite."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un lien et un QR code à partager : les extérieurs s'inscrivent sans compte. Chaque inscrit reçoit un billet avec QR code (STG-12345, TRN-…, SOI-…)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Suivi des inscrits : licenciés reconnus automatiquement (sinon « À vérifier »), « Paiement reçu » ajoute la recette en comptabilité."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Onglet Événements : inscrivez votre enfant en un geste aux stages, tournois et soirées du club."
+   }
+  ]
+ },
+ {
+  "v": "1791842463",
+  "titre": "Version ordinateur (dirigeant)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, un menu fixe à gauche remplace la barre du bas : Accueil, Communauté, Planning, Équipes, Joueurs, Formation, Licences (avec le nombre de fiches à valider), Comptabilité, Buvette, Sponsors, Documents… Le contenu prend toute la largeur. Rien ne change sur téléphone."
+   }
+  ]
+ },
+ {
+  "v": "1791842190",
+  "titre": "Séances d'essai",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Séances d'essai : ouvrez une page « Venir essayer » (lien + QR code) avec vos équipes et créneaux. Les familles demandent une séance sans créer de compte ; vous répondez par SMS en choisissant l'entraînement, puis « Inscrire » crée la fiche et envoie le lien d'inscription."
+   },
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Équipe : les séances d'essai prévues pour votre équipe s'affichent avec le prénom et l'âge de l'enfant."
+   }
+  ]
+ },
+ {
+  "v": "1791827574",
+  "titre": "Offre gratuite pour les petits clubs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle offre gratuite pour les clubs jusqu'à 60 licenciés : tout le contenu du Pack Standard. À la 61e licence, l'appli propose le passage au Standard. Le Premium leur est proposé à 200 €/an."
+   }
+  ]
+ },
+ {
+  "v": "1791827014",
+  "titre": "Réseaux sociaux et boutique du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Mon club › Réseaux et boutique : ajoutez Facebook, Instagram, TikTok, le site et la boutique du club (un @compte suffit pour Instagram et TikTok)."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Nouveau « Suivre le club » en bas de l'Accueil : les réseaux et la boutique du club en un clic."
+   }
+  ]
+ },
+ {
+  "v": "1791742473",
+  "titre": "Accès famille par SMS et réinscription en ligne",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "En validant une licence, l'appli propose tout de suite d'envoyer l'accès à la famille par SMS (message prêt, qui commence par le nom du club). Si la famille a déjà un compte, rien à envoyer : l'enfant apparaît chez elle."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences : nouveau bloc « Réinscriptions en ligne » pour les ouvrir pour la saison suivante. Les demandes des familles arrivent automatiquement comme fiches reçues."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Quand le club ouvre les réinscriptions, une carte « Réinscrire » apparaît sur l'Accueil, avec la fiche de l'an dernier déjà remplie. Pas de code à saisir."
+   }
+  ]
+ },
+ {
+  "v": "1791737960",
+  "titre": "Lien d'inscription direct",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le mail d'inscription contient maintenant un lien qui ouvre directement la fiche de la famille, sans recopier le code. Adresse et QR code passent sur generalmanagerapp.fr."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Écran d'inscription : « Entrez le code envoyé par votre club », exemple de code neutre."
+   }
+  ]
+ },
+ {
+  "v": "1791737358",
+  "titre": "Onglet Inscription retiré du dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'onglet « Inscription » disparaît de la barre du bas du dirigeant : les familles remplissent leur fiche via le lien ou le QR code du club, et le dirigeant gère tout dans Admin → Licences."
+   }
+  ]
+ },
+ {
+  "v": "1791735121",
+  "titre": "Paramètres rangés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les Paramètres sont rangés en blocs repliables (Mon compte, Apparence, Mon club, Argent & documents, Données & saison), tous fermés à l'ouverture."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Couleurs du club dans un menu déroulant. « Avis et suggestions » (dirigeants, coachs et parents) arrive directement à l'équipe General Manager."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Notes de frais : réservées au dirigeant et aux coachs. Le mail groupé « Communication » est retiré."
+   }
+  ]
+ },
+ {
+  "v": "1791704047",
+  "titre": "2 couleurs de club et demandes d'essai",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : choisissez 1 ou 2 couleurs. La 2e devient l'accent et termine les dégradés, dans tous les thèmes visuels."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : les demandes d'essai envoyées depuis le site arrivent dans la Plateforme (pastille sur le bouton). « Valider » crée le club avec ses couleurs et ouvre un SMS pré-rempli avec le lien d'accès du dirigeant."
+   }
+  ]
+ },
+ {
+  "v": "1791703451",
+  "titre": "Communauté façon WhatsApp",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Appui long sur un message : réagir, répondre, copier, modifier (pendant 2 minutes), transférer, infos, supprimer. Glisser un message vers la droite pour y répondre."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Coches de lecture : ✓ envoyé, ✓✓ lu par certains, ✓✓ bleu lu par tous. « Infos » montre qui a lu."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Messages supprimés : « Ce message a été supprimé », ou « Supprimé par un admin » quand le coach ou le dirigeant le retire."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Séparateurs Aujourd'hui / Hier, bouton « nouveaux messages », liens cliquables."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Discussions privées avec un parent ou un membre du club (jamais avec un compte joueur)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "La convocation dans le canal et les boutons Présent/Absent de l'accueil sont maintenant la même réponse."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Le premier onglet s'appelle Accueil."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Changer un numéro sur la fiche d'inscription met à jour le compte du parent (et inversement)."
+   }
+  ]
+ },
+ {
+  "v": "1791699588",
+  "titre": "Numéro de téléphone modifiable par le club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Accès : bouton « Modifier le numéro » sur chaque compte. Le titulaire ne peut plus changer son numéro lui-même (il sert à le relier à ses enfants)."
+   }
+  ]
+ },
+ {
+  "v": "1791644576",
+  "titre": "Échéances d'abonnement et avis de reconduction",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : chaque club Standard ou Premium a une date d'échéance (12 mois, modifiable). Trois mois avant, une alerte orange rappelle d'envoyer l'avis de reconduction : e-mail pré-rempli au dirigeant, puis « Avis envoyé » et « Renouvelé (+12 mois) »."
+   }
+  ]
+ },
+ {
+  "v": "1791567944",
+  "titre": "Rappel des comptes à supprimer",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : après la suppression d'un club, une alerte rouge liste les comptes de connexion à supprimer dans la console Firebase, jusqu'à ce que tu les marques « fait »."
+   }
+  ]
+ },
+ {
+  "v": "1791567716",
+  "titre": "Retrait du bouton de suppression de licence",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le bouton « Supprimer cette licence » est retiré."
+   }
+  ]
+ },
+ {
+  "v": "1791567017",
+  "titre": "Suppression d'un club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : un club peut être supprimé directement (sans suspension ni délai de 7 jours), après saisie de son nom."
+   }
+  ]
+ },
+ {
+  "v": "1791565848",
+  "titre": "Licences en accès limité",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un club en accès limité peut saisir, modifier et valider des licences (jusqu'à 300 par saison)."
+   }
+  ]
+ },
+ {
+  "v": "1791565259",
+  "titre": "Accès limité",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau statut « Accès limité » pour un club sans abonnement : seuls les modules choisis par la plateforme restent ouverts, en consultation. Rien n'est supprimé et tout revient dès l'abonnement."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "« Exporter mes données » (Excel, PDF, sauvegarde complète) reste toujours disponible."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Fin de l'essai gratuit sans abonnement : le club passe en accès limité au lieu d'être suspendu."
+   }
+  ]
+ },
+ {
+  "v": "1791547003",
+  "titre": "Compta : rien ne se perd pendant le verrouillage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta verrouillée (Pack Standard ou essai terminé) : les paiements de licences, notes de frais remboursées, ventes buvette et mouvements de stock continuent d'être enregistrés en arrière-plan. Au passage en Premium, même des mois plus tard, tout s'ajoute à la comptabilité existante."
+   }
+  ]
+ },
+ {
+  "v": "1791546567",
+  "titre": "Packs : fin d'essai, buvette et limite de licences",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pendant les 30 jours d'essai, tout est ouvert. Ensuite, sans Pack Premium, la comptabilité est verrouillée : rien n'est perdu, tout ce qui a été saisi reste téléchargeable en PDF (archive complète)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pack Standard : limite de 300 licences par saison verrouillée sur tous les chemins (nouvelles licences et renouvellements), avec alerte dès 270."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Inventaire > Buvette : nouveau bouton « Journées » avec le PDF de chaque journée de caisse (ventes par article, espèces/CB, détail par bénévole), quel que soit le pack."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Formations animées : chaque animation correspond maintenant à l'intitulé de sa situation (une quarantaine de schémas corrigés, dessins faits main réutilisés quand l'exercice est le même)."
+   }
+  ]
+ },
+ {
+  "v": "1791543688",
+  "titre": "Packs Standard et Premium",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Deux packs : Standard et Premium. Le Premium débloque la comptabilité complète, les reçus fiscaux, le bilan comptable PDF, les factures sponsors, les formations animées et le lien buvette / comptabilité."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Au-delà de 300 licences, le Pack Premium est nécessaire pour en ajouter (alerte dès 270, renouvellements jamais bloqués)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Nouveau : bilan comptable en PDF depuis la comptabilité."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Caisse buvette : onglet Récap avec export PDF/Excel pour les bénévoles (en Standard, les ventes ne vont pas en comptabilité)."
+   }
+  ]
+ },
+ {
+  "v": "1791226346",
+  "titre": "Conditions générales de vente",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle page « CGV » (conditions générales de vente de la plateforme : essai gratuit de 30 jours, paiement par virement, suspension, résiliation), accessible depuis le pied de page à côté des CGU et de la confidentialité."
+   }
+  ]
+ },
+ {
+  "v": "1791216539",
+  "titre": "Bandeau d'accueil arrondi (Carnet, Bento)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Dans les thèmes Carnet et Bento, le bandeau d'accueil est maintenant une carte aux bords arrondis, alignée avec les autres cartes."
+   }
+  ]
+ },
+ {
+  "v": "1791216042",
+  "titre": "Thème Carnet : bandeau lisible, dégradé sur toutes les couleurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Thème Carnet : le bandeau d'accueil (texte blanc sur fond clair) était illisible ; il prend maintenant un dégradé de la couleur du club. Le fond dégradé pastel est adapté à chacune des 50 couleurs."
+   }
+  ]
+ },
+ {
+  "v": "1791200459",
+  "titre": "Thème Épuré : bandeau lisible et couleur du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Thème Épuré : le bandeau d'accueil était presque illisible (texte blanc sur fond blanc). Il est maintenant noir par défaut, ou de la couleur du club si elle est choisie, avec la barre du haut qui reste blanche. Les boutons et accents prennent aussi la couleur du club."
+   }
+  ]
+ },
+ {
+  "v": "1791200068",
+  "titre": "Thème Feuille : fond à la couleur du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Dans le thème Feuille de match, le fond crème, les cartes et l'encre prennent la teinte de la couleur du club (clair et sombre)."
+   }
+  ]
+ },
+ {
+  "v": "1791199787",
+  "titre": "Couleur du club : fonds et textes teintés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Avec une couleur de club choisie, les thèmes se teintent entièrement : fond de Bento, fonds et textes de Classique, fonds de Carnet (clair et sombre), en-tête de Feuille. Plus de violet ou de bleu d'origine qui reste visible."
+   }
+  ]
+ },
+ {
+  "v": "1791199562",
+  "titre": "Couleur du club dans tous les thèmes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La couleur choisie par le dirigeant s'applique maintenant à tous les thèmes visuels (Classique, Épuré, Bento, Feuille, Carnet, Éditorial), sans changer leur style : chaque thème garde ses formes et ses neutres, seule sa teinte de marque change."
+   }
+  ]
+ },
+ {
+  "v": "1791199274",
+  "titre": "Couleurs du club et logo General Manager",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau : Paramètres > Couleurs du club. Choisis la couleur de ton club dans une palette de 50 teintes ; elle s'applique à l'en-tête, aux boutons et aux PDF pour tous tes membres (thème Moderne). Sans choix, l'appli garde les couleurs General Manager."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Les PDF (planning, liste des licenciés, reçus, factures) reprennent la couleur du club."
+   }
+  ]
+ },
+ {
+  "v": "1791194179",
+  "titre": "Animation du « feu tricolore » corrigée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les exercices où le coach montre une couleur et où les joueurs choisissent leur action (tirer, passer, dribbler) ont maintenant leur propre animation : le coach brandit la couleur, le groupe réagit. Avant, c'était un simple schéma de tir."
+   }
+  ]
+ },
+ {
+  "v": "1791193884",
+  "titre": "Filles / Garçons : filtres, tri et exports",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Inscriptions (Joueurs) et Licences : nouveau filtre Filles / Garçons, tri par catégorie puis genre, et effectifs filles/garçons affichés par catégorie. Filtres U18 et U21 ajoutés sur les Joueurs."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "PDF de la liste des licenciés : colonne Genre, regroupement par catégorie puis Filles / Garçons, et tableau récapitulatif des effectifs. Export Excel des licences : tri catégorie/genre et nouvel onglet « Effectifs »."
+   }
+  ]
+ },
+ {
+  "v": "1791193434",
+  "titre": "Messages automatiques du chat : affichage corrigé",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Les messages automatiques (rappel de présence, événement créé/annulé/modifié, alerte météo, absence signalée) s'affichaient avec des balises <b> et <br> visibles. Ils sont maintenant lisibles, avec retours à la ligne."
+   }
+  ]
+ },
+ {
+  "v": "1791176856",
+  "titre": "Exports Excel : comptabilité, licences, sponsors, inventaire",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouveau bouton « Excel » sur Comptabilité (écritures + synthèse par catégorie), Licences (fiches avec suivi des paiements et relances), Sponsors et Inventaire. L'export respecte les filtres affichés à l'écran et les accès délégués. Le bouton CSV reste disponible en Comptabilité."
+   }
+  ]
+ },
+ {
+  "v": "1791118203",
+  "titre": "Relances impayés : seuil de suspension configurable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle section Paramètres > Relances impayés (licences) : choisissez vous-même le nombre de relances sans paiement avant que le bouton « Suspendre la licence » n'apparaisse (3 par défaut)."
+   }
+  ]
+ },
+ {
+  "v": "1791117348",
+  "titre": "Licences : suivi des impayés et relances",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur une fiche licence, vous pouvez fixer un montant attendu pour suivre le reste à payer. Boutons « Relancer » (SMS/email, message prêt à envoyer) avec historique des relances. Après 3 relances sans paiement, un bouton « Suspendre la licence » apparaît (jamais automatique, c'est vous qui décidez) : le licencié n'est alors plus convocable aux événements et son accès espace licencié est coupé jusqu'à réactivation. Un filtre « Voir les impayés » a été ajouté en haut de la liste des licences. La validation d'une licence n'a jamais été, et n'est toujours pas, bloquée par le paiement."
+   }
+  ]
+ },
+ {
+  "v": "1791111014",
+  "titre": "Sponsors : génération de factures numérotées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle section Paramètres > Facturation (sponsors/partenaires) : renseignez l'adresse et le SIRET (facultatif) du club. Par défaut, pas de TVA (franchise en base, art. 293 B du CGI) — une case permet de l'activer avec un taux si votre club y est assujetti. Depuis la fiche d'un sponsor, bouton « Générer une facture » : désignation + montant HT, numérotation automatique et continue (FAC-00001, FAC-00002...), PDF prêt à envoyer. L'accès suit la même délégation que Sponsors (comptable/bureau autorisé peut aussi facturer)."
+   }
+  ]
+ },
+ {
+  "v": "1791094170",
+  "titre": "Nouveau module : Sponsors & Partenaires",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvel onglet Admin > Sponsors & Partenaires : fiches prospects/actifs/expirés avec contact, montant de convention, dates, logo, document de convention et date de relance (badge si dépassée). L'historique des paiements liés (catégorie « Sponsors/Partenaires » en Comptabilité) s'affiche directement sur la fiche. L'accès peut être délégué à un trésorier/bureau comme pour la Comptabilité et l'Inventaire."
+   }
+  ]
+ },
+ {
+  "v": "1791092567",
+  "titre": "Comptabilité : génération des reçus fiscaux (CERFA)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle section Paramètres > Reçus fiscaux (CERFA) : renseignez une fois l'adresse, l'objet et le n° RNA/récépissé du club, puis activez. Une fois activé, chaque ligne de type Dons en Comptabilité propose un bouton « Générer le reçu fiscal » qui produit un PDF prêt à remettre au donateur."
+   }
+  ]
+ },
+ {
+  "v": "1791090404",
+  "titre": "Sécurité : support de Firebase App Check (anti-bot)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le code support App Check (reCAPTCHA v3) pour protéger les codes buvette/invitation/inscription et le formulaire public contre les scripts automatisés. Inactif tant que la clé n'est pas configurée côté console Firebase — voir APP_CHECK_SETUP.md pour les 3 étapes restantes (gratuit, ~10 min)."
+   }
+  ]
+ },
+ {
+  "v": "1791015301",
+  "titre": "Correctif sécurité : liste des joueurs (Inscriptions) non échappée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Oubliée lors du sweep précédent : la liste des joueurs dans Admin > Inscriptions (prénom, nom, catégorie, naissance, poste) s'affichait sans échappement HTML, et l'identifiant du joueur était injecté directement dans les boutons Historique/Modifier/Suppr. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs. Aucune action requise."
+   }
+  ]
+ },
+ {
+  "v": "1790928548",
+  "titre": "Planning : plusieurs entraînements par semaine pour une même équipe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans « Nouveau créneau », tous les jours de la semaine sont maintenant sélectionnables en même temps (plus besoin d'en créer un à chaque fois). Chaque jour coché a son propre horaire et sa propre salle/lieu, pour les équipes qui s'entraînent par exemple le mardi ET le jeudi dans des gymnases différents."
+   }
+  ]
+ },
+ {
+  "v": "1790928265",
+  "titre": "Correctif sécurité : audit complet anti-XSS",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sweep complet de l'app après la correction d'hier sur Communauté : fiche d'inscription publique (gros morceau — nom, adresse, contacts, photo, certificat), noms de joueurs, titres d'événements, canaux, documents, contacts annuaire, lignes comptables, séances de formation éditées par un coach, et plus — tout passe maintenant par l'échappement HTML déjà utilisé ailleurs. Aucune action requise."
+   }
+  ]
+ },
+ {
+  "v": "1790927580",
+  "titre": "Correctif sécurité : messages/sondages Communauté non échappés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un message, un message épinglé ou un sondage (question/options) pouvait contenir du code HTML exécuté chez tous les autres membres du canal, au lieu de s'afficher comme du texte. Corrigé — tout passe maintenant par l'échappement déjà utilisé ailleurs dans l'app. Aucune action requise."
+   }
+  ]
+ },
+ {
+  "v": "1790927441",
+  "titre": "Notifications push : tout reste dans Firebase",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Changement technique : l'envoi des notifications passe maintenant par une Cloud Function Firebase (déclenchée automatiquement à chaque message) plutôt que par un service externe. Un compte de moins à gérer, et la notif part même si la personne qui poste ferme l'app juste après. Reste à faire côté compte avant que ce soit actif : voir PUSH_SETUP.md (passage en plan Blaze + clé Web Push + déploiement de la fonction)."
+   }
+  ]
+ },
+ {
+  "v": "1790890089",
+  "titre": "Vraies notifications push pour les nouveaux messages",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le bouton « Autoriser les notifications » dans Paramètres active maintenant un vrai abonnement push : un nouveau message dans Communauté peut notifier même app fermée. (Nécessite l'activation finale côté dirigeant technique — voir PUSH_SETUP.md ; reste inactif tant que ce n'est pas branché.)"
+   }
+  ]
+ },
+ {
+  "v": "1790883392",
+  "titre": "Nettoyage : retrait de l'ancien outil de migration Firestore",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le bloc « Migration vers Firestore » dans Paramètres datait d'avant le passage 100% cloud et ne servait plus à rien. Retiré."
+   }
+  ]
+ },
+ {
+  "v": "1790882235",
+  "titre": "Essai gratuit : rappel, prolongation et passage en payant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Rappel automatique dans les 3 derniers jours de l'essai gratuit, pour ne pas être suspendu par surprise."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Depuis la Plateforme, deux nouveaux boutons sur un club en essai : « Passer en payant » (arrête le compte à rebours) et « Prolonger l'essai » (ajoute des jours)."
+   }
+  ]
+ },
+ {
+  "v": "1790881872",
+  "titre": "Club d'essai : expiration automatique après 30 jours",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Tout club créé depuis la Plateforme démarre maintenant avec un essai gratuit de 30 jours, affiché sous forme de compte à rebours sur sa fiche. Passé ce délai, le club se suspend automatiquement (avec les mêmes 7 jours de régularisation qu'une suspension manuelle) — pratique pour envoyer un accès test limité à un dirigeant sans avoir à suspendre soi-même."
+   }
+  ]
+ },
+ {
+  "v": "1790843536",
+  "titre": "Plateforme : plus de logo d'un club sur l'écran de tous les clubs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le logo qui apparaissait en haut de l'écran Plateforme était celui d'un autre club, ce qui prêtait à confusion vu que cet écran liste tous les clubs. Il ne s'affiche plus là. En contrepartie, chaque club de la liste affiche maintenant son propre logo à côté de son nom."
+   }
+  ]
+ },
+ {
+  "v": "1790843103",
+  "titre": "Nouveau rôle « Membre du bureau »",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un parent ne peut plus recevoir d'accès bureau (Comptabilité, Licences…), même par erreur : ce bloc n'apparaît que pour un compte Coach ou « Membre du bureau ». Nouveau bouton « Inviter un membre du bureau » dans Accès & invitations, pour quelqu'un qui aide à la gestion sans entraîner d'équipe."
+   },
+   {
+    "roles": [
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau profil « Membre du bureau » disponible à la connexion pour les comptes concernés : sans équipe, avec uniquement Communauté et ce que le dirigeant a coché."
+   }
+  ]
+ },
+ {
+  "v": "1790842533",
+  "titre": "Accès coach : le titre (trésorier/secrétaire) se transfère immédiatement",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Cliquer sur Trésorier ou Secrétaire pour quelqu'un l'enregistre tout de suite (plus besoin d'appuyer sur Enregistrer). Si le titre est déjà pris, une confirmation propose de le transférer directement de l'ancien détenteur au nouveau, sans étape intermédiaire."
+   }
+  ]
+ },
+ {
+  "v": "1790842268",
+  "titre": "Accès bureau : l'onglet se nomme « Gestion »",
+  "points": [
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "L'onglet qui apparaît quand le dirigeant t'accorde un accès bureau s'appelle maintenant « Gestion » (plus clair que « Admin », qui donnait l'impression d'un accès total)."
+   }
+  ]
+ },
+ {
+  "v": "1790836654",
+  "titre": "Accès bureau : tous les modules admin, module par module",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La case à cocher ne se limite plus à Comptabilité/Inventaire : au moment où vous créez le lien d'invitation d'un coach, une modale « Accès bureau » liste tous les modules admin (Licences, Équipes, Planning, Documents, Communauté, Avis, Fiches reçues, Comptabilité, Notes de frais, Inventaire). Vous cochez ce que la personne pourra voir dès la création de son compte. Vous pouvez aussi revenir dessus à tout moment pour un compte existant depuis « Accès coach »."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "À noter : seules Comptabilité et Inventaire sont aussi bloquées côté serveur si elles sont décochées. Pour les autres modules, la case pilote ce qui s'affiche dans l'appli mais pas (encore) l'accès aux données en cas d'accès direct à la base - à faire dans une passe séparée si besoin."
+   },
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Si le dirigeant t'accorde au moins un accès bureau, un onglet « Admin » apparaît dans ta barre de navigation, en plus de tes onglets sportifs habituels qui ne changent pas."
+   }
+  ]
+ },
+ {
+  "v": "1790835973",
+  "titre": "Accès bureau : retouche visuelle",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « Accès coach », le titre, les cases d'accès et l'étiquette de suggestion de rôle sont maintenant regroupés dans un encart dédié, plus lisible qu'avant."
+   }
+  ]
+ },
+ {
+  "v": "1790832270",
+  "titre": "Accès bureau : comptabilité et inventaire réservés par le dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « Accès coach », chaque compte a maintenant un titre (Trésorier / Secrétaire, un seul par club) et des cases à cocher pour donner l'accès à la Comptabilité et à l'Inventaire buvette. Choisir un titre pré-coche les cases utiles, mais c'est bien ce qui est coché qui donne l'accès. Une étiquette en haut suggère le rôle (Coach, Membre du bureau...) selon ce qui est coché."
+   },
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Si le dirigeant t'accorde l'accès à la Comptabilité ou à l'Inventaire, ces écrans apparaissent dans ton admin en plus de ton accès sportif habituel, qui ne change pas."
+   }
+  ]
+ },
+ {
+  "v": "1790830815",
+  "titre": "Correction : l'écran Documents ne s'ouvrait pas au premier clic",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Bug corrigé : cliquer sur « Documents » depuis l'admin ne faisait rien la première fois, et ressortait ensuite au mauvais moment avec le bouton Retour. L'écran s'ouvre maintenant normalement dès le premier clic."
+   }
+  ]
+ },
+ {
+  "v": "1790829838",
+  "titre": "Nouvel écran d'entrée dans l'appli",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "L'écran de connexion (et mot de passe oublié) a été redessiné : fond encre avec le nom General Manager, un seul accent ambre pour le bouton. Aucun changement dans la façon de se connecter, juste l'habillage."
+   }
+  ]
+ },
+ {
+  "v": "1790827761",
+  "titre": "Comptabilité : un tableau de bord avec des graphiques",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau bouton « 📈 Graphiques » en haut de la Comptabilité : recettes et dépenses mois par mois sur les 12 derniers mois, et répartition par catégorie (Cotisations, Buvette, Matériel...). De quoi repérer d'un coup d'œil où va l'argent du club."
+   }
+  ]
+ },
+ {
+  "v": "1790794713",
+  "titre": "Comptabilité : plusieurs comptes / caisses au lieu d'un seul solde",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque ligne comptable peut maintenant être rattachée à un compte (Banque, Caisse espèces, Caisse buvette, Autre). Un filtre par compte et un solde détaillé par compte apparaissent en haut de la Comptabilité. Les anciennes lignes sont classées automatiquement selon leur moyen de paiement, rien à corriger à la main. Les ventes de la caisse buvette en ligne et les mouvements de stock buvette sont désormais affectés au bon compte tout seuls."
+   }
+  ]
+ },
+ {
+  "v": "1790793064",
+  "titre": "Code buvette permanent, pour les clubs qui gardent les mêmes bénévoles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans Accès caisse buvette, deux choix maintenant : « Code du jour » (comme avant, pratique quand ça change selon les dates) ou « Code permanent » (valable jusqu'à révocation — utile si ce sont toujours les mêmes personnes qui tiennent la buvette, pas besoin d'en redemander un à chaque fois)."
+   }
+  ]
+ },
+ {
+  "v": "1790792489",
+  "titre": "La caisse buvette demande le nom du bénévole",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Avant d'ouvrir la caisse avec le code, le bénévole doit maintenant indiquer son nom et prénom. Il apparaît en haut de l'écran pendant toute la session et sur chaque ligne comptable créée (colonne Tiers), pour savoir qui a encaissé quoi."
+   }
+  ]
+ },
+ {
+  "v": "1790782485",
+  "titre": "Le doré n'est plus figé : tous les écrans suivent le thème choisi",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Licences, profils, admin, annuaire, équipes, animations, communauté... une centaine d'endroits gardaient encore la touche dorée d'origine même sur un autre thème que Classique. Ils suivent maintenant la couleur d'accent du thème actif, comme le reste de l'appli."
+   }
+  ]
+ },
+ {
+  "v": "1790780888",
+  "titre": "La caisse buvette passe sur generalmanagerapp.fr",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La caisse buvette en ligne est maintenant sur generalmanagerapp.fr/buvette (au lieu d'un site séparé avec un ancien nom dans l'adresse). Rien à faire : le bouton « 🔑 Accès caisse » dans Inventaire → Buvette donne directement la bonne adresse."
+   }
+  ]
+ },
+ {
+  "v": "1790780467",
+  "titre": "Caisse buvette en ligne, reliée en temps réel",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans Inventaire → onglet Buvette, le bouton « 🔑 Accès caisse » génère un code court valable jusqu'à ce soir. Transmis à un bénévole, il ouvre la caisse en ligne (site séparé) sur son téléphone ou une tablette, sans qu'il ait besoin d'un compte. Chaque vente qu'il encaisse décrémente le stock et crée automatiquement la ligne comptable correspondante, visible immédiatement dans la Comptabilité du club."
+   }
+  ]
+ },
+ {
+  "v": "1790769837",
+  "titre": "Lien direct entre la buvette et la comptabilité",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque article de buvette peut avoir un prix d'achat et un prix de vente. Sur la fiche de l'article, les boutons + 1 / − 1 sont remplacés par « ↓ Achat » et « ↑ Vente » : ils mettent à jour le stock et créent automatiquement la ligne correspondante en comptabilité (dépense « Achats buvette » ou recette « Buvette/Événements »), montant et quantité pré-remplis mais modifiables. Les articles de matériel gardent les boutons + 1 / − 1 classiques."
+   }
+  ]
+ },
+ {
+  "v": "1790700112",
+  "titre": "Barre de navigation élargissable (thèmes Bento Glass et Carnet illustré)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Sur les thèmes où la navigation est sur le côté (Bento Glass, Carnet illustré), un appui long dessus l'élargit pour afficher le nom de chaque onglet en plus de l'icône. Un autre appui long la remet en version compacte. Le choix est mémorisé."
+   }
+  ]
+ },
+ {
+  "v": "1790697980",
+  "titre": "Correction : le mode sombre ne fonctionnait plus avec les nouveaux thèmes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Depuis l'ajout des thèmes visuels, activer le mode sombre n'avait plus d'effet une fois un autre thème que Moderne choisi (Classique, Épuré, Feuille de match, Carnet illustré, Éditorial ont maintenant leur propre version sombre). Bento Glass reste identique quel que soit le mode : c'est déjà un thème sombre par nature."
+   }
+  ]
+ },
+ {
+  "v": "1790697643",
+  "titre": "Bannières d'accueil désormais adaptées au thème choisi",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les grandes bannières (accueil, jour de match) suivaient toujours le dégradé doré/marine même en changeant de thème visuel — elles utilisent maintenant la couleur du thème choisi, comme le reste de l'appli."
+   }
+  ]
+ },
+ {
+  "v": "1790697380",
+  "titre": "6 thèmes visuels en plus du thème par défaut",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau réglage « Thème visuel » dans Paramètres · Apparence : Classique (doré/marine d'origine), Épuré (minimal), Bento Glass (fond violet, navigation sur le côté), Feuille de match (look carnet, onglets en haut), Carnet illustré (pastel, navigation flottante) et Éditorial (bloc couleur, navigation en pilule)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Chaque thème change vraiment l'habillage complet (couleurs, formes des cartes, position de la navigation), pas juste une couleur d'accent."
+   }
+  ]
+ },
+ {
+  "v": "1790683836",
+  "titre": "Comptabilité complète pour le club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Les catégories de recettes/dépenses sont maintenant une liste fixe adaptée à un club sportif (Cotisations/Licences, Subventions, Sponsors, Buvette, Dons... / Affiliation/Licences fédérales, Location salle, Matériel, Déplacements, Arbitrage/Formations, Assurances, Frais admin...) au lieu d'un texte libre."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque ligne comptable peut avoir un justificatif joint (photo ou PDF du reçu, 700 Ko max)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle case « Pointé » sur chaque ligne pour le rapprochement bancaire, avec un solde pointé affiché en plus du solde total, et un filtre pointé/non pointé."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau bouton « Budget » : définissez un montant prévisionnel par catégorie pour l'année et suivez le réalisé en face."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau bouton « Bilan AG » : rapport financier de l'année (recettes et dépenses par catégorie, résultat net) prêt à imprimer ou exporter en PDF pour l'Assemblée Générale."
+   }
+  ]
+ },
+ {
+  "v": "1790675282",
+  "titre": "Nouveau look de l'application",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau look pour l'application : cartes plus arrondies, couleurs plus modernes."
+   }
+  ]
+ },
+ {
+  "v": "1790667688",
+  "titre": "Mise à jour du 29 septembre (5)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Le badge « Arbitre » utilise maintenant l'icône main qui repousse (🫷) — pas d'emoji sifflet dans le standard actuel."
+   }
+  ]
+ },
+ {
+  "v": "1790667432",
+  "titre": "Mise à jour du 29 septembre (4)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau libellé « OTM » (officiel table de marque) dans la liste des badges."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Le badge « Arbitre » a désormais l'icône d'un sifflet."
+   }
+  ]
+ },
+ {
+  "v": "1790667278",
+  "titre": "Mise à jour du 29 septembre (3)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Le pseudo dans le chat se choisit maintenant une fois pour toutes dans Paramètres · Communauté (limité à 20 caractères), au lieu de le retaper à chaque message."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Cliquer sur le nom de l'auteur d'un message ouvre une fiche avec ses vraies infos (nom, prénom, équipe), en plus du pseudo affiché."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Depuis cette fiche, possibilité d'attribuer un libellé (Dirigeant, Coach, Trésorier, Secrétaire, Bénévole, Arbitre...) à n'importe quel membre, y compris soi-même. Le libellé s'affiche à côté du pseudo dans les messages suivants."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveaux réglages dans Paramètres · Communauté : son de notification, et taille du texte des messages (normal/grand)."
+   }
+  ]
+ },
+ {
+  "v": "1790665631",
+  "titre": "Mise à jour du 29 septembre (2)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau bouton ⚙️ sur l'écran Communauté : un panneau de paramètres simplifié (autoriser les notifications, archiver les vieux messages) s'ouvre en fenêtre plutôt qu'un nouvel écran."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Option pour masquer automatiquement les messages de plus de 30 ou 90 jours à l'ouverture d'un canal (rien n'est supprimé, un bouton permet de tout réafficher)."
+   }
+  ]
+ },
+ {
+  "v": "1790659880",
+  "titre": "Mise à jour du 29 septembre",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Dans un canal de discussion : possibilité de répondre à un message précis (il s'affiche en citation, cliquable pour le retrouver)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Mentionnez quelqu'un avec « @ » : une liste s'affiche pour choisir la personne, et elle reçoit une notification même si elle a coupé les notifications du canal."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Possibilité de modifier ses propres messages après envoi (repère « modifié »)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau bouton 🔍 pour rechercher dans les messages d'un canal."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau bouton 🔔 pour couper les notifications d'un canal précis, sans toucher aux autres."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Le partage de fichiers dans un canal accepte maintenant les PDF (en plus des photos), jusqu'à 700 Ko."
+   }
+  ]
+ },
+ {
+  "v": "1790628783",
+  "titre": "Mise à jour du 28 septembre (17)",
+  "points": [
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Nouveau bouton « Quitter cette équipe » sur l'écran Équipe : arrête de suivre une équipe (événements, messages) sans toucher à l'effectif officiel, géré par le dirigeant."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un message est posté dans le canal de l'équipe quand un parent quitte le suivi, pour que coach et dirigeant le voient."
+   }
+  ]
+ },
+ {
+  "v": "1790628294",
+  "titre": "Mise à jour du 28 septembre (16)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle carte « Évolution de l'assiduité » sur le tableau de bord : courbe de présence par semaine (sur les vraies données enregistrées), dans le style cartes arrondies avec les couleurs du club."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La carte « Prochain événement » a désormais une icône, à la manière des applis de gestion de club."
+   }
+  ]
+ },
+ {
+  "v": "1790619994",
+  "titre": "Mise à jour du 28 septembre (15)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le bouton pour changer de profil apparaît maintenant aussi pour un dirigeant ou un coach qui est aussi parent d'un joueur licencié (même si « parent » n'a jamais été coché explicitement sur son compte) — il reste caché pour les comptes à un seul rôle."
+   }
+  ]
+ },
+ {
+  "v": "1790619896",
+  "titre": "Mise à jour du 28 septembre (14)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Correction : le bouton pour changer de profil (dirigeant/coach/parent) disparaissait une fois basculé en vue parent, ce qui bloquait le retour en dirigeant."
+   }
+  ]
+ },
+ {
+  "v": "1790619600",
+  "titre": "Mise à jour du 28 septembre (13)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Retour à l'habillage doré/marine d'origine (le nouveau violet/indigo ne convainc pas)."
+   }
+  ]
+ },
+ {
+  "v": "1790619066",
+  "titre": "Mise à jour du 28 septembre (12)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Suite du nouvel habillage General Manager : la barre du haut, les bannières et les éléments d'accent (boutons, icônes, badges actifs) passent du doré/marine d'origine au violet/indigo, sur toute l'application."
+   }
+  ]
+ },
+ {
+  "v": "1790618812",
+  "titre": "Mise à jour du 28 septembre (11)",
+  "points": [
+   {
+    "roles": [
+     "coach",
+     "parent"
+    ],
+    "texte": "Correction : le bouton retour était masqué sur l'écran de sélection d'équipe (ex : « Modifier mon équipe » depuis les réglages coach), on ne pouvait plus revenir en arrière."
+   }
+  ]
+ },
+ {
+  "v": "1790618311",
+  "titre": "Mise à jour du 28 septembre (10)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Première touche de la nouvelle identité visuelle : cartes plus arrondies et accent violet/indigo (au lieu du doré/marine) pour les éléments communs à l'application (navigation, prochain événement)."
+   }
+  ]
+ },
+ {
+  "v": "1790588575",
+  "titre": "Mise à jour du 28 septembre (9)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Recherche par nom dans la liste des licenciés."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les confirmations anodines (présences enregistrées, message envoyé...) s'affichent maintenant en petit message discret au lieu d'une fenêtre à fermer."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les écrans de chargement affichent une petite animation au lieu d'un texte figé."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Supprimer un événement, un joueur, une équipe ou un document propose désormais quelques secondes pour annuler."
+   }
+  ]
+ },
+ {
+  "v": "1790588263",
+  "titre": "Mise à jour du 28 septembre (8)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Toutes les fenêtres de confirmation et d'erreur utilisent maintenant le même style que le reste de l'application, au lieu des popups grises du navigateur."
+   }
+  ]
+ },
+ {
+  "v": "1790587905",
+  "titre": "Mise à jour du 28 septembre (7)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau réglage « Paiement des licences » : renseignez le lien de votre formulaire HelloAsso (ou équivalent) — vous gardez la main sur votre compte et vos virements."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Un bouton « Payer ma licence » apparaît sur votre espace tant que le club n'a pas enregistré votre paiement, si le club a activé un lien de paiement en ligne."
+   }
+  ]
+ },
+ {
+  "v": "1790587700",
+  "titre": "Mise à jour du 28 septembre (6)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Nouveau : proposez un covoiturage pour un match ou un entraînement depuis un canal de discussion (bouton 🚗), et réservez une place en un clic."
+   }
+  ]
+ },
+ {
+  "v": "1790586147",
+  "titre": "Mise à jour du 28 septembre (5)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le tableau de bord affiche désormais une alerte si deux licenciés portent le même nom et prénom, pour vérifier que photo/téléphone/accès parent correspondent à la bonne personne."
+   }
+  ]
+ },
+ {
+  "v": "1790585654",
+  "titre": "Mise à jour du 28 septembre (4)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le rapprochement entre une fiche licence et un joueur du club tolère maintenant les différences de majuscules/minuscules, d'accents et d'espaces dans le nom/prénom."
+   }
+  ]
+ },
+ {
+  "v": "1790582482",
+  "titre": "Mise à jour du 28 septembre (3)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Corrigé : la réinitialisation des données d'un club pouvait affecter des données d'autres clubs. C'est maintenant totalement cloisonné."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les erreurs de connexion (réactions, votes, sondages, messages) affichent maintenant un message clair au lieu d'échouer silencieusement."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Corrigé un bug d'affichage dans les animations et dans les notifications de rappel d'événement."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'import de joueurs par fichier CSV gère maintenant correctement les noms contenant une virgule."
+   }
+  ]
+ },
+ {
+  "v": "1790580708",
+  "titre": "Mise à jour du 28 septembre (2)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Corrigé : créer un événement en cochant « Tout le club » faisait planter l'écran."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Correction de nombreuses fautes d'orthographe et d'accents dans l'application."
+   }
+  ]
+ },
+ {
+  "v": "1790576570",
+  "titre": "Mise à jour du 28 septembre",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "En activant un nouveau club, vous devez maintenant lire et accepter le contrat qui protège les données de vos licenciés, avant de créer votre compte."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Les pages légales (mentions, confidentialité, CGU) ont un bouton pour revenir facilement à l'application."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "parent"
+    ],
+    "texte": "Les parents créent désormais leur compte uniquement via un lien envoyé par le club, plus par numéro de téléphone — plus sûr sur un appareil partagé."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "parent"
+    ],
+    "texte": "Une case permet d'autoriser (ou non) la photo d'un licencié à être visible par les autres familles du club — jamais visible sans cet accord."
+   }
+  ]
+ }
 ]

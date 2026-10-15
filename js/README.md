@@ -36,6 +36,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `06-licences.js` | Licences, codes d'inscription, fiche publique, paiement |
 | `06c-essais.js` | Séances d'essai : page publique « Venir essayer » (`?essai=clubId`, `essai_pages`), demandes (`essais`), réponse SMS, inscription, vue coach |
 | `06d-cheques.js` | Licences payées par chèque : 1 à 4 chèques (n°, banque, émetteur, date d'encaissement), « À déposer » → « Déposé », remise en banque avec bordereau PDF, recette en compta au dépôt ; paiement prévu choisi par la famille sur la fiche |
+| `06e-aides.js` | Aides Pass'Sport / Pass'Région : champs de la fiche publique (selon `clubs/{id}.aides`, recopié dans `inscription_codes`), aide = part du paiement (`lic.aides`), ligne compta avec le n°, liste des codes à saisir, alertes 10 j / 5 j avant le 31/12 |
 | `06b-reinscription.js` | Réinscription en ligne : ouverture par le club, carte et fiche pré-remplie côté parent, import auto en licence |
 | `07-presences.js` | Pointage des présences, envoi groupé aux familles |
 | `08-parametres.js` | Écran Paramètres et sa personnalisation |

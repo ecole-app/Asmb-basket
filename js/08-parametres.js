@@ -316,6 +316,7 @@ function clubFacturationInfos(){
 // code — voir licenceEligibleSuspension() dans 06-licences.js qui lit
 // clubSeuilRelances().
 function remplirFormRelances(){
+  if(typeof aidesRemplirParams==="function") aidesRemplirParams();
   var r=(window.CURRENT_CLUB && window.CURRENT_CLUB.relances)||{};
   var seuilEl=document.getElementById("rel-seuil"); if(seuilEl)seuilEl.value=(r.seuilSuspension!=null?r.seuilSuspension:3);
 }
@@ -341,7 +342,7 @@ function clubSeuilRelances(){
 // ═══ PERSONNALISATION DES PARAMETRES (ordre, masquage, raccourcis) ═══
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
-  identite:"Identité du club",couleurs:"Couleurs du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
+  identite:"Identité du club",couleurs:"Couleurs du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",aides:"Aides Pass'Sport / Pass'Région",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
   apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };
@@ -397,7 +398,7 @@ var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
   {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
-  {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","relances","facturation","cerfa"]},
+  {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","aides","relances","facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees"]},
   {id:"danger", ic:"⚠️", titre:"Zone dangereuse", dir:true, secs:["@danger"]},

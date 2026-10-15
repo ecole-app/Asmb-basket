@@ -37,7 +37,7 @@ function syncInscriptionCodes(lics){
   var entries={};
   (lics||[]).forEach(function(l){
     if(!l||!l.code) return;
-    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null, clubId:window.CURRENT_CLUB_ID||null};
+    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null, clubId:window.CURRENT_CLUB_ID||null, aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null)};
   });
   Object.keys(entries).forEach(function(code){
     var s=JSON.stringify(entries[code]);
@@ -65,7 +65,7 @@ function lookupInscriptionCode(code, attempt){
   attempt=attempt||0;
   var lics=getLicences();
   var local=lics.find(function(l){return l.code===code;});
-  if(local) return Promise.resolve({found:true, local:local, code:code, clubId:localStorage.getItem("gm_active_club")});
+  if(local) return Promise.resolve({found:true, local:local, code:code, clubId:localStorage.getItem("gm_active_club"), aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null)});
   if(!window.fbDb||!window.fbGetDoc){
     // Firebase pas encore initialise (appareil neuf, page qui vient de charger) : on reessaie brievement.
     if(attempt<30){
@@ -78,7 +78,7 @@ function lookupInscriptionCode(code, attempt){
   return window.fbGetDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).then(function(snap){
     if(snap&&snap.exists()){
       var d=snap.data();
-      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null, clubId:d.clubId||null};
+      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null, clubId:d.clubId||null, aides:d.aides||null};
     }
     return {found:false, code:code};
   }).catch(function(){ return {found:false, code:code}; });
@@ -411,6 +411,7 @@ function buildLicences(){
  if(typeof renderReinscriptionAdmin==="function") renderReinscriptionAdmin();
  if(typeof renderEssaisAdmin==="function") renderEssaisAdmin();
   if(typeof renderChequesAdmin==="function") renderChequesAdmin();
+ if(typeof renderAidesAdmin==="function") renderAidesAdmin();
  var el=document.getElementById("licenceList");if(!el)return;
  document.getElementById("lic-count").textContent=lics.length+" fiche"+(lics.length>1?"s":"")+" · Saison "+season+(licShowArchived?" (archives)":"");
 
@@ -678,6 +679,7 @@ function renderLicenceDetail(lic){
         '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
         '</div>';
     }
+    if(typeof aidesBlockHtml==="function") paiementHtml+=aidesBlockHtml(lic);
     paiementHtml+=renderImpayesBlock(lic);
   }
 
@@ -826,7 +828,7 @@ function savePaiementLicence(code,paiement){
 // attendu s'il veut suivre cette famille) ; les relances sont manuelles
 // (SMS/email via mailto:/sms:, pas d'envoi auto) et la suspension après la
 // 3e relance est PROPOSÉE au dirigeant, jamais automatique.
-function licenceMontantPaye(lic){ return (lic.paiement&&lic.paiement.montant)||0; }
+function licenceMontantPaye(lic){ return ((lic.paiement&&lic.paiement.montant)||0)+(typeof aidesTotalLicence==="function"?aidesTotalLicence(lic):0); }
 function licenceStatutPaiement(lic){
   if(lic.montantAttendu==null) return null; // pas de suivi actif sur cette licence
   var paye=licenceMontantPaye(lic);
@@ -1250,6 +1252,7 @@ async function validerCode(){
     window.CURRENT_CLUB_ID=res.clubId;
   }
   licCurrentCode=code;
+  FICHE_AIDES=res.aides||null;
 
   if(res.local){
     // Appareil du staff : on peut marquer l'ouverture et ecrire dans les licences
@@ -1374,7 +1377,7 @@ function renderFicheForm(lic){
       '</div>'+
       '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prénom"></div>'+
       '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(f.nom||'')+'" placeholder="Nom de famille"></div>'+
-      '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'"></div>'+
+      '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'" oninput="if(typeof aidesMaj===\'function\')aidesMaj()" onchange="if(typeof aidesMaj===\'function\')aidesMaj()"></div>'+
       '<div class="form-group"><label class="form-label">Né(e) à l\'étranger ?</label>'+
         '<div style="display:flex;gap:10px">'+
           '<button type="button" id="btn-etr-non" onclick="selectEtranger(false)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--bdr)":"var(--dkg)")+';background:'+(f.neEtranger?"var(--bg)":"var(--dkg)")+';color:'+(f.neEtranger?"var(--mut)":"#fff")+';cursor:pointer">Non</button>'+
@@ -1417,6 +1420,7 @@ function renderFicheForm(lic){
         '</select>'+
         '<div id="f-ordre" style="display:'+(/^cheque/.test(f.paiementPrevu||'')?'block':'none')+';font-size:12px;color:var(--txt2);margin-top:6px">Chèques à l\'ordre de : <b>'+authEsc((window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"le club")+'</b>. Vous les remettez au club, qui les encaisse aux dates convenues.</div>'+
       '</div>'+
+      (typeof aidesFicheHtml==="function"?aidesFicheHtml(f):'')+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div class="form-group" style="background:rgba(232,103,10,.06);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
         '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
@@ -1570,6 +1574,8 @@ function soumettreFiche(){
       return;
     }
   }
+  var aidesF=(typeof aidesLireFiche==="function")?aidesLireFiche():{};
+  if(aidesF===null) return;
   var fiche={
     genre:ficheGenre,prenom:prenom.trim(),nom:nom.trim(),
     naissance:naissance,
@@ -1597,6 +1603,7 @@ function soumettreFiche(){
     certificat:ficheCertificat||null,
     photo:fichePhoto||null,
     photoAutorisee:fichePhotoAutorisee===true,
+    passSport:aidesF.passSport||"",passRegionOui:aidesF.passRegionOui===true,passRegionNumero:aidesF.passRegionNumero||"",
     soumisLe:new Date().toLocaleDateString("fr-FR")+" a "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),
   };
   var lics=getLicences();

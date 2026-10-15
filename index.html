@@ -420,6 +420,7 @@
     <div id="lic-genre-filter" style="display:none;padding:0 12px 10px;gap:8px;overflow-x:auto;scrollbar-width:none"></div>
     <div id="lic-essai-box"></div>
     <div id="lic-cheques-box"></div>
+    <div id="lic-aides-box"></div>
     <div id="lic-reinsc-box"></div>
     <div id="lic-impayes-toggle" style="display:none"></div>
     <div id="lic-archive-toggle" style="display:none"></div>
@@ -1372,6 +1373,14 @@
  <button onclick="enregistrerInfosRelances()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
+ <div class="param-block" data-sec="aides"><div class="sec">Aides Pass'Sport / Pass'Région</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Active les champs correspondants sur la fiche d'inscription. L'aide compte comme une part du paiement : la famille règle la différence, et le club réclame ensuite l'aide (codes à saisir listés dans Licences).</div>
+ <label style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--txt)"><input type="checkbox" id="aide-ps" style="width:20px;height:20px"> Le club accepte le Pass'Sport (50 €)</label>
+ <label style="display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--txt)"><input type="checkbox" id="aide-pr" style="width:20px;height:20px"> Le club est partenaire Pass'Région (30 €, lycéens et apprentis AURA)</label>
+ <button onclick="aidesEnregistrerParams()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
+ </div>
+ </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>
@@ -1874,6 +1883,7 @@
 <script src="js/06b-reinscription.js"></script>
 <script src="js/06c-essais.js"></script>
 <script src="js/06d-cheques.js"></script>
+<script src="js/06e-aides.js"></script>
 <script src="js/07-presences.js"></script>
 <script src="js/08-parametres.js"></script>
 <script src="js/08b-abonnement.js"></script>
