@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E5A">
+<meta name="robots" content="noindex">
+<title>Pass bénévole — General Manager</title>
+<style>
+/* Pass bénévole (generalmanagerapp.fr/benevole/?p=CODE) : les missions à venir d'un
+   bénévole et ses réponses « je confirme / je ne peux pas ». Aucune donnée perso hors prénom/nom. */
+:root{ --club:#1A2E5A; --bg:#F3F4F7; --card:#fff; --line:#E1E4EB; --ink:#141824; --mut:#7A8197; --ok:#1F8A4C; --ko:#C0392B; color-scheme:light; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#0E1118; --card:#171B25; --line:#262C3A; --ink:#EEF0F5; --mut:#8A91A6; color-scheme:dark; } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+header{background:var(--club);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 16px 18px}
+header .club{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+header h1{margin:4px 0 0;font-size:24px}
+main{max-width:520px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.date{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase}
+.poste{font-size:18px;font-weight:800;margin:2px 0}
+.sub{font-size:13px;color:var(--mut)}
+.btns{display:flex;gap:8px;margin-top:12px}
+button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;font-weight:700;cursor:pointer}
+button.oui.on{background:var(--ok);border-color:var(--ok);color:#fff}
+button.non.on{background:var(--ko);border-color:var(--ko);color:#fff}
+.msg{text-align:center;color:var(--mut);padding:40px 16px;line-height:1.5}
+</style>
+</head>
+<body>
+<header><div class="club" id="club"></div><h1 id="nom">Pass bénévole</h1></header>
+<main id="main"><div class="msg">Chargement…</div></main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const app = initializeApp({
+  apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
+  authDomain: "asmb-app.firebaseapp.com",
+  projectId: "asmb-app",
+  storageBucket: "asmb-app.firebasestorage.app",
+  messagingSenderId: "786817375628",
+  appId: "1:786817375628:web:3db013af1adab9e8ab8aa9"
+});
+try{ initializeAppCheck(app,{ provider:new ReCaptchaEnterpriseProvider("6Le30N8tAAAAAGUJks6zaN09Rbn8B6L-cQRC5Jwp"), isTokenAutoRefreshEnabled:true }); }catch(e){}
+const db = getFirestore(app);
+const code = (new URLSearchParams(location.search).get("p")||"").toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,14);
+const main = document.getElementById("main");
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function msg(t){ main.innerHTML='<div class="msg">'+esc(t)+'</div>'; }
+function jour(d){ try{ return new Date(d+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}); }catch(e){ return d; } }
+let page = null;
+async function repondre(mid, val){
+  const rep = Object.assign({}, page.reponses||{});
+  if(rep[mid]===val) delete rep[mid]; else rep[mid]=val;
+  try{ await updateDoc(doc(db,"ben_pass",code),{ reponses: rep }); }
+  catch(e){ alert("Réponse non enregistrée, réessayez."); }
+}
+window.repondre = repondre;
+function rendre(){
+  if(/^#[0-9a-fA-F]{6}$/.test(page.couleur||"")){ document.documentElement.style.setProperty("--club",page.couleur); document.querySelector('meta[name=theme-color]').content=page.couleur; }
+  document.getElementById("club").textContent = page.clubName||"";
+  document.getElementById("nom").textContent = "Salut "+(String(page.nom||"").split(" ")[0]||"")+" 👋";
+  if(page.actif===false) return msg("Ce pass est désactivé. Contactez le club.");
+  const ms = Array.isArray(page.missions)?page.missions:[];
+  if(!ms.length) return msg("Aucune mission à venir pour l'instant. Le club te prévient dès qu'on a besoin de toi.");
+  const rep = page.reponses||{};
+  main.innerHTML = ms.map(m=>{
+    const r = rep[m.id];
+    return '<div class="card"><div class="date">'+esc(jour(m.date))+(m.heure?' · '+esc(m.heure):'')+'</div>'+
+      '<div class="poste">'+esc(m.poste)+'</div>'+
+      '<div class="sub">'+esc(m.titre)+(m.lieu?' · '+esc(m.lieu):'')+'</div>'+
+      '<div class="btns"><button class="oui'+(r==="oui"?' on':'')+'" data-m="'+esc(m.id)+'" data-v="oui">✓ Je confirme</button>'+
+      '<button class="non'+(r==="non"?' on':'')+'" data-m="'+esc(m.id)+'" data-v="non">✗ Je ne peux pas</button></div></div>';
+  }).join("");
+  main.querySelectorAll("button[data-m]").forEach(b=>b.addEventListener("click",()=>repondre(b.dataset.m,b.dataset.v)));
+}
+if(code.length!==14){ msg("Lien incomplet : demandez au club votre lien de pass bénévole."); }
+else onSnapshot(doc(db,"ben_pass",code), s=>{
+  if(!s.exists()){ msg("Ce pass n'existe pas ou n'est plus valable."); return; }
+  page = s.data(); rendre();
+}, ()=>msg("Connexion impossible. Réessayez dans un instant."));
+</script>
+</body>
+</html>

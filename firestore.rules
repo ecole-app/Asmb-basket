@@ -391,6 +391,36 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
+    // ── Pass bénévole (generalmanagerapp.fr/benevole/?p=CODE) ───────────
+    // Un lien (ou QR) par bénévole : ses missions à venir, sans téléphone ni donnée
+    // sensible. Lisible par son code (non devinable) ; le staff du club le publie.
+    // Seule écriture publique : la réponse du bénévole (oui / non) à chaque mission.
+    match /ben_pass/{code} {
+      function passCles(d) {
+        return d.keys().hasOnly(['clubId','clubName','couleur','benId','nom','actif','missions','reponses','majLe','createdAt'])
+          && d.clubId is string && d.clubId.size() > 0
+          && d.nom is string && d.nom.size() >= 1 && d.nom.size() <= 60
+          && d.actif is bool
+          && d.missions is list && d.missions.size() <= 40
+          && d.get('reponses', {}) is map && d.get('reponses', {}).size() <= 60;
+      }
+      allow get: if true;
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+      allow create: if staff(request.resource.data.clubId)
+        && code.matches('^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$')
+        && passCles(request.resource.data);
+      allow update: if (staff(resource.data.clubId)
+                          && request.resource.data.clubId == resource.data.clubId
+                          && request.resource.data.benId == resource.data.benId
+                          && passCles(request.resource.data))
+        || (resource.data.actif == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reponses'])
+            && request.resource.data.reponses is map
+            && request.resource.data.reponses.size() <= 60
+            && request.resource.data.reponses.values().hasOnly(['oui','non']));
+      allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
+    }
+
     // ── Planning public d'un tournoi (?trn=clubId__eventId) ─────────
     // Équipes, poules et horaires, sans donnée personnelle : lisible par tous,
     // écrit par le staff du club seulement.
@@ -574,6 +604,7 @@ service cloud.firestore {
       }
       match /teams/{id}        { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      match /benevoles/{id}    { allow read: if readStaff(clubId); allow write: if staff(clubId); }
       match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
       // Une fiche de licence contient l'adresse, les coordonnees des responsables
       // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que

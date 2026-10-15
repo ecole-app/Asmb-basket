@@ -19,6 +19,7 @@ function benSauver(eid,liste){
   if(i<0) return false;
   evs[i].benevoles=liste;
   saveEvents(evs);
+  benSyncPlanifier();
   return true;
 }
 // Comptes du club, avec un nom lisible tiré des fiches de licence (le compte n'a pas de nom).
@@ -54,6 +55,8 @@ function benOuvrir(eid){
   var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
   info.textContent=benJourTxt(e)+(e.heure?" · "+e.heure:"")+(e.lieu?" · "+e.lieu:"");
   s.body.appendChild(info);
+  gmRow(s.body).appendChild(gmBtn("🎫 Mes bénévoles (pass)","ghost",function(){ benCarnetOuvrir(); }));
+  benCarnetCharger();
   var liste=document.createElement("div"); s.body.appendChild(liste);
   function rendre(){
     var ev=getEvents().find(function(x){ return x.id===eid; })||e, l=benListe(ev);
@@ -64,6 +67,8 @@ function benOuvrir(eid){
       d.style.cssText="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:9px 10px;margin-bottom:6px";
       d.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase">'+authEsc(m.poste+(m.heure?" · "+m.heure:""))+'</div>'+
         '<div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc(m.nom||"?")+(m.uid?'':' <span style="font-size:11px;color:var(--mut);font-weight:600">(sans compte)</span>')+'</div></div>';
+      var rep=m.benId&&BEN_REPONSES[m.benId]&&BEN_REPONSES[m.benId][m.id];
+      if(rep) d.firstChild.lastChild.insertAdjacentHTML("beforeend",' <span style="font-size:11px;font-weight:800;color:'+(rep==="oui"?"#1F8A4C":"#C0392B")+'">'+(rep==="oui"?"✓ confirmé":"✗ ne peut pas")+'</span>');
       var sms=gmBtn("📱 SMS","soft",function(){ benSms(ev,m); }); sms.style.flex="0 0 auto";
       var del=gmBtn("✕","ghost",function(){
         benSauver(eid,benListe(getEvents().find(function(x){ return x.id===eid; })).filter(function(x){ return x.id!==m.id; })); rendre();
@@ -72,6 +77,7 @@ function benOuvrir(eid){
     });
   }
   rendre();
+  benReponsesCharger().then(rendre);
   gmSection(s.body,"Placer quelqu'un");
   var g=document.createElement("div"); g.style.cssText="display:grid;grid-template-columns:2fr 1fr;gap:8px";
   var wp=document.createElement("div"); wp.className="form-group"; wp.innerHTML='<label class="form-label">Poste</label>';
@@ -91,6 +97,7 @@ function benOuvrir(eid){
         var ev=getEvents().find(function(x){ return x.id===eid; }); if(!ev) return;
         var m={id:"b"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), poste:String(p).slice(0,40), heure:heure.value.trim().slice(0,12), nom:String(pers.nom||"").slice(0,60)};
         if(pers.uid) m.uid=pers.uid;
+        if(pers.benId) m.benId=pers.benId;
         benSauver(eid,benListe(ev).concat([m])); rendre();
         askConfirm("Prévenir "+m.nom+" par SMS maintenant ?",{confirmText:"Envoyer le SMS"}).then(function(ok){ if(ok) benSms(ev,m,pers.phone); });
       });
@@ -106,6 +113,24 @@ function benChoisirPersonne(cb){
   var q=document.createElement("input"); q.className="form-input"; q.placeholder="Rechercher un nom…"; q.style.marginBottom="8px";
   s.body.appendChild(q);
   var l=document.createElement("div"); l.innerHTML='<div style="color:var(--mut);font-size:12px;padding:8px 0">Chargement…</div>'; s.body.appendChild(l);
+  var carnetBox=document.createElement("div"); s.body.insertBefore(carnetBox,l);
+  benCarnetCharger().then(function(c){
+    var actifs=c.filter(function(x){ return x.actif!==false; });
+    if(!actifs.length) return;
+    var t=document.createElement("div"); t.style.cssText="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;margin:2px 0 6px"; t.textContent="Mes bénévoles (avec pass)";
+    carnetBox.appendChild(t);
+    actifs.forEach(function(x){
+      var b=document.createElement("button"); b.type="button";
+      b.style.cssText="display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
+      b.textContent="🎫 "+x.nom;
+      b.addEventListener("click",function(){ choisir({nom:x.nom,benId:x.id,phone:x.tel||""}); });
+      carnetBox.appendChild(b);
+    });
+  });
+  var nouveau=gmBtn("🎫 Nouveau bénévole avec pass (lien / QR)","soft",function(){
+    benNouveau().then(function(x){ if(x) choisir({nom:x.nom,benId:x.id}); });
+  });
+  gmRow(s.body).appendChild(nouveau);
   var autre=gmBtn("Personne sans compte dans l'appli","ghost",function(){
     askPrompt("Nom de la personne",{placeholder:"",confirmText:"OK"}).then(function(v){ v=v&&v.trim(); if(v) choisir({nom:v}); });
   });
@@ -129,8 +154,9 @@ function benChoisirPersonne(cb){
 }
 function benSmsTexte(e,m){
   var club=(typeof clubLabel==="function")?clubLabel(""):"";
+  var pass=m.benId&&BEN_CARNET?BEN_CARNET.find(function(x){ return x.id===m.benId&&x.actif!==false; }):null;
   var prenom=String(m.nom||"").split(" ")[0];
-  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+benJourTxt(e)+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! En cas d'empêchement, prévenez-nous au plus vite.";
+  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+benJourTxt(e)+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! "+(pass?"Confirmez ou signalez un empêchement ici : "+benPassUrl(pass.code):"En cas d'empêchement, prévenez-nous au plus vite.");
 }
 function benSms(e,m,tel){
   var envoyer=function(t){
@@ -145,6 +171,120 @@ function benSms(e,m,tel){
     else askPrompt("Numéro de "+m.nom,{placeholder:"0612345678",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
   });
   askPrompt("Numéro de "+m.nom,{placeholder:"0612345678",confirmText:"Envoyer"}).then(function(v){ if(v) envoyer(v); });
+}
+
+
+// ── Carnet de bénévoles + pass (lien / QR) ───────────────────────────
+// Carnet : clubs/{id}/benevoles/{benId} = {nom, tel?, code, actif}. Le pass public
+// ben_pass/{CODE} (collection globale) reprend les missions à venir du bénévole, sans
+// téléphone : la page /benevole/?p=CODE les affiche et enregistre « je confirme / je ne peux pas ».
+var BEN_CARNET=null;      // cache : [{id, nom, tel, code, actif}]
+var BEN_REPONSES={};      // benId -> {missionId: 'oui'|'non'}
+var BEN_SYNC_T=null;
+function benPassUrl(code){ return "https://generalmanagerapp.fr/benevole/?p="+encodeURIComponent(code); }
+function benCarnetCharger(force){
+  if(BEN_CARNET&&!force) return Promise.resolve(BEN_CARNET);
+  if(!window.fbGetDocs||!window.fbDb||!window.CURRENT_CLUB_ID) return Promise.resolve([]);
+  return window.fbGetDocs(window.fbCollection(window.fbDb,"benevoles")).then(function(sn){
+    var out=[]; sn.forEach(function(d){ var x=d.data()||{}; x.id=d.id; out.push(x); });
+    out.sort(function(a,b){ return String(a.nom).localeCompare(String(b.nom),"fr"); });
+    BEN_CARNET=out; return out;
+  }).catch(function(){ return []; });
+}
+function benReponsesCharger(){
+  if(!window.fbGetDocs||!window.fbDb||!window.CURRENT_CLUB_ID) return Promise.resolve();
+  return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"ben_pass"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(sn){
+    BEN_REPONSES={}; sn.forEach(function(d){ var x=d.data()||{}; if(x.benId) BEN_REPONSES[x.benId]=x.reponses||{}; });
+  }).catch(function(){});
+}
+// Missions à venir d'un bénévole du carnet, tirées des événements.
+function benMissionsDe(benId){
+  var auj=benJourLocal(), out=[];
+  getEvents().forEach(function(e){
+    if(!e||e.annule||e.cancelled||String(e.date||"")<auj) return;
+    benListe(e).forEach(function(m){
+      if(m.benId!==benId) return;
+      out.push({id:String(m.id).slice(0,30), eid:String(e.id).slice(0,60), poste:String(m.poste||"").slice(0,40), heure:String(m.heure||"").slice(0,12),
+        date:String(e.date||"").slice(0,10), titre:String(e.titre||eventTypeLabel(e.type)||"").slice(0,80), lieu:String(e.lieu||"").slice(0,80)});
+    });
+  });
+  out.sort(function(a,b){ return (a.date+a.heure).localeCompare(b.date+b.heure); });
+  return out.slice(0,40);
+}
+function benPassDonnees(x){
+  var c=window.CURRENT_CLUB||{};
+  return {clubId:window.CURRENT_CLUB_ID, clubName:String(c.name||"").slice(0,80), couleur:c.couleur||null, benId:x.id, nom:String(x.nom).slice(0,60),
+    actif:x.actif!==false, missions:benMissionsDe(x.id), majLe:Date.now()};
+}
+// Remet à jour les pass après un changement d'événement (sans toucher aux réponses).
+function benSyncPlanifier(){
+  if(!BEN_CARNET||!BEN_CARNET.length||!benEstStaff()) return;
+  clearTimeout(BEN_SYNC_T);
+  BEN_SYNC_T=setTimeout(benSyncTous,1500);
+}
+function benSyncTous(){
+  (BEN_CARNET||[]).forEach(function(x){
+    if(!x.code) return;
+    var d=benPassDonnees(x); delete d.clubId; delete d.benId;
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"ben_pass",x.code),d).catch(function(){});
+  });
+}
+function benNouveau(){
+  return askPrompt("Nom du bénévole",{placeholder:"Prénom Nom",confirmText:"Créer le pass"}).then(function(v){
+    v=v&&v.trim().slice(0,60); if(!v) return null;
+    var id="v"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), code=genSecureCode(3,4);
+    var x={nom:v,code:code,actif:true,createdAt:Date.now()};
+    return window.fbSetDoc(window.fbDoc(window.fbDb,"benevoles",id),x).then(function(){
+      x.id=id;
+      var d=benPassDonnees(x); d.createdAt=Date.now();
+      return window.fbSetDoc(window.fbDoc(window.fbDb,"ben_pass",code),d);
+    }).then(function(){ BEN_CARNET=(BEN_CARNET||[]).concat([x]); return x; })
+      .catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); return null; });
+  });
+}
+// Fiche d'un pass : lien, QR, SMS, désactivation.
+function benPassOuvrir(x){
+  var s=gmSheet("Pass · "+x.nom), url=benPassUrl(x.code);
+  var t=document.createElement("div"); t.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
+  t.textContent="Le bénévole ouvre ce lien (ou scanne le QR) : il voit ses missions et confirme sa venue. Pas de compte à créer.";
+  s.body.appendChild(t);
+  var qr=document.createElement("div"); qr.style.cssText="display:flex;justify-content:center;padding:8px 0";
+  s.body.appendChild(qr);
+  if(typeof QRCode!=="undefined"){ try{ new QRCode(qr,{text:url,width:200,height:200,colorDark:"#0b1630",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  var u=document.createElement("div"); u.style.cssText="font-size:11.5px;word-break:break-all;color:var(--mut);text-align:center;margin-bottom:8px"; u.textContent=url; s.body.appendChild(u);
+  var row=gmRow(s.body);
+  row.appendChild(gmBtn("Copier le lien","soft",function(){ try{ navigator.clipboard.writeText(url); showToast("Lien copié"); }catch(e){ askAlert(url); } }));
+  row.appendChild(gmBtn("Partager","primary",function(){
+    var txt=(clubLabel("")?clubLabel("")+" : ":"")+"voici ton pass bénévole, tu y vois tes missions et tu confirmes ta venue : "+url;
+    if(navigator.share) navigator.share({text:txt}).catch(function(){});
+    else window.location.href="sms:"+(x.tel?String(x.tel).replace(/[^+0-9]/g,""):"")+"?&body="+encodeURIComponent(txt);
+  }));
+  var row2=gmRow(s.body);
+  row2.appendChild(gmBtn(x.actif!==false?"Désactiver le pass":"Réactiver le pass","ghost",function(){
+    var actif=x.actif===false;
+    Promise.all([
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"benevoles",x.id),{actif:actif}),
+      window.fbUpdateDoc(window.fbDoc(window.fbDb,"ben_pass",x.code),{actif:actif,majLe:Date.now()})
+    ]).then(function(){ x.actif=actif; s.modal.remove(); benCarnetOuvrir(); }).catch(function(err){ askAlert("Erreur : "+((err&&err.code)||err)); });
+  }));
+}
+function benCarnetOuvrir(){
+  var s=gmSheet("Mes bénévoles");
+  var l=document.createElement("div"); s.body.appendChild(l);
+  function rendre(){
+    l.innerHTML="";
+    var c=BEN_CARNET||[];
+    if(!c.length) l.innerHTML='<div style="font-size:12.5px;color:var(--mut);padding:6px 0 10px">Aucun bénévole dans le carnet. Chacun reçoit un lien perso (ou QR) pour voir ses missions et confirmer.</div>';
+    c.forEach(function(x){
+      var b=document.createElement("button"); b.type="button";
+      b.style.cssText="display:block;width:100%;text-align:left;padding:11px 12px;margin-bottom:6px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer";
+      b.textContent="🎫 "+x.nom+(x.actif===false?" (désactivé)":"");
+      b.addEventListener("click",function(){ benPassOuvrir(x); });
+      l.appendChild(b);
+    });
+  }
+  benCarnetCharger(true).then(rendre);
+  gmRow(s.body).appendChild(gmBtn("+ Nouveau bénévole","primary",function(){ benNouveau().then(function(x){ if(x){ rendre(); benPassOuvrir(x); } }); }));
 }
 
 // ── Accueil : « Ce week-end, tu es à la buvette » ───────────────────

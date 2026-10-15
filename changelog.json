@@ -1,5 +1,25 @@
 [
   {
+    "v": "1792049639",
+    "titre": "Pass bénévole (lien ou QR)",
+    "points": [
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Bénévoles : crée un bénévole avec pass, il reçoit un lien (ou QR) perso où il voit ses missions à venir et confirme ou signale un empêchement, sans créer de compte. Tu vois sa réponse dans la liste des postes."
+      },
+      {
+        "roles": [
+          "dirigeant",
+          "coach"
+        ],
+        "texte": "Le SMS de mission contient le lien du pass. Tu peux désactiver ou réactiver un pass à tout moment (bouton « Mes bénévoles »)."
+      }
+    ]
+  },
+  {
     "v": "1792049373",
     "titre": "Profils Trésorier, Secrétaire et Membre du bureau",
     "points": [

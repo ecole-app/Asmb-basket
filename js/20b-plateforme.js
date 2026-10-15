@@ -824,7 +824,7 @@ var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
  "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
  "sponsors","facturation_compteur","push_subscriptions",
- "indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas"];
+ "indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas","benevoles"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
 // actif de la session ne se substitue a celui qu'on purge.
@@ -1063,7 +1063,7 @@ async function deleteClubFlow(c, list){
     if(ch.canaux){ total+=ch.canaux+ch.messages; detail.push("canaux : "+ch.canaux+" ("+ch.messages+" messages)"); }
 
     try{ await window.fbDeleteDoc(window.fbDoc(window.fbDb,"essai_pages",c.id)); }catch(e){}
-    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes","indep_liens"];
+    var globales=["club_invites","support_grants","inscription_codes","buvette_codes","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes","indep_liens","ben_pass"];
     for(var g=0;g<globales.length;g++){
       var ng=await purgeGlobalePourClub(c.id,globales[g]);
       if(ng){ total+=ng; detail.push(globales[g]+" : "+ng); }

@@ -1015,3 +1015,45 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertSucceeds(updateDoc(doc(await as("dirI"), "clubs/I"), { name: "KS Training Pro" }));
   });
 });
+
+describe("Pass bénévole (ben_pass)", () => {
+  const CODE = "ABCD-EFGH-JKMN";
+  const pass = (o = {}) => ({ clubId: "A", clubName: "Club A", benId: "v1", nom: "Léa Martin", actif: true, missions: [{ id: "b1", poste: "Buvette" }], reponses: {}, majLe: 1, ...o });
+  beforeEach(async () => { await setDoc(doc(await as("dirA"), "ben_pass/" + CODE), pass()); });
+
+  it("le staff crée un pass, pas un parent ni un autre club", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "ben_pass/WXYZ-2345-6789"), pass()));
+    await assertFails(setDoc(doc(await as("parentA"), "ben_pass/WXYZ-2345-6789"), pass()));
+    await assertFails(setDoc(doc(await as("dirB"), "ben_pass/WXYZ-2345-6789"), pass()));
+  });
+  it("un code mal formé ou un champ en trop est refusé", async () => {
+    await assertFails(setDoc(doc(await as("dirA"), "ben_pass/abc"), pass()));
+    await assertFails(setDoc(doc(await as("dirA"), "ben_pass/WXYZ-2345-6789"), pass({ tel: "0600000000" })));
+  });
+  it("lisible par son code, pas listable par un visiteur", async () => {
+    await assertSucceeds(getDoc(doc(await as(null), "ben_pass/" + CODE)));
+    await assertFails(getDocs(collection(await as(null), "ben_pass")));
+  });
+  it("le visiteur ne change que ses réponses oui/non", async () => {
+    const v = await as(null);
+    await assertSucceeds(updateDoc(doc(v, "ben_pass/" + CODE), { reponses: { b1: "oui" } }));
+    await assertFails(updateDoc(doc(v, "ben_pass/" + CODE), { reponses: { b1: "peut-être" } }));
+    await assertFails(updateDoc(doc(v, "ben_pass/" + CODE), { missions: [] }));
+    await assertFails(updateDoc(doc(v, "ben_pass/" + CODE), { actif: false }));
+    await assertFails(deleteDoc(doc(v, "ben_pass/" + CODE)));
+  });
+  it("pass désactivé : plus de réponse possible", async () => {
+    await updateDoc(doc(await as("dirA"), "ben_pass/" + CODE), { actif: false });
+    await assertFails(updateDoc(doc(await as(null), "ben_pass/" + CODE), { reponses: { b1: "oui" } }));
+  });
+  it("le staff met à jour les missions mais ne change pas de club", async () => {
+    await assertSucceeds(updateDoc(doc(await as("coachA"), "ben_pass/" + CODE), { missions: [] }));
+    await assertFails(updateDoc(doc(await as("dirB"), "ben_pass/" + CODE), { missions: [] }));
+    await assertFails(updateDoc(doc(await as("dirA"), "ben_pass/" + CODE), { clubId: "B" }));
+  });
+  it("carnet de bénévoles réservé au staff du club", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/benevoles/v1"), { nom: "Léa", code: CODE, actif: true }));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/benevoles/v1")));
+    await assertFails(setDoc(doc(await as("dirB"), "clubs/A/benevoles/v2"), { nom: "X" }));
+  });
+});
