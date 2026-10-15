@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792089544",
+  "titre": "Import des photos (trombinoscope)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Photos : importe plusieurs images ou un ZIP (export FBI). Chaque photo est rattachée au licencié par son n° de licence ou son nom dans le nom du fichier, avec aperçu avant validation."
+   }
+  ]
+ },
+ {
   "v": "1792089420",
   "titre": "Import des licences (CSV / Excel)",
   "points": [
