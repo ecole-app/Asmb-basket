@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792103382",
+  "titre": "Anciennes notifications détaillées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : chaque ancienne notification indique ce qu'elle signale (compte dirigeant créé)."
+   }
+  ]
+ },
+ {
   "v": "1792103294",
   "titre": "Anciennes notifications",
   "points": [
