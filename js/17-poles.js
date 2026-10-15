@@ -3,7 +3,7 @@
 var currentPoleId=null;
 var currentPoleType=null;
 
-var CATS_OPT=["U7","U9","U11","U13","U15","U17","Senior","Loisir","3x3"];
+var CATS_OPT=TEAM_CATS.slice(); // U6 → Senior, Loisir, 3x3 (défini dans 11-admin.js)
 var POLE_FORMS={
   "session":    {title:"Nouvelle session",fields:[{id:"nom",label:"Nom de la session",ph:""},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"date",label:"Date",type:"date"},{id:"heure",label:"Heure",ph:""},{id:"lieu",label:"Lieu",ph:""},{id:"notes",label:"Notes",ph:""}]},
   "participant":{title:"Nouveau participant",fields:[{id:"nom",label:"Nom complet",ph:"Prénom Nom"},{id:"cat",label:"Catégorie",type:"select-cat"},{id:"contact",label:"Contact",ph:"0612345678"}]},
