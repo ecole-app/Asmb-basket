@@ -13,7 +13,18 @@ const club = { id: "x", poles: ["formation", "competition", "evenement", "3x3", 
 describe("Pôles", () => {
   it("seuls les pôles avec joueurs proposent des pastilles (pas Formation ni Événements)", () => {
     const c = app({ uid: "d", roles: ["dirigeant"] }, club);
-    assert.deepEqual(JSON.parse(JSON.stringify(c.polesJoueursActifs().map((p) => p.id))), ["competition", "3x3", "basketpourtous", "basketsante"]);
+    // Club Standard (hasPremium absent du contexte) : Compétition seulement
+    assert.deepEqual(JSON.parse(JSON.stringify(c.polesJoueursActifs().map((p) => p.id))), ["competition"]);
+  });
+  it("Standard : 3 pôles ; Premium : + 3x3 et Basket Santé ; Basket Pour Tous jamais hors ASMB", () => {
+    const ids = (c) => JSON.parse(JSON.stringify(c.activePoles().map((p) => p.id)));
+    const std = app({ uid: "d", roles: ["dirigeant"] }, { id: "x", plan: "standard" });
+    assert.deepEqual(ids(std), ["formation", "competition", "evenement"]);
+    const prem = app({ uid: "d", roles: ["dirigeant"] }, { id: "x", plan: "premium" });
+    prem.hasPremium = () => true;
+    assert.deepEqual(ids(prem), ["formation", "competition", "3x3", "evenement", "basketsante"]);
+    const asmb = app({ uid: "d", roles: ["dirigeant"] }, { id: "asmb" });
+    assert.equal(ids(asmb).includes("basketpourtous"), true);
   });
   it("le dirigeant gère tous les pôles", () => {
     const c = app({ uid: "d", roles: ["dirigeant"] }, club);
