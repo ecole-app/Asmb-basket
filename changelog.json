@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792103294",
+  "titre": "Anciennes notifications",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : les dirigeants déjà vus restent consultables dans « Anciennes » du panneau de la cloche."
+   }
+  ]
+ },
+ {
   "v": "1792103206",
   "titre": "Cloche déroulante",
   "points": [

@@ -520,14 +520,32 @@ async function loadRejoints(box){
   box.innerHTML="";
   var snap;
   try{ snap=await window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"club_invites"),window.fbWhere("createdBy","==",window.ASMB_USER.uid))); }catch(e){ return; }
-  var vus=pfVusLire(), lim=Date.now()-30*86400000, a=[];
+  var vus=pfVusLire(), lim=Date.now()-30*86400000, a=[], vieux=[];
   snap.forEach(function(d){
     var v=d.data()||{}, t=gmDate(v.usedAt);
-    if(v.role==="dirigeant" && v.usedBy && vus.indexOf(d.id)<0 && (!t||t.getTime()>lim)) a.push({id:d.id,club:v.clubName||v.clubId,t:t});
+    if(!(v.role==="dirigeant" && v.usedBy)) return;
+    var x={id:d.id,club:v.clubName||v.clubId,t:t};
+    if(vus.indexOf(d.id)<0 && (!t||t.getTime()>lim)) a.push(x); else vieux.push(x);
   });
-  a.sort(function(x,y){ return ((y.t&&y.t.getTime())||0)-((x.t&&x.t.getTime())||0); });
+  var tri=function(x,y){ return ((y.t&&y.t.getTime())||0)-((x.t&&x.t.getTime())||0); };
+  a.sort(tri); vieux.sort(tri);
   pfNotifN("join",a.length);
-  if(!a.length) return;
+  if(vieux.length){
+    var hist=document.createElement("div"); hist.style.cssText="margin-top:10px";
+    var lst=document.createElement("div"); lst.style.display="none";
+    vieux.forEach(function(x){
+      var r=document.createElement("div"); r.style.cssText="font-size:12px;color:var(--txt2);padding:6px 2px;border-bottom:1px solid var(--bdr)";
+      r.textContent=x.club+(x.t?" · "+x.t.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"");
+      lst.appendChild(r);
+    });
+    var bt=gmBtn("Anciennes ("+vieux.length+") ▾","soft",function(){
+      var o=lst.style.display!=="none"; lst.style.display=o?"none":"block"; bt.textContent="Anciennes ("+vieux.length+") "+(o?"▾":"▴");
+    });
+    hist.appendChild(bt); hist.appendChild(lst);
+    window.__pfHist=hist;
+  } else window.__pfHist=null;
+  var finHist=function(){ if(window.__pfHist) box.appendChild(window.__pfHist); };
+  if(!a.length){ finHist(); return; }
   var head=document.createElement("div");
   head.style.cssText="background:#1f844b;color:#fff;border-radius:var(--rx);padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:8px";
   head.textContent="🎉 "+a.length+" dirigeant"+(a.length>1?"s":"")+(a.length>1?" ont":" a")+" validé son compte";
@@ -548,6 +566,7 @@ async function loadRejoints(box){
     }));
     box.appendChild(card);
   });
+  finHist();
 }
 
 // ── Cloche des notifications de la Plateforme ──────────────────────
