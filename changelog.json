@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792104486",
+  "titre": "Pôles selon la formule",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Standard : Formation, Compétition 5x5 et Événements. Premium (et pendant l'essai de 30 jours) : en plus 3x3 et Basket Santé. Basket Pour Tous et Élite Academy restent réservés à ASMB."
+   }
+  ]
+ },
+ {
   "v": "1792104174",
   "titre": "Tous les pôles pour tous les clubs",
   "points": [

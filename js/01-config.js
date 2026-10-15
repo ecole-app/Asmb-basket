@@ -187,21 +187,21 @@ function clubSlug(){
 // joueur) n'est pas un pole : c'est une brique transverse du socle, jamais
 // retiree. Elite Academy reste propre au club d'origine : le suivi
 // individualise demande une autre structure, il n'est pas proposable en option.
-const BASE_POLES=["formation","competition","evenement","3x3","basketpourtous","basketsante"];   // tous les pôles, sauf Élite Academy (réservée au club d'origine)
-const OPTION_POLES=["3x3","basketpourtous","basketsante"];   // activables plus tard, club par club
+const BASE_POLES=["formation","competition","evenement"];   // Standard
+const PREMIUM_POLES=["3x3","basketsante"];                  // Premium (ouverts pendant l'essai de 30 jours)
+// Élite Academy et Basket Pour Tous : réservés au club d'origine (ASMB).
 
 // Poles reellement affiches pour le club actif.
+// Standard : Formation, Compétition 5x5, Événements. Premium (et essai de 30 jours) :
+// + 3x3 et Basket Santé. Élite Academy et Basket Pour Tous : club d'origine seulement.
 function activePoles(){
   var c=window.CURRENT_CLUB;
-  var ids=null;   // la liste stockée sur le club est ignorée : tout club a tous les pôles (sauf Élite)
-  if(!ids){
-    // Club d'origine cree avant ce reglage : il conserve tous ses poles.
-    var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
-    ids = (c && c.id===boot) ? POLES.map(function(p){ return p.id; }) : BASE_POLES;
-  }
-  // Élite Academy : réservée au club d'origine, même si la liste d'un autre club la contenait.
-  var estOrigine=!!(c && c.id===((typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb"));
-  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0 && (p.id!=="elite"||estOrigine); });
+  var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
+  var estOrigine=!!(c && c.id===boot);
+  var ids=BASE_POLES.slice();
+  if(estOrigine) ids=POLES.map(function(p){ return p.id; });
+  else if(typeof hasPremium==="function" && hasPremium()) ids=ids.concat(PREMIUM_POLES);
+  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
 }
 
 function isPoleActive(poleId){
