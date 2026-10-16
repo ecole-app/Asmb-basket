@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792147621",
+  "titre": "Dernier message dans la liste des canaux",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Dans Communauté, chaque canal affiche son dernier message (auteur et texte) à la place de sa description."
+   }
+  ]
+ },
+ {
   "v": "1792147418",
   "titre": "Nom des personnes dans les discussions privées",
   "points": [

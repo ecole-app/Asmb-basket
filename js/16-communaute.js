@@ -557,7 +557,7 @@ function renderChannelList(channels){
     }
     var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)"> Membre</span>':'<span style="font-size:10px;color:var(--red)"> Prive</span>'):'';
     var unreadBadge='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
-    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ch.name)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
+    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ch.name)+'</div><div id="chdesc-'+ch.id+'" style="font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc((isMember&&lastMsgTxt[ch.id])||ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
     el.appendChild(div);
   });
   checkUnreadBadges();
@@ -991,6 +991,7 @@ async function reserverCarpool(channelId,msgId){
 
 // ── BADGE NON-LU ──────────────────────────────────────────────────
 var lastUsedActivity={};
+var lastMsgTxt={}; // aperçu du dernier message de chaque canal (affiché à la place de la description)
 
 function checkUnreadBadges(){
   if(!window.fbReady)return;
@@ -1013,6 +1014,11 @@ function checkUnreadBadges(){
         var last=msgs[msgs.length-1];
         if(last&&last.ts){
           lastUsedActivity[chId]=last.ts.toDate?last.ts.toDate().getTime():0;
+        }
+        if(last&&!last.deleted&&typeof chatMsgPlain==="function"){
+          lastMsgTxt[chId]=((last.pseudo||"")?last.pseudo+" : ":"")+chatMsgPlain(last).replace(/\s+/g," ").trim();
+          var dEl=document.getElementById("chdesc-"+chId), carte=dEl&&dEl.closest(".channel-card");
+          if(dEl&&carte&&!carte.classList.contains("locked")&&lastMsgTxt[chId]) dEl.textContent=lastMsgTxt[chId];
         }
         var unreadCount=0;
         msgs.forEach(function(m){
