@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792143459",
+  "titre": "Le logo du club devient l'icône de l'appli",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le logo du club sert d'icône (onglet, écran d'accueil). Après un changement de logo, un tuto explique comment réinstaller l'appli pour voir la nouvelle icône."
+   }
+  ]
+ },
+ {
   "v": "1792142708",
   "titre": "Icône des notifications",
   "points": [

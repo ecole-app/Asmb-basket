@@ -96,6 +96,86 @@ function applyClubLogo(){
     });
   }catch(e){}
   applyClubColor();
+  try{ majIconeAppli(); }catch(e){}
+}
+
+// ═══ ICÔNE DE L'APPLI = LOGO DU CLUB ═════════════════════════════
+// Onglet (favicon), icône iPhone et manifeste d'installation prennent le logo
+// du club. Sans logo : icônes General Manager d'origine. Une appli DÉJÀ
+// installée garde son ancienne icône (le système la fige à l'installation) :
+// d'où le tuto de réinstallation (iconeReinstallerTuto) après un changement.
+var ICONE_ORIGINE=null;
+function majIconeAppli(){
+  var head=document.head;
+  var lf=head.querySelector('link[rel="icon"]');
+  var la=head.querySelector('link[rel="apple-touch-icon"]');
+  var lm=head.querySelector('link[rel="manifest"]');
+  if(!ICONE_ORIGINE) ICONE_ORIGINE={f:lf&&lf.getAttribute("href"),a:la&&la.getAttribute("href"),m:lm&&lm.getAttribute("href")};
+  var logo=clubLogo();
+  if(!logo){
+    if(lf&&ICONE_ORIGINE.f){ lf.setAttribute("href",ICONE_ORIGINE.f); lf.setAttribute("type","image/x-icon"); }
+    if(la&&ICONE_ORIGINE.a) la.setAttribute("href",ICONE_ORIGINE.a);
+    if(lm&&ICONE_ORIGINE.m) lm.setAttribute("href",ICONE_ORIGINE.m);
+    return;
+  }
+  var img=new Image();
+  img.onload=function(){
+    function carre(px,marge){
+      var c=document.createElement("canvas"); c.width=px; c.height=px;
+      var x=c.getContext("2d");
+      x.fillStyle="#ffffff"; x.fillRect(0,0,px,px);
+      var zone=px*(1-2*marge), ech=Math.min(zone/img.width,zone/img.height);
+      var w=img.width*ech, h=img.height*ech;
+      x.drawImage(img,(px-w)/2,(px-h)/2,w,h);
+      return c.toDataURL("image/png");
+    }
+    var i32=carre(64,0.06), i180=carre(180,0.12), i192=carre(192,0.14), i512=carre(512,0.14);
+    if(lf){ lf.setAttribute("href",i32); lf.setAttribute("type","image/png"); }
+    if(la) la.setAttribute("href",i180);
+    if(lm){
+      var nom=clubLabel("")||"General Manager";
+      var base=location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/,"");
+      var man={name:nom,short_name:nom.slice(0,12),description:"Gestion de club sportif",
+        start_url:base+"index.html",scope:base,display:"standalone",
+        background_color:"#f1f4f9",theme_color:clubCouleur()||"#1A2E5A",orientation:"portrait",
+        icons:[{src:i192,sizes:"192x192",type:"image/png",purpose:"any"},
+               {src:i512,sizes:"512x512",type:"image/png",purpose:"any"}]};
+      try{
+        var url=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:"application/manifest+json"}));
+        lm.setAttribute("href",url);
+      }catch(e){}
+    }
+  };
+  img.src=logo;
+}
+
+// Tuto affiché au dirigeant après un changement de logo, et rouvrable depuis
+// Paramètres : l'icône de l'appli installée ne change qu'après réinstallation.
+function iconeReinstallerTuto(){
+  var modal=document.createElement("div");
+  modal.className="alert-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto";
+  var box=document.createElement("div");
+  box.style.cssText="background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+  box.addEventListener("click",function(e){ e.stopPropagation(); });
+  box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);text-align:center;margin-bottom:6px">Nouvelle icône : réinstalle l\'appli</div>'+
+    '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:12px">Le logo est changé dans l\'appli, mais l\'icône sur l\'écran d\'accueil ne change pas toute seule. Il faut supprimer l\'appli puis la réinstaller. <b>Tes données ne sont pas perdues</b> : elles sont dans ton compte. Chaque membre qui veut la nouvelle icône doit faire pareil.</div>'+
+    '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:0 0 4px">Android (Chrome)</div>'+
+    '<ol class="ios-tuto"><li>Appui long sur l\'icône de l\'appli › <b>Désinstaller</b>.</li>'+
+    '<li>Ouvre le site dans <b>Chrome</b> et connecte-toi.</li>'+
+    '<li>Menu ⋮ › <b>Installer l\'application</b> (ou « Ajouter à l\'écran d\'accueil »).</li></ol>'+
+    '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:10px 0 4px">iPhone (Safari)</div>'+
+    '<ol class="ios-tuto"><li>Appui long sur l\'icône › <b>Supprimer l\'app</b>.</li>'+
+    '<li>Ouvre le site dans <b>Safari</b> et connecte-toi.</li>'+
+    '<li><b>Partager</b> › <b>Sur l\'écran d\'accueil</b> › <b>Ajouter</b>.</li>'+
+    '<li>Rouvre l\'appli depuis la nouvelle icône et réactive les notifications dans Paramètres.</li></ol>'+
+    '<div style="height:12px"></div>';
+  var ok=document.createElement("button");
+  ok.textContent="J'ai compris";
+  ok.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+  function fin(){ modal.remove(); }
+  ok.addEventListener("click",fin); modal.addEventListener("click",fin);
+  box.appendChild(ok); modal.appendChild(box); document.body.appendChild(modal);
 }
 
 // Couleur du club : une feuille de style ajoutée après la principale. Chaque

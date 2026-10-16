@@ -139,6 +139,8 @@ function majApercuLogo(){
     ? "Logo du club" : "Aucun logo : les initiales sont affichées";
   var rm=document.getElementById("club-logo-retirer");
   if(rm) rm.style.display=(typeof clubLogo==="function"&&clubLogo())?"block":"none";
+  var ri=document.getElementById("club-logo-reinstall");
+  if(ri) ri.style.display=(typeof clubLogo==="function"&&clubLogo())?"block":"none";
 }
 
 function televerserLogoClub(input){
@@ -158,6 +160,7 @@ function televerserLogoClub(input){
         if(window.CURRENT_CLUB) window.CURRENT_CLUB.logo=dataUrl;
         if(typeof applyClubLogo==="function") applyClubLogo();
         majApercuLogo();
+        if(typeof iconeReinstallerTuto==="function") iconeReinstallerTuto();
       });
   }).catch(function(e){ askAlert("Erreur : "+((e&&(e.message||e.code))||e)); });
 }
@@ -172,6 +175,7 @@ function retirerLogoClub(){
         if(window.CURRENT_CLUB) window.CURRENT_CLUB.logo=null;
         if(typeof applyClubLogo==="function") applyClubLogo();
         majApercuLogo();
+        if(typeof iconeReinstallerTuto==="function") iconeReinstallerTuto();
       }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   });
 }
