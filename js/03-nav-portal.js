@@ -271,6 +271,7 @@ function applyClubLabels(){
   try{
     document.querySelectorAll(".js-club-name").forEach(function(el){ el.textContent=n; });
     applyClubLogo();
+    if(typeof bandeauLimiteAccueil==="function") bandeauLimiteAccueil();
     if(typeof stack!=="undefined" && stack.length) updateHdr(stack[stack.length-1]);
     if(typeof gmDeskSync==="function") gmDeskSync();
   }catch(e){}

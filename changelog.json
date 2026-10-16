@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792158378",
+  "titre": "Accès limité : bandeau bien présent à l'ouverture",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "Le bandeau « Accès limité » s'affiche dès l'ouverture de l'appli, sans attendre un changement d'écran."
+   }
+  ]
+ },
+ {
   "v": "1792157915",
   "titre": "Changement de formule appliqué dès le retour dans l'appli",
   "points": [
