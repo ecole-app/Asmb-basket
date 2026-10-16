@@ -301,6 +301,14 @@ function loadClubProfile(clubId){
             if(premier){ premier=false; return; }
             if(s2 && s2.exists() && sig(s2.data())!==sig0){ location.reload(); }
           },function(){});
+          // Appli remise au premier plan (iPhone : la connexion en direct est coupée
+          // quand elle dort) : on revérifie tout de suite.
+          document.addEventListener("visibilitychange",function(){
+            if(document.visibilityState!=="visible" || !window.fbGetDoc) return;
+            window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(s3){
+              if(s3 && s3.exists() && sig(s3.data())!==sig0){ location.reload(); }
+            }).catch(function(){});
+          });
         }
       }catch(e){}
       if((st==="suspended"||st==="deleted") && !window.SUPPORT_MODE && !isSuperAdmin()){

@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792157915",
+  "titre": "Changement de formule appliqué dès le retour dans l'appli",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "Quand la plateforme change la formule du club (suspension, accès limité...), l'appli se met à jour dès qu'on la rouvre, sans la fermer complètement."
+   }
+  ]
+ },
+ {
   "v": "1792157811",
   "titre": "Accès limité : bandeau à l'accueil, planning en consultation seule",
   "points": [
