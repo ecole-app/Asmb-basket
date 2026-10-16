@@ -85,28 +85,29 @@ function compresserLogo(file){
 function buildPaletteClub(){
   var box=document.getElementById("club-palette");
   if(!box||typeof CLUB_PALETTE==="undefined") return;
-  var c1=clubCouleur(), c2=clubCouleur2();
+  var c1=clubCouleurBrute(), c2=clubCouleur2Brute();
   box.innerHTML="";
   CLUB_PALETTE.forEach(function(hex){
     var h=hex.toLowerCase();
     var rang=(h===c1)?1:((h===c2)?2:0);
+    var blanc=(h==="#ffffff");
     var b=document.createElement("button");
     b.type="button";
-    b.setAttribute("aria-label","Couleur "+hex+(rang?(rang===1?" (principale)":" (secondaire)"):""));
-    b.title=hex;
-    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(rang?"3px solid var(--txt)":"2px solid transparent")+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25);color:#fff;font-size:11px;font-weight:900";
+    b.setAttribute("aria-label","Couleur "+(blanc?"blanc":hex)+(rang?(rang===1?" (principale)":" (secondaire)"):""));
+    b.title=blanc?"Blanc":hex;
+    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(rang?"3px solid var(--txt)":(blanc?"2px solid var(--bdr)":"2px solid transparent"))+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25);color:"+(blanc?"#14141f":"#fff")+";font-size:11px;font-weight:900";
     if(rang) b.textContent=String(rang);
     b.onclick=function(){ toucherCouleurClub(h); };
     box.appendChild(b);
   });
   var etat=document.getElementById("club-couleur-etat");
-  if(etat) etat.textContent=c1?("Couleur principale : "+c1+(c2?" · secondaire : "+c2:" · touchez une 2e couleur si vous voulez")):"Couleurs General Manager (par défaut)";
+  if(etat) etat.textContent=c1?("Couleur principale : "+(c1==="#ffffff"?"blanc":c1)+(c2?" · secondaire : "+(c2==="#ffffff"?"blanc":c2):" · touchez une 2e couleur si vous voulez")):"Couleurs General Manager (par défaut)";
   var rs=document.getElementById("club-couleur-reset");
   if(rs) rs.style.display=c1?"block":"none";
   if(typeof majBoutonPalette==="function") majBoutonPalette();
 }
 function toucherCouleurClub(hex){
-  var c1=clubCouleur(), c2=clubCouleur2(), n1=c1, n2=c2, msg=null;
+  var c1=clubCouleurBrute(), c2=clubCouleur2Brute(), n1=c1, n2=c2, msg=null;
   if(hex===c1){ n1=c2||null; n2=null; }
   else if(hex===c2){ n2=null; }
   else if(!c1){ n1=hex; }
@@ -124,7 +125,7 @@ function enregistrerCouleursClub(c1,c2,msg){
   if(!c1) c2=null;
   window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{couleur:c1,couleur2:c2})
     .then(function(){
-      if(window.CURRENT_CLUB){ window.CURRENT_CLUB.couleur=c1; window.CURRENT_CLUB.couleur2=c2; }
+      if(window.CURRENT_CLUB){ window.CURRENT_CLUB.couleur=c1; window.CURRENT_CLUB.couleur2=c2; clubNormaliserCouleurs(window.CURRENT_CLUB); }
       applyClubColor();
       buildPaletteClub();
       showToast(msg||(c1?"Couleurs du club enregistrées":"Couleurs General Manager rétablies"));

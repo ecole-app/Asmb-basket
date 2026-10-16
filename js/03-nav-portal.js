@@ -249,6 +249,7 @@ function applyClubColor(){
     var old=document.getElementById("club-colors");
     var c=document.documentElement.classList.contains("gm-horsclub")?null:clubCouleur();
     document.documentElement.classList.toggle("gm-clubcolor",!!c);
+    document.documentElement.classList.toggle("gm-club-blanc",!!c && typeof clubBlanc==="function" && clubBlanc());
     // Version teintée pour les thèmes ordinateur sombres (même idée que le mode sombre des thèmes).
     if(c) document.documentElement.style.setProperty("--club-dk",gmMix(c,0.3)); else document.documentElement.style.removeProperty("--club-dk");
     if(!c){ if(old) old.remove(); return; }

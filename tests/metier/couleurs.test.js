@@ -33,4 +33,28 @@ describe("Couleurs du club", () => {
     assert.equal(c.clubCouleur(), "#a5272f");
     assert.equal(c.clubCouleur2(), "#1f844b");
   });
+  it("le blanc ne fait rien disparaître : couleur de remplacement lisible, valeur choisie gardée", () => {
+    c.CURRENT_CLUB = { couleur: "#ffffff", couleur2: "#FFFFFF" };
+    c.clubNormaliserCouleurs(c.CURRENT_CLUB);
+    assert.equal(c.clubCouleur(), "#1f2937");
+    assert.equal(c.clubCouleur2(), "#64748b");
+    assert.equal(c.clubCouleurBrute(), "#ffffff");
+    assert.equal(c.clubBlanc(), true);
+    // Un club en couleur n'est pas touché.
+    c.CURRENT_CLUB = { couleur: "#a5272f", couleur2: "#1f844b" };
+    c.clubNormaliserCouleurs(c.CURRENT_CLUB);
+    assert.equal(c.clubCouleur(), "#a5272f");
+    assert.equal(c.clubBlanc(), false);
+  });
+  it("blanc en 2e couleur avec un club en couleur : la 1re reste, l'accent devient lisible", () => {
+    c.CURRENT_CLUB = { couleur: "#a5272f", couleur2: "#ffffff" };
+    c.clubNormaliserCouleurs(c.CURRENT_CLUB);
+    assert.equal(c.clubCouleur(), "#a5272f");
+    assert.equal(c.clubCouleur2(), "#64748b");
+    assert.equal(c.clubCouleur2Brute(), "#ffffff");
+  });
+  it("la palette propose le blanc et le reste garde son contraste avec le blanc", () => {
+    assert.ok(c.CLUB_PALETTE.includes("#ffffff"));
+    for (const h of c.CLUB_PALETTE.filter((x) => x !== "#ffffff")) assert.equal(c.gmCouleurClaire(h), false, h);
+  });
 });

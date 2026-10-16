@@ -45,8 +45,36 @@ function clubLogoHtml(px){
 // elle vit sur la fiche du club (champ "couleur") et s'applique à tous ses
 // membres. Toutes les teintes de la palette ont un contraste >= 4,5:1 avec le
 // blanc : texte blanc des boutons et de l'en-tête toujours lisible.
-var CLUB_PALETTE=["#a5272f", "#911820", "#6b1f24", "#d31724", "#a54d27", "#913c18", "#6b361f", "#ca4c16", "#a16826", "#915818", "#6b471f", "#aa6313", "#1f844b", "#168847", "#1f6b40", "#0f8542", "#1f8469", "#158466", "#1f6b57", "#0f8566", "#208188", "#168088", "#1f666b", "#0f828a", "#275ea5", "#184c91", "#1f406b", "#1769d3", "#272fa5", "#182091", "#1f246b", "#1724d3", "#6627a5", "#541891", "#451f6b", "#7517d3", "#a5276e", "#91185c", "#6b1f4a", "#d31782", "#1A2E5A", "#0f1c33", "#334155", "#475569", "#1f2937", "#44403c", "#7c2d12", "#14532d", "#4c1d95", "#831843"];
+var CLUB_PALETTE=["#ffffff", "#a5272f", "#911820", "#6b1f24", "#d31724", "#a54d27", "#913c18", "#6b361f", "#ca4c16", "#a16826", "#915818", "#6b471f", "#aa6313", "#1f844b", "#168847", "#1f6b40", "#0f8542", "#1f8469", "#158466", "#1f6b57", "#0f8566", "#208188", "#168088", "#1f666b", "#0f828a", "#275ea5", "#184c91", "#1f406b", "#1769d3", "#272fa5", "#182091", "#1f246b", "#1724d3", "#6627a5", "#541891", "#451f6b", "#7517d3", "#a5276e", "#91185c", "#6b1f4a", "#d31782", "#1A2E5A", "#0f1c33", "#334155", "#475569", "#1f2937", "#44403c", "#7c2d12", "#14532d", "#4c1d95", "#831843"];
 var CLUB_COULEUR_DEFAUT="#5b5bf0";
+// Blanc (et teintes très claires) : le texte blanc des boutons et des bandeaux serait
+// invisible. Le dirigeant peut le choisir ; l'appli utilise alors une couleur de
+// remplacement lisible partout (graphite pour la principale, gris ardoise pour la
+// secondaire) et l'en-tête devient blanc (classe gm-club-blanc). La valeur choisie
+// reste dans couleurBrute / couleur2Brute, pour la palette des réglages.
+var CLUB_GRAPHITE="#1f2937", CLUB_ARDOISE="#64748b";
+function gmCouleurClaire(hex){
+  if(typeof hex!=="string"||!/^#[0-9a-fA-F]{6}$/.test(hex)) return false;
+  var r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return (0.299*r+0.587*g+0.114*b)/255>0.82;
+}
+// À appeler une fois, juste après avoir posé couleur / couleur2 bruts sur CURRENT_CLUB.
+function clubNormaliserCouleurs(club){
+  if(!club) return club;
+  club.couleurBrute=club.couleur||null; club.couleur2Brute=club.couleur2||null;
+  if(gmCouleurClaire(club.couleur)) club.couleur=CLUB_GRAPHITE;
+  if(gmCouleurClaire(club.couleur2)) club.couleur2=CLUB_ARDOISE;
+  return club;
+}
+function clubCouleurBrute(){
+  var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleurBrute;
+  return (typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
+}
+function clubCouleur2Brute(){
+  var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur2Brute;
+  return (clubCouleurBrute() && typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
+}
+function clubBlanc(){ return gmCouleurClaire(clubCouleurBrute()); }
 function clubCouleur(){
   var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur;
   return (typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;

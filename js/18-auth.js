@@ -284,7 +284,7 @@ function loadClubProfile(clubId){
   if(!window.fbGetDoc) return;
   window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",clubId)).then(function(snap){
     if(snap && snap.exists()){
-      window.CURRENT_CLUB=Object.assign({id:clubId}, snap.data());
+      window.CURRENT_CLUB=clubNormaliserCouleurs(Object.assign({id:clubId}, snap.data()));
       try{ localStorage.setItem("gm_type_"+clubId, snap.data().type||"club"); }catch(e){}
       if(typeof applyClubLabels==="function") applyClubLabels();
       // Suspendu ou supprime : on n'ejecte plus vers l'ecran de connexion, le club
@@ -331,7 +331,7 @@ function loadClubProfile(clubId){
       var club={ name:"ASMB Basket", sport:"basket", codePrefix:"ASMB", ownerUid:BOOTSTRAP_DIRIGEANT_UID,
                  status:"active", createdAt:window.fbServerTimestamp() };
       window.fbSetDoc(window.fbDoc(window.fbDb,"clubs",clubId), club).catch(function(e){ console.log("création club:",e&&e.code); });
-      window.CURRENT_CLUB=Object.assign({id:clubId}, club);
+      window.CURRENT_CLUB=clubNormaliserCouleurs(Object.assign({id:clubId}, club));
       if(typeof applyClubLabels==="function") applyClubLabels();
     }
     var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];

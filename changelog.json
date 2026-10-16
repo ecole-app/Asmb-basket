@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792155606",
+  "titre": "Le blanc dans les couleurs du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le blanc fait partie des couleurs du club. En principale, l'en-tête devient blanc et les boutons restent lisibles ; rien ne disparaît."
+   }
+  ]
+ },
+ {
   "v": "1792148808",
   "titre": "Tester les notifications du club",
   "points": [
