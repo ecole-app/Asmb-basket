@@ -744,10 +744,11 @@ function plateformeClubLogoHtml(c, px){
 }
 function renderClubCard(c, list){
   var card=gmCard();
-  var suspended=c.status==="suspended";
+  var suspLimite=!!c.planAvantSuspension;
+  var suspended=c.status==="suspended" || suspLimite;
   var supprime=(c.status==="deleted"||c.status==="purging");
-  var jr=joursRestants(c);
-  var etat=(c.status==="purging")?"suppression en cours":(supprime?"supprimé":(suspended?"suspendu":"actif"));
+  var jr=c.status==="suspended"?joursRestants(c):null;
+  var etat=(c.status==="purging")?"suppression en cours":(supprime?"supprimé":(suspLimite?"suspendu (accès limité)":(suspended?"suspendu":"actif")));
   var etatCol=(supprime||suspended)?"var(--red)":"var(--dkg)";
   var delai="";
   if(suspended && jr!==null){
@@ -1592,16 +1593,18 @@ async function suspendreClub(c, list){
   var motif=await askPrompt("Motif communique au club (facultatif)",
     {defaultValue:c.suspendMotif||"",placeholder:"",confirmText:"Suivant"});
   if(motif===null) return;
-  var ok=await askConfirm("Suspendre "+(c.name||c.id)+" ?\n\nSes membres ne pourront plus accéder à leurs données. Ils verront le motif et disposeront de "+GM_DELAI_REGUL_JOURS+" jours pour régulariser avant que la suppression ne devienne possible.",
+  var ok=await askConfirm("Suspendre "+(c.name||c.id)+" ?\n\nLe club passe en accès limité (consultation seule, licences ouvertes). « Réactiver » lui rend sa formule d'avant.",
     {danger:true,confirmText:"Suspendre"});
   if(!ok) return;
-  var now=new Date();
-  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
-    status:"suspended",
-    suspendedAt:now,
-    graceUntil:new Date(now.getTime()+GM_DELAI_REGUL_JOURS*86400000),
+  var maj={
+    plan:"limite",
+    modulesLimites:(c.plan==="limite"&&c.modulesLimites)?c.modulesLimites:gmLimiteDefauts(),
+    planAvantSuspension:c.plan||"paid",
+    suspendedAt:new Date(),
     suspendMotif:String(motif).trim()||null
-  }).then(function(){ loadClubsList(list); })
+  };
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj)
+    .then(function(){ loadClubsList(list); })
     .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
 }
 
@@ -1609,9 +1612,9 @@ async function suspendreClub(c, list){
 function reactiverClub(c, list){
   askConfirm("Réactiver l'accès de "+(c.name||c.id)+" ?",{confirmText:"Réactiver"}).then(function(ok){
     if(!ok) return;
-    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),{
-      status:"active", suspendedAt:null, graceUntil:null, suspendMotif:null
-    }).then(function(){ loadClubsList(list); })
+    var maj={status:"active", suspendedAt:null, graceUntil:null, suspendMotif:null};
+    if(c.planAvantSuspension){ maj.plan=c.planAvantSuspension; maj.planAvantSuspension=null; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){ loadClubsList(list); })
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   });
 }

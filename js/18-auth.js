@@ -290,6 +290,19 @@ function loadClubProfile(clubId){
       // Suspendu ou supprime : on n'ejecte plus vers l'ecran de connexion, le club
       // doit pouvoir lire le motif et le delai dont il dispose pour regulariser.
       var st=snap.data().status;
+      // Suivi en direct : si la plateforme suspend / change la formule pendant que
+      // le club est ouvert, on recharge pour appliquer tout de suite (sinon il faut
+      // attendre que la personne referme l'appli).
+      try{
+        if(window.fbOnSnapshot && !window.SUPPORT_MODE && !isSuperAdmin() && !window.__clubLive){
+          var sig=function(d){ return [d.status||"",d.plan||"",d.planAvantSuspension||"",JSON.stringify(d.aboGels||[])].join("|"); };
+          var sig0=sig(snap.data()), premier=true;
+          window.__clubLive=window.fbOnSnapshot(window.fbDoc(window.fbDb,"clubs",clubId),function(s2){
+            if(premier){ premier=false; return; }
+            if(s2 && s2.exists() && sig(s2.data())!==sig0){ location.reload(); }
+          },function(){});
+        }
+      }catch(e){}
       if((st==="suspended"||st==="deleted") && !window.SUPPORT_MODE && !isSuperAdmin()){
         if(typeof showClubSuspendu==="function") showClubSuspendu(window.CURRENT_CLUB);
         else { askAlert("L'accès de votre club est suspendu."); window.fbSignOut(window.fbAuth); showAuth("entry"); }

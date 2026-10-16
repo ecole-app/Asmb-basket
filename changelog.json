@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792156771",
+  "titre": "Suspension d'un club = accès limité, appliquée tout de suite",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Quand la plateforme suspend un club, il passe en accès limité (consultation seule, licences ouvertes) et c'est appliqué immédiatement, sans devoir fermer l'appli. « Réactiver » rend la formule d'avant."
+   }
+  ]
+ },
+ {
   "v": "1792156474",
   "titre": "Blanc : bandeau d'accueil vraiment blanc",
   "points": [
