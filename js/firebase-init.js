@@ -157,7 +157,7 @@ fbMsgIsSupported().then(function(ok){
       var n=(payload&&payload.notification)||{};
       if(["Test d'alerte","Nouvelle demande d'essai","Compte dirigeant validé"].indexOf(n.title)<0) return;
       navigator.serviceWorker.ready.then(function(reg){
-        reg.showNotification(n.title,{body:n.body||"",icon:"./icon-192.png",badge:"./icon-192.png",data:{url:"./"}});
+        reg.showNotification(n.title,{body:n.body||"",icon:"./icon-192.png",badge:"./badge-96.png",data:{url:"./"}});
       });
     }catch(e){}
   });

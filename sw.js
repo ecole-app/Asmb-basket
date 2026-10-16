@@ -32,7 +32,7 @@ try{
     self.registration.showNotification(n.title || 'Nouveau message', {
       body: n.body || '',
       icon: './icon-192.png',
-      badge: './icon-192.png',
+      badge: './badge-96.png',
       data: { url: (payload.data && payload.data.url) || './' }
     });
   });
@@ -59,6 +59,7 @@ const PRECACHE = [
   './css/style.css',
   './favicon.ico',
   './icon-192.png',
+  './badge-96.png',
   './icon-512.png',
   './apple-touch-icon-180.png',
   './js/sw-register.js',

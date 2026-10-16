@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792142708",
+  "titre": "Icône des notifications",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Notifications : la petite icône dans la barre d'état affiche maintenant GM au lieu d'un carré blanc."
+   }
+  ]
+ },
+ {
   "v": "1792142496",
   "titre": "Diagnostic des alertes : appareil enregistré",
   "points": [
