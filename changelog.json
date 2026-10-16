@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792145289",
+  "titre": "Prénom et nom sur chaque compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La liste des accès affiche le prénom et le nom, pas l'e-mail. Si quelqu'un change son nom ou son e-mail, tu reçois un message privé."
+   },
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "bureau"
+    ],
+    "texte": "Prénom, nom et téléphone demandés à la création du compte. Paramètres › Mon compte pour modifier son prénom, son nom et son e-mail."
+   }
+  ]
+ },
+ {
   "v": "1792144391",
   "titre": "Plus de numéro de téléphone redemandé",
   "points": [

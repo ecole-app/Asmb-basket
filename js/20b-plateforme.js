@@ -319,6 +319,11 @@ function renderInviteCompteForm(el, code, inv){
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">'
     +(indep?'Votre espace <b>Indépendant</b> est prêt. Créez votre compte pour gérer vos séances et vos clients.'
            :'Vous êtes invité(e) comme <b>'+roleLbl.toLowerCase()+'</b>. Créez votre compte pour accéder au club.')+'</p>'
+    +(indep?'':'<label style="'+AUTH_LBL+'">Prénom</label>'
+      +'<input id="auth-prenom" type="text" autocomplete="given-name" maxlength="40" style="'+AUTH_INP+'" placeholder="Prénom">'
+      +'<label style="'+AUTH_LBL+'">Nom</label>'
+      +'<input id="auth-nom" type="text" autocomplete="family-name" maxlength="40" style="'+AUTH_INP+'" placeholder="Nom">'
+      +(inv.tel?'<label style="'+AUTH_LBL+'">Téléphone</label><input type="tel" value="'+authEsc(inv.tel)+'" readonly style="'+AUTH_INP+';opacity:.7">':''))
     +'<label style="'+AUTH_LBL+'">E-mail</label>'
     +'<input id="auth-email" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" placeholder="mail@gmail.com">'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
@@ -371,7 +376,7 @@ function acceptInviteExistant(code, inv){
       if(!snap.exists()){
         // Compte de connexion sans accès (par exemple retiré par le dirigeant) : on recrée la fiche d'accès.
         b.set(uref,{
-          email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
+          email:email, prenom:prenom, nom:nom, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
           permissions:(inv.grantedPermissions||{}), titre:null,
           linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
           dpaAcceptedAt:(inv.role==="dirigeant"?window.fbServerTimestamp():null),
@@ -420,6 +425,9 @@ function acceptInvite(code, inv){
   var estJoueur=(inv.role==="joueur");
   var email=estJoueur?identifiantJoueur():((document.getElementById("auth-email")||{}).value||"").trim();
   var pass=(document.getElementById("auth-pass")||{}).value||"";
+  var prenom=((document.getElementById("auth-prenom")||{}).value||"").trim().slice(0,40);
+  var nom=((document.getElementById("auth-nom")||{}).value||"").trim().slice(0,40);
+  if(!estJoueur && !inviteIndep(inv) && (!prenom||!nom)){ authErr("Prénom et nom obligatoires"); return; }
   if(!estJoueur && email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
   if(pass.length<6){ authErr("Mot de passe : 6 caractères minimum"); return; }
   var btn=document.getElementById("invite-accept-btn");

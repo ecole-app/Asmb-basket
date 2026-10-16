@@ -47,6 +47,8 @@ var BUREAU_TITRES={
   secretaire:{label:"Secrétaire",exclusif:true,autoCheck:["licences","inscriptions","fiches","equipes","planning","documents","communaute"]},
   bureau:{label:"Membre du bureau",exclusif:false,autoCheck:["planning","communaute"]}
 };
+// Prénom + nom saisis par la personne sur son compte (users/{uid}.prenom / .nom).
+function compteNom(u){ return u?(((u.prenom||"")+" "+(u.nom||"")).trim()):""; }
 function bureauProfilLabel(titre){ return (titre&&BUREAU_TITRES[titre])?BUREAU_TITRES[titre].label:""; }
 // ═══ PACKS (Standard / Premium) ═══════════════════════════════════════
 // Le champ clubs/{id}.plan n'est modifiable que par le super admin (voir
@@ -714,7 +716,7 @@ function renderAccesList(list,users,phoneToName){
   // de l'ancien détenteur au nouveau dans la même opération), puis les DEUX
   // cartes concernées sont repeintes tout de suite.
   var titreRegistry={}; // _uid -> {repaint:fn}
-  function nameFor(ou){ return phoneToName[(ou.phone||"").replace(/\s+/g,"")]||ou.email||ou.phone||"ce compte"; }
+  function nameFor(ou){ return compteNom(ou)||phoneToName[(ou.phone||"").replace(/\s+/g,"")]||ou.email||ou.phone||"ce compte"; }
   function setTitreImmediate(u, val, onDone){
     var exclusif=!!(val&&BUREAU_TITRES[val]&&BUREAU_TITRES[val].exclusif!==false);
     var holder=exclusif?users.find(function(ou){return ou._uid!==u._uid && ou.titre===val;}):null;
@@ -749,6 +751,7 @@ function renderAccesList(list,users,phoneToName){
     var name=phoneToName[(u.phone||"").replace(/\s+/g,"")];
     var head=document.createElement("div");
     head.style.cssText="font-size:13px;font-weight:800;color:var(--txt)";
+    name=compteNom(u)||name;
     head.textContent=name||u.email||u.phone||u._uid;
     card.appendChild(head);
     if(name){

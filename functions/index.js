@@ -181,3 +181,38 @@ exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (even
     await ref.update({ ok: false, erreur: String((e && (e.code || e.message)) || e).slice(0, 200) });
   }
 });
+
+// Une personne modifie son prénom, son nom ou son e-mail : message privé au(x)
+// dirigeant(s) du club (la première saisie du nom, elle, ne prévient personne).
+exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
+  const avant = event.data && event.data.before.data();
+  const apres = event.data && event.data.after.data();
+  if (!avant || !apres || !apres.clubId) return;
+  const roles = apres.roles || [];
+  if (roles.includes("dirigeant") || roles.includes("joueur") || roles.includes("client")) return;
+  const uid = event.params.uid;
+  const nomDe = (u) => `${u.prenom || ""} ${u.nom || ""}`.trim();
+  const ancienNom = nomDe(avant), nouveauNom = nomDe(apres);
+  const nomChange = ancienNom !== nouveauNom && !!ancienNom;
+  const mailChange = !!avant.email && !!apres.email && avant.email !== apres.email;
+  if (!nomChange && !mailChange) return;
+  const lignes = [];
+  if (nomChange) lignes.push(`Nom : ${ancienNom} → ${nouveauNom}`);
+  if (mailChange) lignes.push(`E-mail : ${avant.email} → ${apres.email}`);
+  const texte = `J'ai modifié mon compte.\n${lignes.join("\n")}`;
+  const dirs = await db.collection("users").where("clubId", "==", apres.clubId).where("roles", "array-contains", "dirigeant").get();
+  const clubRef = db.collection("clubs").doc(apres.clubId);
+  const label = nouveauNom || apres.email || "Compte";
+  for (const d of dirs.docs) {
+    if (d.id === uid) continue;
+    const dmId = [uid, d.id].sort().join("__");
+    const dmRef = clubRef.collection("dms").doc(dmId);
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    await dmRef.set({
+      memberUids: [uid, d.id],
+      members: [{ uid, label }, { uid: d.id, label: nomDe(d.data()) || d.data().email || "Dirigeant" }],
+      createdBy: uid, lastMsg: texte.slice(0, 80), lastTs: now, lastSender: uid
+    }, { merge: true });
+    await dmRef.collection("messages").add({ senderUid: uid, pseudo: label, text: texte, ts: now });
+  }
+});

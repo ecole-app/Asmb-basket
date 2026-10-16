@@ -794,7 +794,7 @@ function dmStartPicker(){
       var u=d.data()||{}; if(d.id===me) return;
       var roles=u.roles||[];
       if(roles.indexOf("joueur")>=0) return;
-      var label=names[String(u.phone||"").replace(/\s+/g,"")]||u.email||u.phone||"Compte";
+      var label=(typeof compteNom==="function"&&compteNom(u))||names[String(u.phone||"").replace(/\s+/g,"")]||u.email||u.phone||"Compte";
       var role=roles.indexOf("dirigeant")>=0?"Dirigeant":roles.indexOf("coach")>=0?"Coach":roles.indexOf("bureau")>=0?"Bureau":"Parent";
       list.push({uid:d.id,label:label,role:role});
     });

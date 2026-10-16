@@ -396,7 +396,7 @@ function finishAuthedUser(user, u, isUpdate){
               : roles.indexOf("parent")>=0 ? "parent"
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
-  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], badge:u.badge||"" };
+  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", prenom:u.prenom||"", nom:u.nom||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], badge:u.badge||"" };
   // Mode support : le super admin consulte un club qui lui a donné un code d'accès
   var activeClub=u.clubId;
   var sup=(typeof getSupportSession==="function")?getSupportSession():null;
@@ -418,6 +418,7 @@ function finishAuthedUser(user, u, isUpdate){
   // reste du routage ci-dessous (portail du club, synchro) ne la concerne pas.
   if(typeof indRoute==="function" && indRoute(u, isUpdate, function(){ routerClub(); })) return;
   routerClub();
+  if(!isUpdate) setTimeout(function(){ try{ monCompteSiIncomplet(u); }catch(e){} },1500);
   function routerClub(){
   // Super admin : l'accueil est la Plateforme (clubs), jamais le portail d'un
   // club — décidé AVANT tout routage, pour ne jamais afficher le portail (même
@@ -480,3 +481,53 @@ function initAuthGate(){
 }
 
 
+
+
+// ═══ MON COMPTE : prénom, nom, e-mail ═════════════════════════════
+// Le numéro de téléphone rattache le compte aux enfants : il n'est pas
+// modifiable ici (seul le staff le change, voir firestore.rules).
+function monCompteSiIncomplet(u){
+  var roles=(u&&u.roles)||[];
+  if(window.SUPPORT_MODE||!u||!u.clubId) return;
+  if(roles.indexOf("joueur")>=0||roles.indexOf("client")>=0||(typeof isSuperAdmin==="function"&&isSuperAdmin())) return;
+  if(u.prenom&&u.nom) return;
+  if(sessionStorage.getItem("gm_compte_plus_tard")) return;
+  ouvrirMonCompte(true);
+}
+function ouvrirMonCompte(obligatoire){
+  var user=window.fbAuth&&window.fbAuth.currentUser;
+  if(!user||!window.ASMB_USER){ askAlert("Vous devez être connecté."); return; }
+  var me=window.ASMB_USER;
+  var modal=document.createElement("div");
+  modal.className="alert-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto";
+  var box=document.createElement("div");
+  box.style.cssText="background:var(--bg);border-radius:18px;padding:20px 18px 16px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+  box.addEventListener("click",function(e){ e.stopPropagation(); });
+  box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:4px">'+(obligatoire?'Complète ton profil':'Mon compte')+'</div>'+
+    (obligatoire?'<div style="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:6px">Ton club a besoin de ton prénom et de ton nom pour te reconnaître.</div>':'')+
+    '<label style="'+AUTH_LBL+'">Prénom</label><input id="mc-prenom" type="text" maxlength="40" style="'+AUTH_INP+'" value="'+authEsc(me.prenom||"")+'">'+
+    '<label style="'+AUTH_LBL+'">Nom</label><input id="mc-nom" type="text" maxlength="40" style="'+AUTH_INP+'" value="'+authEsc(me.nom||"")+'">'+
+    '<label style="'+AUTH_LBL+'">Téléphone</label><input type="tel" readonly style="'+AUTH_INP+';opacity:.7" value="'+authEsc(me.phone||"Non renseigné")+'">'+
+    '<div style="font-size:11px;color:var(--mut);margin-top:4px;line-height:1.4">Pour changer ton numéro, demande au dirigeant.</div>'+
+    '<div id="mc-err" style="display:none;color:var(--red);font-size:12px;font-weight:600;margin-top:10px;text-align:center"></div>'+
+    '<button id="mc-ok" style="'+AUTH_BTN+'">Enregistrer</button>'+
+    '<button id="mc-mail" type="button" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Changer mon e-mail de connexion</button>'+
+    '<button id="mc-non" type="button" style="width:100%;margin-top:6px;padding:10px;background:none;border:none;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer">'+(obligatoire?'Plus tard':'Fermer')+'</button>';
+  modal.appendChild(box); document.body.appendChild(modal);
+  function fin(){ modal.remove(); }
+  document.getElementById("mc-non").addEventListener("click",function(){ if(obligatoire) sessionStorage.setItem("gm_compte_plus_tard","1"); fin(); });
+  document.getElementById("mc-mail").addEventListener("click",function(){ fin(); openChangeEmailModal(); });
+  document.getElementById("mc-ok").addEventListener("click",function(){
+    var p=document.getElementById("mc-prenom").value.trim().slice(0,40), n=document.getElementById("mc-nom").value.trim().slice(0,40);
+    var er=document.getElementById("mc-err");
+    if(!p||!n){ er.textContent="Prénom et nom obligatoires"; er.style.display="block"; return; }
+    var change=(p!==(me.prenom||"")||n!==(me.nom||""));
+    var avait=!!(me.prenom||me.nom);
+    window.fbSetDoc(window.fbDoc(window.fbDb,"users",user.uid),{prenom:p,nom:n},{merge:true}).then(function(){
+      me.prenom=p; me.nom=n; fin();
+      if(change&&avait) askAlert("Pense à prévenir le dirigeant de ce changement. Il en est aussi averti dans l'appli par un message privé.");
+      if(document.getElementById("scr-parametres")&&typeof buildParametres==="function") buildParametres();
+    }).catch(function(e){ er.textContent="Erreur : "+((e&&e.code)||e); er.style.display="block"; });
+  });
+}
