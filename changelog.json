@@ -1,6 +1,6 @@
 [
  {
-  "v": "1792145691",
+  "v": "1792146131",
   "titre": "Discussions privées : suppression et nom",
   "points": [
    {
@@ -10,7 +10,7 @@
      "bureau",
      "parent"
     ],
-    "texte": "Appui long sur une discussion privée pour la supprimer. Les messages portent ton prénom et ton nom au lieu de « Anonyme ». Le bouton sondage a retrouvé son icône."
+    "texte": "Appui long sur une discussion privée pour la supprimer de ta liste (l'autre personne la garde, elle réapparaît si un message arrive). Les messages portent ton prénom et ton nom au lieu de « Anonyme ». Le bouton sondage a retrouvé son icône."
    }
   ]
  },

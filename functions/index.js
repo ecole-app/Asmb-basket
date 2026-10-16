@@ -216,3 +216,21 @@ exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
     await dmRef.collection("messages").add({ senderUid: uid, pseudo: label, text: texte, ts: now });
   }
 });
+
+// Chaque nuit : une discussion privée n'est effacée pour de bon que si TOUS ses
+// participants l'ont « supprimée » (masquée) et que son dernier message a plus de
+// 12 mois. Tant qu'un participant la garde, rien n'est supprimé.
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+exports.purgeDiscussionsMasquees = onSchedule("every day 03:30", async () => {
+  const limite = admin.firestore.Timestamp.fromMillis(Date.now() - 365 * 24 * 3600 * 1000);
+  const clubs = await db.collection("clubs").get();
+  for (const club of clubs.docs) {
+    const vieux = await club.ref.collection("dms").where("lastTs", "<", limite).get();
+    for (const dm of vieux.docs) {
+      const uids = dm.data().memberUids || [];
+      const reads = await Promise.all(uids.map((u) => dm.ref.collection("reads").doc(u).get()));
+      if (!uids.length || !reads.every((r) => r.exists && r.data().masque === true)) continue;
+      await db.recursiveDelete(dm.ref);
+    }
+  }
+});

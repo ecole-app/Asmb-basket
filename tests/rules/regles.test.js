@@ -448,11 +448,11 @@ describe("Discussions privées", () => {
     await assertFails(setDoc(doc(await as("parentA"), "clubs/A/dms/parentA__parent2A"), { memberUids: ["parentA", "parent2A"] }));
     await assertFails(setDoc(doc(await as("coachA"), "clubs/A/dms/dirA__parent2A"), { memberUids: ["dirA", "parent2A"] }));
   });
-  it("un participant supprime la discussion (messages puis discussion), pas un tiers", async () => {
-    await assertFails(deleteDoc(doc(await as("parent2A"), "clubs/A/dms/dirA__parentA/messages/d1")));
-    await assertFails(deleteDoc(doc(await as("parent2A"), "clubs/A/dms/dirA__parentA")));
-    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/messages/d1")));
-    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA")));
+  it("« supprimer » = masquer pour soi : on écrit son propre reads, jamais celui d'un autre, et rien n'est effaçable côté client", async () => {
+    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/reads/parentA"), { uid: "parentA", masque: true, masqueAt: Timestamp.now() }, { merge: true }));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/reads/dirA"), { uid: "dirA", masque: true }, { merge: true }));
+    await assertFails(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA")));
+    await assertFails(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/messages/d1")));
   });
   it("le staff voit les comptes de son club, pas un parent", async () => {
     await assertSucceeds(getDocs(query(collection(await as("coachA"), "users"), where("clubId", "==", "A"))));

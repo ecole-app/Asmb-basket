@@ -705,8 +705,19 @@ function dmListen(){
   dmUnsub=window.fbOnSnapshot(q,function(snap){
     var dms=[]; snap.forEach(function(d){ var x=d.data(); x.id=d.id; dms.push(x); });
     dms.sort(function(a,b){ return chatMsgTime({ts:b.lastTs})-chatMsgTime({ts:a.lastTs}); });
-    window.__chatDmsCache=dms;
-    dmRenderList();
+    // Discussions masquées par moi : cachées tant qu'aucun message plus récent n'arrive.
+    Promise.all(dms.map(function(dm){
+      return window.fbGetDoc(window.fbDoc(window.fbDb,"dms",dm.id,"reads",myUid()))
+        .then(function(r){
+          var x=r.exists()?r.data({serverTimestamps:"estimate"}):null;
+          if(!x||!x.masque) return true;
+          var at=x.masqueAt&&x.masqueAt.toDate?x.masqueAt.toDate().getTime():0;
+          return chatMsgTime({ts:dm.lastTs})>at;
+        }).catch(function(){ return true; });
+    })).then(function(vis){
+      window.__chatDmsCache=dms.filter(function(d,i){ return vis[i]; });
+      dmRenderList();
+    });
   },function(e){ console.log("dms:",e&&e.code); });
 }
 function dmUnreadOf(dm){
@@ -759,18 +770,18 @@ function dmRenderList(){
   window.__dmUnread=unread;
   if(typeof updateNavBadge==="function") updateNavBadge(window.__chanUnread||0);
 }
+// « Supprimer » = masquer pour soi. La discussion reste chez l'autre personne et,
+// côté serveur, n'est effacée pour de bon que lorsque tous les participants l'ont
+// masquée ET que le dernier message a plus de 12 mois (functions/index.js).
 function dmSupprimer(dm){
-  if(!dm||!window.fbDeleteDoc) return;
-  askConfirm("Supprimer la discussion privée avec "+dmOtherLabel(dm)+" ? Les messages seront effacés pour vous deux.",
+  if(!dm||!window.fbSetDoc) return;
+  askConfirm("Supprimer la discussion privée avec "+dmOtherLabel(dm)+" ? Elle disparaît de votre liste. L'autre personne la garde, et elle réapparaît si un nouveau message arrive.",
     {danger:true,confirmText:"Supprimer"}).then(function(ok){
     if(!ok) return;
-    var col=window.fbCollection(window.fbDb,"dms",dm.id,"messages");
-    window.fbGetDocs(col).then(function(snap){
-      var ps=[]; snap.forEach(function(d){ ps.push(window.fbDeleteDoc(d.ref)); });
-      return Promise.all(ps);
-    }).then(function(){
-      return window.fbDeleteDoc(window.fbDoc(window.fbDb,"dms",dm.id));
-    }).then(function(){
+    var me=myUid();
+    window.fbSetDoc(window.fbDoc(window.fbDb,"dms",dm.id,"reads",me),
+      {uid:me,pseudo:myChatPseudo(),ts:window.fbServerTimestamp(),masque:true,masqueAt:window.fbServerTimestamp()},{merge:true})
+    .then(function(){
       window.__chatDmsCache=(window.__chatDmsCache||[]).filter(function(x){ return x.id!==dm.id; });
       dmRenderList();
       if(typeof showToast==="function") showToast("Discussion supprimée");
