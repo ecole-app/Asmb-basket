@@ -1422,6 +1422,17 @@
  <button onclick="startNewSeason()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Démarrer la saison suivante</button>
  <div style="font-size:10px;color:var(--mut);margin-top:8px;line-height:1.4">Archive les licences de la saison en cours (elles restent consultables). Les joueurs et équipes ne sont pas touchés.</div>
  </div>
+ <div class="sec">Réinitialisation</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1.5px solid color-mix(in srgb, var(--red) 35%, var(--bdr));border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:13px;font-weight:700;color:var(--txt)">Réinitialiser la comptabilité</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime les recettes et dépenses enregistrées. Action définitive et irréversible.</div>
+ <button onclick="resetComptabilite()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:color-mix(in srgb, var(--red) 10%, transparent);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer">Réinitialiser la comptabilité</button>
+ </div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1.5px solid color-mix(in srgb, var(--red) 35%, var(--bdr));border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:13px;font-weight:700;color:var(--txt)">Réinitialiser toutes les données du club</div>
+ <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime joueurs, équipes, événements, licences et canaux de discussion, dans le cloud partagé. Action définitive et irréversible.</div>
+ <button onclick="resetAllData()" style="margin-top:10px;padding:8px 16px;border-radius:20px;background:color-mix(in srgb, var(--red) 10%, transparent);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer">Tout réinitialiser</button>
+ </div>
  </div><div class="param-block" data-sec="demo"><div class="sec">Démonstration</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow);cursor:pointer" onclick="loadDemoData()">
  <div style="font-size:13px;font-weight:700;color:var(--txt)"> Charger des données de démo</div>
@@ -1587,7 +1598,7 @@
         </label>
         <div style="padding:14px">
           <button onclick="exportSeasonIcs()" style="width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:12px;font-weight:700;border:none;cursor:pointer">Exporter la saison vers mon agenda</button>
-          <button onclick="localStorage.removeItem('asmb_pwa_hint');alert('Le bandeau d\'installation réapparaîtra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide à l'installation</button>
+          <button onclick="localStorage.removeItem('asmb_pwa_hint');askAlert('Le bandeau d\'installation réapparaîtra.');" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:12px;font-weight:700;border:none;cursor:pointer">Revoir l'aide à l'installation</button>
         </div>
       </div>
 

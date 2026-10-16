@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792194950",
+  "titre": "Réinitialisation des données, de retour dans Paramètres",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Données & saison : un bloc « Réinitialisation » permet de supprimer la comptabilité ou toutes les données du club si besoin, avec double confirmation. Même protection qu'avant, sans l'intitulé alarmant."
+   }
+  ]
+ },
+ {
   "v": "1792182623",
   "titre": "Indépendant : discussions privées avec photos",
   "points": [
