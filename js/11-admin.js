@@ -533,7 +533,7 @@ function buildAdminHome(){
    var gelA=(typeof aboGelActif==="function")&&aboGelActif();
    lim.innerHTML=gelA
      ?'<div style="font-size:13px;font-weight:800">⏸ Abonnement gelé jusqu\'au '+aboDateTxt(gelA.fin)+'</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Accès limité pendant le gel. Relancez quand vous voulez : Paramètres › Abonnement.</div>'
-     :'<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Vos données sont conservées. Contactez-nous pour réactiver le club.</div>';
+     :'<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Vos données sont conservées. Contactez-nous pour réactiver le club.'+(window.CURRENT_CLUB&&window.CURRENT_CLUB.suspendMotif?'<br><i>Motif : '+authEsc(window.CURRENT_CLUB.suspendMotif)+'</i>':'')+'</div>';
    el.appendChild(lim);
    var exp=document.createElement("div");exp.className="admin-card";
    exp.onclick=openExportDonnees;

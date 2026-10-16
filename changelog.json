@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792157284",
+  "titre": "Accès limité : motif affiché",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Quand la plateforme met le club en accès limité, le motif donné s'affiche dans le bandeau « Accès limité »."
+   }
+  ]
+ },
+ {
   "v": "1792156771",
   "titre": "Suspension d'un club = accès limité, appliquée tout de suite",
   "points": [
