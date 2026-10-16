@@ -104,6 +104,29 @@ function applyClubLogo(){
 // du club. Sans logo : icônes General Manager d'origine. Une appli DÉJÀ
 // installée garde son ancienne icône (le système la fige à l'installation) :
 // d'où le tuto de réinstallation (iconeReinstallerTuto) après un changement.
+// Retire le fond uni d'un logo (carré blanc, couleur de fond...) : on part des
+// bords et on efface les pixels proches de la couleur des coins, sans toucher
+// à l'intérieur du dessin. Un logo déjà transparent est laissé tel quel.
+function logoSansFond(ctx,w,h){
+  var im=ctx.getImageData(0,0,w,h), d=im.data;
+  function px(x,y){ var i=(y*w+x)*4; return [d[i],d[i+1],d[i+2],d[i+3]]; }
+  var coins=[px(0,0),px(w-1,0),px(0,h-1),px(w-1,h-1)];
+  if(coins.some(function(c){ return c[3]<200; })) return;
+  var r=coins[0];
+  var tol=48;
+  function proche(i){ return Math.abs(d[i]-r[0])+Math.abs(d[i+1]-r[1])+Math.abs(d[i+2]-r[2])<=tol*3/2 && d[i+3]>0; }
+  if(!coins.every(function(c){ return Math.abs(c[0]-r[0])+Math.abs(c[1]-r[1])+Math.abs(c[2]-r[2])<=tol; })) return;
+  var vu=new Uint8Array(w*h), pile=[];
+  function push(x,y){ if(x<0||y<0||x>=w||y>=h) return; var k=y*w+x; if(vu[k]) return; vu[k]=1; if(proche(k*4)) pile.push(k); }
+  for(var x=0;x<w;x++){ push(x,0); push(x,h-1); }
+  for(var y=0;y<h;y++){ push(0,y); push(w-1,y); }
+  while(pile.length){
+    var k=pile.pop(), cx=k%w, cy=(k-cx)/w;
+    d[k*4+3]=0;
+    push(cx+1,cy); push(cx-1,cy); push(cx,cy+1); push(cx,cy-1);
+  }
+  ctx.putImageData(im,0,0);
+}
 var ICONE_ORIGINE=null;
 function majIconeAppli(){
   var head=document.head;
@@ -130,6 +153,7 @@ function majIconeAppli(){
     // flotter petit au milieu d'un carré blanc.
     var src=document.createElement("canvas"); src.width=img.width; src.height=img.height;
     var sx=src.getContext("2d"); sx.drawImage(img,0,0);
+    try{ logoSansFond(sx,img.width,img.height); }catch(e){}
     var bx=0,by=0,bw=img.width,bh=img.height;
     try{
       var d=sx.getImageData(0,0,img.width,img.height).data, x0=img.width,y0=img.height,x1=-1,y1=-1;
