@@ -1,5 +1,29 @@
 [
  {
+  "v": "1792181010",
+  "titre": "Indépendant : annonces à tes clients",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvel onglet Messages : écris une annonce à tous tes clients ou aux habitués d'un créneau, avec une séance jointe si tu veux. Tu vois qui a répondu 👍🏼 ou 👎🏼."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Quand tu annules une séance, l'appli te propose de prévenir tes clients par une annonce déjà rédigée."
+   },
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Nouvel onglet Messages : tu reçois les annonces de ton coach et tu réponds d'un 👍🏼 ou d'un 👎🏼 (pour toi et pour chacun de tes enfants). Une pastille indique les annonces non lues."
+   }
+  ]
+ },
+ {
   "v": "1792169774",
   "titre": "Test de notification : détails de l'erreur",
   "points": [

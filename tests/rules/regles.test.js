@@ -979,6 +979,36 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertFails(setDoc(doc(cli, "clubs/I/indep_resas/x__cliI"), resa({ seance: "x", statut: "peut-etre" })));
     await assertSucceeds(setDoc(doc(await as("dirI"), "clubs/I/indep_resas/cr1_2026-10-20__cli2I"), { present: true }, { merge: true }));
   });
+  it("annonces : l'indépendant publie, les clients lisent sans écrire ; un autre club ne lit pas", async () => {
+    const annonce = (o = {}) => Object.assign({ texte: "Séance annulée jeudi", cible: "cr1", seance: "cr1_2026-10-22", seanceDate: "2026-10-22", createdAt: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(await as("dirI"), "clubs/I/indep_annonces/an2"), annonce()));
+    await assertFails(setDoc(doc(await as("dirI"), "clubs/I/indep_annonces/an3"), annonce({ texte: "" })));
+    await assertFails(setDoc(doc(await as("dirI"), "clubs/I/indep_annonces/an3"), annonce({ texte: "x".repeat(1001) })));
+    await assertFails(setDoc(doc(await as("dirI"), "clubs/I/indep_annonces/an3"), annonce({ extra: 1 })));
+    await assertFails(setDoc(doc(await as("cliI"), "clubs/I/indep_annonces/an4"), annonce()));
+    await assertFails(updateDoc(doc(await as("cliI"), "clubs/I/indep_annonces/an1"), { texte: "piraté" }));
+    await assertSucceeds(getDoc(doc(await as("cliI"), "clubs/I/indep_annonces/an1")));
+    await assertFails(getDoc(doc(await as("dirA"), "clubs/I/indep_annonces/an1")));
+    await assertSucceeds(deleteDoc(doc(await as("dirI"), "clubs/I/indep_annonces/an2")));
+  });
+  it("réponses aux annonces : 👍🏼/👎🏼 pour soi ou son enfant ; lues par le compte qui répond et l'indépendant seulement", async () => {
+    const cli = await as("cliI"), par = await as("parI");
+    const rep = (o = {}) => Object.assign({ annonce: "an1", uid: "cliI", owner: "cliI", val: "up", nom: "Julie D.", at: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cliI"), rep()));
+    await assertSucceeds(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cliI"), { val: "down", at: serverTimestamp() }, { merge: true }));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cliI"), { val: "peut-etre", at: serverTimestamp() }, { merge: true }));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cliI"), { owner: "cli2I", at: serverTimestamp() }, { merge: true }));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cli2I"), rep({ uid: "cli2I" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reactions/an1__cli2I"), { val: "down", at: serverTimestamp() }, { merge: true }));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reactions/an1__e_lina01"), rep({ uid: "e_lina01" })));
+    await assertSucceeds(setDoc(doc(par, "clubs/I/indep_reactions/an1__e_lina01"), rep({ uid: "e_lina01", owner: "parI", nom: "Lina B." })));
+    await assertFails(setDoc(doc(par, "clubs/I/indep_reactions/an1__e_tom002"), rep({ uid: "e_tom002", owner: "parI" })));
+    await assertSucceeds(getDocs(query(collection(cli, "clubs/I/indep_reactions"), where("owner", "==", "cliI"))));
+    await assertFails(getDocs(collection(cli, "clubs/I/indep_reactions")));
+    await assertFails(getDoc(doc(cli, "clubs/I/indep_reactions/an1__cli2I")));
+    await assertSucceeds(getDocs(collection(await as("dirI"), "clubs/I/indep_reactions")));
+    await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_reactions")));
+  });
   it("lien : l'indépendant le crée et le coupe ; un club ou un client non ; personne ne liste", async () => {
     const lien = (o = {}) => Object.assign({ clubId: "I", clubName: "KS Training", couleur: "#0e7c7b", actif: true, createdBy: "dirI", createdAt: serverTimestamp() }, o);
     await assertSucceeds(setDoc(doc(await as("dirI"), "indep_liens/WXYZ-2345"), lien()));

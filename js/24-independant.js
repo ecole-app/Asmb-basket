@@ -19,14 +19,18 @@
 //                       ses enfants a parentSeul:true sur sa propre fiche (il n'est pas « client »).
 //                       Un enfant est une « personne » comme une autre : son id sert dans les
 //                       habitués d'un créneau et dans les réservations (seance__e_xxx).
+//  indep_annonces/{id} annonce de l'indépendant {texte, cible:"tous"|creneauId, seance?, seanceDate?, createdAt}
+//  indep_reactions/{annonce__personne}  réponse 👍🏼/👎🏼 {annonce, uid (personne), owner (compte), val:"up"|"down", nom}
 //  indep_notes/{uid}    notes privées de l'indépendant
 //  indep_liens/{CODE}   (global) lien d'invitation réutilisable, désactivable
 
 var IND={role:null, uid:null, clubId:null, club:{}, tab:"accueil", creneaux:[], seances:{}, resas:{},
-  clients:{}, clientsCharges:false, fiche:null, ficheChargee:false, enfants:{}, liens:[], unsubs:[], feuille:null, rendu:false};
+  clients:{}, clientsCharges:false, fiche:null, ficheChargee:false, enfants:{}, liens:[], unsubs:[], feuille:null, rendu:false,
+  annonces:[], reacs:{}, lu:null, luAvant:null};
 var IND_COULEUR="#0E7C7B";
 var IND_HORIZON=28;   // jours de séances affichés à l'avance
 var IND_PASSE=14;     // jours d'historique chargés
+var IND_ANNONCES_JOURS=90; // annonces gardées à l'écran
 var IND_JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 var IND_JOURS_C=["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
 var IND_MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
@@ -35,7 +39,8 @@ var IND_ICONES={
   accueil:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg>',
   seances:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
   clients:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.5 3.5 0 010 7M21 20c0-2.5-1.5-4.6-3.6-5.5"/></svg>',
-  reserver:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M12 13v4M10 15h4"/></svg>'
+  reserver:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M12 13v4M10 15h4"/></svg>',
+  messages:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>'
 };
 
 // ── Petits outils ────────────────────────────────────────────────────
@@ -110,6 +115,12 @@ function indEcouter(){
   });
   ecoute(window.fbQuery(window.fbCollection(db,"indep_resas"),window.fbWhere("date",">=",debut)),function(sn){
     var m={}; sn.forEach(function(d){ m[d.id]=d.data(); }); IND.resas=m; indRendre();
+  });
+  ecoute(window.fbQuery(window.fbCollection(db,"indep_annonces"),window.fbWhere("createdAt",">=",new Date(Date.now()-IND_ANNONCES_JOURS*86400000))),function(sn){
+    var l=[]; sn.forEach(function(d){ l.push(Object.assign({id:d.id},d.data({serverTimestamps:"estimate"}))); }); IND.annonces=l; indRendre();
+  });
+  ecoute(IND.role==="coach"?window.fbCollection(db,"indep_reactions"):window.fbQuery(window.fbCollection(db,"indep_reactions"),window.fbWhere("owner","==",IND.uid)),function(sn){
+    var m={}; sn.forEach(function(d){ m[d.id]=d.data(); }); IND.reacs=m; indRendre();
   });
   if(IND.role==="coach"){
     ecoute(window.fbCollection(db,"indep_clients"),function(sn){
@@ -222,21 +233,24 @@ function indPeindre(){
   var coach=IND.role==="coach", h="", tabs;
   var nom=(IND.club&&IND.club.name)||"Mon activité";
   if(coach){
-    tabs=[["accueil","Accueil"],["seances","Séances"],["clients","Clients"]];
-    var sur={accueil:indDateLong(indAuj()), seances:"Séances", clients:"Mes clients"}[IND.tab]||"";
+    tabs=[["accueil","Accueil"],["seances","Séances"],["clients","Clients"],["messages","Messages"]];
+    var sur={accueil:indDateLong(indAuj()), seances:"Séances", clients:"Mes clients", messages:"Annonces"}[IND.tab]||"";
     h+=indTop(sur, nom, '<button type="button" data-act="reglages" aria-label="Réglages de mon activité">⚙</button>');
-    h+='<div class="ind-body">'+(IND.tab==="seances"?indVueSeances():IND.tab==="clients"?indVueClients():indVueAccueil())+'</div>';
+    h+='<div class="ind-body">'+(IND.tab==="seances"?indVueSeances():IND.tab==="clients"?indVueClients():IND.tab==="messages"?indVueMessages():indVueAccueil())+'</div>';
   } else {
-    tabs=[["accueil","Accueil"],["reserver","Réserver"]];
+    tabs=[["accueil","Accueil"],["reserver","Réserver"],["messages","Messages"]];
     var f=IND.fiche||{};
-    h+=indTop(nom, IND.tab==="reserver"?"Réserver":"Bonjour"+(f.prenom?" "+f.prenom:""),
+    if(IND.tab==="messages"){ if(IND.luAvant==null) IND.luAvant=indLuLire(); indMarquerLu(); }
+    h+=indTop(nom, IND.tab==="reserver"?"Réserver":IND.tab==="messages"?"Messages":"Bonjour"+(f.prenom?" "+f.prenom:""),
       '<button type="button" data-act="ma-fiche" aria-label="Ma fiche">'+indEsc(indInitiales(f.prenom,f.nom))+'</button>');
     if(IND.ficheChargee && !IND.fiche){ h+='<div class="ind-body">'+indVueFicheManquante()+'</div>'; tabs=null; }
-    else h+='<div class="ind-body">'+(IND.tab==="reserver"?indVueReserver():indVueAccueilClient())+'</div>';
+    else h+='<div class="ind-body">'+(IND.tab==="reserver"?indVueReserver():IND.tab==="messages"?indVueMessagesClient():indVueAccueilClient())+'</div>';
   }
   if(tabs){
+    var nbLus=coach?0:indNbNonLus();
     h+='<nav class="ind-nav" style="grid-template-columns:repeat('+tabs.length+',1fr)">'+tabs.map(function(t){
-      return '<button type="button" data-act="tab" data-v="'+t[0]+'" class="'+(IND.tab===t[0]?"on":"")+'"'+(IND.tab===t[0]?' aria-current="page"':'')+'>'+IND_ICONES[t[0]]+t[1]+'</button>';
+      var bdg=(t[0]==="messages"&&nbLus>0)?'<i class="bdg" aria-label="'+nbLus+' non lu'+(nbLus>1?"s":"")+'">'+nbLus+'</i>':'';
+      return '<button type="button" data-act="tab" data-v="'+t[0]+'" class="'+(IND.tab===t[0]?"on":"")+'"'+(IND.tab===t[0]?' aria-current="page"':'')+'>'+IND_ICONES[t[0]]+t[1]+bdg+'</button>';
     }).join("")+'</nav>';
   }
   root.innerHTML='<div class="ind" style="--ia:'+indCouleur()+'">'+h+'</div>';
@@ -344,7 +358,8 @@ function indSeanceCoach(s){
   h+=aut.length?'<div class="ind-c ind-list">'+aut.map(ligne).join("")+'</div>':'<div class="ind-c ind-vide">'+(s.ouvert?"Personne pour l'instant. Tes clients réservent depuis leur appli.":"Ce créneau n'est pas ouvert aux inscriptions.")+'</div>';
   h+='<div class="ind-btns" style="margin-top:4px">';
   if(!s.annulee) h+='<button type="button" class="ind-btn s" data-act="ajout-seance" data-id="'+indEsc(s.id)+'">+ Ajouter un client</button>'
-    +'<button type="button" class="ind-btn d" data-act="annuler-seance" data-id="'+indEsc(s.id)+'">Annuler la séance</button>';
+    +'<button type="button" class="ind-btn s" data-act="annoncer-seance" data-id="'+indEsc(s.id)+'">Annoncer cette séance</button>'
+    +'<button type="button" class="ind-btn d" data-act="annuler-seance" data-id="'+indEsc(s.id)+'" style="grid-column:1/-1">Annuler la séance</button>';
   else h+='<button type="button" class="ind-btn s" data-act="retablir-seance" data-id="'+indEsc(s.id)+'">Rétablir la séance</button>'
     +(s.ponctuelle?'<button type="button" class="ind-btn d" data-act="suppr-seance" data-id="'+indEsc(s.id)+'">Supprimer</button>':'<span></span>');
   h+='</div>';
@@ -365,7 +380,15 @@ function indAnnulerSeance(sid){
     if(m===null) return;
     var d={date:s.date, annulee:true, motif:String(m||"").trim().slice(0,120)};
     if(s.creneauId) d.creneauId=s.creneauId;
-    window.fbSetDoc(window.fbDoc(indDb(),"indep_seances",sid),d,{merge:true}).then(function(){ showToast("Séance annulée"); }).catch(indErr);
+    window.fbSetDoc(window.fbDoc(indDb(),"indep_seances",sid),d,{merge:true}).then(function(){
+      showToast("Séance annulée"); indProposerAnnonceAnnulation(s,d.motif);
+    }).catch(indErr);
+  });
+}
+function indProposerAnnonceAnnulation(s,motif){
+  askConfirm("Veux-tu prévenir tes clients par une annonce ?",{title:"Séance annulée",confirmText:"Écrire l'annonce",cancelText:"Plus tard"}).then(function(ok){
+    if(!ok) return;
+    indAnnonceForm({texte:"Séance du "+indDateLong(s.date)+(s.heure?" à "+s.heure:"")+" annulée"+(motif?" ("+motif+")":"")+".", cible:s.creneauId||"tous", seance:s.id});
   });
 }
 function indRetablirSeance(sid){
@@ -599,6 +622,173 @@ function indClientFiche(uid){
       b.commit().then(function(){ sh.modal.remove(); showToast(c.mineur?"Enfant retiré":"Client retiré"); }).catch(indErr);
     });
   });
+}
+
+// ── Annonces (l'indépendant écrit, les clients répondent 👍🏼 ou 👎🏼) ──
+// Réserver reste « Je viens / Je ne peux pas » sur la séance : une annonce n'inscrit personne.
+function indAnnMs(a){ var c=a&&a.createdAt; return (c&&c.toMillis)?c.toMillis():Date.now(); }
+function indHeure(d){ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function indAnnQuand(a){ var d=new Date(indAnnMs(a)); return indDateTxt(indIso(d))+" · "+indHeure(d); }
+function indAnnoncesTriees(){ return IND.annonces.slice().sort(function(x,y){ return indAnnMs(y)-indAnnMs(x); }); }
+function indAnnonceParId(id){ for(var i=0;i<IND.annonces.length;i++) if(IND.annonces[i].id===id) return IND.annonces[i]; return null; }
+function indCreneauParId(id){ for(var i=0;i<IND.creneaux.length;i++) if(IND.creneaux[i].id===id) return IND.creneaux[i]; return null; }
+function indAnnVisible(a,pid){
+  if(a.cible==="tous") return true;
+  var c=indCreneauParId(a.cible); return !!c && (c.habitues||[]).indexOf(pid)>=0;
+}
+function indAnnoncesPourMoi(){
+  var pers=indPersonnes();
+  return indAnnoncesTriees().filter(function(a){ return pers.some(function(p){ return indAnnVisible(a,p.id); }); });
+}
+function indCibleTxt(a){
+  if(a.cible==="tous") return "Tous mes clients";
+  var c=indCreneauParId(a.cible);
+  return c?"Habitués · "+IND_JOURS_C[Number(c.jour)]+" "+(c.heure||"")+" "+(c.titre||""):"Habitués d'un créneau";
+}
+// Dernière annonce vue par ce compte sur cet appareil (la pastille « non lu » du client).
+function indCleLu(){ return "ind_lu_"+IND.clubId+"_"+IND.uid; }
+function indLuLire(){
+  if(IND.lu!=null) return IND.lu;
+  var v=null; try{ v=localStorage.getItem(indCleLu()); }catch(e){}
+  if(v===null){ v=String(Date.now()); try{ localStorage.setItem(indCleLu(),v); }catch(e){} }
+  IND.lu=Number(v)||0; return IND.lu;
+}
+function indMarquerLu(){
+  var max=indLuLire();
+  indAnnoncesPourMoi().forEach(function(a){ max=Math.max(max,indAnnMs(a)); });
+  if(max>IND.lu){ IND.lu=max; try{ localStorage.setItem(indCleLu(),String(max)); }catch(e){} }
+}
+function indNbNonLus(){ var lu=indLuLire(); return indAnnoncesPourMoi().filter(function(a){ return indAnnMs(a)>lu; }).length; }
+
+function indDestinataires(a){
+  if(a.cible==="tous") return indClientsActifs().map(function(c){ return c.uid; });
+  var c=indCreneauParId(a.cible);
+  return ((c&&c.habitues)||[]).filter(function(uid){ var f=IND.clients[uid]; return f && f.actif!==false; });
+}
+function indCompteReac(a){
+  var r={up:[], down:[], aucune:[]};
+  indDestinataires(a).forEach(function(uid){
+    var x=IND.reacs[a.id+"__"+uid];
+    if(x&&x.val==="up") r.up.push(uid); else if(x&&x.val==="down") r.down.push(uid); else r.aucune.push(uid);
+  });
+  return r;
+}
+// Séance jointe à une annonce : un clic ouvre la séance (c'est là qu'on réserve).
+function indMiniSeance(a){
+  if(!a.seance) return "";
+  var s=indSeanceParId(a.seance);
+  if(!s) return '<div class="ind-mini"><div class="t"><strong>'+indEsc("Séance du "+indDateTxt(a.seanceDate||indAuj()))+'</strong></div></div>';
+  var sous=s.annulee?"":[s.lieu, s.places?indNbVenants(s)+" / "+s.places+" inscrits":""].filter(Boolean).join(" · ");
+  return '<div class="ind-mini tap" data-act="seance" data-id="'+indEsc(s.id)+'" role="button" tabindex="0"><div class="t"><strong>'
+    +indEsc(indQuand(s.date)+" · "+(s.heure||"")+" · "+s.titre)+'</strong>'+(sous?'<span>'+indEsc(sous)+'</span>':'')+'</div>'
+    +(s.annulee?'<span class="ind-pill no">Annulée</span>':'<span aria-hidden="true">›</span>')+'</div>';
+}
+function indVueMessages(){
+  var l=indAnnoncesTriees(), h='<button type="button" class="ind-btn p" data-act="annonce-new">+ Nouvelle annonce</button>';
+  if(!l.length) return h+'<div class="ind-c ind-vide">Aucune annonce pour l\'instant.<br>Écris à tous tes clients, ou seulement aux habitués d\'un créneau : ils répondent d\'un 👍🏼 ou d\'un 👎🏼.</div>';
+  return h+l.map(function(a){
+    var c=indCompteReac(a);
+    return '<div class="ind-c tap" data-act="annonce" data-id="'+indEsc(a.id)+'" role="button" tabindex="0">'
+      +'<div class="ind-ann-h"><span>'+indEsc(indCibleTxt(a))+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
+      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)
+      +'<div class="ind-reacs"><span class="ind-pill ok">👍🏼 '+c.up.length+'</span><span class="ind-pill no">👎🏼 '+c.down.length+'</span><span class="ind-pill a">'+c.aucune.length+' sans réponse</span></div></div>';
+  }).join("");
+}
+function indOuvrirAnnonce(id){
+  if(!indAnnonceParId(id)) return;
+  var sh=gmSheet("Annonce");
+  sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
+  sh.body.addEventListener("click",indClic);
+  IND.feuille={s:sh, peindre:function(){
+    var a=indAnnonceParId(id); if(!a){ sh.modal.remove(); return; }
+    var c=indCompteReac(a);
+    function liste(titre,uids){
+      return '<div class="ind-k">'+titre+' · '+uids.length+'</div>'+(uids.length?'<div class="ind-c ind-list">'+uids.map(function(uid){
+        var f=IND.clients[uid]||{}, par=indParentDe(f);
+        return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(f.prenom,f.nom))+'</div><div class="t"><strong>'+indEsc(indNom(uid))+'</strong>'
+          +(indEstMineur(f)?'<span>Mineur'+(par?" · parent : "+indEsc(par.prenom||""):"")+'</span>':'')+'</div></div>';
+      }).join("")+'</div>':'<div class="ind-c ind-vide">Personne.</div>');
+    }
+    sh.body.innerHTML='<div class="ind-c"><div class="ind-ann-h"><span>'+indEsc(indCibleTxt(a))+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
+      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +liste("👍🏼 D'accord",c.up)+liste("👎🏼 Pas d'accord",c.down)+liste("Sans réponse",c.aucune)
+      +'<button type="button" class="ind-btn d" data-act="annonce-suppr" data-id="'+indEsc(a.id)+'" style="margin-top:6px">Supprimer l\'annonce</button>';
+  }};
+  IND.feuille.peindre();
+}
+function indSupprAnnonce(id){
+  askConfirm("Supprimer cette annonce et les réponses de tes clients ?",{title:"Supprimer",confirmText:"Supprimer",danger:true}).then(function(ok){
+    if(!ok) return;
+    var b=window.fbWriteBatch();
+    Object.keys(IND.reacs).forEach(function(k){ if(IND.reacs[k].annonce===id) b.delete(window.fbDoc(indDb(),"indep_reactions",k)); });
+    b.delete(window.fbDoc(indDb(),"indep_annonces",id));
+    b.commit().then(function(){ if(IND.feuille&&IND.feuille.s.modal) IND.feuille.s.modal.remove(); showToast("Annonce supprimée"); }).catch(indErr);
+  });
+}
+// Rédaction : texte, destinataires (tous / habitués d'un créneau), séance jointe en option.
+// opts : {texte, cible, seance}
+function indAnnonceForm(opts){
+  opts=opts||{};
+  var sh=gmSheet("Nouvelle annonce");
+  sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
+  var cr=IND.creneaux.filter(function(c){ return c.actif!==false; })
+    .sort(function(x,y){ return (((Number(x.jour)+6)%7)+(x.heure||"")).localeCompare(((Number(y.jour)+6)%7)+(y.heure||"")); });
+  var a=indAuj(), ss=indSeances(a,indAjout(a,IND_HORIZON));
+  if(opts.seance && !ss.some(function(x){ return x.id===opts.seance; })){ var x0=indSeanceParId(opts.seance); if(x0) ss.unshift(x0); }
+  sh.body.innerHTML='<form class="ind-f" id="ind-an-f" novalidate>'
+    +'<label>Message<textarea id="ind-an-txt" maxlength="1000" rows="4" placeholder="Ex. : Pluie jeudi, on passe en salle.">'+indEsc(opts.texte||"")+'</textarea></label>'
+    +'<label>Pour qui<select id="ind-an-cible"><option value="tous">Tous mes clients</option>'
+    +cr.map(function(c){ return '<option value="'+indEsc(c.id)+'">Habitués · '+indEsc(IND_JOURS_C[Number(c.jour)]+" "+(c.heure||"")+" "+(c.titre||"Séance"))+'</option>'; }).join("")+'</select></label>'
+    +'<label>Séance jointe (facultatif)<select id="ind-an-seance"><option value="">Aucune</option>'
+    +ss.map(function(x){ return '<option value="'+indEsc(x.id)+'">'+indEsc(indDateTxt(x.date)+" · "+(x.heure||"")+" · "+x.titre)+'</option>'; }).join("")+'</select></label>'
+    +'<p class="ind-note">Tes clients répondent d\'un 👍🏼 ou d\'un 👎🏼. Pour s\'inscrire à une séance, ils passent par « Je viens » sur la séance.</p>'
+    +'<div class="err" id="ind-an-err"></div><div class="actions"><button type="submit" class="ok">Publier</button></div></form>';
+  var f=sh.body.querySelector("#ind-an-f");
+  f.querySelector("#ind-an-cible").value=opts.cible||"tous";
+  if(f.querySelector("#ind-an-cible").value!==(opts.cible||"tous")) f.querySelector("#ind-an-cible").value="tous";
+  f.querySelector("#ind-an-seance").value=opts.seance||"";
+  f.addEventListener("submit",function(e){
+    e.preventDefault();
+    var txt=f.querySelector("#ind-an-txt").value.trim();
+    if(!txt){ f.querySelector("#ind-an-err").textContent="Écris ton message."; return; }
+    var d={texte:txt.slice(0,1000), cible:f.querySelector("#ind-an-cible").value||"tous", createdAt:window.fbServerTimestamp()};
+    var sid=f.querySelector("#ind-an-seance").value;
+    if(sid){ var s=indSeanceParId(sid); d.seance=sid; d.seanceDate=s?s.date:""; }
+    var btn=f.querySelector("button[type=submit]"); btn.disabled=true;
+    window.fbSetDoc(window.fbDoc(indDb(),"indep_annonces",indId("a_")),d)
+      .then(function(){ sh.modal.remove(); showToast("Annonce publiée"); })
+      .catch(function(e2){ btn.disabled=false; indErr(e2); });
+  });
+}
+// Client : annonces reçues, avec 👍🏼 / 👎🏼 (une réponse par personne : moi, puis chaque enfant concerné).
+function indVueMessagesClient(){
+  var l=indAnnoncesPourMoi();
+  if(!l.length) return '<div class="ind-c ind-vide">Pas encore d\'annonce de ton coach.<br>Elles apparaîtront ici.</div>';
+  var avant=IND.luAvant==null?indLuLire():IND.luAvant, tous=indPersonnes(), multi=tous.length>1;
+  return l.map(function(a){
+    var pers=tous.filter(function(p){ return indAnnVisible(a,p.id); }), nouveau=indAnnMs(a)>avant;
+    return '<div class="ind-c"><div class="ind-ann-h"><span>'+(nouveau?'<span class="ind-pill ok">Nouveau</span>':'')+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
+      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)
+      +'<div class="ind-reacs c">'+pers.map(function(p){
+        var r=IND.reacs[a.id+"__"+p.id], v=r&&r.val;
+        function bt(val,emoji,lib){
+          return '<button type="button" class="ind-rb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'">'+emoji+'</button>';
+        }
+        return '<div class="ind-row"><div class="t"><span>'+(multi?'<b>'+indEsc(p.prenom)+'</b>':'Ta réponse')+'</span></div>'+bt("up","👍🏼","D'accord")+bt("down","👎🏼","Pas d'accord")+'</div>';
+      }).join("")+'</div></div>';
+  }).join("");
+}
+function indReac(aid,v,pid){
+  pid=pid||IND.uid;
+  if(v!=="up" && v!=="down") return;
+  if(!indAnnonceParId(aid)) return;
+  if(pid!==IND.uid && !IND.enfants[pid]) return;
+  var k=aid+"__"+pid, avant=IND.reacs[k];
+  var d={annonce:aid, uid:pid, owner:IND.uid, val:v, nom:indNomPersonne(pid), at:window.fbServerTimestamp()};
+  IND.reacs[k]=Object.assign({},avant||{},{annonce:aid, uid:pid, owner:IND.uid, val:v}); indRendre();
+  window.fbSetDoc(window.fbDoc(indDb(),"indep_reactions",k),d,{merge:true}).then(function(){
+    showToast(v==="up"?"Réponse envoyée 👍🏼":"Réponse envoyée 👎🏼");
+  }).catch(function(e){ if(avant) IND.reacs[k]=avant; else delete IND.reacs[k]; indRendre(); indErr(e); });
 }
 
 // ── Réglages de l'activité (nom, couleur) ───────────────────────────
@@ -847,7 +1037,7 @@ function indMaFiche(){
 function indClic(e){
   var el=e.target.closest("[data-act]"); if(!el) return;
   var act=el.dataset.act, id=el.dataset.id;
-  if(act==="tab"){ IND.tab=el.dataset.v; indRendre(); var m=document.querySelector(".main"); if(m) m.scrollTop=0; window.scrollTo(0,0); return; }
+  if(act==="tab"){ IND.tab=el.dataset.v; IND.luAvant=null; indRendre(); var m=document.querySelector(".main"); if(m) m.scrollTop=0; window.scrollTo(0,0); return; }
   if(act==="seance") return indOuvrirSeance(id);
   if(act==="creneau") return indCreneauForm(id||null);
   if(act==="ponctuelle") return indPonctuelleForm();
@@ -862,6 +1052,11 @@ function indClic(e){
   if(act==="suppr-seance") return indSupprSeance(id);
   if(act==="ajout-seance") return indAjoutSeance(id);
   if(act==="resa") return indResa(id, el.dataset.v, el.dataset.pid);
+  if(act==="reac") return indReac(id, el.dataset.v, el.dataset.pid);
+  if(act==="annonce") return indOuvrirAnnonce(id);
+  if(act==="annonce-new") return indAnnonceForm();
+  if(act==="annonce-suppr") return indSupprAnnonce(id);
+  if(act==="annoncer-seance"){ var sa=indSeanceParId(id); return indAnnonceForm({seance:id, cible:(sa&&sa.creneauId)||"tous"}); }
   if(act==="lien-creer") return indCreerLien();
   if(act==="lien-couper") return indCouperLien();
   if(act==="lien-copier"){ var l=indLienActif(); if(l) copyToClipboard(indLienUrl(l.code)); return; }

@@ -51,6 +51,8 @@ export async function seed() {
     await set("clubs/I/indep_clients/e_tom002", { prenom: "Tom", nom: "A", naissance: "2014-01-09", parentUid: "cli2I", mineur: true, autorisation: true });
     await set("clubs/I/indep_creneaux/cr1", { titre: "Cross-training", jour: 2, heure: "18:30", places: 12, habitues: ["cliI"], actif: true });
     await set("clubs/I/indep_resas/cr1_2026-10-20__cli2I", { seance: "cr1_2026-10-20", date: "2026-10-20", uid: "cli2I", statut: "vient", nom: "Nadia A." });
+    await set("clubs/I/indep_annonces/an1", { texte: "Pluie : on passe en salle", cible: "tous" });
+    await set("clubs/I/indep_reactions/an1__cli2I", { annonce: "an1", uid: "cli2I", owner: "cli2I", val: "up", nom: "Nadia A." });
 
     await set("users/dirA", { clubId: "A", roles: ["dirigeant"], phone: "0600000001" });
     await set("users/coachA", { clubId: "A", roles: ["coach"], phone: "0600000002" });

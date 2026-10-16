@@ -536,6 +536,21 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .ind-chk.on{background:var(--iok);border-color:var(--iok);color:var(--ic)}
 .ind-vide{text-align:center;color:var(--im);font-size:13.5px;padding:18px 10px;line-height:1.5}
 .ind-note{font-size:12px;color:var(--im);line-height:1.45;margin:0}
+.ind-nav button{position:relative}
+.ind-nav .bdg{position:absolute;top:2px;left:calc(50% + 7px);min-width:17px;height:17px;border-radius:999px;background:var(--ino);color:#fff;font-style:normal;font-size:10px;font-weight:800;line-height:17px;padding:0 5px;text-align:center;letter-spacing:0}
+.ind-ann-h{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:800;color:var(--im);margin-bottom:6px}
+.ind-ann-t{margin:0;font-size:14.5px;line-height:1.45;white-space:pre-line;color:var(--it);word-break:break-word}
+.ind-mini{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;border:1px solid var(--il);border-radius:10px;background:var(--ib);color:var(--it)}
+.ind-mini.tap{cursor:pointer}
+.ind-mini .t{flex:1;min-width:0}
+.ind-mini .t strong{display:block;font-size:13.5px;font-weight:800}
+.ind-mini .t span{display:block;font-size:12px;color:var(--im)}
+.ind-reacs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ind-reacs.c{flex-direction:column;flex-wrap:nowrap;gap:8px}
+.ind-reacs.c .ind-row .t span{font-size:13px;color:var(--im)}
+.ind-reacs.c .ind-row .t b{color:var(--it)}
+.ind-rb{width:52px;height:42px;border-radius:12px;border:1.5px solid var(--il);background:var(--ic);font-size:20px;line-height:1;cursor:pointer;flex-shrink:0;font-family:inherit}
+.ind-rb.on{border-color:var(--ia);background:color-mix(in srgb,var(--ia) 16%,transparent)}
 .ind-nav{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;display:grid;background:var(--ic);border-top:1px solid var(--il);padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px));z-index:60}
 .ind-nav button{background:none;border:none;font-size:10.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--im);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;border-radius:10px;font-family:inherit}
 .ind-nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}

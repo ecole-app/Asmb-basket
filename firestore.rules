@@ -840,6 +840,49 @@ service cloud.firestore {
         allow delete: if dirigeant(clubId);
       }
 
+      // Annonces de l'indépendant à ses clients (tous, ou les habitués d'un créneau),
+      // avec une séance jointe en option. Les clients les lisent, seul l'indépendant écrit.
+      match /indep_annonces/{id} {
+        function annonceOk(d) {
+          return d.texte is string && d.texte.size() >= 1 && d.texte.size() <= 1000
+            && d.cible is string && d.cible.size() >= 1 && d.cible.size() <= 120
+            && d.get('seance', '') is string && d.get('seance', '').size() <= 120
+            && d.get('seanceDate', '') is string && d.get('seanceDate', '').size() <= 10;
+        }
+        allow read: if readMember(clubId);
+        allow create: if dirigeant(clubId)
+          && request.resource.data.keys().hasOnly(['texte','cible','seance','seanceDate','createdAt'])
+          && annonceOk(request.resource.data) && request.resource.data.createdAt == request.time;
+        allow update: if dirigeant(clubId) && annonceOk(request.resource.data);
+        allow delete: if dirigeant(clubId);
+      }
+      // Réponse d'un client à une annonce : 👍🏼 (up) ou 👎🏼 (down). id = annonce__personne.
+      // La personne est le client lui-même ou l'un de SES enfants ; « owner » = le compte
+      // qui répond (le parent), ce qui permet de ne lui faire lire que ses réponses.
+      match /indep_reactions/{id} {
+        function parentDeReac(clubId, pid) {
+          return pid is string && pid.matches('^e_[a-z0-9]{6,30}$')
+            && get(/databases/$(database)/documents/clubs/$(clubId)/indep_clients/$(pid)).data.get('parentUid', '') == request.auth.uid;
+        }
+        function reacOk(d) {
+          return d.annonce is string && d.annonce.size() >= 1 && d.annonce.size() <= 120
+            && d.val in ['up', 'down']
+            && d.get('nom', '') is string && d.get('nom', '').size() <= 60;
+        }
+        allow read: if readDirigeant(clubId)
+          || (member(clubId) && resource.data.get('owner', '') == request.auth.uid);
+        allow create: if member(clubId) && hasRole('client')
+          && request.resource.data.keys().hasOnly(['annonce','uid','owner','val','nom','at'])
+          && request.resource.data.owner == request.auth.uid
+          && (request.resource.data.uid == request.auth.uid || parentDeReac(clubId, request.resource.data.uid))
+          && id == request.resource.data.annonce + '__' + request.resource.data.uid
+          && reacOk(request.resource.data) && request.resource.data.at == request.time;
+        allow update: if member(clubId) && hasRole('client') && resource.data.owner == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['val','nom','at'])
+          && reacOk(request.resource.data) && request.resource.data.at == request.time;
+        allow delete: if dirigeant(clubId);
+      }
+
       // Purge : lecture et suppression sur TOUTES les sous-collections de ce
       // club, uniquement pendant la fenetre ci-dessus. Un match recursif evite
       // d'oublier une collection — une sous-collection ajoutee plus tard y sera
