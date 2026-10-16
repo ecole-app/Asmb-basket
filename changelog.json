@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792156474",
+  "titre": "Blanc : bandeau d'accueil vraiment blanc",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Avec le blanc comme couleur du club, le bandeau d'accueil reste blanc (textes foncés) au lieu de passer en gris."
+   }
+  ]
+ },
+ {
   "v": "1792156065",
   "titre": "Paramètres : bloc « Zone dangereuse » retiré",
   "points": [

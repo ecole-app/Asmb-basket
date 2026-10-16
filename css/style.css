@@ -89,6 +89,10 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 .bni.on{color:var(--ltg);font-weight:800}.bni.on::before{width:22px}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
 .sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);padding:16px 16px 8px}
 .hero{background:var(--herograd,var(--hdrgrad));padding:24px 16px 20px;text-align:center;border-bottom:1px solid var(--bdr)}
+/* Club en blanc : le bandeau reste blanc, textes foncés (les couleurs en dur du bandeau sont écrasées) */
+html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="bento"]) .hero{background:#fff !important;border-bottom:2px solid var(--bdr)}
+html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="bento"]) .hero *{color:#14141f !important;text-shadow:none !important}
+html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="bento"]) .hero [style*="rgba(255,255,255,.5"],html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="bento"]) .hero [style*="rgba(255,255,255,.6"],html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="bento"]) .hero [style*="rgba(255,255,255,.7"]{color:#5b6578 !important}
 .card{margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .12s;box-shadow:0 2px 12px var(--shadow)}
 .card:active{transform:scale(.97)}.card.locked{opacity:.42;cursor:default}
 .ci{padding:16px;display:flex;align-items:center;gap:14px}
