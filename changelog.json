@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792143652",
+  "titre": "Le nom du club sur l'appli installée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'appli installée porte le nom du club (en plus de son logo)."
+   }
+  ]
+ },
+ {
   "v": "1792143459",
   "titre": "Le logo du club devient l'icône de l'appli",
   "points": [

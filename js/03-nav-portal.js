@@ -111,6 +111,11 @@ function majIconeAppli(){
   var la=head.querySelector('link[rel="apple-touch-icon"]');
   var lm=head.querySelector('link[rel="manifest"]');
   if(!ICONE_ORIGINE) ICONE_ORIGINE={f:lf&&lf.getAttribute("href"),a:la&&la.getAttribute("href"),m:lm&&lm.getAttribute("href")};
+  // Nom de l'appli (iPhone, onglet) = nom du club ; sans nom, General Manager.
+  var mt=head.querySelector('meta[name="apple-mobile-web-app-title"]');
+  var nomClub=clubLabel("")||"";
+  if(mt) mt.setAttribute("content",nomClub||"General Manager");
+  document.title=nomClub||"General Manager";
   var logo=clubLogo();
   if(!logo){
     if(lf&&ICONE_ORIGINE.f){ lf.setAttribute("href",ICONE_ORIGINE.f); lf.setAttribute("type","image/x-icon"); }
@@ -159,7 +164,7 @@ function iconeReinstallerTuto(){
   box.style.cssText="background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
   box.addEventListener("click",function(e){ e.stopPropagation(); });
   box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);text-align:center;margin-bottom:6px">Nouvelle icône : réinstalle l\'appli</div>'+
-    '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:12px">Le logo est changé dans l\'appli, mais l\'icône sur l\'écran d\'accueil ne change pas toute seule. Il faut supprimer l\'appli puis la réinstaller. <b>Tes données ne sont pas perdues</b> : elles sont dans ton compte. Chaque membre qui veut la nouvelle icône doit faire pareil.</div>'+
+    '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:12px">Le logo est changé dans l\'appli, mais l\'icône (et le nom du club) sur l\'écran d\'accueil ne change pas toute seule. Il faut supprimer l\'appli puis la réinstaller. <b>Tes données ne sont pas perdues</b> : elles sont dans ton compte. Chaque membre qui veut la nouvelle icône doit faire pareil.</div>'+
     '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:0 0 4px">Android (Chrome)</div>'+
     '<ol class="ios-tuto"><li>Appui long sur l\'icône de l\'appli › <b>Désinstaller</b>.</li>'+
     '<li>Ouvre le site dans <b>Chrome</b> et connecte-toi.</li>'+
