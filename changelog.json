@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792156065",
+  "titre": "Paramètres : bloc « Zone dangereuse » retiré",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le bloc « Zone dangereuse » (réinitialiser les données / la comptabilité) n'apparaît plus dans les Paramètres."
+   }
+  ]
+ },
+ {
   "v": "1792155848",
   "titre": "Filtres des inscriptions en menus",
   "points": [

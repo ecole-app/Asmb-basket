@@ -406,7 +406,6 @@ var PARAMS_GROUPES=[
   {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","aides","relances","facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees"]},
-  {id:"danger", ic:"⚠️", titre:"Réinitialisation", dir:true, secs:["@danger"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
 ];
 function paramsResume(id){
