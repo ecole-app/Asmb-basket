@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792146396",
+  "titre": "Icône de l'appli plus nette",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le logo du club est recadré et remplit l'icône de l'appli au lieu de rester petit au milieu d'un carré blanc."
+   }
+  ]
+ },
+ {
   "v": "1792146131",
   "titre": "Discussions privées : suppression et nom",
   "points": [

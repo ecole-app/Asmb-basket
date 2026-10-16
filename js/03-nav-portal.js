@@ -125,16 +125,30 @@ function majIconeAppli(){
   }
   var img=new Image();
   img.onload=function(){
+    // On recadre sur la partie visible du logo (le fichier enregistré est un carré
+    // 256 px avec des marges transparentes) : le logo remplit l'icône au lieu de
+    // flotter petit au milieu d'un carré blanc.
+    var src=document.createElement("canvas"); src.width=img.width; src.height=img.height;
+    var sx=src.getContext("2d"); sx.drawImage(img,0,0);
+    var bx=0,by=0,bw=img.width,bh=img.height;
+    try{
+      var d=sx.getImageData(0,0,img.width,img.height).data, x0=img.width,y0=img.height,x1=-1,y1=-1;
+      for(var y=0;y<img.height;y++) for(var x=0;x<img.width;x++){
+        if(d[(y*img.width+x)*4+3]>24){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+      }
+      if(x1>=x0&&y1>=y0){ bx=x0; by=y0; bw=x1-x0+1; bh=y1-y0+1; }
+    }catch(e){}
     function carre(px,marge){
       var c=document.createElement("canvas"); c.width=px; c.height=px;
       var x=c.getContext("2d");
+      x.imageSmoothingQuality="high";
       x.fillStyle="#ffffff"; x.fillRect(0,0,px,px);
-      var zone=px*(1-2*marge), ech=Math.min(zone/img.width,zone/img.height);
-      var w=img.width*ech, h=img.height*ech;
-      x.drawImage(img,(px-w)/2,(px-h)/2,w,h);
+      var zone=px*(1-2*marge), ech=Math.min(zone/bw,zone/bh);
+      var w=bw*ech, h=bh*ech;
+      x.drawImage(src,bx,by,bw,bh,(px-w)/2,(px-h)/2,w,h);
       return c.toDataURL("image/png");
     }
-    var i32=carre(64,0.06), i180=carre(180,0.12), i192=carre(192,0.14), i512=carre(512,0.14);
+    var i32=carre(64,0.04), i180=carre(180,0.08), i192=carre(192,0.10), i512=carre(512,0.10);
     if(lf){ lf.setAttribute("href",i32); lf.setAttribute("type","image/png"); }
     if(la) la.setAttribute("href",i180);
     if(lm){
