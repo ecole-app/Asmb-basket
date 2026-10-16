@@ -1009,6 +1009,40 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertSucceeds(getDocs(collection(await as("dirI"), "clubs/I/indep_reactions")));
     await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_reactions")));
   });
+  it("discussion privée : le client ouvre SON fil et y écrit ; personne d'autre ne le lit sauf l'indépendant", async () => {
+    const cli = await as("cliI"), dir = await as("dirI");
+    const fil = (o = {}) => Object.assign({ nom: "Julie D.", dernier: "Salut coach", dernierTs: serverTimestamp(), dernierDe: "client" }, o);
+    const msg = (o = {}) => Object.assign({ de: "client", auteur: "cliI", texte: "Salut coach", createdAt: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(cli, "clubs/I/indep_discussions/cliI"), fil()));
+    await assertSucceeds(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m1"), msg()));
+    await assertSucceeds(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m2"), msg({ texte: "", img: "data:image/jpeg;base64,/9j/4AAQ" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m3"), msg({ texte: "" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m3"), msg({ texte: "x".repeat(1001) })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m3"), msg({ de: "coach" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m3"), msg({ auteur: "cli2I" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cli2I/messages/m3"), msg()));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cli2I"), fil()));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m1"), { texte: "modifié" }, { merge: true }));
+    await assertFails(deleteDoc(doc(cli, "clubs/I/indep_discussions/cliI/messages/m1")));
+    await assertSucceeds(getDocs(collection(cli, "clubs/I/indep_discussions/cliI/messages")));
+    await assertFails(getDocs(collection(cli, "clubs/I/indep_discussions/cli2I/messages")));
+    await assertFails(getDoc(doc(cli, "clubs/I/indep_discussions/cli2I")));
+    await assertSucceeds(getDocs(collection(dir, "clubs/I/indep_discussions/cliI/messages")));
+    await assertFails(getDoc(doc(await as("dirA"), "clubs/I/indep_discussions/cliI")));
+  });
+  it("discussion privée : l'indépendant répond et marque lu ; le client ne se fait pas passer pour lui", async () => {
+    const cli2 = await as("cli2I"), dir = await as("dirI");
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_discussions/cli2I/messages/m1"), { de: "coach", auteur: "dirI", texte: "Séance jeudi ?", createdAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(doc(dir, "clubs/I/indep_discussions/cli2I"), { dernier: "Séance jeudi ?", dernierTs: serverTimestamp(), dernierDe: "coach" }));
+    await assertFails(updateDoc(doc(dir, "clubs/I/indep_discussions/cli2I"), { dernier: "x", dernierTs: serverTimestamp(), dernierDe: "client" }));
+    await assertSucceeds(updateDoc(doc(dir, "clubs/I/indep_discussions/cli2I"), { luCoach: serverTimestamp() }));
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_discussions/cliI"), { nom: "Julie D.", dernier: "Bonjour", dernierTs: serverTimestamp(), dernierDe: "coach" }));
+    await assertFails(setDoc(doc(cli2, "clubs/I/indep_discussions/cli2I/messages/m2"), { de: "coach", auteur: "cli2I", texte: "Je suis le coach", createdAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(doc(cli2, "clubs/I/indep_discussions/cli2I"), { luClient: serverTimestamp() }));
+    await assertFails(updateDoc(doc(cli2, "clubs/I/indep_discussions/cli2I"), { luCoach: serverTimestamp() }));
+    await assertFails(updateDoc(doc(cli2, "clubs/I/indep_discussions/cli2I"), { dernier: "x", dernierTs: serverTimestamp(), dernierDe: "coach" }));
+    await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_discussions/cli2I/messages/m0")));
+  });
   it("lien : l'indépendant le crée et le coupe ; un club ou un client non ; personne ne liste", async () => {
     const lien = (o = {}) => Object.assign({ clubId: "I", clubName: "KS Training", couleur: "#0e7c7b", actif: true, createdBy: "dirI", createdAt: serverTimestamp() }, o);
     await assertSucceeds(setDoc(doc(await as("dirI"), "indep_liens/WXYZ-2345"), lien()));

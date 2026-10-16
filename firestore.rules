@@ -883,6 +883,55 @@ service cloud.firestore {
         allow delete: if dirigeant(clubId);
       }
 
+      // Discussion privée entre un client (compte adulte, parent pour ses enfants) et
+      // l'indépendant : un fil par client, id = uid du compte. La fiche du fil porte
+      // l'aperçu du dernier message et les heures de lecture (pastilles « non lu »).
+      match /indep_discussions/{uid} {
+        function discOk(d) {
+          return d.get('nom', '') is string && d.get('nom', '').size() <= 60
+            && d.get('dernier', '') is string && d.get('dernier', '').size() <= 80
+            && d.dernierDe in ['client', 'coach'];
+        }
+        allow read: if readDirigeant(clubId) || (member(clubId) && request.auth.uid == uid);
+        allow create: if (dirigeant(clubId)
+              && request.resource.data.keys().hasOnly(['nom','dernier','dernierTs','dernierDe','luCoach'])
+              && discOk(request.resource.data) && request.resource.data.dernierDe == 'coach'
+              && request.resource.data.dernierTs == request.time)
+          || (member(clubId) && hasRole('client') && request.auth.uid == uid
+              && request.resource.data.keys().hasOnly(['nom','dernier','dernierTs','dernierDe'])
+              && discOk(request.resource.data) && request.resource.data.dernierDe == 'client'
+              && request.resource.data.dernierTs == request.time);
+        allow update: if (dirigeant(clubId)
+              && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['luCoach'])
+                    && request.resource.data.luCoach == request.time)
+                  || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nom','dernier','dernierTs','dernierDe'])
+                    && discOk(request.resource.data) && request.resource.data.dernierDe == 'coach'
+                    && request.resource.data.dernierTs == request.time)))
+          || (member(clubId) && hasRole('client') && request.auth.uid == uid
+              && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['luClient'])
+                    && request.resource.data.luClient == request.time)
+                  || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nom','dernier','dernierTs','dernierDe'])
+                    && discOk(request.resource.data) && request.resource.data.dernierDe == 'client'
+                    && request.resource.data.dernierTs == request.time)));
+        allow delete: if dirigeant(clubId);
+
+        // Messages : texte et/ou une photo (JPEG réduit, en texte data:). Jamais modifiés.
+        match /messages/{mid} {
+          function msgOk(d, de) {
+            return d.de == de && d.auteur == request.auth.uid
+              && d.get('texte', '') is string && d.get('texte', '').size() <= 1000
+              && d.get('img', '') is string && d.get('img', '').size() <= 350000
+              && (d.get('texte', '').size() > 0 || d.get('img', '').size() > 0)
+              && d.createdAt == request.time;
+          }
+          allow read: if readDirigeant(clubId) || (member(clubId) && request.auth.uid == uid);
+          allow create: if request.resource.data.keys().hasOnly(['de','auteur','texte','img','createdAt'])
+            && ((dirigeant(clubId) && msgOk(request.resource.data, 'coach'))
+              || (member(clubId) && hasRole('client') && request.auth.uid == uid && msgOk(request.resource.data, 'client')));
+          allow delete: if dirigeant(clubId);
+        }
+      }
+
       // Purge : lecture et suppression sur TOUTES les sous-collections de ce
       // club, uniquement pendant la fenetre ci-dessus. Un match recursif evite
       // d'oublier une collection — une sous-collection ajoutee plus tard y sera

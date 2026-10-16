@@ -1,5 +1,23 @@
 [
  {
+  "v": "1792182623",
+  "titre": "Indépendant : discussions privées avec photos",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Onglet Messages › Discussions : tu échanges en privé avec chaque client (texte et photos), avec une pastille quand un nouveau message arrive. Tu peux aussi écrire en premier depuis la fiche d'un client."
+   },
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Onglet Messages : une carte « Écrire à ton coach » ouvre une discussion privée (texte et photos). Un parent écrit pour lui et ses enfants dans la même discussion."
+   }
+  ]
+ },
+ {
   "v": "1792181010",
   "titre": "Indépendant : annonces à tes clients",
   "points": [
