@@ -370,6 +370,8 @@ var myPhone=localStorage.getItem("asmb_phone")||"";
 
 async function checkMyPhone(){
   if(myPhone)return true;
+  // Le dirigeant n'est membre d'aucun canal "par téléphone" : il les voit tous.
+  if(localStorage.getItem("asmb_profile")==="dirigeant")return true;
   var phone=await askPrompt("Votre numéro de téléphone", {placeholder:"Le même que celui fourni au club", confirmText:"Valider"});
   if(!phone)return false;
   myPhone=phone.trim().replace(/\s+/g,"");

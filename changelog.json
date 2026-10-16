@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792144285",
+  "titre": "Plus de numéro de téléphone demandé au dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le dirigeant n'a plus à saisir son numéro pour écrire ou réagir dans les canaux."
+   }
+  ]
+ },
+ {
   "v": "1792143652",
   "titre": "Le nom du club sur l'appli installée",
   "points": [
