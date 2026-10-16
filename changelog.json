@@ -1,5 +1,24 @@
 [
  {
+  "v": "1792155848",
+  "titre": "Filtres des inscriptions en menus",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "Inscriptions : catégorie, genre et pôle sont maintenant trois menus sur une seule ligne, au lieu de trois rangées de boutons."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres : le bloc « Zone dangereuse » s'appelle maintenant « Réinitialisation »."
+   }
+  ]
+ },
+ {
   "v": "1792155606",
   "titre": "Le blanc dans les couleurs du club",
   "points": [

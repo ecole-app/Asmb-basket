@@ -239,21 +239,8 @@
       </div>
       <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="importPlayersCSV(this)">
     </div>
-    <!-- Filtres catégorie -->
-    <div style="padding:10px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
-      <button class="cat-filter on" onclick="filterCat('all')" id="cat-all">Tous</button>
-      <button class="cat-filter" onclick="filterCat('U7')" id="cat-U7">U7</button>
-      <button class="cat-filter" onclick="filterCat('U9')" id="cat-U9">U9</button>
-      <button class="cat-filter" onclick="filterCat('U11')" id="cat-U11">U11</button>
-      <button class="cat-filter" onclick="filterCat('U13')" id="cat-U13">U13</button>
-      <button class="cat-filter" onclick="filterCat('U15')" id="cat-U15">U15</button>
-      <button class="cat-filter" onclick="filterCat('U17')" id="cat-U17">U17</button>
-      <button class="cat-filter" onclick="filterCat('U18')" id="cat-U18">U18</button>
-      <button class="cat-filter" onclick="filterCat('U21')" id="cat-U21">U21</button>
-      <button class="cat-filter" onclick="filterCat('Senior')" id="cat-Senior">Senior</button>
-    </div>
-    <!-- Filtre genre -->
-    <div id="insc-genre-filter" style="padding:8px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)"></div>
+    <!-- Filtres : une seule ligne de menus -->
+    <div id="insc-genre-filter" style="padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--bdr)"></div>
     <div style="padding:0 12px 4px">
       <input id="insc-search" type="search" placeholder="Rechercher un joueur..." oninput="renderPlayers()" style="width:100%;padding:11px 14px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:13px;box-sizing:border-box">
     </div>
@@ -1448,7 +1435,7 @@
       <div style="font-size:13px;font-weight:700;color:var(--txt)">Vider les données de démo</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Supprime les équipes/joueurs/événements de test</div>
     </div>
-    </div><div id="params-custom-list"></div><div class="sec">Zone dangereuse</div>
+    </div><div id="params-custom-list"></div><div class="sec">Réinitialisation</div>
     <div style="margin:0 12px 12px;background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.3);border-radius:var(--rs);padding:14px;cursor:pointer" onclick="resetAllData()">
       <div style="font-size:13px;font-weight:700;color:var(--red)">Réinitialiser les données du club</div>
       <div style="font-size:11px;color:var(--mut);margin-top:2px">Joueurs, équipes, événements, licences, évaluations, canaux de discussion (irréversible). Ne touche pas à la comptabilité.</div>

@@ -406,7 +406,7 @@ var PARAMS_GROUPES=[
   {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","aides","relances","facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees"]},
-  {id:"danger", ic:"⚠️", titre:"Zone dangereuse", dir:true, secs:["@danger"]},
+  {id:"danger", ic:"⚠️", titre:"Réinitialisation", dir:true, secs:["@danger"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
 ];
 function paramsResume(id){
@@ -440,7 +440,7 @@ function paramsNoeuds(scr,key){
   if(key==="@danger"){
     var out=[], secs=scr.querySelectorAll(".sec");
     for(var i=0;i<secs.length;i++){
-      if(secs[i].textContent.trim()==="Zone dangereuse"){
+      if(secs[i].textContent.trim()==="Réinitialisation"){
         out.push(secs[i]);
         var n=secs[i].nextElementSibling;
         while(n && !n.classList.contains("sec") && !n.classList.contains("param-block") && !n.classList.contains("pgrp")){ out.push(n); n=n.nextElementSibling; }

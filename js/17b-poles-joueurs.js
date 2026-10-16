@@ -245,20 +245,7 @@ function polesFicheLire(base){
 
 // ── Liste Joueurs : filtre par pôle ───────────────────────────────────
 function polesFiltreJoueurs(players,liste){
-  var ps=polesJoueursActifs(), bar=document.getElementById("insc-pole-filter");
-  if(!bar){
-    var g=document.getElementById("insc-genre-filter");
-    if(g&&ps.length){ bar=document.createElement("div"); bar.id="insc-pole-filter"; bar.style.cssText="padding:8px 12px;overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--bdr)"; g.parentNode.insertBefore(bar,g.nextSibling); }
-  }
-  if(bar){
-    if(!ps.length){ bar.style.display="none"; currentPoleFilter="all"; }
-    else {
-      if(currentPoleFilter!=="all"&&!ps.some(function(p){ return p.id===currentPoleFilter; })) currentPoleFilter="all";
-      bar.style.display="flex";
-      bar.innerHTML='<button class="cat-filter'+(currentPoleFilter==="all"?" on":"")+'" onclick="currentPoleFilter=\'all\';renderPlayers()">Tous les pôles</button>'+
-        ps.map(function(p){ var n=players.filter(function(x){ return x.poles&&x.poles[p.id]; }).length;
-          return '<button class="cat-filter'+(currentPoleFilter===p.id?" on":"")+'" onclick="currentPoleFilter=\''+p.id+'\';renderPlayers()">'+authEsc(poleCourt(p.id))+' · '+n+'</button>'; }).join("");
-    }
-  }
+  var ps=polesJoueursActifs();
+  if(!ps.length||(currentPoleFilter!=="all"&&!ps.some(function(p){ return p.id===currentPoleFilter; }))) currentPoleFilter="all";
   return currentPoleFilter==="all"?liste:liste.filter(function(p){ return p.poles&&p.poles[currentPoleFilter]; });
 }

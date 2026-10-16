@@ -300,6 +300,23 @@ function genreFilterHtml(current,fnName,showNR){
     return '<button class="cat-filter'+(current===o[0]?' on':'')+'" onclick="'+fnName+'(\''+o[0]+'\')">'+o[1]+'</button>';
   }).join("");
 }
+function inscFiltresHtml(players,hasNR){
+  var st='style="flex:1 1 30%;min-width:96px;padding:9px 8px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:600"';
+  function sel(label,fn,cur,opts){
+    return '<select aria-label="'+label+'" onchange="'+fn+'(this.value)" '+st+(cur!=="all"?' class="on"':'')+'>'+opts.map(function(o){return '<option value="'+authEsc(o[0])+'"'+(cur===o[0]?' selected':'')+'>'+authEsc(o[1])+'</option>';}).join("")+'</select>';
+  }
+  var cats=[["all","Catégorie : toutes"]].concat(["U7","U9","U11","U13","U15","U17","U18","U21","Senior"].map(function(c){return [c,c];}));
+  var genres=[["all","Genre : tous"],["F","Filles"],["M","Garçons"]];
+  if(hasNR)genres.push(["NR","Non renseigné"]);
+  var out=sel("Catégorie","filterCat",currentCatFilter,cats)+sel("Genre","filterGenre",currentGenreFilter,genres);
+  var ps=typeof polesJoueursActifs==="function"?polesJoueursActifs():[];
+  if(ps.length){
+    var po=[["all","Pôle : tous"]].concat(ps.map(function(p){var n=players.filter(function(x){return x.poles&&x.poles[p.id];}).length;return [p.id,poleCourt(p.id)+" · "+n];}));
+    out+=sel("Pôle","filterPole",currentPoleFilter,po);
+  }
+  return out;
+}
+function filterPole(v){currentPoleFilter=v;renderPlayers();}
 function filterGenre(g){
   currentGenreFilter=g;
   renderPlayers();
@@ -1193,7 +1210,6 @@ function savePlayers(p){
 function filterCat(cat){
   currentCatFilter=cat;
   document.querySelectorAll(".cat-filter").forEach(function(b){b.classList.remove("on");});
-  var btn=document.getElementById("cat-"+cat);if(btn)btn.classList.add("on");
   renderPlayers();
 }
 function buildPlayers(){renderPlayers();}
@@ -1204,7 +1220,7 @@ function renderPlayers(){
   if(gBar){
     var hasNR=players.some(function(p){return genreNorm(p.genre)==="NR";});
     if(!hasNR&&currentGenreFilter==="NR")currentGenreFilter="all";
-    gBar.innerHTML=genreFilterHtml(currentGenreFilter,"filterGenre",hasNR);
+    gBar.innerHTML=inscFiltresHtml(players,hasNR);
   }
   filtered=filtered.filter(function(p){return genreMatch(p.genre,currentGenreFilter);});
   if(typeof polesFiltreJoueurs==="function") filtered=polesFiltreJoueurs(players,filtered);
