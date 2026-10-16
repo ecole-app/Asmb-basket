@@ -133,7 +133,7 @@ async function pfPushOn(){
     var reg=await navigator.serviceWorker.ready;
     var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
     if(!token){ askAlert("Impossible d'obtenir un abonnement push."); return; }
-    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,ua:(navigator.userAgent||"").slice(0,200),updatedAt:window.fbServerTimestamp()});
     showToast("Alertes Plateforme activées ✓");
     var b=document.getElementById("pf-push-btn"); if(b) pfPushEtat(b);
   }catch(e){ askAlert("Impossible d'activer les alertes : "+((e&&e.message)||e)); }
@@ -154,7 +154,7 @@ async function pfPushSync(){
     var reg=await navigator.serviceWorker.ready;
     var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
     if(!token) return;
-    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid),{token:token,uid:window.ASMB_USER.uid,ua:(navigator.userAgent||"").slice(0,200),updatedAt:window.fbServerTimestamp()});
   }catch(e){ console.log("pfPushSync:",e); }
 }
 
@@ -165,7 +165,13 @@ async function pfPushDiag(el){
   var etat="";
   try{
     var s=await window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_push",window.ASMB_USER.uid));
-    etat=(s&&s.exists&&s.exists())?"Un appareil est enregistré pour les alertes.":"Aucun appareil enregistré : appuie sur « Activer les alertes ».";
+    if(s&&s.exists&&s.exists()){
+      var d=s.data()||{}, ua=d.ua||"", t=d.updatedAt&&d.updatedAt.toMillis?d.updatedAt.toMillis():0;
+      var os=/Android/i.test(ua)?"Android":/iPhone|iPad/i.test(ua)?"iPhone/iPad":/Windows/i.test(ua)?"Windows":/Mac/i.test(ua)?"Mac":"appareil inconnu";
+      var nav=/Brave/i.test(ua)?"Brave":/Edg\//i.test(ua)?"Edge":/Firefox/i.test(ua)?"Firefox":/Chrome/i.test(ua)?"Chrome":/Safari/i.test(ua)?"Safari":"";
+      var min=t?Math.max(0,Math.round((Date.now()-t)/60000)):null;
+      etat="Appareil enregistré : "+os+(nav?" · "+nav:"")+(min!==null?" · il y a "+(min<60?min+" min":Math.round(min/60)+" h"):"")+".";
+    } else etat="Aucun appareil enregistré : appuie sur « Activer les alertes ».";
   }catch(e){ etat="Lecture impossible (règles Firestore publiées ?)."; }
   el.textContent=etat;
 }

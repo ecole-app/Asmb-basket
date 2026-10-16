@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792142496",
+  "titre": "Diagnostic des alertes : appareil enregistré",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme : sous la cloche, on voit quel appareil est enregistré pour les alertes (téléphone ou ordinateur, navigateur, depuis quand)."
+   }
+  ]
+ },
+ {
   "v": "1792142393",
   "titre": "Alertes Plateforme au premier plan",
   "points": [
