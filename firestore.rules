@@ -729,6 +729,12 @@ service cloud.firestore {
       match /push_subscriptions/{uid} {
         allow read, write: if member(clubId) && signedIn() && request.auth.uid==uid;
       }
+      // Test de notification (Communauté › réglages) : chacun crée et lit son propre test.
+      match /push_ping/{id} {
+        allow create: if member(clubId) && request.resource.data.keys().hasOnly(['at','uid'])
+          && request.resource.data.uid == request.auth.uid;
+        allow read: if member(clubId) && resource.data.get('uid', '') == request.auth.uid;
+      }
 
       // ── Discussions privées (2 personnes : un membre du staff et un adulte du
       // club). Ouvertes par le staff seulement ; personne d'autre ne les lit,

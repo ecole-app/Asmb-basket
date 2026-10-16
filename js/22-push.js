@@ -241,3 +241,27 @@ async function pfPushTester(btn){
   }catch(e){ el.textContent="Erreur : "+((e&&e.code)||e); }
   btn.disabled=false; btn.textContent=txt;
 }
+
+// Test des notifications du club sur CET appareil : le serveur cherche l'abonnement
+// de la personne, envoie une vraie notification et dit précisément ce qui bloque.
+async function pushTesterClub(btn){
+  var el=document.getElementById("push-club-diag");
+  if(!el||!window.ASMB_USER) return;
+  btn.disabled=true; var txt=btn.textContent; btn.textContent="Envoi…";
+  try{
+    await pushAutoClub();
+    var uid=window.ASMB_USER.uid;
+    var ref=await window.fbAddDoc(window.fbCollection(window.fbDb,"push_ping"),{at:new Date(),uid:uid});
+    var res=null;
+    for(var i=0;i<12&&!res;i++){
+      await new Promise(function(r){ setTimeout(r,1000); });
+      var s=await window.fbGetDoc(ref);
+      var d=s&&s.exists&&s.exists()?s.data():null;
+      if(d&&typeof d.ok==="boolean") res=d;
+    }
+    if(!res) el.textContent="Pas de réponse du serveur : les fonctions sont-elles déployées ?";
+    else if(res.ok) el.textContent="Envoyé ✓ Si rien n'apparaît sur cet appareil, regarde les réglages de notifications du téléphone pour cette appli.";
+    else el.textContent="Échec : "+res.erreur;
+  }catch(e){ el.textContent="Erreur : "+((e&&e.code)||e)+" (règles Firestore publiées ?)"; }
+  btn.disabled=false; btn.textContent=txt;
+}

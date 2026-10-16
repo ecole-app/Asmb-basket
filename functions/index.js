@@ -284,3 +284,25 @@ exports.purgeDiscussionsMasquees = onSchedule("every day 03:30", async () => {
     }
   }
 });
+
+// Test des notifications du club (bouton de Communauté › réglages) : envoie une
+// vraie notification à l'abonnement de la personne et note le résultat.
+exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", async (event) => {
+  const ref = event.data && event.data.ref;
+  const d = event.data && event.data.data();
+  if (!ref || !d || !d.uid) return;
+  const sub = await db.collection("clubs").doc(event.params.clubId).collection("push_subscriptions").doc(d.uid).get();
+  const token = sub.exists && sub.data() && sub.data().token;
+  if (!token) { await ref.update({ ok: false, erreur: "aucun abonnement pour ce compte dans ce club (active les notifications dans les réglages)" }); return; }
+  try {
+    await admin.messaging().send({
+      token,
+      notification: { title: "Test de notification", body: "Si tu vois ceci, les messages du club t'arriveront." },
+      data: { url: "./" },
+      webpush: { fcmOptions: { link: "./" } }
+    });
+    await ref.update({ ok: true });
+  } catch (e) {
+    await ref.update({ ok: false, erreur: String((e && (e.code || e.message)) || e).slice(0, 200) });
+  }
+});

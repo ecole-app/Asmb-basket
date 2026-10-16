@@ -431,6 +431,17 @@ describe("Communauté", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Test de notification du club", () => {
+  it("chacun crée et lit son propre test, pas celui d'un autre ni d'un autre club", async () => {
+    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/push_ping/t1"), { at: Timestamp.now(), uid: "parentA" }));
+    await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/push_ping/t1")));
+    await assertFails(getDoc(doc(await as("parent2A"), "clubs/A/push_ping/t1")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/push_ping/t2"), { at: Timestamp.now(), uid: "parent2A" }));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/push_ping/t3"), { at: Timestamp.now(), uid: "parentA", ok: true }));
+    await assertFails(setDoc(doc(await as("dirB"), "clubs/A/push_ping/t4"), { at: Timestamp.now(), uid: "dirB" }));
+  });
+});
+
 describe("Discussions privées", () => {
   it("les deux personnes lisent et écrivent, personne d'autre", async () => {
     await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/messages/d1")));

@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792148808",
+  "titre": "Tester les notifications du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Dans Communauté › réglages, un bouton teste les notifications sur l'appareil et indique ce qui bloque."
+   }
+  ]
+ },
+ {
   "v": "1792148139",
   "titre": "Notifications des messages : activation automatique",
   "points": [

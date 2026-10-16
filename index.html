@@ -1014,6 +1014,8 @@
         <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Autoriser les notifications</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Reçois une alerte quand un message arrive</div></div>
         <input type="checkbox" id="cs-notif-toggle" onchange="toggleNotif(this.checked,'cs-notif-toggle')" style="width:44px;height:24px;accent-color:var(--dkg);flex-shrink:0">
       </label>
+      <button type="button" onclick="pushTesterClub(this)" style="width:100%;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">Tester les notifications sur cet appareil</button>
+      <div id="push-club-diag" style="font-size:11px;color:var(--mut);margin:6px 0 10px;line-height:1.4"></div>
       <div class="push-ios-hint" onclick="pushTutoIphone()" role="button" tabindex="0">📲 Sur iPhone : comment installer l'appli pour recevoir les notifications</div>
       <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr);cursor:pointer">
         <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Son de notification</div></div>
