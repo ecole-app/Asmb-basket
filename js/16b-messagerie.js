@@ -869,8 +869,21 @@ function dmOpenWith(p){
   var id=[me,p.uid].sort().join("__");
   var existing=(window.__chatDmsCache||[]).find(function(d){return d.id===id;});
   if(existing){ openDm(existing); return; }
+  // Discussion existante mais masquée (supprimée de ma liste) : on la rouvre au lieu de la recréer.
+  window.fbGetDoc(window.fbDoc(window.fbDb,"dms",id)).then(function(snap){
+    if(snap.exists()){
+      var ex=snap.data(); ex.id=id;
+      var cache=window.__chatDmsCache||(window.__chatDmsCache=[]);
+      if(!cache.find(function(d){return d.id===id;})) cache.push(ex);
+      openDm(ex);
+      return;
+    }
+    creer();
+  }).catch(function(){ creer(); });
+  function creer(){
   var dm={memberUids:[me,p.uid],members:[{uid:me,label:myChatPseudo()},{uid:p.uid,label:p.label}],createdBy:me,createdAt:window.fbServerTimestamp(),lastMsg:"",lastTs:window.fbServerTimestamp(),lastSender:""};
   window.fbSetDoc(window.fbDoc(window.fbDb,"dms",id),dm).then(function(){
     dm.id=id; openDm(dm);
   }).catch(function(e){ askAlert("La discussion n'a pas pu être créée : "+((e&&e.code)||e)); });
+  }
 }

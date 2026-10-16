@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792147178",
+  "titre": "Rouvrir une discussion supprimée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau"
+    ],
+    "texte": "Recréer une discussion privée avec quelqu'un dont tu avais supprimé la discussion la rouvre, sans erreur."
+   }
+  ]
+ },
+ {
   "v": "1792146903",
   "titre": "Icône de l'appli : fond du logo conservé",
   "points": [
