@@ -152,6 +152,12 @@ function askModuleFerme(nom){
   askConfirm("Votre club est en accès limité : le module « "+nom+" » n'est pas disponible pour l'instant. Toutes vos données sont conservées et réapparaîtront dès la réactivation.\n\nPack Standard : 200\u00a0€/an\nPack Premium (comptabilité incluse) : 300\u00a0€/an\n\nContactez-nous pour réactiver votre club.",
     {title:"Module « "+nom+" » fermé",confirmText:"Télécharger mes données"}).then(function(ok){ if(ok) openExportDonnees(); });
 }
+// Accès limité : true (et message) si la collection ne peut pas être modifiée.
+function limiteLectureSeule(coll,nom){
+  if(!isLimite() || limiteEcritureAutorisee(coll)) return false;
+  askAlert((nom||"Ce module")+" est en consultation seule : le club est en accès limité. Vous pouvez tout consulter, mais pas ajouter ni modifier.");
+  return true;
+}
 // Toujours ouvert, quel que soit le statut du club.
 function openExportDonnees(){
   var s=gmSheet("Exporter mes données");

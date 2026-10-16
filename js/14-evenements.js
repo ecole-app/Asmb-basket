@@ -189,6 +189,7 @@ function toggleEvEvalOption(){
 
 // type : facultatif, pré-choisit le type (ex. « + Tournoi » du pôle Événements).
 function showAddEvent(type){
+  if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
   evEditId=null;
   var mt=document.getElementById("ev-modal-titre"); if(mt) mt.textContent="Nouvel événement";
   var mb=document.getElementById("ev-modal-btn"); if(mb) mb.textContent="Créer l'événement";
@@ -314,6 +315,7 @@ function addEvExterne(){
 function removeEvExterne(i){evExternes.splice(i,1);renderEvExternes();}
 
 function saveEventFull(){
+  if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
   var titre=document.getElementById("ev-titre").value.trim();
   var type=document.getElementById("ev-type").value;
   var date=document.getElementById("ev-date").value;
@@ -371,6 +373,7 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
   }
 }
 function deleteEvent(id){
+  if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
   askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
     var all=getEvents();
@@ -562,6 +565,7 @@ function cancelEvent(eventId){
 
 // « Modifier » rouvre le formulaire complet (celui de la création), prérempli.
 function editEventDateTime(eventId){
+  if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
   var ev=getEvents().find(function(e){return e.id===eventId;});
   if(!ev) return;
   showAddEvent();

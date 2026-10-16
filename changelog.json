@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792157811",
+  "titre": "Accès limité : bandeau à l'accueil, planning en consultation seule",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "En accès limité, le bandeau s'affiche tout en haut de l'accueil, et le planning est en consultation seule (plus de création, modification ni suppression d'événement)."
+   }
+  ]
+ },
+ {
   "v": "1792157284",
   "titre": "Accès limité : motif affiché",
   "points": [

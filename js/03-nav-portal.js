@@ -318,7 +318,22 @@ function makeCard(p,onclick){
   return d;
 }
 
+function bandeauLimiteAccueil(){
+  var scr=document.getElementById("scr-portal"); if(!scr) return;
+  var b=document.getElementById("portal-limite"); if(b) b.remove();
+  if(typeof isLimite!=="function" || !isLimite() || isSuperAdmin() ) return;
+  b=document.createElement("div"); b.id="portal-limite";
+  b.style.cssText="margin:10px 12px 0;background:#8a4500;color:#fff;border-radius:var(--rs);padding:12px 14px";
+  var gel=(typeof aboGelActif==="function")&&aboGelActif();
+  var motif=(window.CURRENT_CLUB&&window.CURRENT_CLUB.suspendMotif)||"";
+  b.innerHTML=gel
+    ?'<div style="font-size:13px;font-weight:800">⏸ Abonnement gelé jusqu\'au '+aboDateTxt(gel.fin)+'</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Accès limité : consultation seule. Vos données sont conservées.</div>'
+    :'<div style="font-size:13px;font-weight:800">🔒 Accès limité</div><div style="font-size:11px;line-height:1.4;margin-top:2px">Consultation seule. Vos données sont conservées. Contactez-nous pour réactiver le club.'+(motif?'<br><i>Motif : '+authEsc(motif)+'</i>':'')+'</div>';
+  var h=document.getElementById("desk-home");
+  if(h&&h.parentNode===scr) scr.insertBefore(b,h.nextSibling); else scr.insertBefore(b,scr.firstChild);
+}
 function buildPortal(){
+  try{ bandeauLimiteAccueil(); }catch(e){}
   if(typeof benBandeau==="function") benBandeau("dashboard-dirigeant","0 12px 14px");
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
   activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
