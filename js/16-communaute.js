@@ -370,8 +370,11 @@ var myPhone=localStorage.getItem("asmb_phone")||"";
 
 async function checkMyPhone(){
   if(myPhone)return true;
-  // Le dirigeant n'est membre d'aucun canal "par téléphone" : il les voit tous.
+  // Compte connecté = identité déjà connue (invitation ou inscription) : on ne
+  // redemande rien. Le dirigeant voit tous les canaux. Sans numéro sur le
+  // compte, la personne n'est simplement pas membre des canaux réservés.
   if(localStorage.getItem("asmb_profile")==="dirigeant")return true;
+  if(window.ASMB_USER&&window.ASMB_USER.uid)return true;
   var phone=await askPrompt("Votre numéro de téléphone", {placeholder:"Le même que celui fourni au club", confirmText:"Valider"});
   if(!phone)return false;
   myPhone=phone.trim().replace(/\s+/g,"");

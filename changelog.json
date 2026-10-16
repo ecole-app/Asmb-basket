@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792144391",
+  "titre": "Plus de numéro de téléphone redemandé",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "bureau"
+    ],
+    "texte": "Un compte connecté n'a plus à ressaisir son numéro pour écrire ou réagir dans les canaux."
+   }
+  ]
+ },
+ {
   "v": "1792144285",
   "titre": "Plus de numéro de téléphone demandé au dirigeant",
   "points": [
