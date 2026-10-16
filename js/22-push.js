@@ -248,10 +248,17 @@ async function pushTesterClub(btn){
   var el=document.getElementById("push-club-diag");
   if(!el||!window.ASMB_USER) return;
   btn.disabled=true; var txt=btn.textContent; btn.textContent="Envoi…";
+  var etape="";
   try{
+    etape="1/4 abonnement de cet appareil";
     await pushAutoClub();
     var uid=window.ASMB_USER.uid;
+    etape="2/4 lecture de l'abonnement";
+    var sub=await window.fbGetDoc(window.fbDoc(window.fbDb,"push_subscriptions",uid));
+    if(!(sub&&sub.exists&&sub.exists())){ el.textContent="Aucun abonnement enregistré pour ce compte : active les notifications (autorise-les sur le téléphone) puis relance."; btn.disabled=false; btn.textContent=txt; return; }
+    etape="3/4 envoi du test (push_ping)";
     var ref=await window.fbAddDoc(window.fbCollection(window.fbDb,"push_ping"),{at:new Date(),uid:uid});
+    etape="4/4 réponse du serveur";
     var res=null;
     for(var i=0;i<12&&!res;i++){
       await new Promise(function(r){ setTimeout(r,1000); });
@@ -262,6 +269,6 @@ async function pushTesterClub(btn){
     if(!res) el.textContent="Pas de réponse du serveur : les fonctions sont-elles déployées ?";
     else if(res.ok) el.textContent="Envoyé ✓ Si rien n'apparaît sur cet appareil, regarde les réglages de notifications du téléphone pour cette appli.";
     else el.textContent="Échec : "+res.erreur;
-  }catch(e){ el.textContent="Erreur : "+((e&&e.code)||e)+" (règles Firestore publiées ?)"; }
+  }catch(e){ el.textContent="Erreur à l'étape "+etape+" : "+((e&&e.code)||e); }
   btn.disabled=false; btn.textContent=txt;
 }

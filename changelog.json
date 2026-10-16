@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792167929",
+  "titre": "Test de notification plus précis",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le test de notification indique maintenant à quelle étape il échoue."
+   }
+  ]
+ },
+ {
   "v": "1792158378",
   "titre": "Accès limité : bandeau bien présent à l'ouverture",
   "points": [
