@@ -78,6 +78,7 @@ async function enablePushNotifications(){
       uid: window.ASMB_USER.uid,
       updatedAt: window.fbServerTimestamp()
     });
+    try{ localStorage.removeItem("gm_push_off"); }catch(e){}
     showToast("Notifications activées ✓");
     refreshPushButton();
   }catch(e){
@@ -91,9 +92,56 @@ async function disablePushNotifications(){
   try{
     if(window.fbMsgDeleteToken) await window.fbMsgDeleteToken().catch(function(){});
     await window.fbDeleteDoc(window.fbDoc(window.fbDb,"push_subscriptions",window.ASMB_USER.uid)).catch(function(){});
+    try{ localStorage.setItem("gm_push_off","1"); }catch(e){}
     showToast("Notifications désactivées");
     refreshPushButton();
   }catch(e){ console.log("disablePushNotifications:",e); }
+}
+
+// ── Abonnement du club : automatique, sans que la personne ait à le chercher ──
+// Cas réel : la permission du navigateur est déjà accordée (autre alerte, autre
+// compte) mais aucun abonnement n'existe pour CE club, donc aucun message ne
+// part. À chaque ouverture, si la permission est accordée et que la personne
+// n'a pas désactivé volontairement, on (ré)enregistre l'appareil. Sinon, une
+// seule invitation à activer, jamais répétée plus d'une fois par semaine.
+async function pushAutoClub(){
+  try{
+    if(!pushSupported()||!window.ASMB_USER||!window.CURRENT_CLUB_ID||window.SUPPORT_MODE) return;
+    if(GM_FCM_VAPID_KEY.indexOf("REMPLACER")>=0) return;
+    if(localStorage.getItem("gm_push_off")) return;
+    var st=pushStatus();
+    if(st==="granted"){
+      var reg=await navigator.serviceWorker.ready;
+      var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
+      if(!token) return;
+      await window.fbSetDoc(window.fbDoc(window.fbDb,"push_subscriptions",window.ASMB_USER.uid),
+        {token:token,uid:window.ASMB_USER.uid,updatedAt:window.fbServerTimestamp()});
+      refreshPushButton();
+    } else if(st==="default"||pushIosAInstaller()){
+      var vu=parseInt(localStorage.getItem("gm_push_invite")||"0",10);
+      if(Date.now()-vu<7*24*3600*1000) return;
+      localStorage.setItem("gm_push_invite",String(Date.now()));
+      pushInviter();
+    }
+  }catch(e){ console.log("pushAutoClub:",e); }
+}
+function pushInviter(){
+  var modal=document.createElement("div");
+  modal.className="alert-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px";
+  var box=document.createElement("div");
+  box.style.cssText="background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center";
+  box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);margin-bottom:6px">Reçois les messages du club</div>'+
+    '<div style="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:14px">Active les notifications pour être prévenu d\'un nouveau message, même quand ton téléphone est verrouillé.</div>';
+  var ok=document.createElement("button");
+  ok.textContent="Activer les notifications";
+  ok.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+  var non=document.createElement("button");
+  non.textContent="Plus tard";
+  non.style.cssText="width:100%;margin-top:6px;padding:10px;background:none;border:none;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer";
+  ok.addEventListener("click",function(){ modal.remove(); enablePushNotifications(); });
+  non.addEventListener("click",function(){ modal.remove(); });
+  box.appendChild(ok); box.appendChild(non); modal.appendChild(box); document.body.appendChild(modal);
 }
 
 // Repeint le bouton là où il est affiché (voir buildParametres).

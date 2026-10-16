@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792148139",
+  "titre": "Notifications des messages : activation automatique",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "L'appareil est enregistré automatiquement pour recevoir les messages du club, même téléphone verrouillé. Si les notifications n'ont jamais été activées, l'appli te le propose une fois."
+   }
+  ]
+ },
+ {
   "v": "1792147621",
   "titre": "Dernier message dans la liste des canaux",
   "points": [

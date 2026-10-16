@@ -419,6 +419,7 @@ function finishAuthedUser(user, u, isUpdate){
   if(typeof indRoute==="function" && indRoute(u, isUpdate, function(){ routerClub(); })) return;
   routerClub();
   if(!isUpdate) setTimeout(function(){ try{ monCompteSiIncomplet(u); }catch(e){} },1500);
+  if(!isUpdate) setTimeout(function(){ try{ if(typeof pushAutoClub==="function") pushAutoClub(); }catch(e){} },4000);
   function routerClub(){
   // Super admin : l'accueil est la Plateforme (clubs), jamais le portail d'un
   // club — décidé AVANT tout routage, pour ne jamais afficher le portail (même
