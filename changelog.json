@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792147418",
+  "titre": "Nom des personnes dans les discussions privées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau"
+    ],
+    "texte": "Les discussions privées affichent le nom de la personne (compte ou fiche de licence) au lieu de son e-mail."
+   }
+  ]
+ },
+ {
   "v": "1792147178",
   "titre": "Rouvrir une discussion supprimée",
   "points": [

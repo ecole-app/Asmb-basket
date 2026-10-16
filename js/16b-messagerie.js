@@ -697,7 +697,25 @@ var dmUnsub=null;
 function dmOtherLabel(dm){
   var me=myUid();
   var o=(dm.members||[]).find(function(x){return x.uid!==me;});
-  return (o&&o.label)||"Discussion privée";
+  var nom=o&&window.__dmNoms&&window.__dmNoms[o.uid];
+  return nom||(o&&o.label)||"Discussion privée";
+}
+// Nom à jour de l'autre personne (prénom + nom du compte), lisible par le staff :
+// évite d'afficher l'e-mail enregistré à la création de la discussion.
+function dmChargerNoms(dms){
+  if(!window.__dmNoms) window.__dmNoms={};
+  var me=myUid();
+  dms.forEach(function(dm){
+    var o=(dm.members||[]).find(function(x){return x.uid!==me;});
+    if(!o||window.__dmNoms[o.uid]!==undefined) return;
+    window.__dmNoms[o.uid]=null;
+    window.fbGetDoc(window.fbDoc(window.fbDb,"users",o.uid)).then(function(r){
+      var u=r.exists()?r.data():null;
+      var n=(typeof compteNom==="function"&&compteNom(u))||"";
+      if(!n&&u) n=dmNameForPhone()[String(u.phone||"").replace(/\s+/g,"")]||"";
+      if(n){ window.__dmNoms[o.uid]=n; dmRenderList(); }
+    }).catch(function(){});
+  });
 }
 function dmListen(){
   if(dmUnsub||!window.fbReady||!myUid()) return;
@@ -717,6 +735,7 @@ function dmListen(){
     })).then(function(vis){
       window.__chatDmsCache=dms.filter(function(d,i){ return vis[i]; });
       dmRenderList();
+      dmChargerNoms(window.__chatDmsCache);
     });
   },function(e){ console.log("dms:",e&&e.code); });
 }
