@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792169774",
+  "titre": "Test de notification : détails de l'erreur",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "En cas d'erreur, le test de notification affiche le club actif, le profil et le statut du club pour trouver la cause."
+   }
+  ]
+ },
+ {
   "v": "1792167929",
   "titre": "Test de notification plus précis",
   "points": [

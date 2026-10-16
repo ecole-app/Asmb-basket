@@ -269,6 +269,19 @@ async function pushTesterClub(btn){
     if(!res) el.textContent="Pas de réponse du serveur : les fonctions sont-elles déployées ?";
     else if(res.ok) el.textContent="Envoyé ✓ Si rien n'apparaît sur cet appareil, regarde les réglages de notifications du téléphone pour cette appli.";
     else el.textContent="Échec : "+res.erreur;
-  }catch(e){ el.textContent="Erreur à l'étape "+etape+" : "+((e&&e.code)||e); }
+  }catch(e){
+    var ctx=" · club actif="+(window.CURRENT_CLUB_ID||"?");
+    try{
+      var us=await window.fbGetDoc(window.fbDoc(window.fbDb,"users",window.ASMB_USER.uid));
+      var ud=us&&us.exists&&us.exists()?us.data():null;
+      ctx+=" · ton profil: clubId="+(ud?(ud.clubId||"vide"):"introuvable")+", rôles="+(ud&&ud.roles?ud.roles.join("/"):"?");
+    }catch(e2){ ctx+=" · profil illisible"; }
+    try{
+      var cs=await window.fbGetDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID));
+      var cd=cs&&cs.exists&&cs.exists()?cs.data():null;
+      ctx+=" · statut du club="+(cd?(cd.status||"actif"):"introuvable");
+    }catch(e3){ ctx+=" · fiche club illisible"; }
+    el.textContent="Erreur à l'étape "+etape+" : "+((e&&e.code)||e)+ctx;
+  }
   btn.disabled=false; btn.textContent=txt;
 }
