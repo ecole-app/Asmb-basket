@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792142393",
+  "titre": "Alertes Plateforme au premier plan",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Les alertes Plateforme (test, demande d'essai, compte dirigeant validé) s'affichent aussi quand l'appli est ouverte."
+   }
+  ]
+ },
+ {
   "v": "1792107242",
   "titre": "Test des alertes Plateforme",
   "points": [

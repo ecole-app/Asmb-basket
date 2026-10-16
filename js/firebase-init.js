@@ -4,7 +4,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as acGetToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported, onMessage as fbMsgOnMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -150,6 +150,17 @@ fbMsgIsSupported().then(function(ok){
     return fbMsgGetToken(messaging,{vapidKey:vapidKey,serviceWorkerRegistration:swReg});
   };
   window.fbMsgDeleteToken=function(){ return fbMsgDeleteToken(messaging); };
+  // Appli ouverte au premier plan : FCM ne montre rien tout seul. Les alertes Plateforme
+  // (test, demande d'essai, compte dirigeant validé) s'affichent quand même comme notification.
+  fbMsgOnMessage(messaging,function(payload){
+    try{
+      var n=(payload&&payload.notification)||{};
+      if(["Test d'alerte","Nouvelle demande d'essai","Compte dirigeant validé"].indexOf(n.title)<0) return;
+      navigator.serviceWorker.ready.then(function(reg){
+        reg.showNotification(n.title,{body:n.body||"",icon:"./icon-192.png",badge:"./icon-192.png",data:{url:"./"}});
+      });
+    }catch(e){}
+  });
 }).catch(function(e){ console.log("FCM isSupported:",e); });
 
 window.dispatchEvent(new Event("fb-ready"));
