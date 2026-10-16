@@ -29,12 +29,45 @@ exports.onChannelMessage = onDocumentCreated(
       : String(msg.text || "").slice(0, 120);
     if (!body) return;
 
-    const subsSnap = await db.collection("clubs").doc(clubId).collection("push_subscriptions").get();
-    if (subsSnap.empty) return;
+    // Destinataires : seulement les personnes qui voient ce canal.
+    //  - canal réservé (liste de membres par téléphone) : ces membres + les dirigeants ;
+    //  - canal d'équipe : tout le monde sauf les coachs d'une autre équipe ;
+    //  - canal ouvert : tout le club.
+    const clubRef = db.collection("clubs").doc(clubId);
+    const subsCol = clubRef.collection("push_subscriptions");
+    const chSnap = await clubRef.collection("channels").doc(channelId).get();
+    const ch = (chSnap.exists && chSnap.data()) || {};
+    const membres = Array.isArray(ch.members) ? ch.members : [];
+    let docs = [];
+    if (membres.length) {
+      const tels = [...new Set(membres.map((m) => String(typeof m === "string" ? m : (m && m.phone) || "").replace(/\s+/g, "")).filter(Boolean))];
+      const uids = new Set();
+      for (let i = 0; i < tels.length; i += 30) {
+        const r = await db.collection("users").where("clubId", "==", clubId).where("phone", "in", tels.slice(i, i + 30)).get();
+        r.forEach((d) => uids.add(d.id));
+      }
+      const dirs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "dirigeant").get();
+      dirs.forEach((d) => uids.add(d.id));
+      if (!uids.size) return;
+      docs = await db.getAll(...[...uids].map((u) => subsCol.doc(u)));
+    } else {
+      const subsSnap = await subsCol.get();
+      docs = subsSnap.docs;
+      if (ch.teamId && !ch.clubWide) {
+        const coachs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "coach").get();
+        const exclus = new Set();
+        coachs.forEach((d) => {
+          const u = d.data() || {};
+          if (!(u.roles || []).includes("dirigeant") && !(u.linkedTeamIds || []).includes(ch.teamId)) exclus.add(d.id);
+        });
+        docs = docs.filter((d) => !exclus.has(d.id));
+      }
+    }
 
     const tokens = [];
     const tokenToDocId = {};
-    subsSnap.forEach((doc) => {
+    docs.forEach((doc) => {
+      if (!doc.exists) return;
       if (authorUid && doc.id === authorUid) return;
       const token = doc.data() && doc.data().token;
       if (!token) return;
@@ -43,12 +76,19 @@ exports.onChannelMessage = onDocumentCreated(
     });
     if (!tokens.length) return;
 
-    const resp = await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: { title, body },
-      data: { url: "./", conv: channelId },
-      webpush: { fcmOptions: { link: "./" } }
-    });
+    // Firebase limite un envoi groupé à 500 destinataires : on découpe.
+    const responses = [];
+    for (let i = 0; i < tokens.length; i += 500) {
+      const lot = tokens.slice(i, i + 500);
+      const r = await admin.messaging().sendEachForMulticast({
+        tokens: lot,
+        notification: { title, body },
+        data: { url: "./", conv: channelId },
+        webpush: { fcmOptions: { link: "./" } }
+      });
+      r.responses.forEach((x) => responses.push(x));
+    }
+    const resp = { responses };
 
     // Nettoie les tokens morts (app désinstallée, cache navigateur vidé...).
     const cleanup = [];
