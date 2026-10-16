@@ -84,7 +84,7 @@ exports.onChannelMessage = onDocumentCreated(
         tokens: lot,
         notification: { title, body },
         data: { url: "./", conv: channelId },
-        webpush: { fcmOptions: { link: "./" } }
+        webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
       });
       r.responses.forEach((x) => responses.push(x));
     }
@@ -129,7 +129,7 @@ exports.onDmMessage = onDocumentCreated(
     });
     if (!tokens.length) return;
     const resp = await admin.messaging().sendEachForMulticast({
-      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: { fcmOptions: { link: "./" } }
+      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
     });
     const cleanup = [];
     resp.responses.forEach((r, i) => {
@@ -165,7 +165,7 @@ exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) 
       token,
       notification: { title: "Nouvelle demande d'essai", body: quoi || "Un club vient de remplir le formulaire" },
       data: { url: "./" },
-      webpush: { fcmOptions: { link: "./" } }
+      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
     });
   } catch (e) {
     const code = e && e.code;
@@ -193,7 +193,7 @@ exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", asy
       token,
       notification: { title: "Compte dirigeant validé", body: String(apres.clubName || "Un club") + " : le dirigeant vient de créer son compte" },
       data: { url: "./" },
-      webpush: { fcmOptions: { link: "./" } }
+      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
     });
   } catch (e) {
     const code = e && e.code;
@@ -214,7 +214,7 @@ exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (even
       token,
       notification: { title: "Test d'alerte", body: "Si tu vois ceci, les alertes Plateforme fonctionnent." },
       data: { url: "./" },
-      webpush: { fcmOptions: { link: "./" } }
+      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
     });
     await ref.update({ ok: true });
   } catch (e) {
@@ -299,7 +299,7 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
       token,
       notification: { title: "Test de notification", body: "Si tu vois ceci, les messages du club t'arriveront." },
       data: { url: "./" },
-      webpush: { fcmOptions: { link: "./" } }
+      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
     });
     await ref.update({ ok: true });
   } catch (e) {
