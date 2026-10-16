@@ -1,13 +1,13 @@
 [
  {
-  "v": "1792146636",
-  "titre": "Icône de l'appli sans fond",
+  "v": "1792146745",
+  "titre": "Icône de l'appli aux couleurs du logo",
   "points": [
    {
     "roles": [
      "dirigeant"
     ],
-    "texte": "L'icône de l'appli est le logo du club détouré, sans carré blanc ou coloré derrière."
+    "texte": "L'icône de l'appli reprend le logo du club tel quel, avec ses couleurs d'origine, recadré pour remplir l'icône."
    }
   ]
  },
