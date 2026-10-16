@@ -21,7 +21,7 @@ exports.onChannelMessage = onDocumentCreated(
     const msg = event.data && event.data.data();
     if (!msg || msg.deleted) return;
 
-    const { clubId } = event.params;
+    const { clubId, channelId } = event.params;
     const authorUid = msg.senderUid || null;
     const title = msg.pseudo ? `${msg.pseudo} (Communauté)` : "Nouveau message";
     const body = (msg.type === "media")
@@ -46,7 +46,7 @@ exports.onChannelMessage = onDocumentCreated(
     const resp = await admin.messaging().sendEachForMulticast({
       tokens,
       notification: { title, body },
-      data: { url: "./" },
+      data: { url: "./", conv: channelId },
       webpush: { fcmOptions: { link: "./" } }
     });
 
@@ -89,7 +89,7 @@ exports.onDmMessage = onDocumentCreated(
     });
     if (!tokens.length) return;
     const resp = await admin.messaging().sendEachForMulticast({
-      tokens, notification: { title, body }, data: { url: "./" }, webpush: { fcmOptions: { link: "./" } }
+      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: { fcmOptions: { link: "./" } }
     });
     const cleanup = [];
     resp.responses.forEach((r, i) => {

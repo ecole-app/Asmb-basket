@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792146444",
+  "titre": "Bannière de notification des messages",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Un nouveau message s'affiche en bannière en haut de l'écran même quand l'appli est ouverte (sauf si tu es déjà dans la conversation)."
+   }
+  ]
+ },
+ {
   "v": "1792146396",
   "titre": "Icône de l'appli plus nette",
   "points": [

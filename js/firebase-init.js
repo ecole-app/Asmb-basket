@@ -155,7 +155,9 @@ fbMsgIsSupported().then(function(ok){
   fbMsgOnMessage(messaging,function(payload){
     try{
       var n=(payload&&payload.notification)||{};
-      if(["Test d'alerte","Nouvelle demande d'essai","Compte dirigeant validé"].indexOf(n.title)<0) return;
+      // Message d'une conversation : pas de bannière si on est déjà dedans à l'écran.
+      var conv=payload&&payload.data&&payload.data.conv;
+      if(conv && window.currentChannelId===conv && document.visibilityState==="visible") return;
       navigator.serviceWorker.ready.then(function(reg){
         reg.showNotification(n.title,{body:n.body||"",icon:"./icon-192.png",badge:"./badge-96.png",data:{url:"./"}});
       });
