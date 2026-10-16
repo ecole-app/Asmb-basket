@@ -130,11 +130,21 @@ function majIconeAppli(){
     // flotter petit au milieu d'un carré blanc.
     var src=document.createElement("canvas"); src.width=img.width; src.height=img.height;
     var sx=src.getContext("2d"); sx.drawImage(img,0,0);
-    var bx=0,by=0,bw=img.width,bh=img.height;
+    // Fond du logo : si les 4 coins sont opaques et de même couleur, c'est le fond
+    // du logo (on le garde, sur toute l'icône). Sinon le logo est transparent et
+    // l'icône l'est aussi. On recadre sur le dessin lui-même.
+    var bx=0,by=0,bw=img.width,bh=img.height,fond=null;
     try{
-      var d=sx.getImageData(0,0,img.width,img.height).data, x0=img.width,y0=img.height,x1=-1,y1=-1;
-      for(var y=0;y<img.height;y++) for(var x=0;x<img.width;x++){
-        if(d[(y*img.width+x)*4+3]>24){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+      var W=img.width,H=img.height,d=sx.getImageData(0,0,W,H).data;
+      function cl(x,y){ var i=(y*W+x)*4; return [d[i],d[i+1],d[i+2],d[i+3]]; }
+      var cs=[cl(0,0),cl(W-1,0),cl(0,H-1),cl(W-1,H-1)], r0=cs[0];
+      var ecart=function(c,r){ return Math.abs(c[0]-r[0])+Math.abs(c[1]-r[1])+Math.abs(c[2]-r[2]); };
+      if(cs.every(function(c){ return c[3]>=200 && ecart(c,r0)<=48; })) fond=r0;
+      var x0=W,y0=H,x1=-1,y1=-1;
+      for(var y=0;y<H;y++) for(var x=0;x<W;x++){
+        var i=(y*W+x)*4;
+        var vis=fond ? (d[i+3]>24 && ecart([d[i],d[i+1],d[i+2]],fond)>48) : d[i+3]>24;
+        if(vis){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
       }
       if(x1>=x0&&y1>=y0){ bx=x0; by=y0; bw=x1-x0+1; bh=y1-y0+1; }
     }catch(e){}
@@ -142,13 +152,13 @@ function majIconeAppli(){
       var c=document.createElement("canvas"); c.width=px; c.height=px;
       var x=c.getContext("2d");
       x.imageSmoothingQuality="high";
-      // Pas de fond : le logo seul, transparent (iPhone le pose sur noir, Android sur le fond de son lanceur).
+      if(fond){ x.fillStyle="rgb("+fond[0]+","+fond[1]+","+fond[2]+")"; x.fillRect(0,0,px,px); }
       var zone=px*(1-2*marge), ech=Math.min(zone/bw,zone/bh);
       var w=bw*ech, h=bh*ech;
       x.drawImage(src,bx,by,bw,bh,(px-w)/2,(px-h)/2,w,h);
       return c.toDataURL("image/png");
     }
-    var i32=carre(64,0.04), i180=carre(180,0.08), i192=carre(192,0.10), i512=carre(512,0.10);
+    var i32=carre(64,0.06), i180=carre(180,0.14), i192=carre(192,0.16), i512=carre(512,0.16);
     if(lf){ lf.setAttribute("href",i32); lf.setAttribute("type","image/png"); }
     if(la) la.setAttribute("href",i180);
     if(lm){

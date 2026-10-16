@@ -140,7 +140,7 @@ setTimeout(initAuthGate,80);
 setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1792146745";
+var APP_VERSION="1792146903";
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
