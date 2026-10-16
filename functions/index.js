@@ -189,10 +189,20 @@ exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
   const apres = event.data && event.data.after.data();
   if (!avant || !apres || !apres.clubId) return;
   const roles = apres.roles || [];
-  if (roles.includes("dirigeant") || roles.includes("joueur") || roles.includes("client")) return;
   const uid = event.params.uid;
   const nomDe = (u) => `${u.prenom || ""} ${u.nom || ""}`.trim();
   const ancienNom = nomDe(avant), nouveauNom = nomDe(apres);
+  // Le nom affiché dans les discussions privées existantes suit le compte
+  // (y compris la toute première saisie du nom).
+  if (nouveauNom && ancienNom !== nouveauNom) {
+    const dms = await db.collection("clubs").doc(apres.clubId).collection("dms").where("memberUids", "array-contains", uid).get();
+    for (const dm of dms.docs) {
+      const membres = (dm.data().members || []).map((m) => (m.uid === uid ? { uid, label: nouveauNom } : m));
+      await dm.ref.update({ members: membres });
+    }
+  }
+  // Pas de message au dirigeant pour un dirigeant, un joueur ou un client.
+  if (roles.includes("dirigeant") || roles.includes("joueur") || roles.includes("client")) return;
   const nomChange = ancienNom !== nouveauNom && !!ancienNom;
   const mailChange = !!avant.email && !!apres.email && avant.email !== apres.email;
   if (!nomChange && !mailChange) return;
