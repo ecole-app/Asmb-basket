@@ -142,7 +142,7 @@ function majIconeAppli(){
       var c=document.createElement("canvas"); c.width=px; c.height=px;
       var x=c.getContext("2d");
       x.imageSmoothingQuality="high";
-      x.fillStyle="#ffffff"; x.fillRect(0,0,px,px);
+      // Pas de fond : le logo seul, transparent (iPhone le pose sur noir, Android sur le fond de son lanceur).
       var zone=px*(1-2*marge), ech=Math.min(zone/bw,zone/bh);
       var w=bw*ech, h=bh*ech;
       x.drawImage(src,bx,by,bw,bh,(px-w)/2,(px-h)/2,w,h);

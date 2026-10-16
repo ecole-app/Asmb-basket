@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792146531",
+  "titre": "Icône de l'appli sans fond blanc",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'icône de l'appli est le logo du club seul, sans carré blanc derrière."
+   }
+  ]
+ },
+ {
   "v": "1792146444",
   "titre": "Bannière de notification des messages",
   "points": [
