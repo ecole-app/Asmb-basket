@@ -868,7 +868,7 @@
       <button onclick="cancelReply()" style="width:26px;height:26px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:12px;color:var(--mut);flex-shrink:0">✕</button>
     </div>
     <div id="chat-input-bar" style="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:6px;z-index:10">
-      <button id="poll-btn" onclick="showPollCreator()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></button>
+      <button id="poll-btn" onclick="showPollCreator()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</button>
       <button id="carpool-btn" onclick="showCarpoolCreator()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">🚗</button>
       <button onclick="document.getElementById('chat-media-input').click()" style="width:34px;height:34px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">📎</button>
       <input type="file" id="chat-media-input" accept="image/*,application/pdf" style="display:none" onchange="sendMediaMessage(this)">

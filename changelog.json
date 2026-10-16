@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792145691",
+  "titre": "Discussions privées : suppression et nom",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Appui long sur une discussion privée pour la supprimer. Les messages portent ton prénom et ton nom au lieu de « Anonyme ». Le bouton sondage a retrouvé son icône."
+   }
+  ]
+ },
+ {
   "v": "1792145289",
   "titre": "Prénom et nom sur chaque compte",
   "points": [

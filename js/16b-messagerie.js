@@ -737,12 +737,45 @@ function dmRenderList(){
     h+='<div class="channel-card" data-dm="'+i+'" style="position:relative;cursor:pointer"><div class="ch-icon">🔒</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);display:flex;justify-content:space-between;gap:8px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(dmOtherLabel(dm))+'</span><span style="font-size:10px;font-weight:600;color:var(--mut)">'+(t?authEsc(chatDayLabel(t)==="Aujourd'hui"?t.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):chatDayLabel(t)):"")+'</span></div><div style="font-size:11px;color:'+(un?"var(--txt)":"var(--mut)")+';font-weight:'+(un?"700":"400")+';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(dm.lastSender===myUid()?"Vous : ":"")+authEsc(dm.lastMsg||"Nouvelle discussion")+'</div></div>'+(un?'<span style="width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0"></span>':'')+'</div>';
   });
   box.innerHTML=h;
+  // Appui long (0,6 s) sur une discussion privée : proposer de la supprimer.
+  var lpT=null, lpFait=false;
+  function lpStop(){ clearTimeout(lpT); lpT=null; }
+  box.onpointerdown=function(e){
+    var c=e.target.closest("[data-dm]"); if(!c) return;
+    lpFait=false; lpStop();
+    lpT=setTimeout(function(){
+      lpFait=true;
+      dmSupprimer((window.__chatDmsCache||[])[parseInt(c.getAttribute("data-dm"),10)]);
+    },600);
+  };
+  box.onpointerup=box.onpointerleave=box.onpointercancel=lpStop;
+  box.onpointermove=function(e){ if(lpT&&(Math.abs(e.movementX)>3||Math.abs(e.movementY)>3)) lpStop(); };
+  box.oncontextmenu=function(e){ if(e.target.closest("[data-dm]")) e.preventDefault(); };
   box.onclick=function(e){
     var c=e.target.closest("[data-dm]"); if(!c) return;
+    if(lpFait){ lpFait=false; return; }
     openDm((window.__chatDmsCache||[])[parseInt(c.getAttribute("data-dm"),10)]);
   };
   window.__dmUnread=unread;
   if(typeof updateNavBadge==="function") updateNavBadge(window.__chanUnread||0);
+}
+function dmSupprimer(dm){
+  if(!dm||!window.fbDeleteDoc) return;
+  askConfirm("Supprimer la discussion privée avec "+dmOtherLabel(dm)+" ? Les messages seront effacés pour vous deux.",
+    {danger:true,confirmText:"Supprimer"}).then(function(ok){
+    if(!ok) return;
+    var col=window.fbCollection(window.fbDb,"dms",dm.id,"messages");
+    window.fbGetDocs(col).then(function(snap){
+      var ps=[]; snap.forEach(function(d){ ps.push(window.fbDeleteDoc(d.ref)); });
+      return Promise.all(ps);
+    }).then(function(){
+      return window.fbDeleteDoc(window.fbDoc(window.fbDb,"dms",dm.id));
+    }).then(function(){
+      window.__chatDmsCache=(window.__chatDmsCache||[]).filter(function(x){ return x.id!==dm.id; });
+      dmRenderList();
+      if(typeof showToast==="function") showToast("Discussion supprimée");
+    }).catch(function(e){ askAlert("Suppression impossible : "+((e&&e.code)||e)); });
+  });
 }
 function openDm(dm){
   if(!dm) return;

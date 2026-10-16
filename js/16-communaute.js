@@ -391,7 +391,12 @@ var typingDebounce=null;
 var savedPseudo=(localStorage.getItem("asmb_pseudo")||"").substring(0,20);
 // Pseudo à utiliser pour envoyer un message : le pseudo choisi dans les paramètres
 // (édité une fois pour toutes, plus de champ à retaper à chaque message).
-function myChatPseudo(){ return savedPseudo||"Anonyme"; }
+function myChatPseudo(){
+  if(savedPseudo) return savedPseudo;
+  var u=window.ASMB_USER;
+  var n=u?(((u.prenom||"")+" "+(u.nom||"")).trim()):"";
+  return n||"Anonyme";
+}
 // Identité technique jointe à chaque nouveau message : sert à résoudre la vraie
 // identité et le badge de rôle au clic (voir openSenderIdentityModal), sans
 // obliger à retaper quoi que ce soit.

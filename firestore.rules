@@ -745,10 +745,14 @@ service cloud.firestore {
           && request.auth.uid in request.resource.data.memberUids;
         allow update: if member(clubId) && request.auth.uid in resource.data.get('memberUids', [])
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMsg','lastTs','lastSender']);
+        // Chaque participant peut supprimer la discussion (appui long dans la liste) :
+        // les messages d'abord, puis la discussion elle-même.
+        allow delete: if member(clubId) && request.auth.uid in resource.data.get('memberUids', []);
         match /messages/{msgId} {
           allow read: if dansLaDiscussion();
           allow create: if dansLaDiscussion() && request.resource.data.get('senderUid', null) == request.auth.uid;
           allow update: if dansLaDiscussion() && (auteurPeut() || champsPartages());
+          allow delete: if dansLaDiscussion();
         }
         match /reads/{uid} {
           allow read: if dansLaDiscussion();

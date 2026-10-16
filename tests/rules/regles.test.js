@@ -448,6 +448,12 @@ describe("Discussions privées", () => {
     await assertFails(setDoc(doc(await as("parentA"), "clubs/A/dms/parentA__parent2A"), { memberUids: ["parentA", "parent2A"] }));
     await assertFails(setDoc(doc(await as("coachA"), "clubs/A/dms/dirA__parent2A"), { memberUids: ["dirA", "parent2A"] }));
   });
+  it("un participant supprime la discussion (messages puis discussion), pas un tiers", async () => {
+    await assertFails(deleteDoc(doc(await as("parent2A"), "clubs/A/dms/dirA__parentA/messages/d1")));
+    await assertFails(deleteDoc(doc(await as("parent2A"), "clubs/A/dms/dirA__parentA")));
+    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA/messages/d1")));
+    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/dms/dirA__parentA")));
+  });
   it("le staff voit les comptes de son club, pas un parent", async () => {
     await assertSucceeds(getDocs(query(collection(await as("coachA"), "users"), where("clubId", "==", "A"))));
     await assertFails(getDocs(query(collection(await as("parentA"), "users"), where("clubId", "==", "A"))));
