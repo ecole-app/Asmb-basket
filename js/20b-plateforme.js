@@ -28,7 +28,7 @@ function genSecureCode(groups, size){
 
 function gmSlug(s){
   return (s||"club").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,24) || "club";
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,50) || "club";
 }
 
 function gmFmtDate(ts){

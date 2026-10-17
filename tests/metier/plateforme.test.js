@@ -84,9 +84,9 @@ describe("Identifiant d'un nouveau club (gmSlug)", () => {
     const c = app();
     assert.equal(c.gmSlug("  C.O. Basket !! "), "c-o-basket");
   });
-  it("plafonné à 24 caractères", () => {
+  it("plafonné à 50 caractères", () => {
     const c = app();
-    assert.ok(c.gmSlug("Un Tres Tres Tres Long Nom De Club Basket").length <= 24);
+    assert.ok(c.gmSlug("Un Tres Tres Tres Tres Tres Tres Long Nom De Club Basket Associatif").length <= 50);
   });
   it("vide ou uniquement des symboles : repli sur « club »", () => {
     const c = app();
