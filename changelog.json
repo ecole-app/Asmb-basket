@@ -1,5 +1,21 @@
 [
  {
+  "v": "1792242050",
+  "titre": "Dates : saisie libre JJ/MM/AAAA",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach",
+     "parent",
+     "client"
+    ],
+    "texte": "Partout où l'on demande une date (naissance, événement, paiement…), tu peux maintenant la taper directement au format JJ/MM/AAAA, en plus du calendrier. Les barres se mettent toutes seules."
+   }
+  ]
+ },
+ {
   "v": "1792230932",
   "titre": "Nom de club plus long accepté à la création",
   "points": [

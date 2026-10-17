@@ -600,3 +600,11 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .gm-ios-web .push-ios-hint{display:block}
 .ios-tuto{margin:0;padding-left:20px;font-size:13px;color:var(--txt);line-height:1.5}
 .ios-tuto li{margin-bottom:8px}
+
+/* Saisie libre des dates (js/09b-saisie-dates.js) : champ texte JJ/MM/AAAA + bouton calendrier */
+.date-wrap{display:flex;align-items:stretch;gap:6px;width:100%;min-width:0}
+.date-wrap .date-txt{flex:1 1 auto;min-width:0;width:auto}
+.date-cal{flex:0 0 auto;width:44px;padding:0;border:1.5px solid var(--bdr,#d8dce3);border-radius:10px;background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer}
+.date-cal:disabled{opacity:.5;cursor:default}
+.date-cal:focus-visible{outline:3px solid var(--ia,var(--dkg,#1a7f4b));outline-offset:2px}
+.date-txt.err{border-color:var(--red,#c0392b)!important}
