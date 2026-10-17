@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792230932",
+  "titre": "Nom de club plus long accepté à la création",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'identifiant interne généré à la création d'un club accepte maintenant jusqu'à 50 caractères du nom (au lieu de 24)."
+   }
+  ]
+ },
+ {
   "v": "1792194950",
   "titre": "Réinitialisation des données, de retour dans Paramètres",
   "points": [
