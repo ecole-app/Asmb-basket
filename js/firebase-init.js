@@ -97,7 +97,7 @@ window.fbWriteBatch = function(){ return writeBatch(db); };
 // club_invites (invitations), support_grants (codes d'accès support),
 // buvette_codes (codes d'accès caisse buvette).
 // Toute autre collection est traitée comme donnée de club.
-const GLOBAL_COLLECTIONS = new Set(["users","clubs","inscription_codes","club_invites","support_grants","buvette_codes","comptes_a_supprimer","plateforme_push","plateforme_config","plateforme_ping","demandes_essai","avis_plateforme","essai_pages","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes","indep_liens","ben_pass"]);
+const GLOBAL_COLLECTIONS = new Set(["users","clubs","inscription_codes","club_invites","support_grants","buvette_codes","comptes_a_supprimer","plateforme_push","plateforme_config","plateforme_ping","demandes_essai","avis_plateforme","essai_pages","evt_pages","evt_entrees","trn_pages","trn_matchs","trn_inscriptions","trn_live","trn_equipes","indep_liens","ben_pass","pf_compta"]);
 
 function requireClubId(coll){
   const id = window.CURRENT_CLUB_ID;

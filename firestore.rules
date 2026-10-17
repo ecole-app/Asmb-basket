@@ -260,6 +260,13 @@ service cloud.firestore {
       allow write: if superAdmin();
     }
 
+    // ── Comptabilité de la micro-entreprise (Plateforme › Comptabilité) ──
+    // Lignes de factures/recettes + document _config (nom, SIRET, adresse).
+    // Super admin seul : aucun club n'y accède.
+    match /pf_compta/{id} {
+      allow read, write: if superAdmin();
+    }
+
     // ── Test d'alerte push (bouton « Tester » de la Plateforme) ──
     match /plateforme_ping/{id} {
       allow create: if superAdmin() && request.resource.data.keys().hasOnly(['at']);

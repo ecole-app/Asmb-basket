@@ -1182,6 +1182,17 @@ describe("RIB de la Plateforme", () => {
   });
 });
 
+describe("Comptabilité de la Plateforme", () => {
+  it("réservée au super admin, invisible pour les clubs", async () => {
+    await assertSucceeds(setDoc(doc(await as(SUPER_ADMIN), "pf_compta/l1"), { montant: 200, type: "abonnement" }));
+    await assertSucceeds(getDoc(doc(await as(SUPER_ADMIN), "pf_compta/l1")));
+    await assertFails(getDoc(doc(await as("dirA"), "pf_compta/l1")));
+    await assertFails(getDoc(doc(await as(null), "pf_compta/l1")));
+    await assertFails(setDoc(doc(await as("dirA"), "pf_compta/l2"), { montant: 1 }));
+    await assertFails(setDoc(doc(await as("dirA"), "pf_compta/_config"), { siret: "x" }));
+  });
+});
+
 describe("Test d'alerte Plateforme", () => {
   it("seul le super admin crée un test, avec le seul champ at", async () => {
     await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date() }));

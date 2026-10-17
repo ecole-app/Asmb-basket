@@ -75,6 +75,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `19-profils.js` | Profils parent/coach/joueur, thèmes animés |
 | `20-parent-tabs.js` | Onglets événements et statistiques côté parent |
 | `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |
+| `20c-pf-compta.js` | Comptabilité de la micro-entreprise (Plateforme › Comptabilité, super admin) : lignes abonnements / indépendants, livre des recettes CSV, facture PDF (collection globale `pf_compta`) |
 | `22-push.js` | Notifications push (inscription de l'appareil) |
 | `23-export.js` | Exports Excel (.xlsx) : compta, licences, sponsors, inventaire |
 | `23b-bilan-saison.js` | Bilan de saison en PDF (subventions ANS/mairie, AG) : licenciés par catégorie × genre, tranche d'âge et commune (tirée de l'adresse), équipes, pôles, événements avec participants (evt_pages), compta de l'exercice en Premium. Bouton « 📊 Bilan » de l'écran Licences. |

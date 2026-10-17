@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792251431",
+  "titre": "Plateforme : Ma comptabilité",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvel écran Plateforme › Comptabilité (réservé au super admin) : lignes d'abonnements et d'indépendants séparées, suivi à encaisser / payé, totaux du trimestre et de l'année, livre des recettes en CSV et facture PDF."
+   }
+  ]
+ },
+ {
   "v": "1792243191",
   "titre": "Indépendant : suivi des paiements et pass",
   "points": [

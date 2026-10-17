@@ -504,6 +504,7 @@ function openPlateforme(){
   var list=document.createElement("div");
   s.body.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   s.body.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
+  s.body.appendChild(gmBtn("Comptabilité","ghost",function(){ pfcOuvrir(); }));
   list.style.marginTop="14px";
   s.body.appendChild(list);
   loadClubsList(list);
@@ -673,6 +674,7 @@ function showPlateformeHome(opts){
   act.appendChild(gmBtn("+ Créer un club","primary",function(){ createClubFlow(list); }));
   act.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
   act.appendChild(gmBtn("RIB","ghost",function(){ pfRibOuvrir(); }));
+  act.appendChild(gmBtn("Comptabilité","ghost",function(){ pfcOuvrir(); }));
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
   el.appendChild(list);
@@ -789,6 +791,7 @@ function renderClubCard(c, list){
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
   if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }
+  if(!own && !supprime && typeof pfcFacturerClub==="function"){ row.appendChild(gmBtn("Facturer","soft",function(){ pfcFacturerClub(c); })); }
   if(!own && !supprime && c.plan==="trial"){
     row.appendChild(gmBtn("Passer en payant","soft",function(){ passerEnPayant(c, list); }));
     row.appendChild(gmBtn("Prolonger l'essai","soft",function(){ prolongerEssai(c, list); }));
