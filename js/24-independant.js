@@ -29,7 +29,7 @@
 
 var IND={role:null, uid:null, clubId:null, club:{}, tab:"accueil", creneaux:[], seances:{}, resas:{},
   clients:{}, clientsCharges:false, fiche:null, ficheChargee:false, enfants:{}, liens:[], unsubs:[], feuille:null, rendu:false,
-  annonces:[], reacs:{}, lu:null, luAvant:null, disc:null, discs:{}, msgVue:"annonces"};
+  annonces:[], reacs:{}, lu:null, luAvant:null, disc:null, discs:{}, msgVue:"annonces", lignes:{}};
 var IND_COULEUR="#0E7C7B";
 var IND_HORIZON=28;   // jours de séances affichés à l'avance
 var IND_PASSE=14;     // jours d'historique chargés
@@ -125,6 +125,7 @@ function indEcouter(){
   ecoute(IND.role==="coach"?window.fbCollection(db,"indep_reactions"):window.fbQuery(window.fbCollection(db,"indep_reactions"),window.fbWhere("owner","==",IND.uid)),function(sn){
     var m={}; sn.forEach(function(d){ m[d.id]=d.data(); }); IND.reacs=m; indRendre();
   });
+  if(typeof indArgentEcouter==="function") indArgentEcouter(ecoute,db);
   if(IND.role==="coach"){
     ecoute(window.fbCollection(db,"indep_discussions"),function(sn){
       var m={}; sn.forEach(function(d){ m[d.id]=d.data({serverTimestamps:"estimate"}); }); IND.discs=m; indRendre();
@@ -240,10 +241,10 @@ function indPeindre(){
   var coach=IND.role==="coach", h="", tabs;
   var nom=(IND.club&&IND.club.name)||"Mon activité";
   if(coach){
-    tabs=[["accueil","Accueil"],["seances","Séances"],["clients","Clients"],["messages","Messages"]];
-    var sur={accueil:indDateLong(indAuj()), seances:"Séances", clients:"Mes clients", messages:"Annonces"}[IND.tab]||"";
+    tabs=[["accueil","Accueil"],["seances","Séances"],["clients","Clients"],["messages","Messages"],["argent","Argent"]];
+    var sur={accueil:indDateLong(indAuj()), seances:"Séances", clients:"Mes clients", messages:"Annonces", argent:"Paiements et pass"}[IND.tab]||"";
     h+=indTop(sur, nom, '<button type="button" data-act="reglages" aria-label="Réglages de mon activité">⚙</button>');
-    h+='<div class="ind-body">'+(IND.tab==="seances"?indVueSeances():IND.tab==="clients"?indVueClients():IND.tab==="messages"?indVueMessages():indVueAccueil())+'</div>';
+    h+='<div class="ind-body">'+(IND.tab==="seances"?indVueSeances():IND.tab==="clients"?indVueClients():IND.tab==="messages"?indVueMessages():IND.tab==="argent"?indArgentVue():indVueAccueil())+'</div>';
   } else {
     tabs=[["accueil","Accueil"],["reserver","Réserver"],["messages","Messages"]];
     var f=IND.fiche||{};
@@ -251,7 +252,7 @@ function indPeindre(){
     h+=indTop(nom, IND.tab==="reserver"?"Réserver":IND.tab==="messages"?"Messages":"Bonjour"+(f.prenom?" "+f.prenom:""),
       '<button type="button" data-act="ma-fiche" aria-label="Ma fiche">'+indEsc(indInitiales(f.prenom,f.nom))+'</button>');
     if(IND.ficheChargee && !IND.fiche){ h+='<div class="ind-body">'+indVueFicheManquante()+'</div>'; tabs=null; }
-    else h+='<div class="ind-body">'+(IND.tab==="reserver"?indVueReserver():IND.tab==="messages"?indVueMessagesClient():indVueAccueilClient())+'</div>';
+    else h+='<div class="ind-body">'+(IND.tab==="reserver"?indVueReserver():IND.tab==="messages"?indVueMessagesClient():indVueAccueilClient()+indArgentClientBloc())+'</div>';
   }
   if(tabs){
     var nbLus=coach?indNbDiscNonLues():indNbNonLus()+(indDiscNonLueClient()?1:0);
@@ -353,7 +354,8 @@ function indSeanceCoach(s){
   var hab=ins.filter(function(x){ return x.habitue; }), aut=ins.filter(function(x){ return !x.habitue; });
   function ligne(x){
     var droite;
-    if(passe && !s.annulee) droite='<button type="button" class="ind-chk'+(x.present===true?" on":"")+'" data-act="presence" data-id="'+indEsc(s.id)+'" data-uid="'+indEsc(x.uid)+'" aria-pressed="'+(x.present===true)+'" aria-label="Présent : '+indEsc(indNom(x.uid,x.nom))+'">✓</button>';
+    var pil=(typeof indArgentPill==="function"&&passe&&x.present===true)?indArgentPill(s.id,x.uid):"";
+    if(passe && !s.annulee) droite=pil+'<button type="button" class="ind-chk'+(x.present===true?" on":"")+'" data-act="presence" data-id="'+indEsc(s.id)+'" data-uid="'+indEsc(x.uid)+'" aria-pressed="'+(x.present===true)+'" aria-label="Présent : '+indEsc(indNom(x.uid,x.nom))+'">✓</button>';
     else droite=x.statut==="vient"?'<span class="ind-pill ok">Vient</span>':'<span class="ind-pill no">Absent</span>';
     var c=IND.clients[x.uid]||{};
     return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(c.prenom||x.nom,c.nom))+'</div><div class="t"><strong>'+indEsc(indNom(x.uid,x.nom))+'</strong><span>'
@@ -380,6 +382,7 @@ function indPresence(sid,uid){
   var d={seance:sid, date:s.date, uid:uid, statut:r.statut||"vient", present:val, nom:indNom(uid,r.nom)};
   IND.resas[k]=Object.assign({},r,d); indRendre();
   window.fbSetDoc(window.fbDoc(indDb(),"indep_resas",k),d,{merge:true}).catch(indErr);
+  if(typeof indArgentPresence==="function") indArgentPresence(s,uid,val);
 }
 function indAnnulerSeance(sid){
   var s=indSeanceParId(sid); if(!s) return;
@@ -582,7 +585,8 @@ function indClientFiche(uid){
   }
   if(c.note) lignes+='<div class="ind-row"><div class="t"><strong>À savoir ('+(c.mineur?"écrit par le parent":"écrit par le client")+')</strong><span>'+indEsc(c.note)+'</span></div></div>';
   sh.body.innerHTML='<div class="ind-c ind-list">'+lignes+'</div>'
-    +'<button type="button" class="ind-btn s" id="ind-cl-ecrire" style="margin-top:10px">'+(c.mineur?"Écrire au parent":"Écrire à ce client")+'</button>'
+    +'<button type="button" class="ind-btn s" id="ind-cl-argent" style="margin-top:10px">Argent et pass</button>'
+    +'<button type="button" class="ind-btn s" id="ind-cl-ecrire" style="margin-top:8px">'+(c.mineur?"Écrire au parent":"Écrire à ce client")+'</button>'
     +'<div class="ind-k">Habitué de</div>'
     +(crs.length?'<div class="ind-c ind-f" style="gap:6px">'+crs.map(function(x){
       return '<label class="case"><input type="checkbox" data-cr="'+indEsc(x.id)+'"'+((x.habitues||[]).indexOf(uid)>=0?" checked":"")+'>'+indEsc(IND_JOURS[Number(x.jour)]+" "+(x.heure||"")+" · "+(x.titre||""))+'</label>';
@@ -591,6 +595,9 @@ function indClientFiche(uid){
     +'<div class="ind-f"><textarea id="ind-cl-notes" maxlength="1000" placeholder="Objectifs, niveau, blessures…"></textarea>'
     +'<div class="actions"><button type="button" class="ok" id="ind-cl-save">Enregistrer les notes</button></div></div>'
     +'<button type="button" class="ind-btn d" style="margin-top:14px" id="ind-cl-retirer">'+(c.mineur?"Retirer cet enfant":"Retirer ce client")+'</button>';
+  sh.body.querySelector("#ind-cl-argent").addEventListener("click",function(){
+    sh.modal.remove(); indArgentFiche(c.mineur&&c.parentUid?c.parentUid:uid);
+  });
   sh.body.querySelector("#ind-cl-ecrire").addEventListener("click",function(){
     var compte=c.mineur?c.parentUid:uid; if(!compte) return askAlert("Compte du parent introuvable.");
     sh.modal.remove(); indOuvrirDiscussion(compte);
@@ -1193,6 +1200,7 @@ function indClic(e){
   if(act==="annoncer-seance"){ var sa=indSeanceParId(id); return indAnnonceForm({seance:id, cible:(sa&&sa.creneauId)||"tous"}); }
   if(act==="lien-creer") return indCreerLien();
   if(act==="lien-couper") return indCouperLien();
+  if(typeof indArgentClic==="function" && indArgentClic(act,el)) return;
   if(act==="lien-copier"){ var l=indLienActif(); if(l) copyToClipboard(indLienUrl(l.code)); return; }
 }
 document.addEventListener("keydown",function(e){

@@ -1,5 +1,29 @@
 [
  {
+  "v": "1792243191",
+  "titre": "Indépendant : suivi des paiements et pass",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvel onglet Argent (formule Premium) : ce qu'il te reste à encaisser, ce que tu as encaissé ce mois-ci, et les pass en cours. Quand tu pointes une présence, la séance payante s'ajoute à ce que le client te doit. Tu marques « payé » en espèces, virement, chèque ou en ligne."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pass de séances (6 mois par défaut) : une séance pointée présent est prise sur le pass du client, qui se décompte tout seul. Fiche d'un client › « Argent et pass »."
+   },
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Sur ton Accueil, « Mes paiements » : ce que tu dois, tes séances de pass restantes et ton historique (pour toi et tes enfants)."
+   }
+  ]
+ },
+ {
   "v": "1792242050",
   "titre": "Dates : saisie libre JJ/MM/AAAA",
   "points": [

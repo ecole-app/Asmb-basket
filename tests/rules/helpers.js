@@ -53,6 +53,8 @@ export async function seed() {
     await set("clubs/I/indep_resas/cr1_2026-10-20__cli2I", { seance: "cr1_2026-10-20", date: "2026-10-20", uid: "cli2I", statut: "vient", nom: "Nadia A." });
     await set("clubs/I/indep_annonces/an1", { texte: "Pluie : on passe en salle", cible: "tous" });
     await set("clubs/I/indep_reactions/an1__cli2I", { annonce: "an1", uid: "cli2I", owner: "cli2I", val: "up", nom: "Nadia A." });
+    await set("clubs/I/indep_lignes/s_cr1_2026-10-20__cli2I", { type: "seance", uid: "cli2I", compte: "cli2I", date: "2026-10-20", montant: 25, statut: "du", libelle: "Cross-training" });
+    await set("clubs/I/indep_lignes/s_cr1_2026-10-20__e_tom002", { type: "seance", uid: "e_tom002", compte: "cli2I", date: "2026-10-20", montant: 25, statut: "du", libelle: "Cross-training" });
     await set("clubs/I/indep_discussions/cli2I", { nom: "Nadia A.", dernier: "Bonjour", dernierDe: "coach" });
     await set("clubs/I/indep_discussions/cli2I/messages/m0", { de: "coach", auteur: "dirI", texte: "Bonjour" });
 

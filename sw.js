@@ -122,6 +122,7 @@ const PRECACHE = [
   './js/23-export.js',
   './js/23b-bilan-saison.js',
   './js/24-independant.js',
+  './js/24b-independant-argent.js',
   './legal/mentions-legales.html',
   './legal/confidentialite.html',
   './legal/cgu.html',

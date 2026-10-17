@@ -1043,6 +1043,28 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertFails(updateDoc(doc(cli2, "clubs/I/indep_discussions/cli2I"), { dernier: "x", dernierTs: serverTimestamp(), dernierDe: "coach" }));
     await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_discussions/cli2I/messages/m0")));
   });
+  it("argent : l'indépendant écrit les lignes ; le client lit les siennes (et celles de ses enfants), jamais celles d'un autre", async () => {
+    const dir = await as("dirI"), cli = await as("cliI"), cli2 = await as("cli2I");
+    const ligne = (o = {}) => Object.assign({ type: "seance", uid: "cliI", compte: "cliI", date: "2026-10-20", montant: 25, statut: "du", libelle: "Cross-training", createdAt: serverTimestamp() }, o);
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI"), ligne()));
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_lignes/p_pass1"), ligne({ type: "pass", date: "2026-10-17", debut: "2026-10-17", fin: "2027-04-17", seances: 10, usages: [], montant: 200, statut: "paye", mode: "virement", datePaiement: "2026-10-17" })));
+    await assertSucceeds(updateDoc(doc(dir, "clubs/I/indep_lignes/p_pass1"), { usages: ["cr1_2026-10-20"] }));
+    await assertSucceeds(updateDoc(doc(dir, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI"), { statut: "paye", mode: "especes", datePaiement: "2026-10-20" }));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_lignes/x1"), ligne({ montant: -5 })));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_lignes/x2"), ligne({ statut: "offert" })));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_lignes/x3"), ligne({ mode: "bitcoin" })));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_lignes/x4"), ligne({ date: "20/10/2026" })));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_lignes/x5"), ligne()));
+    await assertFails(updateDoc(doc(cli, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI"), { statut: "paye" }));
+    await assertFails(deleteDoc(doc(cli, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI")));
+    await assertSucceeds(getDocs(query(collection(cli, "clubs/I/indep_lignes"), where("compte", "==", "cliI"))));
+    await assertFails(getDocs(collection(cli, "clubs/I/indep_lignes")));
+    await assertFails(getDoc(doc(cli, "clubs/I/indep_lignes/s_cr1_2026-10-20__cli2I")));
+    await assertSucceeds(getDoc(doc(cli2, "clubs/I/indep_lignes/s_cr1_2026-10-20__e_tom002")));
+    await assertSucceeds(getDocs(collection(dir, "clubs/I/indep_lignes")));
+    await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_lignes")));
+    await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI")));
+  });
   it("lien : l'indépendant le crée et le coupe ; un club ou un client non ; personne ne liste", async () => {
     const lien = (o = {}) => Object.assign({ clubId: "I", clubName: "KS Training", couleur: "#0e7c7b", actif: true, createdBy: "dirI", createdAt: serverTimestamp() }, o);
     await assertSucceeds(setDoc(doc(await as("dirI"), "indep_liens/WXYZ-2345"), lien()));

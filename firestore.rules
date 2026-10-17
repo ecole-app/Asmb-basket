@@ -932,6 +932,27 @@ service cloud.firestore {
         }
       }
 
+      // Argent de l'indépendant (js/24b-independant-argent.js) : séances à payer, payées ou prises
+      // sur un pass, et pass vendus. Écrit par l'indépendant seul ; lu par lui et par le compte
+      // payeur (le client, ou le parent pour son enfant). L'appli ne touche jamais à l'argent.
+      match /indep_lignes/{id} {
+        function ligneOk(d) {
+          return d.type in ['seance', 'pass'] && d.statut in ['du', 'paye', 'pass']
+            && d.uid is string && d.uid.size() >= 1 && d.uid.size() <= 60
+            && d.compte is string && d.compte.size() >= 1 && d.compte.size() <= 60
+            && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && d.montant is number && d.montant >= 0 && d.montant <= 100000
+            && d.get('libelle', '') is string && d.get('libelle', '').size() <= 120
+            && d.get('mode', '') in ['', 'especes', 'virement', 'cheque', 'en_ligne']
+            && d.get('datePaiement', '') is string && d.get('datePaiement', '').size() <= 10
+            && d.get('usages', []) is list && d.get('usages', []).size() <= 200;
+        }
+        allow read: if readDirigeant(clubId)
+          || (member(clubId) && resource.data.get('compte', '') == request.auth.uid);
+        allow create, update: if dirigeant(clubId) && ligneOk(request.resource.data);
+        allow delete: if dirigeant(clubId);
+      }
+
       // Purge : lecture et suppression sur TOUTES les sous-collections de ce
       // club, uniquement pendant la fenetre ci-dessus. Un match recursif evite
       // d'oublier une collection — une sous-collection ajoutee plus tard y sera
