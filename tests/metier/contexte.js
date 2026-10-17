@@ -8,7 +8,7 @@ const RACINE = new URL("../../", import.meta.url);
 export function charger(fichiers, extra = {}) {
   const store = {};
   const ctx = {
-    console, setTimeout, clearTimeout, Date, Math, JSON, Promise, URL,
+    console, setTimeout, clearTimeout, Date, Math, JSON, Promise, URL, crypto,
     document: { addEventListener() {}, getElementById() { return null; }, querySelectorAll() { return []; }, createElement() { return { style: {}, appendChild() {}, addEventListener() {} }; } },
     localStorage: { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } },
     location: { search: "" }, navigator: {},
