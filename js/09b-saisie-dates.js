@@ -8,6 +8,9 @@
 //    et le champ passe en rouge.
 // Les inputs créés plus tard (fenêtres, createElement…) sont repris par un MutationObserver.
 (function(){
+  // Désactivé (19/10/2026) : l'affichage en 2 champs cassait la mise en page. Remettre true pour réactiver.
+  var GM_DATES_LIBRES=false;
+  if(!GM_DATES_LIBRES) return;
   if(typeof document==="undefined" || typeof MutationObserver==="undefined") return;
   var desc=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value");
   var fait=new WeakMap();

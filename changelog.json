@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792361188",
+  "titre": "Dates : retour à l'affichage d'avant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Les champs date retrouvent leur affichage habituel (un seul champ avec calendrier) : la saisie en deux champs cassait la mise en page."
+   }
+  ]
+ },
+ {
   "v": "1792251431",
   "titre": "Plateforme : Ma comptabilité",
   "points": [
