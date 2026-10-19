@@ -244,7 +244,7 @@ html.gm-desk .gm-vide{padding:56px 22px;max-width:480px}
      animation:ta-sunpulse 4s ease-in-out infinite;z-index:1;pointer-events:none}
 @keyframes ta-sunpulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
 .ta-cloud{position:absolute;top:20px;opacity:.9;animation:ta-drift linear infinite;z-index:1;pointer-events:none}
-@keyframes ta-drift{from{transform:translateX(-60px)}to{transform:translateX(360px)}}
+@keyframes ta-drift{from{transform:translateX(-90px)}to{transform:translateX(calc(100vw + 20px))}}
 .ta-drop{position:absolute;top:-20px;width:2px;height:16px;background:linear-gradient(#bcdfff,rgba(188,223,255,0));border-radius:2px;animation:ta-raindrop linear infinite;z-index:1;pointer-events:none}
 @keyframes ta-raindrop{to{transform:translateY(220px)}}
 .ta-leaf{position:absolute;top:-14px;font-size:15px;animation:ta-leaffall linear infinite;z-index:1;pointer-events:none}

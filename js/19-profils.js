@@ -106,8 +106,8 @@ function taSpawnAnimation(hero,type){
       var el=document.createElement("div");el.className="ta-cloud";el.textContent=c;
       el.style.fontSize=(20+i*7)+"px";
       el.style.top=(8+i*16)+"px";
-      el.style.animationDuration=(14+i*4)+"s";
-      el.style.animationDelay=(i*3)+"s";
+      el.style.animationDuration=(8+i*1.5)+"s"; /* traverse tout l'écran pendant les 10 s */
+      el.style.animationDelay=(i*1.2)+"s";
       add(el);
     });
   } else if(type==="pluie"){

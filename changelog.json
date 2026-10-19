@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792442811",
+  "titre": "Météo : les nuages traversent tout l'écran",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Animation météo de l'accueil : les nuages traversent maintenant l'écran de gauche à droite, au lieu de rester collés à gauche."
+   }
+  ]
+ },
+ {
   "v": "1792442718",
   "titre": "Roue de couleurs : barre de luminosité honnête",
   "points": [
