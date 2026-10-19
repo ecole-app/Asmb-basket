@@ -1144,6 +1144,11 @@
       </div>
       <div class="form-group"><label class="form-label">Titre *</label><input class="form-input" id="ev-titre" placeholder=""></div>
       <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="ev-type" onchange="toggleEvEvalOption()"><option value="match">Match</option><option value="entrainement">Entraînement</option><option value="tournoi">Tournoi</option><option value="stage">Stage / Camp</option><option value="soiree">Soirée</option><option value="formation">Formation (arbitre, table de marque...)</option><option value="autre" selected>Autre</option></select></div>
+      <div class="form-group" id="ev-resp-option" style="display:none">
+        <label class="form-label">Responsable (inscriptions et entrées)</label>
+        <select class="form-select" id="ev-responsable"><option value="">— Aucun —</option></select>
+        <div style="font-size:11px;color:var(--mut);margin-top:4px">Il voit sur son accueil les entrées du jour et la liste des inscrits, du jour J jusqu'à la fin.</div>
+      </div>
       <div class="form-group" id="ev-eval-option" style="display:none">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input type="checkbox" id="ev-eval-enabled" style="width:18px;height:18px;accent-color:var(--dkg)">
@@ -1901,6 +1906,7 @@
 <script src="js/14-evenements.js"></script>
 <script src="js/14b-billetterie.js"></script>
 <script src="js/14n-eval-stage.js"></script>
+<script src="js/14o-responsable-evt.js"></script>
 <script src="js/14c-entree.js"></script>
 <script src="js/14d-affiche.js"></script>
 <script src="js/14e-tournoi.js"></script>

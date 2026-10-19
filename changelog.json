@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792426928",
+  "titre": "Responsable de stage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans la fiche d'un stage (ou soirée, formation…), tu peux désigner un responsable parmi les comptes du staff."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le responsable voit sur son accueil, le jour J puis chaque jour jusqu'à la fin, un bandeau avec « Entrées du jour » et « Inscrits » (liste et validation)."
+   }
+  ]
+ },
+ {
   "v": "1792425228",
   "titre": "Évaluation des stages : tous les inscrits",
   "points": [

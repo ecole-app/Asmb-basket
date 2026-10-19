@@ -336,6 +336,7 @@ function bandeauLimiteAccueil(){
 function buildPortal(){
   try{ bandeauLimiteAccueil(); }catch(e){}
   if(typeof benBandeau==="function") benBandeau("dashboard-dirigeant","0 12px 14px");
+  if(typeof respBandeaux==="function") respBandeaux();
   var el=document.getElementById("poleCards");if(!el)return;el.innerHTML="";
   activePoles().forEach(function(p){el.appendChild(makeCard(p,function(){openPole(p.id);}));});
   // Pôles Premium : visibles mais verrouillés, tout en bas (donner envie de passer Premium)

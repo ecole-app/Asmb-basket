@@ -185,6 +185,8 @@ function toggleEvEvalOption(){
   var type=document.getElementById("ev-type").value;
   var box=document.getElementById("ev-eval-option");
   if(box)box.style.display=(type==="stage")?"block":"none";
+  var rb=document.getElementById("ev-resp-option");
+  if(rb)rb.style.display=(typeof EVT_TYPES_INSCR!=="undefined"&&EVT_TYPES_INSCR.indexOf(type)>=0)?"block":"none";
 }
 
 // type : facultatif, pré-choisit le type (ex. « + Tournoi » du pôle Événements).
@@ -208,6 +210,7 @@ function showAddEvent(type){
   document.getElementById("ev-type").value=(typeof type==="string"&&type)?type:"autre";
   document.getElementById("ev-canal").value="";
   document.getElementById("ev-eval-enabled").checked=false;
+  if(typeof respRemplirChoix==="function") respRemplirChoix("");
   toggleEvEvalOption();
   renderEvExternes();
   renderEvTeamChecks();
@@ -338,6 +341,7 @@ function saveEventFull(){
   var eventObj={
     id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",adresse:adresse,equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
+    responsableUid:(typeof respLireChoix==="function"?respLireChoix().uid:"")||"",responsableNom:(typeof respLireChoix==="function"?respLireChoix().nom:"")||"",
     presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked),
     canalId:canal||null, canalAutoTeamIds:(canal&&realSelectedTeamIds.length)?realSelectedTeamIds:[],
     canalAccessGranted:false, canalAccessRevoked:false,
@@ -581,6 +585,7 @@ function editEventDateTime(eventId){
   document.getElementById("ev-adresse").value=ev.adresse||"";
   document.getElementById("ev-canal").value=ev.canalId||"";
   document.getElementById("ev-eval-enabled").checked=!!ev.evaluationEnabled;
+  if(typeof respRemplirChoix==="function") respRemplirChoix(ev.responsableUid||"");
   toggleEvEvalOption();
   var noms=String(ev.equipe||"").split(",").map(function(x){return x.trim();}).filter(Boolean);
   evSelectedTeams=getTeams().filter(function(t){return noms.indexOf(t.name)>=0;}).map(function(t){return t.id;});
@@ -598,6 +603,7 @@ function sauverModifEvent(eventId,v){
   ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.adresse=v.adresse||""; ev.equipe=v.equipe||"";
   ev.participantsClub=v.participantsClub; ev.participantsExternes=evExternes.slice();
   ev.evaluationEnabled=(v.type==="stage"&&document.getElementById("ev-eval-enabled").checked);
+  if(typeof respLireChoix==="function"){ var rc=respLireChoix(); if(rc.uid!==undefined){ ev.responsableUid=rc.uid; ev.responsableNom=rc.nom; } }
   if(v.canal!==undefined && v.canal!==(ev.canalId||"")){ ev.canalId=v.canal||null; ev.canalAutoTeamIds=(v.canal&&v.realSelectedTeamIds.length)?v.realSelectedTeamIds:[]; }
   // Inscriptions : la page publique reprend les nouvelles dates (et le choix des jours suit la plage)
   if(ev.inscr){

@@ -1465,6 +1465,7 @@ function buildCoachEquipe(){
   var coachTeamNames=getTeams().filter(function(t){return getCoachTeams().indexOf(t.id)>=0;}).map(function(t){return t.name;});
   renderMatchdayBanner("coach-matchday-banner",coachTeamNames.length?coachTeamNames:[team.name]);
   if(typeof benBandeau==="function") benBandeau("coach-matchday-banner","12px 0 0");
+  if(typeof respBandeau==="function") respBandeau("coach-matchday-banner","12px 0 0");
   buildCoachDashboard(document.getElementById("coach-presence-summary"));
   if(typeof renderEssaisCoach==="function") renderEssaisCoach(team);
 
