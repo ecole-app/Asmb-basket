@@ -52,6 +52,7 @@ describe("Isolation entre clubs", () => {
     const db = await as("dirB");
     await assertFails(setDoc(doc(db, "clubs/A/players/x"), { nom: "Intrus" }));
     await assertFails(setDoc(doc(db, "clubs/A/comptabilite/x"), { montant: 1 }));
+    await assertFails(setDoc(doc(db, "clubs/A/budgetPrev/budget"), { x: 1 }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { name: "Piraté" }));
   });
   it("le dirigeant du club B ne peut pas se rattacher au club A", async () => {
@@ -88,6 +89,7 @@ describe("Rôles à l'intérieur d'un club", () => {
     await assertSucceeds(getDoc(doc(db, "clubs/A/comptabilite/c1")));
     await assertSucceeds(setDoc(doc(db, "clubs/A/comptabilite/c2"), { type: "depense", montant: 10 }));
     await assertSucceeds(getDoc(doc(db, "clubs/A/sponsors/s1")));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/budgetPrev/budget"), { subv_2026: [] }));
   });
   it("trésorier (bureau + accès compta) : compta oui, sponsors non", async () => {
     const db = await as("tresorierA");

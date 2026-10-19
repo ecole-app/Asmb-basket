@@ -1,5 +1,23 @@
 [
  {
+  "v": "1792440411",
+  "titre": "Couleur libre et subventions",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : en plus de la palette, une roue pour choisir n'importe quelle teinte (assombrie automatiquement si le texte blanc devenait illisible)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Budget prévisionnel : liste des subventions (à demander, demandée, accordée, versée) ; les accordées alimentent le prévu des recettes."
+   }
+  ]
+ },
+ {
   "v": "1792438014",
   "titre": "Plateforme : journal des mises à jour",
   "points": [

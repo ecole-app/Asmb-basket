@@ -384,6 +384,8 @@ function openBudgetPrev(){
     html+='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:12px 0 6px">'+(type==="recette"?"Recettes":"Dépenses")+'</div>';
     COMPTA_CATS[type].forEach(function(cat){
       var prevu=yearBudget[type+"|"+cat]||0;
+      var subvAuto=(type==="recette"&&cat==="Subventions"&&budgetSubv(year).length>0);
+      if(subvAuto) prevu=budgetSubvTotaux(budgetSubv(year)).accorde;
       var reel=realise[type+"|"+cat]||0;
       var pct=prevu>0?Math.min(100,Math.round(reel/prevu*100)):(reel>0?100:0);
       var over=prevu>0 && reel>prevu;
@@ -391,7 +393,7 @@ function openBudgetPrev(){
         '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt);margin-bottom:3px">'+
           '<span>'+cat+'</span>'+
           '<span style="display:flex;align-items:center;gap:6px">'+
-            '<input type="number" step="1" value="'+(prevu||"")+'" placeholder="0" data-budget-key="'+type+'|'+cat+'" style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
+            '<input type="number" step="1" value="'+(prevu||"")+'" placeholder="0" '+(subvAuto?'disabled title="Calculé depuis la liste des subventions (accordées et versées)" ':'data-budget-key="'+type+'|'+cat+'" ')+'style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
             '<span style="color:var(--mut);font-size:10px">prévu</span>'+
           '</span>'+
         '</div>'+
@@ -400,9 +402,56 @@ function openBudgetPrev(){
       '</div>';
     });
   });
+  html+='<div id="budget-subv-zone"></div>';
   body.innerHTML=html;
+  budgetSubvDessiner(budgetSubv(year));
   document.getElementById("modal-budget-prev").style.display="flex";
 }
+
+// ── Subventions : liste par année (à demander, demandées, accordées, versées) ──
+var BUDGET_SUBV_STATUTS=[["a_demander","À demander"],["demandee","Demandée"],["accordee","Accordée"],["versee","Versée"]];
+function budgetSubv(year){ var l=getBudgetPrev()["subv_"+year]; return Array.isArray(l)?l:[]; }
+// Prévu = accordées + versées ; « en attente » = demandées sans réponse ; « à demander » = pas encore déposées.
+function budgetSubvTotaux(l){
+  var t={accorde:0,attente:0,ademander:0};
+  (l||[]).forEach(function(x){
+    var m=Number(x.montant)||0;
+    if(x.statut==="accordee"||x.statut==="versee") t.accorde+=m;
+    else if(x.statut==="demandee") t.attente+=m;
+    else t.ademander+=m;
+  });
+  return t;
+}
+function budgetSubvLire(){
+  var out=[];
+  document.querySelectorAll("#budget-subv-zone [data-subv-row]").forEach(function(r){
+    var nom=r.querySelector("[data-subv-nom]").value.trim().slice(0,80);
+    var montant=parseFloat(r.querySelector("[data-subv-montant]").value)||0;
+    var statut=r.querySelector("[data-subv-statut]").value;
+    if(nom||montant>0) out.push({nom:nom,montant:montant,statut:statut});
+  });
+  return out;
+}
+function budgetSubvDessiner(l){
+  var z=document.getElementById("budget-subv-zone"); if(!z) return;
+  var t=budgetSubvTotaux(l);
+  var h='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:16px 0 4px">Subventions</div>'+
+    '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">Ce que tu as obtenu, demandé ou dois encore demander. Les subventions accordées ou versées alimentent le prévu « Subventions » des recettes.</div>'+
+    '<datalist id="subv-noms"><option value="ANS (Agence nationale du Sport)"><option value="Mairie"><option value="Département"><option value="Région"><option value="Fédération / Comité"><option value="CAF"></datalist>';
+  l.forEach(function(x,i){
+    h+='<div data-subv-row="'+i+'" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'+
+      '<input data-subv-nom list="subv-noms" value="'+authEsc(x.nom||"")+'" placeholder="Nom (ex : Mairie)" style="flex:1 1 130px;min-width:0;padding:7px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:var(--card);color:var(--txt)">'+
+      '<input data-subv-montant type="number" step="1" value="'+(x.montant||"")+'" placeholder="€" style="width:74px;padding:7px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:var(--card);color:var(--txt)">'+
+      '<select data-subv-statut style="padding:7px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;background:var(--card);color:var(--txt)">'+BUDGET_SUBV_STATUTS.map(function(s){ return '<option value="'+s[0]+'"'+(x.statut===s[0]?' selected':'')+'>'+s[1]+'</option>'; }).join("")+'</select>'+
+      '<button type="button" onclick="budgetSubvSupprimer('+i+')" aria-label="Supprimer" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;color:var(--mut)">✕</button></div>';
+  });
+  h+='<button type="button" onclick="budgetSubvAjouter()" style="padding:8px 14px;border-radius:20px;border:1.5px dashed var(--bdr);background:none;color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer">+ Ajouter une subvention</button>';
+  if(l.length) h+='<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6">Accordé : <b style="color:var(--txt)">'+t.accorde.toFixed(0)+' €</b> · En attente de réponse : <b style="color:var(--txt)">'+t.attente.toFixed(0)+' €</b> · À demander : <b style="color:var(--txt)">'+t.ademander.toFixed(0)+' €</b></div>';
+  z.innerHTML=h;
+}
+function budgetSubvAjouter(){ var l=budgetSubvLire(); l.push({nom:"",montant:0,statut:"a_demander"}); budgetSubvDessiner(l); }
+function budgetSubvSupprimer(i){ var l=budgetSubvLire(); l.splice(i,1); budgetSubvDessiner(l); }
+
 function saveBudgetPrevForm(){
   var year=comptaCurrentYear();
   var budget=getBudgetPrev();
@@ -412,6 +461,7 @@ function saveBudgetPrevForm(){
     if(v>0) yearBudget[inp.getAttribute("data-budget-key")]=v;
   });
   budget[year]=yearBudget;
+  budget["subv_"+year]=budgetSubvLire();
   saveBudgetPrev(budget);
   closeModal("modal-budget-prev");
   buildComptabilite();

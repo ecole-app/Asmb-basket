@@ -704,6 +704,11 @@ service cloud.firestore {
       // Événements" positive (jamais modifier ou supprimer une ligne
       // existante). Le catalogue buvette (nom/prix/stock, pas le matériel)
       // est lisible sans connexion : c'est un menu, rien de sensible.
+      // Budget prévisionnel et subventions (un seul document « budget »), même accès que la compta.
+      match /budgetPrev/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'comptabilite');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'comptabilite');
+      }
       match /comptabilite/{id} {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'comptabilite');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'comptabilite');
