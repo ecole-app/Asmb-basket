@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792428173",
+  "titre": "Accès rapide au stage depuis l'accueil",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur l'accueil, la carte « Prochain événement » est cliquable : Entrées, Liste des inscrits et Évaluation du stage (selon ce que l'événement propose)."
+   }
+  ]
+ },
+ {
   "v": "1792427204",
   "titre": "Évaluation du stage : seulement les présents",
   "points": [
