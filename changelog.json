@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792442718",
+  "titre": "Roue de couleurs : barre de luminosité honnête",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : la barre ne donne plus la même teinte sur toute sa moitié claire ; la poignée s'arrête à la teinte la plus claire encore lisible, et l'aperçu correspond à ce qu'on voit."
+   }
+  ]
+ },
+ {
   "v": "1792442506",
   "titre": "Club en blanc : icônes lisibles en mode sombre",
   "points": [
