@@ -729,6 +729,8 @@ function openBuvetteAccessSettings(){
   s.body.appendChild(hint);
   s.body.appendChild(grants);
   loadBuvetteGrants(grants,clubId);
+  gmSection(s.body,"Procédure de la caisse","Les étapes que le bénévole voit et coche dans l'onglet « Procédure » (allumage, service, fermeture…). Vous les écrivez une fois, elles s'affichent sur toutes les tablettes.");
+  gmRow(s.body).appendChild(gmBtn("📋 Modifier la procédure","soft",function(){ s.modal.remove(); openBuvetteProcedure(); }));
 }
 function loadBuvetteGrants(el,clubId){
   el.innerHTML="";
@@ -756,6 +758,78 @@ function loadBuvetteGrants(el,clubId){
         el.appendChild(card);
       });
     }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+}
+
+// ═══ PROCÉDURE DE LA CAISSE BUVETTE ═══════════════════════════════════
+// Texte écrit par le dirigeant dans clubs/{clubId}/buvette_procedure/main
+// ({blocs:[{titre, etapes:[{texte}]}]}), lu sans connexion par la page
+// buvette/index.html (le bénévole ne fait que cocher, localement).
+// Le modèle ci-dessous est recopié dans buvette/index.html (DEFAULT_PROC) : à garder identique.
+function buvetteProcDefaut(){
+  return [
+    {titre:"À l'allumage de la tablette",etapes:["Vérifier le fond de caisse (compter et noter le montant de départ)","Brancher la tablette et vérifier qu'elle est connectée à internet","Se connecter avec son nom et le code donné par le dirigeant","Sortir la monnaie et la caisse"]},
+    {titre:"Installation",etapes:["Allumer le frigo et mettre les boissons au frais","Afficher les prix","Installer gobelets, serviettes et sacs poubelle"]},
+    {titre:"Pendant le service",etapes:["Encaisser avant de servir","Rendre la monnaie en la comptant à voix haute","Erreur de saisie : utiliser l'annulation de la caisse","Pas de crédit ni de gratuité sans l'accord du bureau","Prévenir le responsable dès qu'un produit est épuisé"]},
+    {titre:"En cas de problème",etapes:["Plus de réseau : noter les ventes sur papier et les ressaisir ensuite","Écart de caisse ou produit cassé : le noter et prévenir le responsable"]},
+    {titre:"À la fermeture",etapes:["Compter la caisse et la comparer au Récap","Noter l'écart éventuel","Ranger et nettoyer la buvette","Éteindre le frigo si besoin","Remettre la caisse au responsable","Noter les produits à racheter"]}
+  ];
+}
+// Texte des zones → blocs enregistrables (une étape par ligne, limites alignées sur les règles).
+function buvetteProcDepuisSaisie(saisie){
+  return saisie.map(function(b){
+    var etapes=String(b.texte||"").split("\n").map(function(l){return l.trim().slice(0,200);}).filter(Boolean).slice(0,30).map(function(t){return {texte:t};});
+    return {titre:String(b.titre||"").trim().slice(0,80)||"Sans titre",etapes:etapes};
+  }).filter(function(b){return b.etapes.length;}).slice(0,20);
+}
+function openBuvetteProcedure(){
+  if(!window.ASMB_USER || (window.ASMB_USER.roles||[]).indexOf("dirigeant")<0){ askAlert("Réservé au dirigeant."); return; }
+  var clubId=window.CURRENT_CLUB_ID; if(!clubId) return;
+  var ref=window.fbDoc(window.fbDb,"clubs",clubId,"buvette_procedure","main");
+  var s=gmSheet("Procédure de la caisse");
+  s.body.innerHTML='<div style="font-size:12px;color:var(--mut)">Chargement…</div>';
+  window.fbGetDoc(ref).then(function(snap){
+    var blocs=(snap.exists()&&snap.data().blocs)||null;
+    var saisie=(blocs||buvetteProcDefaut()).map(function(b){
+      return {titre:b.titre,texte:(b.etapes||[]).map(function(e){return e&&e.texte!=null?e.texte:e;}).join("\n")};
+    });
+    dessiner();
+    function dessiner(){
+      s.body.innerHTML="";
+      gmSection(s.body,"Un bloc par moment de la journée","Une étape par ligne. Le bénévole coche chaque étape ; les cases se remettent à zéro chaque jour.");
+      var zones=document.createElement("div"); s.body.appendChild(zones);
+      saisie.forEach(function(b,i){
+        var c=gmCard();
+        var t=document.createElement("input"); t.type="text"; t.value=b.titre; t.maxLength=80; t.placeholder="Titre du bloc";
+        t.style.cssText="width:100%;box-sizing:border-box;font-size:13px;font-weight:800;padding:9px 10px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--bg);color:var(--txt);margin-bottom:8px";
+        t.addEventListener("input",function(){b.titre=t.value;});
+        var a=document.createElement("textarea"); a.value=b.texte; a.rows=Math.max(4,String(b.texte).split("\n").length+1); a.placeholder="Une étape par ligne";
+        a.style.cssText="width:100%;box-sizing:border-box;font-size:13px;line-height:1.5;padding:9px 10px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--bg);color:var(--txt);font-family:inherit";
+        a.addEventListener("input",function(){b.texte=a.value;});
+        c.appendChild(t); c.appendChild(a);
+        var r=gmRow(c);
+        if(i>0) r.appendChild(gmBtn("↑ Monter","ghost",function(){ var x=saisie.splice(i,1)[0]; saisie.splice(i-1,0,x); dessiner(); }));
+        r.appendChild(gmBtn("Supprimer le bloc","danger",function(){ saisie.splice(i,1); dessiner(); }));
+        zones.appendChild(c);
+      });
+      var r2=gmRow(s.body);
+      r2.appendChild(gmBtn("+ Ajouter un bloc","soft",function(){ if(saisie.length>=20) return; saisie.push({titre:"",texte:""}); dessiner(); }));
+      r2.appendChild(gmBtn("Remettre le modèle","ghost",function(){
+        askConfirm("Remplacer tout par le modèle proposé ?",{confirmText:"Remplacer"}).then(function(ok){
+          if(!ok) return;
+          saisie=buvetteProcDefaut().map(function(b){return {titre:b.titre,texte:b.etapes.join("\n")};}); dessiner();
+        });
+      }));
+      var r3=gmRow(s.body);
+      r3.appendChild(gmBtn("Enregistrer","primary",function(btn){
+        var blocs=buvetteProcDepuisSaisie(saisie);
+        if(!blocs.length){ askAlert("Ajoutez au moins une étape."); return; }
+        btn.disabled=true;
+        window.fbSetDoc(ref,{blocs:blocs,maj:Date.now()}).then(function(){
+          showToast("Procédure enregistrée"); s.modal.remove();
+        }).catch(function(e){ btn.disabled=false; askAlert("Erreur : "+((e&&e.code)||e)); });
+      }));
+    }
+  }).catch(function(e){ s.body.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
 }
 
 // ═══ JOURNÉES BUVETTE (trace des ventes de la caisse en ligne) ═════════

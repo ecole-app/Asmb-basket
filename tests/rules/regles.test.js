@@ -370,6 +370,17 @@ describe("Caisse buvette (sans compte, avec code du jour)", () => {
     const db = await as(null);
     await assertSucceeds(setDoc(doc(db, "clubs/A/buvette_ventes/x"), { id: "x", viaCode: "BUVA", benevole: "Sam", date: "2026-10-11", t: 1, mode: "especes", total: 4, lignes: [] }));
   });
+  it("procédure de la caisse : lisible sans compte, écrite par le dirigeant seul", async () => {
+    const vis = await as(null);
+    const ok = { blocs: [{ titre: "Allumage", etapes: [{ texte: "Compter le fond de caisse" }] }], maj: 1 };
+    await assertSucceeds(getDoc(doc(vis, "clubs/A/buvette_procedure/main")));
+    await assertFails(setDoc(doc(vis, "clubs/A/buvette_procedure/main"), ok));
+    await assertFails(setDoc(doc(await as("coachA"), "clubs/A/buvette_procedure/main"), ok));
+    const dir = await as("dirA");
+    await assertSucceeds(setDoc(doc(dir, "clubs/A/buvette_procedure/main"), ok));
+    await assertFails(setDoc(doc(dir, "clubs/A/buvette_procedure/main"), { ...ok, tel: "0600000000" }));
+    await assertFails(setDoc(doc(dir, "clubs/A/buvette_procedure/main"), { blocs: "x", maj: 1 }));
+  });
   it("abonnement gelé : caisse buvette fermée pendant le gel", async () => {
     const db = await as(null);
     await assertFails(updateDoc(doc(db, "clubs/G/inventaire/buv1"), { qte: 4, viaCode: "BUVG" }));

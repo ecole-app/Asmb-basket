@@ -77,15 +77,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .sale-ok{font-size:12.5px;font-weight:700;color:var(--grn);text-align:center;margin-top:8px;min-height:16px}
 
 /* PROCEDURE */
-.proc-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.proc-bar{height:8px;border-radius:6px;background:var(--bdr);overflow:hidden;margin:6px 0 4px}
+.proc-bar>div{height:100%;background:var(--grn);border-radius:6px;transition:width .2s}
+.proc-prog{font-size:12px;font-weight:700;color:var(--txt2)}
+.proc-head{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0}
+.proc-head .sec-title{margin:0;flex:1}
+.proc-cnt{font-size:11px;font-weight:800;color:var(--dkg)}
+.proc-cnt.ok{color:var(--grn)}
+.proc-body{margin-top:8px}
+.proc-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);cursor:pointer}
 .proc-item:last-child{border-bottom:none}
-.proc-num{font-size:12px;font-weight:800;color:var(--dkg);flex-shrink:0;min-width:18px}
-.proc-text{flex:1;font-size:13px;line-height:1.4}
-.proc-del{background:none;border:none;color:var(--mut);font-size:15px;cursor:pointer;padding:0 4px}
-.proc-add-row{display:flex;gap:8px;margin-top:10px}
-.proc-add-row input{flex:1;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;outline:none}
-.proc-add-row input:focus{border-color:var(--dkg)}
-.proc-add-btn{padding:0 16px;font-size:15px;font-weight:800;border:none;border-radius:var(--rs);background:var(--dkg);color:#fff;cursor:pointer}
+.proc-box{width:24px;height:24px;border-radius:7px;border:2px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.proc-item.fait .proc-box{background:var(--grn);border-color:var(--grn)}
+.proc-text{flex:1;font-size:13.5px;line-height:1.4}
+.proc-item.fait .proc-text{color:var(--mut);text-decoration:line-through}
+.proc-reset{background:none;border:none;color:var(--mut);font-size:12px;font-weight:700;text-decoration:underline;cursor:pointer;padding:6px 0}
 .sec-title{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 @media print{ #app-top,.tab-bar,.pay-btns,.gate-hint,#panel-caisse,#panel-procedure{display:none!important} .panel{display:none!important} #panel-recap{display:block!important} body{background:#fff} }
 </style>
@@ -155,14 +161,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 
   <!-- PROCEDURE -->
   <div class="panel" id="panel-procedure">
-    <div class="card">
-      <div class="sec-title">À faire à l'allumage de la tablette</div>
-      <div id="proc-list"></div>
-      <div class="proc-add-row">
-        <input type="text" id="inp-proc" placeholder="Ajouter une étape...">
-        <button class="proc-add-btn" id="proc-add-btn">+</button>
-      </div>
-    </div>
+    <div class="card" id="proc-top"></div>
+    <div id="proc-list"></div>
   </div>
 </div>
 
@@ -197,11 +197,37 @@ try{
 const db = getFirestore(fbApp);
 
 const K_SESSION = 'asmb_buvette_session';
-const K_PROC = 'asmb_buvette_procedure';
+const K_PROC = 'asmb_buvette_proc2';       // procédure du club (copie locale, hors-ligne)
+const K_COCHES = 'asmb_buvette_coches';    // étapes cochées aujourd'hui sur cet appareil
+// Modèle utilisé tant que le dirigeant n'a rien écrit : à garder identique à
+// buvetteProcDefaut() dans js/15-compta-inventaire.js.
 const DEFAULT_PROC = [
-  { id: 'd1', text: "Vérifier le fond de caisse (compter et noter le montant de départ)" }
+  { id: 'b0', titre: "À l'allumage de la tablette", etapes: [
+    "Vérifier le fond de caisse (compter et noter le montant de départ)",
+    "Brancher la tablette et vérifier qu'elle est connectée à internet",
+    "Se connecter avec son nom et le code donné par le dirigeant",
+    "Sortir la monnaie et la caisse" ] },
+  { id: 'b1', titre: "Installation", etapes: [
+    "Allumer le frigo et mettre les boissons au frais",
+    "Afficher les prix",
+    "Installer gobelets, serviettes et sacs poubelle" ] },
+  { id: 'b2', titre: "Pendant le service", etapes: [
+    "Encaisser avant de servir",
+    "Rendre la monnaie en la comptant à voix haute",
+    "Erreur de saisie : utiliser l'annulation de la caisse",
+    "Pas de crédit ni de gratuité sans l'accord du bureau",
+    "Prévenir le responsable dès qu'un produit est épuisé" ] },
+  { id: 'b3', titre: "En cas de problème", etapes: [
+    "Plus de réseau : noter les ventes sur papier et les ressaisir ensuite",
+    "Écart de caisse ou produit cassé : le noter et prévenir le responsable" ] },
+  { id: 'b4', titre: "À la fermeture", etapes: [
+    "Compter la caisse et la comparer au Récap",
+    "Noter l'écart éventuel",
+    "Ranger et nettoyer la buvette",
+    "Éteindre le frigo si besoin",
+    "Remettre la caisse au responsable",
+    "Noter les produits à racheter" ] }
 ];
-
 let session = null;       // { code, clubId, clubName, validUntil, benevole }
 let items = [];           // articles buvette live (Firestore)
 let panier = [];          // { id, name, price, qty, stock }
@@ -257,6 +283,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   clearSession();
   if(unsubInventaire){ unsubInventaire(); unsubInventaire = null; }
   session = null; panier = [];
+  procBlocs = null; try{ localStorage.removeItem(K_PROC); }catch(e){}
   document.getElementById('app').classList.add('hidden');
   document.getElementById('gate').classList.remove('hidden');
   document.getElementById('gate-code').value = '';
@@ -288,6 +315,7 @@ function startApp(){
     : 'Session valable jusqu\'à ' + fmtHM(expDate);
   listenInventaire();
   renderProc();
+  loadProc();
 }
 
 /* ===== CAISSE — catalogue live depuis l'inventaire buvette ===== */
@@ -457,31 +485,73 @@ document.getElementById('recap-csv').addEventListener('click', () => {
   a.download = 'recap-buvette-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
 });
 
-/* ===== PROCÉDURE (locale à l'appareil, checklist du bénévole) ===== */
-function getProc(){ try{ const v = localStorage.getItem(K_PROC); return v === null ? DEFAULT_PROC.slice() : JSON.parse(v); }catch(e){ return DEFAULT_PROC.slice(); } }
-function saveProc(p){ localStorage.setItem(K_PROC, JSON.stringify(p)); }
+/* ===== PROCÉDURE (écrite par le dirigeant, cochée par le bénévole) ===== */
+let procBlocs = null;     // [{id, titre, etapes:[texte]}]
+let procOuverts = {};     // blocs dépliés
+function getProc(){
+  if(procBlocs) return procBlocs;
+  try{ const v = JSON.parse(localStorage.getItem(K_PROC) || 'null'); if(Array.isArray(v) && v.length) return (procBlocs = v); }catch(e){}
+  return DEFAULT_PROC;
+}
+async function loadProc(){
+  if(!session) return;
+  try{
+    const snap = await getDoc(doc(db, 'clubs', session.clubId, 'buvette_procedure', 'main'));
+    if(snap.exists() && Array.isArray(snap.data().blocs)){
+      procBlocs = snap.data().blocs.map((b, i) => ({
+        id: 'b' + i, titre: String(b.titre || ''),
+        etapes: (b.etapes || []).map(e => String(e && e.texte != null ? e.texte : e))
+      })).filter(b => b.etapes.length);
+      localStorage.setItem(K_PROC, JSON.stringify(procBlocs));
+    } else { procBlocs = null; try{ localStorage.removeItem(K_PROC); }catch(e){} }
+  }catch(e){ console.log('procédure:', e && e.code || e); }
+  renderProc();
+}
+function getCoches(){
+  try{
+    const c = JSON.parse(localStorage.getItem(K_COCHES) || 'null');
+    if(c && c.date === todayISO() && Array.isArray(c.ids)) return new Set(c.ids);
+  }catch(e){}
+  return new Set();
+}
+function saveCoches(set){ try{ localStorage.setItem(K_COCHES, JSON.stringify({ date: todayISO(), ids: Array.from(set) })); }catch(e){} }
 function renderProc(){
-  const list = getProc();
+  const blocs = getProc(), coches = getCoches();
+  let total = 0, faits = 0;
+  blocs.forEach((b, bi) => b.etapes.forEach((t, si) => { total++; if(coches.has(bi + '-' + si)) faits++; }));
+  const pct = total ? Math.round(faits * 100 / total) : 0;
+  document.getElementById('proc-top').innerHTML =
+    '<div class="proc-prog">' + (faits === total && total ? '✅ Tout est fait' : faits + ' / ' + total + ' étapes faites') + '</div>' +
+    '<div class="proc-bar"><div style="width:' + pct + '%"></div></div>' +
+    '<button class="proc-reset" id="proc-reset">Tout décocher</button>';
+  document.getElementById('proc-reset').addEventListener('click', () => {
+    if(!confirm('Tout décocher ?')) return;
+    saveCoches(new Set()); renderProc();
+  });
   const el = document.getElementById('proc-list');
-  if(!list.length){ el.innerHTML = '<div class="empty-msg">Aucune étape pour l\'instant.</div>'; return; }
   el.innerHTML = '';
-  list.forEach((p, i) => {
-    const row = document.createElement('div');
-    row.className = 'proc-item';
-    row.innerHTML = '<span class="proc-num">' + (i + 1) + '.</span><span class="proc-text">' + esc(p.text) + '</span>';
-    const del = document.createElement('button');
-    del.className = 'proc-del'; del.textContent = '✕';
-    del.addEventListener('click', () => { saveProc(getProc().filter(x => x.id !== p.id)); renderProc(); });
-    row.appendChild(del);
-    el.appendChild(row);
+  blocs.forEach((b, bi) => {
+    const n = b.etapes.filter((t, si) => coches.has(bi + '-' + si)).length;
+    const ouvert = (bi in procOuverts) ? procOuverts[bi] : bi === 0;
+    const card = document.createElement('div'); card.className = 'card';
+    const head = document.createElement('div'); head.className = 'proc-head';
+    head.innerHTML = '<div class="sec-title">' + esc(b.titre) + '</div><div class="proc-cnt' + (n === b.etapes.length ? ' ok' : '') + '">' + n + '/' + b.etapes.length + '</div><div>' + (ouvert ? '▾' : '▸') + '</div>';
+    head.addEventListener('click', () => { procOuverts[bi] = !ouvert; renderProc(); });
+    card.appendChild(head);
+    if(ouvert){
+      const body = document.createElement('div'); body.className = 'proc-body';
+      b.etapes.forEach((t, si) => {
+        const id = bi + '-' + si, fait = coches.has(id);
+        const row = document.createElement('div'); row.className = 'proc-item' + (fait ? ' fait' : '');
+        row.innerHTML = '<div class="proc-box">' + (fait ? '✓' : '') + '</div><div class="proc-text">' + esc(t) + '</div>';
+        row.addEventListener('click', () => { const c = getCoches(); if(c.has(id)) c.delete(id); else c.add(id); saveCoches(c); renderProc(); });
+        body.appendChild(row);
+      });
+      card.appendChild(body);
+    }
+    el.appendChild(card);
   });
 }
-document.getElementById('proc-add-btn').addEventListener('click', () => {
-  const inp = document.getElementById('inp-proc');
-  const text = inp.value.trim(); if(!text) return;
-  const list = getProc(); list.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), text });
-  saveProc(list); inp.value = ''; renderProc();
-});
 
 /* ===== INIT ===== */
 (function init(){

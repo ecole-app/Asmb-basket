@@ -705,6 +705,16 @@ service cloud.firestore {
           && request.resource.data.total is number && request.resource.data.total > 0
           && request.resource.data.lignes is list && request.resource.data.lignes.size() <= 100;
       }
+      // Procédure de la caisse buvette : texte écrit par le dirigeant (ou le
+      // module inventaire), lisible sans connexion par la page caisse (rien de
+      // sensible : des consignes). Le bénévole ne peut rien y écrire.
+      match /buvette_procedure/{id} {
+        allow get: if true;
+        allow create, update: if (dirigeant(clubId) || hasPermission(clubId, 'inventaire'))
+          && request.resource.data.keys().hasOnly(['blocs','maj'])
+          && request.resource.data.blocs is list && request.resource.data.blocs.size() <= 20;
+        allow delete: if dirigeant(clubId) || hasPermission(clubId, 'inventaire');
+      }
       match /sponsors/{id} {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');

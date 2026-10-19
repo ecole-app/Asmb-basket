@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792421828",
+  "titre": "Caisse buvette : procédure à cocher",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Inventaire › Accès caisse › « Modifier la procédure » : tu écris les étapes de la buvette par blocs (allumage, installation, service, problèmes, fermeture). Un modèle est déjà prêt."
+   }
+  ]
+ },
+ {
   "v": "1792416923",
   "titre": "Catégories : année corrigée, Baby basket et Micro",
   "points": [
