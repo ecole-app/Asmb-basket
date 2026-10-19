@@ -945,6 +945,10 @@ function indReglages(){
     +'<div class="actions"><button type="submit" class="ok">Enregistrer</button></div>'
     +'<button type="button" class="ind-btn s" id="ind-rg-out" style="margin-top:8px">Se déconnecter</button></form>';
   var f=sh.body.querySelector("#ind-rg-f");
+  if(typeof indAboMonter==="function"){
+    var zoneAbo=document.createElement("div"); zoneAbo.style.marginBottom="12px";
+    sh.body.insertBefore(zoneAbo,f); indAboMonter(zoneAbo);
+  }
   sh.body.querySelector("#ind-rg-pal").addEventListener("click",function(e){
     var b=e.target.closest("button[data-c]"); if(!b) return;
     choix=b.dataset.c.toLowerCase();

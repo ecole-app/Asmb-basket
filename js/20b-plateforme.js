@@ -766,7 +766,8 @@ function renderClubCard(c, list){
   }
   if(!suspended && !supprime && (c.plan==="standard"||c.plan==="premium")){
     var ea=aboEcheance(c);
-    delai=ea ? ' \u00b7 échéance '+ea.toLocaleDateString("fr-FR")
+    if(c.type==="independant" && typeof indAboEtatCourt==="function") delai=' \u00b7 '+indAboEtatCourt(c)+(ea?'':' <span style="color:#E8670A">(échéance non renseignée)</span>');
+    else delai=ea ? ' \u00b7 échéance '+ea.toLocaleDateString("fr-FR")
              : ' \u00b7 <span style="color:#E8670A">échéance non renseignée</span>';
   }
   if(!suspended && !supprime && c.plan==="trial"){
@@ -1357,12 +1358,29 @@ function choisirPack(c, list){
     zoneLim.appendChild(liste);
   }
   s.body.appendChild(boutons);
+  var rythme=(c.aboRythme==="annuel")?"annuel":"mensuel";
+  if(c.type==="independant"){
+    var zr=document.createElement("div");
+    zr.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px";
+    var peindreRythme=function(){
+      zr.innerHTML="";
+      [["mensuel","Mensuel (engagé 12 mois)"],["annuel","Annuel (2 mois offerts)"]].forEach(function(p){
+        var b=document.createElement("button"), on=(rythme===p[0]);
+        b.textContent=p[1];
+        b.style.cssText="min-height:44px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--dkg)":"var(--bdr)")+";background:"+(on?"var(--dkg)":"var(--card)")+";color:"+(on?"#fff":"var(--txt)");
+        b.addEventListener("click",function(){ rythme=p[0]; peindreRythme(); });
+        zr.appendChild(b);
+      });
+    };
+    peindreRythme(); s.body.appendChild(zr);
+  }
   s.body.appendChild(zoneLim);
   rendre();
   gmRow(s.body).appendChild(gmBtn("Enregistrer","primary",function(){
     if(!choix){ askAlert("Choisissez un statut."); return; }
     var maj={plan:choix};
     if(choix==="limite") maj.modulesLimites=mods;
+    if(c.type==="independant") maj.aboRythme=rythme;
     if((choix==="standard"||choix==="premium") && !aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       s.modal.remove(); loadClubsList(list);
@@ -1415,6 +1433,7 @@ function aboARappeler(c){
   if(!(c.plan==="standard"||c.plan==="premium")) return false;
   if(c.status==="deleted"||c.status==="purging") return false;
   if(c.aboResiliation) return false; // le club a résilié : pas d'avis de reconduction
+  if(c.type==="independant" && c.aboRythme!=="annuel") return false; // indépendant mensuel : engagement 12 mois puis sans engagement, pas de reconduction tacite
   var j=aboJours(c);
   if(j===null) return false;
   if(j<0) return true;

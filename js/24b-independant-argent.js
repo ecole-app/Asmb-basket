@@ -30,6 +30,7 @@ function indPremium(){
   var c=IND.club||{};
   if(window.SUPPORT_MODE) return true;
   if(typeof isSuperAdmin==="function" && isSuperAdmin()) return true;
+  if(typeof aboGelActif==="function" && aboGelActif(c)) return false; // abonnement gelé : l'argent est fermé
   if(c.plan==="trial"){ var je=(typeof joursEssaiRestants==="function")?joursEssaiRestants(c):null; return je===null||je>0; }
   return c.plan!=="standard" && c.plan!=="gratuit" && c.plan!=="limite";
 }

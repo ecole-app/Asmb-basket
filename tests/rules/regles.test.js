@@ -160,6 +160,10 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertFails(updateDoc(doc(db, "clubs/A"), { modulesLimites: { compta: true } }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboEcheance: futur() }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboAvisPour: "2027-01-01" }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { aboRythme: "annuel" }));
+  });
+  it("le super admin fixe le rythme d'abonnement (mensuel/annuel) d'un indépendant", async () => {
+    await assertSucceeds(updateDoc(doc(await as(SUPER_ADMIN), "clubs/A"), { aboRythme: "annuel" }));
   });
   it("le dirigeant ne peut pas prolonger lui-même son essai gratuit", async () => {
     const db = await as("dirA");
