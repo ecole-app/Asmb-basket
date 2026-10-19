@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792443016",
+  "titre": "Roue de couleurs : barre qui ne bloque plus",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : la barre de luminosité glisse librement sur toute sa longueur (vrai blanc à gauche, vrai noir à droite) et son dégradé montre les vraies teintes lisibles de la couleur choisie."
+   }
+  ]
+ },
+ {
   "v": "1792442829",
   "titre": "Indépendant : reçus et livre des recettes",
   "points": [
