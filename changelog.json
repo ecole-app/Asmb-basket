@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792442506",
+  "titre": "Club en blanc : icônes lisibles en mode sombre",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Quand le club est en blanc, l'engrenage et le bouton retour de l'en-tête restent visibles en mode sombre."
+   }
+  ]
+ },
+ {
   "v": "1792442224",
   "titre": "Roue de couleurs : blanc et noir aux deux bouts",
   "points": [

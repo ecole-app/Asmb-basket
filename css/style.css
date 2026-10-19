@@ -69,6 +69,8 @@ html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="epure"]):not
 html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="epure"]):not([data-visual-theme="carnet"]):not([data-visual-theme="bento"]) .hsub{color:#5b6578}
 html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="epure"]):not([data-visual-theme="carnet"]):not([data-visual-theme="bento"]) .hbk,
 html.gm-club-blanc:not([data-theme="dark"]):not([data-visual-theme="epure"]):not([data-visual-theme="carnet"]):not([data-visual-theme="bento"]) .theme-btn{background:rgba(0,0,0,.07);color:#14141f}
+/* Club en blanc + mode sombre : icônes de l'en-tête claires sur fond sombre */
+html.gm-club-blanc[data-theme="dark"] .theme-btn,html.gm-club-blanc[data-theme="dark"] .hbk{color:var(--txt)}
 .hbk{width:34px;height:34px;border-radius:var(--rx);background:rgba(255,255,255,.12);display:none;align-items:center;justify-content:center;cursor:pointer;border:none;color:#fff;font-size:18px;flex-shrink:0}
 .hbk.show{display:flex}
 .hinfo{flex:1;min-width:0}
