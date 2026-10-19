@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792410789",
+  "titre": "Mise à jour : bandeau stable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Le bandeau « Nouvelle version disponible » reste affiché tant que vous ne touchez pas « Mettre à jour » ou la croix, et l'appli ne se recharge plus toute seule."
+   }
+  ]
+ },
+ {
   "v": "1792389333",
   "titre": "Plateforme : Ma comptabilité — tableau de bord, statuts, dépenses",
   "points": [
