@@ -130,6 +130,8 @@ function initFirestoreSync(){
   // Reserve au staff : ces fiches contiennent des donnees de sante et des
   // photos de mineurs, elles n'ont pas a descendre sur l'appareil d'un parent.
   if(typeof isStaffUser==="function" && isStaffUser()) fsStartSync("licences","asmb_licences");
+  // Stats de match : réservées au staff (chaque parent ne verra plus tard que celles de son enfant).
+  if(typeof isStaffUser==="function" && isStaffUser()) fsStartSync("match_stats","asmb_match_stats");
   fsStartSync("events","asmb_events");
   fsStartSync("annuaire","asmb_annuaire");
   fsStartSync("notes_frais","asmb_notes_frais");

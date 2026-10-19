@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792423391",
+  "titre": "Stats avancées de match",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouveau bouton « 📊 Stats » sur chaque match du planning : tu choisis les joueurs, tu saisis le match en direct (points, fautes, score adverse, quart-temps) et tu obtiens la feuille de match."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Pack Premium : toutes les actions (rebonds, passes, interceptions, contres…), chrono par quart-temps, remplacements, temps de jeu, +/-, évaluation, export PDF et fiche de chaque joueur sur la saison."
+   }
+  ]
+ },
+ {
   "v": "1792421828",
   "titre": "Caisse buvette : procédure à cocher",
   "points": [

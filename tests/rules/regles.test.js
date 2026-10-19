@@ -342,6 +342,21 @@ describe("Invitations", () => {
   });
 });
 
+describe("Stats de match", () => {
+  it("le staff lit et écrit, un parent ni l'un ni l'autre, un visiteur non plus", async () => {
+    const stats = { id: "ev1", eventId: "ev1", joueurs: ["p1"], evts: [] };
+    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/match_stats/ev1"), stats));
+    await assertSucceeds(getDoc(doc(await as("dirA"), "clubs/A/match_stats/ev1")));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/match_stats/ev1")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/match_stats/ev2"), stats));
+    await assertFails(getDoc(doc(await as(null), "clubs/A/match_stats/ev1")));
+  });
+  it("le dirigeant d'un autre club n'y touche pas", async () => {
+    await assertFails(setDoc(doc(await as("dirB"), "clubs/A/match_stats/ev1"), { id: "ev1" }));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
 // ───────────────────────────────────────────────────────────────
 describe("Caisse buvette (sans compte, avec code du jour)", () => {
   it("avec un code valide : décompte du stock buvette", async () => {
