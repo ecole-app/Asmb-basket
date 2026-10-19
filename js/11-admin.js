@@ -590,7 +590,7 @@ function getAdminCount(id){
   if(id==="inscriptions"){var p=getPlayers();return p.length+" joueur"+(p.length>1?"s":"");}
   if(id==="equipes"){var t=getTeams();return t.length+" équipe"+(t.length>1?"s":"");}
   if(id==="planning"){var e=getEvents();return e.length+" événement"+(e.length>1?"s":"");}
-  if(id==="documents"){var d=getDocs();return d.length+" document"+(d.length>1?"s":"");}
+  if(id==="documents"){var d=getClubDocs();return d.length+" document"+(d.length>1?"s":"");}
   if(id==="comptabilite"){var c=hasPremium()?getComptabilite():comptaLignesAvantVerrou();return (hasPremium()?"":"🔒 Premium · ")+c.length+" ligne"+(c.length>1?"s":"")+(hasPremium()?"":" conservée"+(c.length>1?"s":""));}
   if(id==="notesfrais"){var nf=getNotesFrais().filter(function(n){return n.statut==="soumise";});return nf.length+" en attente";}
   if(id==="inventaire"){var inv=getInventaire();return inv.length+" article"+(inv.length>1?"s":"");}

@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792424968",
+  "titre": "Documents du club pour les parents",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Documents : les fichiers sont maintenant vraiment enregistrés (3 Mo maximum). À chaque ajout tu choisis « Publier aux parents » ou de le garder pour le bureau, et tu peux changer d'avis ensuite."
+   },
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "Nouveau bouton « 📄 Documents du club » sur l'accueil : règlement, charte, organisation… à ouvrir quand on veut."
+   }
+  ]
+ },
+ {
   "v": "1792424808",
   "titre": "Stats : écran de la salle, feuille ordinateur, stats équipe",
   "points": [

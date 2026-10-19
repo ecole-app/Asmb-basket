@@ -69,6 +69,11 @@ export async function seed() {
     await set("users/dirL", { clubId: "L", roles: ["dirigeant"] });
     await set(`users/${SUPER_ADMIN}`, { clubId: "asmb", roles: ["dirigeant"] });
 
+    await set("users/docsA", { clubId: "A", roles: ["bureau"], permissions: { documents: true } });
+    await set("clubs/A/club_docs/dpub", { id: "dpub", name: "Règlement.pdf", publie: true, octets: 1000, parts: 1 });
+    await set("clubs/A/club_docs/dpriv", { id: "dpriv", name: "PV bureau.pdf", publie: false, octets: 1000, parts: 1 });
+    await set("clubs/A/club_docs_parts/dpub_0", { n: 0, data: "AAAA" });
+    await set("clubs/A/club_docs_parts/dpriv_0", { n: 0, data: "BBBB" });
     await set("clubs/A/players/p1", { nom: "Martin", naissance: "2014-03-02" });
     await set("clubs/A/roster/p1", { nom: "Martin" });
     await set("clubs/A/licences/l1", { nom: "Martin", adresse: "1 rue X" });

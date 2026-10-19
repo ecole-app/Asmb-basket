@@ -1008,7 +1008,7 @@ function filterDocCat(cat){
 }
 
 function buildDocs(){
-  var docs=getDocs();
+  var docs=getClubDocs().sort(function(x,y){return (y.ts||0)-(x.ts||0);});
   var filtered=currentDocCatFilter==="all"?docs:docs.filter(function(d){return (d.category||"autre")===currentDocCatFilter;});
   var el=document.getElementById("docList");if(!el)return;
   el.innerHTML="";
@@ -1016,61 +1016,47 @@ function buildDocs(){
   var uploadZone=document.createElement("div");
   uploadZone.style.cssText="margin:12px;padding:20px;background:var(--card);border:2px dashed var(--bdr);border-radius:var(--rs);text-align:center;cursor:pointer";
   uploadZone.onclick=function(){showAddDoc();};
-  uploadZone.innerHTML="<div style=\"font-size:28px;margin-bottom:8px\"></div><div style=\"font-size:13px;font-weight:600;color:var(--txt)\">Ajouter un document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px\">PDF · Image · Word · Excel</div>";
+  uploadZone.innerHTML="<div style=\"font-size:28px;margin-bottom:8px\"></div><div style=\"font-size:13px;font-weight:600;color:var(--txt)\">Ajouter un document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px\">PDF · Image · Word · Excel · 3 Mo maximum</div>";
   el.appendChild(uploadZone);
-  if(!filtered.length){var empty=document.createElement("div");empty.className="empty-state";empty.innerHTML="<div class=\"empty-state-icon\"></div><div style=\"font-size:13px;font-weight:600\">Aucun document</div>";el.appendChild(empty);return;}
-  var typeIcons={"pdf":"","image":"","word":"","excel":"","autre":""};
+  if(!filtered.length){var empty=document.createElement("div");empty.className="empty-state";empty.innerHTML="<div class=\"empty-state-icon\"></div><div style=\"font-size:13px;font-weight:600\">Aucun document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px;max-width:280px;margin-left:auto;margin-right:auto;line-height:1.4\">Règlement, charte, organisation : ajoute-les ici et choisis de les publier aux parents.</div>";el.appendChild(empty);return;}
+  var typeIcons={"pdf":"📕","image":"🖼️","word":"📘","excel":"📗","autre":"📄"};
   filtered.forEach(function(d){
-    var icon=typeIcons[d.type]||"";
+    var icon=typeIcons[d.type]||"📄";
     var cat=d.category||"autre";
     var div=document.createElement("div");div.className="doc-card";
     var catBadge="<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;background:"+(DOC_CAT_COLORS[cat]||"#8E44AD")+"\">"+(DOC_CAT_LABELS[cat]||"Autre")+"</span>";
-    var docDel="<button onclick=\"deleteDoc('"+d.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0\">✕</button>";
-    div.innerHTML="<div class=\"doc-icon\">"+icon+"</div><div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+authEsc(d.name)+"</div><div style=\"font-size:11px;color:var(--mut);margin-top:2px\">"+authEsc(d.size)+" · "+authEsc(d.date)+"</div><div style=\"margin-top:4px\">"+catBadge+"</div></div>"+docDel;
+    var pubBadge=d.publie?"<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;background:rgba(22,179,120,.15);color:var(--grn)\">Publié aux parents</span>":"<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;background:var(--bdr);color:var(--mut)\">Réservé au bureau</span>";
+    var id=authEsc(d.id);
+    var btns="<div style=\"display:flex;gap:6px;margin-top:8px;flex-wrap:wrap\">"
+      +"<button onclick=\"docsOuvrir('"+id+"')\" style=\"padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Ouvrir</button>"
+      +"<button onclick=\"docsBasculerPublication('"+id+"')\" style=\"padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--txt);font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(d.publie?"Retirer aux parents":"Publier aux parents")+"</button></div>";
+    var docDel="<button onclick=\"docsSupprimer('"+id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0\">✕</button>";
+    div.innerHTML="<div class=\"doc-icon\">"+icon+"</div><div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+authEsc(d.name)+"</div><div style=\"font-size:11px;color:var(--mut);margin-top:2px\">"+authEsc(d.size)+" · "+authEsc(d.date)+"</div><div style=\"margin-top:4px\">"+catBadge+pubBadge+"</div>"+btns+"</div>"+docDel;
     el.appendChild(div);
   });
 }
 
 function showAddDoc(){
+  if(typeof isLimite==="function"&&isLimite()){askAlert("Accès limité : consultation seule, tu ne peux pas ajouter de document.");return;}
   document.getElementById("doc-cat-select").value="autre";
+  var pub=document.getElementById("doc-publie"); if(pub) pub.checked=true;
   document.getElementById("modal-doc-cat").style.display="flex";
 }
+var pendingDocPublie=true;
 function confirmDocUpload(){
   pendingDocCategory=document.getElementById("doc-cat-select").value;
+  var pub=document.getElementById("doc-publie"); pendingDocPublie=pub?pub.checked:true;
   closeModal("modal-doc-cat");
   document.getElementById("file-input").click();
 }
 
 function handleFiles(files){
   if(!files||!files.length)return;
-  var docs=getDocs();
-  Array.from(files).forEach(function(file){
-    var type="autre";
-    if(file.type.includes("pdf"))type="pdf";
-    else if(file.type.includes("image"))type="image";
-    else if(file.name.match(/\.docx?$/i))type="word";
-    else if(file.name.match(/\.xlsx?$/i))type="excel";
-    var size=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+" Mo":(file.size/1024).toFixed(0)+" Ko";
-    docs.push({id:Date.now().toString()+Math.random(),name:file.name,type:type,size:size,date:new Date().toLocaleDateString("fr-FR"),desc:"",category:pendingDocCategory});
-  });
-  saveDocs(docs);buildDocs();buildAdminHome();
-  showToast(files.length+" document"+(files.length>1?"s":"")+" ajouté"+(files.length>1?"s":"")+" !");
+  var liste=Array.from(files);
+  var input=document.getElementById("file-input");
+  docsAjouter(liste,pendingDocCategory,pendingDocPublie).then(function(){ if(input) input.value=""; });
 }
-function deleteDoc(id){
-  askConfirm("Supprimer ce document ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
-    if(!ok)return;
-    var all=getDocs();
-    var removed=all.find(function(d){return d.id===id;});
-    var docs=all.filter(function(d){return d.id!==id;});
-    saveDocs(docs);buildDocs();buildAdminHome();
-    if(!removed)return;
-    showUndoToast("Document « "+(removed.name||"")+" » supprimé",function(){
-      var cur=getDocs();
-      cur.push(removed);
-      saveDocs(cur);buildDocs();buildAdminHome();
-    });
-  });
-}
+function deleteDoc(id){ docsSupprimer(id); }
 
 
 // ═══ REÇU FISCAL (CERFA n°11580) POUR LES DONS ════════════════════

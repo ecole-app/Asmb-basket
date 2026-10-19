@@ -268,6 +268,51 @@ describe("Comptes utilisateurs", () => {
   });
 });
 
+describe("Documents du club (publiés aux parents ou réservés au bureau)", () => {
+  const fiche = { id: "n1", name: "Charte.pdf", publie: true, octets: 5000, parts: 1 };
+  it("un parent lit un document publié et son fichier, jamais un document réservé", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(getDoc(doc(db, "clubs/A/club_docs/dpub")));
+    await assertSucceeds(getDoc(doc(db, "clubs/A/club_docs_parts/dpub_0")));
+    await assertFails(getDoc(doc(db, "clubs/A/club_docs/dpriv")));
+    await assertFails(getDoc(doc(db, "clubs/A/club_docs_parts/dpriv_0")));
+  });
+  it("un parent peut lister seulement avec le filtre publié", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(getDocs(query(collection(db, "clubs/A/club_docs"), where("publie", "==", true))));
+    await assertFails(getDocs(collection(db, "clubs/A/club_docs")));
+  });
+  it("un parent n'écrit ni ne supprime rien", async () => {
+    const db = await as("parentA");
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs/n1"), fiche));
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs/dpub"), { ...fiche, id: "dpub", publie: false }));
+    await assertFails(deleteDoc(doc(db, "clubs/A/club_docs/dpub")));
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs_parts/n1_0"), { n: 0, data: "x" }));
+  });
+  it("le dirigeant lit tout, publie, retire, supprime", async () => {
+    const db = await as("dirA");
+    await assertSucceeds(getDoc(doc(db, "clubs/A/club_docs/dpriv")));
+    await assertSucceeds(getDocs(collection(db, "clubs/A/club_docs")));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/club_docs_parts/n1_0"), { n: 0, data: "QUJD" }));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/club_docs/n1"), fiche));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/club_docs/dpriv"), { id: "dpriv", name: "PV bureau.pdf", publie: true, octets: 1000, parts: 1 }));
+    await assertSucceeds(deleteDoc(doc(db, "clubs/A/club_docs/n1")));
+  });
+  it("refuse un fichier de plus de 3 Mo ou un morceau trop gros", async () => {
+    const db = await as("dirA");
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs/gros"), { ...fiche, id: "gros", octets: 4000000 }));
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs_parts/gros_0"), { n: 0, data: "x".repeat(950000) }));
+    await assertFails(setDoc(doc(db, "clubs/A/club_docs_parts/gros_0"), { n: 0, data: "x", autre: 1 }));
+  });
+  it("un compte bureau avec l'accès Documents gère tout, un autre club rien", async () => {
+    await assertSucceeds(getDoc(doc(await as("docsA"), "clubs/A/club_docs/dpriv")));
+    await assertSucceeds(setDoc(doc(await as("docsA"), "clubs/A/club_docs/n2"), { ...fiche, id: "n2" }));
+    await assertFails(getDoc(doc(await as("dirB"), "clubs/A/club_docs/dpub")));
+    await assertFails(getDoc(doc(await as(null), "clubs/A/club_docs/dpub")));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
 // ───────────────────────────────────────────────────────────────
 describe("Invitations", () => {
   async function rejoindre(uid, code, data) {

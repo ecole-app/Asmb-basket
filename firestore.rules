@@ -631,6 +631,28 @@ service cloud.firestore {
       match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /benevoles/{id}    { allow read: if readStaff(clubId); allow write: if staff(clubId); }
       match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      // Documents du club (règlement, charte…). Le dirigeant, ou un compte à qui il a donné
+      // l'accès « Documents », lit et écrit tout et choisit pour chaque document « publie »
+      // (visible des parents) ou non. Les autres membres ne lisent que les documents publiés :
+      // leur requête doit filtrer sur publie == true. Le fichier est découpé en morceaux
+      // (club_docs_parts/{docId}_{n}, 800 Ko au plus) car un document Firestore fait 1 Mo.
+      match /club_docs/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'documents')
+          || (member(clubId) && resource.data.get('publie', false) == true);
+        allow create, update: if (dirigeant(clubId) || hasPermission(clubId, 'documents'))
+          && request.resource.data.publie is bool
+          && request.resource.data.name is string && request.resource.data.name.size() <= 200
+          && request.resource.data.get('octets', 0) <= 3145728;
+        allow delete: if dirigeant(clubId) || hasPermission(clubId, 'documents');
+      }
+      match /club_docs_parts/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'documents')
+          || (member(clubId) && get(/databases/$(database)/documents/clubs/$(clubId)/club_docs/$(id.split('_')[0])).data.get('publie', false) == true);
+        allow create, update: if (dirigeant(clubId) || hasPermission(clubId, 'documents'))
+          && request.resource.data.keys().hasOnly(['n','data'])
+          && request.resource.data.data is string && request.resource.data.data.size() <= 900000;
+        allow delete: if dirigeant(clubId) || hasPermission(clubId, 'documents');
+      }
       // Stats de match (saisie du coach) : staff seulement. Un parent ne lit jamais
       // les chiffres des autres enfants ; sa vue « mon enfant » viendra d'un document à part.
       match /match_stats/{id}  { allow read: if readStaff(clubId); allow write: if staff(clubId); }

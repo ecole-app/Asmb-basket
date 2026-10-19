@@ -387,6 +387,7 @@
           <option value="autre" selected>Autre</option>
         </select>
       </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;margin:4px 0 14px;font-size:13px;color:var(--txt);line-height:1.4;cursor:pointer"><input type="checkbox" id="doc-publie" checked style="width:20px;height:20px;margin-top:1px;flex-shrink:0"><span><b>Publier aux parents</b><br><span style="font-size:11px;color:var(--mut)">Tous les parents et joueurs du club pourront l'ouvrir. Décoche pour le garder réservé au bureau.</span></span></label>
       <button onclick="confirmDocUpload()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer">Continuer et choisir le fichier</button>
     </div>
   </div>
@@ -1690,6 +1691,7 @@
  <div id="parent-stats"></div>
  <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
  <button onclick="openTeamPicker(true)" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Gérer mes équipes</button>
+ <button onclick="docsParentsOuvrir()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📄 Documents du club</button>
  <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Annuaire du club</button>
  <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Galerie photos</button>
  <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Calendrier</button>
@@ -1830,6 +1832,7 @@
  <div id="coach-eq-members" style="padding-bottom:20px"></div>
  <div style="text-align:center;padding-bottom:80px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
  <button onclick="openCoachTeamPicker()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Modifier mon équipe</button>
+ <button onclick="docsParentsOuvrir()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">📄 Documents du club</button>
  <button onclick="openAnnuaire()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Annuaire du club</button>
  <button onclick="openGalerie()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Galerie photos</button>
  <button onclick="openCalendrier()" style="padding:9px 18px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer"> Calendrier</button>
@@ -1912,6 +1915,7 @@
 <script src="js/15b-compta-plan.js"></script>
 <script src="js/15c-compta-ticket.js"></script>
 <script src="js/15d-compta-bilan.js"></script>
+<script src="js/15e-documents-club.js"></script>
 <script src="js/16-communaute.js"></script>
 <script src="js/16b-messagerie.js"></script>
 <script src="js/17-sponsors.js"></script>
