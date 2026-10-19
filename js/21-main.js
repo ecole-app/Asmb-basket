@@ -140,10 +140,10 @@ setTimeout(initAuthGate,80);
 setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1792410972";
+var APP_VERSION="1792411107";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
-// jour ») et appuyé sur le bouton ou la croix. Le bouton ne fait que retirer le bandeau si la
+// jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
 // nouvelle version tourne déjà ; sinon il recharge l'appli sur la nouvelle version.
 // gm_maj_vue = dernière version dont la personne a pris connaissance.
 function majVue(){ try{ return localStorage.getItem("gm_maj_vue"); }catch(e){ return null; } }
@@ -177,18 +177,13 @@ function checkForUpdate(){
  if(data.v&&data.v!==APP_VERSION){
  window.GM_MAJ_VERSION=data.v;
  majPreparer(data.v);
- // Déjà pris connaissance de cette version (croix) : pas de bandeau.
+ // Déjà pris connaissance de cette version : pas de bandeau.
  if(majVue()===data.v) return;
  // Il reste affiché jusqu'à ce que la personne le retire : rien ne le cache tout seul.
  majBandeau("attente");
  }
  })
  .catch(function(){});
-}
-// Croix : la personne a vu le message, il ne revient pas pour cette version.
-function dismissUpdate(){
- majMarquerVue(majEnAttente()?window.GM_MAJ_VERSION:APP_VERSION);
- majBandeau("");
 }
 // Bouton : si la nouvelle version tourne déjà, on retire juste le bandeau ; sinon on
 // force le téléchargement des fichiers frais, on vide les caches et on recharge.
