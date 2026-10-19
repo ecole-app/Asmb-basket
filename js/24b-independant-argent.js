@@ -40,6 +40,8 @@ function indArgentEcouter(ecoute,db){
   ecoute(IND.role==="coach"?window.fbCollection(db,"indep_lignes"):window.fbQuery(window.fbCollection(db,"indep_lignes"),window.fbWhere("compte","==",IND.uid)),function(sn){
     var m={}; sn.forEach(function(d){ m[d.id]=d.data(); }); IND.lignes=m; indRendre();
   });
+  // Identité de l'émetteur + compteur des reçus (lisible par les clients : leur PDF en a besoin).
+  ecoute(window.fbDoc(db,"indep_reglages","recus"),function(sn){ IND.recusCfg=sn.exists()?sn.data():{}; });
 }
 function indLigneId(sid,pid){ return "s_"+sid+"__"+pid; }
 function indLignes(){ return Object.keys(IND.lignes||{}).map(function(k){ return Object.assign({id:k},IND.lignes[k]); }); }
@@ -106,9 +108,16 @@ function indPayerLignes(ids,mode,date){
   return b.commit();
 }
 function indAnnulerPaiement(id){
-  askConfirm("Remettre cette ligne en « à payer » ?",{title:"Annuler le paiement",confirmText:"Remettre à payer"}).then(function(ok){
+  var l=IND.lignes[id]||{}, recu=l.recuNum;
+  askConfirm("Remettre cette ligne en « à payer » ?"+(recu?"\n\nLe reçu "+recu+" sera annulé (son numéro n'est pas réutilisé).":""),{title:"Annuler le paiement",confirmText:"Remettre à payer"}).then(function(ok){
     if(!ok) return;
-    window.fbUpdateDoc(window.fbDoc(indDb(),"indep_lignes",id),{statut:"du", mode:"", datePaiement:""}).then(function(){ showToast("Remis en « à payer »"); }).catch(indErr);
+    var b=window.fbWriteBatch(), maj={statut:"du", mode:"", datePaiement:""};
+    if(recu){
+      maj.recuNum=""; maj.recuLe=""; maj.recusAnnules=window.fbArrayUnion(recu);
+      if(typeof indRecuAnnulerOps==="function") indRecuAnnulerOps(Object.assign({id:id},l),b);
+    }
+    b.update(window.fbDoc(indDb(),"indep_lignes",id),maj);
+    b.commit().then(function(){ showToast("Remis en « à payer »"); }).catch(indErr);
   });
 }
 // o : {pid, n, prix, mois, paye, mode, date}
@@ -124,12 +133,12 @@ function indVendrePass(o){
 function indLigneHtml(l,coach,multi){
   var droite;
   if(l.statut==="du") droite=coach?'<button type="button" class="ind-btn p mini" data-act="lig-payer" data-id="'+indEsc(l.id)+'">Encaisser</button>':'<span class="ind-pill w">À régler</span>';
-  else if(l.statut==="paye") droite='<span class="ind-pill ok">Payé</span>'+(coach?'<button type="button" class="ind-btn s mini" data-act="lig-annuler" data-id="'+indEsc(l.id)+'" aria-label="Annuler le paiement">↺</button>':'');
+  else if(l.statut==="paye") droite='<span class="ind-pill ok">Payé</span>'+((coach||l.recuNum)?'<button type="button" class="ind-btn s mini" data-act="recu" data-id="'+indEsc(l.id)+'">Reçu</button>':'')+(coach?'<button type="button" class="ind-btn s mini" data-act="lig-annuler" data-id="'+indEsc(l.id)+'" aria-label="Annuler le paiement">↺</button>':'');
   else droite='<span class="ind-pill a">Pass</span>';
   var sous=[];
   if(multi) sous.push(indNomPers(l.uid));
   if(l.type==="pass") sous.push(indPassRestantes(l)+" / "+l.seances+" restantes · jusqu'au "+indDateTxt(l.fin));
-  if(l.statut==="paye") sous.push((indModeTxt(l.mode)||"Payé")+(l.datePaiement?" le "+indDateTxt(l.datePaiement):""));
+  if(l.statut==="paye") sous.push((indModeTxt(l.mode)||"Payé")+(l.datePaiement?" le "+indDateTxt(l.datePaiement):"")+(l.recuNum?" · reçu "+l.recuNum:""));
   var montant=l.statut==="pass"?"":" · "+indEuros(l.montant);
   return '<div class="ind-row"><div class="t"><strong>'+indEsc(indDateTxt(l.date)+" · "+(l.libelle||"")+montant)+'</strong>'
     +(sous.length?'<span>'+indEsc(sous.join(" · "))+'</span>':'')+'</div>'+droite+'</div>';
@@ -139,7 +148,7 @@ function indLigneHtml(l,coach,multi){
 function indArgentVue(){
   if(!indPremium()){
     return '<div class="ind-c"><div class="ind-row"><div class="t"><strong>Suivi des paiements et pass : formule Premium</strong>'
-      +'<span>Vois qui te doit quoi, vends des pass de séances et garde ton historique. Les reçus et le livre des recettes arrivent ensuite.</span></div></div></div>';
+      +'<span>Vois qui te doit quoi, vends des pass de séances et garde ton historique. Reçus numérotés et livre des recettes inclus.</span></div></div></div>';
   }
   var l=indLignes(), du=indDuLignes(l), mois=indAuj().slice(0,7);
   var encaisse=indSomme(l.filter(function(x){ return x.statut==="paye" && (x.datePaiement||"").slice(0,7)===mois; }));
@@ -164,6 +173,7 @@ function indArgentVue(){
       +(p.statut==="du"?'<span class="ind-pill w">À payer</span>':'')+'</div>';
   }).join("")+'</div>':'<div class="ind-c ind-vide">Aucun pass en cours.</div>';
   h+='<button type="button" class="ind-btn p" data-act="pass-vendre">+ Vendre un pass</button>';
+  if(typeof indRecusBoutons==="function") h+=indRecusBoutons();
   return h;
 }
 
@@ -268,5 +278,6 @@ function indArgentClic(act,el){
   if(act==="lig-annuler"){ indAnnulerPaiement(id); return true; }
   if(act==="solde-regler"){ var ids=indDuLignes(indLignesCompte(compte)).map(function(x){ return x.id; }); indPayerSheet(ids,indSomme(indDuLignes(indLignesCompte(compte)))); return true; }
   if(act==="pass-vendre"){ indPassForm(compte||null); return true; }
+  if(typeof indRecusClic==="function") return indRecusClic(act,el);
   return false;
 }

@@ -1,5 +1,29 @@
 [
  {
+  "v": "1792442829",
+  "titre": "Indépendant : reçus et livre des recettes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Onglet Argent : bouton « Reçu » sur chaque paiement. PDF numéroté (R-2026-0001…), avec ton SIRET et la mention « TVA non applicable, art. 293 B du CGI », à télécharger, partager ou envoyer par e-mail / SMS pré-remplis. Les paiements encaissés ensemble partagent un seul reçu. Annuler un paiement annule son reçu."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau « Livre des recettes » : tous tes encaissements de l'année par date, totaux par mois et par trimestre, export PDF et Excel. « Mes infos pour les reçus » : nom, SIRET, adresse."
+   },
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Dans « Mes paiements », tu peux télécharger le reçu de chacun de tes paiements."
+   }
+  ]
+ },
+ {
   "v": "1792442811",
   "titre": "Météo : les nuages traversent tout l'écran",
   "points": [

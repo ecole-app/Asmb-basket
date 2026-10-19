@@ -1142,6 +1142,17 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_lignes")));
     await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI")));
   });
+  it("reçus : l'indépendant écrit l'émetteur et le compteur, le client les lit, personne d'autre", async () => {
+    const dir = await as("dirI"), cli = await as("cliI");
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_reglages/recus"), { raison: "KS Training", siret: "12345678901234", adresse: "1 rue X", contact: "0600000000", annee: 2026, n: 3 }));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_reglages/recus"), { raison: "KS", siret: "123456789012345678", annee: 2026, n: 3 }));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_reglages/recus"), { raison: "KS", siret: "12345678901234", interdit: true }));
+    await assertSucceeds(getDoc(doc(cli, "clubs/I/indep_reglages/recus")));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_reglages/recus"), { raison: "Faux", siret: "12345678901234", annee: 2026, n: 0 }));
+    await assertFails(getDoc(doc(await as("dirA"), "clubs/I/indep_reglages/recus")));
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_lignes/r1"), { type: "seance", uid: "cliI", compte: "cliI", date: "2026-10-20", montant: 25, statut: "paye", mode: "especes", datePaiement: "2026-10-20", libelle: "Cross", recuNum: "R-2026-0004", recuLe: "2026-10-20", recuNom: "Julie Durand", recuPour: "", recusAnnules: ["R-2026-0002"] }));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_lignes/r2"), { type: "seance", uid: "cliI", compte: "cliI", date: "2026-10-20", montant: 25, statut: "paye", recuNum: "R-2026-0004-trop-long-pour-etre-valide" }));
+  });
   it("lien : l'indépendant le crée et le coupe ; un club ou un client non ; personne ne liste", async () => {
     const lien = (o = {}) => Object.assign({ clubId: "I", clubName: "KS Training", couleur: "#0e7c7b", actif: true, createdBy: "dirI", createdAt: serverTimestamp() }, o);
     await assertSucceeds(setDoc(doc(await as("dirI"), "indep_liens/WXYZ-2345"), lien()));
