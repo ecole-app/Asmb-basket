@@ -187,8 +187,8 @@ function indLivre(annee){
   sh.body.classList.add("ind-t"); sh.body.style.setProperty("--ia",indCouleur());
   function peindre(){
     var r=indLivreCalcul(indLignes(),annee,indNomComplet);
-    var h='<div class="ind-btns" style="justify-content:space-between;align-items:center;margin-bottom:8px"><button type="button" class="ind-btn s mini" data-a="-1" aria-label="Année précédente">‹</button>'
-      +'<strong>'+annee+'</strong><button type="button" class="ind-btn s mini" data-a="1" aria-label="Année suivante">›</button></div>'
+    var h='<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px"><button type="button" class="ind-btn s mini" style="width:auto;min-width:44px" data-a="-1" aria-label="Année précédente">‹</button>'
+      +'<strong style="font-size:18px">'+annee+'</strong><button type="button" class="ind-btn s mini" style="width:auto;min-width:44px" data-a="1" aria-label="Année suivante">›</button></div>'
       +'<div class="ind-c"><div class="ind-row"><div class="t"><strong style="font-size:22px">'+indEsc(indEuros(r.total))+'</strong><span>encaissé en '+annee+' · '+r.rows.length+' paiement'+(r.rows.length>1?"s":"")+'</span></div></div></div>';
     h+='<div class="ind-k">Par trimestre</div><div class="ind-c ind-list">'+r.trim.map(function(t,i){ return '<div class="ind-row"><div class="t"><strong>T'+(i+1)+'</strong></div><span class="ind-pill">'+indEsc(indEuros(t))+'</span></div>'; }).join("")+'</div>';
     h+='<div class="ind-k">Par mois</div><div class="ind-c ind-list">'+r.mois.map(function(m,i){ return m?'<div class="ind-row"><div class="t"><strong>'+IND_MOIS_LONG[i]+'</strong></div><span class="ind-pill">'+indEsc(indEuros(m))+'</span></div>':""; }).join("")+(r.total?'':'<div class="ind-vide">Aucun encaissement cette année.</div>')+'</div>';

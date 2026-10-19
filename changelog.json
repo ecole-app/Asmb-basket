@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792443552",
+  "titre": "Indépendant : petits correctifs d'affichage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Livre des recettes : les flèches de changement d'année sont bien alignées. Abonnement : boutons Geler / Résilier plus lisibles."
+   }
+  ]
+ },
+ {
   "v": "1792443016",
   "titre": "Roue de couleurs : barre qui ne bloque plus",
   "points": [

@@ -81,9 +81,9 @@ function indAboBloc(){
   h+='<p class="ind-note" style="margin-top:8px">'+indEsc(eng)+'</p>';
   if(!window.SUPPORT_MODE && IND.role==="coach"){
     h+='<div class="ind-btns" style="margin-top:10px">';
-    if(f.gel) h+='<button type="button" class="ind-btn p" data-act="abo-relancer">▶️ Relancer maintenant</button>';
-    else if(f.res) h+='<button type="button" class="ind-btn p" data-act="abo-annuler-res">↩️ Annuler la résiliation</button>';
-    else h+='<button type="button" class="ind-btn s" data-act="abo-geler">⏸ Geler</button><button type="button" class="ind-btn s" data-act="abo-resilier">✖ Résilier</button>';
+    if(f.gel) h+='<button type="button" class="ind-btn p" data-act="abo-relancer">Relancer maintenant</button>';
+    else if(f.res) h+='<button type="button" class="ind-btn p" data-act="abo-annuler-res">Annuler la résiliation</button>';
+    else h+='<button type="button" class="ind-btn s" data-act="abo-geler">Geler</button><button type="button" class="ind-btn s" data-act="abo-resilier">Résilier</button>';
     h+='</div>';
   }
   return h+'</div>';
