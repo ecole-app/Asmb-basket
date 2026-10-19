@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792389333",
+  "titre": "Plateforme : Ma comptabilité — tableau de bord, statuts, dépenses",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Ma comptabilité (super admin) : tableau de bord (encaissé du mois et du trimestre, à encaisser, retards, jauge du plafond annuel, cotisations à mettre de côté), factures avec statut (brouillon, envoyée, en retard, payée) et relance par e-mail ou SMS pré-rempli, dépenses avec photo du justificatif lue par Gemini et registre des achats en CSV."
+   }
+  ]
+ },
+ {
   "v": "1792361188",
   "titre": "Dates : retour à l'affichage d'avant",
   "points": [

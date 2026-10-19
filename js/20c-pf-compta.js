@@ -59,6 +59,7 @@ function pfcNumeroSuivant(lignes, annee) {
 function pfcTotaux(lignes, debut, fin) {
   var r = { encaisse: { abonnement: 0, independant: 0, total: 0 }, aEncaisser: { abonnement: 0, independant: 0, total: 0 } };
   (lignes || []).forEach(function (l) {
+    if (pfcEstDepense(l)) return;
     var t = l.type === "independant" ? "independant" : "abonnement", m = Number(l.montant) || 0;
     if (l.statut === "paye") {
       var d = l.dateEncaissement || l.date || "";
@@ -77,6 +78,60 @@ function pfcBornesTrimestre(iso) {
   var fin = { "03": "31", "06": "30", "09": "30", "12": "31" }[d2];
   return [m[1] + "-" + d1 + "-01", m[1] + "-" + d2 + "-" + fin];
 }
+// ── Tableau de bord, statuts de facture, dépenses (sans écran, testés) ──
+var PFC_PLAFOND_DEFAUT = 83600;   // plafond annuel de chiffre d'affaires (modifiable dans « Mes informations »)
+var PFC_TAUX_DEFAUT = 21.2;       // cotisations sociales en % du chiffre d'affaires encaissé (modifiable)
+function pfcEstDepense(l) { return !!l && l.sens === "depense"; }
+function pfcEcheance(l) { return (l && l.echeance) || pfcPlusJours(l && l.date, 30); }
+function pfcJoursEntre(a, b) { // nombre de jours de a à b (AAAA-MM-JJ)
+  var ma = /^(\d{4})-(\d{2})-(\d{2})/.exec(a || ""), mb = /^(\d{4})-(\d{2})-(\d{2})/.exec(b || "");
+  if (!ma || !mb) return 0;
+  return Math.round((Date.UTC(+mb[1], +mb[2] - 1, +mb[3]) - Date.UTC(+ma[1], +ma[2] - 1, +ma[3])) / 86400000);
+}
+// brouillon (pas encore de PDF/numéro) → envoyee (PDF émis) → retard (échéance dépassée) | paye
+function pfcStatut(l, auj) {
+  if (pfcEstDepense(l)) return "depense";
+  if (l.statut === "paye") return "paye";
+  if (!l.numero) return "brouillon";
+  return pfcEcheance(l) < auj ? "retard" : "envoyee";
+}
+function pfcJoursRetard(l, auj) { return Math.max(0, pfcJoursEntre(pfcEcheance(l), auj)); }
+function pfcTableau(lignes, auj, cfg) {
+  cfg = cfg || {};
+  var annee = auj.slice(0, 4), mois = auj.slice(0, 7);
+  var tAn = pfcTotaux(lignes, annee + "-01-01", annee + "-12-31");
+  var tTri = pfcTotaux(lignes, pfcBornesTrimestre(auj)[0], pfcBornesTrimestre(auj)[1]);
+  var tMois = pfcTotaux(lignes, mois + "-01", mois + "-31");
+  var plafond = Number(cfg.plafond) > 0 ? Number(cfg.plafond) : PFC_PLAFOND_DEFAUT;
+  var taux = (cfg.tauxCotis !== undefined && cfg.tauxCotis !== "" && isFinite(Number(cfg.tauxCotis)) && Number(cfg.tauxCotis) >= 0) ? Number(cfg.tauxCotis) : PFC_TAUX_DEFAUT;
+  var r = { annee: annee, encaisseMois: tMois.encaisse.total, encaisseTrimestre: tTri.encaisse.total, encaisseAnnee: tAn.encaisse.total,
+    aEncaisser: 0, enRetard: 0, nbRetard: 0, nbBrouillons: 0, depensesAnnee: 0, plafond: plafond, taux: taux };
+  (lignes || []).forEach(function (l) {
+    var st = pfcStatut(l, auj), m = Number(l.montant) || 0;
+    if (st === "depense") { if ((l.date || "").slice(0, 4) === annee) r.depensesAnnee = pfcArrondi(r.depensesAnnee + m); }
+    else if (st === "envoyee" || st === "retard") r.aEncaisser = pfcArrondi(r.aEncaisser + m);
+    else if (st === "brouillon") r.nbBrouillons++;
+    if (st === "retard") { r.enRetard = pfcArrondi(r.enRetard + m); r.nbRetard++; }
+  });
+  r.pourcentPlafond = Math.round(r.encaisseAnnee / plafond * 1000) / 10;
+  r.cotisTrimestre = pfcArrondi(r.encaisseTrimestre * taux / 100);
+  r.cotisAnnee = pfcArrondi(r.encaisseAnnee * taux / 100);
+  return r;
+}
+// Registre des achats (dépenses) d'une année, en CSV.
+function pfcAchatsCsv(lignes, annee) {
+  var b = pfcBornesAnnee(annee), tot = 0;
+  var dep = (lignes || []).filter(function (l) { return pfcEstDepense(l) && (l.date || "") >= b[0] && (l.date || "") <= b[1]; })
+    .sort(function (a, c) { return (a.date || "").localeCompare(c.date || ""); });
+  var out = ["Date;Fournisseur;Libellé;Mode de règlement;Montant"];
+  dep.forEach(function (l) {
+    tot = pfcArrondi(tot + Number(l.montant));
+    out.push([pfcDateFr(l.date), l.clientNom || "", l.libelle || "", PFC_MODES[l.mode] || "", String(pfcArrondi(l.montant)).replace(".", ",")].map(pfcCsvCase).join(";"));
+  });
+  out.push(["", "", "", "TOTAL " + annee, String(tot).replace(".", ",")].join(";"));
+  return "\ufeff" + out.join("\r\n");
+}
+
 function pfcCsvCase(v) {
   var s = String(v == null ? "" : v);
   if (/^[=+\-@]/.test(s)) s = "'" + s; // pas de formule exécutée à l'ouverture dans Excel
@@ -87,7 +142,7 @@ function pfcLivreCsv(lignes, annee) {
   var b = pfcBornesAnnee(annee);
   var payees = (lignes || []).filter(function (l) {
     var d = l.dateEncaissement || l.date || "";
-    return l.statut === "paye" && d >= b[0] && d <= b[1];
+    return !pfcEstDepense(l) && l.statut === "paye" && d >= b[0] && d <= b[1];
   }).sort(function (a, c) { return (a.dateEncaissement || a.date || "").localeCompare(c.dateEncaissement || c.date || ""); });
   var out = ["Date d'encaissement;N° facture;Client;Nature;Libellé;Mode de règlement;Montant"];
   var tot = 0;
@@ -160,25 +215,35 @@ function pfcOuvrir() {
     haut.innerHTML = "";
     var auj = pfcAujourdhui();
     var tri = pfcBornesTrimestre(auj);
+    haut.appendChild(pfcTableauCarte(pfcTableau(etat.lignes, auj, etat.cfg)));
     haut.appendChild(carteTotaux("Ce trimestre (" + pfcTrimestre(auj).replace("-", " ") + ") : pour ta déclaration trimestrielle", tri));
     haut.appendChild(carteTotaux("Cette année (" + auj.slice(0, 4) + ")", pfcBornesAnnee(auj.slice(0, 4))));
     var act = gmRow(haut);
     act.appendChild(gmBtn("+ Nouvelle ligne", "primary", function () { pfcLigneForm(null, rafraichir); }));
-    act.appendChild(gmBtn("Mes informations", "soft", function () { pfcInfosForm(etat.cfg, rafraichir); }));
-    act.appendChild(gmBtn("Livre des recettes (CSV)", "soft", function () { pfcExporterLivre(etat.lignes, auj.slice(0, 4)); }));
+    act.appendChild(gmBtn("📷 Justificatif", "soft", function () { pfcDepenseForm(null, rafraichir, null, true); }));
+    act.appendChild(gmBtn("+ Dépense", "soft", function () { pfcDepenseForm(null, rafraichir); }));
+    var act2 = gmRow(haut);
+    act2.appendChild(gmBtn("Mes informations", "soft", function () { pfcInfosForm(etat.cfg, rafraichir); }));
+    act2.appendChild(gmBtn("Livre des recettes (CSV)", "soft", function () { pfcExporterCsv(pfcLivreCsv(etat.lignes, auj.slice(0, 4)), "livre-des-recettes-" + auj.slice(0, 4) + ".csv"); }));
+    act2.appendChild(gmBtn("Registre des achats (CSV)", "soft", function () { pfcExporterCsv(pfcAchatsCsv(etat.lignes, auj.slice(0, 4)), "registre-des-achats-" + auj.slice(0, 4) + ".csv"); }));
     var note = document.createElement("div");
     note.style.cssText = "font-size:11px;color:var(--mut);line-height:1.45;margin:10px 0 4px";
     note.textContent = "Factures en PDF classique : valables jusqu'à l'obligation d'émission électronique (1er septembre 2027 pour les micro-entreprises). Le format électronique, via une plateforme agréée, se branchera sur ces mêmes lignes.";
     haut.appendChild(note);
     var f = document.createElement("div"); f.style.cssText = "display:flex;gap:6px;margin:12px 0 8px;flex-wrap:wrap";
-    [["tous", "Toutes"], ["abonnement", "Abonnements"], ["independant", "Indépendants"]].forEach(function (o) {
+    [["tous", "Toutes"], ["abonnement", "Abonnements"], ["independant", "Indépendants"], ["retard", "En retard"], ["depense", "Dépenses"]].forEach(function (o) {
       var b = gmBtn(o[1], etat.filtre === o[0] ? "primary" : "ghost", function () { etat.filtre = o[0]; dessiner(); });
       f.appendChild(b);
     });
     haut.appendChild(f);
 
     liste.innerHTML = "";
-    var vues = etat.lignes.filter(function (l) { return etat.filtre === "tous" || (l.type === "independant" ? "independant" : "abonnement") === etat.filtre; });
+    function genre(l) { return pfcEstDepense(l) ? "depense" : (l.type === "independant" ? "independant" : "abonnement"); }
+    var vues = etat.lignes.filter(function (l) {
+      if (etat.filtre === "tous") return true;
+      if (etat.filtre === "retard") return pfcStatut(l, auj) === "retard";
+      return genre(l) === etat.filtre;
+    });
     if (!vues.length) {
       var v = document.createElement("div"); v.style.cssText = "text-align:center;color:var(--mut);font-size:12px;padding:20px;line-height:1.5";
       v.textContent = etat.lignes.length ? "Aucune ligne dans ce filtre." : "Aucune ligne pour l'instant. Appuie sur « + Nouvelle ligne » ou sur « Facturer » depuis la carte d'un club.";
@@ -189,27 +254,72 @@ function pfcOuvrir() {
   rafraichir();
 }
 
+// Tableau de bord : encaissé, à encaisser, retards, plafond, cotisations à mettre de côté.
+function pfcTableauCarte(t) {
+  var c = gmCard();
+  var h = document.createElement("div"); h.style.cssText = "font-size:12px;font-weight:800;color:var(--txt);margin-bottom:8px"; h.textContent = "Tableau de bord " + t.annee;
+  c.appendChild(h);
+  var g = document.createElement("div"); g.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px";
+  function tuile(lib, val, sous, col) {
+    var d = document.createElement("div"); d.style.cssText = "background:var(--bg,#f4f6fa);border-radius:12px;padding:10px 12px;min-width:0";
+    var a = document.createElement("div"); a.style.cssText = "font-size:11px;color:var(--mut);font-weight:700"; a.textContent = lib;
+    var b = document.createElement("div"); b.style.cssText = "font-size:18px;font-weight:800;margin-top:2px;color:" + (col || "var(--txt)"); b.textContent = val;
+    d.appendChild(a); d.appendChild(b);
+    if (sous) { var e = document.createElement("div"); e.style.cssText = "font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.35"; e.textContent = sous; d.appendChild(e); }
+    g.appendChild(d);
+  }
+  tuile("Encaissé ce mois", pfcEur(t.encaisseMois));
+  tuile("Encaissé ce trimestre", pfcEur(t.encaisseTrimestre), "à mettre de côté : " + pfcEur(t.cotisTrimestre));
+  tuile("À encaisser", pfcEur(t.aEncaisser), t.nbBrouillons ? t.nbBrouillons + " brouillon" + (t.nbBrouillons > 1 ? "s" : "") + " sans facture" : "");
+  tuile("En retard", pfcEur(t.enRetard), t.nbRetard ? t.nbRetard + " facture" + (t.nbRetard > 1 ? "s" : "") : "aucune", t.nbRetard ? "var(--red)" : "");
+  c.appendChild(g);
+  var pct = Math.min(100, t.pourcentPlafond), col = t.pourcentPlafond >= 100 ? "var(--red)" : (t.pourcentPlafond >= 80 ? "#E8670A" : "var(--grn)");
+  var jt = document.createElement("div"); jt.style.cssText = "display:flex;justify-content:space-between;gap:8px;font-size:12px;margin:12px 0 4px;color:var(--txt)";
+  var j1 = document.createElement("span"); j1.style.fontWeight = "700"; j1.textContent = "Plafond annuel";
+  var j2 = document.createElement("span"); j2.textContent = pfcEur(t.encaisseAnnee) + " / " + Math.round(t.plafond).toLocaleString("fr-FR") + " €" + " (" + String(t.pourcentPlafond).replace(".", ",") + " %)";
+  jt.appendChild(j1); jt.appendChild(j2); c.appendChild(jt);
+  var bar = document.createElement("div"); bar.style.cssText = "height:8px;border-radius:6px;background:var(--bdr);overflow:hidden";
+  var fill = document.createElement("div"); fill.style.cssText = "height:100%;border-radius:6px;width:" + pct + "%;background:" + col;
+  bar.appendChild(fill); c.appendChild(bar);
+  var n = document.createElement("div"); n.style.cssText = "font-size:11px;color:var(--mut);line-height:1.45;margin-top:8px";
+  n.textContent = "Cotisations de l'année à mettre de côté : " + pfcEur(t.cotisAnnee) + " (taux " + String(t.taux).replace(".", ",") + " %, modifiable dans « Mes informations »)."
+    + (t.depensesAnnee ? " Dépenses enregistrées : " + pfcEur(t.depensesAnnee) + " (en micro-entreprise, elles ne se déduisent pas du chiffre d'affaires)." : "");
+  c.appendChild(n);
+  return c;
+}
+
 function pfcCarteLigne(l, etat, rafraichir) {
-  var t = PFC_TYPES[l.type] || PFC_TYPES.abonnement, paye = l.statut === "paye";
+  var auj = pfcAujourdhui(), st0 = pfcStatut(l, auj), dep = st0 === "depense", paye = st0 === "paye";
+  var t = dep ? { lib: "Dépense", col: "#6B7280" } : (PFC_TYPES[l.type] || PFC_TYPES.abonnement);
   var c = gmCard();
   var h = document.createElement("div"); h.style.cssText = "display:flex;justify-content:space-between;gap:8px;align-items:flex-start";
   var g = document.createElement("div"); g.style.cssText = "min-width:0;flex:1";
-  var n = document.createElement("div"); n.style.cssText = "font-size:13px;font-weight:800;color:var(--txt)"; n.textContent = l.clientNom || "(client)";
+  var n = document.createElement("div"); n.style.cssText = "font-size:13px;font-weight:800;color:var(--txt)"; n.textContent = l.clientNom || (dep ? "(fournisseur)" : "(client)");
   var m = document.createElement("div"); m.style.cssText = "font-size:11px;color:var(--mut);margin-top:2px;line-height:1.4";
   var tag = document.createElement("b"); tag.style.color = t.col; tag.textContent = t.lib;
   m.appendChild(tag);
   m.appendChild(document.createTextNode(" · " + pfcDateFr(l.date) + (l.numero ? " · " + l.numero : "") + (l.libelle ? " · " + l.libelle : "")));
   g.appendChild(n); g.appendChild(m);
   var p = document.createElement("div"); p.style.cssText = "text-align:right;flex:none";
-  var mo = document.createElement("div"); mo.style.cssText = "font-size:14px;font-weight:800;color:var(--txt)"; mo.textContent = pfcEur(l.montant);
-  var st = document.createElement("div"); st.style.cssText = "font-size:11px;font-weight:700;margin-top:2px;color:" + (paye ? "var(--grn)" : "#E8670A");
-  st.textContent = paye ? "Payé le " + pfcDateFr(l.dateEncaissement) : "À encaisser";
+  var mo = document.createElement("div"); mo.style.cssText = "font-size:14px;font-weight:800;color:var(--txt)"; mo.textContent = (dep ? "− " : "") + pfcEur(l.montant);
+  var st = document.createElement("div"); st.style.cssText = "font-size:11px;font-weight:700;margin-top:2px";
+  var txt = { brouillon: ["Brouillon", "var(--mut)"], envoyee: ["Envoyée · échéance " + pfcDateFr(pfcEcheance(l)), "#E8670A"],
+    retard: ["En retard de " + pfcJoursRetard(l, auj) + " j", "var(--red)"], paye: ["Payé le " + pfcDateFr(l.dateEncaissement), "var(--grn)"],
+    depense: [PFC_MODES[l.mode] || "", "var(--mut)"] }[st0];
+  st.style.color = txt[1]; st.textContent = txt[0];
   p.appendChild(mo); p.appendChild(st);
   h.appendChild(g); h.appendChild(p); c.appendChild(h);
   var r = gmRow(c);
-  if (!paye) r.appendChild(gmBtn("Marquer payé", "primary", function () { pfcPayeForm(l, rafraichir); }));
-  r.appendChild(gmBtn("Facture PDF", "soft", function () { pfcFacturePdf(l, etat, rafraichir); }));
-  r.appendChild(gmBtn("Modifier", "ghost", function () { pfcLigneForm(l, rafraichir); }));
+  if (st0 === "retard") {
+    var mail = pfcEmailOk(l.clientEmail), tel = pfcTelNet(l.clientTel);
+    if (mail) r.appendChild(gmBtn("Relancer par e-mail", "primary", function () { pfcRelance(l, etat.cfg, "email"); }));
+    if (tel) r.appendChild(gmBtn("Relancer par SMS", mail ? "soft" : "primary", function () { pfcRelance(l, etat.cfg, "sms"); }));
+    if (!mail && !tel) r.appendChild(gmBtn("Relancer", "primary", function () { askAlert("Ajoute l'e-mail ou le téléphone du client (bouton Modifier) pour pouvoir le relancer."); }));
+  }
+  if (st0 === "envoyee" || st0 === "retard") r.appendChild(gmBtn("Marquer payé", st0 === "retard" ? "soft" : "primary", function () { pfcPayeForm(l, rafraichir); }));
+  if (!dep) r.appendChild(gmBtn("Facture PDF", st0 === "brouillon" ? "primary" : "soft", function () { pfcFacturePdf(l, etat, rafraichir); }));
+  if (dep && pfcJustifOk(l.justif)) r.appendChild(gmBtn("Justificatif", "soft", function () { pfcJustifVoir(l); }));
+  r.appendChild(gmBtn("Modifier", "ghost", function () { if (dep) pfcDepenseForm(l, rafraichir); else pfcLigneForm(l, rafraichir); }));
   r.appendChild(gmBtn("Supprimer", "danger", function () {
     if (l.numero) { askAlert("La facture " + l.numero + " a été émise : son numéro ne peut pas disparaître de ta numérotation. Modifie la ligne si besoin."); return; }
     askConfirm("Supprimer cette ligne ?", { danger: true, confirmText: "Supprimer" }).then(function (ok) {
@@ -218,6 +328,28 @@ function pfcCarteLigne(l, etat, rafraichir) {
     });
   }));
   return c;
+}
+
+// Contacts du client : validés avant d'aller dans un mailto: / sms:.
+function pfcEmailOk(v) { v = String(v || "").trim(); return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(v) ? v : ""; }
+function pfcTelNet(v) { var t = String(v || "").replace(/[^+0-9]/g, ""); return t.replace(/\D/g, "").length >= 6 ? t : ""; }
+// Relance manuelle (jamais d'envoi automatique) : e-mail ou SMS pré-rempli, vouvoiement.
+function pfcRelanceTexte(l, cfg) {
+  return "Bonjour,\n\nSauf erreur de ma part, la facture " + (l.numero || "") + " d'un montant de " + pfcEur(l.montant)
+    + " (échéance le " + pfcDateFr(pfcEcheance(l)) + ") n'a pas encore été réglée.\nMerci de bien vouloir procéder au règlement dès que possible.\n\nCordialement,\n" + ((cfg && cfg.nom) || "");
+}
+function pfcRelance(l, cfg, canal) {
+  var texte = pfcRelanceTexte(l, cfg);
+  if (canal === "email") { var a = pfcEmailOk(l.clientEmail); if (a) window.location.href = "mailto:" + a + "?subject=" + encodeURIComponent("Facture " + (l.numero || "") + " : rappel de paiement") + "&body=" + encodeURIComponent(texte); }
+  else { var t = pfcTelNet(l.clientTel); if (t) window.location.href = "sms:" + t + "?&body=" + encodeURIComponent(texte); }
+}
+// Justificatif : image JPEG générée par l'appli (data URL), contrôlée avant affichage.
+function pfcJustifOk(d) { return typeof d === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(d); }
+function pfcJustifVoir(l) {
+  if (!pfcJustifOk(l.justif)) return;
+  var s = gmSheet("Justificatif");
+  var img = document.createElement("img"); img.src = l.justif; img.alt = "Justificatif"; img.style.cssText = "width:100%;border-radius:10px";
+  s.body.appendChild(img);
 }
 
 // ── Formulaires ──
@@ -239,6 +371,7 @@ function pfcSelect(parent, lib, options, val) {
   return sel;
 }
 
+function pfcSansId(l) { var o = Object.assign({}, l); delete o.id; return o; }
 // Création / modification d'une ligne. `pre` peut préremplir (Facturer depuis une carte club).
 function pfcLigneForm(l, apres, pre) {
   var s = gmSheet(l ? "Modifier la ligne" : "Nouvelle ligne");
@@ -247,9 +380,12 @@ function pfcLigneForm(l, apres, pre) {
   var type = pfcSelect(s.body, "Nature", tp, d.type === "independant" ? "independant" : "abonnement");
   var client = pfcChamp(s.body, "Client (club ou indépendant)", "text", d.clientNom, "Nom du client");
   var adr = pfcChamp(s.body, "Adresse du client (pour la facture)", "text", d.clientAdresse, "Rue, code postal, ville");
+  var cmail = pfcChamp(s.body, "E-mail du client (pour les relances, facultatif)", "email", d.clientEmail, "");
+  var ctel = pfcChamp(s.body, "Téléphone du client (pour les relances, facultatif)", "tel", d.clientTel, "");
   var lib = pfcChamp(s.body, "Libellé", "text", d.libelle, "ex. Abonnement Standard, 12 mois");
   var mont = pfcChamp(s.body, "Montant (€, TVA non applicable)", "text", d.montant ? String(d.montant).replace(".", ",") : "", "ex. 200");
   var date = pfcChamp(s.body, "Date de la facture / de la vente", "date", d.date || pfcAujourdhui());
+  var ech = pfcChamp(s.body, "Échéance (30 jours par défaut)", "date", d.echeance || "");
   var go = gmBtn("Enregistrer", "primary", function () {
     var m = pfcMontantLire(mont.value);
     if (!client.value.trim()) { askAlert("Indique le client."); return; }
@@ -258,16 +394,78 @@ function pfcLigneForm(l, apres, pre) {
     var doc = {
       type: type.value, clientNom: client.value.trim().slice(0, 100), clientAdresse: adr.value.trim().slice(0, 160),
       libelle: lib.value.trim().slice(0, 120), montant: m, date: date.value,
+      clientEmail: cmail.value.trim().slice(0, 100), clientTel: ctel.value.trim().slice(0, 30),
+      echeance: ech.value || pfcPlusJours(date.value, 30),
       statut: d.statut === "paye" ? "paye" : "a_encaisser"
     };
     if (d.clubId) doc.clubId = d.clubId;
     if (l && l.numero) doc.numero = l.numero;
     if (l && l.statut === "paye") { doc.dateEncaissement = l.dateEncaissement || ""; doc.mode = l.mode || "autre"; }
-    var p = l ? window.fbSetDoc(window.fbDoc(window.fbDb, "pf_compta", l.id), doc)
+    var p = l ? window.fbSetDoc(window.fbDoc(window.fbDb, "pf_compta", l.id), Object.assign({}, pfcSansId(l), doc))
               : window.fbAddDoc(pfcCol(), Object.assign({ createdAt: Date.now() }, doc));
     p.then(function () { s.modal.remove(); if (apres) apres(); }).catch(function (e) { askAlert("Erreur : " + ((e && e.code) || e)); });
   });
   s.body.appendChild(go);
+}
+
+// Dépense : saisie à la main ou par photo du justificatif (lue par Gemini, comme les tickets des clubs).
+// Rien n'est enregistré sans ta validation ; si la lecture échoue, tu complètes à la main.
+var PFC_MOYEN_IA = { "CB": "cb", "Espèces": "especes", "Chèque": "cheque", "Virement": "virement" };
+function pfcJustifReduire(file) {
+  if (typeof comptaTicketReduire !== "function") return Promise.reject(new Error("image"));
+  return comptaTicketReduire(file, 1100, 0.6).then(function (d) {
+    if (d.length <= 800000) return d;
+    return comptaTicketReduire(file, 800, 0.5).then(function (d2) { return d2.length <= 800000 ? d2 : ""; });
+  });
+}
+function pfcDepenseForm(l, apres, pre, photoDirecte) {
+  var s = gmSheet(l ? "Modifier la dépense" : "Nouvelle dépense");
+  var d = l || pre || {};
+  var justif = pfcJustifOk(d.justif) ? d.justif : "";
+  var etatLect = document.createElement("div"); etatLect.style.cssText = "display:none;font-size:12px;line-height:1.4;margin-bottom:10px;white-space:pre-line;word-break:break-word";
+  var file = document.createElement("input"); file.type = "file"; file.accept = "image/*"; file.setAttribute("capture", "environment"); file.style.display = "none";
+  s.body.appendChild(file);
+  var bt = gmBtn(justif ? "📷 Changer la photo" : "📷 Photo du justificatif", "soft", function () { file.click(); });
+  s.body.appendChild(bt); s.body.appendChild(etatLect);
+  function statut(txt, col) { etatLect.style.display = txt ? "block" : "none"; etatLect.style.color = col || "var(--mut)"; etatLect.textContent = txt || ""; }
+  var four = pfcChamp(s.body, "Fournisseur", "text", d.clientNom, "ex. Vistaprint");
+  var lib = pfcChamp(s.body, "Libellé", "text", d.libelle, "ex. Cartes de visite");
+  var mont = pfcChamp(s.body, "Montant (€)", "text", d.montant ? String(d.montant).replace(".", ",") : "", "ex. 24,90");
+  var date = pfcChamp(s.body, "Date", "date", d.date || pfcAujourdhui());
+  var mode = pfcSelect(s.body, "Moyen de paiement", PFC_MODES, d.mode || "cb");
+  file.addEventListener("change", function () {
+    var f = file.files && file.files[0]; file.value = ""; if (!f) return;
+    if (f.type && f.type.indexOf("image") !== 0) { askAlert("Choisis une photo du justificatif."); return; }
+    statut("⏳ Lecture du justificatif… (jusqu'à 1 minute)");
+    bt.disabled = true;
+    pfcJustifReduire(f).then(function (url) {
+      justif = url; // jointe tout de suite, même si la lecture échoue
+      if (!navigator.onLine) throw new Error("hors-ligne");
+      return (typeof gmTicketIA === "function" ? gmTicketIA(f, statut) : Promise.reject(new Error("ia")));
+    }).then(function (r) {
+      if (r.fournisseur && !four.value.trim()) four.value = r.fournisseur;
+      if (r.description && !lib.value.trim()) lib.value = r.description;
+      if (r.montant) mont.value = String(r.montant).replace(".", ",");
+      if (r.date) date.value = r.date;
+      if (r.moyen && PFC_MOYEN_IA[r.moyen]) mode.value = PFC_MOYEN_IA[r.moyen];
+      statut("✓ Justificatif lu : vérifie puis enregistre.", "var(--grn)");
+    }).catch(function (e) {
+      statut(typeof gmTicketMsgErreur === "function" ? gmTicketMsgErreur(e) : "⚠️ Lecture impossible : complète à la main.", "var(--red)");
+    }).then(function () { bt.disabled = false; });
+  });
+  s.body.appendChild(gmBtn("Enregistrer", "primary", function () {
+    var m = pfcMontantLire(mont.value);
+    if (!four.value.trim()) { askAlert("Indique le fournisseur."); return; }
+    if (m === null) { askAlert("Montant incorrect."); return; }
+    if (!date.value) { askAlert("Indique la date."); return; }
+    var doc = { sens: "depense", type: "abonnement", clientNom: four.value.trim().slice(0, 100), libelle: lib.value.trim().slice(0, 120),
+      montant: m, date: date.value, mode: mode.value, statut: "paye", dateEncaissement: date.value };
+    if (justif) doc.justif = justif;
+    var p = l ? window.fbSetDoc(window.fbDoc(window.fbDb, "pf_compta", l.id), Object.assign({}, pfcSansId(l), doc))
+              : window.fbAddDoc(pfcCol(), Object.assign({ createdAt: Date.now() }, doc));
+    p.then(function () { s.modal.remove(); if (apres) apres(); }).catch(function (e) { askAlert("Erreur : " + ((e && e.code) || e)); });
+  }));
+  if (photoDirecte) file.click();
 }
 
 // Marquer payé : date d'encaissement + mode de règlement.
@@ -295,26 +493,34 @@ function pfcInfosForm(cfg, apres) {
   var adr = pfcChamp(s.body, "Adresse (siège ou domiciliation)", "text", cfg.adresse, "Rue, code postal, ville");
   var mail = pfcChamp(s.body, "E-mail", "email", cfg.email, "");
   var tel = pfcChamp(s.body, "Téléphone", "tel", cfg.tel, "");
+  var plaf = pfcChamp(s.body, "Plafond annuel de chiffre d'affaires (€)", "text", cfg.plafond || PFC_PLAFOND_DEFAUT, "");
+  var taux = pfcChamp(s.body, "Cotisations sociales (% du chiffre d'affaires encaissé)", "text", cfg.tauxCotis !== undefined ? String(cfg.tauxCotis).replace(".", ",") : String(PFC_TAUX_DEFAUT).replace(".", ","), "");
+  var hint = document.createElement("div"); hint.style.cssText = "font-size:11px;color:var(--mut);line-height:1.45;margin:-4px 0 10px";
+  hint.textContent = "Le plafond et le taux dépendent de ton activité : vérifie-les sur autoentrepreneur.urssaf.fr. Ils servent seulement à la jauge et au montant « à mettre de côté ».";
+  s.body.appendChild(hint);
   var chk = document.createElement("div"); chk.style.cssText = "font-size:12px;min-height:16px;margin:-4px 0 10px";
   s.body.appendChild(chk);
   function verif() { var ok = pfcSiretValide(siret.value); chk.textContent = ok ? "✓ SIRET valide" : "✖ SIRET incorrect (14 chiffres)"; chk.style.color = ok ? "var(--grn)" : "var(--red)"; return ok; }
   siret.addEventListener("input", verif); verif();
   s.body.appendChild(gmBtn("Enregistrer", "primary", function () {
     if (!verif()) return;
-    var d = { nom: nom.value.trim().slice(0, 100), siret: siret.value.replace(/\s/g, ""), adresse: adr.value.trim().slice(0, 160), email: mail.value.trim().slice(0, 100), tel: tel.value.trim().slice(0, 30), maj: Date.now() };
+    var pl = pfcMontantLire(plaf.value), tx = parseFloat(String(taux.value).replace(",", "."));
+    if (pl === null) { askAlert("Plafond incorrect."); return; }
+    if (!isFinite(tx) || tx < 0 || tx > 100) { askAlert("Taux de cotisations incorrect (entre 0 et 100)."); return; }
+    var d = { nom: nom.value.trim().slice(0, 100), siret: siret.value.replace(/\s/g, ""), adresse: adr.value.trim().slice(0, 160), email: mail.value.trim().slice(0, 100), tel: tel.value.trim().slice(0, 30), plafond: pl, tauxCotis: tx, maj: Date.now() };
     window.fbSetDoc(window.fbDoc(window.fbDb, "pf_compta", "_config"), d)
       .then(function () { s.modal.remove(); if (typeof showToast === "function") showToast("Informations enregistrées ✓"); if (apres) apres(); })
       .catch(function (e) { askAlert("Erreur : " + ((e && e.code) || e)); });
   }));
 }
 
-function pfcExporterLivre(lignes, annee) {
-  var csv = pfcLivreCsv(lignes, annee);
+function pfcExporterCsv(csv, nomFichier) {
   var a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-  a.download = "livre-des-recettes-" + annee + ".csv";
+  a.download = nomFichier;
   document.body.appendChild(a); a.click(); a.remove();
 }
+function pfcExporterLivre(lignes, annee) { pfcExporterCsv(pfcLivreCsv(lignes, annee), "livre-des-recettes-" + annee + ".csv"); }
 
 // ── Facture PDF ──
 // Le numéro est attribué à la première émission, puis reste le même.
@@ -341,7 +547,7 @@ function pfcFacturePdf(l, etat, rafraichir) {
     doc.setFontSize(10); doc.setFont("helvetica", "normal");
     doc.text("N° " + num, 196, 27, { align: "right" });
     doc.text("Date : " + pfcDateFr(l.date), 196, 32, { align: "right" });
-    doc.text("Échéance : " + pfcDateFr(pfcPlusJours(l.date, 30)), 196, 37, { align: "right" });
+    doc.text("Échéance : " + pfcDateFr(pfcEcheance(l)), 196, 37, { align: "right" });
     y = Math.max(y, 44) + 6;
     doc.setFont("helvetica", "bold"); doc.text("Facturé à", 14, y); y += 5;
     doc.setFont("helvetica", "normal"); doc.text(l.clientNom || "", 14, y); y += 5;

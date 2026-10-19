@@ -62,3 +62,72 @@ describe("Comptabilité plateforme", () => {
     assert.equal(c.pfcPlusJours("2026-12-15", 30), "2027-01-14");
   });
 });
+
+describe("Comptabilité plateforme : tableau de bord, statuts, dépenses", () => {
+  const AUJ = "2026-10-19";
+  const F = [
+    { id: "a", type: "abonnement", clientNom: "Club A", montant: 200, date: "2026-10-05", statut: "paye", dateEncaissement: "2026-10-12", mode: "virement", numero: "F-2026-0001" },
+    { id: "b", type: "independant", clientNom: "Coach B", montant: 150, date: "2026-09-01", statut: "a_encaisser", numero: "F-2026-0002" },          // échue le 01/10 → en retard
+    { id: "c", type: "abonnement", clientNom: "Club C", montant: 300, date: "2026-10-15", statut: "a_encaisser", numero: "F-2026-0003" },          // échéance 14/11 → envoyée
+    { id: "d", type: "abonnement", clientNom: "Club D", montant: 200, date: "2026-10-18", statut: "a_encaisser" },                                  // brouillon
+    { id: "e", sens: "depense", clientNom: "Vistaprint", montant: 24.9, date: "2026-10-03", statut: "paye", dateEncaissement: "2026-10-03", mode: "cb" },
+  ];
+  it("statut de facture : brouillon, envoyée, en retard, payée, dépense", () => {
+    assert.equal(c.pfcStatut(F[0], AUJ), "paye");
+    assert.equal(c.pfcStatut(F[1], AUJ), "retard");
+    assert.equal(c.pfcStatut(F[2], AUJ), "envoyee");
+    assert.equal(c.pfcStatut(F[3], AUJ), "brouillon");
+    assert.equal(c.pfcStatut(F[4], AUJ), "depense");
+  });
+  it("jours de retard depuis l'échéance, 0 si pas échue", () => {
+    assert.equal(c.pfcJoursRetard(F[1], AUJ), 18);
+    assert.equal(c.pfcJoursRetard(F[2], AUJ), 0);
+    assert.equal(c.pfcEcheance({ date: "2026-10-01", echeance: "2026-10-20" }), "2026-10-20");
+    assert.equal(c.pfcEcheance({ date: "2026-10-01" }), "2026-10-31");
+  });
+  it("les dépenses ne comptent jamais dans le chiffre d'affaires ni le livre des recettes", () => {
+    const t = c.pfcTotaux(F, "2026-10-01", "2026-12-31");
+    assert.equal(t.encaisse.total, 200);
+    assert.ok(!c.pfcLivreCsv(F, 2026).includes("Vistaprint"));
+  });
+  it("tableau de bord : encaissé, à encaisser, retard, plafond, cotisations", () => {
+    const t = c.pfcTableau(F, AUJ, {});
+    assert.equal(t.encaisseMois, 200);
+    assert.equal(t.encaisseAnnee, 200);
+    assert.equal(t.aEncaisser, 450);      // en retard (150) + envoyée (300), pas le brouillon
+    assert.equal(t.enRetard, 150);
+    assert.equal(t.nbRetard, 1);
+    assert.equal(t.nbBrouillons, 1);
+    assert.equal(t.depensesAnnee, 24.9);
+    assert.equal(t.plafond, 83600);
+    assert.equal(t.taux, 21.2);
+    assert.equal(t.cotisTrimestre, 42.4);
+    assert.equal(t.pourcentPlafond, 0.2);
+  });
+  it("plafond et taux réglables, valeurs absurdes ignorées", () => {
+    const t = c.pfcTableau(F, AUJ, { plafond: 77700, tauxCotis: 12.3 });
+    assert.equal(t.plafond, 77700);
+    assert.equal(t.cotisAnnee, 24.6);
+    const u = c.pfcTableau(F, AUJ, { plafond: -5, tauxCotis: "abc" });
+    assert.equal(u.plafond, 83600);
+    assert.equal(u.taux, 21.2);
+  });
+  it("registre des achats : seulement les dépenses de l'année, avec total", () => {
+    const csv = c.pfcAchatsCsv(F, 2026).replace("﻿", "").split("\r\n");
+    assert.equal(csv.length, 3);
+    assert.ok(csv[1].startsWith("03/10/2026;Vistaprint"));
+    assert.ok(csv[2].endsWith("24,9"));
+  });
+  it("contacts de relance : e-mail et téléphone validés avant mailto: / sms:", () => {
+    assert.equal(c.pfcEmailOk("a@b.fr"), "a@b.fr");
+    assert.equal(c.pfcEmailOk("pas un mail"), "");
+    assert.equal(c.pfcEmailOk('x"@y.fr'), "");
+    assert.equal(c.pfcTelNet("06 12 34 56 78"), "0612345678");
+    assert.equal(c.pfcTelNet("12"), "");
+  });
+  it("justificatif : seulement une image JPEG en data URL", () => {
+    assert.equal(c.pfcJustifOk("data:image/jpeg;base64,/9j/4AAQ="), true);
+    assert.equal(c.pfcJustifOk("javascript:alert(1)"), false);
+    assert.equal(c.pfcJustifOk("data:text/html;base64,AAAA"), false);
+  });
+});
