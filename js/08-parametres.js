@@ -84,30 +84,31 @@ function compresserLogo(file){
 // secondaire (accent, fin des dégradés). Toucher une couleur choisie la retire.
 function buildPaletteClub(){
   var box=document.getElementById("club-palette");
-  if(!box||typeof CLUB_PALETTE==="undefined") return;
+  if(!box) return;
   var c1=clubCouleurBrute(), c2=clubCouleur2Brute();
+  box.style.cssText="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start";
   box.innerHTML="";
-  CLUB_PALETTE.forEach(function(hex){
-    var h=hex.toLowerCase();
-    var rang=(h===c1)?1:((h===c2)?2:0);
-    var blanc=(h==="#ffffff");
-    var b=document.createElement("button");
-    b.type="button";
-    b.setAttribute("aria-label","Couleur "+(blanc?"blanc":hex)+(rang?(rang===1?" (principale)":" (secondaire)"):""));
-    b.title=blanc?"Blanc":hex;
-    b.style.cssText="aspect-ratio:1;border-radius:50%;border:"+(rang?"3px solid var(--txt)":(blanc?"2px solid var(--bdr)":"2px solid transparent"))+";background:"+hex+";cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.25);color:"+(blanc?"#14141f":"#fff")+";font-size:11px;font-weight:900";
-    if(rang) b.textContent=String(rang);
-    b.onclick=function(){ toucherCouleurClub(h); };
-    box.appendChild(b);
+  [[1,"Principale",c1],[2,"Secondaire",c2]].forEach(function(sl){
+    var rang=sl[0], hex=sl[2];
+    if(rang===2&&!c1) return;     // pas de 2e couleur sans 1re
+    var col=document.createElement("div"); col.style.cssText="display:flex;flex-direction:column;align-items:center;gap:6px";
+    var b=document.createElement("button"); b.type="button";
+    b.setAttribute("aria-label","Choisir la couleur "+sl[1].toLowerCase());
+    b.style.cssText="width:64px;height:64px;border-radius:50%;cursor:pointer;padding:0;font-size:24px;color:var(--mut);box-shadow:0 1px 4px rgba(0,0,0,.25);border:"+(hex?(hex==="#ffffff"?"2px solid var(--bdr)":"3px solid var(--card)"):"2px dashed var(--bdr)")+";background:"+(hex||"var(--bg)");
+    if(!hex) b.textContent="+";
+    b.onclick=function(){ couleurRoueOuvrir(rang); };
+    var lb=document.createElement("div"); lb.style.cssText="font-size:12px;font-weight:700;color:var(--txt)"; lb.textContent=sl[1];
+    col.appendChild(b); col.appendChild(lb);
+    if(hex){
+      var x=document.createElement("button"); x.type="button"; x.textContent=rang===1?"Retirer":"Retirer";
+      x.style.cssText="border:none;background:none;color:var(--mut);font-size:11px;cursor:pointer;text-decoration:underline;padding:0";
+      x.onclick=function(){ if(rang===1) enregistrerCouleursClub(null,null); else enregistrerCouleursClub(c1,null); };
+      col.appendChild(x);
+    }
+    box.appendChild(col);
   });
-  if(!document.getElementById("club-palette-perso")){
-    var pb=document.createElement("button"); pb.type="button"; pb.id="club-palette-perso";
-    pb.style.cssText="margin-top:10px;padding:10px 16px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer";
-    pb.textContent="🎨 Autre couleur (roue)"; pb.onclick=function(){ couleurRoueOuvrir(); };
-    box.parentNode.insertBefore(pb,box.nextSibling);
-  }
   var etat=document.getElementById("club-couleur-etat");
-  if(etat) etat.textContent=c1?("Couleur principale : "+(c1==="#ffffff"?"blanc":c1)+(c2?" · secondaire : "+(c2==="#ffffff"?"blanc":c2):" · touchez une 2e couleur si vous voulez")):"Couleurs General Manager (par défaut)";
+  if(etat) etat.textContent=c1?("Principale : "+(c1==="#ffffff"?"blanc":c1)+(c2?" · secondaire : "+(c2==="#ffffff"?"blanc":c2):" · la 2e couleur est facultative")):"Couleurs General Manager (par défaut) · touchez le rond pour choisir";
   var rs=document.getElementById("club-couleur-reset");
   if(rs) rs.style.display=c1?"block":"none";
   if(typeof majBoutonPalette==="function") majBoutonPalette();
@@ -517,15 +518,7 @@ function buildParamsAccordeon(){
 // Palette des couleurs repliée derrière une ligne qui montre les couleurs choisies.
 function paramsPaletteRepliable(){
   var pal=document.getElementById("club-palette");
-  if(!pal||document.getElementById("club-palette-btn")) return;
-  var btn=document.createElement("button");
-  btn.type="button"; btn.id="club-palette-btn";
-  btn.style.cssText="width:100%;display:flex;align-items:center;gap:10px;border:1.5px solid var(--bdr);border-radius:var(--rx);padding:10px 12px;min-height:46px;background:var(--bg);color:var(--txt);font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left;margin-bottom:8px";
-  btn.innerHTML='<span id="club-palette-sw" style="display:flex;gap:4px"></span><span id="club-palette-lbl" style="flex:1">Choisir les couleurs</span><span style="color:var(--mut)">▾</span>';
-  pal.parentNode.insertBefore(btn,pal);
-  pal.style.display="none";
-  btn.addEventListener("click",function(){ pal.style.display=(pal.style.display==="none")?"grid":"none"; });
-  majBoutonPalette();
+  if(pal) pal.style.display="flex";   // plus de grille de pastilles : deux ronds + la roue (08c)
 }
 function majBoutonPalette(){
   var sw=document.getElementById("club-palette-sw"), lbl=document.getElementById("club-palette-lbl");

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792441723",
+  "titre": "Couleurs du club : la roue remplace les pastilles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres › Couleurs du club : deux ronds (principale et secondaire) ouvrent une roue pour choisir n'importe quelle couleur. Les 50 pastilles sont retirées ; le blanc reste possible."
+   }
+  ]
+ },
+ {
   "v": "1792441677",
   "titre": "Indépendant : mon abonnement",
   "points": [

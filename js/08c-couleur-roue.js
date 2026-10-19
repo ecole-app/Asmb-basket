@@ -20,9 +20,9 @@ function gmCouleurLisible(h,s,v){
   return hex;
 }
 
-function couleurRoueOuvrir(){
+function couleurRoueOuvrir(rang){
   if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
-  var s=gmSheet("Choisir une couleur");
+  var s=gmSheet(rang===2?"Couleur secondaire":"Couleur principale");
   var T=260, R=T/2, etat={h:210,s:0.7,v:0.8};
   var cv=document.createElement("canvas"); cv.width=T; cv.height=T;
   cv.style.cssText="display:block;margin:4px auto 12px;border-radius:50%;touch-action:none;cursor:crosshair;max-width:100%";
@@ -68,14 +68,15 @@ function couleurRoueOuvrir(){
   cv.addEventListener("pointerup",function(){ bas=false; });
   lum.addEventListener("input",function(){ etat.v=Number(lum.value)/100; dessiner(); maj(); });
   var row=gmRow(s.body);
-  row.appendChild(gmBtn("Utiliser cette couleur","primary",function(){ s.modal.remove(); couleurRoueValider(choisie); }));
+  row.appendChild(gmBtn("Utiliser cette couleur","primary",function(){ s.modal.remove(); couleurRoueValider(choisie,rang); }));
+  row.appendChild(gmBtn("Blanc","soft",function(){ s.modal.remove(); couleurRoueValider("#ffffff",rang); }));
   dessiner(); maj();
 }
-// Même logique que toucher une pastille : 1re touche = principale, 2e = secondaire.
-function couleurRoueValider(hex){
+// rang 1 = couleur principale, 2 = secondaire. Le blanc est permis (l'appli le remplace par un gris lisible).
+function couleurRoueValider(hex,rang){
   hex=String(hex).toLowerCase();
-  if(!/^#[0-9a-f]{6}$/.test(hex)||gmContrasteBlanc(hex)<4.5) return;
+  if(hex!=="#ffffff"&&(!/^#[0-9a-f]{6}$/.test(hex)||gmContrasteBlanc(hex)<4.5)) return;
   var c1=clubCouleurBrute(), c2=clubCouleur2Brute();
-  if(hex===c1||hex===c2) return;
-  toucherCouleurClub(hex);
+  if(rang===2&&c1) enregistrerCouleursClub(c1,hex);
+  else enregistrerCouleursClub(hex,c2);
 }
