@@ -1,11 +1,11 @@
 [
  {
-  "v": "1792437948",
-  "titre": "Journal des mises à jour dans Paramètres",
+  "v": "1792438014",
+  "titre": "Plateforme : journal des mises à jour",
   "points": [
    {
     "roles": [],
-    "texte": "Nouveau bloc « Nouveautés » dans Paramètres : tu peux relire à tout moment les dernières mises à jour."
+    "texte": "Plateforme : bouton « Nouveautés » pour relire les dernières mises à jour."
    }
   ]
  },

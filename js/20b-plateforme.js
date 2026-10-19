@@ -675,6 +675,7 @@ function showPlateformeHome(opts){
   act.appendChild(gmBtn("+ Créer un indépendant","soft",function(){ createIndepFlow(list); }));
   act.appendChild(gmBtn("RIB","ghost",function(){ pfRibOuvrir(); }));
   act.appendChild(gmBtn("Comptabilité","ghost",function(){ pfcOuvrir(); }));
+  act.appendChild(gmBtn("Nouveautés","ghost",function(){ showChangelog(true); }));
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
   el.appendChild(list);

@@ -488,15 +488,6 @@ function buildParamsAccordeon(){
       zone.appendChild(grp);
       g.secs.forEach(function(k){ paramsNoeuds(scr,k).forEach(function(n){ cont.appendChild(n); }); });
     });
-    // Journal des mises à jour : relisable à tout moment (pas seulement depuis la bannière)
-    var nv=document.createElement("button");
-    nv.type="button";
-    nv.style.cssText="width:100%;display:flex;align-items:center;gap:12px;border:1px solid var(--bdr);background:var(--card);border-radius:var(--rs);padding:14px;min-height:60px;cursor:pointer;text-align:left;color:var(--txt);font:inherit;margin-bottom:10px;box-shadow:0 1px 4px var(--shadow)";
-    nv.innerHTML='<span style="width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">✨</span>'+
-      '<span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:800">Nouveautés</span><span style="display:block;font-size:12px;color:var(--mut)">Journal des mises à jour</span></span>'+
-      '<span style="color:var(--mut);font-size:16px">›</span>';
-    nv.addEventListener("click",function(){ showChangelog(true); });
-    zone.appendChild(nv);
     // Liens légaux en bas de l'écran
     var legal=scr.querySelector('a[href="legal/cgu.html"]');
     if(legal&&legal.parentNode) scr.appendChild(legal.parentNode);
