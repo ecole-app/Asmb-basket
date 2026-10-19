@@ -55,12 +55,12 @@ function couleurRoueOuvrir(rang){
   var choisie="#1f6b40";
   function maj(){
     var brute=gmHslVersHex(etat.h,etat.s,etat.l);
-    choisie=gmCouleurLisible(etat.h,etat.s,etat.l);
+    choisie=(brute==="#ffffff")?"#ffffff":gmCouleurLisible(etat.h,etat.s,etat.l);   // blanc = vrai blanc (l'appli gère le texte)
     poignee.style.left=((1-etat.l)*100)+"%";
     var ang=etat.h*Math.PI/180;
     curseur.style.left=(R+Math.cos(ang)*etat.s*R)*(cv.clientWidth/T||1)+"px"; curseur.style.top=(R+Math.sin(ang)*etat.s*R)*(cv.clientHeight/T||1)+"px";
-    apercu.style.background=choisie; apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+choisie+'</span>';
-    note.textContent=(choisie!==brute)?"Teinte assombrie pour que le texte blanc reste lisible.":"";
+    apercu.style.background=choisie; apercu.style.color=(choisie==="#ffffff")?"#1f2937":"#fff"; apercu.style.border=(choisie==="#ffffff")?"1px solid var(--bdr)":"none"; apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+choisie+'</span>';
+    note.textContent=(choisie==="#ffffff")?"Blanc : l'appli utilise un gris foncé pour garder le texte lisible.":((choisie!==brute)?"Teinte assombrie pour que le texte blanc reste lisible.":"");
   }
   function pointer(e){
     var r=cv.getBoundingClientRect(), k=T/r.width;
@@ -72,7 +72,7 @@ function couleurRoueOuvrir(rang){
   cv.addEventListener("pointermove",function(e){ if(bas) pointer(e); });
   cv.addEventListener("pointerup",function(){ bas=false; });
   var basB=false;
-  function pointerB(e){ var r=barre.getBoundingClientRect(); etat.l=1-Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); dessiner(); maj(); }
+  function pointerB(e){ var r=barre.getBoundingClientRect(); etat.l=1-Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); if(etat.l>0.96) etat.l=1; else if(etat.l<0.04) etat.l=0; /* les deux bouts = vrai blanc / vrai noir */ dessiner(); maj(); }
   barre.addEventListener("pointerdown",function(e){ basB=true; try{barre.setPointerCapture(e.pointerId);}catch(x){} pointerB(e); });
   barre.addEventListener("pointermove",function(e){ if(basB) pointerB(e); });
   barre.addEventListener("pointerup",function(){ basB=false; });

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792442224",
+  "titre": "Roue de couleurs : blanc et noir aux deux bouts",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : les deux bouts de la barre donnent du vrai blanc et du vrai noir (le blanc n'est plus remplacé par une teinte assombrie)."
+   }
+  ]
+ },
+ {
   "v": "1792442052",
   "titre": "Météo de l'accueil à chaque ouverture",
   "points": [
