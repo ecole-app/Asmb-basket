@@ -18,20 +18,34 @@ function app(opts = {}) {
   c.getCurrentSeason = () => opts.season || "2026-2027";
   return c;
 }
-// Reproduit indépendamment la référence de saison (sept. → juin) utilisée
-// par categorieFromNaissance, pour construire des dates de naissance à un
-// âge exact sans dépendre du mois d'exécution du test.
+// Reproduit indépendamment la référence de saison utilisée par categorieFromNaissance
+// (année de DÉBUT de la saison, sept. → août), pour construire des dates de naissance
+// à un âge exact sans dépendre du mois d'exécution du test.
 function seasonRefYear() {
   const n = new Date();
-  return n.getMonth() >= 8 ? n.getFullYear() + 1 : n.getFullYear();
+  return n.getMonth() >= 8 ? n.getFullYear() : n.getFullYear() - 1;
 }
 const naissPourAge = (age) => (seasonRefYear() - age) + "-06-15";
 
 describe("Catégorie déduite de la naissance (categorieFromNaissance)", () => {
-  it("les paliers U7 à U18, indépendants du genre", () => {
+  it("Micro (3 ans et moins) et Baby basket (4 à 6 ans), sous U9", () => {
     const c = app();
-    assert.equal(c.categorieFromNaissance(naissPourAge(5)), "U7");
-    assert.equal(c.categorieFromNaissance(naissPourAge(6)), "U7");
+    assert.equal(c.categorieFromNaissance(naissPourAge(2)), "Micro");
+    assert.equal(c.categorieFromNaissance(naissPourAge(3)), "Micro");
+    assert.equal(c.categorieFromNaissance(naissPourAge(4)), "Baby basket");
+    assert.equal(c.categorieFromNaissance(naissPourAge(6)), "Baby basket");
+  });
+  it("saison 2026-2027 : 2023 Micro, 2020-2022 Baby, 2018-19 U9, 2016-17 U11, 2014-15 U13, 2012-13 U15, 2009-11 U18", () => {
+    const n = new Date(), debut = n.getMonth() >= 8 ? n.getFullYear() : n.getFullYear() - 1;
+    if (debut !== 2026) return; // table valable pour la saison 2026-2027 seulement
+    const c = app();
+    const att = { 2023: "Micro", 2022: "Baby basket", 2020: "Baby basket", 2019: "U9", 2018: "U9", 2017: "U11", 2016: "U11", 2015: "U13", 2014: "U13", 2013: "U15", 2012: "U15", 2011: "U18", 2009: "U18" };
+    Object.keys(att).forEach((a) => assert.equal(c.categorieFromNaissance(a + "-06-15"), att[a], a));
+    assert.equal(c.categorieFromNaissance("2008-06-15", "M"), "U21");
+    assert.equal(c.categorieFromNaissance("2008-06-15", "F"), "Senior");
+  });
+  it("les paliers U9 à U18, indépendants du genre", () => {
+    const c = app();
     assert.equal(c.categorieFromNaissance(naissPourAge(7)), "U9");
     assert.equal(c.categorieFromNaissance(naissPourAge(8)), "U9");
     assert.equal(c.categorieFromNaissance(naissPourAge(9)), "U11");

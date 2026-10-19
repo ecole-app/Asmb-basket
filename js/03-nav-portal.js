@@ -478,7 +478,7 @@ function buildDashboard(){
  if(localStorage.getItem("asmb_profile")==="coach"){buildCoachDashboard(el);return;}
 
  var players=getPlayers();
- var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
+ var CATS_ALL=["Micro","Baby basket","U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
  var byCat={};
  CATS_ALL.forEach(function(c){byCat[c]=0;});
  players.forEach(function(p){if(byCat.hasOwnProperty(p.cat))byCat[p.cat]++;});

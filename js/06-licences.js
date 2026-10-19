@@ -378,8 +378,8 @@ var STATUTS=[
  {id:"recue",label:"Reçue",icon:"",color:"#8E44AD"},
  {id:"validee",label:"Validée",icon:"",color:"var(--ltg)"},
 ];
-var CATS_LIC=["U7","U9","U11","U13","U15","U18","U21","Senior"];
-var CAT_COLS_LIC={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
+var CATS_LIC=["Micro","Baby basket","U7","U9","U11","U13","U15","U18","U21","Senior"];
+var CAT_COLS_LIC={"Micro":"#D4A017","Baby basket":"#E0457B","U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 
 // ── BUILD LICENCES SCREEN ────────────────────────────────────────
 var licShowArchived=false;

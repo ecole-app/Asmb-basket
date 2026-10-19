@@ -113,7 +113,7 @@ function evtOuvertes(e){
   return (e.dateFin||e.date||auj)>=auj;
 }
 // Catégorie d'un inscrit : saisie (extérieurs) ou connue par sa fiche joueur (licenciés du club).
-var EVT_CATS=["U7","U9","U11","U13","U15","U18","U21","Senior"];
+var EVT_CATS=["Micro","Baby basket","U7","U9","U11","U13","U15","U18","U21","Senior"];
 function evtCat(x){
   if(x&&x.cat) return String(x.cat);
   if(x&&x.playerId&&typeof getPlayers==="function"){

@@ -263,12 +263,12 @@ function suggestBureauRoleLabel(roles,perms){
 }
 
 var CATS=["U7","U9","U11","U13","U15","U17","Senior"];
-var CAT_COLORS={"U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
+var CAT_COLORS={"Micro":"#D4A017","Baby basket":"#E0457B","U7":"#E8670A","U9":"#8E44AD","U11":"#16A085","U13":"var(--ltg)","U15":"#1A2E5A","U17":"#C0392B","U18":"#0B7285","U21":"#5B3A8E","Senior":"#E8670A"};
 var currentCatFilter="all";
 // ── Genre (F/M) : helpers partagés par Joueurs, Licences, PDF et Excel ──
 var currentGenreFilter="all"; // "all" | "F" | "M" | "NR" (non renseigné)
 // Catégories proposées à la création d'une équipe (U6 → Senior, + Loisir et 3x3).
-var TEAM_CATS=["U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16","U17","U18","U19","U20","U21","Senior","Loisir","3x3"];
+var TEAM_CATS=["Micro","Baby basket","U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16","U17","U18","U19","U20","U21","Senior","Loisir","3x3"];
 var CAT_ORDER=TEAM_CATS.slice();
 function catRank(c){var i=CAT_ORDER.indexOf(c);return i<0?99:i;}
 function genreRank(g){return g==="F"?0:g==="M"?1:2;}
@@ -311,7 +311,7 @@ function inscFiltresHtml(players,hasNR){
   function sel(label,fn,cur,opts){
     return '<select aria-label="'+label+'" onchange="'+fn+'(this.value)" '+st+(cur!=="all"?' class="on"':'')+'>'+opts.map(function(o){return '<option value="'+authEsc(o[0])+'"'+(cur===o[0]?' selected':'')+'>'+authEsc(o[1])+'</option>';}).join("")+'</select>';
   }
-  var cats=[["all","Catégorie : toutes"]].concat(["U7","U9","U11","U13","U15","U17","U18","U21","Senior"].map(function(c){return [c,c];}));
+  var cats=[["all","Catégorie : toutes"]].concat(["Micro","Baby basket","U7","U9","U11","U13","U15","U17","U18","U21","Senior"].map(function(c){return [c,c];}));
   var genres=[["all","Genre : tous"],["F","Filles"],["M","Garçons"]];
   if(hasNR)genres.push(["NR","Non renseigné"]);
   var out=sel("Catégorie","filterCat",currentCatFilter,cats)+sel("Genre","filterGenre",currentGenreFilter,genres);
@@ -1291,18 +1291,22 @@ function editPlayer(id){
   renderPlayerForm(p);
   document.getElementById("modal-player").style.display="flex";
 }
-// Catégorie FFBB à partir de l'année de naissance (règle officielle : âge apprécié
-// au 1er janvier de la saison en cours). U15 est suivi de U18 (regroupe U16/U17/U18)
-// puis, chez les garçons en région ARA, de U21 (regroupe U19/U20/U21) avant Senior.
-// Chez les filles : U15 → U18 → Senior directement (pas de U21).
+// Catégorie à partir de l'année de naissance. Référence = année de DÉBUT de la saison
+// (2026 pour 2026-2027, sept. → août) : âge = année de début − année de naissance.
+// Saison 2026-2027 : Micro = 2023 ; Baby basket = 2020-2022 ; U9 = 2018-2019 ; U11 = 2016-2017 ;
+// U13 = 2014-2015 ; U15 = 2012-2013 ; U18 = 2009-2011 (regroupe U16/U17/U18) ; puis, chez les
+// garçons en région ARA, U21 (2006-2008) avant Senior. Filles : U18 → Senior directement.
+// « U7 » reste une catégorie choisissable à la main, mais n'est plus proposée automatiquement
+// (les enfants de cet âge sont en Baby basket / Micro).
 function categorieFromNaissance(dateStr, genre){
   if(!dateStr) return null;
   var birthYear=parseInt(dateStr.slice(0,4),10);
   if(!birthYear||isNaN(birthYear)) return null;
   var now=new Date();
-  var seasonRefYear = (now.getMonth()>=8) ? now.getFullYear()+1 : now.getFullYear(); // saison sept->juin, reference = 1er janvier
-  var age=seasonRefYear-birthYear;
-  if(age<=6) return "U7";
+  var seasonStartYear = (now.getMonth()>=8) ? now.getFullYear() : now.getFullYear()-1;
+  var age=seasonStartYear-birthYear;
+  if(age<=3) return "Micro";
+  if(age<=6) return "Baby basket";
   if(age<=8) return "U9";
   if(age<=10) return "U11";
   if(age<=12) return "U13";
@@ -1325,7 +1329,7 @@ function wirePlayerCatAutofill(){
   if(genreSel) genreSel.addEventListener("change",recompute);
 }
 function renderPlayerForm(p){
-  var CATS_ALL=["U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
+  var CATS_ALL=["Micro","Baby basket","U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
     var cats=CATS_ALL.map(function(c){return '<option value="'+c+'"'+(p&&p.cat===c?' selected':'')+'>'+c+'</option>';}).join("");
   var postes=["Meneur","Arrière","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
   var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencié</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
