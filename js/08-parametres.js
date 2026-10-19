@@ -633,7 +633,7 @@ function wireThemeAnimSettings(prefix){
 
   // Rejoue l'animation immediatement en fond pour donner un retour visuel live du reglage
   function livePreview(){
-    localStorage.removeItem("asmb_theme_anim_shown_date");
+    localStorage.removeItem("asmb_theme_anim_shown_date"); window.__taDerniere=0;
     ["home-hero-portal","home-hero-parent","home-hero-coach"].forEach(function(id){
       var h=document.getElementById(id);
       if(h){ h.querySelectorAll(".ta-flake,.ta-sun,.ta-cloud,.ta-drop,.ta-leaf,.ta-petal,.ta-moon,.ta-star").forEach(function(n){n.remove();}); delete h.dataset.taSpawned; }

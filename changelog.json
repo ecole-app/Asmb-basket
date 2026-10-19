@@ -1,5 +1,15 @@
 [
  {
+  "v": "1792442052",
+  "titre": "Météo de l'accueil à chaque ouverture",
+  "points": [
+   {
+    "roles": [],
+    "texte": "L'animation météo de l'accueil se joue maintenant à chaque ouverture de l'appli (et au retour après quelques minutes), avec une météo remise à jour toutes les 30 minutes, au lieu d'une fois par jour."
+   }
+  ]
+ },
+ {
   "v": "1792441813",
   "titre": "Roue de couleurs : barre de luminosité",
   "points": [

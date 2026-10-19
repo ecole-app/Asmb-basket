@@ -37,7 +37,8 @@ function taGetWeatherType(city){
   var today=taTodayStr();
   try{
     var cache=cacheRaw?JSON.parse(cacheRaw):null;
-    if(cache && cache.date===today && cache.city===city){
+    // Météo gardée 30 min seulement : elle peut changer dans la journée.
+    if(cache && cache.city===city && cache.ts && Date.now()-cache.ts<30*60*1000){
       return Promise.resolve(cache.type);
     }
   }catch(e){}
@@ -52,7 +53,7 @@ function taGetWeatherType(city){
     .then(function(data){
       var cw=data.current_weather;
       var type=taWeatherCodeToType(cw.weathercode, cw.is_day===1);
-      localStorage.setItem("asmb_theme_weather_cache", JSON.stringify({date:today,city:city,type:type}));
+      localStorage.setItem("asmb_theme_weather_cache", JSON.stringify({date:today,ts:Date.now(),city:city,type:type}));
       return type;
     })
     .catch(function(){ return taSeasonType(); }); // repli silencieux sur le thème saisonnier si la météo échoue
@@ -146,13 +147,16 @@ function taSpawnAnimation(hero,type){
 function maybeShowDailyThemeAnimation(){
   var settings=taGetSettings();
   if(!settings.enabled) return;
-  var already = localStorage.getItem("asmb_theme_anim_shown_date")===taTodayStr();
-  if(already && settings.duration!=="continu") return; // deja joue aujourd'hui (mode duree fixe)
+  // Une fois à chaque ouverture de l'appli (ou retour après 5 min d'absence), pas seulement une fois par jour :
+  // la météo change dans la journée. Revenir sur l'accueil dans les 5 min ne la rejoue pas.
+  var maintenant=Date.now();
+  var recent = window.__taDerniere && (maintenant-window.__taDerniere)<5*60*1000;
   var hero=taGetVisibleHomeHero();
   if(!hero) return;
-  if(already && settings.duration==="continu" && hero.dataset.taSpawned) return; // deja affiche cette visite
+  if(recent && settings.duration!=="continu") return;
+  if(recent && settings.duration==="continu" && hero.dataset.taSpawned) return; // deja affiche cette visite
   function spawnWith(type){
-    localStorage.setItem("asmb_theme_anim_shown_date", taTodayStr());
+    window.__taDerniere=Date.now();
     taSpawnAnimation(hero, type);
   }
   if(settings.style==="saison"){
@@ -161,6 +165,11 @@ function maybeShowDailyThemeAnimation(){
     taGetWeatherType(settings.city).then(spawnWith);
   }
 }
+
+// Retour dans l'appli après une absence : la météo se rejoue (la garde de 5 min évite les répétitions).
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible") setTimeout(function(){ try{ maybeShowDailyThemeAnimation(); }catch(e){} },300);
+});
 
 function initProfile(){
   var urlParams=new URLSearchParams(window.location.search);
