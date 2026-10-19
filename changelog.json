@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792410972",
+  "titre": "Mise à jour en arrière-plan, bandeau qui reste",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "L'appli se met à jour toute seule en arrière-plan, mais le bandeau reste affiché jusqu'à ce que vous l'ayez retiré (bouton ou croix) : vous pouvez lire le contenu de la mise à jour avant."
+   }
+  ]
+ },
+ {
   "v": "1792410789",
   "titre": "Mise à jour : bandeau stable",
   "points": [

@@ -140,33 +140,62 @@ setTimeout(initAuthGate,80);
 setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1792410789";
+var APP_VERSION="1792410972";
+// Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
+// bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
+// jour ») et appuyé sur le bouton ou la croix. Le bouton ne fait que retirer le bandeau si la
+// nouvelle version tourne déjà ; sinon il recharge l'appli sur la nouvelle version.
+// gm_maj_vue = dernière version dont la personne a pris connaissance.
+function majVue(){ try{ return localStorage.getItem("gm_maj_vue"); }catch(e){ return null; } }
+function majMarquerVue(v){ try{ if(v) localStorage.setItem("gm_maj_vue",v); }catch(e){} }
+function majBandeau(etat){
+ var b=document.getElementById("update-banner"); if(!b) return;
+ var t=document.getElementById("update-banner-txt"), bt=document.getElementById("update-banner-btn");
+ if(etat==="termine"){ if(t) t.textContent="L'application a été mise à jour"; if(bt) bt.textContent="Compris"; }
+ else { if(t) t.textContent="Nouvelle version disponible"; if(bt) bt.textContent="Mettre à jour"; }
+ b.style.display=etat?"flex":"none";
+}
+// La nouvelle version tourne-t-elle déjà ? (sinon une version plus récente attend)
+function majEnAttente(){ return !!window.GM_MAJ_VERSION && window.GM_MAJ_VERSION!==APP_VERSION; }
+// Démarrage : première installation = rien à annoncer ; sinon, version jamais vue = bandeau.
+(function(){
+ var vue=majVue();
+ if(vue===null) majMarquerVue(APP_VERSION);
+ else if(vue!==APP_VERSION) majBandeau("termine");
+})();
+// Installation silencieuse de la nouvelle version (nouveau service worker, nouveaux fichiers),
+// sans recharger la page : l'écran en cours n'est pas interrompu.
+function majPreparer(v){
+ if(window.GM_MAJ_PREPAREE===v) return;
+ window.GM_MAJ_PREPAREE=v;
+ if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js?v='+v).catch(function(){});
+}
 function checkForUpdate(){
  fetch("./version.json?t="+Date.now(),{cache:"no-store"})
  .then(function(r){return r.json();})
  .then(function(data){
  if(data.v&&data.v!==APP_VERSION){
  window.GM_MAJ_VERSION=data.v;
- // Le bandeau reste affiché tant que la personne n'a pas touché « Mettre à jour »
- // ou la croix : rien ne le retire ni ne recharge la page tout seul.
- // Masqué avec la croix = ne revient pas pour cette version, mais revient pour la suivante.
- var ignoree=null; try{ ignoree=localStorage.getItem("gm_maj_ignoree"); }catch(e){}
- if(ignoree===data.v) return;
- var banner=document.getElementById("update-banner");
- if(banner)banner.style.display="flex";
+ majPreparer(data.v);
+ // Déjà pris connaissance de cette version (croix) : pas de bandeau.
+ if(majVue()===data.v) return;
+ // Il reste affiché jusqu'à ce que la personne le retire : rien ne le cache tout seul.
+ majBandeau("attente");
  }
  })
  .catch(function(){});
 }
+// Croix : la personne a vu le message, il ne revient pas pour cette version.
 function dismissUpdate(){
- try{ if(window.GM_MAJ_VERSION) localStorage.setItem("gm_maj_ignoree",window.GM_MAJ_VERSION); }catch(e){}
- var banner=document.getElementById("update-banner"); if(banner) banner.style.display="none";
+ majMarquerVue(majEnAttente()?window.GM_MAJ_VERSION:APP_VERSION);
+ majBandeau("");
 }
-// Mise à jour : on force le téléchargement des nouveaux fichiers (sinon le navigateur
-// peut recharger les anciens depuis son cache et le bandeau revient aussitôt),
-// on vide les caches du service worker, puis on recharge.
+// Bouton : si la nouvelle version tourne déjà, on retire juste le bandeau ; sinon on
+// force le téléchargement des fichiers frais, on vide les caches et on recharge.
 function applyUpdate(){
- var banner=document.getElementById("update-banner"); if(banner) banner.style.display="none";
+ if(!majEnAttente()){ majMarquerVue(APP_VERSION); majBandeau(""); return; }
+ majMarquerVue(window.GM_MAJ_VERSION);
+ majBandeau("");
  var dest=location.href.split("?")[0]+"?v="+Date.now();
  var fichiers=[].slice.call(document.querySelectorAll("script[src],link[rel=stylesheet][href]")).map(function(el){ return el.src||el.href; })
    .filter(function(u){ return u&&u.indexOf(location.origin)===0; });
@@ -177,6 +206,15 @@ function applyUpdate(){
  Promise.all([frais,vider,desinscrire])
    .then(function(){ location.href=dest; }, function(){ location.href=dest; });
 }
+// Retour dans l'appli après une longue absence (≥ 3 min) : on passe sur la nouvelle version
+// en silence ; le bandeau « L'application a été mise à jour » s'affiche alors à l'ouverture.
+var majMasqueDepuis=0;
+document.addEventListener("visibilitychange",function(){
+ if(document.visibilityState==="hidden"){ majMasqueDepuis=Date.now(); return; }
+ if(majEnAttente()&&majMasqueDepuis&&Date.now()-majMasqueDepuis>180000){
+  var dest=location.href.split("?")[0]+"?v="+Date.now(); location.replace(dest);
+ }
+});
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,120000);
 
