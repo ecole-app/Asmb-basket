@@ -2,8 +2,8 @@
  * Les évaluations (écran « Évaluer » d'un stage, 13-firestore-sync.js) concernent :
  *   - les joueurs du club cochés sur l'événement (participantsClub) ;
  *   - les invités externes saisis à la main (participantsExternes) ;
- *   - TOUS les inscrits du stage qui ne sont pas annulés (evt_inscrits, 14b) : licenciés rapprochés
- *     d'une fiche joueur et extérieurs. Sur un stage « jours au choix », seuls ceux inscrits ce jour-là.
+ *   - les inscrits du stage (evt_inscrits, 14b) ENTRÉS ce jour-là (présence pointée à l'écran Entrée),
+ *     licenciés ou extérieurs ; jamais les annulés ni ceux qui ne sont pas venus.
  * Un stage de plusieurs jours s'évalue jour par jour : clé `eventId__AAAA-MM-JJ` dans la collection
  * `evaluations` (un stage d'un seul jour garde la clé `eventId`, comme avant).
  */
@@ -31,9 +31,12 @@ function evalParticipants(ev, inscrits, jour, players){
   (inscrits||[]).forEach(function(x){
     if(!x||x.statut==="annule") return;
     if(jour&&parJour&&(x.jours||[]).indexOf(jour)<0) return;
+    // Seuls ceux qui sont entrés (pointés à l'écran « Entrée ») ce jour-là sont à évaluer.
+    var entre=(jour&&parJour)?!!(x.presentJ&&x.presentJ[jour]):!!x.present;
+    if(!entre) return;
     var joueur=x.playerId?(players||[]).filter(function(p){return String(p.id)===String(x.playerId);})[0]:null;
     if(joueur) ajouter({key:String(joueur.id),prenom:joueur.prenom||"",nom:joueur.nom||"",ext:false});
-    else ajouter({key:"i_"+(x._id||evalNorm(x.nom+" "+x.prenom)),prenom:x.prenom||"",nom:x.nom||"",ext:!x.playerId});
+    else ajouter({key:"i_"+(x._id||evalNorm(x.nom+" "+x.prenom)),prenom:x.prenom||"",nom:x.nom||"",ext:/ext/i.test(x.tarifNom||"")});
   });
   return out.sort(function(a,b){ return evalNorm(a.nom).localeCompare(evalNorm(b.nom))||evalNorm(a.prenom).localeCompare(evalNorm(b.prenom)); });
 }

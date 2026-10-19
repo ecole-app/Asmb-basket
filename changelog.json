@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792427204",
+  "titre": "Évaluation du stage : seulement les présents",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Évaluation en direct d'un stage : on ne liste plus que les inscrits entrés ce jour-là (pointés à l'écran Entrée), pas tous les inscrits. L'étiquette « Ext. » suit le tarif choisi (Extérieur)."
+   }
+  ]
+ },
+ {
   "v": "1792426928",
   "titre": "Responsable de stage",
   "points": [

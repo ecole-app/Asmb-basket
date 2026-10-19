@@ -8,13 +8,14 @@ const c = charger(["js/14n-eval-stage.js"]);
 const joueurs = [{ id: "p1", prenom: "Léa", nom: "Martin" }, { id: "p2", prenom: "Tom", nom: "Durand" }];
 const ev = { id: "e1", date: "2026-10-19", dateFin: "2026-10-21", participantsClub: ["p2"], inscr: { parJour: true } };
 const ins = [
-  { _id: "a", nom: "Martin", prenom: "Léa", playerId: "p1", statut: "valide", jours: ["2026-10-19"] },
-  { _id: "b", nom: "Petit", prenom: "Zoé", playerId: "", statut: "valide", jours: ["2026-10-19", "2026-10-20"] },
+  { _id: "a", nom: "Martin", prenom: "Léa", playerId: "p1", statut: "valide", jours: ["2026-10-19"], presentJ: { "2026-10-19": 1 } },
+  { _id: "b", nom: "Petit", prenom: "Zoé", playerId: "", statut: "valide", tarifNom: "Extérieur", jours: ["2026-10-19", "2026-10-20"], presentJ: { "2026-10-19": 1, "2026-10-20": 1 } },
+  { _id: "d", nom: "Absent", prenom: "Ali", playerId: "", statut: "valide", tarifNom: "Licencié du club", jours: ["2026-10-19"], presentJ: {} },
   { _id: "c", nom: "Roux", prenom: "Max", playerId: "", statut: "annule", jours: ["2026-10-19"] },
 ];
 
 describe("Qui évaluer sur un stage", () => {
-  it("jour 1 : joueur coché + inscrit licencié + extérieur, pas l'annulé", () => {
+  it("jour 1 : coché + entrés (licencié et extérieur), ni l'annulé ni l'absent", () => {
     const l = c.evalParticipants(ev, ins, "2026-10-19", joueurs);
     assert.deepEqual(Array.from(l.map(p => p.key)).sort(), ["i_b", "p1", "p2"]);
     assert.equal(l.find(p => p.key === "i_b").ext, true);

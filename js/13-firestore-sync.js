@@ -202,7 +202,7 @@ function buildLiveEval(){
   var lb=document.getElementById("live-eval-leaderboard");
   lb.innerHTML="";
   if(!players.length){
-    lb.innerHTML='<div style="font-size:12px;color:var(--mut);line-height:1.5">'+(evalInscrits[currentEvalEventId]===null?'Chargement des inscrits…':'Aucun participant'+(evalJour?' ce jour-là':'')+'. Les joueurs inscrits au stage (licenciés et extérieurs) apparaissent ici automatiquement.')+'</div>';
+    lb.innerHTML='<div style="font-size:12px;color:var(--mut);line-height:1.5">'+(evalInscrits[currentEvalEventId]===null?'Chargement des inscrits…':'Aucun participant'+(evalJour?' ce jour-là':'')+'. Les inscrits apparaissent ici une fois pointés à l’écran Entrée.')+'</div>';
   }
   sorted.forEach(function(p,i){
     var row=document.createElement("div");
