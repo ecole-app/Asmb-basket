@@ -1,5 +1,15 @@
 [
  {
+  "v": "1792437948",
+  "titre": "Journal des mises à jour dans Paramètres",
+  "points": [
+   {
+    "roles": [],
+    "texte": "Nouveau bloc « Nouveautés » dans Paramètres : tu peux relire à tout moment les dernières mises à jour."
+   }
+  ]
+ },
+ {
   "v": "1792428173",
   "titre": "Accès rapide au stage depuis l'accueil",
   "points": [

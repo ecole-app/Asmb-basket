@@ -140,7 +140,7 @@ setTimeout(initAuthGate,80);
 setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1792428173";
+var APP_VERSION="1792437948";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
@@ -217,7 +217,7 @@ setInterval(checkForUpdate,120000);
 // changelog.json : liste (plus recente en premier) de {v, titre, points}.
 // Alimente uniquement pour les changements visibles par un dirigeant/coach/
 // parent — pas un doublon du log Git, qui reste technique.
-function showChangelog(){
+function showChangelog(historique){
   // Filtre par profil actif : un point sans "roles" (ou roles vide) est visible
   // par tout le monde ; sinon seulement par les profils listes. Le super admin
   // (plateforme) voit tout, sans filtre -- ces points ne le concernent pas
@@ -227,6 +227,26 @@ function showChangelog(){
   fetch("./changelog.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
     .then(function(list){
+      if(historique===true){   // Paramètres › Nouveautés : les 15 dernières mises à jour
+        var sh=gmSheet("Nouveautés"), n=0;
+        (list||[]).forEach(function(en){
+          if(n>=15) return;
+          var pts=(en.points||[]).filter(function(pt){ return voitTout||typeof pt==="string"||!pt.roles||!pt.roles.length||pt.roles.indexOf(profil)>=0; });
+          if(!pts.length) return;
+          n++;
+          var h=document.createElement("div");
+          h.style.cssText="font-size:13.5px;font-weight:800;color:var(--txt);margin:"+(n>1?"16px":"0")+" 0 4px";
+          var dt=new Date(Number(en.v)*1000);
+          h.textContent=(isNaN(dt)?"":dt.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · ")+(en.titre||"Mise à jour");
+          sh.body.appendChild(h);
+          var ul2=document.createElement("ul");
+          ul2.style.cssText="margin:0;padding-left:20px;font-size:13px;color:var(--txt2);line-height:1.55";
+          pts.forEach(function(pt){ var li2=document.createElement("li"); li2.textContent=(typeof pt==="string")?pt:pt.texte; li2.style.marginBottom="4px"; ul2.appendChild(li2); });
+          sh.body.appendChild(ul2);
+        });
+        if(!n){ var vide=document.createElement("div"); vide.style.cssText="font-size:13px;color:var(--txt2)"; vide.textContent="Rien à afficher pour le moment."; sh.body.appendChild(vide); }
+        return;
+      }
       var entry=(list&&list[0])||null;
       var s=gmSheet(entry&&entry.titre?entry.titre:"Dernière mise à jour");
       var points=((entry&&entry.points)||[]).filter(function(pt){
