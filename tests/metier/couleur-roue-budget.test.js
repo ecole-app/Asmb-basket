@@ -12,18 +12,20 @@ describe("Roue de couleurs", () => {
     assert.ok(Math.abs(c.gmContrasteBlanc("#ffffff") - 1) < 0.01);
   });
   it("aucune teinte de la roue, même très claire, ne sort sous 4,5:1", () => {
-    for (let h = 0; h < 360; h += 15) for (const s of [0.2, 0.5, 0.8, 1]) for (const v of [0.3, 0.6, 1]) {
-      const hex = c.gmCouleurLisible(h, s, v);
+    for (let h = 0; h < 360; h += 15) for (const s of [0.2, 0.5, 0.8, 1]) for (const l of [0.1, 0.4, 0.7, 1]) {
+      const hex = c.gmCouleurLisible(h, s, l);
       assert.match(hex, /^#[0-9a-f]{6}$/);
-      assert.ok(c.gmContrasteBlanc(hex) >= 4.5, `${h}/${s}/${v} -> ${hex}`);
+      assert.ok(c.gmContrasteBlanc(hex) >= 4.5, `${h}/${s}/${l} -> ${hex}`);
     }
   });
   it("une teinte déjà sombre n'est pas modifiée", () => {
-    assert.equal(c.gmCouleurLisible(120, 0.7, 0.4), c.gmHsvVersHex(120, 0.7, 0.4));
+    assert.equal(c.gmCouleurLisible(120, 0.7, 0.2), c.gmHslVersHex(120, 0.7, 0.2));
   });
   it("rouge pur, vert pur", () => {
-    assert.equal(c.gmHsvVersHex(0, 1, 1), "#ff0000");
-    assert.equal(c.gmHsvVersHex(120, 1, 1), "#00ff00");
+    assert.equal(c.gmHslVersHex(0, 1, 0.5), "#ff0000");
+    assert.equal(c.gmHslVersHex(120, 1, 0.5), "#00ff00");
+    assert.equal(c.gmHslVersHex(200, 0.5, 1), "#ffffff");   // luminosité maxi = blanc
+    assert.equal(c.gmHslVersHex(200, 0.5, 0), "#000000");   // luminosité mini = noir
   });
 });
 

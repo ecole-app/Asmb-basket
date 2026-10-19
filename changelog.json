@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792441813",
+  "titre": "Roue de couleurs : barre de luminosité",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : une barre en dégradé blanc vers noir sous la roue règle la luminosité."
+   }
+  ]
+ },
+ {
   "v": "1792441723",
   "titre": "Couleurs du club : la roue remplace les pastilles",
   "points": [
