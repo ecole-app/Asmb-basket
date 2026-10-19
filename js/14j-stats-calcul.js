@@ -237,3 +237,39 @@ function msTerminer(match, maintenant){
 }
 function msRouvrir(match){ match.statut="en_cours"; match.sFin=null; }
 function msLibQuart(q){ return q>4 ? "P"+(q-4) : "Q"+q; }
+
+// ── Tableau de saison d'une équipe (écran « Stats équipe ») ──────────
+// matchs : documents match_stats terminés (déjà filtrés par saison / équipe / période).
+// Résultat : bilan, points pour / contre par match, adresse et ratio de l'équipe, leaders et une ligne par joueur.
+function msEquipeSaison(matchs, opts){
+  var liste=(matchs||[]).filter(function(m){return m&&m.statut==="termine";});
+  liste.sort(function(a,b){ return String(a.date||"")>String(b.date||"") ? 1 : -1; });
+  var v=0,d=0,n=0,pour=0,contre=0, tot=msLigneVide(), serie=[];
+  var ids=[];
+  liste.forEach(function(m){
+    var c=msCalcul(m,opts);
+    n++; pour+=c.score.nous; contre+=c.score.eux;
+    if(c.score.nous>c.score.eux){ v++; serie.push("V"); } else if(c.score.nous<c.score.eux){ d++; serie.push("D"); } else serie.push("N");
+    ["pts","ro","rd","reb","pd","int","ct","bp","fc","fp","eval"].forEach(function(k){ tot[k]+=c.equipe[k]; });
+    ["lf","p2","p3","tirs"].forEach(function(k){ tot[k].r+=c.equipe[k].r; tot[k].t+=c.equipe[k].t; });
+    c.ids.forEach(function(id){ if(ids.indexOf(id)<0) ids.push(id); });
+  });
+  // Victoires (ou défaites) de suite à la fin de la série.
+  var suite=0, dernier=serie.length?serie[serie.length-1]:"";
+  for(var i=serie.length-1;i>=0&&serie[i]===dernier;i--) suite++;
+  function moy(x){ return n?Math.round(x*10/n)/10:null; }
+  var joueurs=ids.map(function(id){
+    var f=msFicheJoueur(id,liste,opts);
+    return {id:id, n:f.n, min:f.moyennes.min, pts:f.moyennes.pts, reb:f.moyennes.reb, pd:f.moyennes.pd,
+            eval:f.moyennes.eval, adresse:f.adresse, evals:f.matchs.map(function(x){return x.eval;})};
+  }).filter(function(j){return j.n>0;});
+  function leaders(cle){
+    return joueurs.filter(function(j){return j[cle]!=null;}).sort(function(a,b){return b[cle]-a[cle];}).slice(0,3);
+  }
+  return {
+    n:n, v:v, d:d, nuls:n-v-d, suite:{type:dernier, n:suite},
+    pour:moy(pour), contre:moy(contre), adresse:msAdresse(tot), total:tot,
+    joueurs:joueurs.sort(function(a,b){return (b.eval||0)-(a.eval||0);}),
+    leaders:{pts:leaders("pts"), reb:leaders("reb"), pd:leaders("pd"), eval:leaders("eval")}
+  };
+}

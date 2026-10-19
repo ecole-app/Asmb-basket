@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792424808",
+  "titre": "Stats : écran de la salle, feuille ordinateur, stats équipe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Pack Premium : « 📺 Salle » affiche le match en direct sur une TV (gros score, 5 sur le terrain, meilleurs du match). Connecte la TV avec un compte coach."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Pack Premium : la feuille de match passe sur 2 colonnes sur ordinateur (meilleur de chaque colonne en or, écart au score), et « 📊 Stats équipe » dans le planning donne le bilan, les leaders et le tableau de chaque joueur."
+   }
+  ]
+ },
+ {
   "v": "1792423391",
   "titre": "Stats avancées de match",
   "points": [

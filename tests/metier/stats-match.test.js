@@ -197,3 +197,35 @@ describe("Libellés", () => {
   });
   it("mm:ss", () => { assert.equal(c.msMMSS(372), "06:12"); assert.equal(c.msMMSS(-5), "00:00"); });
 });
+
+describe("Tableau de saison d'une équipe (msEquipeSaison)", () => {
+  function termine(date, nous, eux, pid = "a") {
+    const x = c.msNouveau({ id: "e" + date, date }, [pid, "b"], "2026-2027", 10);
+    x.date = date; x.statut = "termine"; x.sFin = 600;
+    for (let i = 0; i < nous / 2; i++) x.evts.push({ a: "p2", p: pid, q: 1, s: i });
+    for (let i = 0; i < eux; i++) x.evts.push({ a: "a1", p: null, q: 1, s: i });
+    return x;
+  }
+  it("bilan, séries et moyennes de points", () => {
+    const r = c.msEquipeSaison([termine("2026-10-03", 40, 50), termine("2026-10-10", 60, 50), termine("2026-10-17", 70, 40)], { maintenant: T0 });
+    assert.equal(r.n, 3); assert.equal(r.v, 2); assert.equal(r.d, 1);
+    assert.deepEqual({ ...r.suite }, { type: "V", n: 2 });
+    assert.equal(r.pour, 56.7);      // (40 + 60 + 70) / 3
+    assert.equal(r.contre, 46.7);    // (50 + 50 + 40) / 3
+  });
+  it("ignore les matchs non terminés et ne plante pas sans match", () => {
+    const enCours = termine("2026-10-24", 10, 10); enCours.statut = "en_cours";
+    assert.equal(c.msEquipeSaison([enCours], { maintenant: T0 }).n, 0);
+    const vide = c.msEquipeSaison([], { maintenant: T0 });
+    assert.equal(vide.pour, null); assert.equal(vide.joueurs.length, 0); assert.equal(vide.suite.n, 0);
+  });
+  it("leaders et ligne par joueur", () => {
+    const m1 = termine("2026-10-03", 20, 10, "a");
+    const m2 = termine("2026-10-10", 10, 10, "b");
+    const r = c.msEquipeSaison([m1, m2], { maintenant: T0 });
+    assert.equal(r.leaders.pts[0].id, "a");
+    assert.equal(r.leaders.pts[0].pts, 20);      // « a » ne figure que dans le 1er match : 20 pts sur 1 match
+    assert.equal(r.leaders.pts[0].n, 1);
+    assert.ok(r.joueurs.every((j) => j.evals.length === j.n));
+  });
+});

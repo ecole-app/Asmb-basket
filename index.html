@@ -286,6 +286,7 @@
     <div style="padding:12px 12px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bdr)">
       <button onclick="showAddCreneau()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--dkg);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Créneau</button>
       <button onclick="showAddEvent()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">+ Evénement</button>
+      <button id="plan-stats-equipe" onclick="statsEquipeOuvrir()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">📊 Stats équipe</button>
       <button id="plan-view-toggle" onclick="togglePlanningView()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">Vue calendrier</button>
       <button onclick="exportPlanningPDF()" style="padding:8px 16px;border-radius:20px;background:var(--card);border:1.5px solid var(--bdr);color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">PDF</button>
     </div>
@@ -1906,6 +1907,7 @@
 <script src="js/14j-stats-calcul.js"></script>
 <script src="js/14k-stats-saisie.js"></script>
 <script src="js/14l-stats-fiche.js"></script>
+<script src="js/14m-stats-ecrans.js"></script>
 <script src="js/15-compta-inventaire.js"></script>
 <script src="js/15b-compta-plan.js"></script>
 <script src="js/15c-compta-ticket.js"></script>
