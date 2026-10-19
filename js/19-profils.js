@@ -1571,10 +1571,12 @@ function buildPlayerHistoryScreen(){
   // Bloc 3 : evaluations stages/camps
   var allEvals=getAllEvaluations();
   var eventEntries=[];
-  Object.keys(allEvals).forEach(function(eventId){
-    if(allEvals[eventId][p.id]){
+  Object.keys(allEvals).forEach(function(cle){
+    if(allEvals[cle][p.id]){
+      // Clé « eventId » ou « eventId__AAAA-MM-JJ » (stage évalué jour par jour).
+      var eventId=cle.split("__")[0], jour=cle.indexOf("__")>0?cle.split("__")[1]:"";
       var ev=getEvents().find(function(e){return e.id===eventId;});
-      if(ev)eventEntries.push({event:ev,scores:allEvals[eventId][p.id]});
+      if(ev)eventEntries.push({event:jour?Object.assign({},ev,{titre:ev.titre+" · "+(typeof evtJourTxt==="function"?evtJourTxt(jour):jour),date:jour,dateFin:jour}):ev,scores:allEvals[cle][p.id]});
     }
   });
   eventEntries.sort(function(a,b){return a.event.date<b.event.date?1:-1;});

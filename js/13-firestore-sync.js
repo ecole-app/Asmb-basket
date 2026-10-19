@@ -160,8 +160,14 @@ function initFirestoreSync(){
 
 function openLiveEval(eventId){
   currentEvalEventId=eventId;
+  // Stage de plusieurs jours : on évalue jour par jour, aujourd'hui par défaut (sinon le 1er jour).
+  var evO=getEvents().find(function(e){return e.id===eventId;}), js=evO?evalJoursStage(evO):[];
+  var auj=new Date(); auj=auj.getFullYear()+"-"+String(auj.getMonth()+1).padStart(2,"0")+"-"+String(auj.getDate()).padStart(2,"0");
+  evalJour=js.length?(js.indexOf(auj)>=0?auj:js[0]):null;
+  delete evalInscrits[eventId];
   stack.push("live-eval");showScr("live-eval");
   buildLiveEval();
+  evalChargerInscrits(eventId);
 }
 
 function buildLiveEval(){
@@ -170,9 +176,20 @@ function buildLiveEval(){
   document.getElementById("live-eval-title").textContent=ev.titre;
   document.getElementById("live-eval-sub").textContent=ev.date+(ev.heure?" · "+ev.heure:"");
 
-  var players=getPlayers().filter(function(p){return (ev.participantsClub||[]).indexOf(p.id)>=0;});
+  var jours=evalJoursStage(ev);
+  if(jours.length&&jours.indexOf(evalJour)<0) evalJour=jours[0];
+  if(!jours.length) evalJour=null;
+  // Sélecteur de jour (stage de plusieurs jours)
+  var lbEl=document.getElementById("live-eval-leaderboard");
+  var jbar=document.getElementById("live-eval-jours");
+  if(!jbar){ jbar=document.createElement("div"); jbar.id="live-eval-jours"; lbEl.parentNode.insertBefore(jbar,lbEl.previousElementSibling); }
+  jbar.style.cssText=jours.length?"display:flex;gap:6px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none":"display:none";
+  jbar.innerHTML=jours.map(function(j){
+    return '<button onclick="evalChoisirJour(\''+j+'\')" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+(j===evalJour?'var(--dkg)':'var(--bdr)')+';background:'+(j===evalJour?'var(--dkg)':'var(--card)')+';color:'+(j===evalJour?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">'+authEsc(typeof evtJourTxt==="function"?evtJourTxt(j):j)+'</button>';
+  }).join("");
+  var players=evalParticipants(ev,evalInscrits[currentEvalEventId]||[],evalJour,getPlayers());
   var allEvals=getAllEvaluations();
-  var evalForEvent=allEvals[currentEvalEventId]||{};
+  var evalForEvent=allEvals[evalCleCourante()]||{};
   var criteria=getEvalCriteria();
 
   function totalFor(playerId){
@@ -181,11 +198,11 @@ function buildLiveEval(){
   }
 
   // Leaderboard
-  var sorted=players.slice().sort(function(a,b){return totalFor(b.id)-totalFor(a.id);});
+  var sorted=players.slice().sort(function(a,b){return totalFor(b.key)-totalFor(a.key);});
   var lb=document.getElementById("live-eval-leaderboard");
   lb.innerHTML="";
   if(!players.length){
-    lb.innerHTML='<div style="font-size:12px;color:var(--mut)">Aucun participant enregistré pour cet événement</div>';
+    lb.innerHTML='<div style="font-size:12px;color:var(--mut);line-height:1.5">'+(evalInscrits[currentEvalEventId]===null?'Chargement des inscrits…':'Aucun participant'+(evalJour?' ce jour-là':'')+'. Les joueurs inscrits au stage (licenciés et extérieurs) apparaissent ici automatiquement.')+'</div>';
   }
   sorted.forEach(function(p,i){
     var row=document.createElement("div");
@@ -193,8 +210,8 @@ function buildLiveEval(){
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
     row.innerHTML='<div style="width:20px;font-size:13px;font-weight:900;color:'+(i===0?"#F5A623":"var(--mut)")+';text-align:center">'+(i+1)+'</div>'+
       '<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
-      '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:13px;font-weight:900;color:var(--ltg)">'+totalFor(p.id).toFixed(1)+'</div>';
+      '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+authEsc((p.prenom+' '+p.nom).trim())+(p.ext?' <span style="font-size:9px;font-weight:800;color:var(--mut);border:1px solid var(--bdr);border-radius:8px;padding:1px 6px;margin-left:4px">EXT.</span>':'')+'</div>'+
+      '<div style="font-size:13px;font-weight:900;color:var(--ltg)">'+totalFor(p.key).toFixed(1)+'</div>';
     lb.appendChild(row);
   });
 
@@ -202,15 +219,15 @@ function buildLiveEval(){
   var list=document.getElementById("live-eval-players");
   list.innerHTML="";
   players.forEach(function(p){
-    var scores=evalForEvent[p.id]||{};
+    var scores=evalForEvent[p.key]||{};
     var card=document.createElement("div");
     card.style.cssText="margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)";
     var hdr=document.createElement("div");
     hdr.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
     hdr.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
-      '<div style="flex:1;font-size:13.5px;font-weight:800;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:13px;font-weight:900;color:var(--ltg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:3px 10px;border-radius:12px">'+totalFor(p.id).toFixed(1)+' pts</div>';
+      '<div style="flex:1;font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc((p.prenom+' '+p.nom).trim())+(p.ext?' <span style="font-size:9px;font-weight:800;color:var(--mut);border:1px solid var(--bdr);border-radius:8px;padding:1px 6px;margin-left:4px">EXTÉRIEUR</span>':'')+'</div>'+
+      '<div style="font-size:13px;font-weight:900;color:var(--ltg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:3px 10px;border-radius:12px">'+totalFor(p.key).toFixed(1)+' pts</div>';
     card.appendChild(hdr);
     criteria.forEach(function(c,ci){
       var row=document.createElement("div");
@@ -219,7 +236,7 @@ function buildLiveEval(){
       lbl.style.cssText="width:82px;font-size:11.5px;font-weight:700;color:var(--txt);flex-shrink:0";
       lbl.textContent=c;
       row.appendChild(lbl);
-      row.appendChild(evalStarsWrap(p.id,c,scores[c]));
+      row.appendChild(evalStarsWrap(p.key,c,scores[c]));
       card.appendChild(row);
     });
     list.appendChild(card);
@@ -254,10 +271,11 @@ function setEvalStar(ev,playerId,critName,fullVal){
   var half=(ev.clientX-rect.left)<rect.width/2;
   var val=half?fullVal-0.5:fullVal;
   var allEvals=getAllEvaluations();
-  if(!allEvals[currentEvalEventId])allEvals[currentEvalEventId]={};
-  if(!allEvals[currentEvalEventId][playerId])allEvals[currentEvalEventId][playerId]={};
-  var current=allEvals[currentEvalEventId][playerId][critName]||0;
-  allEvals[currentEvalEventId][playerId][critName]=(current===val)?0:val;
+  var cle=evalCleCourante();
+  if(!allEvals[cle])allEvals[cle]={};
+  if(!allEvals[cle][playerId])allEvals[cle][playerId]={};
+  var current=allEvals[cle][playerId][critName]||0;
+  allEvals[cle][playerId][critName]=(current===val)?0:val;
   saveAllEvaluations(allEvals);
   buildLiveEval();
 }

@@ -892,7 +892,7 @@ function clearDemoData(){
    var allEvals=getAllEvaluations();
    var evalsChanged=false;
    removedEventIds.forEach(function(evId){
-     if(allEvals[evId]){ delete allEvals[evId]; evalsChanged=true; }
+     Object.keys(allEvals).forEach(function(cle){ if(cle===evId||cle.indexOf(evId+"__")===0){ delete allEvals[cle]; evalsChanged=true; } });
    });
    if(evalsChanged) saveAllEvaluations(allEvals);
    showToast("Données de démo supprimées.");

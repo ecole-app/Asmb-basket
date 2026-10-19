@@ -1,5 +1,25 @@
 [
  {
+  "v": "1792425228",
+  "titre": "Évaluation des stages : tous les inscrits",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Évaluation en direct d'un stage : les joueurs inscrits (licenciés et extérieurs) apparaissent maintenant automatiquement, avec une étiquette « Extérieur »."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stage de plusieurs jours : on évalue jour par jour (onglets en haut), et sur un stage « jours au choix » seuls les inscrits de ce jour sont listés. Les notes de chaque jour se retrouvent dans la fiche du joueur."
+   }
+  ]
+ },
+ {
   "v": "1792424968",
   "titre": "Documents du club pour les parents",
   "points": [
