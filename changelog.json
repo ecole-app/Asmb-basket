@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792477004",
+  "titre": "Compte plateforme : icône et nom General Manager conservés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Pour le compte du gestionnaire de la plateforme, l'icône et le nom de l'appli restent General Manager même dans un club. Les autres clubs gardent leur logo et leur nom."
+   }
+  ]
+ },
+ {
   "v": "1792467662",
   "titre": "Roue de couleurs : bouton « Blanc » retiré",
   "points": [

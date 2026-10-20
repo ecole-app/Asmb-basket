@@ -113,10 +113,13 @@ function majIconeAppli(){
   if(!ICONE_ORIGINE) ICONE_ORIGINE={f:lf&&lf.getAttribute("href"),a:la&&la.getAttribute("href"),m:lm&&lm.getAttribute("href")};
   // Nom de l'appli (iPhone, onglet) = nom du club ; sans nom, General Manager.
   var mt=head.querySelector('meta[name="apple-mobile-web-app-title"]');
-  var nomClub=clubLabel("")||"";
+  // Compte du super admin (Ahmed) : l'icône et le nom de l'appli restent General Manager,
+  // même quand il est dans le club ASMB. Les autres comptes gardent le logo/nom de leur club.
+  var gm=(typeof isSuperAdmin==="function"&&isSuperAdmin());
+  var nomClub=gm?"":(clubLabel("")||"");
   if(mt) mt.setAttribute("content",nomClub||"General Manager");
   document.title=nomClub||"General Manager";
-  var logo=clubLogo();
+  var logo=gm?null:clubLogo();
   if(!logo){
     if(lf&&ICONE_ORIGINE.f){ lf.setAttribute("href",ICONE_ORIGINE.f); lf.setAttribute("type","image/x-icon"); }
     if(la&&ICONE_ORIGINE.a) la.setAttribute("href",ICONE_ORIGINE.a);
@@ -181,6 +184,7 @@ function majIconeAppli(){
 // Tuto affiché au dirigeant après un changement de logo, et rouvrable depuis
 // Paramètres : l'icône de l'appli installée ne change qu'après réinstallation.
 function iconeReinstallerTuto(){
+  if(typeof isSuperAdmin==="function"&&isSuperAdmin()) return;   // son icône reste General Manager : pas de tuto
   var modal=document.createElement("div");
   modal.className="alert-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto";
