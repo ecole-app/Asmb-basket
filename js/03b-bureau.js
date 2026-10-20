@@ -16,7 +16,14 @@ var GM_DESK_ITEMS=[
   {id:"planning", label:"Planning", grp:"Club", ic:"cal", mod:"planning", scr:["planning"]},
   {id:"equipes", label:"Équipes", grp:"Sportif", ic:"team", mod:"equipes", scr:["equipes"]},
   {id:"inscriptions", label:"Joueurs", grp:"Sportif", ic:"users", mod:"inscriptions", scr:["inscriptions","player-history"]},
-  {id:"formation", label:"Formation", grp:"Sportif", ic:"book", scr:["elite","u13home","cycle","seance"], go:function(){ stack=["portal"]; openPole("formation"); }},
+  // Pôles du club : seuls ceux ouverts pour ce club (isPoleActive) apparaissent.
+  {id:"formation", label:"Formation", grp:"Pôles", ic:"book", scr:["elite","u13home","cycle","seance"], go:function(){ stack=["portal"]; openPole("formation"); }},
+  {id:"competition", label:"Compétition 5x5", grp:"Pôles", ic:"trophy", pole:"competition", scr:["pole-competition"], go:function(){ stack=["portal"]; openPole("competition"); }},
+  {id:"evenement", label:"Événements", grp:"Pôles", ic:"flag", pole:"evenement", scr:["pole-evenement"], go:function(){ stack=["portal"]; openPole("evenement"); }},
+  {id:"elite-academy", label:"Élite Academy", grp:"Pôles", ic:"star", pole:"elite", scr:["pole-elite"], go:function(){ stack=["portal"]; openPole("elite"); }},
+  {id:"pole-3x3", label:"3x3", grp:"Pôles", ic:"ball", pole:"3x3", scr:["pole-3x3"], go:function(){ stack=["portal"]; openPole("3x3"); }},
+  {id:"basketpourtous", label:"Basket Pour Tous", grp:"Pôles", ic:"users", pole:"basketpourtous", scr:["pole-basketpourtous"], go:function(){ stack=["portal"]; openPole("basketpourtous"); }},
+  {id:"basketsante", label:"Basket Santé", grp:"Pôles", ic:"heart", pole:"basketsante", scr:["pole-basketsante"], go:function(){ stack=["portal"]; openPole("basketsante"); }},
   {id:"licences", label:"Licences", grp:"Membres", ic:"card", mod:"licences", scr:["licences","licence-detail"]},
   {id:"invitations", label:"Accès & invitations", grp:"Membres", ic:"key", mod:"invitations", scr:[]},
   {id:"comptabilite", label:"Comptabilité", grp:"Gestion", ic:"euro", mod:"comptabilite", scr:["comptabilite"]},
@@ -44,6 +51,10 @@ var GM_DESK_SVG={
   receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   sac:'<path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 13v4M8 21h8M10 17h4"/>',
+  flag:'<path d="M5 21V4M5 5h11l-2 4 2 4H5"/>',
+  ball:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3 3 3 9.8 0 12.8M18.4 5.6c-3 3-3 9.8 0 12.8"/>',
+  heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>'
 };
 
@@ -139,6 +150,7 @@ function gmDeskVisible(it){
   return gmDeskVisibleDroits(it);
 }
 function gmDeskVisibleDroits(it){
+  if(it.pole && typeof isPoleActive==="function" && !isPoleActive(it.pole)) return false;   // pôle pas ouvert pour ce club
   if(it.mod){
     if(typeof ADMIN_MODULES==="undefined" || !ADMIN_MODULES.some(function(m){return m.id===it.mod;})) return false;
     if(typeof hasModulePermission==="function" && !hasModulePermission(it.mod)) return false;

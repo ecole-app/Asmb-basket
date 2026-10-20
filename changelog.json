@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792494226",
+  "titre": "Version ordinateur : les pôles dans le menu",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le menu de gauche a un groupe « Pôles » : Formation, Compétition 5x5, Événements, Élite Academy, 3x3, Basket Pour Tous, Basket Santé (seulement ceux ouverts pour votre club). Les pôles étaient jusqu'ici accessibles uniquement sur téléphone."
+   }
+  ]
+ },
+ {
   "v": "1792493007",
   "titre": "Compétition : championnats et import FBI",
   "points": [
