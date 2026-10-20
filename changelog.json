@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792494880",
+  "titre": "Menu ordinateur déroulant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, les groupes du menu latéral (Sportif, Pôles, Membres...) se replient et se déplient d'un clic. Le choix est retenu."
+   }
+  ]
+ },
+ {
   "v": "1792494664",
   "titre": "Espace Admin plus clair sur ordinateur",
   "points": [

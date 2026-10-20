@@ -755,3 +755,11 @@ html.gm-desk .adm-grp{margin-bottom:22px}
 html.gm-desk .adm-grp-t{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
 html.gm-desk .adm-grp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,340px));gap:12px}
 html.gm-desk .adm-grp-g>.admin-card{margin:0}
+
+/* Menu latéral ordinateur : groupes déroulants */
+.gs-grp-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit}
+.gs-grp-btn:hover{color:var(--gs-hov-txt,var(--txt))}
+.gs-grp-btn svg{transition:transform .15s;transform:rotate(-90deg);flex-shrink:0}
+.gs-grp-btn.ouvert svg{transform:none}
+.gs-grp-body[hidden]{display:none}
+html.gm-desk.gm-desk-mini .gs-grp-btn svg{display:none}

@@ -188,6 +188,22 @@ function gmDeskEcran(scr){
   gmDeskRender();
   if(scr==="portal"&&typeof renderDeskHome==="function") renderDeskHome(); // badges et nom du club à jour à chaque écran
 }
+function gmDeskGrpFermes(){
+  try{ var a=JSON.parse(localStorage.getItem("gm_desk_grp_fermes")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+function gmDeskGrpBascule(g){
+  var a=gmDeskGrpFermes(), i=a.indexOf(g);
+  var actif=GM_DESK_ITEMS.find(function(x){ return x.id===GM_DESK_ACTIF; });
+  if(i<0) a.push(g); else a.splice(i,1);
+  try{ localStorage.setItem("gm_desk_grp_fermes",JSON.stringify(a)); }catch(e){}
+  // Le groupe de la page affichée reste ouvert : on bascule juste l'affichage
+  var btn=document.querySelector('.gs-grp-btn[data-g="'+g.replace(/"/g,'')+'"]');
+  if(btn){
+    var corps=btn.nextElementSibling, ouvre=(i>=0);
+    btn.classList.toggle("ouvert",ouvre); btn.setAttribute("aria-expanded",ouvre);
+    if(corps) corps.hidden=!ouvre;
+  }
+}
 function gmDeskRender(){
   var side=document.getElementById("gm-side"); if(!side) return;
   var nom=(typeof clubLabel==="function")?clubLabel(""):"";
@@ -196,13 +212,21 @@ function gmDeskRender(){
     '<div class="gs-club-sub">Saison '+authEsc((typeof getCurrentSeason==="function")?getCurrentSeason():"")+'</div></div></div><nav class="gs-nav" aria-label="Menu du club">';
   var grp=null;
   var mini=gmDeskPrefs().mini;
+  var fermes=gmDeskGrpFermes(), ouvert=false;
+  var actif=GM_DESK_ITEMS.find(function(x){ return x.id===GM_DESK_ACTIF; });
   gmDeskItemsOrdonnes().filter(gmDeskVisible).forEach(function(it){
-    if(it.grp!==grp){ grp=it.grp; h+='<div class="gs-grp">'+authEsc(grp)+'</div>'; }
+    if(it.grp!==grp){
+      if(grp!==null) h+='</div>';
+      grp=it.grp;
+      ouvert=mini||fermes.indexOf(grp)<0||(actif&&actif.grp===grp);
+      h+='<button type="button" class="gs-grp gs-grp-btn'+(ouvert?" ouvert":"")+'" aria-expanded="'+ouvert+'" onclick="gmDeskGrpBascule(this.dataset.g)" data-g="'+authEsc(grp)+'"><span>'+authEsc(grp)+'</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="gs-grp-body"'+(ouvert?'':' hidden')+'>';
+    }
     var n=gmDeskBadge(it);
     h+='<button type="button" class="gs-item'+(it.id===GM_DESK_ACTIF?" on":"")+'" onclick="gmDeskOuvrir(\''+it.id+'\')"'+(it.id===GM_DESK_ACTIF?' aria-current="page"':'')+(mini?' title="'+authEsc(it.label)+'" aria-label="'+authEsc(it.label)+'"':'')+'>'+
       '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(GM_DESK_SVG[it.ic]||"")+'</svg>'+
       '<span class="gs-lbl">'+authEsc(it.label)+'</span>'+(n?'<span class="gs-badge">'+n+'</span>':'')+'</button>';
   });
+  if(grp!==null) h+='</div>';
   h+='</nav><div class="gs-pied">'+
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskPersonnaliser()" title="Personnaliser le menu" aria-label="Personnaliser le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="gs-lbl">Personnaliser</span></button>'+
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskMini()" title="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-label="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-expanded="'+(!mini)+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(mini?'<path d="m10 6 6 6-6 6"/>':'<path d="m14 6-6 6 6 6"/>')+'</svg><span class="gs-lbl">Réduire le menu</span></button></div>';
