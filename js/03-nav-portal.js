@@ -358,15 +358,20 @@ function buildPortal(){
   if(typeof renderDeskHome==="function") renderDeskHome();
 }
 
+// Un événement qui dure (date → dateFin) reste « à venir » jusqu'à son dernier jour.
+function evtEncoreActif(e,todayStr){ return ((e.dateFin&&e.dateFin>e.date?e.dateFin:e.date)||"")>=todayStr; }
+function evtEnCours(e,todayStr){ return !!(e.dateFin&&e.dateFin>e.date&&e.date<=todayStr&&e.dateFin>=todayStr); }
+function evtDateFr(d){ var p=(d||"").split("-"); return p.length===3?(p[2]+"/"+p[1]+"/"+p[0]):(d||""); }
+function evtPlageFr(e){ return (e.dateFin&&e.dateFin>e.date)?("du "+evtDateFr(e.date)+" au "+evtDateFr(e.dateFin)):evtDateFr(e.date); }
 function updateCountdownBanner(bannerId){
   var el=document.getElementById(bannerId);if(!el)return;
   var events=getEvents();
   var todayStr=new Date().toISOString().slice(0,10);
   var in14=new Date(Date.now()+14*86400000).toISOString().slice(0,10);
-  var big=events.filter(function(e){return e.type==="tournoi"&&e.date>=todayStr&&e.date<=in14;}).sort(function(a,b){return a.date>b.date?1:-1;})[0];
+  var big=events.filter(function(e){return e.type==="tournoi"&&evtEncoreActif(e,todayStr)&&e.date<=in14;}).sort(function(a,b){return a.date>b.date?1:-1;})[0];
   if(!big){el.style.display="none";return;}
-  var diffDays=Math.ceil((new Date(big.date)-new Date(todayStr))/86400000);
-  var txt=diffDays===0?"Aujourd'hui : "+big.titre:(diffDays===1?"Demain : "+big.titre:"J-"+diffDays+" avant "+big.titre);
+  var diffDays=Math.max(0,Math.ceil((new Date(big.date)-new Date(todayStr))/86400000));
+  var txt=evtEnCours(big,todayStr)?"En cours jusqu'au "+evtDateFr(big.dateFin)+" : "+big.titre:diffDays===0?"Aujourd'hui : "+big.titre:(diffDays===1?"Demain : "+big.titre:"J-"+diffDays+" avant "+big.titre);
  el.textContent=txt;
  el.style.display="block";
 }
@@ -382,7 +387,7 @@ function buildCoachDashboard(el){
 
   var todayStr=new Date().toISOString().slice(0,10);
   var upcoming=getEvents().filter(function(e){
-    if(e.cancelled||e.date<todayStr)return false;
+    if(e.cancelled||!evtEncoreActif(e,todayStr))return false;
     var eq=(e.equipe||"").toUpperCase();
     return eq.indexOf(team.name.toUpperCase())>=0;
   }).sort(function(a,b){return a.date>b.date?1:-1;})[0];
@@ -393,9 +398,8 @@ function buildCoachDashboard(el){
   }
 
   var typeLabels={match:"Prochain match",entrainement:"Prochain entraînement",tournoi:"Prochain tournoi"};
-  var upLabel=typeLabels[upcoming.type]||"Prochain événement";
-  var dp=upcoming.date.split("-");
-  var dateFr=dp.length===3?(dp[2]+"/"+dp[1]+"/"+dp[0]):upcoming.date;
+  var upLabel=evtEnCours(upcoming,todayStr)?"En cours":(typeLabels[upcoming.type]||"Prochain événement");
+  var dateFr=evtPlageFr(upcoming);
 
   el.innerHTML=loadingHtml("Chargement des présences…");
 
@@ -498,6 +502,7 @@ function buildDashboard(){
 
  var events=getEvents();
  var todayStr=new Date().toISOString().slice(0,10);
+ var enCoursL=events.filter(function(e){return !e.cancelled&&evtEnCours(e,todayStr);}).sort(function(a,b){return a.dateFin>b.dateFin?1:-1;});
  var upcoming=events.filter(function(e){return e.date>=todayStr;}).sort(function(a,b){return a.date>b.date?1:-1;})[0];
 
  var d30=new Date();d30.setDate(d30.getDate()-30);
@@ -527,18 +532,25 @@ function buildDashboard(){
 
   html+='</div>';
 
+  enCoursL.forEach(function(ev){
+    var cl=(typeof evtMenuOuvrir==="function"&&evtMenuPossible(ev));
+    html+='<div'+(cl?' role="button" onclick="evtMenuOuvrir(\''+authEsc(ev.id)+'\')"':'')+' style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;gap:12px'+(cl?';cursor:pointer':'')+'">'+
+      '<div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#E8670A,#c2410c);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:#E8670A;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">En cours</div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ev.titre)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+evtPlageFr(ev)+'</div></div>'+(cl?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
+  });
   if(upcoming){
     var typeLabels={match:"Prochain match",entrainement:"Prochain entraînement",tournoi:"Prochain tournoi"};
     var upcomingLabel=typeLabels[upcoming.type]||"Prochain événement";
-    var upDateParts=upcoming.date.split("-");
-    var upDateFr=upDateParts.length===3?(upDateParts[2]+"/"+upDateParts[1]+"/"+upDateParts[0]):upcoming.date;
+    var upDateFr=evtPlageFr(upcoming);
     var upCliq=(typeof evtMenuOuvrir==="function"&&evtMenuPossible(upcoming));
     html+='<div'+(upCliq?' role="button" onclick="evtMenuOuvrir(\''+authEsc(upcoming.id)+'\')"':'')+' style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:14px;box-shadow:0 2px 8px var(--shadow);display:flex;align-items:center;gap:12px'+(upCliq?';cursor:pointer':'')+'">'+
       '<div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--dkg),#2a4680);display:flex;align-items:center;justify-content:center;flex-shrink:0">'+
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg></div>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+upcomingLabel+'</div>'+
-        '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+upcoming.titre+'</div>'+
+        '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(upcoming.titre)+'</div>'+
         '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>'+(upCliq?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
   }
 

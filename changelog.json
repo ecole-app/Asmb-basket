@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792504486",
+  "titre": "Événements longs visibles pendant toute leur durée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un stage ou un événement sur plusieurs jours reste affiché sur l'accueil jusqu'à son dernier jour (carte « En cours », dates du … au …)."
+   }
+  ]
+ },
+ {
   "v": "1792495088",
   "titre": "Titres en doublon retirés sur ordinateur",
   "points": [

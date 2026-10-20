@@ -1358,7 +1358,7 @@ function getNextEventForTeam(team){
     if(!e.equipe||e.cancelled)return false;
     var eq=e.equipe.toUpperCase();
     return eq.indexOf(team.name.toUpperCase())>=0;
-  }).filter(function(e){return e.date>=todayStr;});
+  }).filter(function(e){return evtEncoreActif(e,todayStr);});
   matched.sort(function(a,b){return a.date>b.date?1:-1;});
   return matched[0]||null;
 }
