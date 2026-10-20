@@ -739,7 +739,7 @@ function indVueAnnonces(){
     return '<div class="ind-post tap" data-act="annonce" data-id="'+indEsc(a.id)+'" role="button" tabindex="0">'
       +'<div class="ph">'+indAvatarClub()+'<div class="who"><b>'+indEsc((IND.club&&IND.club.name)||"Mon activité")+'</b><small>'+indEsc(indAnnDepuis(a)+" · "+indCibleTxt(a))+'</small></div><span class="dots" aria-hidden="true">···</span></div>'
       +'<div class="pb"><p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
-      +'<div class="pf"><span class="ind-react">👍🏼 '+c.up.length+'</span><span class="ind-react">👎🏼 '+c.down.length+'</span><span class="acc">'+nb+' / '+tot+' réponses</span></div></div>';
+      +'<div class="pf"><span class="ind-react"><span class="em">👍🏼</span> '+c.up.length+'</span><span class="ind-react"><span class="em">👎🏼</span> '+c.down.length+'</span><span class="acc">'+nb+' / '+tot+' réponses</span></div></div>';
   }).join("");
 }
 function indOuvrirAnnonce(id){
@@ -825,7 +825,7 @@ function indListeAnnoncesClient(l){
       +'<div class="pf col">'+pers.map(function(p){
         var r=IND.reacs[a.id+"__"+p.id], v=r&&r.val;
         function bt(val,emoji,lib){
-          return '<button type="button" class="ind-pb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'">'+emoji+' '+lib+'</button>';
+          return '<button type="button" class="ind-pb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'"><span class="em">'+emoji+'</span> '+lib+'</button>';
         }
         return '<div class="pr">'+(multi?'<b>'+indEsc(p.prenom)+'</b>':'')+bt("up","👍🏼","D\'accord")+bt("down","👎🏼","Pas d\'accord")+'</div>';
       }).join("")+'</div></div>';

@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792506082",
+  "titre": "Indépendant : emoji des réponses plus discrets",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "client"
+    ],
+    "texte": "Les 👍🏼 👎🏼 des annonces sont semi-transparents, pleins une fois choisis."
+   }
+  ]
+ },
+ {
   "v": "1792505936",
   "titre": "Indépendant : annonces façon fil d'équipe",
   "points": [
