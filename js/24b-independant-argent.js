@@ -148,7 +148,7 @@ function indLigneHtml(l,coach,multi){
 function indArgentVue(){
   if(!indPremium()){
     return '<div class="ind-c"><div class="ind-row"><div class="t"><strong>Suivi des paiements et pass : formule Premium</strong>'
-      +'<span>Vois qui te doit quoi, vends des pass de séances et garde ton historique. Reçus numérotés et livre des recettes inclus.</span></div></div></div>';
+      +'<span>Vois qui te doit quoi, vends des pass de séances et garde ton historique. Reçus numérotés, livre des recettes et stats inclus.</span></div></div></div>';
   }
   var l=indLignes(), du=indDuLignes(l), mois=indAuj().slice(0,7);
   var encaisse=indSomme(l.filter(function(x){ return x.statut==="paye" && (x.datePaiement||"").slice(0,7)===mois; }));

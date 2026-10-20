@@ -1142,6 +1142,18 @@ describe("Indépendant : compte client par lien, fiches, séances, réservations
     await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_lignes")));
     await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_lignes/s_cr1_2026-10-20__cliI")));
   });
+  it("présences : l'indépendant les écrit et les lit, ni un client ni un club", async () => {
+    const dir = await as("dirI"), cli = await as("cliI");
+    const pr = (o = {}) => Object.assign({ pid: "cliI", compte: "cliI", date: "2026-10-20", seance: "cr1_2026-10-20" }, o);
+    await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_presences/cr1_2026-10-20__cliI"), pr()));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_presences/x1"), pr({ date: "20/10/2026" })));
+    await assertFails(setDoc(doc(dir, "clubs/I/indep_presences/x2"), pr({ extra: 1 })));
+    await assertSucceeds(getDocs(collection(dir, "clubs/I/indep_presences")));
+    await assertFails(getDocs(collection(cli, "clubs/I/indep_presences")));
+    await assertFails(setDoc(doc(cli, "clubs/I/indep_presences/x3"), pr()));
+    await assertFails(getDocs(collection(await as("dirA"), "clubs/I/indep_presences")));
+    await assertSucceeds(deleteDoc(doc(dir, "clubs/I/indep_presences/cr1_2026-10-20__cliI")));
+  });
   it("reçus : l'indépendant écrit l'émetteur et le compteur, le client les lit, personne d'autre", async () => {
     const dir = await as("dirI"), cli = await as("cliI");
     await assertSucceeds(setDoc(doc(dir, "clubs/I/indep_reglages/recus"), { raison: "KS Training", siret: "12345678901234", adresse: "1 rue X", contact: "0600000000", annee: 2026, n: 3 }));

@@ -126,6 +126,7 @@ function indEcouter(){
     var m={}; sn.forEach(function(d){ m[d.id]=d.data(); }); IND.reacs=m; indRendre();
   });
   if(typeof indArgentEcouter==="function") indArgentEcouter(ecoute,db);
+  if(typeof indStatsEcouter==="function") indStatsEcouter(ecoute,db);
   if(IND.role==="coach"){
     ecoute(window.fbCollection(db,"indep_discussions"),function(sn){
       var m={}; sn.forEach(function(d){ m[d.id]=d.data({serverTimestamps:"estimate"}); }); IND.discs=m; indRendre();
@@ -383,6 +384,7 @@ function indPresence(sid,uid){
   IND.resas[k]=Object.assign({},r,d); indRendre();
   window.fbSetDoc(window.fbDoc(indDb(),"indep_resas",k),d,{merge:true}).catch(indErr);
   if(typeof indArgentPresence==="function") indArgentPresence(s,uid,val);
+  if(typeof indStatsPresence==="function") indStatsPresence(s,uid,val);
 }
 function indAnnulerSeance(sid){
   var s=indSeanceParId(sid); if(!s) return;

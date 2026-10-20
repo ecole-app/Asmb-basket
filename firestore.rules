@@ -1005,6 +1005,18 @@ service cloud.firestore {
         allow delete: if dirigeant(clubId);
       }
 
+      // Trace des présences de l'indépendant (stats perso) : écrite au pointage, lue par lui seul.
+      match /indep_presences/{id} {
+        allow read: if readDirigeant(clubId);
+        allow create, update: if dirigeant(clubId)
+          && request.resource.data.keys().hasOnly(['pid','compte','date','seance'])
+          && request.resource.data.pid is string && request.resource.data.pid.size() >= 1 && request.resource.data.pid.size() <= 60
+          && request.resource.data.compte is string && request.resource.data.compte.size() >= 1 && request.resource.data.compte.size() <= 60
+          && request.resource.data.seance is string && request.resource.data.seance.size() >= 1 && request.resource.data.seance.size() <= 80
+          && request.resource.data.date is string && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+        allow delete: if dirigeant(clubId);
+      }
+
       // Reçus de l'indépendant : identité de l'émetteur (nom, SIRET, adresse) et compteur du
       // dernier numéro. Lus par les membres (le client a besoin de l'émetteur pour son PDF).
       match /indep_reglages/{id} {

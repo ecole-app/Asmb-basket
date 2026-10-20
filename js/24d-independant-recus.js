@@ -242,12 +242,13 @@ function indLivrePdf(r,annee){
 
 // ── Boutons de l'onglet Argent et actions ────────────────────────────
 function indRecusBoutons(){
-  return '<div class="ind-btns" style="margin-top:10px"><button type="button" class="ind-btn s" data-act="livre">Livre des recettes</button>'
+  return '<div class="ind-btns" style="margin-top:10px"><button type="button" class="ind-btn s" data-act="stats">Stats</button><button type="button" class="ind-btn s" data-act="livre">Livre des recettes</button>'
     +'<button type="button" class="ind-btn s" data-act="recus-infos">Mes infos pour les reçus</button></div>';
 }
 function indRecusClic(act,el){
   if(act==="recu"){ indRecuOuvrir(el.dataset.id); return true; }
   if(act==="livre"){ indLivre(); return true; }
   if(act==="recus-infos"){ indRecusInfosForm(); return true; }
+  if(typeof indStatsClic==="function") return indStatsClic(act);
   return false;
 }

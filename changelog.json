@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792466259",
+  "titre": "Indépendant : stats perso",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Onglet Argent › Stats (formule Premium) : séances données, présents en moyenne et argent encaissé ce mois-ci, comparés au mois dernier. Plus la liste des clients à relancer (pas venus depuis 3 semaines), avec un SMS pré-rempli à envoyer. Les stats se construisent à partir des présences pointées dès maintenant."
+   }
+  ]
+ },
+ {
   "v": "1792443552",
   "titre": "Indépendant : petits correctifs d'affichage",
   "points": [
