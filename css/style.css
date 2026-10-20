@@ -740,3 +740,18 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
   .ms-tab{font-size:15px}
   .ms-tab td{padding:8px 8px}
 }
+
+/* Espace Admin ordinateur : un seul titre, cartes rangées par thème */
+html.gm-desk #scr-admin>.hero{background:none!important;box-shadow:none;padding:14px 24px 0!important;justify-content:flex-end}
+html.gm-desk #scr-admin>.hero>div{display:none}
+html.gm-desk #scr-admin>.hero #admin-edit-toggle{background:var(--card)!important;color:var(--txt)!important;border:1px solid var(--bdr)!important}
+html.gm-desk #scr-admin>.sec{display:none}
+html.gm-desk #adminCards{display:block;padding:8px 24px 32px}
+html.gm-desk #adminCards>.admin-card{margin:0 0 12px;max-width:380px}
+html.gm-desk #adminCards>div:not(.admin-card):not(.adm-grp){margin:0 0 16px!important;max-width:560px}
+html.gm-desk #season-banner{padding:0 24px}
+html.gm-desk #season-banner>div{margin:0 0 12px!important;max-width:560px}
+html.gm-desk .adm-grp{margin-bottom:22px}
+html.gm-desk .adm-grp-t{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+html.gm-desk .adm-grp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,340px));gap:12px}
+html.gm-desk .adm-grp-g>.admin-card{margin:0}

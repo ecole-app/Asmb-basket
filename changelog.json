@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792494664",
+  "titre": "Espace Admin plus clair sur ordinateur",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, les cartes de l'Espace Admin sont rangées par thème (Sportif, Membres, Gestion, Réglages) avec un seul titre."
+   }
+  ]
+ },
+ {
   "v": "1792494226",
   "titre": "Version ordinateur : les pôles dans le menu",
   "points": [

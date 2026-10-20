@@ -574,6 +574,25 @@ function buildAdminHome(){
  }
     el.appendChild(d);
   });
+  // Ordinateur : cartes rangées par thème (comme le menu latéral). Mode « Organiser » : liste à plat.
+  if(document.documentElement.classList.contains("gm-desk") && !ADMIN_EDIT_MODE){
+    var GRP=[["Sportif",["equipes","planning","documents"]],["Membres",["licences","inscriptions","fiches","communaute","avis"]],["Gestion",["comptabilite","sponsors","notesfrais","inventaire"]],["Réglages",["parametres","invitations","acces"]]];
+    var byId={};
+    Array.prototype.slice.call(el.querySelectorAll(".admin-card[data-module-id]")).forEach(function(c){byId[c.dataset.moduleId]=c;});
+    var used={};
+    function grp(titre,ids){
+      var cs=ids.map(function(i){used[i]=1;return byId[i];}).filter(Boolean);
+      if(!cs.length)return;
+      var g=document.createElement("div");g.className="adm-grp";
+      g.innerHTML='<div class="adm-grp-t">'+titre+'</div>';
+      var gr=document.createElement("div");gr.className="adm-grp-g";
+      cs.forEach(function(c){gr.appendChild(c);});
+      g.appendChild(gr);el.appendChild(g);
+    }
+    GRP.forEach(function(x){grp(x[0],x[1]);});
+    var rest=Object.keys(byId).filter(function(i){return !used[i];});
+    if(rest.length) grp("Autres",rest);
+  }
   if(ADMIN_EDIT_MODE){
     var cards=Array.prototype.slice.call(el.querySelectorAll(".admin-card"));
     enablePressDrag(cards, function(newOrder){
