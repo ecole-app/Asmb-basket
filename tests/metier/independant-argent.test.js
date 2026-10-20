@@ -100,11 +100,23 @@ describe("Présence pointée → ligne", () => {
     c.indArgentPresence(seance(), "cli", false);
     assert.deepEqual(plat(c.ops), [["delete", "indep_lignes/s_cr1_2026-10-20__cli"], ["update", "indep_lignes/p1", { usages: { retire: "cr1_2026-10-20" } }]]);
   });
-  it("formule Standard : rien n'est suivi", () => {
+  it("formule Standard : pas de ligne « à payer », mais le pass se décompte", () => {
     const c = app({ plan: "standard" });
     c.indArgentPresence(seance(), "cli", true);
     assert.equal(c.ops.length, 0);
     assert.equal(c.indPremium(), false);
+    const c2 = app({ plan: "standard", lignes: { p1: pass({ id: "p1" }) } });
+    c2.indArgentPresence(seance(), "cli", true);
+    assert.deepEqual(plat(c2.ops.map((o) => [o[0], o[1]])), [["set", "indep_lignes/s_cr1_2026-10-20__cli"], ["update", "indep_lignes/p1"]]);
+  });
+  it("formule Standard : un pass vendu est enregistré payé (sans suivi des paiements)", () => {
+    const c = app({ plan: "standard" });
+    c.IND.clients = { cli: { prenom: "Julie", nom: "D" } };
+    c.fbSetDoc = (ref, d) => { c.ops.push(["set", ref, d]); return Promise.resolve(); };
+    c.indId = () => "p_x";
+    c.indVendrePass({ pid: "cli", n: 10, prix: 200, mois: 6, paye: false });
+    const d = plat(c.ops[0][2]);
+    assert.equal(d.statut, "paye"); assert.equal(d.montant, 200); assert.equal(d.mode, ""); assert.equal(d.datePaiement, d.debut);
   });
 });
 

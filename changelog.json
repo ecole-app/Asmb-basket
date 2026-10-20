@@ -1,5 +1,23 @@
 [
  {
+  "v": "1792466515",
+  "titre": "Indépendant : le pass de séances aussi en Standard",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Formule Standard : tu peux vendre des pass de séances (onglet Argent). Il se décompte tout seul à chaque présence pointée. Le suivi des paiements, les reçus, le livre des recettes et les stats restent en Premium (les pass vendus apparaîtront alors dans ton livre)."
+   },
+   {
+    "roles": [
+     "client"
+    ],
+    "texte": "Ton pass et le nombre de séances restantes s'affichent sur ton Accueil."
+   }
+  ]
+ },
+ {
   "v": "1792466259",
   "titre": "Indépendant : stats perso",
   "points": [

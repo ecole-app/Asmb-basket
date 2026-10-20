@@ -72,7 +72,8 @@ function indNomPers(pid){
 // ── Présence pointée → ligne à payer ou séance prise sur un pass ─────
 // s : séance (indSeanceParId), pid : personne, present : true/false
 function indArgentPresence(s,pid,present){
-  if(!indPremium() || IND.role!=="coach") return;
+  if(IND.role!=="coach") return;
+  var prem=indPremium(); // Standard : le pass se décompte, mais aucune ligne « à payer » n'est créée
   var id=indLigneId(s.id,pid), ex=IND.lignes[id], b=window.fbWriteBatch(), ref=function(k){ return window.fbDoc(indDb(),"indep_lignes",k); };
   if(present){
     if(ex) return;
@@ -81,7 +82,7 @@ function indArgentPresence(s,pid,present){
     if(pass){
       b.set(ref(id),Object.assign(base,{montant:0, statut:"pass", passId:pass.id}));
       b.update(ref(pass.id),{usages:window.fbArrayUnion(s.id)});
-    } else if(prix>0){
+    } else if(prix>0 && prem){
       b.set(ref(id),Object.assign(base,{montant:prix, statut:"du"}));
     } else return;
   } else {
@@ -94,8 +95,8 @@ function indArgentPresence(s,pid,present){
 }
 // Petite pastille dans la liste des présences d'une séance.
 function indArgentPill(sid,pid){
-  if(!indPremium()) return "";
   var l=IND.lignes[indLigneId(sid,pid)]; if(!l) return "";
+  if(!indPremium() && l.statut!=="pass") return "";
   if(l.statut==="du") return '<span class="ind-pill w">'+indEsc(indEuros(l.montant))+' à payer</span>';
   if(l.statut==="paye") return '<span class="ind-pill ok">Payé</span>';
   return '<span class="ind-pill a">Pass</span>';
@@ -125,7 +126,8 @@ function indVendrePass(o){
   var debut=indAuj();
   var d={type:"pass", uid:o.pid, compte:indCompteDe(o.pid), date:debut, debut:debut, fin:indAjoutMois(debut,o.mois||IND_PASS_MOIS), seances:o.n, usages:[],
     libelle:("Pass "+o.n+" séance"+(o.n>1?"s":"")).slice(0,120), montant:indArrondi(o.prix), statut:o.paye?"paye":"du", createdAt:window.fbServerTimestamp()};
-  if(o.paye){ d.mode=o.mode; d.datePaiement=o.date; }
+  if(!indPremium()){ d.statut="paye"; d.mode=""; d.datePaiement=debut; } // Standard : pas de suivi des paiements ; ces ventes apparaîtront au passage en Premium
+  else if(o.paye){ d.mode=o.mode; d.datePaiement=o.date; }
   return window.fbSetDoc(window.fbDoc(indDb(),"indep_lignes",indId("p_")),d);
 }
 
@@ -145,11 +147,22 @@ function indLigneHtml(l,coach,multi){
 }
 
 // ── Onglet Argent (indépendant) ──────────────────────────────────────
+// Formule Standard : les pass de séances (vente et décompte automatique) ; le reste est Premium.
+function indPassLigneStd(p){
+  return '<div class="ind-row"><div class="t"><strong>'+indEsc(indNomPers(p.uid))+'</strong><span>'
+    +indEsc(indPassRestantes(p)+" / "+p.seances+" restantes · jusqu'au "+indDateTxt(p.fin))+'</span></div></div>';
+}
+function indArgentVueStandard(){
+  var pass=indPassEnCours(indLignes()).sort(function(a,b){ return (a.fin||"").localeCompare(b.fin||""); });
+  var h='<div class="ind-k">Pass en cours</div>';
+  h+=pass.length?'<div class="ind-c ind-list">'+pass.map(indPassLigneStd).join("")+'</div>':'<div class="ind-c ind-vide">Aucun pass en cours. Vends un pass de séances : il se décompte tout seul à chaque présence pointée.</div>';
+  h+='<button type="button" class="ind-btn p" data-act="pass-vendre">+ Vendre un pass</button>';
+  h+='<div class="ind-c" style="margin-top:14px"><div class="ind-row"><div class="t"><strong>Suivi des paiements : formule Premium</strong>'
+    +'<span>Vois qui te doit quoi, encaisse, garde l\'historique. Reçus numérotés, livre des recettes et stats inclus.</span></div></div></div>';
+  return h;
+}
 function indArgentVue(){
-  if(!indPremium()){
-    return '<div class="ind-c"><div class="ind-row"><div class="t"><strong>Suivi des paiements et pass : formule Premium</strong>'
-      +'<span>Vois qui te doit quoi, vends des pass de séances et garde ton historique. Reçus numérotés, livre des recettes et stats inclus.</span></div></div></div>';
-  }
+  if(!indPremium()) return indArgentVueStandard();
   var l=indLignes(), du=indDuLignes(l), mois=indAuj().slice(0,7);
   var encaisse=indSomme(l.filter(function(x){ return x.statut==="paye" && (x.datePaiement||"").slice(0,7)===mois; }));
   var h='<div class="ind-stats"><div class="ind-c"><div class="ind-big">'+indEsc(indEuros(indSomme(du)))+'</div><span>à encaisser</span></div>'
@@ -185,6 +198,11 @@ function indArgentFiche(compte){
   sh.body.addEventListener("click",indClic);
   IND.feuille={s:sh, peindre:function(){
     var l=indLignesCompte(compte), du=indDuLignes(l), pass=indPassEnCours(l);
+    if(!indPremium()){
+      sh.body.innerHTML='<div class="ind-k">Pass</div>'+(pass.length?'<div class="ind-c ind-list">'+pass.map(indPassLigneStd).join("")+'</div>':'<div class="ind-c ind-vide">Aucun pass en cours.</div>')
+        +(coach?'<button type="button" class="ind-btn p" data-act="pass-vendre" data-compte="'+indEsc(compte)+'">+ Vendre un pass</button>':'');
+      return;
+    }
     var multi=false, vus={}; l.forEach(function(x){ vus[x.uid]=1; }); multi=Object.keys(vus).length>1;
     var h='<div class="ind-c"><div class="ind-row"><div class="t"><strong style="font-size:22px">'+indEsc(indEuros(indSomme(du)))+'</strong><span>'
       +(du.length?"à régler ("+du.length+" ligne"+(du.length>1?"s":"")+")":"Tout est réglé")+'</span></div>'
@@ -236,32 +254,36 @@ function indPassForm(compte){
     +'<div class="deux"><label>Nombre de séances<input id="ind-ps-n" type="number" inputmode="numeric" min="1" max="200" value="10"></label>'
     +'<label>Prix total (€)<input id="ind-ps-prix" type="number" inputmode="decimal" min="0" step="0.01" placeholder="200"></label></div>'
     +'<label>Valable (mois)<input id="ind-ps-mois" type="number" inputmode="numeric" min="1" max="36" value="'+IND_PASS_MOIS+'"></label>'
-    +'<label class="case"><input type="checkbox" id="ind-ps-paye">Déjà payé</label>'
+    +(indPremium()?'<label class="case"><input type="checkbox" id="ind-ps-paye">Déjà payé</label>'
     +'<div id="ind-ps-pay" class="ind-f" hidden><label>Mode de paiement<select id="ind-ps-mode">'+IND_MODES.map(function(m){ return '<option value="'+m[0]+'">'+m[1]+'</option>'; }).join("")+'</select></label>'
-    +'<label>Date du paiement<input id="ind-ps-date" type="date" max="'+indAuj()+'" value="'+indAuj()+'"></label></div>'
+    +'<label>Date du paiement<input id="ind-ps-date" type="date" max="'+indAuj()+'" value="'+indAuj()+'"></label></div>':'')
     +'<p class="ind-note">Chaque séance pointée « présent » est prise sur le pass tant qu\'il est valable et qu\'il reste des séances.</p>'
     +'<div class="err" id="ind-ps-err"></div><div class="actions"><button type="submit" class="ok">Créer le pass</button></div></form>';
   var f=sh.body.querySelector("#ind-ps-f");
-  f.querySelector("#ind-ps-paye").addEventListener("change",function(){ f.querySelector("#ind-ps-pay").hidden=!this.checked; });
+  var cbPaye=f.querySelector("#ind-ps-paye");
+  if(cbPaye) cbPaye.addEventListener("change",function(){ f.querySelector("#ind-ps-pay").hidden=!this.checked; });
   f.addEventListener("submit",function(e){
     e.preventDefault();
     var err=f.querySelector("#ind-ps-err");
     var n=parseInt(f.querySelector("#ind-ps-n").value,10), prix=parseFloat(String(f.querySelector("#ind-ps-prix").value).replace(",",".")), mois=parseInt(f.querySelector("#ind-ps-mois").value,10);
-    var paye=f.querySelector("#ind-ps-paye").checked, date=f.querySelector("#ind-ps-date").value;
+    var paye=!!(cbPaye&&cbPaye.checked), dEl=f.querySelector("#ind-ps-date"), date=dEl?dEl.value:"";
     if(!(n>=1&&n<=200)) { err.textContent="Indique le nombre de séances (1 à 200)."; return; }
     if(!(prix>=0)) { err.textContent="Indique le prix du pass."; return; }
     if(!(mois>=1&&mois<=36)) { err.textContent="Indique la durée de validité en mois."; return; }
     if(paye && !date) { err.textContent="Indique la date du paiement (JJ/MM/AAAA)."; return; }
     f.querySelector("button[type=submit]").disabled=true;
-    indVendrePass({pid:f.querySelector("#ind-ps-qui").value, n:n, prix:prix, mois:mois, paye:paye, mode:f.querySelector("#ind-ps-mode").value, date:date})
+    indVendrePass({pid:f.querySelector("#ind-ps-qui").value, n:n, prix:prix, mois:mois, paye:paye, mode:(f.querySelector("#ind-ps-mode")||{}).value, date:date})
       .then(function(){ sh.modal.remove(); showToast("Pass créé"); }).catch(function(e2){ f.querySelector("button[type=submit]").disabled=false; indErr(e2); });
   });
 }
 
 // ── Client : encart sur l'Accueil ────────────────────────────────────
 function indArgentClientBloc(){
-  if(!indPremium()) return "";
   var l=indLignesCompte(IND.uid); if(!l.length) return "";
+  if(!indPremium()){
+    var ps=indPassEnCours(l); if(!ps.length) return "";
+    return '<div class="ind-k">Mon pass</div><div class="ind-c ind-list">'+ps.map(indPassLigneStd).join("")+'</div>';
+  }
   var du=indSomme(indDuLignes(l)), pass=indPassEnCours(l);
   var sous=[];
   pass.forEach(function(p){ sous.push((indPersonnes().length>1?indNomPers(p.uid)+" : ":"")+indPassRestantes(p)+" séance"+(indPassRestantes(p)>1?"s":"")+" restante"+(indPassRestantes(p)>1?"s":"")+" (jusqu'au "+indDateTxt(p.fin)+")"); });
