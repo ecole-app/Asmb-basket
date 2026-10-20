@@ -553,6 +553,30 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .ind-reacs.c .ind-row .t b{color:var(--it)}
 .ind-rb{width:52px;height:42px;border-radius:12px;border:1.5px solid var(--il);background:var(--ic);font-size:20px;line-height:1;cursor:pointer;flex-shrink:0;font-family:inherit}
 .ind-rb.on{border-color:var(--ia);background:color-mix(in srgb,var(--ia) 16%,transparent)}
+/* Fil d'annonces façon réseau d'équipe : cartes blanches, en-tête avatar + nom + heure, barre de réactions séparée */
+.ind-compo{display:flex;align-items:center;gap:12px;padding:14px;background:var(--ic);border:1px solid var(--il);border-radius:16px;cursor:pointer;color:var(--it)}
+.ind-compo .ind-av{width:44px;height:44px;font-size:14px}
+.ind-compo .t{flex:1;min-width:0}
+.ind-compo b{display:block;font-size:16px;font-weight:800}
+.ind-compo span:not(.ind-pill){display:block;font-size:13px;color:var(--im)}
+.ind-post{background:var(--ic);border:1px solid var(--il);border-radius:16px;overflow:hidden;color:var(--it)}
+.ind-post.tap{cursor:pointer}
+.ind-post .ph{display:flex;align-items:center;gap:10px;padding:14px 14px 0}
+.ind-post .ph .ind-av{width:42px;height:42px;font-size:13.5px}
+.ind-post .who{flex:1;min-width:0}
+.ind-post .who b{display:block;font-size:15px;font-weight:800}
+.ind-post .who small{display:block;font-size:12.5px;color:var(--im)}
+.ind-post .dots{font-size:20px;font-weight:900;letter-spacing:1px;color:var(--it);line-height:1}
+.ind-post .pb{padding:12px 14px 14px}
+.ind-post .pf{display:flex;align-items:center;gap:16px;padding:11px 14px;border-top:1px solid var(--il);flex-wrap:wrap}
+.ind-post .pf.col{flex-direction:column;align-items:stretch;gap:8px}
+.ind-react{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--it2)}
+.ind-post .acc{margin-left:auto;color:var(--ia);font-weight:800;font-size:13px}
+.ind-post .pr{display:flex;align-items:center;gap:8px}
+.ind-post .pr b{flex:1;font-size:14px}
+.ind-pb{flex:1 1 0;min-width:0;height:42px;border-radius:999px;border:1.5px solid var(--il);background:var(--ic);color:var(--it);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:0 4px;white-space:nowrap}
+.ind-post .pr b + .ind-pb{flex:0 0 auto;min-width:84px}
+.ind-pb.on{border-color:var(--ia);background:color-mix(in srgb,var(--ia) 14%,transparent)}
 .ind-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--ib);border:1px solid var(--il);border-radius:12px;padding:3px}
 .ind-seg button{border:none;background:none;padding:9px;border-radius:9px;font:inherit;font-size:13px;font-weight:800;color:var(--im);cursor:pointer}
 .ind-seg button.on{background:var(--ic);color:var(--it);box-shadow:0 1px 3px rgba(0,0,0,.12)}

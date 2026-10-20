@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792505936",
+  "titre": "Indépendant : annonces façon fil d'équipe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "client"
+    ],
+    "texte": "Annonces et messages présentés comme un fil : cartes avec nom, heure, réponses en un geste (D'accord / Pas d'accord)."
+   }
+  ]
+ },
+ {
   "v": "1792504486",
   "titre": "Événements longs visibles pendant toute leur durée",
   "points": [

@@ -650,6 +650,25 @@ function indClientFiche(uid){
 function indAnnMs(a){ var c=a&&a.createdAt; return (c&&c.toMillis)?c.toMillis():Date.now(); }
 function indHeure(d){ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 function indAnnQuand(a){ var d=new Date(indAnnMs(a)); return indDateTxt(indIso(d))+" · "+indHeure(d); }
+// « il y a 3 h », « hier », sinon la date : lecture rapide d'un fil.
+function indAnnDepuis(a){
+  var m=Math.round((Date.now()-indAnnMs(a))/60000);
+  if(m<1) return "à l'instant";
+  if(m<60) return "il y a "+m+" min";
+  if(m<1440) return "il y a "+Math.round(m/60)+" h";
+  if(m<2880) return "hier";
+  if(m<10080) return "il y a "+Math.round(m/1440)+" j";
+  return indDateTxt(indIso(new Date(indAnnMs(a))));
+}
+function indAvatarClub(){
+  var w=String((IND.club&&IND.club.name)||"?").trim().split(/\s+/);
+  return '<div class="ind-av">'+indEsc(indInitiales(w[0],w[1]||""))+'</div>';
+}
+// Carte « Écrire… » en haut du fil : ouvre le formulaire ou la discussion.
+function indCarteCompo(act,titre,sous,nonLue){
+  return '<div class="ind-compo" data-act="'+act+'" role="button" tabindex="0">'+indAvatarClub()+'<div class="t"><b>'+indEsc(titre)+'</b><span>'+indEsc(sous)+'</span></div>'
+    +(nonLue?'<span class="ind-pill ok">Nouveau</span>':'')+'</div>';
+}
 function indAnnoncesTriees(){ return IND.annonces.slice().sort(function(x,y){ return indAnnMs(y)-indAnnMs(x); }); }
 function indAnnonceParId(id){ for(var i=0;i<IND.annonces.length;i++) if(IND.annonces[i].id===id) return IND.annonces[i]; return null; }
 function indCreneauParId(id){ for(var i=0;i<IND.creneaux.length;i++) if(IND.creneaux[i].id===id) return IND.creneaux[i]; return null; }
@@ -713,14 +732,14 @@ function indVueMessages(){
   return seg+indVueAnnonces();
 }
 function indVueAnnonces(){
-  var l=indAnnoncesTriees(), h='<button type="button" class="ind-btn p" data-act="annonce-new">+ Nouvelle annonce</button>';
+  var l=indAnnoncesTriees(), h=indCarteCompo("annonce-new","Écrire à mes clients","Information, changement de séance, encouragement");
   if(!l.length) return h+'<div class="ind-c ind-vide">Aucune annonce pour l\'instant.<br>Écris à tous tes clients, ou seulement aux habitués d\'un créneau : ils répondent d\'un 👍🏼 ou d\'un 👎🏼.</div>';
   return h+l.map(function(a){
-    var c=indCompteReac(a);
-    return '<div class="ind-c tap" data-act="annonce" data-id="'+indEsc(a.id)+'" role="button" tabindex="0">'
-      +'<div class="ind-ann-h"><span>'+indEsc(indCibleTxt(a))+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
-      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)
-      +'<div class="ind-reacs"><span class="ind-pill ok">👍🏼 '+c.up.length+'</span><span class="ind-pill no">👎🏼 '+c.down.length+'</span><span class="ind-pill a">'+c.aucune.length+' sans réponse</span></div></div>';
+    var c=indCompteReac(a), nb=c.up.length+c.down.length, tot=nb+c.aucune.length;
+    return '<div class="ind-post tap" data-act="annonce" data-id="'+indEsc(a.id)+'" role="button" tabindex="0">'
+      +'<div class="ph">'+indAvatarClub()+'<div class="who"><b>'+indEsc((IND.club&&IND.club.name)||"Mon activité")+'</b><small>'+indEsc(indAnnDepuis(a)+" · "+indCibleTxt(a))+'</small></div><span class="dots" aria-hidden="true">···</span></div>'
+      +'<div class="pb"><p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +'<div class="pf"><span class="ind-react">👍🏼 '+c.up.length+'</span><span class="ind-react">👎🏼 '+c.down.length+'</span><span class="acc">'+nb+' / '+tot+' réponses</span></div></div>';
   }).join("");
 }
 function indOuvrirAnnonce(id){
@@ -791,11 +810,8 @@ function indAnnonceForm(opts){
 }
 // Client : annonces reçues, avec 👍🏼 / 👎🏼 (une réponse par personne : moi, puis chaque enfant concerné).
 function indVueMessagesClient(){
-  var l=indAnnoncesPourMoi(), d=IND.disc, nonLue=indDiscNonLueClient();
-  var carte='<div class="ind-c tap" data-act="disc" role="button" tabindex="0"><div class="ind-row"><div class="ind-av">💬</div><div class="t"><strong>'
-    +indEsc(d?"Discussion avec "+((IND.club&&IND.club.name)||"ton coach"):"Écrire à "+((IND.club&&IND.club.name)||"ton coach"))+'</strong><span>'
-    +indEsc(d?((d.dernierDe==="client"?"Toi : ":"")+(d.dernier||"")):"Une question ? Ouvre une discussion privée.")+'</span></div>'
-    +(nonLue?'<span class="ind-pill ok">Nouveau</span>':'<span aria-hidden="true">›</span>')+'</div></div>';
+  var l=indAnnoncesPourMoi(), d=IND.disc, nonLue=indDiscNonLueClient(), nom=(IND.club&&IND.club.name)||"ton coach";
+  var carte=indCarteCompo("disc",d?"Discussion avec "+nom:"Écrire à "+nom,d?((d.dernierDe==="client"?"Toi : ":"")+(d.dernier||"")):"Une question ? Ouvre une discussion privée.",nonLue);
   if(!l.length) return carte+'<div class="ind-c ind-vide">Pas encore d\'annonce de ton coach.<br>Elles apparaîtront ici.</div>';
   return carte+indListeAnnoncesClient(l);
 }
@@ -803,14 +819,15 @@ function indListeAnnoncesClient(l){
   var avant=IND.luAvant==null?indLuLire():IND.luAvant, tous=indPersonnes(), multi=tous.length>1;
   return l.map(function(a){
     var pers=tous.filter(function(p){ return indAnnVisible(a,p.id); }), nouveau=indAnnMs(a)>avant;
-    return '<div class="ind-c"><div class="ind-ann-h"><span>'+(nouveau?'<span class="ind-pill ok">Nouveau</span>':'')+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
-      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)
-      +'<div class="ind-reacs c">'+pers.map(function(p){
+    return '<div class="ind-post"><div class="ph">'+indAvatarClub()+'<div class="who"><b>'+indEsc((IND.club&&IND.club.name)||"Ton coach")+'</b><small>'+indEsc(indAnnDepuis(a))+'</small></div>'
+      +(nouveau?'<span class="ind-pill ok">Nouveau</span>':'')+'</div>'
+      +'<div class="pb"><p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +'<div class="pf col">'+pers.map(function(p){
         var r=IND.reacs[a.id+"__"+p.id], v=r&&r.val;
         function bt(val,emoji,lib){
-          return '<button type="button" class="ind-rb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'">'+emoji+'</button>';
+          return '<button type="button" class="ind-pb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'">'+emoji+' '+lib+'</button>';
         }
-        return '<div class="ind-row"><div class="t"><span>'+(multi?'<b>'+indEsc(p.prenom)+'</b>':'Ta réponse')+'</span></div>'+bt("up","👍🏼","D'accord")+bt("down","👎🏼","Pas d'accord")+'</div>';
+        return '<div class="pr">'+(multi?'<b>'+indEsc(p.prenom)+'</b>':'')+bt("up","👍🏼","D\'accord")+bt("down","👎🏼","Pas d\'accord")+'</div>';
       }).join("")+'</div></div>';
   }).join("");
 }
