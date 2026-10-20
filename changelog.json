@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792529467",
+  "titre": "Chacun voit ses stats de match",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "joueur",
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "Après chaque feuille de match, le joueur ou son parent voit ses propres stats dans l'onglet Stats (jamais celles des autres) : moyennes, adresse, évaluation match par match en Premium, points et fautes en Standard. Bouton 📄 PDF sur la fiche joueur."
+   }
+  ]
+ },
+ {
   "v": "1792529264",
   "titre": "Planning filtré par type",
   "points": [

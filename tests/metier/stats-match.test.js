@@ -229,3 +229,37 @@ describe("Tableau de saison d'une équipe (msEquipeSaison)", () => {
     assert.ok(r.joueurs.every((j) => j.evals.length === j.n));
   });
 });
+
+describe("Vue joueur / parent : ses lignes seulement", () => {
+  function termine(id, date, actions) {
+    const m = c.msNouveau({ id, equipe: "U15", date }, ["a", "b"], "2026-2027", 10);
+    actions.forEach(([a, p, s]) => ev(m, a, p, s));
+    c.msTerminer(m, T0);
+    return m;
+  }
+  const m1 = termine("e1", "2026-10-10", [["p2", "a", 10], ["p3", "b", 20], ["a2", null, 30]]);
+  const m2 = termine("e2", "2026-10-17", [["p2", "a", 10], ["p2", "a", 20], ["rd", "a", 25]]);
+  const enCours = c.msNouveau({ id: "e3", equipe: "U15", date: "2026-10-24" }, ["a"], "2026-2027", 10);
+  it("une liste par joueur, matchs terminés seulement, triés par date", () => {
+    const l = c.msLignesJoueurs([m2, enCours, m1], { maintenant: T0 });
+    assert.equal(l.a.length, 2);
+    assert.deepEqual(Array.from(l.a, (x) => x.eventId), ["e1", "e2"]);
+    assert.equal(l.a[0].ligne.pts, 2);
+    assert.equal(l.a[0].nous, 5);
+    assert.equal(l.a[0].eux, 2);
+  });
+  it("la ligne du joueur a ne contient rien de b", () => {
+    const l = c.msLignesJoueurs([m1], { maintenant: T0 });
+    assert.equal(l.a[0].ligne.pts, 2);
+    assert.equal(l.b[0].ligne.pts, 3);
+    assert.equal(JSON.stringify(l.a).includes('"b"'), false);
+  });
+  it("même fiche que la vue staff", () => {
+    const staff = c.msFicheJoueur("a", [m1, m2], { maintenant: T0 });
+    const parent = c.msFicheDepuisLignes(c.msLignesJoueurs([m1, m2], { maintenant: T0 }).a);
+    assert.equal(parent.n, staff.n);
+    assert.equal(parent.moyennes.pts, staff.moyennes.pts);
+    assert.equal(parent.moyennes.reb, staff.moyennes.reb);
+    assert.equal(parent.moyennes.eval, staff.moyennes.eval);
+  });
+});

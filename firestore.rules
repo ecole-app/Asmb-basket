@@ -658,6 +658,15 @@ service cloud.firestore {
       // Stats de match (saisie du coach) : staff seulement. Un parent ne lit jamais
       // les chiffres des autres enfants ; sa vue « mon enfant » viendra d'un document à part.
       match /match_stats/{id}  { allow read: if readStaff(clubId); allow write: if staff(clubId); }
+      // Stats de match d'UN joueur (ses lignes seulement, publiées par le staff depuis match_stats) :
+      // lues par le staff et par le compte rattaché à ce joueur (parent, ou joueur lui-même).
+      match /stats_joueurs/{pid} {
+        allow read: if readStaff(clubId)
+          || (member(clubId) && (pid in me().get('linkedPlayerIds', [])
+              || (exists(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone','')))
+                  && pid in get(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', []))));
+        allow write: if staff(clubId);
+      }
       // Une fiche de licence contient l'adresse, les coordonnees des responsables
       // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que
       // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.

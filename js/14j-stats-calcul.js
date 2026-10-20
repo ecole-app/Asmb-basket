@@ -159,6 +159,12 @@ function msFicheJoueur(pid, matchs, opts){
     var c=msCalcul(m, opts);
     if(c.joueurs[pid]) liste.push({match:m, ligne:c.joueurs[pid]});
   });
+  return msFicheDepuisListe(liste);
+}
+// Même fiche, depuis une liste [{match:{date, adversaire}, ligne}] : sert aussi à la vue joueur/parent,
+// qui ne reçoit que ses propres lignes (stats_joueurs/{pid}), jamais les matchs complets.
+function msFicheDepuisListe(liste){
+  liste=(liste||[]).slice();
   liste.sort(function(a,b){ return String(a.match.date||"")>String(b.match.date||"") ? 1 : -1; });
   var cumul=msLigneVide();
   liste.forEach(function(x){
@@ -187,6 +193,28 @@ function msFicheJoueur(pid, matchs, opts){
     matchs:liste.map(function(x,i){ return {nom:"M"+(i+1), date:x.match.date||"", adversaire:x.match.adversaire||"", eval:x.ligne.eval, pts:x.ligne.pts}; }),
     meilleur: meilleur ? {nom:"M"+(liste.indexOf(meilleur)+1), pts:meilleur.ligne.pts, reb:meilleur.ligne.reb, pd:meilleur.ligne.pd, eval:meilleur.ligne.eval} : null
   };
+}
+
+// Lignes de chaque joueur sur une liste de matchs : {pid: [{eventId, date, adversaire, nous, eux, ligne}]}.
+// C'est tout ce qui est publié pour un joueur (ses chiffres, le score final), rien sur ses coéquipiers.
+function msLignesJoueurs(matchs, opts){
+  var out={};
+  (matchs||[]).forEach(function(m){
+    if(!m||m.statut!=="termine") return;
+    var c=msCalcul(m, opts);
+    c.ids.forEach(function(pid){
+      var L=c.joueurs[pid];
+      var joue=L.sec>0||L.pts||L.reb||L.pd||L.fc||L.tirs.t||L.lf.t||(m.joueurs||[]).indexOf(pid)>=0;
+      if(!joue) return;
+      (out[pid]=out[pid]||[]).push({eventId:String(m.eventId||m.id||""), date:m.date||"", adversaire:m.adversaire||"", saison:m.saison||"",
+        nous:c.score.nous, eux:c.score.eux, ligne:L});
+    });
+  });
+  Object.keys(out).forEach(function(pid){ out[pid].sort(function(a,b){ return String(a.date)>String(b.date)?1:-1; }); });
+  return out;
+}
+function msFicheDepuisLignes(lignes){
+  return msFicheDepuisListe((lignes||[]).map(function(x){ return {match:{date:x.date, adversaire:x.adversaire}, ligne:x.ligne}; }));
 }
 
 // Nouveau match vide.

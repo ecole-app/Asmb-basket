@@ -1308,3 +1308,22 @@ describe("Test d'alerte Plateforme", () => {
     await assertFails(addDoc(collection(await as("dirA"), "plateforme_ping"), { at: new Date() }));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Stats de match d'un joueur (stats_joueurs)", () => {
+  const fiche = (pid) => ({ pid, saison: "2026-2027", matchs: [{ eventId: "e1", date: "2026-10-10", nous: 50, eux: 40, ligne: { pts: 12 } }] });
+  it("le staff publie, le parent rattaché lit son enfant seulement", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/stats_joueurs/p1"), fiche("p1")));
+    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/stats_joueurs/p2"), fiche("p2")));
+    await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/stats_joueurs/p1")));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/stats_joueurs/p2")));
+    await assertSucceeds(getDoc(doc(await as("parent2A"), "clubs/A/stats_joueurs/p2")));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/stats_joueurs/p1")));
+  });
+  it("un parent ne publie rien, un autre club ne lit rien", async () => {
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/stats_joueurs/p1"), fiche("p1")));
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/stats_joueurs/p1"), fiche("p1")));
+    await assertFails(getDoc(doc(await as("dirB"), "clubs/A/stats_joueurs/p1")));
+    await assertFails(getDocs(collection(await as("parentA"), "clubs/A/stats_joueurs")));
+  });
+});

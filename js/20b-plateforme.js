@@ -978,7 +978,7 @@ function revokeSupportGrant(code, clubId){
 var GM_PURGE_MINUTES=30;
 // Sous-collections connues. Le match recursif des regles couvre aussi celles
 // qui seraient ajoutees plus tard, mais la purge doit les nommer pour les lister.
-var CLUB_SOUS_COLLECTIONS=["players","roster","rattachements","teams","events","evaluations","licences","checkins",
+var CLUB_SOUS_COLLECTIONS=["stats_joueurs","players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
  "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
  "sponsors","facturation_compteur","push_subscriptions","push_ping",

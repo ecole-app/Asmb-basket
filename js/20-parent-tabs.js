@@ -45,7 +45,7 @@ function buildParentStats(){
   var team=teams.find(function(t){return t.id===activeId;});
   document.getElementById("parent-stats-sub").textContent=team?team.name:"";
   var el=document.getElementById("parent-stats-content");
-  if(!team){el.innerHTML="";return;}
+  if(!team){el.innerHTML=""; if(typeof statsMesJoueursBloc==="function") statsMesJoueursBloc(el); return;}
 
   var stats=getTeamPresenceStats(team);
   var html="";
@@ -72,6 +72,8 @@ function buildParentStats(){
   }
 
   el.innerHTML=html;
+  // Stats de match de mes enfants (leurs chiffres seulement, publiés par le staff)
+  if(typeof statsMesJoueursBloc==="function") statsMesJoueursBloc(el);
 }
 
 // ── DYNAMIC BOTTOM NAV ────────────────────────────────────────────

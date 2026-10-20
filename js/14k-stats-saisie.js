@@ -14,7 +14,7 @@ function getMatchStats(){ try{ return JSON.parse(localStorage.getItem(MS_CLE)||"
 function saveMatchStats(arr, tout){
   localStorage.setItem(MS_CLE, JSON.stringify(arr));
   clearTimeout(msSaveT);
-  var envoyer=function(){ try{ fsWriteCollection("match_stats", getMatchStats()); }catch(e){} };
+  var envoyer=function(){ try{ fsWriteCollection("match_stats", getMatchStats()); }catch(e){} if(typeof statsJoueursPublier==="function") statsJoueursPublier(); };
   if(tout) envoyer(); else msSaveT=setTimeout(envoyer, 1500);
 }
 function msMatch(){ return getMatchStats().filter(function(m){return String(m.id)===String(msId);})[0]||null; }
