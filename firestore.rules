@@ -794,6 +794,13 @@ service cloud.firestore {
         allow read: if member(clubId) && resource.data.get('uid', '') == request.auth.uid;
       }
 
+      // Demandes de synchro FFBB (écran Championnats) : le staff crée, la Function répond (ok, poules, erreur).
+      match /ffbb_demandes/{id} {
+        allow create: if staff(clubId) && request.resource.data.keys().hasOnly(['action','numeros','champId','pouleId','at','uid'])
+          && request.resource.data.uid == request.auth.uid;
+        allow read: if staff(clubId) && resource.data.get('uid', '') == request.auth.uid;
+      }
+
       // ── Discussions privées (2 personnes : un membre du staff et un adulte du
       // club). Ouvertes par le staff seulement ; personne d'autre ne les lit,
       // pas même le dirigeant s'il n'en fait pas partie.

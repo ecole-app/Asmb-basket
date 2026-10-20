@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792537186",
+  "titre": "Championnats liés à la FFBB",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Championnats › Lier à la FFBB : le classement officiel et les scores se mettent à jour chaque nuit (bouton Actualiser maintenant), une notification prévient quand le classement ou les résultats changent, et les parents voient le classement de l'équipe dans l'onglet Stats."
+   }
+  ]
+ },
+ {
   "v": "1792534032",
   "titre": "Type d'événement en pastilles",
   "points": [

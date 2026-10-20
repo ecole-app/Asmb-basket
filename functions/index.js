@@ -306,3 +306,182 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
     await ref.update({ ok: false, erreur: String((e && (e.code || e.message)) || e).slice(0, 200) });
   }
 });
+
+/* ===== Synchro FFBB (classement + résultats de la poule) =====
+   API NON officielle de la FFBB (celle de l'appli mobile) : jetons publics lus
+   dans api.ffbb.app/items/configuration, poule dans items/ffbbserver_poules/{id},
+   recherche dans Meilisearch. Elle peut changer sans prévenir : en cas d'échec
+   on garde les données déjà en base et on le dit, on ne casse rien. */
+const FFBB_API = "https://api.ffbb.app/";
+const FFBB_MS = "https://meilisearch-prod.ffbb.app/multi-search";
+const FFBB_UA = "okhttp/4.12.0";
+
+async function ffbbJson(url, opt) {
+  const r = await fetch(url, Object.assign({ headers: {} }, opt));
+  if (!r.ok) throw new Error("FFBB " + r.status);
+  return r.json();
+}
+async function ffbbTokens() {
+  const j = await ffbbJson(FFBB_API + "items/configuration", { headers: { "user-agent": FFBB_UA } });
+  const d = (j && j.data) || j || {};
+  if (!d.key_dh || !d.key_ms) throw new Error("jetons FFBB introuvables");
+  return { dh: d.key_dh, ms: d.key_ms };
+}
+// « ASSOCIATION SPORTIVE MAGIQUE BASKET (6) » → {nom, num}
+function ffbbEquipe(s) {
+  const t = String(s == null ? "" : s).trim(), m = t.match(/^(.*?)\s*\((\d+)\)\s*$/);
+  return m ? { nom: m[1].trim(), num: parseInt(m[2], 10) } : { nom: t, num: null };
+}
+function ffbbHeure(v) {
+  const m = String(v == null ? "" : v).trim().match(/^(\d{1,2})\s*[:hH]?\s*(\d{2})/);
+  return m ? ("0" + m[1]).slice(-2) + ":" + m[2] : "";
+}
+// Recherche d'une poule à partir de numéros de match (ceux de l'export FBI).
+async function ffbbTrouverPoule(numeros) {
+  const tk = await ffbbTokens();
+  const votes = {};
+  for (const n of numeros.slice(0, 4)) {
+    const j = await ffbbJson(FFBB_MS, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + tk.ms, "user-agent": FFBB_UA },
+      body: JSON.stringify({ queries: [{ indexUid: "ffbbserver_rencontres", q: String(n), limit: 20 }] })
+    });
+    const hits = (j && j.results && j.results[0] && j.results[0].hits) || [];
+    hits.forEach((h) => {
+      if (String(h.numero) !== String(n)) return;
+      const id = h.idPoule && (h.idPoule.id || h.idPoule);
+      if (id) votes[id] = (votes[id] || 0) + 1;
+    });
+  }
+  return Object.keys(votes).sort((a, b) => votes[b] - votes[a]).map((id) => ({ id, votes: votes[id] }));
+}
+// Lit la poule : {nom, rencontres:[...], classement:[...]} au format de l'appli.
+async function ffbbLirePoule(pouleId) {
+  const tk = await ffbbTokens();
+  const q = new URLSearchParams();
+  ["id", "nom", "rencontres.numero", "rencontres.nomEquipe1", "rencontres.nomEquipe2", "rencontres.resultatEquipe1",
+    "rencontres.resultatEquipe2", "rencontres.joue", "rencontres.date_rencontre", "rencontres.horaire",
+    "rencontres.forfaitEquipe1", "rencontres.forfaitEquipe2",
+    "classements.position", "classements.points", "classements.matchJoues", "classements.gagnes", "classements.perdus",
+    "classements.nombreForfaits", "classements.paniersMarques", "classements.paniersEncaisses", "classements.difference",
+    "classements.organisme_nom", "classements.horsClassement"].forEach((f) => q.append("fields[]", f));
+  q.set("deep[rencontres][_limit]", "1000");
+  q.set("deep[classements][_limit]", "1000");
+  const j = await ffbbJson(FFBB_API + "items/ffbbserver_poules/" + encodeURIComponent(pouleId) + "?" + q.toString(),
+    { headers: { authorization: "Bearer " + tk.dh, "user-agent": FFBB_UA } });
+  const d = (j && j.data) || j;
+  if (!d || !Array.isArray(d.rencontres)) throw new Error("poule introuvable");
+  const rencontres = d.rencontres.map((r) => {
+    const a = ffbbEquipe(r.nomEquipe1), b = ffbbEquipe(r.nomEquipe2);
+    const joue = r.joue === true || (r.resultatEquipe1 != null && r.resultatEquipe2 != null && (r.resultatEquipe1 + r.resultatEquipe2) > 0);
+    return {
+      num: String(r.numero), e1: a.nom, n1: a.num, e2: b.nom, n2: b.num,
+      date: String(r.date_rencontre || "").slice(0, 10), heure: ffbbHeure(r.horaire),
+      s1: joue ? r.resultatEquipe1 : null, s2: joue ? r.resultatEquipe2 : null,
+      f1: !!r.forfaitEquipe1, f2: !!r.forfaitEquipe2
+    };
+  });
+  const classement = (d.classements || []).filter((c) => !c.horsClassement).map((c) => {
+    const e = ffbbEquipe(c.organisme_nom);
+    return { rang: c.position, nom: e.nom, num: e.num, pts: c.points, j: c.matchJoues, g: c.gagnes, p: c.perdus,
+      f: c.nombreForfaits || 0, pp: c.paniersMarques, pc: c.paniersEncaisses, diff: c.difference };
+  }).sort((x, y) => (x.rang || 99) - (y.rang || 99));
+  return { nom: d.nom || "", rencontres, classement };
+}
+// Applique la poule FFBB à un championnat : met à jour scores/dates des rencontres connues
+// (par numéro), garde les autres. Renvoie {champ, changements:[texte]}.
+function ffbbAppliquer(champ, poule) {
+  const anc = champ.rencontres || [];
+  const parNum = {};
+  poule.rencontres.forEach((r) => { parNum[r.num] = r; });
+  const vus = {};
+  const out = anc.map((m) => {
+    const n = parNum[String(m.num)];
+    if (!n) return m;
+    vus[String(m.num)] = 1;
+    return Object.assign({}, m, {
+      date: n.date || m.date, heure: n.heure || m.heure,
+      s1: n.s1, s2: n.s2, f1: n.f1, f2: n.f2
+    });
+  });
+  poule.rencontres.forEach((n) => {
+    if (vus[n.num]) return;
+    out.push(Object.assign({ key: champ.division + "|" + n.num, division: champ.division, salle: "", emarque: "" }, n));
+  });
+  const nous = champ.nous || {};
+  const rangDe = (cl) => { const t = (cl || []).find((x) => x.nom === nous.nom && (nous.num == null || x.num === nous.num)); return t ? t.rang : null; };
+  const changements = [];
+  const r0 = rangDe(champ.classementFfbb), r1 = rangDe(poule.classement);
+  if (r1 && r0 && r1 !== r0) changements.push(`Classement : ${r0}${r0 === 1 ? "er" : "e"} → ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`);
+  else if (r1 && !r0 && champ.ffbb && champ.ffbb.maj) changements.push(`Classement : ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`);
+  const joues = (arr) => (arr || []).filter((m) => m.s1 != null && m.s2 != null).length;
+  if (joues(out) > joues(anc)) changements.push(`Nouveaux résultats dans la poule (${champ.division})`);
+  return {
+    champ: Object.assign({}, champ, { rencontres: out, classementFfbb: poule.classement, pouleNom: poule.nom, maj: Date.now() }),
+    changements
+  };
+}
+async function ffbbPush(clubId, titre, corps) {
+  const subs = await db.collection("clubs").doc(clubId).collection("push_subscriptions").get();
+  const tokens = [], docs = [];
+  subs.forEach((s) => { const t = s.data() && s.data().token; if (t) { tokens.push(t); docs.push(s.ref); } });
+  if (!tokens.length) return;
+  const res = await admin.messaging().sendEachForMulticast({
+    tokens, notification: { title: titre, body: corps }, data: { url: "./" },
+    webpush: { fcmOptions: { link: "./" } }
+  });
+  await Promise.all(res.responses.map((r, i) => {
+    const c = r.error && r.error.code;
+    return (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") ? docs[i].delete() : null;
+  }));
+}
+async function ffbbSyncChamp(clubId, ref, champ, notifier) {
+  const poule = await ffbbLirePoule(champ.ffbb.pouleId);
+  const r = ffbbAppliquer(champ, poule);
+  r.champ.ffbb = Object.assign({}, champ.ffbb, { maj: Date.now(), erreur: "" });
+  await ref.set(JSON.parse(JSON.stringify(r.champ)));
+  if (notifier && r.changements.length) await ffbbPush(clubId, "Championnat", r.changements.join(" · "));
+  return r.changements;
+}
+
+// Demande du dirigeant/coach (écran Championnats) : action "trouver" (cherche la poule
+// d'après des numéros de match) ou "actualiser" (relit la poule d'un championnat).
+exports.onFfbbDemande = onDocumentCreated("clubs/{clubId}/ffbb_demandes/{id}", async (event) => {
+  const ref = event.data && event.data.ref;
+  const d = event.data && event.data.data();
+  if (!ref || !d) return;
+  const clubId = event.params.clubId;
+  try {
+    if (d.action === "trouver") {
+      const poules = await ffbbTrouverPoule((d.numeros || []).map(String));
+      await ref.update({ ok: true, poules });
+    } else if (d.action === "actualiser") {
+      const cref = db.collection("clubs").doc(clubId).collection("championnats").doc(String(d.champId));
+      const snap = await cref.get();
+      const champ = snap.exists && snap.data();
+      if (!champ) throw new Error("championnat introuvable");
+      if (d.pouleId) champ.ffbb = Object.assign({}, champ.ffbb, { pouleId: String(d.pouleId) });
+      if (!champ.ffbb || !champ.ffbb.pouleId) throw new Error("championnat pas encore lié à la FFBB");
+      const ch = await ffbbSyncChamp(clubId, cref, champ, true);
+      await ref.update({ ok: true, changements: ch });
+    } else {
+      await ref.update({ ok: false, erreur: "action inconnue" });
+    }
+  } catch (e) {
+    await ref.update({ ok: false, erreur: String((e && e.message) || e).slice(0, 200) });
+  }
+});
+
+// Chaque nuit : relit les poules liées (sauf les clubs suspendus / hors saison, on ne filtre pas ici).
+exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds: 540 }, async () => {
+  const clubs = await db.collection("clubs").get();
+  for (const club of clubs.docs) {
+    const champs = await club.ref.collection("championnats").get();
+    for (const c of champs.docs) {
+      const champ = c.data();
+      if (!champ.ffbb || !champ.ffbb.pouleId) continue;
+      try { await ffbbSyncChamp(club.id, c.ref, champ, true); }
+      catch (e) { await c.ref.update({ "ffbb.erreur": String((e && e.message) || e).slice(0, 200) }); }
+    }
+  }
+});

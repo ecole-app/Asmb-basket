@@ -16,6 +16,7 @@ function fsStartSync(coll, lsKey){
       var arr=fsArrFromSnap(snap);
       FS_PREV[coll]=arr.slice();
       localStorage.setItem(lsKey, JSON.stringify(arr));
+      if(coll==="championnats" && typeof champSyncPlanning==="function") setTimeout(champSyncPlanning,300);
       refreshCurrentScreen();
     },
     function(err){ console.log("sync "+coll+":", (err&&err.code)||err); }

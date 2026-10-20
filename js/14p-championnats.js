@@ -167,6 +167,79 @@ function champBilan(matchsNous){
 }
 function champId(division,saison){ return String(division||"").replace(/[^A-Za-z0-9]+/g,"-")+"_"+String(saison||"").replace(/[^0-9]+/g,"-"); }
 
+
+// ── Synchro FFBB (Cloud Function onFfbbDemande, voir functions/index.js) ──
+// Le classement officiel et les scores viennent de la FFBB (API non officielle) : si elle
+// ne répond pas, on garde ce qui est déjà là et on le dit.
+function champDemande(data){
+  if(!window.fbAddDoc||!window.fbDb) return Promise.reject(new Error("Connexion indisponible"));
+  var d=Object.assign({at:new Date(),uid:window.ASMB_USER.uid},data);
+  return window.fbAddDoc(window.fbCollection(window.fbDb,"ffbb_demandes"),d).then(function(ref){
+    return new Promise(function(resolve,reject){
+      var n=0, t=setInterval(function(){
+        n++;
+        window.fbGetDoc(ref).then(function(sn){
+          var r=sn&&sn.exists&&sn.exists()?sn.data():null;
+          if(r&&typeof r.ok==="boolean"){ clearInterval(t); r.ok?resolve(r):reject(new Error(r.erreur||"Échec")); }
+          else if(n>=30){ clearInterval(t); reject(new Error("Pas de réponse du serveur (fonctions déployées ?)")); }
+        }).catch(function(){});
+      },1000);
+    });
+  });
+}
+// Extrait l'identifiant de poule d'un texte collé (nombre seul ou lien contenant le nombre).
+function champPouleDepuisTexte(t){
+  var m=String(t||"").match(/\d{4,}/g); return m?m[m.length-1]:"";
+}
+// Après une synchro serveur : les matchs de NOTRE équipe sont fusionnés dans le planning
+// (dates corrigées dans GM jamais écrasées). Une fois par version de championnat et par appareil.
+function champSyncPlanning(){
+  try{
+    if(!champPeutEcrire()) return;
+    // Une seule fois par appareil : propose de lier les championnats déjà importés à la FFBB.
+    if(!localStorage.getItem("gm_ffbb_invite") && getChampionnats().some(function(c){ return !c.ffbb; })){
+      localStorage.setItem("gm_ffbb_invite","1");
+      if(typeof showToast==="function") showToast("Nouveau : liez vos championnats à la FFBB (classement et scores automatiques) — Championnats › Lier à la FFBB");
+    }
+    var mk={}; try{ mk=JSON.parse(localStorage.getItem("gm_champ_merge")||"{}"); }catch(e){}
+    var chg=false, ev=getEvents();
+    getChampionnats().forEach(function(c){
+      if(!c.ffbb||!c.maj||(mk[c.id]||0)>=c.maj||!c.nous) return;
+      var mn=(c.rencontres||[]).map(function(m){ return champMatchNous(m,c.nous); }).filter(Boolean);
+      ev=champFusionner(ev,c.id,mn,c.equipe).events; mk[c.id]=c.maj; chg=true;
+    });
+    if(chg){ saveEvents(ev); localStorage.setItem("gm_champ_merge",JSON.stringify(mk)); try{ buildPlanning(); }catch(e){} }
+  }catch(e){ console.log("champSyncPlanning",e); }
+}
+// Classement à afficher : officiel FFBB s'il existe, sinon calculé par GM.
+function champClassementAffiche(c){
+  if(c.classementFfbb&&c.classementFfbb.length>=3) return {liste:c.classementFfbb,officiel:true};
+  var cl=champPouleComplete(c)?champClassement(c.rencontres||[]):[];
+  return cl.length>=3?{liste:cl,officiel:false}:null;
+}
+function champTableHtml(c,cl){
+  var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="text-align:left;color:var(--mut)"><th style="padding:6px 4px">#</th><th>Équipe</th><th>Pts</th><th>J</th><th>G</th><th>P</th><th>Diff</th></tr>';
+  cl.forEach(function(t){
+    var moi=c.nous&&t.nom===c.nous.nom&&t.num===c.nous.num;
+    h+='<tr style="border-top:1px solid var(--bdr);'+(moi?'font-weight:800;background:color-mix(in srgb, var(--dkg) 10%, transparent)':'')+'"><td style="padding:7px 4px">'+t.rang+'</td><td>'+authEsc(t.nom)+(t.num!=null?' ('+t.num+')':'')+'</td><td>'+t.pts+'</td><td>'+t.j+'</td><td>'+t.g+'</td><td>'+t.p+'</td><td>'+(t.diff>0?'+':'')+t.diff+'</td></tr>';
+  });
+  return h+'</table>';
+}
+// Vue parents / joueurs : classement du championnat de l'équipe active.
+function champParentBloc(el,team){
+  if(!el||!team) return;
+  var liste=getChampionnats().filter(function(c){ return c.equipe&&c.equipe===team.name&&champClassementAffiche(c); });
+  if(!liste.length) return;
+  var zone=document.createElement("div"); el.insertBefore(zone,el.firstChild);
+  zone.innerHTML=liste.map(function(c){
+    var a=champClassementAffiche(c);
+    return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:0 2px 12px var(--sh,rgba(0,0,0,.06))">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Classement · '+authEsc(c.division)+'</div>'
+      +'<div style="overflow-x:auto">'+champTableHtml(c,a.liste)+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);margin-top:8px">'+(a.officiel?'Classement FFBB':'Calculé par General Manager')+(c.maj?' · mis à jour le '+new Date(c.maj).toLocaleDateString("fr-FR"):'')+'</div></div>';
+  }).join("");
+}
+
 // ── Écrans ──────────────────────────────────────────────────────────────
 function champPeutEcrire(){
   var u=window.ASMB_USER, roles=(u&&u.roles)||[];
@@ -212,10 +285,17 @@ function champOuvrir(){
       var d=document.createElement("div"); d.style.cssText="font-size:12px;color:var(--mut);margin:4px 0 8px;line-height:1.5";
       d.textContent=mn.length+" match(s) · "+b.j+" joué(s) : "+b.g+" gagné(s), "+b.p+" perdu(s)"+(apres?" · prochain : "+apres.date.split("-").reverse().join("/")+(apres.heure?" à "+apres.heure:"")+" vs "+apres.advNom:"")+(sans?" · "+sans+" sans date":"")+" · mis à jour le "+new Date(c.maj||Date.now()).toLocaleDateString("fr-FR");
       card.appendChild(d);
+      if(c.ffbb&&c.ffbb.pouleId){
+        var fs=document.createElement("div"); fs.style.cssText="font-size:11px;color:"+(c.ffbb.erreur?"var(--red,#c0392b)":"var(--mut)")+";margin:-4px 0 8px";
+        fs.textContent=c.ffbb.erreur?"FFBB : dernière actualisation en échec ("+c.ffbb.erreur+") — données précédentes conservées":"Lié à la FFBB · actualisé chaque nuit"+(c.ffbb.maj?" · dernière fois le "+new Date(c.ffbb.maj).toLocaleDateString("fr-FR"):"");
+        card.appendChild(fs);
+      }
       var r=gmRow(card);
+      if(c.ffbb&&c.ffbb.pouleId) r.appendChild(gmBtn("Actualiser maintenant","primary",function(){ actualiser(c,this); }));
+      else r.appendChild(gmBtn("Lier à la FFBB","primary",function(){ lierFfbb(c); }));
       r.appendChild(gmBtn("Réimporter","soft",function(){ choisirFichier(c); }));
-      var cl=champPouleComplete(c)?champClassement(c.rencontres||[]):[];
-      if(cl.length>=3) r.appendChild(gmBtn("Classement","soft",function(){ afficherClassement(c,cl); }));
+      var aff=champClassementAffiche(c), cl=aff?aff.liste:[];
+      if(cl.length>=3) r.appendChild(gmBtn("Classement","soft",function(){ afficherClassement(c,cl,aff.officiel); }));
       if(sans) r.appendChild(gmBtn("Dates à confirmer ("+sans+")","soft",function(){ confirmerDates(c); }));
       r.appendChild(gmBtn("Retirer","danger",function(){
         askConfirm("Retirer ce championnat ? Les matchs déjà au planning sont conservés.",{danger:true,confirmText:"Retirer"}).then(function(ok){
@@ -226,6 +306,43 @@ function champOuvrir(){
     });
     var r2=gmRow(s.body);
     r2.appendChild(gmBtn("+ Importer un export FBI","primary",function(){ choisirFichier(null); }));
+  }
+  function actualiser(c,btn){
+    if(btn){ btn.disabled=true; btn.textContent="Actualisation…"; }
+    champDemande({action:"actualiser",champId:c.id}).then(function(r){
+      var ch=(r.changements||[]);
+      showToast(ch.length?ch.join(" · "):"À jour, rien de nouveau");
+      setTimeout(function(){ champSyncPlanning(); dessiner(); },700);
+    }).catch(function(e){ askAlert("Actualisation impossible : "+((e&&e.message)||e)+"\nVos données actuelles sont conservées."); dessiner(); });
+  }
+  function lierFfbb(c){
+    s.body.innerHTML='<div style="font-size:12px;color:var(--mut)">Recherche de la poule sur la FFBB…</div>';
+    var nums=(c.rencontres||[]).map(function(m){ return m.num; }).filter(Boolean).slice(0,4);
+    champDemande({action:"trouver",numeros:nums}).then(function(r){
+      var p=(r.poules||[])[0];
+      if(!p){ saisirPoule(c,"Poule non trouvée automatiquement."); return; }
+      s.body.innerHTML="";
+      gmSection(s.body,"Poule trouvée","Poule FFBB n° "+p.id+" ("+p.votes+" match(s) correspondent). Vérifiez après l'actualisation que le classement est bien celui de votre division.");
+      var rr=gmRow(s.body);
+      rr.appendChild(gmBtn("C'est bon, lier","primary",function(){ lier(c,p.id); }));
+      rr.appendChild(gmBtn("Autre numéro","soft",function(){ saisirPoule(c,""); }));
+      rr.appendChild(gmBtn("Annuler","ghost",dessiner));
+    }).catch(function(e){ saisirPoule(c,"Recherche impossible ("+((e&&e.message)||e)+")."); });
+  }
+  function saisirPoule(c,msg){
+    s.body.innerHTML="";
+    gmSection(s.body,"Lier à la FFBB",(msg?msg+" ":"")+"Collez le lien de la poule (page de votre division sur ffbb.com) ou son numéro.");
+    var inp=document.createElement("input"); inp.type="text"; inp.placeholder="Lien ou numéro de poule"; inp.style.cssText="width:100%;padding:10px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;margin-bottom:10px;box-sizing:border-box";
+    s.body.appendChild(inp);
+    var rr=gmRow(s.body);
+    rr.appendChild(gmBtn("Lier","primary",function(){ var id=champPouleDepuisTexte(inp.value); if(!id){ askAlert("Numéro de poule introuvable dans ce texte."); return; } lier(c,id); }));
+    rr.appendChild(gmBtn("Annuler","ghost",dessiner));
+  }
+  function lier(c,pouleId){
+    s.body.innerHTML='<div style="font-size:12px;color:var(--mut)">Liaison et premier téléchargement…</div>';
+    var liste=getChampionnats().map(function(x){ return x.id===c.id?Object.assign({},x,{ffbb:{pouleId:String(pouleId),maj:0,erreur:""}}):x; });
+    saveChampionnats(liste);
+    setTimeout(function(){ actualiser(c,null); },1200);   // laisse le temps à la liaison d'arriver sur le serveur
   }
   function choisirFichier(cible){
     var inp=document.createElement("input"); inp.type="file"; inp.accept=".xlsx,.xls,.csv";
@@ -280,9 +397,9 @@ function champOuvrir(){
     showToast(f.ajoutes+" match(s) ajouté(s), "+f.majs+" mis à jour"+(f.gardes?", "+f.gardes+" date(s) corrigée(s) conservée(s)":"")+(f.sansDate.length?", "+f.sansDate.length+" sans date":""));
     dessiner();
   }
-  function afficherClassement(c,cl){
+  function afficherClassement(c,cl,officiel){
     s.body.innerHTML="";
-    gmSection(s.body,"Classement · "+c.division,"Calculé par General Manager d'après les scores du fichier (victoire 2 pts, défaite 1, forfait 0). Il peut différer du classement officiel en cas d'égalité.");
+    gmSection(s.body,"Classement · "+c.division,(officiel?"Classement officiel de la FFBB, relu chaque nuit.":"Calculé par General Manager d'après les scores du fichier (victoire 2 pts, défaite 1, forfait 0). Il peut différer du classement officiel en cas d'égalité."));
     var tb=document.createElement("div"); tb.style.cssText="overflow-x:auto";
     var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="text-align:left;color:var(--mut)"><th style="padding:6px 4px">#</th><th>Équipe</th><th>Pts</th><th>J</th><th>G</th><th>P</th><th>Diff</th></tr>';
     cl.forEach(function(t){

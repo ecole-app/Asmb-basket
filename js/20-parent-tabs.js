@@ -73,7 +73,7 @@ function buildParentStats(){
 
   el.innerHTML=html;
   // Stats de match de mes enfants (leurs chiffres seulement, publiés par le staff)
-  if(typeof statsMesJoueursBloc==="function") statsMesJoueursBloc(el);
+  if(typeof statsMesJoueursBloc==="function") statsMesJoueursBloc(el); if(typeof champParentBloc==="function") champParentBloc(el,team);
 }
 
 // ── DYNAMIC BOTTOM NAV ────────────────────────────────────────────

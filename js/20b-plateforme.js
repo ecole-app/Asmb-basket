@@ -981,7 +981,7 @@ var GM_PURGE_MINUTES=30;
 var CLUB_SOUS_COLLECTIONS=["stats_joueurs","players","roster","rattachements","teams","events","evaluations","licences","checkins",
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
  "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
- "sponsors","facturation_compteur","push_subscriptions","push_ping",
+ "sponsors","facturation_compteur","push_subscriptions","push_ping","ffbb_demandes",
  "championnats","indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas","indep_annonces","indep_reactions","indep_discussions","indep_lignes","indep_reglages","indep_presences","benevoles","match_stats","buvette_procedure","club_docs","club_docs_parts","budgetPrev"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club

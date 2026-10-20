@@ -515,6 +515,19 @@ describe("Communauté", () => {
   });
 });
 
+describe("Synchro FFBB", () => {
+  it("le staff crée sa demande (sans champs de réponse), pas un parent ni un autre club", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/ffbb_demandes/d1"), { action: "trouver", numeros: ["1"], uid: "coachA", at: Timestamp.now() }));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/ffbb_demandes/d1")));
+    await assertFails(setDoc(doc(await as("coachA"), "clubs/A/ffbb_demandes/d2"), { action: "trouver", uid: "coachA", ok: true }));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/ffbb_demandes/d3"), { action: "trouver", uid: "parentA" }));
+    await assertFails(setDoc(doc(await as("dirB"), "clubs/A/ffbb_demandes/d4"), { action: "trouver", uid: "dirB" }));
+  });
+  it("les parents lisent les championnats (classement)", async () => {
+    await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/championnats/c2")));
+  });
+});
+
 // ───────────────────────────────────────────────────────────────
 describe("Test de notification du club", () => {
   it("chacun crée et lit son propre test, pas celui d'un autre ni d'un autre club", async () => {

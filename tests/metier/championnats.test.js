@@ -123,3 +123,17 @@ describe("Bilan et classement", () => {
     assert.deepEqual(Array.from(cl.map((t) => t.rang)), [1, 2, 3]);
   });
 });
+
+describe("Synchro FFBB (côté appli)", () => {
+  it("extrait le numéro de poule d'un lien ou d'un nombre", () => {
+    assert.equal(c.champPouleDepuisTexte("200000012345678"), "200000012345678");
+    assert.equal(c.champPouleDepuisTexte("https://competitions.ffbb.com/ligues/ara/comites/0069/poule/1234567"), "1234567");
+    assert.equal(c.champPouleDepuisTexte("abc"), "");
+  });
+  it("préfère le classement officiel FFBB au classement calculé", () => {
+    const off = [1, 2, 3].map((r) => ({ rang: r, nom: "E" + r, num: null, pts: 10 - r, j: 5, g: 3, p: 2, diff: 0 }));
+    const a = c.champClassementAffiche({ classementFfbb: off, rencontres: [] });
+    assert.equal(a.officiel, true);
+    assert.equal(c.champClassementAffiche({ rencontres: [] }), null);
+  });
+});
