@@ -1,5 +1,32 @@
 [
  {
+  "v": "1792493007",
+  "titre": "Compétition : championnats et import FBI",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Pôle Compétition 5x5 › « Championnats » : importez l'export FBI « Rechercher rencontre » de votre équipe. Les matchs arrivent dans le planning avec la salle, l'heure et le score."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Réimportez l'export quand les scores changent : les nouveaux scores et matchs sont ajoutés, et les dates ou heures que vous avez corrigées dans GM ne sont jamais écrasées. Un match sans date reste « à confirmer »."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Si l'export couvre toute la poule, General Manager calcule le classement (victoire 2 pts, défaite 1, forfait 0)."
+   }
+  ]
+ },
+ {
   "v": "1792477004",
   "titre": "Compte plateforme : icône et nom General Manager conservés",
   "points": [

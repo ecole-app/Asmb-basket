@@ -53,6 +53,7 @@ describe("Isolation entre clubs", () => {
     await assertFails(setDoc(doc(db, "clubs/A/players/x"), { nom: "Intrus" }));
     await assertFails(setDoc(doc(db, "clubs/A/comptabilite/x"), { montant: 1 }));
     await assertFails(setDoc(doc(db, "clubs/A/budgetPrev/budget"), { x: 1 }));
+    await assertFails(setDoc(doc(db, "clubs/A/championnats/x"), { division: "X" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { name: "Piraté" }));
   });
   it("le dirigeant du club B ne peut pas se rattacher au club A", async () => {
@@ -90,6 +91,13 @@ describe("Rôles à l'intérieur d'un club", () => {
     await assertSucceeds(setDoc(doc(db, "clubs/A/comptabilite/c2"), { type: "depense", montant: 10 }));
     await assertSucceeds(getDoc(doc(db, "clubs/A/sponsors/s1")));
     await assertSucceeds(setDoc(doc(db, "clubs/A/budgetPrev/budget"), { subv_2026: [] }));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/championnats/DFU18-2_2026-2027"), { division: "DFU18-2" }));
+    await assertSucceeds(getDoc(doc(db, "clubs/A/championnats/DFU18-2_2026-2027")));
+  });
+  it("championnats : un coach écrit, un parent lit sans écrire", async () => {
+    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/championnats/c2"), { division: "DF4" }));
+    await assertSucceeds(getDoc(doc(await as("parentA"), "clubs/A/championnats/c2")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/championnats/c3"), { division: "X" }));
   });
   it("trésorier (bureau + accès compta) : compta oui, sponsors non", async () => {
     const db = await as("tresorierA");

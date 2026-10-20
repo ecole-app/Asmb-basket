@@ -629,6 +629,8 @@ service cloud.firestore {
       }
       match /teams/{id}        { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /events/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
+      // Championnats suivis (import FBI : rencontres, équipe du club, classement calculé) : tout le club lit, le staff écrit.
+      match /championnats/{id} { allow read: if readMember(clubId); allow write: if staff(clubId); }
       match /benevoles/{id}    { allow read: if readStaff(clubId); allow write: if staff(clubId); }
       match /evaluations/{id}  { allow read: if readMember(clubId); allow write: if staff(clubId); }
       // Documents du club (règlement, charte…). Le dirigeant, ou un compte à qui il a donné
