@@ -742,9 +742,10 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 }
 
 /* Espace Admin ordinateur : un seul titre, cartes rangées par thème */
-html.gm-desk #scr-admin>.hero{background:none!important;box-shadow:none;padding:14px 24px 0!important;justify-content:flex-end}
-html.gm-desk #scr-admin>.hero>div{display:none}
-html.gm-desk #scr-admin>.hero #admin-edit-toggle{background:var(--card)!important;color:var(--txt)!important;border:1px solid var(--bdr)!important}
+html.gm-desk .gm-dup{display:none!important}
+html.gm-desk .gm-hero-nu{background:none!important;box-shadow:none;border:none!important;padding:14px 24px 0!important;justify-content:flex-end!important}
+html.gm-desk .gm-hero-nu>div{display:none}
+html.gm-desk .gm-hero-nu button{background:var(--card)!important;color:var(--txt)!important;border:1px solid var(--bdr)!important}
 html.gm-desk #scr-admin>.sec{display:none}
 html.gm-desk #adminCards{display:block;padding:8px 24px 32px}
 html.gm-desk #adminCards>.admin-card{margin:0 0 12px;max-width:380px}

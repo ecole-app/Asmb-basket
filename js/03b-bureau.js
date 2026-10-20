@@ -188,6 +188,30 @@ function gmDeskEcran(scr){
   gmDeskRender();
   if(scr==="portal"&&typeof renderDeskHome==="function") renderDeskHome(); // badges et nom du club à jour à chaque écran
 }
+// Ordinateur : le titre de l'écran est déjà dans l'en-tête, on masque son doublon dans la page.
+function gmDeskDedoublonner(){
+  try{
+    if(!gmDeskOn()) return;
+    var scr=document.querySelector(".main>.scr.on"); if(!scr) return;
+    var n=function(t){ return (t||"").replace(/\s+/g," ").trim().toLowerCase(); };
+    var cibles=[n((document.getElementById("htit")||{}).textContent)];
+    var it=GM_DESK_ITEMS.find(function(x){ return x.id===GM_DESK_ACTIF; });
+    if(it) cibles.push(n(it.label));
+    scr.querySelectorAll(".gm-dup").forEach(function(e){ e.classList.remove("gm-dup"); });
+    scr.querySelectorAll(".gm-hero-nu").forEach(function(e){ e.classList.remove("gm-hero-nu"); });
+    var vus=0;
+    Array.prototype.slice.call(scr.querySelectorAll("div")).forEach(function(d){
+      if(vus||d.children.length||!d.textContent.trim()) return;
+      if(cibles.indexOf(n(d.textContent))<0) return;
+      var r=d.getBoundingClientRect(), r0=scr.getBoundingClientRect();
+      if(r.top-r0.top>160) return;
+      vus=1;
+      var hero=d.closest(".hero");
+      if(hero){ if(hero.querySelector("button")) hero.classList.add("gm-hero-nu"); else hero.classList.add("gm-dup"); }
+      else d.classList.add("gm-dup");
+    });
+  }catch(e){}
+}
 function gmDeskGrpFermes(){
   try{ var a=JSON.parse(localStorage.getItem("gm_desk_grp_fermes")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
@@ -231,6 +255,7 @@ function gmDeskRender(){
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskPersonnaliser()" title="Personnaliser le menu" aria-label="Personnaliser le menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span class="gs-lbl">Personnaliser</span></button>'+
     '<button type="button" class="gs-item gs-outil" onclick="gmDeskMini()" title="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-label="'+(mini?"Déplier le menu":"Réduire le menu")+'" aria-expanded="'+(!mini)+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(mini?'<path d="m10 6 6 6-6 6"/>':'<path d="m14 6-6 6 6 6"/>')+'</svg><span class="gs-lbl">Réduire le menu</span></button></div>';
   side.innerHTML=h;
+  setTimeout(gmDeskDedoublonner,80);
 }
 
 // ── Thèmes de la version ordinateur (par appareil, gm_desk_theme) ─────
