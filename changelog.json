@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792529264",
+  "titre": "Planning filtré par type",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "En haut du planning, des pastilles Matchs, Entraînements, Tournois, Stages… avec leur nombre : un appui n'affiche que ce type (liste et calendrier). Le choix est retenu."
+   }
+  ]
+ },
+ {
   "v": "1792529210",
   "titre": "Projets avec budget prévisionnel",
   "points": [

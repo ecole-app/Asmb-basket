@@ -558,14 +558,14 @@ function togglePlanningView(){
 
 function renderPlanningCalendar(){
   var el=document.getElementById("planning-calendar");if(!el)return;
-  var events=getEvents();
+  var events=(typeof planTypeFiltrer==="function")?planTypeFiltrer(getEvents()):getEvents();
   var monthNames=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
   var firstDay=new Date(planCalYear,planCalMonth,1);
   var startOffset=(firstDay.getDay()+6)%7; // lundi=0
   var daysInMonth=new Date(planCalYear,planCalMonth+1,0).getDate();
   var todayStr=new Date().toISOString().slice(0,10);
 
-  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+  var html=((typeof planTypeChips==="function")?planTypeChips(getEvents()).replace("padding:4px 12px 10px","padding:0 0 12px"):"")+'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
     '<button onclick="shiftPlanCal(-1)" style="width:32px;height:32px;border-radius:8px;background:var(--bdr);border:none;color:var(--mut);cursor:pointer">‹</button>'+
     '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+monthNames[planCalMonth]+' '+planCalYear+'</div>'+
     '<button onclick="shiftPlanCal(1)" style="width:32px;height:32px;border-radius:8px;background:var(--bdr);border:none;color:var(--mut);cursor:pointer">›</button>'+
@@ -605,6 +605,38 @@ function showDayEvents(dateStr){
   askAlert("Événements du "+dateStr+" :\n\n"+txt);
 }
 
+// ── Pastilles de type d'événement (filtre du planning) ─────────────
+function planTypeFiltre(){ try{ return localStorage.getItem("gm_plan_type")||""; }catch(e){ return ""; } }
+function planTypeCompter(events){
+  var n={}; (events||[]).forEach(function(e){ var t=e.type||"autre"; n[t]=(n[t]||0)+1; }); return n;
+}
+function planTypeFiltrer(events){
+  var f=planTypeFiltre(); if(!f) return events;
+  var r=events.filter(function(e){ return (e.type||"autre")===f; });
+  return r.length?r:events; // type disparu : on montre tout
+}
+function planTypeChips(events){
+  var n=planTypeCompter(events), types=Object.keys(n);
+  if(types.length<2) return "";
+  var ordre=["match","entrainement","tournoi","stage","formation","soiree","autre"];
+  types.sort(function(a,b){ var i=ordre.indexOf(a), j=ordre.indexOf(b); return (i<0?99:i)-(j<0?99:j); });
+  var f=planTypeFiltre(); if(f&&!n[f]) f="";
+  function chip(t,txt,coul,nb){
+    var on=f===t;
+    return '<button type="button" onclick="planTypeChoisir(\''+t+'\')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0;cursor:pointer;font-size:11.5px;font-weight:700;border:1.5px solid '+(on?(coul||'var(--dkg)'):'var(--bdr)')+';background:'+(on?(coul||'var(--dkg)'):'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+'">'+
+      (coul?'<span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#fff':coul)+'"></span>':'')+txt+(nb!=null?' <span style="opacity:.7;font-weight:600">'+nb+'</span>':'')+'</button>';
+  }
+  var pl=function(t){ var l=eventTypeLabel(t); return t==="match"?"Matchs":t==="entrainement"?"Entraînements":t==="tournoi"?"Tournois":t==="soiree"?"Soirées":t==="stage"?"Stages/Camps":t==="formation"?"Formations":l; };
+  return '<div class="plan-type-chips" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 12px 10px">'+
+    chip("","Tous",null,null)+types.map(function(t){ return chip(t,authEsc(pl(t)),eventTypeColor(t),n[t]); }).join("")+'</div>';
+}
+function planTypeChoisir(t){
+  try{ if(t) localStorage.setItem("gm_plan_type",t); else localStorage.removeItem("gm_plan_type"); }catch(e){}
+  buildPlanning();
+  var cal=document.getElementById("planning-calendar");
+  if(cal&&cal.style.display!=="none"&&typeof renderPlanningCalendar==="function") renderPlanningCalendar();
+}
+
 function buildPlanning(){
   var events=getVisibleEvents();
   var el=document.getElementById("planningList");if(!el)return;
@@ -612,6 +644,10 @@ function buildPlanning(){
   el.innerHTML="";
   // Sort by date
   events.sort(function(a,b){return a.date>b.date?1:-1;});
+  // Pastilles de type (Matchs, Entraînements, Tournois…) : filtre retenu par appareil
+  var chips=planTypeChips(events);
+  if(chips){ var cw=document.createElement("div"); cw.innerHTML=chips; el.appendChild(cw.firstChild); }
+  events=planTypeFiltrer(events);
   events.forEach(function(e){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
