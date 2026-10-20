@@ -47,6 +47,8 @@ var IND_ICONES={
 };
 
 // ── Petits outils ────────────────────────────────────────────────────
+// Les 👍/👎 écrits dans un texte sont rendus transparents (même style que les boutons de réponse).
+function indEmojiVoile(h){ return String(h).replace(/(\uD83D\uDC4D|\uD83D\uDC4E)(\uD83C[\uDFFB-\uDFFF])?/g,'<span class="em">$&</span>'); }
 function indEsc(v){ return v===0?"0":authEsc(v==null?"":String(v)); }
 function indIso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function indDate(iso){ var p=String(iso||"").split("-"); return new Date(+p[0],(+p[1]||1)-1,+p[2]||1); }
@@ -738,7 +740,7 @@ function indVueAnnonces(){
     var c=indCompteReac(a), nb=c.up.length+c.down.length, tot=nb+c.aucune.length;
     return '<div class="ind-post tap" data-act="annonce" data-id="'+indEsc(a.id)+'" role="button" tabindex="0">'
       +'<div class="ph">'+indAvatarClub()+'<div class="who"><b>'+indEsc((IND.club&&IND.club.name)||"Mon activité")+'</b><small>'+indEsc(indAnnDepuis(a)+" · "+indCibleTxt(a))+'</small></div><span class="dots" aria-hidden="true">···</span></div>'
-      +'<div class="pb"><p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +'<div class="pb"><p class="ind-ann-t">'+indEmojiVoile(indEsc(a.texte))+'</p>'+indMiniSeance(a)+'</div>'
       +'<div class="pf"><span class="ind-react"><span class="em">👍🏼</span> '+c.up.length+'</span><span class="ind-react"><span class="em">👎🏼</span> '+c.down.length+'</span><span class="acc">'+nb+' / '+tot+' réponses</span></div></div>';
   }).join("");
 }
@@ -758,7 +760,7 @@ function indOuvrirAnnonce(id){
       }).join("")+'</div>':'<div class="ind-c ind-vide">Personne.</div>');
     }
     sh.body.innerHTML='<div class="ind-c"><div class="ind-ann-h"><span>'+indEsc(indCibleTxt(a))+'</span><span>'+indEsc(indAnnQuand(a))+'</span></div>'
-      +'<p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +'<p class="ind-ann-t">'+indEmojiVoile(indEsc(a.texte))+'</p>'+indMiniSeance(a)+'</div>'
       +liste("👍🏼 D'accord",c.up)+liste("👎🏼 Pas d'accord",c.down)+liste("Sans réponse",c.aucune)
       +'<button type="button" class="ind-btn d" data-act="annonce-suppr" data-id="'+indEsc(a.id)+'" style="margin-top:6px">Supprimer l\'annonce</button>';
   }};
@@ -821,7 +823,7 @@ function indListeAnnoncesClient(l){
     var pers=tous.filter(function(p){ return indAnnVisible(a,p.id); }), nouveau=indAnnMs(a)>avant;
     return '<div class="ind-post"><div class="ph">'+indAvatarClub()+'<div class="who"><b>'+indEsc((IND.club&&IND.club.name)||"Ton coach")+'</b><small>'+indEsc(indAnnDepuis(a))+'</small></div>'
       +(nouveau?'<span class="ind-pill ok">Nouveau</span>':'')+'</div>'
-      +'<div class="pb"><p class="ind-ann-t">'+indEsc(a.texte)+'</p>'+indMiniSeance(a)+'</div>'
+      +'<div class="pb"><p class="ind-ann-t">'+indEmojiVoile(indEsc(a.texte))+'</p>'+indMiniSeance(a)+'</div>'
       +'<div class="pf col">'+pers.map(function(p){
         var r=IND.reacs[a.id+"__"+p.id], v=r&&r.val;
         function bt(val,emoji,lib){

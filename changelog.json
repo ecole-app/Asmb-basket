@@ -1,6 +1,6 @@
 [
  {
-  "v": "1792506172",
+  "v": "1792506602",
   "titre": "Indépendant : emoji des réponses transparents",
   "points": [
    {
@@ -8,7 +8,7 @@
      "dirigeant",
      "client"
     ],
-    "texte": "Les 👍🏼 👎🏼 des annonces sont transparents."
+    "texte": "Les 👍 👎 des annonces (boutons et texte) sont transparents."
    }
   ]
  },
