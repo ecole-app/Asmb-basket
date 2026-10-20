@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792529210",
+  "titre": "Projets avec budget prévisionnel",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Comptabilité › 📊 Budget : créez vos projets (stage, achat, tournoi…) avec ce qu'ils coûtent, les subventions (à demander, demandées, accordées, versées) et les autres financements. Reste à financer calculé, budget du projet en PDF pour vos dossiers de subvention."
+   }
+  ]
+ },
+ {
   "v": "1792528979",
   "titre": "Licence offerte ou prise ailleurs",
   "points": [

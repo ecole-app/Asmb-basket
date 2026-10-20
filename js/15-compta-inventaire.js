@@ -380,6 +380,7 @@ function openBudgetPrev(){
   });
   var body=document.getElementById("modal-budget-body");
   var html='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">Budget prévisionnel '+year+' — comparez le prévu au réalisé de l\'année en cours.</div>';
+  if(typeof projetsBlocHtml==="function") html+='<div id="budget-projets-zone">'+projetsBlocHtml()+'</div>';
   ["recette","depense"].forEach(function(type){
     html+='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:12px 0 6px">'+(type==="recette"?"Recettes":"Dépenses")+'</div>';
     COMPTA_CATS[type].forEach(function(cat){
