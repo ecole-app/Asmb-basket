@@ -181,8 +181,27 @@ var evExternes=[];
 var evSelectedTeams=[];
 var evEditId=null; // événement en cours de modification (même formulaire que la création)
 
+// Type d'événement en pastilles (le <select> reste la source de vérité, masqué).
+var EV_TYPE_PASTILLES=[["match","Match"],["entrainement","Entraînement"],["tournoi","Tournoi"],["stage","Stage / Camp"],["soiree","Soirée"],["formation","Formation"],["autre","Autre"]];
+function evTypePastilles(){
+  var sel=document.getElementById("ev-type"); if(!sel) return;
+  var z=document.getElementById("ev-type-pastilles");
+  if(!z){
+    z=document.createElement("div"); z.id="ev-type-pastilles"; z.style.cssText="display:flex;flex-wrap:wrap;gap:6px";
+    sel.parentNode.insertBefore(z,sel); sel.style.display="none";
+  }
+  z.innerHTML=EV_TYPE_PASTILLES.map(function(t){
+    var on=sel.value===t[0], c=(typeof eventTypeColor==="function")?eventTypeColor(t[0]):"var(--dkg)";
+    return '<button type="button" onclick="evTypeChoisir(\''+t[0]+'\')" aria-pressed="'+on+'" style="display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;border:1.5px solid '+(on?c:'var(--bdr)')+';background:'+(on?c:'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+'"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#fff':c)+'"></span>'+t[1]+'</button>';
+  }).join("");
+}
+function evTypeChoisir(t){
+  var sel=document.getElementById("ev-type"); if(!sel) return;
+  sel.value=t; toggleEvEvalOption();
+}
 function toggleEvEvalOption(){
   var type=document.getElementById("ev-type").value;
+  evTypePastilles();
   var box=document.getElementById("ev-eval-option");
   if(box)box.style.display=(type==="stage")?"block":"none";
   var rb=document.getElementById("ev-resp-option");

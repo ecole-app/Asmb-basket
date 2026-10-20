@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792534032",
+  "titre": "Type d'événement en pastilles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "À la création ou modification d'un événement, le type (Match, Entraînement, Tournoi, Stage, Soirée, Formation, Autre) se choisit d'un appui sur une pastille colorée, au lieu d'une liste déroulante."
+   }
+  ]
+ },
+ {
   "v": "1792529467",
   "titre": "Chacun voit ses stats de match",
   "points": [
