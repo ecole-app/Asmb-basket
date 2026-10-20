@@ -249,7 +249,9 @@ function applyClubColor(){
     var old=document.getElementById("club-colors");
     var c=document.documentElement.classList.contains("gm-horsclub")?null:clubCouleur();
     document.documentElement.classList.toggle("gm-clubcolor",!!c);
-    document.documentElement.classList.toggle("gm-club-blanc",!!c && typeof clubBlanc==="function" && clubBlanc());
+    var fond=c && typeof clubFondClair==="function" ? clubFondClair() : null;
+    document.documentElement.classList.toggle("gm-club-clair",!!fond);
+    if(fond) document.documentElement.style.setProperty("--club-fond",fond); else document.documentElement.style.removeProperty("--club-fond");
     // Version teintée pour les thèmes ordinateur sombres (même idée que le mode sombre des thèmes).
     if(c) document.documentElement.style.setProperty("--club-dk",gmMix(c,0.3)); else document.documentElement.style.removeProperty("--club-dk");
     if(!c){ if(old) old.remove(); return; }

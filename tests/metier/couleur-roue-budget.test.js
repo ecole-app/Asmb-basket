@@ -7,6 +7,14 @@ import { charger } from "./contexte.js";
 const c = charger(["js/08c-couleur-roue.js"]);
 
 describe("Roue de couleurs", () => {
+  it("roue HSV : centre blanc, bord vif, barre vers le noir, aller-retour hex", () => {
+    assert.equal(c.gmHsvVersHex(0, 0, 1), "#ffffff");
+    assert.equal(c.gmHsvVersHex(0, 1, 1), "#ff0000");
+    assert.equal(c.gmHsvVersHex(120, 1, 1), "#00ff00");
+    assert.equal(c.gmHsvVersHex(240, 1, 0), "#000000");
+    const x = c.gmHexVersHsv("#8ecae6");
+    assert.equal(c.gmHsvVersHex(x.h, x.s, x.v), "#8ecae6");
+  });
   it("contraste : blanc sur noir = 21, sur blanc = 1", () => {
     assert.ok(Math.abs(c.gmContrasteBlanc("#000000") - 21) < 0.01);
     assert.ok(Math.abs(c.gmContrasteBlanc("#ffffff") - 1) < 0.01);

@@ -1,7 +1,9 @@
-/* ===== 08c-couleur-roue.js — Couleur du club : roue libre en plus de la palette =====
- * Le dirigeant peut choisir n'importe quelle teinte sur une roue (teinte = angle, intensité = rayon)
- * avec une barre de luminosité (dégradé blanc vers noir). Comme le texte des boutons et de l'en-tête est blanc, la couleur
- * est automatiquement assombrie jusqu'à un contraste >= 4,5:1 avec le blanc (même exigence que la palette).
+/* ===== 08c-couleur-roue.js — Couleur du club : roue de couleurs (comme iro.js / Google) =====
+ * Roue : teinte = angle, intensité = distance au centre (centre blanc, bord vif).
+ * Barre : luminosité, de la couleur à fond (gauche) au noir (droite).
+ * Toutes les couleurs sont permises : sur une couleur claire, l'appli met le texte en noir
+ * (en-tête, bandeau d'accueil) et garde une version foncée de la teinte pour les boutons
+ * (clubNormaliserCouleurs, js/01-config.js).
  */
 function gmLuminance(hex){
   var c=[1,3,5].map(function(i){ var v=parseInt(hex.slice(i,i+2),16)/255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); });
@@ -20,24 +22,20 @@ function gmCouleurLisible(h,s,l){
   return hex;
 }
 
-// Luminosité maximale (même teinte, même intensité) qui garde un contraste >= 4,5 avec le blanc.
-function gmHslRgb(h,s,l){
-  var c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2, r=0,g=0,b=0;
-  if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){g=c;b=x;} else if(h<240){g=x;b=c;} else if(h<300){r=x;b=c;} else {r=c;b=x;}
-  return [r+m,g+m,b+m];
+function gmHsvVersHex(h,s,v){
+  var f=function(n){ var k=(n+h/60)%6; return v-v*s*Math.max(0,Math.min(k,4-k,1)); };
+  return "#"+[f(5),f(3),f(1)].map(function(t){ return ("0"+Math.round(Math.max(0,Math.min(1,t))*255).toString(16)).slice(-2); }).join("");
 }
-function gmLumRgb(a){ var c=a.map(function(v){ v=Math.max(0,Math.min(1,v)); return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; }
-function gmLmax(h,s){
-  var lo=0, hi=1;
-  for(var i=0;i<14;i++){ var mid=(lo+hi)/2; if(gmLumRgb(gmHslRgb(h,s,mid))<=0.1833) lo=mid; else hi=mid; }
-  return lo;
+function gmHexVersHsv(hex){
+  var c=[1,3,5].map(function(i){ return parseInt(hex.slice(i,i+2),16)/255; }), mx=Math.max.apply(null,c), mn=Math.min.apply(null,c), d=mx-mn, h=0;
+  if(d){ h=mx===c[0]?((c[1]-c[2])/d+6)%6:mx===c[1]?(c[2]-c[0])/d+2:(c[0]-c[1])/d+4; h*=60; }
+  return {h:h,s:mx?d/mx:0,v:mx};
 }
 function couleurRoueOuvrir(rang){
   if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
   var s=gmSheet(rang===2?"Couleur secondaire":"Couleur principale");
-  var T=260, R=T/2, etat={h:210,s:0.7,t:0.4}, lmaxCache=null;
-  var BLANC=0.04, NOIR=0.96;   // les deux bouts de la barre = vrai blanc / vrai noir
-  function niveau(){ return Math.max(0,Math.min(1,(etat.t-BLANC)/(NOIR-BLANC))); }
+  var dep=(rang===2?clubCouleur2Brute():clubCouleurBrute())||"#2477cb";
+  var T=260, R=T/2, etat=gmHexVersHsv(dep);
   var cv=document.createElement("canvas"); cv.width=T; cv.height=T;
   cv.style.cssText="display:block;margin:4px auto 12px;border-radius:50%;touch-action:none;cursor:crosshair;max-width:100%";
   var ctx=cv.getContext("2d");
@@ -45,57 +43,54 @@ function couleurRoueOuvrir(rang){
   var zone=document.createElement("div"); zone.style.cssText="position:relative;width:"+T+"px;max-width:100%;margin:0 auto";
   curseur.style.cssText="position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.45);pointer-events:none";
   zone.appendChild(cv); zone.appendChild(curseur); s.body.appendChild(zone);
-  // Barre de luminosité : dégradé blanc (à gauche) vers noir (à droite), à toucher ou faire glisser.
   var barre=document.createElement("div");
-  barre.style.cssText="position:relative;height:30px;border-radius:15px;margin:2px 0 14px;background:linear-gradient(to right,#fff,#000);border:1px solid var(--bdr);touch-action:none;cursor:pointer";
+  barre.style.cssText="position:relative;height:30px;border-radius:15px;margin:2px 0 14px;border:1px solid var(--bdr);touch-action:none;cursor:pointer";
   var poignee=document.createElement("div");
   poignee.style.cssText="position:absolute;top:-3px;width:14px;height:34px;margin-left:-7px;border-radius:7px;background:#fff;border:2px solid #333;box-shadow:0 1px 3px rgba(0,0,0,.4);pointer-events:none";
-  barre.appendChild(poignee); barre.setAttribute("role","slider"); barre.setAttribute("aria-label","Luminosité, du blanc au noir");
+  barre.appendChild(poignee); barre.setAttribute("role","slider"); barre.setAttribute("aria-label","Luminosité, de la couleur au noir");
   s.body.appendChild(barre);
   var apercu=document.createElement("div");
-  apercu.style.cssText="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:12px;font-weight:800;font-size:15px;color:#fff;margin-bottom:6px";
+  apercu.style.cssText="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:12px;font-weight:800;font-size:15px;margin-bottom:6px";
   var note=document.createElement("div"); note.style.cssText="font-size:11px;color:var(--mut);min-height:16px;text-align:center;margin-bottom:10px";
   s.body.appendChild(apercu); s.body.appendChild(note);
+  var vDessin=-1;
   function dessiner(){
-    var img=ctx.createImageData(T,T), u=niveau();
-    if(!lmaxCache){ lmaxCache=new Float32Array(T*T); for(var y0=0;y0<T;y0++) for(var x0=0;x0<T;x0++){
-      var ex=x0-R+0.5, ey=y0-R+0.5, dd=Math.sqrt(ex*ex+ey*ey); if(dd>R) continue;
-      lmaxCache[y0*T+x0]=gmLmax((Math.atan2(ey,ex)*180/Math.PI+360)%360, dd/R); } }
+    if(vDessin===etat.v) return; vDessin=etat.v;
+    var img=ctx.createImageData(T,T), v=etat.v;
     for(var y=0;y<T;y++) for(var x=0;x<T;x++){
       var dx=x-R+0.5, dy=y-R+0.5, d=Math.sqrt(dx*dx+dy*dy), i=(y*T+x)*4;
       if(d>R){ img.data[i+3]=0; continue; }
-      var h=(Math.atan2(dy,dx)*180/Math.PI+360)%360, rgb;
-      if(etat.t<=BLANC) rgb=[1,1,1]; else if(etat.t>=NOIR) rgb=[0,0,0]; else rgb=gmHslRgb(h,d/R,lmaxCache[y*T+x]*(1-u*u));
-      img.data[i]=Math.round(rgb[0]*255); img.data[i+1]=Math.round(rgb[1]*255); img.data[i+2]=Math.round(rgb[2]*255); img.data[i+3]=255;
+      var h=(Math.atan2(dy,dx)*180/Math.PI+360)%360, sat=d/R;
+      for(var n=0;n<3;n++){ var k=([5,3,1][n]+h/60)%6; img.data[i+n]=Math.round((v-v*sat*Math.max(0,Math.min(k,4-k,1)))*255); }
+      img.data[i+3]=255;
     }
     ctx.putImageData(img,0,0);
   }
-  var choisie="#1f6b40";
+  var choisie=dep;
   function maj(){
-    var lm=gmLmax(etat.h,etat.s), l, u=niveau();
-    if(etat.t<=BLANC) l=1; else if(etat.t>=NOIR) l=0; else l=lm*(1-u*u);   /* courbe en u² : les teintes sombres sont tassées à droite, le milieu reste vivant */
-    var brute=gmHslVersHex(etat.h,etat.s,l);
-    choisie=(brute==="#ffffff")?"#ffffff":gmCouleurLisible(etat.h,etat.s,l);   // blanc = vrai blanc (l'appli gère le texte)
-    // la barre montre les vraies teintes possibles pour la teinte/l'intensité choisies : blanc, plus clair lisible, noir
-    var arr=[0,0.25,0.5,0.75,1].map(function(q){ return gmHslVersHex(etat.h,etat.s,lm*(1-q*q))+" "+(BLANC*100+2+q*(NOIR*100-BLANC*100-2))+"%"; }).join(",");
-    barre.style.background="linear-gradient(to right,#fff 0%,#fff "+(BLANC*100)+"%,"+arr+",#000 100%)";
-    poignee.style.left=(etat.t*100)+"%";
-    var ang=etat.h*Math.PI/180;
-    curseur.style.left=(R+Math.cos(ang)*etat.s*R)*(cv.clientWidth/T||1)+"px"; curseur.style.top=(R+Math.sin(ang)*etat.s*R)*(cv.clientHeight/T||1)+"px";
-    apercu.style.background=choisie; apercu.style.color=(choisie==="#ffffff")?"#1f2937":"#fff"; apercu.style.border=(choisie==="#ffffff")?"1px solid var(--bdr)":"none"; apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+choisie+'</span>';
-    note.textContent=(choisie==="#ffffff")?"Blanc : l'appli utilise un gris foncé pour garder le texte lisible.":"";
+    choisie=gmHsvVersHex(etat.h,etat.s,etat.v);
+    barre.style.background="linear-gradient(to right,"+gmHsvVersHex(etat.h,etat.s,1)+",#000)";
+    poignee.style.left=((1-etat.v)*100)+"%";
+    var ang=etat.h*Math.PI/180, k=(cv.clientWidth/T||1);
+    curseur.style.left=(R+Math.cos(ang)*etat.s*R)*k+"px"; curseur.style.top=(R+Math.sin(ang)*etat.s*R)*k+"px";
+    curseur.style.background=choisie;
+    var clair=gmContrasteBlanc(choisie)<4.5;
+    apercu.style.background=choisie; apercu.style.color=clair?"#14141f":"#fff"; apercu.style.border=clair?"1px solid var(--bdr)":"none";
+    apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+choisie+'</span>';
+    note.textContent=clair?"Couleur claire : texte noir sur l'en-tête et l'accueil, boutons dans une version plus foncée de la teinte.":"";
   }
   function pointer(e){
     var r=cv.getBoundingClientRect(), k=T/r.width;
     var dx=(e.clientX-r.left)*k-R, dy=(e.clientY-r.top)*k-R, d=Math.min(Math.sqrt(dx*dx+dy*dy),R);
-    etat.h=(Math.atan2(dy,dx)*180/Math.PI+360)%360; etat.s=d/R; maj();
+    etat.h=(Math.atan2(dy,dx)*180/Math.PI+360)%360; etat.s=d/R<0.04?0:d/R;   // tout au centre = blanc pur (si la barre est à gauche)
+    maj();
   }
   var bas=false;
   cv.addEventListener("pointerdown",function(e){ bas=true; try{cv.setPointerCapture(e.pointerId);}catch(x){} pointer(e); });
   cv.addEventListener("pointermove",function(e){ if(bas) pointer(e); });
   cv.addEventListener("pointerup",function(){ bas=false; });
   var basB=false;
-  function pointerB(e){ var r=barre.getBoundingClientRect(); etat.t=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); dessiner(); maj(); }
+  function pointerB(e){ var r=barre.getBoundingClientRect(); var t=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); if(t<0.03) t=0; else if(t>0.97) t=1; etat.v=1-t; dessiner(); maj(); }
   barre.addEventListener("pointerdown",function(e){ basB=true; try{barre.setPointerCapture(e.pointerId);}catch(x){} pointerB(e); });
   barre.addEventListener("pointermove",function(e){ if(basB) pointerB(e); });
   barre.addEventListener("pointerup",function(){ basB=false; });
@@ -104,10 +99,10 @@ function couleurRoueOuvrir(rang){
   row.appendChild(gmBtn("Blanc","soft",function(){ s.modal.remove(); couleurRoueValider("#ffffff",rang); }));
   dessiner(); maj();
 }
-// rang 1 = couleur principale, 2 = secondaire. Le blanc est permis (l'appli le remplace par un gris lisible).
+// rang 1 = couleur principale, 2 = secondaire. Toute couleur est permise (claire = texte noir).
 function couleurRoueValider(hex,rang){
   hex=String(hex).toLowerCase();
-  if(hex!=="#ffffff"&&(!/^#[0-9a-f]{6}$/.test(hex)||gmContrasteBlanc(hex)<4.5)) return;
+  if(!/^#[0-9a-f]{6}$/.test(hex)) return;
   var c1=clubCouleurBrute(), c2=clubCouleur2Brute();
   if(rang===2&&c1) enregistrerCouleursClub(c1,hex);
   else enregistrerCouleursClub(hex,c2);

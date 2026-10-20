@@ -50,7 +50,7 @@ var CLUB_COULEUR_DEFAUT="#5b5bf0";
 // Blanc (et teintes très claires) : le texte blanc des boutons et des bandeaux serait
 // invisible. Le dirigeant peut le choisir ; l'appli utilise alors une couleur de
 // remplacement lisible partout (graphite pour la principale, gris ardoise pour la
-// secondaire) et l'en-tête devient blanc (classe gm-club-blanc). La valeur choisie
+// secondaire) et l'en-tête devient blanc (classe gm-club-clair). La valeur choisie
 // reste dans couleurBrute / couleur2Brute, pour la palette des réglages.
 var CLUB_GRAPHITE="#1f2937", CLUB_ARDOISE="#64748b";
 function gmCouleurClaire(hex){
@@ -58,12 +58,27 @@ function gmCouleurClaire(hex){
   var r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
   return (0.299*r+0.587*g+0.114*b)/255>0.82;
 }
+// Couleur claire (pastel, jaune, bleu ciel…) : le texte blanc n'y serait pas lisible.
+// L'appli garde alors deux versions : la vraie couleur pour les grands fonds (en-tête,
+// bandeau d'accueil, texte noir dessus, classe gm-club-clair) et une version foncée de la
+// même teinte (« encre ») pour les boutons, les accents et les PDF (texte blanc dessus).
+function gmContrasteBlancHex(hex){
+  var c=[1,3,5].map(function(i){ var v=parseInt(hex.slice(i,i+2),16)/255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); });
+  return 1.05/(0.2126*c[0]+0.7152*c[1]+0.0722*c[2]+0.05);
+}
+function gmEncreLisible(hex){
+  if(gmContrasteBlancHex(hex)>=4.5) return hex.toLowerCase();
+  var x=gmHsl(hex), l=x[2], h=hex, n=0;
+  while(gmContrasteBlancHex(h)<4.5&&n<80){ l*=0.96; h=gmFromHsl(x[0],x[1],l); n++; }
+  return h;
+}
 // À appeler une fois, juste après avoir posé couleur / couleur2 bruts sur CURRENT_CLUB.
 function clubNormaliserCouleurs(club){
   if(!club) return club;
   club.couleurBrute=club.couleur||null; club.couleur2Brute=club.couleur2||null;
-  if(gmCouleurClaire(club.couleur)) club.couleur=CLUB_GRAPHITE;
-  if(gmCouleurClaire(club.couleur2)) club.couleur2=CLUB_ARDOISE;
+  var ok=function(x){ return typeof x==="string"&&/^#[0-9a-fA-F]{6}$/.test(x); };
+  if(gmCouleurClaire(club.couleur)) club.couleur=CLUB_GRAPHITE; else if(ok(club.couleur)) club.couleur=gmEncreLisible(club.couleur);
+  if(gmCouleurClaire(club.couleur2)) club.couleur2=CLUB_ARDOISE; else if(ok(club.couleur2)) club.couleur2=gmEncreLisible(club.couleur2);
   return club;
 }
 function clubCouleurBrute(){
@@ -75,6 +90,8 @@ function clubCouleur2Brute(){
   return (clubCouleurBrute() && typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;
 }
 function clubBlanc(){ return gmCouleurClaire(clubCouleurBrute()); }
+// Couleur claire choisie (blanc compris) : fond de l'en-tête et du bandeau, sinon null.
+function clubFondClair(){ var b=clubCouleurBrute(); return (b && gmContrasteBlancHex(b)<4.5) ? b : null; }
 function clubCouleur(){
   var c=window.CURRENT_CLUB && window.CURRENT_CLUB.couleur;
   return (typeof c==="string" && /^#[0-9a-fA-F]{6}$/.test(c)) ? c.toLowerCase() : null;

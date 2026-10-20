@@ -127,9 +127,7 @@ function choisirCouleurClub(hex){ if(hex===null) enregistrerCouleursClub(null,nu
 function enregistrerCouleursClub(c1,c2,msg){
   if(localStorage.getItem("asmb_profile")!=="dirigeant"){ askAlert("Réservé au dirigeant."); return; }
   if(!window.CURRENT_CLUB_ID||!window.fbUpdateDoc){ askAlert("Club en cours de chargement, réessayez dans un instant."); return; }
-  // Palette (blanc compris) ou couleur libre de la roue, à condition qu'elle reste lisible avec du texte blanc.
-  var ok=function(x){ return x===null || (typeof CLUB_PALETTE!=="undefined" && CLUB_PALETTE.map(function(p){return p.toLowerCase();}).indexOf(x)>=0)
-    || (typeof gmContrasteBlanc==="function" && /^#[0-9a-f]{6}$/.test(x) && gmContrasteBlanc(x)>=4.5); };
+    var ok=function(x){ return x===null || /^#[0-9a-f]{6}$/.test(x); };   // toute couleur : une couleur claire passe le texte en noir
   if(!ok(c1)||!ok(c2)) return;
   if(!c1) c2=null;
   window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{couleur:c1,couleur2:c2})

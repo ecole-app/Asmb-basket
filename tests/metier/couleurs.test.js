@@ -57,4 +57,18 @@ describe("Couleurs du club", () => {
     assert.ok(c.CLUB_PALETTE.includes("#ffffff"));
     for (const h of c.CLUB_PALETTE.filter((x) => x !== "#ffffff")) assert.equal(c.gmCouleurClaire(h), false, h);
   });
+  it("couleur claire (bleu ciel) : fond = vraie couleur, encre foncée de la même teinte pour les boutons", () => {
+    c.CURRENT_CLUB = { couleur: "#8ecae6", couleur2: "#ffe066" };
+    c.clubNormaliserCouleurs(c.CURRENT_CLUB);
+    assert.equal(c.clubCouleurBrute(), "#8ecae6");
+    assert.equal(c.clubFondClair(), "#8ecae6");
+    assert.ok(c.gmContrasteBlancHex(c.clubCouleur()) >= 4.5, c.clubCouleur());
+    assert.ok(c.gmContrasteBlancHex(c.clubCouleur2()) >= 4.5, c.clubCouleur2());
+    assert.equal(Math.round(c.gmHsl(c.clubCouleur())[0] / 10), Math.round(c.gmHsl("#8ecae6")[0] / 10)); // même teinte
+    // Couleur déjà foncée : pas de fond clair, rien de changé.
+    c.CURRENT_CLUB = { couleur: "#1f6b40" };
+    c.clubNormaliserCouleurs(c.CURRENT_CLUB);
+    assert.equal(c.clubFondClair(), null);
+    assert.equal(c.clubCouleur(), "#1f6b40");
+  });
 });

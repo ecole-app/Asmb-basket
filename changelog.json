@@ -1,5 +1,26 @@
 [
  {
+  "v": "1792467456",
+  "titre": "Couleurs du club : vraie roue, couleurs claires permises",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouvelle roue de couleurs (comme celle de Google) : centre blanc, bord vif, barre de la couleur vers le noir. Toutes les couleurs sont permises, y compris les claires."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Club en couleur claire : l'en-tête et le bandeau d'accueil prennent la vraie couleur avec le texte en noir ; les boutons utilisent une version plus foncée de la même teinte."
+   }
+  ]
+ },
+ {
   "v": "1792466832",
   "titre": "Roue de couleurs : milieu de barre plus vif",
   "points": [
