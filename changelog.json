@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792528979",
+  "titre": "Licence offerte ou prise ailleurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur la fiche d'un coach, bénévole ou membre du bureau : « Sa licence » payée par la personne, offerte par le club (coût facultatif ajouté en dépense) ou licencié dans un autre club. Rien à payer, aucune relance. Nouveau rôle Bénévole : son pass bénévole est créé automatiquement."
+   }
+  ]
+ },
+ {
   "v": "1792506602",
   "titre": "Indépendant : emoji des réponses transparents",
   "points": [

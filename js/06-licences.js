@@ -516,6 +516,7 @@ function licencesTableau(el,lics,season){
     var suivi=[];
     if(lic.statut==="envoyee"&&(Date.now()-lic.createdAt)/86400000>=5) suivi.push(pastille("Relance recommandée","#E8670A"));
     if(lic.saison&&lic.saison>season) suivi.push(pastille("Saison "+authEsc(lic.saison),"#1A2E5A"));
+    if(lic.priseEnCharge&&typeof licPecLibelle==="function"&&!licEstJoueur(lic)) suivi.push(pastille(authEsc(licPecLibelle(lic)),"color-mix(in srgb, var(--grn) 15%, transparent)","var(--grn)"));
     if(lic.reinscriptionEnLigne) suivi.push(pastille("Réinscription en ligne","color-mix(in srgb, var(--ltg) 15%, transparent)","var(--dkg)"));
     if(lic.ouvertLe) suivi.push('<span class="mut">Ouverte le '+authEsc(lic.ouvertLe)+'</span>');
     h+='<tr data-code="'+authEsc(lic.code)+'"><td><div style="display:flex;align-items:center;gap:10px">'+photo+'<b>'+nom+'</b></div></td>'+
@@ -660,7 +661,11 @@ function renderLicenceDetail(lic){
   // Paiement
   var paiementHtml="";
   if(lic.fiche){
-    if(lic.paiement){
+    if(lic.priseEnCharge&&typeof licPecLibelle==="function"&&!licEstJoueur(lic)){
+      paiementHtml='<div style="margin-top:12px;background:color-mix(in srgb, var(--ltg) 8%, transparent);border:1px solid color-mix(in srgb, var(--ltg) 30%, transparent);border-radius:var(--rs);padding:14px">'+
+        '<div style="font-size:13px;font-weight:800;color:var(--dkg)">✓ '+authEsc(licPecLibelle(lic))+'</div>'+
+        '<div style="font-size:11px;color:var(--mut);margin-top:4px">'+(lic.priseEnCharge==="club"?"Rien à payer pour la personne"+(lic.coutClub?" · "+authEsc(String(lic.coutClub))+" € en dépense pour le club":""):"Rien à payer ici"+(lic.numAilleurs?" · licence n° "+authEsc(lic.numAilleurs):""))+'</div></div>';
+    } else if(lic.paiement){
       var p=lic.paiement;
       paiementHtml='<div style="margin-top:12px;background:color-mix(in srgb, var(--ltg) 8%, transparent);border:1px solid color-mix(in srgb, var(--ltg) 30%, transparent);border-radius:var(--rs);padding:14px">'+
         '<div style="font-size:13px;font-weight:800;color:var(--dkg)">'+(lic.cheques&&lic.cheques.length?"✓ Payé par chèque"+(lic.cheques.length>1?" en "+lic.cheques.length+" fois":""):"✓ Paiement reçu")+'</div>'+
@@ -831,6 +836,7 @@ function savePaiementLicence(code,paiement){
 // 3e relance est PROPOSÉE au dirigeant, jamais automatique.
 function licenceMontantPaye(lic){ return ((lic.paiement&&lic.paiement.montant)||0)+(typeof aidesTotalLicence==="function"?aidesTotalLicence(lic):0); }
 function licenceStatutPaiement(lic){
+  if(lic.priseEnCharge&&!licEstJoueur(lic)) return null; // licence offerte ou prise ailleurs : rien à suivre
   if(lic.montantAttendu==null) return null; // pas de suivi actif sur cette licence
   var paye=licenceMontantPaye(lic);
   if(paye>=lic.montantAttendu) return "paye";
@@ -861,6 +867,7 @@ function enregistrerMontantAttendu(code){
   renderLicenceDetail(lics[idx]);
 }
 function renderImpayesBlock(lic){
+  if(lic.priseEnCharge&&!licEstJoueur(lic)) return "";
   var statut=licenceStatutPaiement(lic);
   if(statut==null && !lic.suspendue){
     // Pas encore de suivi : proposer d'en démarrer un (optionnel, à la discrétion du dirigeant).
