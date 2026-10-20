@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792467662",
+  "titre": "Roue de couleurs : bouton « Blanc » retiré",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le blanc se choisit directement sur la roue (centre de la roue, barre à gauche)."
+   }
+  ]
+ },
+ {
   "v": "1792467456",
   "titre": "Couleurs du club : vraie roue, couleurs claires permises",
   "points": [

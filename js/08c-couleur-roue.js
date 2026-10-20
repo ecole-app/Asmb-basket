@@ -96,7 +96,6 @@ function couleurRoueOuvrir(rang){
   barre.addEventListener("pointerup",function(){ basB=false; });
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Utiliser cette couleur","primary",function(){ s.modal.remove(); couleurRoueValider(choisie,rang); }));
-  row.appendChild(gmBtn("Blanc","soft",function(){ s.modal.remove(); couleurRoueValider("#ffffff",rang); }));
   dessiner(); maj();
 }
 // rang 1 = couleur principale, 2 = secondaire. Toute couleur est permise (claire = texte noir).
