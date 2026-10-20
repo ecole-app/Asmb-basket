@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792466832",
+  "titre": "Roue de couleurs : milieu de barre plus vif",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Couleurs du club : les teintes sombres sont tassées à droite de la barre, le milieu reste une vraie couleur vive."
+   }
+  ]
+ },
+ {
   "v": "1792466515",
   "titre": "Indépendant : le pass de séances aussi en Standard",
   "points": [

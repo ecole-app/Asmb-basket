@@ -65,7 +65,7 @@ function couleurRoueOuvrir(rang){
       var dx=x-R+0.5, dy=y-R+0.5, d=Math.sqrt(dx*dx+dy*dy), i=(y*T+x)*4;
       if(d>R){ img.data[i+3]=0; continue; }
       var h=(Math.atan2(dy,dx)*180/Math.PI+360)%360, rgb;
-      if(etat.t<=BLANC) rgb=[1,1,1]; else if(etat.t>=NOIR) rgb=[0,0,0]; else rgb=gmHslRgb(h,d/R,lmaxCache[y*T+x]*(1-u));
+      if(etat.t<=BLANC) rgb=[1,1,1]; else if(etat.t>=NOIR) rgb=[0,0,0]; else rgb=gmHslRgb(h,d/R,lmaxCache[y*T+x]*(1-u*u));
       img.data[i]=Math.round(rgb[0]*255); img.data[i+1]=Math.round(rgb[1]*255); img.data[i+2]=Math.round(rgb[2]*255); img.data[i+3]=255;
     }
     ctx.putImageData(img,0,0);
@@ -73,11 +73,12 @@ function couleurRoueOuvrir(rang){
   var choisie="#1f6b40";
   function maj(){
     var lm=gmLmax(etat.h,etat.s), l, u=niveau();
-    if(etat.t<=BLANC) l=1; else if(etat.t>=NOIR) l=0; else l=lm*(1-u);
+    if(etat.t<=BLANC) l=1; else if(etat.t>=NOIR) l=0; else l=lm*(1-u*u);   /* courbe en u² : les teintes sombres sont tassées à droite, le milieu reste vivant */
     var brute=gmHslVersHex(etat.h,etat.s,l);
     choisie=(brute==="#ffffff")?"#ffffff":gmCouleurLisible(etat.h,etat.s,l);   // blanc = vrai blanc (l'appli gère le texte)
     // la barre montre les vraies teintes possibles pour la teinte/l'intensité choisies : blanc, plus clair lisible, noir
-    barre.style.background="linear-gradient(to right,#fff 0%,#fff "+(BLANC*100)+"%,"+gmHslVersHex(etat.h,etat.s,lm)+" "+(BLANC*100+2)+"%,"+gmHslVersHex(etat.h,etat.s,lm*0.5)+" 50%,#000 "+(NOIR*100)+"%,#000 100%)";
+    var arr=[0,0.25,0.5,0.75,1].map(function(q){ return gmHslVersHex(etat.h,etat.s,lm*(1-q*q))+" "+(BLANC*100+2+q*(NOIR*100-BLANC*100-2))+"%"; }).join(",");
+    barre.style.background="linear-gradient(to right,#fff 0%,#fff "+(BLANC*100)+"%,"+arr+",#000 100%)";
     poignee.style.left=(etat.t*100)+"%";
     var ang=etat.h*Math.PI/180;
     curseur.style.left=(R+Math.cos(ang)*etat.s*R)*(cv.clientWidth/T||1)+"px"; curseur.style.top=(R+Math.sin(ang)*etat.s*R)*(cv.clientHeight/T||1)+"px";
