@@ -1,14 +1,14 @@
 [
  {
-  "v": "1792506082",
-  "titre": "Indépendant : emoji des réponses plus discrets",
+  "v": "1792506172",
+  "titre": "Indépendant : emoji des réponses transparents",
   "points": [
    {
     "roles": [
      "dirigeant",
      "client"
     ],
-    "texte": "Les 👍🏼 👎🏼 des annonces sont semi-transparents, pleins une fois choisis."
+    "texte": "Les 👍🏼 👎🏼 des annonces sont transparents."
    }
   ]
  },

@@ -788,5 +788,5 @@ html.gm-desk .adm-grp-g>.admin-card{margin:0}
 .gs-grp-btn.ouvert svg{transform:none}
 .gs-grp-body[hidden]{display:none}
 html.gm-desk.gm-desk-mini .gs-grp-btn svg{display:none}
-.ind-pb .em,.ind-react .em{opacity:.45}
-.ind-pb.on .em{opacity:1}
+.ind-pb .em,.ind-react .em{opacity:0}
+.ind-pb.on .em{opacity:0}
