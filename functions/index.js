@@ -518,3 +518,65 @@ exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds:
     }
   }
 });
+
+/* ===== Notifications « on vous a donné un rôle / un accès / un poste » ===== */
+const NOTIF_ROLES = { dirigeant: "Dirigeant", coach: "Coach", parent: "Parent", joueur: "Joueur", bureau: "Bureau" };
+const NOTIF_TITRES = { tresorier: "Trésorier", secretaire: "Secrétaire", bureau: "Membre du bureau" };
+const NOTIF_MODULES = {
+  invitations: "Accès & invitations", parametres: "Paramètres", communaute: "Communauté", licences: "Licences",
+  inscriptions: "Inscriptions", equipes: "Équipes", planning: "Planning", documents: "Documents", acces: "Accès coach",
+  avis: "Avis & suggestions", fiches: "Fiches reçues", comptabilite: "Comptabilité", sponsors: "Sponsors & Partenaires",
+  notesfrais: "Notes de frais", inventaire: "Inventaire"
+};
+// Envoie une notification à un compte du club (rien si pas d'abonnement push).
+async function notifierCompte(clubId, uid, titre, corps) {
+  const ref = db.collection("clubs").doc(clubId).collection("push_subscriptions").doc(uid);
+  const snap = await ref.get();
+  const token = snap.exists && snap.data() && snap.data().token;
+  if (!token) return;
+  try {
+    await admin.messaging().send({
+      token, notification: { title: titre, body: corps }, data: { url: "./" },
+      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+    });
+  } catch (e) {
+    const c = e && e.code;
+    if (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") await ref.delete();
+  }
+}
+const listeFr = (a) => a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1];
+
+// Le dirigeant change le rôle, le profil du bureau ou les accès d'une personne du club.
+// (Un compte qui vient d'être créé ou rattaché au club n'a pas d'« avant » : pas de notification.)
+exports.onRoleAttribue = onDocumentUpdated("users/{uid}", async (event) => {
+  const avant = event.data && event.data.before.data();
+  const apres = event.data && event.data.after.data();
+  if (!avant || !apres || !avant.clubId || avant.clubId !== apres.clubId) return;
+  const lignes = [];
+  const rolesAvant = avant.roles || [], rolesApres = apres.roles || [];
+  const nouveauxRoles = rolesApres.filter((r) => !rolesAvant.includes(r) && NOTIF_ROLES[r]);
+  if (nouveauxRoles.length) lignes.push("rôle " + listeFr(nouveauxRoles.map((r) => NOTIF_ROLES[r])));
+  if (apres.titre && apres.titre !== avant.titre && NOTIF_TITRES[apres.titre]) lignes.push("profil " + NOTIF_TITRES[apres.titre]);
+  const pAvant = avant.permissions || {}, pApres = apres.permissions || {};
+  const modules = Object.keys(pApres).filter((k) => pApres[k] === true && pAvant[k] !== true && NOTIF_MODULES[k]).map((k) => NOTIF_MODULES[k]);
+  if (!lignes.length && !modules.length) return;
+  let corps = "";
+  if (lignes.length) corps += "Le club vous a attribué le " + listeFr(lignes) + ". ";
+  if (modules.length) corps += "Nouvel accès : " + listeFr(modules) + ".";
+  await notifierCompte(apres.clubId, event.params.uid, "Votre rôle a changé", corps.trim());
+});
+
+// Un bénévole avec compte est placé sur un poste d'un événement.
+exports.onBenevolePlace = onDocumentUpdated("clubs/{clubId}/events/{eventId}", async (event) => {
+  const avant = event.data && event.data.before.data();
+  const apres = event.data && event.data.after.data();
+  if (!avant || !apres || apres.cancelled) return;
+  const dejaIds = new Set((avant.benevoles || []).map((m) => m.id));
+  const nouveaux = (apres.benevoles || []).filter((m) => m.uid && !dejaIds.has(m.id));
+  for (const m of nouveaux) {
+    const jour = String(m.jour || apres.date || "");
+    const jourFr = jour ? jour.split("-").reverse().join("/") : "";
+    const corps = `Poste « ${m.poste || "bénévole"} »${jourFr ? " le " + jourFr : ""}${m.heure ? " à " + m.heure : ""} : ${apres.titre || "événement du club"}.`;
+    await notifierCompte(event.params.clubId, m.uid, "Vous êtes bénévole", corps);
+  }
+});
