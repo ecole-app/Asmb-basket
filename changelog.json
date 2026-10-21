@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792577894",
+  "titre": "Événements longs sur tous les jours du planning",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans le calendrier du Planning, un stage ou un événement de plusieurs jours apparaît sur chacun de ses jours (point de couleur et détail au toucher)."
+   }
+  ]
+ },
+ {
   "v": "1792568616",
   "titre": "Bénévoles sur la carte de l'accueil, alerte synchro FFBB",
   "points": [

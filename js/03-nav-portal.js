@@ -360,6 +360,8 @@ function buildPortal(){
 
 // Un événement qui dure (date → dateFin) reste « à venir » jusqu'à son dernier jour.
 function evtEncoreActif(e,todayStr){ return ((e.dateFin&&e.dateFin>e.date?e.dateFin:e.date)||"")>=todayStr; }
+// L'événement a lieu ce jour-là (un jour précis, ou n'importe quel jour de date → dateFin).
+function evtSurJour(e,jour){ return !!e&&e.date<=jour&&((e.dateFin&&e.dateFin>e.date)?e.dateFin:e.date)>=jour; }
 function evtEnCours(e,todayStr){ return !!(e.dateFin&&e.dateFin>e.date&&e.date<=todayStr&&e.dateFin>=todayStr); }
 function evtDateFr(d){ var p=(d||"").split("-"); return p.length===3?(p[2]+"/"+p[1]+"/"+p[0]):(d||""); }
 function evtPlageFr(e){ return (e.dateFin&&e.dateFin>e.date)?("du "+evtDateFr(e.date)+" au "+evtDateFr(e.dateFin)):evtDateFr(e.date); }

@@ -579,7 +579,7 @@ function renderPlanningCalendar(){
   for(var i=0;i<startOffset;i++){html+='<div></div>';}
   for(var day=1;day<=daysInMonth;day++){
     var dateStr=planCalYear+"-"+String(planCalMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
-    var dayEvents=events.filter(function(e){return e.date===dateStr;});
+    var dayEvents=events.filter(function(e){return evtSurJour(e,dateStr);});
     var isToday=dateStr===todayStr;
     var dots=dayEvents.slice(0,3).map(function(e){return '<span style="width:5px;height:5px;border-radius:50%;background:'+eventTypeColor(e.type)+';display:inline-block;margin:0 1px"></span>';}).join("");
     html+='<div onclick="showDayEvents(\''+dateStr+'\')" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;background:'+(isToday?"var(--dkg)":"var(--card)")+';border:1px solid var(--bdr)">'+
@@ -599,9 +599,9 @@ function shiftPlanCal(delta){
 }
 
 function showDayEvents(dateStr){
-  var events=getEvents().filter(function(e){return e.date===dateStr;});
+  var events=getEvents().filter(function(e){return evtSurJour(e,dateStr);});
   if(!events.length){askAlert("Aucun événement ce jour-là");return;}
-  var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.heure?" à "+e.heure:"");}).join("\n");
+  var txt=events.map(function(e){return "• "+e.titre+" ("+e.type+")"+(e.dateFin&&e.dateFin>e.date&&typeof evtPlageFr==="function"?" "+evtPlageFr(e):"")+(e.heure?" à "+e.heure:"");}).join("\n");
   askAlert("Événements du "+dateStr+" :\n\n"+txt);
 }
 
