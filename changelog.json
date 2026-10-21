@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792568106",
+  "titre": "Événements de plusieurs jours dans le calendrier",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Un stage ou un événement de plusieurs jours apparaît chaque jour de la semaine du calendrier, avec « jour 2/5 » et ses dates. Les bénévoles se placent jour par jour (ou pour tous les jours) et chacun voit sa mission à la bonne date."
+   }
+  ]
+ },
+ {
   "v": "1792537186",
   "titre": "Championnats liés à la FFBB",
   "points": [

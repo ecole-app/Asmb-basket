@@ -9,7 +9,12 @@
 var BEN_POSTES=["Buvette","Table de marque","Chronomètre","Arbitrage","Accueil","Installation / rangement"];
 var BEN_COMPTES=null; // cache des comptes du club : [{uid, label, phone, prenom}]
 
-function benListe(e){ return (e&&Array.isArray(e.benevoles))?e.benevoles:[]; }
+// Sur un événement de plusieurs jours, un bénévole peut être placé un jour précis (m.jour) ;
+// sans m.jour il vaut pour toute la durée. benListe(e,jour) filtre sur ce jour.
+function benListe(e,jour){
+  var l=(e&&Array.isArray(e.benevoles))?e.benevoles:[];
+  return jour?l.filter(function(m){ return !m.jour||m.jour===jour; }):l;
+}
 function benEstStaff(){ return ["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0; }
 function benJourTxt(e){
   try{ return new Date(e.date+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}); }catch(x){ return e.date||""; }
@@ -49,17 +54,17 @@ function benChargerComptes(){
 }
 
 // ── Écran du staff : postes de l'événement ───────────────────────────
-function benOuvrir(eid){
+function benOuvrir(eid,jour){
   var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
   var s=gmSheet("Bénévoles · "+(e.titre||eventTypeLabel(e.type)));
   var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
-  info.textContent=benJourTxt(e)+(e.heure?" · "+e.heure:"")+(e.lieu?" · "+e.lieu:"");
+  info.textContent=(jour?benJourTxt({date:jour}):benJourTxt(e))+(e.heure?" · "+e.heure:"")+(e.lieu?" · "+e.lieu:"");
   s.body.appendChild(info);
   gmRow(s.body).appendChild(gmBtn("🎫 Mes bénévoles (pass)","ghost",function(){ benCarnetOuvrir(); }));
   benCarnetCharger();
   var liste=document.createElement("div"); s.body.appendChild(liste);
   function rendre(){
-    var ev=getEvents().find(function(x){ return x.id===eid; })||e, l=benListe(ev);
+    var ev=getEvents().find(function(x){ return x.id===eid; })||e, l=benListe(ev,jour);
     liste.innerHTML="";
     if(!l.length){ var v=document.createElement("div"); v.style.cssText="font-size:12.5px;color:var(--mut);padding:6px 0 10px"; v.textContent="Personne n'est encore placé. Ajoutez un poste ci-dessous."; liste.appendChild(v); }
     l.forEach(function(m){
@@ -87,6 +92,13 @@ function benOuvrir(eid){
   var wh=document.createElement("div"); wh.className="form-group"; wh.innerHTML='<label class="form-label">Heure</label>';
   var heure=document.createElement("input"); heure.className="form-input"; heure.placeholder=""; heure.maxLength=12; heure.value=String(e.heure||"").slice(0,12);
   wh.appendChild(heure); g.appendChild(wp); g.appendChild(wh); s.body.appendChild(g);
+  var quand=null;
+  if(jour){
+    var wq=document.createElement("div"); wq.className="form-group"; wq.innerHTML='<label class="form-label">Quand</label>';
+    quand=document.createElement("select"); quand.className="form-input";
+    [["jour","Ce jour seulement ("+benJourTxt({date:jour})+")"],["tous","Tous les jours de l'événement"]].forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; quand.appendChild(op); });
+    wq.appendChild(quand); s.body.appendChild(wq);
+  }
   var row=gmRow(s.body);
   row.appendChild(gmBtn("Choisir la personne","primary",function(){
     var nomPoste=poste.value;
@@ -96,6 +108,7 @@ function benOuvrir(eid){
         if(!pers) return;
         var ev=getEvents().find(function(x){ return x.id===eid; }); if(!ev) return;
         var m={id:"b"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), poste:String(p).slice(0,40), heure:heure.value.trim().slice(0,12), nom:String(pers.nom||"").slice(0,60)};
+        if(jour&&quand&&quand.value==='jour') m.jour=jour;
         if(pers.uid) m.uid=pers.uid;
         if(pers.benId) m.benId=pers.benId;
         benSauver(eid,benListe(ev).concat([m])); rendre();
@@ -156,7 +169,7 @@ function benSmsTexte(e,m){
   var club=(typeof clubLabel==="function")?clubLabel(""):"";
   var pass=m.benId&&BEN_CARNET?BEN_CARNET.find(function(x){ return x.id===m.benId&&x.actif!==false; }):null;
   var prenom=String(m.nom||"").split(" ")[0];
-  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+benJourTxt(e)+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! "+(pass?"Confirmez ou signalez un empêchement ici : "+benPassUrl(pass.code):"En cas d'empêchement, prévenez-nous au plus vite.");
+  return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+(m.jour?benJourTxt({date:m.jour}):benJourTxt(e))+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! "+(pass?"Confirmez ou signalez un empêchement ici : "+benPassUrl(pass.code):"En cas d'empêchement, prévenez-nous au plus vite.");
 }
 function benSms(e,m,tel){
   var envoyer=function(t){
@@ -201,11 +214,12 @@ function benReponsesCharger(){
 function benMissionsDe(benId){
   var auj=benJourLocal(), out=[];
   getEvents().forEach(function(e){
-    if(!e||e.annule||e.cancelled||String(e.date||"")<auj) return;
+    if(!e||e.annule||e.cancelled) return;
     benListe(e).forEach(function(m){
       if(m.benId!==benId) return;
+      if(String(m.jour||e.date||"")<auj) return;
       out.push({id:String(m.id).slice(0,30), eid:String(e.id).slice(0,60), poste:String(m.poste||"").slice(0,40), heure:String(m.heure||"").slice(0,12),
-        date:String(e.date||"").slice(0,10), titre:String(e.titre||eventTypeLabel(e.type)||"").slice(0,80), lieu:String(e.lieu||"").slice(0,80)});
+        date:String(m.jour||e.date||"").slice(0,10), titre:String(e.titre||eventTypeLabel(e.type)||"").slice(0,80), lieu:String(e.lieu||"").slice(0,80)});
     });
   });
   out.sort(function(a,b){ return (a.date+a.heure).localeCompare(b.date+b.heure); });
@@ -300,10 +314,9 @@ function benMesMissions(){
   var out=[];
   (getEvents()||[]).forEach(function(e){
     if(!e||e.cancelled||e.statut==="attente"||!e.date) return;
-    var j=benJoursAvant(e.date); if(j<0||j>14) return;
-    benListe(e).forEach(function(m){ if(m.uid===uid) out.push({e:e,m:m,j:j}); });
+    benListe(e).forEach(function(m){ if(m.uid!==uid) return; var j=benJoursAvant(m.jour||e.date); if(j<0||j>14) return; out.push({e:e,m:m,j:j}); });
   });
-  return out.sort(function(a,b){ return (a.e.date+(a.m.heure||a.e.heure||"")).localeCompare(b.e.date+(b.m.heure||b.e.heure||"")); });
+  return out.sort(function(a,b){ return ((a.m.jour||a.e.date)+(a.m.heure||a.e.heure||"")).localeCompare((b.m.jour||b.e.date)+(b.m.heure||b.e.heure||"")); });
 }
 function benARappeler(x){
   var auj=benJourLocal();

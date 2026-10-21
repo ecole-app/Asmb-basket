@@ -189,7 +189,7 @@ function buildCalendrier(){
       var dStr=d.toISOString().slice(0,10);
       var isSaturday=idx===5;
       var isToday=dStr===todayStr;
-      var dayEvents=events.filter(function(e){return e.date===dStr&&!e.cancelled;});
+      var dayEvents=events.filter(function(e){return !e.cancelled&&e.date<=dStr&&(e.dateFin&&e.dateFin>e.date?e.dateFin:e.date)>=dStr;});
       if(isSaturday){
         dayEvents=dayEvents.slice().sort(function(a,b){return a.type==="match"?-1:(b.type==="match"?1:0);});
       }
@@ -212,8 +212,9 @@ function buildCalendrier(){
           var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'';
           var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
           var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
-          var nbBen=(typeof benListe==="function")?benListe(e).length:0;
-          var benBtn=(isCoachOrDir&&e.type!=="entrainement"&&typeof benOuvrir==="function")?'<button onclick="benOuvrir(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">🙋 Bénévoles'+(nbBen?' ('+nbBen+')':'')+'</button>':'';
+          var multi=!!(e.dateFin&&e.dateFin>e.date), nbBen=(typeof benListe==="function")?benListe(e,multi?dStr:null).length:0;
+          var jourTxt=multi?'<div style="font-size:10px;font-weight:700;color:var(--dkg);margin-top:2px">'+(typeof evtPlageFr==="function"?evtPlageFr(e):"")+' · jour '+(Math.round((new Date(dStr+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'/'+(Math.round((new Date(e.dateFin+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'</div>':"";
+          var benBtn=(isCoachOrDir&&e.type!=="entrainement"&&typeof benOuvrir==="function")?'<button onclick="benOuvrir(\''+e.id+'\''+(multi?',\''+dStr+'\'':'')+')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">🙋 Bénévoles'+(nbBen?' ('+nbBen+')':'')+'</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
             ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
             '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>')
@@ -221,7 +222,7 @@ function buildCalendrier(){
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+eventTypeColor(e.type)+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0">'+
             '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+eventTypeLabel(e.type)+'</span>'+
-            '<div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div><div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
+            '<div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+jourTxt+'<div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
             '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+icsBtn+carBtn+coachBtns+benBtn+'</div>'+
             (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
           '</div>';
