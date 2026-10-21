@@ -345,7 +345,7 @@ function champOuvrir(){
     setTimeout(function(){ actualiser(c,null); },1200);   // laisse le temps à la liaison d'arriver sur le serveur
   }
   function choisirFichier(cible){
-    var inp=document.createElement("input"); inp.type="file"; inp.accept=".xlsx,.xls,.csv";
+    var inp=document.createElement("input"); inp.type="file"; /* pas de filtre : sur Android, le fichier FBI (type inconnu) serait grisé */
     inp.onchange=function(){
       var f=inp.files&&inp.files[0]; if(!f) return;
       s.body.innerHTML='<div style="font-size:12px;color:var(--mut)">Lecture du fichier…</div>';

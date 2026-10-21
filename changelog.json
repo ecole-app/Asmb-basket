@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792587559",
+  "titre": "Import FBI sur téléphone",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Import de l'export FBI : le fichier n'est plus grisé dans la liste des téléchargements du téléphone, on peut le choisir."
+   }
+  ]
+ },
+ {
   "v": "1792585391",
   "titre": "Match déplacé et résultats notifiés",
   "points": [
