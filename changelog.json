@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792585391",
+  "titre": "Match déplacé et résultats notifiés",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "joueur",
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "Quand la FFBB déplace un match de votre équipe ou publie son score, un message arrive dans le canal de l'équipe et les familles reçoivent la notification. Un score saisi dans l'appli est aussi annoncé."
+   }
+  ]
+ },
+ {
   "v": "1792577894",
   "titre": "Événements longs sur tous les jours du planning",
   "points": [

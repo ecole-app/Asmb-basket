@@ -444,12 +444,77 @@ async function ffbbPush(clubId, titre, corps) {
     return (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") ? docs[i].delete() : null;
   }));
 }
+// Matchs de NOTRE équipe dont la date/heure a changé ou dont le score vient d'arriver.
+function ffbbDiffNous(anc, nouv, nous) {
+  if (!nous || !nous.nom) return [];
+  const estNous = (m) => {
+    const a = m.e1 === nous.nom && (nous.num == null || m.n1 === nous.num);
+    const b = m.e2 === nous.nom && (nous.num == null || m.n2 === nous.num);
+    return a ? 1 : (b ? 2 : 0);
+  };
+  const avant = {};
+  (anc || []).forEach((m) => { avant[String(m.num)] = m; });
+  const out = [];
+  (nouv || []).forEach((m) => {
+    const cote = estNous(m); if (!cote) return;
+    const a = avant[String(m.num)]; if (!a) return;
+    const dom = cote === 1, adv = dom ? m.e2 : m.e1;
+    if (m.date && a.date && (m.date !== a.date || (m.heure || "") !== (a.heure || ""))) {
+      out.push({ type: "deplace", num: String(m.num), adv, dom, date: m.date, heure: m.heure || "" });
+    }
+    const joueAvant = a.s1 != null && a.s2 != null, joue = m.s1 != null && m.s2 != null;
+    if ((joue && !joueAvant) || (!a.f1 && !a.f2 && (m.f1 || m.f2))) {
+      const nousS = dom ? m.s1 : m.s2, euxS = dom ? m.s2 : m.s1;
+      const forfaitNous = dom ? m.f1 : m.f2, forfaitEux = dom ? m.f2 : m.f1;
+      out.push({ type: "resultat", num: String(m.num), adv, dom, nous: nousS, eux: euxS, forfaitNous: !!forfaitNous, forfaitEux: !!forfaitEux });
+    }
+  });
+  return out;
+}
+const dateFr = (d) => String(d || "").split("-").reverse().join("/");
+function texteResultat(x) {
+  if (x.forfaitNous && !x.forfaitEux) return `Défaite par forfait contre ${x.adv}`;
+  if (x.forfaitEux && !x.forfaitNous) return `Victoire par forfait contre ${x.adv}`;
+  if (x.nous == null || x.eux == null) return `Match contre ${x.adv} : forfait`;
+  const quoi = x.nous > x.eux ? "Victoire" : (x.nous < x.eux ? "Défaite" : "Match nul");
+  return `${quoi} ${x.nous}-${x.eux} ${x.dom ? "contre" : "à"} ${x.adv}`;
+}
+// Message dans le canal de l'équipe → la Function onChannelMessage notifie les familles.
+async function ffbbAlertesEquipe(clubId, champ, diffs) {
+  if (!diffs.length || !champ.equipe) return;
+  const clubRef = db.collection("clubs").doc(clubId);
+  const teams = await clubRef.collection("teams").where("name", "==", champ.equipe).limit(1).get();
+  if (teams.empty) return;
+  const canal = clubRef.collection("channels").doc(teams.docs[0].id);
+  if (!(await canal.get()).exists) return;    // canal supprimé volontairement : on ne le recrée pas
+  const club = (await clubRef.get()).data() || {};
+  for (const x of diffs) {
+    const evSnap = await clubRef.collection("events").doc("champ-" + champ.id + "-" + x.num).get();
+    const ev = evSnap.exists ? evSnap.data() : null;
+    let texte = "";
+    if (x.type === "deplace") {
+      // Date/heure retouchées dans GM : le planning ne suit pas la FFBB, on ne prévient pas.
+      if (ev && ev.fbi && ((ev.date || "") !== (ev.fbi.date || "") || (ev.heure || "") !== (ev.fbi.heure || ""))) continue;
+      texte = `Match déplacé (FFBB)\n${champ.equipe} ${x.dom ? "contre" : "à"} ${x.adv} : nouveau rendez-vous le ${dateFr(x.date)}${x.heure ? " à " + x.heure : ""}`;
+    } else {
+      if (ev && ev.score && ev.score.asmb === x.nous && ev.score.adv === x.eux) continue;   // déjà saisi dans GM
+      texte = `Résultat\n${champ.equipe} : ${texteResultat(x)}`;
+    }
+    await canal.collection("messages").add({
+      text: texte, pseudo: club.name || "Club", ts: admin.firestore.FieldValue.serverTimestamp(), likeUsers: [], heartUsers: []
+    });
+  }
+}
 async function ffbbSyncChamp(clubId, ref, champ, notifier) {
   const poule = await ffbbLirePoule(champ.ffbb.pouleId);
   const r = ffbbAppliquer(champ, poule);
   r.champ.ffbb = Object.assign({}, champ.ffbb, { maj: Date.now(), erreur: "" });
   await ref.set(JSON.parse(JSON.stringify(r.champ)));
-  if (notifier && r.changements.length) await ffbbPush(clubId, "Championnat", r.changements.join(" · "));
+  if (notifier) {
+    try { await ffbbAlertesEquipe(clubId, r.champ, ffbbDiffNous(champ.rencontres, r.champ.rencontres, champ.nous)); } catch (e) { /* l'alerte ne bloque jamais la synchro */ }
+    const classement = r.changements.filter((t) => t.indexOf("Classement") === 0);   // les résultats partent déjà dans le canal de l'équipe
+    if (classement.length) await ffbbPush(clubId, "Championnat", classement.join(" · "));
+  }
   return r.changements;
 }
 

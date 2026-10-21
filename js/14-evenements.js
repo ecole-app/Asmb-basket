@@ -658,9 +658,18 @@ async function editScore(eventId){
   if(scoreAsmb===null)return;
   var scoreAdv=await askPrompt("Score adversaire", {defaultValue:(ev.score&&ev.score.adv)||"0", type:"number", confirmText:"Enregistrer"});
   if(scoreAdv===null)return;
+  var avant=ev.score?JSON.stringify(ev.score):"";
   ev.score={adversaire:adversaire.trim()||"Adversaire",asmb:parseInt(scoreAsmb,10)||0,adv:parseInt(scoreAdv,10)||0};
   saveEvents(events);
   buildPlanning();
+  // Résultat posté dans le canal de l'équipe : les familles reçoivent la notification.
+  if(window.fbReady && JSON.stringify(ev.score)!==avant && ev.equipe){
+    var sc=ev.score, quoi=sc.asmb>sc.adv?"Victoire":(sc.asmb<sc.adv?"Défaite":"Match nul");
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",findChannelForTeamText(ev.equipe),"messages"),{
+      text:"Résultat\n"+ev.equipe+" : "+quoi+" "+sc.asmb+"-"+sc.adv+" contre "+sc.adversaire,
+      pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+    }).catch(function(){});
+  }
 }
 
 // ── CONVOCATION ────────────────────────────────────────────────────
