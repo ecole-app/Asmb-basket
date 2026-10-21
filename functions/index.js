@@ -319,7 +319,12 @@ const FFBB_UA = "okhttp/4.12.0";
 
 async function ffbbJson(url, opt) {
   const r = await fetch(url, Object.assign({ headers: {} }, opt));
-  if (!r.ok) throw new Error("FFBB " + r.status);
+  if (!r.ok) {
+    // Début de la réponse : permet de distinguer un champ refusé (Directus) d'un blocage réseau (CDN).
+    let corps = "";
+    try { corps = (await r.text()).replace(/\s+/g, " ").slice(0, 140); } catch (e) { /* ignoré */ }
+    throw new Error("FFBB " + r.status + (corps ? " : " + corps : ""));
+  }
   return r.json();
 }
 // Chemin relatif (« items/... ») essayé sur chaque adresse de FFBB_APIS.
@@ -365,22 +370,29 @@ async function ffbbTrouverPoule(numeros) {
   return Object.keys(votes).sort((a, b) => votes[b] - votes[a]).map((id) => ({ id, votes: votes[id] }));
 }
 // Lit la poule : {nom, rencontres:[...], classement:[...]} au format de l'appli.
+// Deux appels, comme le fait le client open source de l'API : la poule (avec son classement)
+// puis ses rencontres. Demander des champs de rencontres imbriqués dans la poule est refusé (403).
 async function ffbbLirePoule(pouleId) {
   const tk = await ffbbTokens();
+  const h = { authorization: "Bearer " + tk.dh, "user-agent": FFBB_UA };
   const q = new URLSearchParams();
-  ["id", "nom", "rencontres.numero", "rencontres.nomEquipe1", "rencontres.nomEquipe2", "rencontres.resultatEquipe1",
-    "rencontres.resultatEquipe2", "rencontres.joue", "rencontres.date_rencontre", "rencontres.horaire",
-    "rencontres.forfaitEquipe1", "rencontres.forfaitEquipe2",
-    "classements.position", "classements.points", "classements.matchJoues", "classements.gagnes", "classements.perdus",
-    "classements.nombreForfaits", "classements.paniersMarques", "classements.paniersEncaisses", "classements.difference",
-    "classements.organisme_nom", "classements.horsClassement"].forEach((f) => q.append("fields[]", f));
-  q.set("deep[rencontres][_limit]", "1000");
+  ["id", "nom", "classements.id", "classements.position", "classements.points", "classements.matchJoues", "classements.gagnes",
+    "classements.perdus", "classements.nombreForfaits", "classements.paniersMarques", "classements.paniersEncaisses",
+    "classements.difference", "classements.horsClassement", "classements.organisme_nom"].forEach((f) => q.append("fields[]", f));
   q.set("deep[classements][_limit]", "1000");
-  const j = await ffbbApi("items/ffbbserver_poules/" + encodeURIComponent(pouleId) + "?" + q.toString(),
-    { headers: { authorization: "Bearer " + tk.dh, "user-agent": FFBB_UA } });
+  const j = await ffbbApi("items/ffbbserver_poules/" + encodeURIComponent(pouleId) + "?" + q.toString(), { headers: h });
   const d = (j && j.data) || j;
-  if (!d || !Array.isArray(d.rencontres)) throw new Error("poule introuvable");
-  const rencontres = d.rencontres.map((r) => {
+  if (!d) throw new Error("poule introuvable");
+  const qr = new URLSearchParams();
+  ["numero", "nomEquipe1", "nomEquipe2", "resultatEquipe1", "resultatEquipe2", "joue", "date_rencontre", "horaire",
+    "forfaitEquipe1", "forfaitEquipe2"].forEach((f) => qr.append("fields[]", f));
+  qr.set("filter", JSON.stringify({ idPoule: { _eq: String(pouleId) } }));
+  qr.set("limit", "1000");
+  qr.set("sort[]", "date_rencontre");
+  const jr = await ffbbApi("items/ffbbserver_rencontres?" + qr.toString(), { headers: h });
+  const lignes = (jr && jr.data) || [];
+  if (!Array.isArray(lignes) || !lignes.length) throw new Error("aucune rencontre pour cette poule");
+  const rencontres = lignes.map((r) => {
     const a = ffbbEquipe(r.nomEquipe1), b = ffbbEquipe(r.nomEquipe2);
     const joue = r.joue === true || (r.resultatEquipe1 != null && r.resultatEquipe2 != null && (r.resultatEquipe1 + r.resultatEquipe2) > 0);
     return {
