@@ -312,7 +312,8 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
    dans api.ffbb.app/items/configuration, poule dans items/ffbbserver_poules/{id},
    recherche dans Meilisearch. Elle peut changer sans prévenir : en cas d'échec
    on garde les données déjà en base et on le dit, on ne casse rien. */
-const FFBB_API = "https://api.ffbb.app/";
+// Adresses connues de l'API (la première qui répond est utilisée).
+const FFBB_APIS = ["https://api.ffbb.app/", "https://bo.ffbb.com/", "https://bo.ffbb.app/"];
 const FFBB_MS = "https://meilisearch-prod.ffbb.app/multi-search";
 const FFBB_UA = "okhttp/4.12.0";
 
@@ -321,8 +322,16 @@ async function ffbbJson(url, opt) {
   if (!r.ok) throw new Error("FFBB " + r.status);
   return r.json();
 }
+// Chemin relatif (« items/... ») essayé sur chaque adresse de FFBB_APIS.
+async function ffbbApi(chemin, opt) {
+  let derniere = null;
+  for (const base of FFBB_APIS) {
+    try { return await ffbbJson(base + chemin, opt); } catch (e) { derniere = e; }
+  }
+  throw derniere || new Error("FFBB injoignable");
+}
 async function ffbbTokens() {
-  const j = await ffbbJson(FFBB_API + "items/configuration", { headers: { "user-agent": FFBB_UA } });
+  const j = await ffbbApi("items/configuration", { headers: { "user-agent": FFBB_UA } });
   const d = (j && j.data) || j || {};
   if (!d.key_dh || !d.key_ms) throw new Error("jetons FFBB introuvables");
   return { dh: d.key_dh, ms: d.key_ms };
@@ -367,7 +376,7 @@ async function ffbbLirePoule(pouleId) {
     "classements.organisme_nom", "classements.horsClassement"].forEach((f) => q.append("fields[]", f));
   q.set("deep[rencontres][_limit]", "1000");
   q.set("deep[classements][_limit]", "1000");
-  const j = await ffbbJson(FFBB_API + "items/ffbbserver_poules/" + encodeURIComponent(pouleId) + "?" + q.toString(),
+  const j = await ffbbApi("items/ffbbserver_poules/" + encodeURIComponent(pouleId) + "?" + q.toString(),
     { headers: { authorization: "Bearer " + tk.dh, "user-agent": FFBB_UA } });
   const d = (j && j.data) || j;
   if (!d || !Array.isArray(d.rencontres)) throw new Error("poule introuvable");
@@ -475,13 +484,37 @@ exports.onFfbbDemande = onDocumentCreated("clubs/{clubId}/ffbb_demandes/{id}", a
 // Chaque nuit : relit les poules liées (sauf les clubs suspendus / hors saison, on ne filtre pas ici).
 exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds: 540 }, async () => {
   const clubs = await db.collection("clubs").get();
+  let tentes = 0, echecs = 0, derniere = "";
   for (const club of clubs.docs) {
     const champs = await club.ref.collection("championnats").get();
     for (const c of champs.docs) {
       const champ = c.data();
       if (!champ.ffbb || !champ.ffbb.pouleId) continue;
+      tentes++;
       try { await ffbbSyncChamp(club.id, c.ref, champ, true); }
-      catch (e) { await c.ref.update({ "ffbb.erreur": String((e && e.message) || e).slice(0, 200) }); }
+      catch (e) {
+        echecs++; derniere = String((e && e.message) || e).slice(0, 200);
+        await c.ref.update({ "ffbb.erreur": derniere });
+      }
+    }
+  }
+  if (!tentes) return;
+  // Alerte Plateforme : tout a échoué 3 nuits de suite → la synchro est probablement cassée.
+  const etatRef = db.collection("plateforme_config").doc("ffbb_etat");
+  const etat = (await etatRef.get()).data() || {};
+  const toutKo = echecs === tentes;
+  const n = toutKo ? (etat.echecs || 0) + 1 : 0;
+  await etatRef.set({ echecs: n, erreur: toutKo ? derniere : "", maj: Date.now() });
+  if (n === 3) {
+    const snap = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
+    const token = snap.exists && snap.data() && snap.data().token;
+    if (token) {
+      try {
+        await admin.messaging().send({
+          token, notification: { title: "Synchro FFBB en panne", body: "3 nuits sans réponse (" + derniere + "). L'API a peut-être changé." },
+          data: { url: "./" }, webpush: { fcmOptions: { link: "./" } }
+        });
+      } catch (e) { /* jeton périmé : le bandeau Plateforme reste */ }
     }
   }
 });

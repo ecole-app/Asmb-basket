@@ -478,6 +478,11 @@ function openPlateforme(){
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
   intro.textContent=GM_INTRO;
   s.body.appendChild(intro);
+  var ffbbBox=document.createElement("div"); s.body.appendChild(ffbbBox);
+  if(window.fbGetDoc&&window.fbDb) window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","ffbb_etat")).then(function(sn){
+    var d=sn&&sn.exists&&sn.exists()?sn.data():null;
+    if(d&&d.echecs>=3) ffbbBox.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);font-size:12px;color:var(--txt);line-height:1.5"><b>Synchro FFBB en panne</b> depuis '+d.echecs+' nuits ('+authEsc(d.erreur||"pas de réponse")+'). L\'API a peut-être changé : les classements gardent leurs dernières données.</div>';
+  }).catch(function(){});
   var comptesBox=document.createElement("div");
   comptesBox.style.marginBottom="12px";
   window.__gmComptesBox=comptesBox;

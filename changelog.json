@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792568616",
+  "titre": "Bénévoles sur la carte de l'accueil, alerte synchro FFBB",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur l'accueil, la carte du stage/événement (entrées, inscrits, évaluation) a maintenant aussi le bouton 🙋 Bénévoles, ouvert sur le jour en cours pour un événement de plusieurs jours."
+   }
+  ]
+ },
+ {
   "v": "1792568106",
   "titre": "Événements de plusieurs jours dans le calendrier",
   "points": [

@@ -62,6 +62,7 @@ function respBandeau(refId,marge){
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
         (insc?'<button type="button" onclick="evtEntree(\''+eid+'\')" style="padding:10px 16px;border-radius:20px;background:var(--dkg);color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer">🎟️ Entrées du jour</button>':'')+
         '<button type="button" onclick="evtTableau(\''+eid+'\')" style="padding:10px 16px;border-radius:20px;background:var(--card);color:var(--dkg);font-size:13px;font-weight:800;border:1.5px solid var(--dkg);cursor:pointer">📋 Inscrits</button>'+
+        (typeof benOuvrir==="function"?'<button type="button" onclick="evtBenOuvrir(\''+eid+'\')" style="padding:10px 16px;border-radius:20px;background:var(--card);color:#E8670A;font-size:13px;font-weight:800;border:1.5px solid #E8670A;cursor:pointer">🙋 Bénévoles'+(typeof benListe==="function"&&benListe(e,evtBenJour(e)).length?' ('+benListe(e,evtBenJour(e)).length+')':'')+'</button>':'')+
         ((e.type==="stage"&&e.evaluationEnabled)?'<button type="button" onclick="openLiveEval(\''+eid+'\')" style="padding:10px 16px;border-radius:20px;background:var(--card);color:var(--dkg);font-size:13px;font-weight:800;border:1.5px solid var(--dkg);cursor:pointer">⭐ Évaluation</button>':'')+
         '</div></div>';
     }).join("");
@@ -73,7 +74,7 @@ function respBandeaux(){
 
 // ── Menu d'un événement (carte « Prochain événement » de l'accueil) ──
 // Entrées, liste des inscrits, évaluation : seulement ce que l'événement propose.
-function evtMenuPossible(e){ return !!e&&(!!e.inscr||(e.type==="stage"&&!!e.evaluationEnabled)); }
+function evtMenuPossible(e){ return !!e&&(!!e.inscr||(e.type==="stage"&&!!e.evaluationEnabled)||(e.type!=="entrainement"&&typeof benOuvrir==="function"&&typeof benEstStaff==="function"&&benEstStaff())); }
 function evtMenuOuvrir(eid){
   var e=getEvents().find(function(x){return x.id===eid;}); if(!evtMenuPossible(e)) return;
   var s=gmSheet(e.titre||eventTypeLabel(e.type));
@@ -85,4 +86,16 @@ function evtMenuOuvrir(eid){
     row.appendChild(gmBtn("📋 Liste des inscrits","soft",function(){ s.modal.remove(); evtTableau(eid); }));
   }
   if(e.type==="stage"&&e.evaluationEnabled) row.appendChild(gmBtn("⭐ Évaluation","soft",function(){ s.modal.remove(); openLiveEval(eid); }));
+  if(typeof benOuvrir==="function") row.appendChild(gmBtn("🙋 Bénévoles","soft",function(){ s.modal.remove(); evtBenOuvrir(eid); }));
+}
+// Bénévoles depuis l'accueil : sur un événement de plusieurs jours, on ouvre le jour en cours
+// (ou le premier jour s'il n'a pas commencé).
+function evtBenJour(e){
+  if(!e||!(e.dateFin&&e.dateFin>e.date)) return null;
+  var d=new Date(), auj=d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
+  return (auj>=e.date&&auj<=e.dateFin)?auj:e.date;
+}
+function evtBenOuvrir(eid){
+  var e=getEvents().find(function(x){return x.id===eid;}); if(!e) return;
+  var j=evtBenJour(e); if(j) benOuvrir(eid,j); else benOuvrir(eid);
 }
