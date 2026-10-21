@@ -92,8 +92,10 @@ function msDebut(ev){
   h+="<div class=\"ms-body\">";
   h+="<div class=\"ms-card\"><div class=\"ms-lbl\">Adversaire</div>"
     +"<input id=\"ms-adv\" type=\"text\" value=\""+authEsc(msChoix.adversaire)+"\" placeholder=\"Nom de l'équipe adverse\" oninput=\"msChoix.adversaire=this.value\" style=\"width:100%;box-sizing:border-box;margin-top:6px;padding:10px;font-size:14px;border:1.5px solid var(--bdr);border-radius:12px;background:var(--bg);color:var(--txt)\">";
-  if(prem) h+="<div class=\"ms-lbl\" style=\"margin-top:10px\">Durée d'un quart-temps</div><div style=\"display:flex;gap:8px;margin-top:6px\">"
-    +[8,10,12].map(function(d){return "<button class=\"ms-btn"+(msChoix.dureeQ===d?" plein":"")+"\" onclick=\"msChoix.dureeQ="+d+";msDebutRedessiner()\">"+d+" min</button>";}).join("")+"</div>";
+  if(prem) h+="<div class=\"ms-lbl\" style=\"margin-top:10px\">Durée d'un quart-temps</div><div style=\"display:flex;gap:12px;margin-top:6px;align-items:center\">"
+    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.max(1,(msChoix.dureeQ||10)-1);msDebutRedessiner()\">−</button>"
+    +"<b style=\"font-size:20px;min-width:80px;text-align:center\">"+(msChoix.dureeQ||10)+" min</b>"
+    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.min(20,(msChoix.dureeQ||10)+1);msDebutRedessiner()\">+</button></div>";
   h+="</div>";
   h+="<div class=\"ms-h\">Qui joue ? ("+nb+")</div>";
   if(prem) h+="<div style=\"font-size:12px;color:var(--mut)\">Touche « Titulaire » pour les 5 de départ ("+nbT+"/5).</div>";

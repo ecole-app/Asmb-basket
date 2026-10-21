@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792613805",
+  "titre": "Durée du quart-temps en − / +",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stats du match : la durée d'un quart-temps se règle avec − et + (10 min par défaut), pratique pour les U9-U11."
+   }
+  ]
+ },
+ {
   "v": "1792588417",
   "titre": "Version affichée dans Championnats",
   "points": [
