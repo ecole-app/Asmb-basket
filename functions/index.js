@@ -381,6 +381,44 @@ async function ffbbTrouverPoule(numeros) {
 // Deux appels, comme le fait le client open source de l'API : la poule (avec son classement)
 // puis ses rencontres. Demander des champs de rencontres imbriqués dans la poule est refusé (403).
 async function ffbbLirePoule(pouleId) {
+  try { return await ffbbLirePouleDirectus(pouleId); } catch (e) {
+    // Directus (api.ffbb.app) refuse parfois les serveurs Google : on lit alors via la recherche (Meilisearch), qui répond.
+    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error(String(e.message).slice(0, 160) + " || recherche : " + String(e2.message).slice(0, 120)); }
+  }
+}
+// Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
+async function ffbbLirePouleMeili(pouleId) {
+  const tk = await ffbbTokens();
+  const j = await ffbbJson(FFBB_MS, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: "Bearer " + tk.ms, "user-agent": FFBB_UA },
+    body: JSON.stringify({ queries: [{ indexUid: "ffbbserver_rencontres", q: "", filter: 'idPoule.id = "' + String(pouleId) + '"', limit: 400, sort: ["date_rencontre:asc"] }] })
+  });
+  const hits = (j && j.results && j.results[0] && j.results[0].hits) || [];
+  if (!hits.length) throw new Error("aucune rencontre");
+  const num = (v) => (v === null || v === undefined || v === "" || isNaN(Number(v)) ? null : Number(v));
+  const rencontres = hits.map((r) => {
+    const a = ffbbEquipe(r.nomEquipe1), b = ffbbEquipe(r.nomEquipe2);
+    const s1 = num(r.resultatEquipe1), s2 = num(r.resultatEquipe2);
+    const joue = r.joue === true || (s1 !== null && s2 !== null && s1 + s2 > 0);
+    return { num: String(r.numero), e1: a.nom, n1: a.num, e2: b.nom, n2: b.num,
+      date: String(r.date_rencontre || "").slice(0, 10), heure: ffbbHeure(r.horaire),
+      s1: joue ? s1 : null, s2: joue ? s2 : null, f1: false, f2: false };
+  });
+  const eq = {};
+  const get = (nom, n) => (eq[nom] = eq[nom] || { nom, num: n, pts: 0, j: 0, g: 0, p: 0, f: 0, pp: 0, pc: 0, diff: 0 });
+  rencontres.forEach((r) => {
+    const A = get(r.e1, r.n1), B = get(r.e2, r.n2);
+    if (r.s1 === null || r.s2 === null) return;
+    A.j++; B.j++; A.pp += r.s1; A.pc += r.s2; B.pp += r.s2; B.pc += r.s1;
+    if (r.s1 > r.s2) { A.g++; A.pts += 2; B.p++; B.pts += 1; } else if (r.s2 > r.s1) { B.g++; B.pts += 2; A.p++; A.pts += 1; }
+  });
+  const classement = Object.keys(eq).map((k) => { const e = eq[k]; e.diff = e.pp - e.pc; return e; })
+    .sort((x, y) => y.pts - x.pts || y.diff - x.diff).map((e, i) => Object.assign({ rang: i + 1 }, e));
+  const p = hits[0].idPoule;
+  return { nom: (p && p.nom) || "", rencontres, classement };
+}
+async function ffbbLirePouleDirectus(pouleId) {
   const tk = await ffbbTokens();
   const h = { authorization: "Bearer " + tk.dh, "user-agent": FFBB_UA };
   const q = new URLSearchParams();
