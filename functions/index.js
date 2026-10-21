@@ -329,11 +329,19 @@ async function ffbbJson(url, opt) {
 }
 // Chemin relatif (« items/... ») essayé sur chaque adresse de FFBB_APIS.
 async function ffbbApi(chemin, opt) {
-  let derniere = null;
-  for (const base of FFBB_APIS) {
-    try { return await ffbbJson(base + chemin, opt); } catch (e) { derniere = e; }
+  // Essaie chaque adresse, d'abord avec l'identité de l'appli mobile, puis comme un navigateur.
+  const navigateur = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+    accept: "application/json, text/plain, */*", "accept-language": "fr-FR,fr;q=0.9", origin: "https://competitions.ffbb.com", referer: "https://competitions.ffbb.com/" };
+  const essais = [opt || {}, Object.assign({}, opt || {}, { headers: Object.assign({}, (opt && opt.headers) || {}, navigateur) })];
+  const erreurs = [];
+  for (const o of essais) {
+    for (const base of FFBB_APIS) {
+      try { return await ffbbJson(base + chemin, o); } catch (e) {
+        erreurs.push(base.replace(/^https:\/\//, "").replace(/\/$/, "") + " " + String(e.message).slice(0, 60));
+      }
+    }
   }
-  throw derniere || new Error("FFBB injoignable");
+  throw new Error(chemin.split("?")[0] + " -> " + erreurs.join(" | "));
 }
 async function ffbbTokens() {
   const j = await ffbbApi("items/configuration", { headers: { "user-agent": FFBB_UA } });
