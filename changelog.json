@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792588417",
+  "titre": "Version affichée dans Championnats",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "L'écran Championnats affiche le numéro de version de l'appli dans son titre, pour vérifier qu'on a bien la dernière."
+   }
+  ]
+ },
+ {
   "v": "1792587559",
   "titre": "Import FBI sur téléphone",
   "points": [

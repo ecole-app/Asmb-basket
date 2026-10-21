@@ -263,7 +263,7 @@ function champLireFichier(file){
 }
 function champOuvrir(){
   if(!champPeutEcrire()){ askAlert("Réservé au dirigeant et aux coachs."); return; }
-  var s=gmSheet("Championnats");
+  var s=gmSheet("Championnats · v"+String(typeof APP_VERSION!=="undefined"?APP_VERSION:"?").slice(-5));
   dessiner();
   function dessiner(){
     s.body.innerHTML="";
