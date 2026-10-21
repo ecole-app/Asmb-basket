@@ -1,0 +1,40 @@
+name: Déploiement Firebase
+
+# Met à jour les Cloud Functions et les règles Firestore quand elles changent.
+# Demande le secret GitHub FIREBASE_SERVICE_ACCOUNT (clé JSON d'un compte de service
+# du projet asmb-app, rôles « Firebase Admin » ou équivalent). Sans lui, ce workflow
+# s'arrête sans rien casser.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "firestore.rules"
+      - "firebase.json"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier le secret
+        id: cle
+        env:
+          CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$CLE" ]; then echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secret FIREBASE_SERVICE_ACCOUNT absent : rien déployé."; else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.cle.outputs.ok == 'true'
+        with:
+          node-version: 20
+      - name: Déployer functions + règles
+        if: steps.cle.outputs.ok == 'true'
+        env:
+          CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$CLE" > "$RUNNER_TEMP/cle.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/cle.json"
+          (cd functions && npm install --no-audit --no-fund)
+          npx --yes firebase-tools@13 deploy --only functions,firestore:rules --project asmb-app --non-interactive --force
+          rm -f "$RUNNER_TEMP/cle.json"
