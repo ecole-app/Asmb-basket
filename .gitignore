@@ -1,0 +1,5 @@
+
+# Clés privées Firebase : ne jamais les mettre dans le dépôt
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+asmb-app-*.json
