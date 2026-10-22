@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792700371",
+  "titre": "Canaux : accès plus clairs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur la gestion d'un canal ouvert, la liste vide est expliquée et un bouton « Voir qui a accès » affiche les comptes qui le voient vraiment."
+   }
+  ]
+ },
+ {
   "v": "1792700238",
   "titre": "Modifier un match importé ne vide plus son équipe",
   "points": [

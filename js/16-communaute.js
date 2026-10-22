@@ -231,7 +231,13 @@ function openChannelDetail(ch){
 function renderMembers(ch){
   var el=document.getElementById("member-list");if(!el)return;
   var members=ch.members||[];
-  if(!members.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun membre autorise</div><div style="font-size:11px;margin-top:4px">Tout le monde peut voir ce canal</div></div>';return;}
+  if(!members.length){
+    // Canal non restreint : la liste ci-dessous ne sert qu'aux canaux réservés. On renvoie vers la vraie liste des comptes.
+    el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Canal ouvert, pas de liste à gérer</div><div style="font-size:11px;margin-top:4px;line-height:1.5">Les comptes concernés y ont déjà accès (dirigeants, coachs de l\'équipe, familles, joueurs).<br>Ajoutez un numéro ci-dessus seulement pour réserver ce canal à certaines personnes.</div>'
+      +'<button type="button" id="ch-voir-acces" style="margin-top:12px;padding:9px 16px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">Voir qui a accès</button></div>';
+    var vb=document.getElementById("ch-voir-acces"); if(vb) vb.onclick=function(){ chatMembresCanal(ch); };
+    return;
+  }
   el.innerHTML="";
   members.forEach(function(m){
     var phone=typeof m==="string"?m:m.phone;
@@ -616,9 +622,9 @@ function chatRoleCompte(u){
   return r.indexOf("dirigeant")>=0?"Dirigeants":r.indexOf("coach")>=0?"Coachs":r.indexOf("bureau")>=0?"Bureau":r.indexOf("joueur")>=0?"Joueurs":"Familles";
 }
 var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Familles","Joueurs"];
-function chatMembresCanal(){
-  if(currentConvKind!=="channel"||!currentChannelData) return;
-  var ch=currentChannelData, restreint=(ch.members||[]).length>0;
+function chatMembresCanal(chArg){
+  if(!chArg && (currentConvKind!=="channel"||!currentChannelData)) return;
+  var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0;
   var s=gmSheet((ch.icon?ch.icon+" ":"")+(ch.name||"Canal")+" · membres");
   var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
   intro.textContent=restreint?"Canal réservé : seuls les membres ci-dessous et les dirigeants y ont accès."
