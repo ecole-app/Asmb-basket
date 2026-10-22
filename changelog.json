@@ -1,14 +1,14 @@
 [
  {
-  "v": "1792638633",
-  "titre": "Planning : matchs en liste compacte",
+  "v": "1792660439",
+  "titre": "Planning : filtres par équipe et par date",
   "points": [
    {
     "roles": [
      "dirigeant",
      "coach"
     ],
-    "texte": "Planning, filtre Matchs : une ligne par match (date, catégorie, adversaire, score), les matchs à venir d'abord. Un appui ouvre les boutons. Une rangée de chips filtre par équipe quand le club en a plusieurs."
+    "texte": "Planning, filtre Matchs : une ligne par match, menus Équipe et Période (cette semaine, ce week-end, ce mois…) et mois à feuilleter avec ‹ ›. Les périodes suivent la date du jour : lundi, « cette semaine » montre déjà le samedi suivant."
    }
   ]
  },

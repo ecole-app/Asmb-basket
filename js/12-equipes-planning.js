@@ -650,13 +650,14 @@ function buildPlanning(){
   events=planTypeFiltrer(events);
   var compact=planTypeFiltre()==="match" && events.length>0 && events.every(function(e){return e.type==="match";});
   if(compact){
-    var chEq=planEquipeChips(events); if(chEq){ var cw2=document.createElement("div"); cw2.innerHTML=chEq; el.appendChild(cw2.firstChild); }
-    events=planEquipeFiltrer(events);
-    var auj=new Date(), ajd=auj.getFullYear()+"-"+("0"+(auj.getMonth()+1)).slice(-2)+"-"+("0"+auj.getDate()).slice(-2);
+    var chEq=planMatchBarre(events); if(chEq){ var cw2=document.createElement("div"); cw2.innerHTML=chEq; el.appendChild(cw2.firstChild); }
+    events=planPeriodeFiltrer(planEquipeFiltrer(events));
+    var ajd=planAujourdhui();
     var aVenir=events.filter(function(e){return !e.score && (e.dateFin||e.date)>=ajd;});
     var joues=events.filter(function(e){return aVenir.indexOf(e)<0;}).reverse();
     events=aVenir.concat(joues);
     var nbV=aVenir.length, rangCompact=0;
+    if(!events.length){ var vide=document.createElement("div"); vide.style.cssText="padding:18px 14px;text-align:center;font-size:12px;color:var(--mut)"; vide.textContent="Aucun match sur cette période."; el.appendChild(vide); }
   }
   events.forEach(function(e){
     var d=document.createElement("div");d.className="event-card";
@@ -692,20 +693,68 @@ function planEquipeFiltrer(events){
   var r=events.filter(function(e){ return e.equipe===f; });
   return r.length?r:events;
 }
-function planEquipeChips(events){
-  var n=planEquipes(events), eq=Object.keys(n).sort();
-  if(eq.length<2) return "";
-  var f=planEquipeFiltre(); if(f&&!n[f]) f="";
-  function chip(v,txt){
-    var on=f===v;
-    return '<button type="button" onclick="planEquipeChoisir(\''+authEsc(v).replace(/'/g,"&#39;")+'\')" style="padding:5px 11px;border-radius:20px;white-space:nowrap;flex-shrink:0;cursor:pointer;font-size:11px;font-weight:700;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'transparent')+';color:'+(on?'#fff':'var(--txt)')+'">'+authEsc(txt)+'</button>';
-  }
-  return '<div class="plan-equipe-chips" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 12px 10px">'+chip("","Toutes")+eq.map(function(q){return chip(q,q);}).join("")+'</div>';
+// Date du jour recalculée à chaque affichage : « cette semaine », « ce week-end » avancent donc toutes seules.
+function planAujourdhui(){ var a=new Date(); return a.getFullYear()+"-"+("0"+(a.getMonth()+1)).slice(-2)+"-"+("0"+a.getDate()).slice(-2); }
+var planMois=""; // « AAAA-MM » choisi avec ‹ › ; vide = pas de mois précisé
+var PLAN_PERIODES=[["","Toute la saison"],["sem","Cette semaine"],["we","Ce week-end"],["mois","Ce mois"],["suiv","Mois prochain"],["venir","À venir"],["pass","Déjà joués"]];
+function planPeriodeFiltre(){ try{ return localStorage.getItem("gm_plan_periode")||""; }catch(e){ return ""; } }
+function planPeriodeFiltrer(events){
+  var f=planPeriodeFiltre(), ajd=planAujourdhui(), t=new Date(ajd+"T12:00:00"), dow=(t.getDay()+6)%7;
+  var iso=function(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); };
+  var lun=new Date(t); lun.setDate(t.getDate()-dow); var dim=new Date(lun); dim.setDate(lun.getDate()+6);
+  var sam=new Date(lun); sam.setDate(lun.getDate()+5);
+  var mCour=ajd.slice(0,7), mSuiv=iso(new Date(t.getFullYear(),t.getMonth()+1,1)).slice(0,7);
+  return events.filter(function(e){
+    var d=e.date||"";
+    if(planMois) return d.slice(0,7)===planMois;
+    if(f==="sem") return d>=iso(lun)&&d<=iso(dim);
+    if(f==="we") return d>=iso(sam)&&d<=iso(dim);
+    if(f==="mois") return d.slice(0,7)===mCour;
+    if(f==="suiv") return d.slice(0,7)===mSuiv;
+    if(f==="venir") return !e.score&&(e.dateFin||d)>=ajd;
+    if(f==="pass") return !!e.score||(e.dateFin||d)<ajd;
+    return true;
+  });
+}
+// Une ligne de menus (équipe, période) + un mois à feuilleter. Les menus restent affichés même si le filtre ne laisse rien.
+function planMatchBarre(events){
+  var n=planEquipes(events), eq=Object.keys(n).sort(), f=planEquipeFiltre(); if(f&&!n[f]) f="";
+  var fp=planPeriodeFiltre(), MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  var st="min-width:0;padding:9px 10px;border-radius:12px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700";
+  var selEq=eq.length>1?'<select aria-label="Équipe" onchange="planEquipeChoisir(this.value)" style="'+st+'"><option value="">Toutes les équipes</option>'
+    +eq.map(function(q){ return '<option value="'+authEsc(q)+'"'+(f===q?' selected':'')+'>'+authEsc(q)+' ('+n[q]+')</option>'; }).join("")+'</select>':"";
+  var selPer='<select aria-label="Période" onchange="planPeriodeChoisir(this.value)" style="'+st+'">'
+    +PLAN_PERIODES.map(function(p){ return '<option value="'+p[0]+'"'+(!planMois&&fp===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join("")+'</select>';
+  var lib=planMois?MOIS[parseInt(planMois.slice(5),10)-1]+" "+planMois.slice(0,4):"Tous les mois";
+  var bt="width:36px;height:32px;border-radius:10px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:18px;cursor:pointer";
+  return '<div style="padding:0 12px 10px"><div style="display:grid;grid-template-columns:'+(selEq?'1fr 1fr':'1fr')+';gap:8px">'+selEq+selPer+'</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><button type="button" aria-label="Mois précédent" onclick="planMoisDecale(-1)" style="'+bt+'">‹</button>'
+    +'<b onclick="planMoisDecale(0)" style="font-size:13px;cursor:pointer">'+authEsc(lib)+'</b><button type="button" aria-label="Mois suivant" onclick="planMoisDecale(1)" style="'+bt+'">›</button></div></div>';
 }
 function planEquipeChoisir(v){
   try{ if(v) localStorage.setItem("gm_plan_equipe",v); else localStorage.removeItem("gm_plan_equipe"); }catch(e){}
   buildPlanning();
 }
+function planPeriodeChoisir(v){
+  planMois="";
+  try{ if(v) localStorage.setItem("gm_plan_periode",v); else localStorage.removeItem("gm_plan_periode"); }catch(e){}
+  buildPlanning();
+}
+// d = -1 / +1 : mois précédent / suivant (part du mois en cours) ; 0 : retour à « tous les mois ».
+function planMoisDecale(d){
+  if(!d){ planMois=""; } else {
+    var c=planMois||planAujourdhui().slice(0,7), y=parseInt(c.slice(0,4),10), m=parseInt(c.slice(5),10)-1+d;
+    y+=Math.floor(m/12); m=((m%12)+12)%12; planMois=y+"-"+("0"+(m+1)).slice(-2);
+  }
+  buildPlanning();
+}
+// Si l'appli reste ouverte d'un jour à l'autre, la liste se remet à jour au retour sur l'écran.
+(function(){
+  var jour=planAujourdhui();
+  var maj=function(){ var j=planAujourdhui(); if(j!==jour){ jour=j; if(document.getElementById("planningList") && typeof buildPlanning==="function") buildPlanning(); } };
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) maj(); });
+  setInterval(maj,60000);
+})();
 // Une ligne par match ; un appui déplie la carte complète (présences, score, convocation…).
 function planMatchLigne(el, e, carte, titreGroupe){
   if(titreGroupe){ var g=document.createElement("div"); g.style.cssText="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);padding:10px 14px 2px"; g.textContent=titreGroupe; el.appendChild(g); }
