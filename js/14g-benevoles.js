@@ -44,9 +44,11 @@ function benChargerComptes(){
     sn.forEach(function(d){
       var u=d.data()||{}, tel=String(u.phone||"").replace(/[^+0-9]/g,""), tel0=tel.replace(/^\+33/,"0"), n=noms[tel]||noms[tel0]||{};
       var roles=(u.roles||[]).filter(function(r){ return r!=="parent"; });
-      var nom=n.nom||u.email||u.phone||"Compte";
-      var label=nom+(n.de?" · parent de "+n.de:"")+(roles.length?" · "+roles.join(", "):"");
-      out.push({uid:d.id, label:label, nom:nom, phone:tel0||tel, prenom:String(n.nom||"").split(" ")[0]});
+      // Nom saisi sur le compte (prénom + nom), sinon fiche de licence, sinon e-mail en dernier recours.
+      var vrai=((typeof compteNom==="function"?compteNom(u):"")||n.nom||"").trim();
+      var nom=vrai||u.email||u.phone||"Compte";
+      var label=nom+(vrai&&u.email?" ("+u.email+")":"")+(n.de?" · parent de "+n.de:"")+(roles.length?" · "+roles.join(", "):"");
+      out.push({uid:d.id, label:label, nom:nom, phone:tel0||tel, prenom:vrai?String(u.prenom||vrai.split(" ")[0]):""});
     });
     out.sort(function(a,b){ return a.label.localeCompare(b.label,"fr"); });
     BEN_COMPTES=out; return out;
@@ -110,6 +112,7 @@ function benOuvrir(eid,jour){
         var m={id:"b"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), poste:String(p).slice(0,40), heure:heure.value.trim().slice(0,12), nom:String(pers.nom||"").slice(0,60)};
         if(jour&&quand&&quand.value==='jour') m.jour=jour;
         if(pers.uid) m.uid=pers.uid;
+        if(pers.prenom) m.prenom=String(pers.prenom).slice(0,40);
         if(pers.benId) m.benId=pers.benId;
         benSauver(eid,benListe(ev).concat([m])); rendre();
         askConfirm("Prévenir "+m.nom+" par SMS maintenant ?",{confirmText:"Envoyer le SMS"}).then(function(ok){ if(ok) benSms(ev,m,pers.phone); });
@@ -168,7 +171,9 @@ function benChoisirPersonne(cb){
 function benSmsTexte(e,m){
   var club=(typeof clubLabel==="function")?clubLabel(""):"";
   var pass=m.benId&&BEN_CARNET?BEN_CARNET.find(function(x){ return x.id===m.benId&&x.actif!==false; }):null;
-  var prenom=String(m.nom||"").split(" ")[0];
+  // Prénom si on l'a, sinon le nom ; jamais d'e-mail ni de Monsieur/Madame.
+  var nomPropre=String(m.nom||"").indexOf("@")>=0?"":String(m.nom||"").trim();
+  var prenom=String(m.prenom||"").trim()||nomPropre.split(" ")[0];
   return (club?club+" : ":"")+"Bonjour"+(prenom?" "+prenom:"")+", vous êtes bénévole au poste « "+m.poste+" » "+(m.jour?benJourTxt({date:m.jour}):benJourTxt(e))+(m.heure?" à "+m.heure:"")+" ("+(e.titre||eventTypeLabel(e.type))+(e.lieu?", "+e.lieu:"")+"). Merci pour votre aide ! "+(pass?"Confirmez ou signalez un empêchement ici : "+benPassUrl(pass.code):"En cas d'empêchement, prévenez-nous au plus vite.");
 }
 function benSms(e,m,tel){

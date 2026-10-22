@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792660901",
+  "titre": "Bénévoles : noms lisibles et SMS plus simple",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Choix d'un bénévole : on voit le prénom et le nom du compte (l'e-mail en petit), plus seulement l'adresse e-mail. Le SMS commence par « Bonjour Prénom » (le nom à défaut), sans Monsieur/Madame et jamais avec une adresse e-mail."
+   }
+  ]
+ },
+ {
   "v": "1792660439",
   "titre": "Planning : filtres par équipe et par date",
   "points": [
