@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792678627",
+  "titre": "Fiche adhérent remplie par le dirigeant",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Licences › Nouvelle fiche : bouton « Je remplis la fiche moi-même ». On peut créer un joueur, un bénévole (son pass est créé aussitôt), un coach ou une autre personne, sans passer par l'e-mail à la famille."
+   }
+  ]
+ },
+ {
   "v": "1792678476",
   "titre": "Tableau des factures sponsors",
   "points": [
