@@ -4,7 +4,7 @@ import { describe, it, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import {
-  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, collection, query, where, writeBatch, Timestamp, serverTimestamp,
+  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, collection, query, where, writeBatch, Timestamp, serverTimestamp, deleteField,
 } from "firebase/firestore";
 import { getEnv, seed, as, SUPER_ADMIN, futur, SG_EXP } from "./helpers.js";
 
@@ -767,6 +767,33 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
     await assertSucceeds(inscrire(db, "STG-40001", insc({ tarifIdx: 0, tarifNom: "Licencié", montant: 40, playerId: "p1", auteurUid: "parentA", source: "app" }), 1));
     await assertFails(inscrire(db, "STG-40002", insc({ tarifIdx: 0, tarifNom: "Licencié", montant: 40, playerId: "p2", auteurUid: "parentA", source: "app" }), 2));
     await assertSucceeds(getDoc(doc(db, "clubs/A/evt_inscrits/STG-40001")));
+  });
+  it("dossier du participant : créé avec l'inscription, lu par le staff seul", async () => {
+    await updateDoc(doc(await as("dirA"), "evt_pages/A__e1"), { dossier: { sante: true, signature: true, photo: false, docs: [], purgeLe: "2026-11-05" } });
+    const dos = (o = {}) => ({ eventId: "e1", sante: { allergies: "", infos: "", urgenceNom: "Mère", urgenceTel: "0611111111" },
+      signature: "data:image/png;base64,xx", signataire: "Mère", mineur: true, purgeLe: "2026-11-05", at: serverTimestamp(), ...o });
+    async function avecDossier(db, code, d, nb) {
+      const b = writeBatch(db);
+      b.set(doc(db, "clubs/A/evt_inscrits/" + code), insc());
+      b.update(doc(db, "evt_pages/A__e1"), { nb, dernier: code });
+      b.set(doc(db, "clubs/A/evt_dossiers/" + code), d);
+      return b.commit();
+    }
+    const db = await as(null);
+    await assertSucceeds(avecDossier(db, "STG-70001", dos(), 1));
+    await assertFails(avecDossier(db, "STG-70002", dos({ purgeLe: "2099-01-01" }), 2));
+    await assertFails(avecDossier(db, "STG-70003", dos({ extra: 1 }), 2));
+    await assertFails(setDoc(doc(db, "clubs/A/evt_dossiers/STG-70001"), dos()));
+    await assertFails(getDoc(doc(db, "clubs/A/evt_dossiers/STG-70001")));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/evt_dossiers/STG-70001")));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/evt_dossiers/STG-70001")));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/evt_dossiers/STG-70001"), { sante: deleteField() }));
+  });
+  it("documents du club : le dirigeant les écrit, le coach les lit, le parent non", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/docs_club/d1"), { titre: "Règlement", texte: "…", ordre: 0 }));
+    await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/docs_club/d1")));
+    await assertFails(setDoc(doc(await as("coachA"), "clubs/A/docs_club/d2"), { titre: "x", texte: "y" }));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/docs_club/d1")));
   });
   it("seul le staff lit la liste et marque le paiement", async () => {
     await assertSucceeds(inscrire(await as(null), "STG-50001", insc(), 1));

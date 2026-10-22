@@ -703,3 +703,24 @@ exports.onBenevolePlace = onDocumentUpdated("clubs/{clubId}/events/{eventId}", a
     await notifierCompte(event.params.clubId, m.uid, "Vous êtes bénévole", corps);
   }
 });
+
+// ── Dossiers des participants aux événements : fiche santé effacée 10 jours après ──
+// purgeLe (AAAA-MM-JJ) est posé à l'inscription depuis la page publique (fin de l'événement + 10 jours).
+// On efface la fiche santé seulement ; le reste du dossier (documents acceptés, signature) est gardé.
+exports.dossiersPurge = onSchedule({ schedule: "every day 04:40", timeZone: "Europe/Paris", timeoutSeconds: 300 }, async () => {
+  const auj = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }); // AAAA-MM-JJ
+  const clubs = await db.collection("clubs").get();
+  let n = 0;
+  for (const club of clubs.docs) {
+    const q = await club.ref.collection("evt_dossiers").where("purgeLe", "<=", auj).get();
+    let batch = db.batch(), k = 0;
+    for (const d of q.docs) {
+      if (!d.get("sante")) continue;
+      batch.update(d.ref, { sante: admin.firestore.FieldValue.delete(), santePurgee: true });
+      k++; n++;
+      if (k >= 400) { await batch.commit(); batch = db.batch(); k = 0; }
+    }
+    if (k) await batch.commit();
+  }
+  console.log("dossiersPurge : fiches santé effacées", n);
+});

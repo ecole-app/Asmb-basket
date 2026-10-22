@@ -1,5 +1,24 @@
 [
  {
+  "v": "1792682296",
+  "titre": "Dossier des participants aux événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Inscriptions d'un événement : demandez une photo, une fiche santé (allergies, points à savoir, contact d'urgence), des documents à accepter et une signature au doigt (le responsable légal signe pour un mineur). Chaque inscrit a un bouton « Dossier » avec PDF. La fiche santé s'efface 10 jours après l'événement."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Documents du club : droit à l'image, règlement intérieur, autorisation de soins. Des modèles génériques sont prêts, à adapter une fois et à réutiliser partout."
+   }
+  ]
+ },
+ {
   "v": "1792682068",
   "titre": "Tirage de la table : mois, joueurs des équipes supérieures, ajout match par match",
   "points": [

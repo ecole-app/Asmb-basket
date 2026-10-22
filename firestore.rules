@@ -1133,6 +1133,43 @@ service cloud.firestore {
         allow update, delete: if staff(clubId);
       }
 
+      // Dossier du participant (photo, fiche santé, documents acceptés, signature),
+      // créé sans compte dans la MÊME opération que l'inscription (même code de billet),
+      // seulement si la page publique demande un dossier. Lecture : staff seul.
+      // La fiche santé est effacée 10 jours après l'événement (Cloud Function dossiersPurge).
+      match /evt_dossiers/{code} {
+        function dosPage(eventId) { return /databases/$(database)/documents/evt_pages/$(clubId + '__' + eventId); }
+        function dosInsc() { return /databases/$(database)/documents/clubs/$(clubId)/evt_inscrits/$(code); }
+        allow create: if clubStatus(clubId) == 'active'
+          && request.resource.data.keys().hasOnly(['eventId','photo','sante','docs','signature','signataire','mineur','purgeLe','at'])
+          && request.resource.data.eventId is string
+          && get(dosPage(request.resource.data.eventId)).data.get('dossier', null) != null
+          && request.resource.data.purgeLe == get(dosPage(request.resource.data.eventId)).data.dossier.purgeLe
+          && existsAfter(dosInsc()) && !exists(dosInsc())
+          && getAfter(dosInsc()).data.eventId == request.resource.data.eventId
+          && (!('photo' in request.resource.data) || (request.resource.data.photo is string && request.resource.data.photo.size() <= 150000))
+          && (!('sante' in request.resource.data) || (request.resource.data.sante is map
+               && request.resource.data.sante.keys().hasOnly(['allergies','infos','urgenceNom','urgenceTel'])
+               && request.resource.data.sante.get('allergies', '').size() <= 300
+               && request.resource.data.sante.get('infos', '').size() <= 300
+               && request.resource.data.sante.get('urgenceNom', '').size() <= 60
+               && request.resource.data.sante.get('urgenceTel', '').size() <= 16))
+          && (!('docs' in request.resource.data) || (request.resource.data.docs is list && request.resource.data.docs.size() <= 10))
+          && (!('signature' in request.resource.data) || (request.resource.data.signature is string && request.resource.data.signature.size() <= 150000))
+          && request.resource.data.get('signataire', '') is string && request.resource.data.get('signataire', '').size() <= 60
+          && request.resource.data.get('mineur', false) is bool
+          && request.resource.data.at == request.time;
+        allow read: if readStaff(clubId);
+        allow update, delete: if staff(clubId);
+      }
+
+      // Bibliothèque des documents à accepter (droit à l'image, règlement…) : le dirigeant
+      // les écrit, le staff les lit ; ils sont recopiés sur la page publique d'un événement.
+      match /docs_club/{id} {
+        allow read: if readStaff(clubId);
+        allow write: if dirigeant(clubId);
+      }
+
       // Demande de séance d'essai, déposée sans compte depuis la page publique
       // du club, seulement quand le dirigeant l'a ouverte. Lecture réservée au staff.
       match /essais/{id} {

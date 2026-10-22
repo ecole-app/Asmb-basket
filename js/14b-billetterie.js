@@ -246,6 +246,10 @@ function evtConfigurer(eid){
   var iL=document.createElement("input"); iL.className="form-input"; iL.type="date"; iL.value=i.limite||""; iL.style.flex="1"; iL.setAttribute("aria-label","Date limite d'inscription");
   pl.appendChild(iP); pl.appendChild(iL); s.body.appendChild(pl);
 
+  // Dossier du participant (photo, santé, documents, signature) : js/14r-dossier-evt.js
+  var dosHost=document.createElement("div"); s.body.appendChild(dosHost);
+  var dosEtat=(!resa&&typeof dosConfigSection==="function")?dosConfigSection(dosHost,i.dossier):null;
+
   gmSection(s.body,"Programme (facultatif)","Affiché sur la page d'inscription.");
   var prog=document.createElement("textarea"); prog.className="form-input"; prog.rows=3; prog.maxLength=600;
   prog.placeholder="";
@@ -265,7 +269,8 @@ function evtConfigurer(eid){
     if(!toutGratuit && md.indexOf("helloasso")>=0 && !/^https:\/\/([a-z0-9-]+\.)*helloasso\.com\//i.test(lienHa)){ askAlert("Collez le lien HelloAsso de l'événement (il commence par https://www.helloasso.com/)."); return; }
     var inscr={
       actif:cbA.checked, tarifs:tf, modes:md, helloasso:md.indexOf("helloasso")>=0?lienHa.slice(0,300):"",
-      parJour:parJour, places:Math.max(0,parseInt(iP.value,10)||0), limite:iL.value||"", programme:prog.value.trim().slice(0,600), majLe:Date.now()
+      parJour:parJour, places:Math.max(0,parseInt(iP.value,10)||0), limite:iL.value||"", programme:prog.value.trim().slice(0,600), majLe:Date.now(),
+      dossier:dosEtat?dosEtat.get():(i.dossier||null)
     };
     b.disabled=true;
     evtPublierPage(e, inscr).then(function(){
@@ -288,7 +293,11 @@ function evtPublierPage(e, inscr){
     programme:inscr.programme||"", nom:c.name||"", logo:c.logo||null, couleur:c.couleur||null, couleur2:c.couleur2||null,
     liens:c.liens||{}, majLe:Date.now()
   };
-  return window.fbGetDoc(ref).then(function(snap){
+  var dos=(typeof dosPagePublique==="function")?dosPagePublique(e, inscr.dossier):Promise.resolve(null);
+  return dos.then(function(d){
+    page.dossier=d||null;
+    return window.fbGetDoc(ref);
+  }).then(function(snap){
     if(!snap.exists()){ page.nb=0; page.nbJ={}; }
     return window.fbSetDoc(ref,page,{merge:true});
   });
@@ -467,6 +476,7 @@ function evtListe(list, items, e, page, repeindre){
       else r.appendChild(gmBtn("Annuler le paiement","ghost",function(b){ b.disabled=true; evtMarquerPaye(x,e,false).then(repeindre).catch(function(){ b.disabled=false; }); }));
       if(!x.playerId && evtEstLicTarif(x,page)) r.appendChild(gmBtn("Relier","soft",function(){ evtRelier(x, repeindre); }));
       if(x.tel) r.appendChild(gmBtn("SMS","soft",function(){ window.location.href="sms:"+String(x.tel).replace(/[^+0-9]/g,""); }));
+      if(page&&page.dossier&&typeof dosVoir==="function") r.appendChild(gmBtn("Dossier","soft",function(){ dosVoir(x,e); }));
       r.appendChild(gmBtn("Annuler","danger",function(){
         askConfirm("Annuler l'inscription de "+(x.prenom||"")+" ? La place est libérée.",{danger:true,confirmText:"Annuler l'inscription"}).then(function(ok){
           if(!ok) return;
@@ -561,7 +571,7 @@ function evtPartager(e){
 // ── Inscription (écriture commune page publique / appli) ─────────────
 // Une seule opération : le billet + le compteur de la page. En cas de code
 // déjà pris ou d'inscription simultanée, on relit la page et on réessaie.
-function evtInscrire(pid, data, essai){
+function evtInscrire(pid, data, essai, dossier){
   essai=essai||0;
   var pageRef=window.fbDoc(window.fbDb,"evt_pages",pid);
   return window.fbGetDoc(pageRef).then(function(snap){
@@ -580,10 +590,12 @@ function evtInscrire(pid, data, essai){
     var code=evtCode(p.type);
     var b=window.fbWriteBatch();
     b.set(window.fbDoc(window.fbDb,"evt_inscrits",code),Object.assign({},data,{at:window.fbServerTimestamp()}));
+    // Dossier (photo, santé, documents, signature) : à part, lisible par le staff seul.
+    if(dossier&&p.dossier) b.set(window.fbDoc(window.fbDb,"evt_dossiers",code),Object.assign({},dossier,{eventId:String(data.eventId),at:window.fbServerTimestamp()}));
     maj.dernier=code;
     b.update(pageRef,maj);
     return b.commit().then(function(){ return {code:code,page:p}; }).catch(function(err){
-      if(essai<3) return evtInscrire(pid,data,essai+1);
+      if(essai<3) return evtInscrire(pid,data,essai+1,dossier);
       throw err;
     });
   });
@@ -886,6 +898,7 @@ function rendreEvtPublic(el,p,pid){
         '<div class="form-group"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div></div>'+
       '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="0612345678"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-email">E-mail (facultatif)</label><input class="form-input" id="evt-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email" placeholder="mail@gmail.com"></div>'+
+      '<div id="evt-dossier"></div>'+
       '<div id="evt-pay-g"><div class="form-label" style="margin-bottom:8px">Paiement</div><div id="evt-modes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div></div>'+
       '<input id="evt-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">'+
       '<button id="evt-envoyer" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">M\'inscrire</button>'+
@@ -933,6 +946,7 @@ function rendreEvtPublic(el,p,pid){
     });
   })();
   if(p.parJour) evtSelecteurJours(document.getElementById("evt-jours"),p,sel,peindre);
+  var dos=(p.dossier&&typeof dosFormPublic==="function")?dosFormPublic(document.getElementById("evt-dossier"),p):null;
   document.getElementById("evt-envoyer").addEventListener("click",function(){
     var btn=this;
     if(document.getElementById("evt-hp").value){ el.innerHTML=evtEntete(p)+essaiMerci(""); return; }
@@ -958,9 +972,10 @@ function rendreEvtPublic(el,p,pid){
     if(p.parJour) data.jours=sel.slice().sort();
     if(mail) data.email=mail;
     if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
-    if(t.pour!=="lic") data.cat=String((document.getElementById("evt-cat")||{}).value||"").slice(0,12);
+    var dossier=null;
+    if(dos){ dossier=dos.lire(data); if(!dossier) return; }
     btn.disabled=true; btn.textContent="Inscription…";
-    evtInscrire(pid,data).then(function(r){
+    evtInscrire(pid,data,0,dossier).then(function(r){
       var billet=Object.assign({code:r.code},data);
       evtGarderBillet(pid,billet);
       p.nb=(r.page.nb||0)+1;
