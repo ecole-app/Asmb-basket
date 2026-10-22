@@ -1207,6 +1207,14 @@ function getPlayers(){
   return getRoster();
 }
 
+// Pastille d'un joueur : sa photo du trombinoscope (si le responsable l'a autorisée), sinon ses initiales.
+function joueurAvatarHtml(p, fond){
+  var ph=p&&p.photo;
+  if(ph && (p.photoAutorisee===true||p._roster) && /^data:image\/|^https:\/\//.test(ph))
+    return '<div class="player-avatar" style="background:'+fond+';overflow:hidden;padding:0"><img src="'+authEsc(ph)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
+  var ini=((p&&p.prenom)||"?")[0].toUpperCase()+((p&&p.nom)||"?")[0].toUpperCase();
+  return '<div class="player-avatar" style="background:'+fond+'">'+authEsc(ini)+'</div>';
+}
 // Trombinoscope derive de la fiche complete : nom, prenom, categorie, poste,
 // maillot. La photo n'y figure que si le responsable l'a autorisee.
 function rosterDepuisJoueurs(players){
@@ -1271,7 +1279,7 @@ function renderPlayers(){
     btns+='<button onclick="showPresenceHistory(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
     btns+='<button onclick="editPlayer(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
     btns+='<button onclick="deletePlayer(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Suppr.</button></div>';
-    d.innerHTML='<div class="player-avatar" style="background:'+col+'">'+initials+'</div>'
+    d.innerHTML=joueurAvatarHtml(p,col)
       +'<div class="player-info"><div class="player-name">'+authEsc(p.prenom||"")+" "+authEsc(p.nom||"")+'</div>'
       +'<div class="player-meta">'+meta+'</div>'
       +'<div style="margin-top:4px">'+status+genreBadge+'</div>'+(typeof polePastilles==="function"?'<div>'+polePastilles(p)+'</div>':'')+'</div>'+btns;

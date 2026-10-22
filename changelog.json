@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792679462",
+  "titre": "Photos du trombinoscope dans les listes de joueurs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Dans Mon équipe et la liste des joueurs, la photo du trombinoscope remplace les initiales quand le responsable a autorisé la photo."
+   }
+  ]
+ },
+ {
   "v": "1792678913",
   "titre": "Tirage de la table de marque et de l'arbitrage",
   "points": [

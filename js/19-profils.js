@@ -1400,7 +1400,7 @@ function buildParentEquipe(){
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
     var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div>';
+    div.innerHTML=joueurAvatarHtml(p,"var(--dkg)")+'<div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
       div.onclick=function(){askAlert(p.prenom+" "+p.nom+"\nPoste : "+posteTxt+(p.maillot?"\nMaillot : #"+p.maillot:"")+"\nCatégorie : "+team.cat);};
@@ -1495,7 +1495,7 @@ function buildCoachEquipe(){
     var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
     var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
     var historyBtn='<button onclick="openPlayerHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
-    div.innerHTML='<div class="player-avatar" style="background:var(--dkg)">'+initials+'</div><div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
+    div.innerHTML=joueurAvatarHtml(p,"var(--dkg)")+'<div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
     el.appendChild(div);
   });
 }
