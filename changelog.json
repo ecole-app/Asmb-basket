@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792678381",
+  "titre": "Relance des accès famille non activés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Accueil : un bandeau liste les familles qui n'ont pas créé leur compte 3 jours après l'envoi de l'accès. Bouton « Relancer par SMS » (SMS pré-rempli). Après 7 jours le lien est expiré : un nouveau lien est envoyé."
+   }
+  ]
+ },
+ {
   "v": "1792661164",
   "titre": "Accueil : rappel bénévole au-dessus des chiffres",
   "points": [

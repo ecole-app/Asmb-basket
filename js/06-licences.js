@@ -292,7 +292,7 @@ function proposerAccesFamille(lic, depuisFiche){
     var go=gmBtn("Envoyer par SMS","primary",function(b){
       b.disabled=true; b.textContent="Préparation…";
       creerInvitationParent(lic).then(function(code){
-        marquerAccesEnvoye(lic.code);
+        marquerAccesEnvoye(lic.code, code);
         s.modal.remove();
         window.location.href="sms:"+tel+"?&body="+encodeURIComponent(debut+inviteLink(code));
       }).catch(function(e){ b.disabled=false; b.textContent="Envoyer par SMS"; askAlert(e&&e.message?e.message:"Erreur : "+((e&&e.code)||e)); });
@@ -300,7 +300,7 @@ function proposerAccesFamille(lic, depuisFiche){
     var autre=gmBtn("Copier le lien à la place","soft",function(){
       s.modal.remove();
       creerInvitationParent(lic).then(function(code){
-        marquerAccesEnvoye(lic.code);
+        marquerAccesEnvoye(lic.code, code);
         showInviteResult(code,"parent",club);
       }).catch(function(e){ askAlert(e&&e.message?e.message:"Erreur : "+((e&&e.code)||e)); });
     });
@@ -309,10 +309,11 @@ function proposerAccesFamille(lic, depuisFiche){
     s.body.appendChild(col);
   });
 }
-function marquerAccesEnvoye(code){
+function marquerAccesEnvoye(code, codeInvit){
   var lics=getLicences(), i=lics.findIndex(function(l){return l.code===code;});
   if(i<0) return;
   lics[i].accesEnvoyeLe=Date.now();
+  if(codeInvit) lics[i].accesCode=String(codeInvit); // pour relancer avec le même lien (valable 7 jours)
   saveLicences(lics);
   if(currentLicCode===code) renderLicenceDetail(lics[i]);
 }
