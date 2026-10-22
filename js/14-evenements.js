@@ -178,7 +178,7 @@ function saveCreneau(){
 }
 
 var evExternes=[];
-var evSelectedTeams=[];
+var evSelectedTeams=[], evSelInit="";
 var evEditId=null; // événement en cours de modification (même formulaire que la création)
 
 // Type d'événement en pastilles (le <select> reste la source de vérité, masqué).
@@ -349,6 +349,12 @@ function saveEventFull(){
   var teams=getTeams();
   var realSelectedTeamIds=evSelectedTeams.filter(function(id){return id!=="__all__";});
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
+  // Match importé de la FFBB : son équipe s'écrit « U11M-1 », qui ne correspond à aucune équipe du club.
+  // Si les équipes n'ont pas été touchées, on garde le texte d'origine au lieu de l'effacer.
+  if(evEditId && JSON.stringify(evSelectedTeams)===evSelInit){
+    var evOrig=getEvents().find(function(e){return e.id===evEditId;});
+    if(evOrig && evOrig.equipe && !equipe) equipe=evOrig.equipe;
+  }
   var canal=document.getElementById("ev-canal").value;
   if(!titre||!date){askAlert("Titre et date obligatoires");return;}
   if(dateFin&&dateFin<date){askAlert("La date de fin doit être après la date de début.");return;}
@@ -609,6 +615,7 @@ function editEventDateTime(eventId){
   toggleEvEvalOption();
   var noms=String(ev.equipe||"").split(",").map(function(x){return x.trim();}).filter(Boolean);
   evSelectedTeams=getTeams().filter(function(t){return noms.indexOf(t.name)>=0;}).map(function(t){return t.id;});
+  evSelInit=JSON.stringify(evSelectedTeams);
   evExternes=(ev.participantsExternes||[]).slice();
   renderEvExternes(); renderEvTeamChecks(); renderEvPlayers();
   if(ev.participantsClub){
