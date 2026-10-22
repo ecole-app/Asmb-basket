@@ -336,10 +336,15 @@ function benBandeau(refId,marge){
   var id="ben-"+refId, box=document.getElementById(id);
   var ms=benMesMissions().filter(benARappeler);
   if(!ms.length){ if(box) box.remove(); return; }
-  if(!box){ box=document.createElement("div"); box.id=id; ref.parentNode.insertBefore(box,ref); }
+  if(!box){
+    box=document.createElement("div"); box.id=id;
+    // Sur l'accueil du dirigeant : au-dessus du titre « Chiffres clés », pas entre le titre et les chiffres.
+    var avant=ref.previousElementSibling; if(!(avant&&avant.classList&&avant.classList.contains("sec"))) avant=ref;
+    ref.parentNode.insertBefore(box,avant);
+  }
   ms.forEach(function(x){ benLs(benCle(x,"vu"),"1"); });
   var j0=ms[0].j;
-  box.style.cssText="margin:"+(marge||"0 0 14px")+";padding:14px 16px;border-radius:var(--rs);background:color-mix(in srgb, #E8670A 12%, var(--card));border:1.5px solid #E8670A";
+  box.style.cssText="margin:"+(marge==="0 12px 14px"?"12px 12px 14px":(marge||"0 0 14px"))+";padding:14px 16px;border-radius:var(--rs);background:color-mix(in srgb, #E8670A 12%, var(--card));border:1.5px solid #E8670A";
   box.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#E8670A;margin-bottom:6px">🙋 '+(j0===0?"Vous êtes bénévole aujourd'hui":"Rappel : vous êtes bénévole "+benQuand(j0))+'</div>'+
     ms.map(function(x){
       var j=x.j===0?"Aujourd'hui":benJourTxt(x.e);

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792661164",
+  "titre": "Accueil : rappel bénévole au-dessus des chiffres",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le rappel « Vous êtes bénévole » s'affiche au-dessus de « Chiffres clés » sur l'accueil."
+   }
+  ]
+ },
+ {
   "v": "1792660901",
   "titre": "Bénévoles : noms lisibles et SMS plus simple",
   "points": [
