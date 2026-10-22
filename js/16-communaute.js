@@ -1009,8 +1009,13 @@ function checkUnreadBadges(){
     if(!pending){updateNavBadge(0);return;}
     checks.forEach(function(chId){
       var lastRead=parseInt(localStorage.getItem("asmb_lastread_"+chId)||"0",10);
-      window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"channels",chId,"messages"),window.fbOrderBy("ts"))).then(function(msnap){
+      // Sans le nombre exact de messages : on ne lit que les derniers (un badge « 20+ » suffit), pour ne pas relire tout l'historique à chaque contrôle.
+      var qm=window.fbLimit
+        ? window.fbQuery(window.fbCollection(window.fbDb,"channels",chId,"messages"),window.fbOrderBy("ts","desc"),window.fbLimit(30))
+        : window.fbQuery(window.fbCollection(window.fbDb,"channels",chId,"messages"),window.fbOrderBy("ts"));
+      window.fbGetDocs(qm).then(function(msnap){
         var msgs=[];msnap.forEach(function(m){msgs.push(m.data());});
+        if(window.fbLimit) msgs.reverse();
         var last=msgs[msgs.length-1];
         if(last&&last.ts){
           lastUsedActivity[chId]=last.ts.toDate?last.ts.toDate().getTime():0;
@@ -1040,7 +1045,7 @@ function checkUnreadBadges(){
 function updateNavBadge(count){
   window.__chanUnread=count;
   count=count+(window.__dmUnread||0);
-  ["bni-communaute","bni-c-communaute"].forEach(function(btnId){
+  ["bni-communaute","bni-c-communaute","bni-p-communaute"].forEach(function(btnId){
     var btn=document.getElementById(btnId);
     if(!btn)return;
     var dot=btn.querySelector(".nav-dot");
@@ -1056,3 +1061,21 @@ function updateNavBadge(count){
   });
 }
 
+
+// Pastille « messages non lus » de l'onglet Communauté : contrôlée au démarrage, puis toutes les 3 minutes
+// et au retour sur l'appli, sans qu'il faille ouvrir l'onglet (avant, elle ne se mettait à jour qu'en l'ouvrant).
+(function(){
+  var essais=0;
+  var verifie=function(){
+    if(document.hidden||!window.ASMB_USER) return;
+    if(!window.fbReady||!window.fbDb) return;
+    try{ checkUnreadBadges(); }catch(e){}
+  };
+  var amorce=setInterval(function(){
+    essais++;
+    if(window.fbReady&&window.ASMB_USER){ clearInterval(amorce); verifie(); }
+    else if(essais>40) clearInterval(amorce);
+  },1500);
+  setInterval(verifie,180000);
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) setTimeout(verifie,800); });
+})();

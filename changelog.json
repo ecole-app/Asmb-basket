@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792699721",
+  "titre": "Pastille des messages non lus",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "La pastille rouge de l'onglet Communauté se met à jour toute seule (au démarrage, toutes les 3 minutes et au retour sur l'appli), sans ouvrir l'onglet. Elle apparaît aussi côté parents."
+   }
+  ]
+ },
+ {
   "v": "1792699638",
   "titre": "Recherche d'adresse pour les événements",
   "points": [
