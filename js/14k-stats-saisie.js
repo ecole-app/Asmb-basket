@@ -75,12 +75,12 @@ function statsOuvrir(eventId){
 }
 
 // ── Avant le match : adversaire, joueurs présents, 5 de départ ──────
-var msChoix={presents:{}, titulaires:{}, adversaire:"", dureeQ:10};
+var msChoix={presents:{}, titulaires:{}, adversaire:"", dureeQ:10, nbQ:4};
 function msDebut(ev){
   var o=msOverlay();
   if(!msChoix.init || msChoix.evId!==String(ev.id)){
     var joueurs=getPlayersForEvent(ev), conv=ev.convocations||[];
-    msChoix={init:true, evId:String(ev.id), presents:{}, titulaires:{}, dureeQ:10,
+    msChoix={init:true, evId:String(ev.id), presents:{}, titulaires:{}, dureeQ:10, nbQ:4,
              adversaire:(ev.score&&ev.score.adversaire)||""};
     joueurs.forEach(function(p){ if(!conv.length || conv.indexOf(p.id)>=0) msChoix.presents[p.id]=true; });
   }
@@ -95,7 +95,11 @@ function msDebut(ev){
   if(prem) h+="<div class=\"ms-lbl\" style=\"margin-top:10px\">Durée d'un quart-temps</div><div style=\"display:flex;gap:12px;margin-top:6px;align-items:center\">"
     +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.max(1,(msChoix.dureeQ||10)-1);msDebutRedessiner()\">−</button>"
     +"<b style=\"font-size:20px;min-width:80px;text-align:center\">"+(msChoix.dureeQ||10)+" min</b>"
-    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.min(20,(msChoix.dureeQ||10)+1);msDebutRedessiner()\">+</button></div>";
+    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.min(20,(msChoix.dureeQ||10)+1);msDebutRedessiner()\">+</button></div>"
+    +"<div class=\"ms-lbl\" style=\"margin-top:10px\">Nombre de quart-temps</div><div style=\"display:flex;gap:12px;margin-top:6px;align-items:center\">"
+    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.nbQ=Math.max(1,(msChoix.nbQ||4)-1);msDebutRedessiner()\">−</button>"
+    +"<b style=\"font-size:20px;min-width:80px;text-align:center\">"+(msChoix.nbQ||4)+"</b>"
+    +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.nbQ=Math.min(10,(msChoix.nbQ||4)+1);msDebutRedessiner()\">+</button></div>";
   h+="</div>";
   h+="<div class=\"ms-h\">Qui joue ? ("+nb+")</div>";
   if(prem) h+="<div style=\"font-size:12px;color:var(--mut)\">Touche « Titulaire » pour les 5 de départ ("+nbT+"/5).</div>";
@@ -133,7 +137,7 @@ function msCommencer(){
   var prem=msPremium();
   var tit=ids.filter(function(id){return msChoix.titulaires[id];});
   if(prem && tit.length!==Math.min(5,ids.length)){ askAlert("Choisis tes "+Math.min(5,ids.length)+" titulaires (touche « Titulaire »)."); return; }
-  var m=msNouveau(ev, ids, (typeof getCurrentSeason==="function"?getCurrentSeason():""), msChoix.dureeQ);
+  var m=msNouveau(ev, ids, (typeof getCurrentSeason==="function"?getCurrentSeason():""), msChoix.dureeQ, msChoix.nbQ);
   m.adversaire=(msChoix.adversaire||"").trim()||"Adversaire";
   if(prem) tit.forEach(function(id){ msAjouter(m,"in",id,Date.now()); });
   msSauver(m, true);
@@ -162,7 +166,7 @@ function msSaisie(m){
   h+="<div class=\"ms-body\" style=\"padding-bottom:0\">";
   h+="<div class=\"ms-card\"><div class=\"ms-score\">"
     +"<div><div class=\"ms-lbl\">"+authEsc(clubLabel("Nous"))+"</div><div class=\"ms-big\">"+r.score.nous+"</div></div>"
-    +"<div style=\"flex:0 0 auto;min-width:76px\"><div class=\"ms-lbl\">Quart-temps</div><div class=\"ms-clock\">"+msLibQuart(q)+"</div>"
+    +"<div style=\"flex:0 0 auto;min-width:76px\"><div class=\"ms-lbl\">Quart-temps</div><div class=\"ms-clock\">"+msLibQuart(q,m.nbQ)+"</div>"
     +(prem?"<div class=\"ms-clock\" id=\"ms-clock\">"+msMMSS(msRestantQuart(m))+"</div>"
         +"<button class=\"ms-btn\" id=\"ms-pause\" onclick=\"msBasculeChrono()\" style=\"min-width:76px\">"+(msChronoMarche(m)?"Pause":"Démarrer")+"</button>":"")
     +"<div class=\"ms-lbl\" style=\"margin-top:2px\">Fautes éq. "+(r.fautesEq[q-1]||0)+"</div></div>"
@@ -253,7 +257,7 @@ function msOuvrirRempl(){ msVue="rempl"; msPendSort=msPendEntre=null; msPendTxt=
 function msRempl(m){
   var o=msOverlay(), r=msCalcul(m), q=Number(m.q)||1;
   var sur=msTerrain(m), banc=m.joueurs.filter(function(id){return sur.indexOf(id)<0;});
-  var h=msEntete("Remplacement", msLibQuart(q)+" · chrono "+(msChronoMarche(m)?"en marche":"arrêté à "+msMMSS(msRestantQuart(m))));
+  var h=msEntete("Remplacement", msLibQuart(q,m.nbQ)+" · chrono "+(msChronoMarche(m)?"en marche":"arrêté à "+msMMSS(msRestantQuart(m))));
   h+="<div class=\"ms-body\"><div class=\"ms-h\">1. Qui sort ? (sur le terrain)</div><div style=\"display:flex;flex-direction:column;gap:6px\">";
   sur.forEach(function(id){
     var L=r.joueurs[id]||msLigneVide();
@@ -317,7 +321,7 @@ function msFeuille(m){
   else gauche+="<div class=\"ms-card\" style=\"font-size:12.5px;line-height:1.5\">Rebonds, passes, temps de jeu, +/-, évaluation et fiche joueur font partie du Pack Premium.</div>";
   // Colonne de droite : quart-temps, adresse, écart au score
   var droite="<div class=\"ms-card\"><table class=\"ms-tab\"><tr><th></th>";
-  for(var i=1;i<=nq;i++) droite+="<th>"+msLibQuart(i)+"</th>";
+  for(var i=1;i<=nq;i++) droite+="<th>"+msLibQuart(i,r.nbQ)+"</th>";
   droite+="<th>Total</th></tr>";
   [["nous",clubLabel("Nous")],["eux",m.adversaire||"Adversaire"]].forEach(function(x){
     droite+="<tr><td>"+authEsc(x[1])+"</td>";
@@ -338,7 +342,7 @@ function msFeuille(m){
     barres="<div class=\"ms-card\"><div class=\"ms-h\" style=\"margin:0 0 6px\">Écart au score</div><div style=\"display:flex;gap:10px;align-items:center;height:96px\">"
       +ecarts.map(function(e,i){
         var hh=Math.max(4,Math.round(Math.abs(e)*38/mx));
-        return "<div style=\"flex:1;display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:800\"><div style=\"height:44px;display:flex;align-items:flex-end\">"+(e>=0?"<i style=\"display:block;width:26px;height:"+hh+"px;border-radius:5px;background:var(--dkg)\"></i>":"")+"</div><span>"+(e>0?"+":"")+e+"</span><div style=\"height:44px;display:flex;align-items:flex-start\">"+(e<0?"<i style=\"display:block;width:26px;height:"+hh+"px;border-radius:5px;background:var(--red)\"></i>":"")+"</div><small style=\"color:var(--mut);font-weight:700\">"+msLibQuart(i+1)+"</small></div>";}).join("")+"</div></div>";
+        return "<div style=\"flex:1;display:flex;flex-direction:column;align-items:center;font-size:12px;font-weight:800\"><div style=\"height:44px;display:flex;align-items:flex-end\">"+(e>=0?"<i style=\"display:block;width:26px;height:"+hh+"px;border-radius:5px;background:var(--dkg)\"></i>":"")+"</div><span>"+(e>0?"+":"")+e+"</span><div style=\"height:44px;display:flex;align-items:flex-start\">"+(e<0?"<i style=\"display:block;width:26px;height:"+hh+"px;border-radius:5px;background:var(--red)\"></i>":"")+"</div><small style=\"color:var(--mut);font-weight:700\">"+msLibQuart(i+1,r.nbQ)+"</small></div>";}).join("")+"</div></div>";
     droite+=barres;
   }
   h+="<div class=\"ms-col1 ms-fcard\">"+gauche+"</div><div class=\"ms-col2 ms-fcard\">"+droite+"</div></div>";
@@ -387,7 +391,7 @@ function msExportPdf(){
   y+=8;
   var nq=r.nbQuarts, col=[14,50,64,78,92,106,120,134,148];
   doc.setFont(undefined,"bold");
-  var tetes=["Quart-temps"].concat(Array.apply(null,Array(nq)).map(function(_,i){return msLibQuart(i+1);}));
+  var tetes=["Quart-temps"].concat(Array.apply(null,Array(nq)).map(function(_,i){return msLibQuart(i+1,r.nbQ);}));
   tetes.forEach(function(t,i){ doc.text(t,[14,70,84,98,112,126,140][i]||150,y); });
   doc.setFont(undefined,"normal"); y+=6;
   [["nous",clubLabel("Nous")],["eux",m.adversaire||"Adversaire"]].forEach(function(t){

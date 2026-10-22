@@ -40,10 +40,10 @@ function statsSalleDessiner(){
   var h="<button class=\"sl-x\" onclick=\"statsSalleFermer()\" aria-label=\"Fermer\">✕</button>"
     +"<div class=\"sl-top\"><span class=\"sl-logo\">"+authEsc((clubLabel("Club")||"C").slice(0,2).toUpperCase())+"</span><b>"+authEsc(clubLabel("Club"))+"</b><span>"+authEsc((m.equipe||"")+(m.date?" · "+m.date:""))+"</span></div>"
     +"<div class=\"sl-score\"><div><i>"+authEsc(clubLabel("Nous"))+"</i><b>"+r.score.nous+"</b></div>"
-    +"<div class=\"sl-mid\"><span class=\"sl-pill"+(etat==="En direct"?" live":"")+"\">"+etat+"</span><div class=\"sl-q\">"+msLibQuart(q)+"</div><div class=\"sl-clk\">"+msMMSS(msRestantQuart(m))+"</div>"
-    +"<div class=\"sl-qs\">"+Array.apply(null,Array(Math.max(4,q))).map(function(_,i){
+    +"<div class=\"sl-mid\"><span class=\"sl-pill"+(etat==="En direct"?" live":"")+"\">"+etat+"</span><div class=\"sl-q\">"+msLibQuart(q,m.nbQ)+"</div><div class=\"sl-clk\">"+msMMSS(msRestantQuart(m))+"</div>"
+    +"<div class=\"sl-qs\">"+Array.apply(null,Array(Math.max(Number(m.nbQ)||4,q))).map(function(_,i){
         var n=i+1, a=r.parQuart.nous[i], e=r.parQuart.eux[i];
-        return "<span"+(n===q&&m.statut!=="termine"?" class=\"on\"":"")+">"+msLibQuart(n)+(a!=null?" "+a+"-"+e:"")+"</span>";}).join("")+"</div></div>"
+        return "<span"+(n===q&&m.statut!=="termine"?" class=\"on\"":"")+">"+msLibQuart(n,m.nbQ)+(a!=null?" "+a+"-"+e:"")+"</span>";}).join("")+"</div></div>"
     +"<div class=\"d\"><i>"+authEsc(m.adversaire||"Adversaire")+"</i><b>"+r.score.eux+"</b></div></div>"
     +"<div class=\"sl-bas\"><div><h3>Sur le terrain</h3><div class=\"sl-cinq\">"+ter.map(function(id){
         var L=r.joueurs[id]||msLigneVide(), pts=[];
@@ -51,7 +51,7 @@ function statsSalleDessiner(){
         return "<div class=\"sl-jo"+(L.fc>=4?" al":"")+"\"><b>"+authEsc(msNomJoueur(id))+"</b><div class=\"p\">"+L.pts+"</div><small>PTS · "+L.min+" min</small><span class=\"fa\">"+pts.join("")+"</span></div>";}).join("")+"</div></div>"
     +"<div><h3>Meilleurs du match</h3><div class=\"sl-ld\">"+[["Points","pts"],["Rebonds","reb"],["Passes","pd"]].map(function(x){
         var t=meilleur(x[1]); return "<div><em>"+x[0]+"</em><b>"+authEsc(t.nom)+"</b><strong>"+t.v+"</strong></div>";}).join("")+"</div></div></div>"
-    +"<div class=\"sl-tk\"><span><b>Tirs</b> "+(ad.tirs==null?"–":ad.tirs+" %")+"</span><span><b>3 points</b> "+(ad.p3==null?"–":ad.p3+" %")+"</span><span><b>Lancers francs</b> "+(ad.lf==null?"–":ad.lf+" %")+"</span><span><b>Fautes équipe "+msLibQuart(q)+"</b> "+(r.fautesEq[q-1]||0)+"</span></div>";
+    +"<div class=\"sl-tk\"><span><b>Tirs</b> "+(ad.tirs==null?"–":ad.tirs+" %")+"</span><span><b>3 points</b> "+(ad.p3==null?"–":ad.p3+" %")+"</span><span><b>Lancers francs</b> "+(ad.lf==null?"–":ad.lf+" %")+"</span><span><b>Fautes équipe "+msLibQuart(q,m.nbQ)+"</b> "+(r.fautesEq[q-1]||0)+"</span></div>";
   o.innerHTML=h;
 }
 

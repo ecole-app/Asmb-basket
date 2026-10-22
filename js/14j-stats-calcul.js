@@ -41,7 +41,7 @@ function msPointsAction(a){
 function msPct(reussis, tentes){ return tentes>0 ? Math.round(reussis*100/tentes) : null; }
 
 // Durée (en minutes) d'un quart-temps : la durée choisie pour les 4 premiers, 5 min en prolongation.
-function msDureeQuart(match, q){ return q>4 ? 5 : (Number(match && match.dureeQ)||10); }
+function msDureeQuart(match, q){ return q>(Number(match && match.nbQ)||4) ? 5 : (Number(match && match.dureeQ)||10); }
 
 // Secondes de jeu écoulées (le chrono ne tourne que quand il est lancé).
 function msSecJeu(match, maintenant){
@@ -138,7 +138,7 @@ function msCalcul(match, opts){
     ["lf","p2","p3","tirs"].forEach(function(k){ tot[k].r+=L[k].r; tot[k].t+=L[k].t; });
   });
   return {joueurs:j, ids:ids, equipe:tot, score:{nous:nous, eux:eux}, parQuart:parQuart, fautesEq:fautesEq,
-          nbQuarts:Math.max(parQuart.nous.length,4)};
+          nbQ:Number(match&&match.nbQ)||4, nbQuarts:Math.max(parQuart.nous.length,Number(match&&match.nbQ)||4)};
 }
 
 // Pourcentages et rapports d'un total ou d'un cumul de plusieurs matchs.
@@ -218,11 +218,11 @@ function msFicheDepuisLignes(lignes){
 }
 
 // Nouveau match vide.
-function msNouveau(ev, joueurs, saison, dureeQ){
+function msNouveau(ev, joueurs, saison, dureeQ, nbQ){
   return {
     id:String(ev.id), eventId:String(ev.id), saison:saison||"", equipe:ev.equipe||"", date:ev.date||"",
     adversaire:(ev.score&&ev.score.adversaire)||"", statut:"en_cours",
-    joueurs:joueurs.slice(), evts:[], q:1, dureeQ:dureeQ||10, qDebut:[0],
+    joueurs:joueurs.slice(), evts:[], q:1, dureeQ:dureeQ||10, nbQ:nbQ||4, qDebut:[0],
     chrono:{sec:0, depuis:null}, sFin:null, minCorr:{}
   };
 }
@@ -264,7 +264,7 @@ function msTerminer(match, maintenant){
   match.statut="termine"; match.sFin=match.chrono.sec;
 }
 function msRouvrir(match){ match.statut="en_cours"; match.sFin=null; }
-function msLibQuart(q){ return q>4 ? "P"+(q-4) : "Q"+q; }
+function msLibQuart(q, nb){ nb=Number(nb)||4; return q>nb ? "P"+(q-nb) : "Q"+q; }
 
 // ── Tableau de saison d'une équipe (écran « Stats équipe ») ──────────
 // matchs : documents match_stats terminés (déjà filtrés par saison / équipe / période).

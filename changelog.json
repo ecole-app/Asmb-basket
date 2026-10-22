@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792637749",
+  "titre": "Nombre de quart-temps réglable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stats du match : on choisit aussi le nombre de quart-temps (4 par défaut) avec − et +, en plus de leur durée."
+   }
+  ]
+ },
+ {
   "v": "1792613805",
   "titre": "Durée du quart-temps en − / +",
   "points": [
