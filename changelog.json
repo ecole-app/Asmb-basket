@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792699207",
+  "titre": "Stats du match : ouverture sécurisée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Si l'écran des stats d'un match ne s'ouvre pas, il se ferme proprement et affiche la cause au lieu de bloquer le bouton Stats."
+   }
+  ]
+ },
+ {
   "v": "1792697190",
   "titre": "Mini-basket 4 contre 4 dans les stats du match",
   "points": [

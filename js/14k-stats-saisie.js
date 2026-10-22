@@ -67,11 +67,17 @@ function statsOuvrir(eventId){
   if(typeof isLimite==="function" && isLimite()){ askAlert("Accès limité : la saisie des stats est fermée. Tes feuilles de match restent consultables."); }
   var ev=getEvents().filter(function(e){return String(e.id)===String(eventId);})[0];
   if(!ev){ askAlert("Match introuvable."); return; }
-  msId=String(eventId); msSel=null; msPendSort=msPendEntre=null;
-  var m=msMatch();
-  if(!m){ msVue="debut"; msDessiner(ev); return; }
-  msVue = m.statut==="termine" ? "feuille" : "saisie";
-  msDessiner();
+  // Si l'écran plante à l'ouverture, on le ferme (sinon il reste en plein écran, bloque l'appli et empêche de rouvrir) et on affiche la cause.
+  try{
+    msId=String(eventId); msSel=null; msPendSort=msPendEntre=null;
+    var m=msMatch();
+    if(!m){ msVue="debut"; msDessiner(ev); return; }
+    msVue = m.statut==="termine" ? "feuille" : "saisie";
+    msDessiner();
+  }catch(err){
+    try{ msFermer(); }catch(e2){}
+    askAlert("Impossible d'ouvrir les stats de ce match.\n\nMessage : "+(err&&err.message?err.message:err));
+  }
 }
 
 // ── Avant le match : adversaire, joueurs présents, titulaires (5, ou 4 en mini-basket) ──────
