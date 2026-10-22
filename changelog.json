@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792682068",
+  "titre": "Tirage de la table : mois, joueurs des équipes supérieures, ajout match par match",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Tirage table de marque : période au mois, à la phase (2 mois) ou à la saison. Si l'équipe n'a pas de parent disponible, on tire parmi les joueurs des équipes supérieures et les bénévoles. Un match incomplet ou en vacances se complète avec « Tirer ce match » ou « Choisir à la main ». Les vacances scolaires se mettent à jour seules à chaque saison."
+   }
+  ]
+ },
+ {
   "v": "1792679462",
   "titre": "Photos du trombinoscope dans les listes de joueurs",
   "points": [

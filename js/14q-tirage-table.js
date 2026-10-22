@@ -1,12 +1,14 @@
 // ── Tirage au sort de la table de marque et de l'arbitrage (matchs à domicile) ──
-// Un appui tire toute la période choisie (une phase d'environ 2 mois, ou la saison) pour que les parents
-// sachent à l'avance. Le vivier d'un match = les parents de l'équipe qui joue ; s'il n'y en a pas,
-// les autres parents et les bénévoles du club. Équité : on prend toujours ceux qui sont passés le moins
+// Un appui tire toute la période choisie (un mois, une phase d'environ 2 mois, ou la saison) pour que les
+// parents sachent à l'avance. Le vivier d'un match = les parents de l'équipe qui joue ; s'il n'y en a pas,
+// les joueurs des équipes supérieures et les bénévoles du club (jamais les parents des autres équipes). Équité : on prend toujours ceux qui sont passés le moins
 // de fois (historique de la saison compris). Un tour sans match n'est jamais perdu : il passe au match suivant.
 // Pas de tirage pendant les vacances scolaires de la zone du club : ces matchs restent « à désigner ».
 // Les missions sont des bénévoles de l'événement (js/14g-benevoles.js) : accueil, rappel et SMS déjà en place.
 
-// Vacances 2026-2027 (début = samedi de sortie, fin = dimanche avant la reprise). À compléter chaque saison.
+// Vacances scolaires : chargées chaque saison depuis l'API ouverte de l'Éducation nationale
+// (data.education.gouv.fr, jeu « fr-en-calendrier-scolaire »), gardées sur l'appareil.
+// Table de secours ci-dessous si l'API ne répond pas (début = samedi de sortie, fin = dimanche avant la reprise).
 var TIR_VACANCES={
   "2026-2027":{
     toussaint:{A:["2026-10-17","2026-11-01"],B:["2026-10-17","2026-11-01"],C:["2026-10-17","2026-11-01"]},
@@ -22,13 +24,44 @@ function tirPrefs(){
   return p;
 }
 function tirPrefsSauver(p){ try{ localStorage.setItem("gm_tirage_prefs",JSON.stringify(p)); }catch(e){} }
+var TIR_VAC_API={}; // "saison|zone" → [[début, fin, nom], …]
+function tirIsoLocal(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function tirVacancesCle(saison, zone){ return saison+"|"+zone; }
+// Charge (une fois par saison et par zone) les vacances depuis l'API ; ne rejette jamais.
+function tirVacancesCharger(saison, zone){
+  var cle=tirVacancesCle(saison,zone);
+  if(TIR_VAC_API[cle]) return Promise.resolve(TIR_VAC_API[cle]);
+  try{ var m=JSON.parse(localStorage.getItem("gm_vacances_"+cle)||"null"); if(m&&m.length){ TIR_VAC_API[cle]=m; return Promise.resolve(m); } }catch(e){}
+  if(typeof fetch!=="function") return Promise.resolve(null);
+  var where='annee_scolaire="'+saison+'" and zones="Zone '+zone+'"';
+  var url="https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-calendrier-scolaire/records?limit=100&where="+encodeURIComponent(where);
+  return fetch(url).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+    var res=[], vus={};
+    ((j&&j.results)||[]).forEach(function(x){
+      if(/enseignant/i.test(x.population||"")||!x.start_date) return;
+      // start_date = veille au soir (UTC) → samedi en heure de Paris ; end_date = jour de reprise → on garde la veille.
+      var d=new Date(x.start_date), f=x.end_date?new Date(x.end_date):null;
+      var deb=tirIsoLocal(d), fin=f?tirIsoLocal(new Date(f.getTime()-86400000)):tirPlusJours(deb,60);
+      if(/été/i.test(x.description||"")) fin=tirPlusJours(deb,60);
+      var k=deb+fin; if(vus[k]) return; vus[k]=true;
+      res.push([deb, fin, String(x.description||"vacances").replace(/^Vacances (de la |de |d')?/i,"")]);
+    });
+    if(!res.length) return null;
+    TIR_VAC_API[cle]=res;
+    try{ localStorage.setItem("gm_vacances_"+cle,JSON.stringify(res)); }catch(e){}
+    return res;
+  }).catch(function(){ return null; });
+}
 // Nom de la période de vacances qui contient cette date (pour la zone), ou "".
 function tirVacances(dateIso, zone){
-  var saison=tirSaisonDe(dateIso), t=TIR_VACANCES[saison]; if(!t) return "";
+  var saison=tirSaisonDe(dateIso), api=TIR_VAC_API[tirVacancesCle(saison,zone)];
+  if(api){ for(var i=0;i<api.length;i++){ if(dateIso>=api[i][0]&&dateIso<=api[i][1]) return api[i][2]; } return ""; }
+  var t=TIR_VACANCES[saison]; if(!t) return "";
   var noms={toussaint:"Toussaint",noel:"Noël",hiver:"hiver",printemps:"printemps",ete:"été"};
   for(var k in t){ var r=t[k][zone]; if(r && dateIso>=r[0] && dateIso<=r[1]) return noms[k]; }
   return "";
 }
+function tirVacancesConnues(saison, zone){ return !!(TIR_VAC_API[tirVacancesCle(saison,zone)]||TIR_VACANCES[saison]); }
 function tirSaisonDe(dateIso){
   var y=parseInt(String(dateIso).slice(0,4),10), m=parseInt(String(dateIso).slice(5,7),10);
   return m>=8 ? y+"-"+(y+1) : (y-1)+"-"+y;
@@ -53,15 +86,23 @@ function tirParentsDe(p, lics, comptes){
   });
   return res;
 }
+// Rang d'une catégorie (Micro < Baby < U7 < … < Senior) ; -1 si inconnue.
+function tirRangCat(c){ return (typeof CATS_LIC!=="undefined")?CATS_LIC.indexOf(c):-1; }
 function tirVivier(equipeNom, comptes){
   var lics=getLicences()||[], teams=getTeams()||[], team=teams.find(function(t){ return t.name===equipeNom; });
-  var parEquipe={}, tous={};
+  var parEquipe={}, dansEquipe={};
   var ajoute=function(map,c){ if(!map[c.cle]) map[c.cle]=c; else if(c.de && map[c.cle].de.indexOf(c.de)<0) map[c.cle].de+=", "+c.de; };
-  var dansEquipe={};
   if(team) getPlayersForTeam(team).forEach(function(p){ dansEquipe[p.id]=true; tirParentsDe(p,lics,comptes).forEach(function(c){ ajoute(parEquipe,c); }); });
-  getPlayers().forEach(function(p){ tirParentsDe(p,lics,comptes).forEach(function(c){ ajoute(tous,c); }); });
-  return {equipe:Object.keys(parEquipe).map(function(k){ return parEquipe[k]; }),
-          club:Object.keys(tous).filter(function(k){ return !parEquipe[k]; }).map(function(k){ return tous[k]; })};
+  // Joueurs des équipes supérieures (catégorie plus âgée que l'équipe qui joue), avec un numéro.
+  var rang=team?tirRangCat(team.cat):-1, joueurs=[];
+  getPlayers().forEach(function(p){
+    if(dansEquipe[p.id]) return;
+    var r=tirRangCat(p.cat); if(rang>=0 && !(r>rang)) return;
+    var tel=tirTel(p.contact||p.telephone||""); if(!tel) return;
+    var cpt=comptes.find(function(c){ return tirTel(c.phone)===tel; });
+    joueurs.push({cle:"j"+tirHash(String(p.id)), nom:((p.prenom||"")+" "+(p.nom||"")).trim(), prenom:p.prenom||"", tel:tel, uid:cpt?cpt.uid:null, de:"", joueur:p.cat||""});
+  });
+  return {equipe:Object.keys(parEquipe).map(function(k){ return parEquipe[k]; }), club:joueurs};
 }
 function tirBenevolesCarnet(carnet){
   return (carnet||[]).filter(function(x){ return x.actif!==false; }).map(function(x){
@@ -85,12 +126,14 @@ function tirMatchs(du, au, zone){
     return e.domicile===true || (e.domicile===undefined && /domicile/i.test(e.lieu||""));
   }).sort(function(a,b){ return (a.date+(a.heure||""))<(b.date+(b.heure||""))?-1:1; });
 }
-function tirTirer(du, au, prefs, comptes, carnet){
+function tirTirer(du, au, prefs, comptes, carnet, opts){
+  opts=opts||{};
   var events=getEvents(), postes=Object.keys(prefs.postes).filter(function(p){ return prefs.postes[p]>0; });
-  var cnt=tirCompteurs(events, postes), matchs=tirMatchs(du,au,prefs.zone), carnetPool=tirBenevolesCarnet(carnet);
-  var idTirage="t"+Date.now().toString(36), res=[], nouveaux={};
+  var cnt=tirCompteurs(events, postes), carnetPool=tirBenevolesCarnet(carnet);
+  var matchs=opts.eid?getEvents().filter(function(e){ return e.id===opts.eid; }):tirMatchs(du,au,prefs.zone);
+  var idTirage=opts.id||("t"+Date.now().toString(36)), res=[], nouveaux={};
   matchs.forEach(function(e){
-    var ligne={e:e, affectes:[], manques:[], vacances:tirVacances(e.date,prefs.zone)};
+    var ligne={e:e, affectes:[], manques:[], vacances:opts.forcer?"":tirVacances(e.date,prefs.zone)};
     if(ligne.vacances){ res.push(ligne); return; }
     var deja=benListe(e), pris={};
     deja.forEach(function(m){ pris[tirCleMission(m)]=true; });
@@ -98,7 +141,7 @@ function tirTirer(du, au, prefs, comptes, carnet){
     postes.forEach(function(poste){
       var existants=deja.filter(function(m){ return m.poste===poste; }).length;
       for(var i=existants;i<prefs.postes[poste];i++){
-        // 1) parents de l'équipe, 2) autres parents du club et bénévoles
+        // 1) parents de l'équipe, 2) joueurs des équipes supérieures et bénévoles du club
         var choix=null;
         [viv.equipe, viv.club.concat(carnetPool)].some(function(pool){
           var dispo=pool.filter(function(c){ return !pris[c.cle]; });
@@ -114,7 +157,7 @@ function tirTirer(du, au, prefs, comptes, carnet){
         if(choix.uid) m.uid=choix.uid;
         if(choix.benId) m.benId=choix.benId;
         (nouveaux[e.id]=nouveaux[e.id]||[]).push(m);
-        ligne.affectes.push({poste:poste, m:m, tel:choix.tel, dePrenom:choix.de});
+        ligne.affectes.push({poste:poste, m:m, tel:choix.tel, dePrenom:choix.de, joueur:choix.joueur||""});
       }
     });
     res.push(ligne);
@@ -125,7 +168,7 @@ function tirTirer(du, au, prefs, comptes, carnet){
     if(ev) benSauver(eid, benListe(ev).concat(nouveaux[eid]));
   });
   try{ localStorage.setItem("gm_dernier_tirage",idTirage); }catch(e){}
-  return {id:idTirage, lignes:res};
+  return {id:idTirage, lignes:res, du:du, au:au, prefs:prefs};
 }
 function tirAnnuler(id){
   var n=0;
@@ -143,11 +186,11 @@ function tirageOuvrir(){
   var prefs=tirPrefs(), s=gmSheet("Tirage table de marque et arbitrage");
   var ajd=tirAujourdhui();
   var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:12px";
-  info.textContent="Un appui tire les matchs à domicile de la période. On choisit d'abord les parents de l'équipe qui joue, sinon les autres parents et bénévoles du club. Tout le monde passe à peu près autant de fois.";
+  info.textContent="Un appui tire les matchs à domicile de la période. On choisit d'abord les parents de l'équipe qui joue, sinon les joueurs des équipes supérieures et les bénévoles du club. Tout le monde passe à peu près autant de fois. Il manque quelqu'un ? On complète match par match.";
   s.body.appendChild(info);
   var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="form-group"><label class="form-label">Du</label><input class="form-input" id="tir-du" type="date" value="'+ajd+'"></div>'
     +'<div class="form-group"><label class="form-label">Au</label><input class="form-input" id="tir-au" type="date" value="'+tirPlusJours(ajd,61)+'"></div></div>'
-    +'<div style="display:flex;gap:6px;margin:-4px 0 10px"><button type="button" class="mini" id="tir-2m" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Phase (2 mois)</button>'
+    +'<div style="display:flex;gap:6px;margin:-4px 0 10px;flex-wrap:wrap"><button type="button" id="tir-mois" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Mois</button><button type="button" class="mini" id="tir-2m" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Phase (2 mois)</button>'
     +'<button type="button" id="tir-saison" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Toute la saison</button></div>'
     +'<div class="form-group"><label class="form-label">Zone scolaire du club</label><select class="form-select" id="tir-zone">'
     +["A","B","C"].map(function(z){ return '<option value="'+z+'"'+(prefs.zone===z?" selected":"")+'>Zone '+z+(z==="A"?" (Lyon, Saint-Étienne)":"")+'</option>'; }).join("")+'</select></div>'
@@ -156,6 +199,13 @@ function tirageOuvrir(){
         return '<label style="font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:7px 10px">'+authEsc(p)
           +'<input type="number" min="0" max="4" value="'+(prefs.postes[p]||0)+'" data-poste="'+authEsc(p)+'" style="width:44px;text-align:center" class="form-input"></label>'; }).join("")+'</div>';
   var f=document.createElement("div"); f.innerHTML=html; s.body.appendChild(f);
+  // Mois : jusqu'à la fin du mois en cours ; après le 20, le mois suivant entier.
+  f.querySelector("#tir-mois").onclick=function(){
+    var a=new Date(ajd+"T12:00:00"), debut, fin;
+    if(a.getDate()>20){ debut=new Date(a.getFullYear(),a.getMonth()+1,1); fin=new Date(a.getFullYear(),a.getMonth()+2,0); }
+    else { debut=a; fin=new Date(a.getFullYear(),a.getMonth()+1,0); }
+    f.querySelector("#tir-du").value=tirIsoLocal(debut); f.querySelector("#tir-au").value=tirIsoLocal(fin);
+  };
   f.querySelector("#tir-2m").onclick=function(){ f.querySelector("#tir-du").value=ajd; f.querySelector("#tir-au").value=tirPlusJours(ajd,61); };
   f.querySelector("#tir-saison").onclick=function(){
     var sai=(typeof getCurrentSeason==="function"?getCurrentSeason():"")||tirSaisonDe(ajd), an=parseInt(String(sai).slice(5,9),10)||(new Date().getFullYear()+1);
@@ -169,10 +219,13 @@ function tirageOuvrir(){
     var p={zone:f.querySelector("#tir-zone").value, postes:{}};
     f.querySelectorAll("#tir-postes input").forEach(function(i){ p.postes[i.getAttribute("data-poste")]=Math.max(0,Math.min(4,parseInt(i.value,10)||0)); });
     if(!Object.keys(p.postes).some(function(k){ return p.postes[k]>0; })){ askAlert("Choisis au moins un poste."); return; }
-    if(!TIR_VACANCES[tirSaisonDe(du)]) showToast("Vacances de cette saison pas encore dans l'appli : aucun match ne sera mis de côté.");
     tirPrefsSauver(p); b.disabled=true; b.textContent="Tirage en cours…";
-    Promise.all([typeof benChargerComptes==="function"?benChargerComptes():[], typeof benCarnetCharger==="function"?benCarnetCharger():[]]).then(function(r){
+    var saisons=[tirSaisonDe(du)]; if(tirSaisonDe(au)!==saisons[0]) saisons.push(tirSaisonDe(au));
+    Promise.all([typeof benChargerComptes==="function"?benChargerComptes():[], typeof benCarnetCharger==="function"?benCarnetCharger():[]]
+      .concat(saisons.map(function(x){ return tirVacancesCharger(x,p.zone); }))).then(function(r){
+      if(saisons.some(function(x){ return !tirVacancesConnues(x,p.zone); })) showToast("Vacances scolaires introuvables pour cette saison : aucun match n'est mis de côté.");
       var t=tirTirer(du,au,p,r[0]||[],r[1]||[]);
+      t.comptes=r[0]||[]; t.carnet=r[1]||[];
       b.disabled=false; b.textContent="🎲 Tirer au sort";
       tirResultat(sortie, t, function(){ go.click(); });
       sortie.scrollIntoView({behavior:"smooth",block:"start"});
@@ -207,11 +260,24 @@ function tirResultat(box, t, refaire){
     var txt='<div style="font-size:12px;font-weight:800">'+authEsc(tirFr(l.e.date))+(l.e.heure?" · "+authEsc(l.e.heure):"")+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+authEsc(titre)+authEsc(eq)+'</div>';
     if(l.vacances) txt+='<div style="font-size:11px;font-weight:700;color:#E8670A">Vacances ('+authEsc(l.vacances)+') : à désigner à la main</div>';
     l.affectes.forEach(function(a){
-      txt+='<div style="font-size:12px"><b>'+authEsc(a.poste)+'</b> : '+authEsc(a.m.nom)+(a.dePrenom?' <span style="color:var(--mut)">(parent de '+authEsc(a.dePrenom)+')</span>':"")+'</div>';
+      var qui=a.dePrenom?"parent de "+a.dePrenom:(a.joueur?"joueur "+a.joueur:(a.m.benId?"bénévole":""));
+      txt+='<div style="font-size:12px"><b>'+authEsc(a.poste)+'</b> : '+authEsc(a.m.nom)+(qui?' <span style="color:var(--mut)">('+authEsc(qui)+')</span>':"")+'</div>';
       var k=a.m.cle; (parPersonne[k]=parPersonne[k]||{nom:a.m.nom,prenom:a.m.prenom,tel:a.tel,items:[]}).items.push({e:l.e,poste:a.poste});
     });
     l.manques.forEach(function(p){ txt+='<div style="font-size:11px;font-weight:700;color:#C0392B">'+authEsc(p)+' : personne de disponible</div>'; });
     c.innerHTML=txt; box.appendChild(c);
+    // Compléter ce match : nouveau tirage pour lui seul (même pendant les vacances), ou choix à la main.
+    if(l.vacances||l.manques.length){
+      var rg=document.createElement("div"); rg.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"; c.appendChild(rg);
+      var b1=gmBtn("🎲 Tirer ce match","primary",function(){
+        var u=tirTirer(t.du,t.au,t.prefs,t.comptes||[],t.carnet||[],{eid:l.e.id,forcer:true,id:t.id});
+        var nl=u.lignes[0]; if(nl){ var i=t.lignes.indexOf(l); nl.e=getEvents().find(function(x){ return x.id===l.e.id; })||l.e;
+          nl.affectes=l.affectes.concat(nl.affectes); t.lignes[i]=nl; }
+        tirResultat(box,t,refaire);
+      });
+      var b2=gmBtn("Choisir à la main","soft",function(){ if(typeof benOuvrir==="function") benOuvrir(l.e.id); });
+      [b1,b2].forEach(function(b){ b.style.padding="7px 12px"; b.style.fontSize="11px"; rg.appendChild(b); });
+    }
   });
   var cles=Object.keys(parPersonne);
   if(cles.length){
