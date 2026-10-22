@@ -218,10 +218,22 @@ function msFicheDepuisLignes(lignes){
 }
 
 // Nouveau match vide.
-function msNouveau(ev, joueurs, saison, dureeQ, nbQ){
+// Format de jeu selon la catégorie (nom d'équipe du type « U11M-1 »).
+// Mini-basket U9 / U11 (ex. comité de la Loire) : 4 contre 4, périodes de 4 min décomptées
+// (U9 : 6 périodes, U11 : 8 périodes). U7 : plateaux, même effectif (4). Sinon 5 contre 5, 4 × 10 min.
+function msFormatEquipe(equipe){
+  var mt=/(?:^|[^A-Za-z0-9])U\s?(\d{1,2})(?!\d)/i.exec(String(equipe||""));
+  var age=mt?Number(mt[1]):null;
+  if(age!=null && age<=11){
+    var presets=[{nbQ:6,dureeQ:4},{nbQ:8,dureeQ:4}];
+    return {mini:true, nbJ:4, presets:presets, defaut:age>=10?presets[1]:presets[0]};
+  }
+  return {mini:false, nbJ:5, presets:[], defaut:{nbQ:4,dureeQ:10}};
+}
+function msNouveau(ev, joueurs, saison, dureeQ, nbQ, nbJ){
   return {
     id:String(ev.id), eventId:String(ev.id), saison:saison||"", equipe:ev.equipe||"", date:ev.date||"",
-    adversaire:(ev.score&&ev.score.adversaire)||"", statut:"en_cours",
+    adversaire:(ev.score&&ev.score.adversaire)||"", statut:"en_cours", nbJ:nbJ||5,
     joueurs:joueurs.slice(), evts:[], q:1, dureeQ:dureeQ||10, nbQ:nbQ||4, qDebut:[0],
     chrono:{sec:0, depuis:null}, sFin:null, minCorr:{}
   };

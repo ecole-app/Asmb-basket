@@ -263,3 +263,27 @@ describe("Vue joueur / parent : ses lignes seulement", () => {
     assert.equal(parent.moyennes.eval, staff.moyennes.eval);
   });
 });
+
+describe("Format mini-basket (4 contre 4)", () => {
+  it("U9 : 4 joueurs, 6 périodes de 4 min", () => {
+    const f = c.msFormatEquipe("U9M-1");
+    assert.equal(f.mini, true); assert.equal(f.nbJ, 4);
+    assert.deepEqual([f.defaut.nbQ, f.defaut.dureeQ], [6, 4]);
+  });
+  it("U11 : 4 joueurs, 8 périodes de 4 min", () => {
+    const f = c.msFormatEquipe("U11M-1");
+    assert.equal(f.nbJ, 4);
+    assert.deepEqual([f.defaut.nbQ, f.defaut.dureeQ], [8, 4]);
+  });
+  it("U13 et plus : 5 contre 5, 4 × 10 min", () => {
+    for (const e of ["U13F", "U15M", "U18M", "Senior", "", undefined]) {
+      const f = c.msFormatEquipe(e);
+      assert.equal(f.mini, false); assert.equal(f.nbJ, 5);
+      assert.deepEqual([f.defaut.nbQ, f.defaut.dureeQ], [4, 10]);
+    }
+  });
+  it("le match garde son nombre de joueurs sur le terrain", () => {
+    assert.equal(c.msNouveau({ id: "x", equipe: "U11M-1" }, ["a"], "2026-2027", 4, 8, 4).nbJ, 4);
+    assert.equal(c.msNouveau({ id: "y" }, ["a"], "2026-2027", 10).nbJ, 5);
+  });
+});

@@ -74,13 +74,14 @@ function statsOuvrir(eventId){
   msDessiner();
 }
 
-// ── Avant le match : adversaire, joueurs présents, 5 de départ ──────
+// ── Avant le match : adversaire, joueurs présents, titulaires (5, ou 4 en mini-basket) ──────
 var msChoix={presents:{}, titulaires:{}, adversaire:"", dureeQ:10, nbQ:4};
 function msDebut(ev){
   var o=msOverlay();
   if(!msChoix.init || msChoix.evId!==String(ev.id)){
     var joueurs=getPlayersForEvent(ev), conv=ev.convocations||[];
-    msChoix={init:true, evId:String(ev.id), presents:{}, titulaires:{}, dureeQ:10, nbQ:4,
+    var fmt0=msFormatEquipe(ev.equipe||ev.titre);
+    msChoix={init:true, evId:String(ev.id), presents:{}, titulaires:{}, dureeQ:fmt0.defaut.dureeQ, nbQ:fmt0.defaut.nbQ, nbJ:fmt0.nbJ,
              adversaire:(ev.score&&ev.score.adversaire)||""};
     joueurs.forEach(function(p){ if(!conv.length || conv.indexOf(p.id)>=0) msChoix.presents[p.id]=true; });
   }
@@ -88,10 +89,15 @@ function msDebut(ev){
   var liste=getPlayersForEvent(ev);
   var nb=Object.keys(msChoix.presents).filter(function(k){return msChoix.presents[k];}).length;
   var nbT=Object.keys(msChoix.titulaires).filter(function(k){return msChoix.titulaires[k];}).length;
+  var fmt=msFormatEquipe(ev.equipe||ev.titre), nbJ=msChoix.nbJ||fmt.nbJ;
   var h=msEntete("Stats du match",(ev.titre||"Match")+" · "+(ev.date||""));
   h+="<div class=\"ms-body\">";
   h+="<div class=\"ms-card\"><div class=\"ms-lbl\">Adversaire</div>"
     +"<input id=\"ms-adv\" type=\"text\" value=\""+authEsc(msChoix.adversaire)+"\" placeholder=\"Nom de l'équipe adverse\" oninput=\"msChoix.adversaire=this.value\" style=\"width:100%;box-sizing:border-box;margin-top:6px;padding:10px;font-size:14px;border:1.5px solid var(--bdr);border-radius:12px;background:var(--bg);color:var(--txt)\">";
+  if(fmt.mini) h+="<div class=\"ms-lbl\" style=\"margin-top:10px\">Mini-basket · "+nbJ+" contre "+nbJ+"</div><div style=\"display:flex;gap:8px;margin-top:6px;flex-wrap:wrap\">"
+    +fmt.presets.map(function(f){ var on=msChoix.nbQ===f.nbQ&&msChoix.dureeQ===f.dureeQ;
+      return "<button class=\"ms-btn"+(on?" plein":"")+"\" onclick=\"msChoix.nbQ="+f.nbQ+";msChoix.dureeQ="+f.dureeQ+";msDebutRedessiner()\">"+f.nbQ+" × "+f.dureeQ+" min</button>"; }).join("")+"</div>"
+    +"<div style=\"font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.4\">Temps décompté. Chaque joueur joue au moins 2 périodes et se repose 1 période complète.</div>";
   if(prem) h+="<div class=\"ms-lbl\" style=\"margin-top:10px\">Durée d'un quart-temps</div><div style=\"display:flex;gap:12px;margin-top:6px;align-items:center\">"
     +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.dureeQ=Math.max(1,(msChoix.dureeQ||10)-1);msDebutRedessiner()\">−</button>"
     +"<b style=\"font-size:20px;min-width:80px;text-align:center\">"+(msChoix.dureeQ||10)+" min</b>"
@@ -102,7 +108,7 @@ function msDebut(ev){
     +"<button class=\"ms-btn\" style=\"min-width:52px\" onclick=\"msChoix.nbQ=Math.min(10,(msChoix.nbQ||4)+1);msDebutRedessiner()\">+</button></div>";
   h+="</div>";
   h+="<div class=\"ms-h\">Qui joue ? ("+nb+")</div>";
-  if(prem) h+="<div style=\"font-size:12px;color:var(--mut)\">Touche « Titulaire » pour les 5 de départ ("+nbT+"/5).</div>";
+  if(prem) h+="<div style=\"font-size:12px;color:var(--mut)\">Touche « Titulaire » pour les "+nbJ+" de départ ("+nbT+"/"+nbJ+").</div>";
   if(!liste.length) h+="<div class=\"ms-card\" style=\"font-size:13px\">Aucun joueur trouvé pour cette équipe. Ajoute les joueurs à l'équipe ou convoque-les d'abord.</div>";
   liste.forEach(function(p){
     var on=!!msChoix.presents[p.id], tit=!!msChoix.titulaires[p.id];
@@ -125,7 +131,8 @@ function msBasculePresent(id){
 function msBasculeTitulaire(id){
   if(!msChoix.titulaires[id]){
     var nb=Object.keys(msChoix.titulaires).filter(function(k){return msChoix.titulaires[k];}).length;
-    if(nb>=5){ showToast("5 titulaires au maximum"); return; }
+    var max=msChoix.nbJ||5;
+    if(nb>=max){ showToast(max+" titulaires au maximum"); return; }
   }
   msChoix.titulaires[id]=!msChoix.titulaires[id];
   msDebutRedessiner();
@@ -136,8 +143,9 @@ function msCommencer(){
   if(!ids.length){ askAlert("Coche au moins un joueur."); return; }
   var prem=msPremium();
   var tit=ids.filter(function(id){return msChoix.titulaires[id];});
-  if(prem && tit.length!==Math.min(5,ids.length)){ askAlert("Choisis tes "+Math.min(5,ids.length)+" titulaires (touche « Titulaire »)."); return; }
-  var m=msNouveau(ev, ids, (typeof getCurrentSeason==="function"?getCurrentSeason():""), msChoix.dureeQ, msChoix.nbQ);
+  var nbJ=msChoix.nbJ||5, attendus=Math.min(nbJ,ids.length);
+  if(prem && tit.length!==attendus){ askAlert("Choisis tes "+attendus+" titulaires (touche « Titulaire »)."); return; }
+  var m=msNouveau(ev, ids, (typeof getCurrentSeason==="function"?getCurrentSeason():""), msChoix.dureeQ, msChoix.nbQ, nbJ);
   m.adversaire=(msChoix.adversaire||"").trim()||"Adversaire";
   if(prem) tit.forEach(function(id){ msAjouter(m,"in",id,Date.now()); });
   msSauver(m, true);

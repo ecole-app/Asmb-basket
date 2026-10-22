@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792697190",
+  "titre": "Mini-basket 4 contre 4 dans les stats du match",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Stats du match en U9 et U11 : 4 titulaires au lieu de 5, et le format se règle en un appui (U9 : 6 × 4 min, U11 : 8 × 4 min, temps décompté, comme le règlement du comité de la Loire). Les −/+ restent pour ajuster."
+   }
+  ]
+ },
+ {
   "v": "1792682296",
   "titre": "Dossier des participants aux événements",
   "points": [
