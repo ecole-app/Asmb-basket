@@ -648,6 +648,16 @@ function buildPlanning(){
   var chips=planTypeChips(events);
   if(chips){ var cw=document.createElement("div"); cw.innerHTML=chips; el.appendChild(cw.firstChild); }
   events=planTypeFiltrer(events);
+  var compact=planTypeFiltre()==="match" && events.length>0 && events.every(function(e){return e.type==="match";});
+  if(compact){
+    var chEq=planEquipeChips(events); if(chEq){ var cw2=document.createElement("div"); cw2.innerHTML=chEq; el.appendChild(cw2.firstChild); }
+    events=planEquipeFiltrer(events);
+    var auj=new Date(), ajd=auj.getFullYear()+"-"+("0"+(auj.getMonth()+1)).slice(-2)+"-"+("0"+auj.getDate()).slice(-2);
+    var aVenir=events.filter(function(e){return !e.score && (e.dateFin||e.date)>=ajd;});
+    var joues=events.filter(function(e){return aVenir.indexOf(e)<0;}).reverse();
+    events=aVenir.concat(joues);
+    var nbV=aVenir.length, rangCompact=0;
+  }
   events.forEach(function(e){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
@@ -667,8 +677,60 @@ function buildPlanning(){
     var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Annuler</button>";
     var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\"> ÉVÉNEMENT ANNULÉ</div>":"";
     d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+authEsc(e.titre)+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+(typeof statsBoutonCarte==="function"?statsBoutonCarte(e):"")+convocBtn+weatherBtn+evalBtn+editTimeBtn+cancelBtn+(typeof evtBoutonCarte==="function"?evtBoutonCarte(e):"")+(typeof trnBoutonCarte==="function"?trnBoutonCarte(e):"")+"</div>"+delBtn+"</div>";
+    if(compact){ planMatchLigne(el, e, d, rangCompact===0 ? (nbV?"À venir · "+nbV:"Joués · "+(events.length)) : (rangCompact===nbV && nbV>0 ? "Joués · "+(events.length-nbV) : "")); rangCompact++; return; }
     el.appendChild(d);
   });
+}
+
+// Filtre « catégorie » (équipe) du filtre Matchs : retenu par appareil, absent s'il n'y a qu'une équipe.
+function planEquipeFiltre(){ try{ return localStorage.getItem("gm_plan_equipe")||""; }catch(e){ return ""; } }
+function planEquipes(events){
+  var n={}; (events||[]).forEach(function(e){ var q=e.equipe||""; if(q) n[q]=(n[q]||0)+1; }); return n;
+}
+function planEquipeFiltrer(events){
+  var f=planEquipeFiltre(); if(!f) return events;
+  var r=events.filter(function(e){ return e.equipe===f; });
+  return r.length?r:events;
+}
+function planEquipeChips(events){
+  var n=planEquipes(events), eq=Object.keys(n).sort();
+  if(eq.length<2) return "";
+  var f=planEquipeFiltre(); if(f&&!n[f]) f="";
+  function chip(v,txt){
+    var on=f===v;
+    return '<button type="button" onclick="planEquipeChoisir(\''+authEsc(v).replace(/'/g,"&#39;")+'\')" style="padding:5px 11px;border-radius:20px;white-space:nowrap;flex-shrink:0;cursor:pointer;font-size:11px;font-weight:700;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'transparent')+';color:'+(on?'#fff':'var(--txt)')+'">'+authEsc(txt)+'</button>';
+  }
+  return '<div class="plan-equipe-chips" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 12px 10px">'+chip("","Toutes")+eq.map(function(q){return chip(q,q);}).join("")+'</div>';
+}
+function planEquipeChoisir(v){
+  try{ if(v) localStorage.setItem("gm_plan_equipe",v); else localStorage.removeItem("gm_plan_equipe"); }catch(e){}
+  buildPlanning();
+}
+// Une ligne par match ; un appui déplie la carte complète (présences, score, convocation…).
+function planMatchLigne(el, e, carte, titreGroupe){
+  if(titreGroupe){ var g=document.createElement("div"); g.style.cssText="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);padding:10px 14px 2px"; g.textContent=titreGroupe; el.appendChild(g); }
+  var dt=String(e.date||"").split("-"), mois=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+  var jour=dt.length===3?parseInt(dt[2],10):"", moisT=dt.length===3?mois[parseInt(dt[1],10)-1]||"":"";
+  var sc="", scCl="background:var(--bdr);color:var(--mut)";
+  if(e.score){ var a=Number(e.score.asmb), b=Number(e.score.adv); sc=a+"-"+b; scCl=a>b?"background:color-mix(in srgb,var(--ltg) 14%,transparent);color:var(--dkg)":(a<b?"background:rgba(192,57,43,.12);color:#C0392B":scCl); }
+  else sc=e.heure||"";
+  var adv=(e.score&&e.score.adversaire)||e.titre||"Match";
+  var multi=Object.keys(planEquipes(getVisibleEvents().filter(function(x){return x.type==="match";}))).length>1;
+  var row=document.createElement("div");
+  row.style.cssText="margin:0 12px;border-top:1px solid var(--bdr)";
+  row.innerHTML="<div role=\"button\" tabindex=\"0\" style=\"display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 2px;cursor:pointer\">"
+    +"<div style=\"text-align:center;line-height:1.1\"><b style=\"display:block;font-size:17px\">"+jour+"</b><span style=\"font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:700\">"+moisT+"</span></div>"
+    +"<div style=\"min-width:0\"><div style=\"font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"
+    +(multi&&e.equipe?"<span style=\"font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:9px;margin-right:6px;background:color-mix(in srgb,var(--ltg) 14%,transparent);color:var(--dkg)\">"+authEsc(e.equipe)+"</span>":"")
+    +authEsc(adv)+(e.cancelled?" · annulé":"")+"</div>"
+    +"<div style=\"font-size:11px;color:var(--mut);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+authEsc((e.heure||"")+(e.lieu?" · "+e.lieu:""))+"</div></div>"
+    +"<span style=\"font-size:12px;font-weight:800;padding:3px 8px;border-radius:10px;"+scCl+"\">"+authEsc(sc)+"</span></div>";
+  carte.style.display="none"; carte.style.margin="0 0 8px";
+  row.appendChild(carte);
+  var tete=row.firstChild;
+  var bascule=function(){ carte.style.display=carte.style.display==="none"?"block":"none"; };
+  tete.onclick=bascule; tete.onkeydown=function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); bascule(); } };
+  el.appendChild(row);
 }
 
 // ── EVALUATION EN DIRECT (Stage/Camp) ────────────────────────────

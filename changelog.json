@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792638633",
+  "titre": "Planning : matchs en liste compacte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Planning, filtre Matchs : une ligne par match (date, catégorie, adversaire, score), les matchs à venir d'abord. Un appui ouvre les boutons. Une rangée de chips filtre par équipe quand le club en a plusieurs."
+   }
+  ]
+ },
+ {
   "v": "1792637749",
   "titre": "Nombre de quart-temps réglable",
   "points": [
