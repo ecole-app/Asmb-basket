@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792699638",
+  "titre": "Recherche d'adresse pour les événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans « Adresse du lieu », tape le début de l'adresse et choisis dans la liste. La météo du match s'appuie alors sur l'adresse exacte."
+   }
+  ]
+ },
+ {
   "v": "1792699350",
   "titre": "Météo du match plus fiable",
   "points": [

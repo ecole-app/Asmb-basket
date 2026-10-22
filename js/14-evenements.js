@@ -225,7 +225,7 @@ function showAddEvent(type){
   document.getElementById("ev-date-fin").value="";
   document.getElementById("ev-heure").value="";
   document.getElementById("ev-lieu").value="";
-  document.getElementById("ev-adresse").value="";
+  document.getElementById("ev-adresse").value=""; adrGeoPoser("ev-adresse",null);
   document.getElementById("ev-type").value=(typeof type==="string"&&type)?type:"autre";
   document.getElementById("ev-canal").value="";
   document.getElementById("ev-eval-enabled").checked=false;
@@ -345,6 +345,7 @@ function saveEventFull(){
   var heure=document.getElementById("ev-heure").value;
   var lieu=document.getElementById("ev-lieu").value.trim();
   var adresse=((document.getElementById("ev-adresse")||{}).value||"").trim().slice(0,140);
+  var geo=adrGeoLire("ev-adresse");
   var teams=getTeams();
   var realSelectedTeamIds=evSelectedTeams.filter(function(id){return id!=="__all__";});
   var equipe=teams.filter(function(t){return evSelectedTeams.indexOf(t.id)>=0;}).map(function(t){return t.name;}).join(", ");
@@ -355,10 +356,10 @@ function saveEventFull(){
   var players=getPlayers();
   var participantsNoms=participantsClub.map(function(id){var p=players.find(function(x){return x.id===id;});return p?p.prenom+" "+p.nom:id;});
   var isDirigeant=(window.ASMB_USER&&window.ASMB_USER.roles||[]).indexOf("dirigeant")>=0;
-  if(evEditId){ sauverModifEvent(evEditId,{titre:titre,type:type,date:date,dateFin:dateFin,heure:heure,lieu:lieu,adresse:adresse,equipe:equipe,
+  if(evEditId){ sauverModifEvent(evEditId,{titre:titre,type:type,date:date,dateFin:dateFin,heure:heure,lieu:lieu,adresse:adresse,geo:geo,equipe:equipe,
     participantsClub:participantsClub,canal:canal,realSelectedTeamIds:realSelectedTeamIds}); return; }
   var eventObj={
-    id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",adresse:adresse,equipe:equipe||"",
+    id:Date.now().toString(),titre:titre,type:type,date:date,dateFin:dateFin||"",heure:heure||"",lieu:lieu||"",adresse:adresse,geo:geo,equipe:equipe||"",
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
     responsableUid:(typeof respLireChoix==="function"?respLireChoix().uid:"")||"",responsableNom:(typeof respLireChoix==="function"?respLireChoix().nom:"")||"",
     presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked),
@@ -601,7 +602,7 @@ function editEventDateTime(eventId){
   document.getElementById("ev-date-fin").value=ev.dateFin||"";
   document.getElementById("ev-heure").value=ev.heure||"";
   document.getElementById("ev-lieu").value=ev.lieu||"";
-  document.getElementById("ev-adresse").value=ev.adresse||"";
+  document.getElementById("ev-adresse").value=ev.adresse||""; adrGeoPoser("ev-adresse",ev.geo||null);
   document.getElementById("ev-canal").value=ev.canalId||"";
   document.getElementById("ev-eval-enabled").checked=!!ev.evaluationEnabled;
   if(typeof respRemplirChoix==="function") respRemplirChoix(ev.responsableUid||"");
@@ -619,7 +620,7 @@ function sauverModifEvent(eventId,v){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev){ evEditId=null; return; }
   var old={date:ev.date,heure:ev.heure,equipe:ev.equipe,lieu:ev.lieu};
-  ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.adresse=v.adresse||""; ev.equipe=v.equipe||"";
+  ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.adresse=v.adresse||""; ev.geo=v.geo||null; ev.equipe=v.equipe||"";
   ev.participantsClub=v.participantsClub; ev.participantsExternes=evExternes.slice();
   ev.evaluationEnabled=(v.type==="stage"&&document.getElementById("ev-eval-enabled").checked);
   if(typeof respLireChoix==="function"){ var rc=respLireChoix(); if(rc.uid!==undefined){ ev.responsableUid=rc.uid; ev.responsableNom=rc.nom; } }
@@ -1102,6 +1103,7 @@ function showWeather(eventId){
   essais.push(ev.lieu+", France");
   if(ville) essais.push(ville+", France");
   var cherche=function(i){
+    if(i===0 && ev.adresse && ev.geo && ev.geo.lat) return Promise.resolve({lat:ev.geo.lat,lon:ev.geo.lon,approx:false});
     if(i>=essais.length) return Promise.resolve(null);
     return fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=fr&q="+encodeURIComponent(essais[i]))
       .then(function(r){return r.json();})
@@ -1129,3 +1131,50 @@ function showWeather(eventId){
   });
 }
 
+
+// ── Recherche d'adresse (Base Adresse Nationale, api-adresse.data.gouv.fr, gratuite, sans clé) ──
+// Branchée sur un champ <input> : propose des adresses pendant la frappe ; le choix mémorise les coordonnées
+// (utilisées par la météo). Une adresse tapée à la main reste possible.
+var adrTimer=null, adrSeq=0;
+function adrGeoPoser(id, geo){
+  var i=document.getElementById(id); if(!i) return;
+  if(geo&&geo.lat){ i.dataset.lat=geo.lat; i.dataset.lon=geo.lon; i.dataset.label=i.value; }
+  else { delete i.dataset.lat; delete i.dataset.lon; delete i.dataset.label; }
+  adrFermer(id);
+}
+// Coordonnées valables seulement si le texte du champ n'a pas été modifié depuis le choix.
+function adrGeoLire(id){
+  var i=document.getElementById(id);
+  if(i && i.dataset.lat && i.dataset.label===i.value) return {lat:Number(i.dataset.lat), lon:Number(i.dataset.lon)};
+  return null;
+}
+function adrFermer(id){ var b=document.getElementById(id+"-sug"); if(b) b.remove(); }
+function adrChercher(input){
+  var id=input.id; clearTimeout(adrTimer);
+  var q=input.value.trim();
+  if(q.length<4){ adrFermer(id); return; }
+  var n=++adrSeq;
+  adrTimer=setTimeout(function(){
+    fetch("https://api-adresse.data.gouv.fr/search/?autocomplete=1&limit=5&q="+encodeURIComponent(q))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(n!==adrSeq) return;
+        adrFermer(id);
+        var f=(d&&d.features)||[]; if(!f.length) return;
+        var box=document.createElement("div"); box.id=id+"-sug";
+        box.style.cssText="margin-top:4px;border:1px solid var(--bdr);border-radius:12px;background:var(--card,#fff);overflow:hidden";
+        f.forEach(function(x){
+          var b=document.createElement("button"); b.type="button";
+          b.style.cssText="display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid var(--bdr);background:transparent;color:var(--txt);font-size:13px;cursor:pointer";
+          b.textContent=(x.properties&&x.properties.label)||"";
+          b.onclick=function(){
+            input.value=b.textContent.slice(0,140);
+            var c=(x.geometry&&x.geometry.coordinates)||[];
+            adrGeoPoser(id, c.length>1?{lat:c[1],lon:c[0]}:null);
+          };
+          box.appendChild(b);
+        });
+        input.insertAdjacentElement("afterend", box);
+      }).catch(function(){});
+  }, 300);
+}
