@@ -760,6 +760,11 @@ service cloud.firestore {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
       }
+      // Tableau des factures sponsors (statut, paiement) : même droit que les sponsors.
+      match /factures/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
+      }
       // Compteur de numérotation des factures sponsors : à part de la fiche
       // club (réservée au dirigeant) pour qu'un trésorier/bureau délégué sur
       // Sponsors puisse réserver un numéro sans toucher au doc clubs/{clubId}.

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792678476",
+  "titre": "Tableau des factures sponsors",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sponsors : un bouton Factures ouvre le tableau des factures (à envoyer, envoyée, en retard, payée) avec les totaux. Envoi et relance par e-mail pré-rempli, et « Marquer payée » ajoute la ligne dans la comptabilité (Premium)."
+   }
+  ]
+ },
+ {
   "v": "1792678381",
   "titre": "Relance des accès famille non activés",
   "points": [

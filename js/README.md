@@ -82,6 +82,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `17b-poles-joueurs.js` | Pôles : le dirigeant choisit les coachs de chaque pôle (`clubs/{id}.polesCoachs`), les coachs du pôle y mettent leurs joueurs avec 1-2 infos propres (`players/{id}.poles`) ; pastilles sur la fiche joueur, filtre par pôle dans Joueurs. Formation et Événements : coachs seulement |
 | `17c-poles-fiche.js` | Fiche « profil sportif » d'un joueur dans un pôle, en 4 onglets : Général (assiduité 90 j, séances, matchs, ancienneté, équipes), Paiements (licence du club + cotisation propre au pôle et versements, recette en compta si l'utilisateur y a accès), Infos (champs du pôle, notes du coach, contacts appel/SMS), Réglages (pause, date d'entrée, retrait). Données dans `players/{id}.poles[poleId]`. |
 | `17-sponsors.js` | Sponsors & partenaires, conventions, factures PDF numérotées |
+| `17b-factures.js` | Tableau des factures sponsors (`clubs/{id}/factures`, Premium) : chaque facture générée est gardée (`getFactures`/`saveFactures`), statuts à envoyer / envoyée / en retard (échéance 30 j) / payée / annulée ; PDF refait à partir de la facture (`factTelechargerPdf`), e-mail et relance en `mailto:` pré-rempli, « payée » crée la ligne de comptabilité (catégorie Sponsors/Partenaires, id `fact<id>`). Droit `sponsors`. |
 | `18-auth.js` | Authentification, comptes, changement d'e-mail |
 | `19-profils.js` | Profils parent/coach/joueur, thèmes animés |
 | `20-parent-tabs.js` | Onglets événements et statistiques côté parent |

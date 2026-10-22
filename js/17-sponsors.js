@@ -303,47 +303,14 @@ function genererFacturePdf(){
   var montantTtc=montantHt+montantTva;
 
   reserverNumeroFacture(function(numero){
-    var jsPDF=window.jspdf.jsPDF;
-    var doc=new jsPDF();
-    var y=20;
-
-    doc.setFontSize(16);doc.setTextColor.apply(doc,clubPdfRgb());
-    doc.text("FACTURE "+numero,14,y);y+=6;
-    doc.setFontSize(9);doc.setTextColor(100,100,100);
-    doc.text("Date : "+new Date().toLocaleDateString("fr-FR"),14,y);y+=14;
-
-    doc.setFontSize(10);doc.setTextColor(30,30,30);
-    doc.setFont(undefined,"bold");doc.text("Émetteur",14,y);doc.setFont(undefined,"normal");y+=6;
-    doc.text(clubLabel(),14,y);y+=5;
-    doc.text(factInfos.adresse,14,y,{maxWidth:182});y+=5;
-    if(factInfos.siret){doc.text("SIRET : "+factInfos.siret,14,y);y+=5;}
-    y+=6;
-
-    doc.setFont(undefined,"bold");doc.text("Client",14,y);doc.setFont(undefined,"normal");y+=6;
-    doc.text(s.nom||"",14,y,{maxWidth:182});y+=5;
-    if(s.contactNom){doc.text("Contact : "+s.contactNom,14,y,{maxWidth:182});y+=5;}
-    y+=8;
-
-    doc.setFont(undefined,"bold");doc.text("Désignation",14,y);doc.setFont(undefined,"normal");y+=6;
-    var designationLines=doc.splitTextToSize(designation,182);
-    doc.text(designationLines,14,y);
-    y+=designationLines.length*5+6;
-
-    doc.text("Montant HT : "+montantHt.toFixed(2)+" €",14,y);y+=6;
-    if(tvaActive){
-      doc.text("TVA ("+tauxTva+"%) : "+montantTva.toFixed(2)+" €",14,y);y+=6;
-      doc.setFont(undefined,"bold");doc.text("Total TTC : "+montantTtc.toFixed(2)+" €",14,y);doc.setFont(undefined,"normal");y+=10;
-    } else {
-      doc.setFont(undefined,"bold");doc.text("Total : "+montantHt.toFixed(2)+" €",14,y);doc.setFont(undefined,"normal");y+=6;
-      doc.setFontSize(9);doc.text("TVA non applicable, article 293 B du Code général des impôts.",14,y,{maxWidth:182});y+=10;
-      doc.setFontSize(10);
-    }
-
-    y+=8;
-    doc.setFontSize(9);doc.setTextColor(80,80,80);
-    doc.text("Paiement à réception de facture.",14,y);
-
-    doc.save(clubSlug()+"_"+numero.toLowerCase()+"_"+(s.nom||"").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    var auj=new Date(), ech=new Date(auj.getTime()+30*86400000);
+    var iso=function(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); };
+    var rec={id:"f"+Date.now().toString(36), numero:numero, sponsorId:s.id, client:s.nom||"", contactNom:s.contactNom||"", contactEmail:s.contactEmail||"",
+      date:iso(auj), echeance:iso(ech), designation:designation, montantHt:montantHt, tvaActive:tvaActive, tauxTva:tauxTva,
+      montantTva:montantTva, montantTtc:montantTtc, statut:"brouillon"};
+    // La facture est gardée : elle apparaît dans le tableau « Factures » (js/17b-factures.js).
+    if(typeof saveFactures==="function"){ var fl=getFactures(); fl.push(rec); saveFactures(fl); }
+    if(typeof factTelechargerPdf==="function") factTelechargerPdf(rec, factInfos);
     closeModal("modal-facture");
     showToast("Facture "+numero+" générée !");
   });

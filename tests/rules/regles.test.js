@@ -105,6 +105,12 @@ describe("Rôles à l'intérieur d'un club", () => {
     await assertSucceeds(setDoc(doc(db, "clubs/A/comptabilite/c3"), { type: "recette", montant: 5 }));
     await assertFails(getDoc(doc(db, "clubs/A/sponsors/s1")));
   });
+  it("factures sponsors : dirigeant oui, trésorier sans accès sponsors et parent non", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/factures/f1"), { numero: "F-2026-001", statut: "brouillon" }));
+    await assertSucceeds(getDoc(doc(await as("dirA"), "clubs/A/factures/f1")));
+    await assertFails(getDoc(doc(await as("tresorierA"), "clubs/A/factures/f1")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/factures/f2"), { numero: "x" }));
+  });
   it("plan comptable : dirigeant et trésorier le règlent, coach et parent n'y ont pas accès", async () => {
     const plan = { debutMois: 9, comptes: { "recette|Dons": "7541" }, tresorerie: {} };
     await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/compta_reglages/plan"), plan));

@@ -147,7 +147,7 @@ function initFirestoreSync(){
   var fsIsDirigeant=fsRoles.indexOf("dirigeant")>=0;
   if(fsIsDirigeant || fsPerms.comptabilite) fsStartSync("comptabilite","asmb_comptabilite");
   if(fsIsDirigeant || fsPerms.inventaire) fsStartSync("inventaire","asmb_inventaire");
-  if(fsIsDirigeant || fsPerms.sponsors) fsStartSync("sponsors","asmb_sponsors");
+  if(fsIsDirigeant || fsPerms.sponsors){ fsStartSync("sponsors","asmb_sponsors"); fsStartSync("factures","asmb_factures"); }
   fetchCycleOverridesFromCloud();
   if(typeof fetchAnimAttachmentsFromCloud==="function") fetchAnimAttachmentsFromCloud();
   if(window.fbGetDoc){
