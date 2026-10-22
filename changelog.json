@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792699350",
+  "titre": "Météo du match plus fiable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "La météo d'un match utilise l'adresse du lieu si elle est renseignée, sinon le nom du lieu puis la ville du club. Un message clair indique quand la date est passée ou trop lointaine."
+   }
+  ]
+ },
+ {
   "v": "1792699207",
   "titre": "Stats du match : ouverture sécurisée",
   "points": [

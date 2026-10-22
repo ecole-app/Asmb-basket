@@ -1089,32 +1089,43 @@ function showWeather(eventId){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev||!ev.lieu)return;
   var el=document.getElementById("weather-content");
-  el.innerHTML='<div style="font-size:12px;color:var(--mut)">Recherche de la météo pour "'+ev.lieu+'"...</div>';
+  var msg=function(t){ el.innerHTML='<div style="font-size:12px;color:var(--mut);line-height:1.5">'+t+'</div>'; };
+  msg('Recherche de la météo pour "'+authEsc(ev.lieu)+'"...');
   document.getElementById("modal-weather").style.display="flex";
 
-  fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(ev.lieu+", France"))
-    .then(function(r){return r.json();})
-    .then(function(geo){
-      if(!geo||!geo.length){el.innerHTML='<div style="font-size:12px;color:var(--mut)">Lieu introuvable pour la météo. Vérifiez l\'adresse renseignée.</div>';return;}
-      var lat=geo[0].lat,lon=geo[0].lon;
-      return fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date="+ev.date+"&end_date="+ev.date)
-        .then(function(r2){return r2.json();})
-        .then(function(w){
-          if(!w.daily||!w.daily.weathercode||!w.daily.weathercode.length){
-            el.innerHTML='<div style="font-size:12px;color:var(--mut)">Prévisions non disponibles pour cette date (trop lointaine ou passée).</div>';
-            return;
-          }
-          var code=w.daily.weathercode[0];
-          var tmax=Math.round(w.daily.temperature_2m_max[0]);
-          var tmin=Math.round(w.daily.temperature_2m_min[0]);
-          el.innerHTML=weatherIconHtml(code)+
-            '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px">'+weatherLabel(code)+'</div>'+
-            '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+tmax+'° <span style="font-size:14px;color:var(--mut);font-weight:600">/ '+tmin+'°</span></div>'+
-            '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+ev.lieu+' · '+ev.date+'</div>';
-        });
-    })
-    .catch(function(){
-      el.innerHTML='<div style="font-size:12px;color:var(--mut)">Impossible de récupérer la météo (vérifiez votre connexion).</div>';
-    });
+  // Plusieurs essais, du plus précis au plus large : adresse du lieu, nom du lieu (+ ville du club), ville du club.
+  var ville=(window.CURRENT_CLUB&&window.CURRENT_CLUB.ville)||"";
+  var essais=[];
+  if(ev.adresse) essais.push(ev.adresse);
+  if(ev.adresse&&ev.lieu) essais.push(ev.lieu+", "+ev.adresse);
+  if(ville) essais.push(ev.lieu+", "+ville);
+  essais.push(ev.lieu+", France");
+  if(ville) essais.push(ville+", France");
+  var cherche=function(i){
+    if(i>=essais.length) return Promise.resolve(null);
+    return fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=fr&q="+encodeURIComponent(essais[i]))
+      .then(function(r){return r.json();})
+      .then(function(geo){ return (geo&&geo.length)?{lat:geo[0].lat,lon:geo[0].lon,approx:i>=essais.length-(ville?1:0)&&!!ville}:cherche(i+1); });
+  };
+  cherche(0).then(function(pos){
+    if(!pos){ msg('Lieu introuvable pour la météo. Ajoutez l\'adresse du lieu dans « Modifier » (champ « Adresse du lieu »).'); return; }
+    return fetch("https://api.open-meteo.com/v1/forecast?latitude="+pos.lat+"&longitude="+pos.lon+"&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&start_date="+ev.date+"&end_date="+ev.date)
+      .then(function(r2){return r2.json();})
+      .then(function(w){
+        if(!w.daily||!w.daily.weathercode||!w.daily.weathercode.length||w.daily.weathercode[0]==null){
+          msg('Prévisions non disponibles pour cette date (trop lointaine ou déjà passée).');
+          return;
+        }
+        var code=w.daily.weathercode[0];
+        var tmax=Math.round(w.daily.temperature_2m_max[0]);
+        var tmin=Math.round(w.daily.temperature_2m_min[0]);
+        el.innerHTML=weatherIconHtml(code)+
+          '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px">'+weatherLabel(code)+'</div>'+
+          '<div style="font-size:22px;font-weight:900;color:var(--txt)">'+tmax+'° <span style="font-size:14px;color:var(--mut);font-weight:600">/ '+tmin+'°</span></div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+authEsc(ev.lieu)+' · '+authEsc(ev.date)+(pos.approx?' · lieu approximatif (ville du club)':'')+'</div>';
+      });
+  }).catch(function(){
+    msg('Impossible de récupérer la météo (vérifiez votre connexion).');
+  });
 }
 
