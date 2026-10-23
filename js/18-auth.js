@@ -371,6 +371,9 @@ function applyAuthedUser(user){
   var firstLoad=true;
   var rattachementTente=false; // garde-fou : un seul essai par session, jamais de boucle si le serveur refuse
   window.__userDocUnsub = window.fbOnSnapshot(window.fbDoc(window.fbDb,"users",user.uid), function(snap){
+    // Réponse « le compte n'existe pas » venue seulement du cache de l'appareil (réseau coupé ou lent au
+    // démarrage) : on attend la réponse du serveur au lieu de déconnecter la personne à tort.
+    if(snap && !snap.exists() && snap.metadata && snap.metadata.fromCache) return;
     if(snap && snap.exists()){
       var data=snap.data();
       // Compte d'origine créé avant le multi-club : rattachement au club d'origine

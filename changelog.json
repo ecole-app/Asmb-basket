@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792792395",
+  "titre": "Connexion plus stable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Au démarrage avec un réseau lent ou coupé, l'appli ne te déconnecte plus par erreur : elle attend la réponse du serveur."
+   }
+  ]
+ },
+ {
   "v": "1792700371",
   "titre": "Canaux : accès plus clairs",
   "points": [
