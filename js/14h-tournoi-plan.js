@@ -72,7 +72,7 @@ function trnPlanEditer(zone,eid){
   aide.textContent="Cherchez l'adresse du tournoi, choisissez un élément ci-dessous puis touchez la carte pour le placer. Les repères se déplacent en les faisant glisser. Le plan s'affiche sur la page publique du tournoi.";
   zone.appendChild(aide);
   var rech=document.createElement("div"); rech.style.cssText="display:flex;gap:6px";
-  var q=document.createElement("input"); q.className="form-input"; q.placeholder="Adresse du gymnase ou du complexe"; q.value=e.adresse||e.lieu||""; q.style.flex="1";
+  var q=document.createElement("input"); q.className="form-input"; q.placeholder="Adresse du gymnase ou du complexe"; q.value=e.adresse||e.lieu||""; q.style.flex="1"; q.id="trn-plan-adr"; q.autocomplete="off"; q.addEventListener("input",function(){ if(typeof adrChercher==="function") adrChercher(q); });
   var go=gmBtn("Chercher","primary",function(){ chercher(); }); go.style.flex="0 0 auto";
   rech.appendChild(q); rech.appendChild(go); zone.appendChild(rech);
   var res=document.createElement("div"); zone.appendChild(res);

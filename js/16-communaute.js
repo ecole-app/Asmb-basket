@@ -1076,6 +1076,7 @@ function updateNavBadge(count){
     if(document.hidden||!window.ASMB_USER) return;
     if(!window.fbReady||!window.fbDb) return;
     try{ checkUnreadBadges(); }catch(e){}
+    try{ if(typeof dmListen==="function") dmListen(); }catch(e){}   // les messages privés comptent aussi dans la pastille
   };
   var amorce=setInterval(function(){
     essais++;

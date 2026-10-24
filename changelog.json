@@ -1,5 +1,26 @@
 [
  {
+  "v": "1792855927",
+  "titre": "Adresses suggérées + messages privés dans la pastille",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La recherche d'adresse (suggestions en tapant) est aussi dans les fiches licence, les reçus CERFA, les factures et le plan du site d'un tournoi."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Les messages privés non lus comptent maintenant dans la pastille de l'onglet Communauté, sans ouvrir l'onglet."
+   }
+  ]
+ },
+ {
   "v": "1792827373",
   "titre": "Évaluation : un nom du classement ouvre sa fiche",
   "points": [

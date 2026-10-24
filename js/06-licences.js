@@ -1153,7 +1153,7 @@ function showEditFiche(){
     '<div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="ef-prenom" value="'+(f.prenom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ef-nom" value="'+(f.nom||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="ef-naissance" type="date" value="'+(f.naissance||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2">'+(f.adresse||"")+'</textarea></div>'+
+    '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2" autocomplete="off" oninput="adrChercher(this)">'+(f.adresse||"")+'</textarea></div>'+
     '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ef-telephone" value="'+(f.telephone||"")+'"></div>'+
     '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ef-emailLic" value="'+(f.emailLic||"")+'"></div>'+
     '<div class="form-group" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px">'+
@@ -1403,7 +1403,7 @@ function renderFicheForm(lic){
         '<div class="form-group"><label class="form-label">Ville de naissance</label><input class="form-input" id="f-villeNaiss" value="'+(f.villeNaiss||'')+'" placeholder="Ville"></div>'+
         '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(f.paysNaiss||'')+'" placeholder="Pays"></div>'+
       '</div>'+
-      '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville">'+(f.adresse||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville" autocomplete="off" oninput="adrChercher(this)">'+(f.adresse||'')+'</textarea></div>'+
       '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="0612345678"></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="mail@gmail.com"></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+

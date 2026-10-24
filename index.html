@@ -519,7 +519,7 @@
             </select>
           </div>
           <div class="form-group"><label class="form-label">Nom du donateur<span id="cerfa-donateur-nom-hint" style="color:var(--mut);font-weight:400"></span></label><input class="form-input" id="cerfa-donateur-nom" placeholder="Nom et prénom, ou raison sociale"></div>
-          <div class="form-group"><label class="form-label">Adresse du donateur</label><input class="form-input" id="cerfa-donateur-adresse" placeholder="Adresse complète"></div>
+          <div class="form-group"><label class="form-label">Adresse du donateur</label><input class="form-input" id="cerfa-donateur-adresse" placeholder="Adresse complète" autocomplete="off" oninput="adrChercher(this)"></div>
           <button onclick="genererCerfaPdf()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Télécharger le PDF</button>
         </div>
       </div>
@@ -1345,7 +1345,7 @@
  <input type="checkbox" id="cerfa-active" style="width:44px;height:24px;accent-color:var(--dkg)">
  <label class="form-label" style="margin:0" for="cerfa-active">Mon club peut émettre des reçus fiscaux</label>
  </div>
- <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="cerfa-adresse" placeholder=""></div>
+ <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="cerfa-adresse" placeholder="" autocomplete="off" oninput="adrChercher(this)"></div>
  <div class="form-group"><label class="form-label">Objet social (tel que déclaré en préfecture)</label><input class="form-input" id="cerfa-objet" placeholder=""></div>
  <div style="display:flex;gap:12px">
  <div class="form-group" style="flex:1"><label class="form-label">N° RNA / récépissé</label><input class="form-input" id="cerfa-rna" placeholder=""></div>
@@ -1357,7 +1357,7 @@
  <div class="param-block" data-sec="facturation"><div class="sec">Facturation (sponsors/partenaires)</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Permet de générer des factures numérotées pour vos sponsors/partenaires, depuis leur fiche. Par défaut les clubs amateurs ne facturent pas de TVA (franchise en base, art. 293 B du CGI) — à activer seulement si votre club y est effectivement assujetti.</div>
- <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="fact-adresse" placeholder=""></div>
+ <div class="form-group"><label class="form-label">Adresse complète de l'association</label><input class="form-input" id="fact-adresse" placeholder="" autocomplete="off" oninput="adrChercher(this)"></div>
  <div class="form-group"><label class="form-label">N° SIRET (optionnel)</label><input class="form-input" id="fact-siret" placeholder="Laisser vide si vous n'en avez pas"></div>
  <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
  <input type="checkbox" id="fact-tva-active" onchange="document.getElementById('fact-tva-taux-box').style.display=this.checked?'block':'none'" style="width:44px;height:24px;accent-color:var(--dkg)">

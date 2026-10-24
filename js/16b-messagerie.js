@@ -745,7 +745,13 @@ function dmUnreadOf(dm){
   return chatMsgTime({ts:dm.lastTs})>lr;
 }
 function dmRenderList(){
-  var list=document.getElementById("channel-list"); if(!list) return;
+  var list=document.getElementById("channel-list");
+  if(!list){
+    // Écran Communauté pas ouvert : on met quand même à jour la pastille de l'onglet.
+    window.__dmUnread=(window.__chatDmsCache||[]).filter(dmUnreadOf).length;
+    if(typeof updateNavBadge==="function") updateNavBadge(window.__chanUnread||0);
+    return;
+  }
   var box=document.getElementById("dm-list");
   if(!box){
     box=document.createElement("div"); box.id="dm-list";
