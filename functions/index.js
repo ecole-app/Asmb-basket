@@ -409,7 +409,7 @@ async function ffbbTrouverPoule(numeros) {
 async function ffbbLirePoule(pouleId) {
   try { return await ffbbLirePouleDirectus(pouleId); } catch (e) {
     // Directus (api.ffbb.app) refuse parfois les serveurs Google : on lit alors via la recherche (Meilisearch), qui répond.
-    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error(String(e.message).slice(0, 160) + " || recherche : " + String(e2.message).slice(0, 300)); }
+    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 380) + " || directus : " + String(e.message).slice(0, 90)); }
   }
 }
 // Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
@@ -641,7 +641,7 @@ exports.onFfbbDemande = onDocumentCreated("clubs/{clubId}/ffbb_demandes/{id}", a
       await ref.update({ ok: false, erreur: "action inconnue" });
     }
   } catch (e) {
-    await ref.update({ ok: false, erreur: String((e && e.message) || e).slice(0, 200) });
+    await ref.update({ ok: false, erreur: String((e && e.message) || e).slice(0, 600) });
   }
 });
 
@@ -657,7 +657,7 @@ exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds:
       tentes++;
       try { await ffbbSyncChamp(club.id, c.ref, champ, true); }
       catch (e) {
-        echecs++; derniere = String((e && e.message) || e).slice(0, 200);
+        echecs++; derniere = String((e && e.message) || e).slice(0, 600);
         await c.ref.update({ "ffbb.erreur": derniere });
       }
     }
