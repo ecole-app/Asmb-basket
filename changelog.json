@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792821369",
+  "titre": "Reconnexion automatique après une mise à jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Si l'appli n'arrive pas à charger ton compte juste après une mise à jour ou avec un réseau instable, elle réessaie toute seule au lieu de te laisser sur l'écran de connexion."
+   }
+  ]
+ },
+ {
   "v": "1792792395",
   "titre": "Connexion plus stable",
   "points": [

@@ -402,7 +402,13 @@ function applyAuthedUser(user){
     }
   }, function(err){
     console.log("applyAuthedUser:",err);
-    if(firstLoad){ askAlert("Erreur de connexion aux données. Réessayer."); firstLoad=false; }
+    if(firstLoad){
+      // Échec passager au démarrage (jeton de sécurité pas encore prêt juste après une mise à jour, réseau instable) :
+      // on réessaie seul jusqu'à 3 fois avant de prévenir, pour ne pas laisser un écran de connexion alors que le compte est bien ouvert.
+      window.__authRetry=(window.__authRetry||0)+1;
+      if(window.__authRetry<=3){ firstLoad=false; setTimeout(function(){ if(window.fbAuth&&window.fbAuth.currentUser) applyAuthedUser(window.fbAuth.currentUser); }, 1500*window.__authRetry); return; }
+      askAlert("Erreur de connexion aux données. Fermez puis rouvrez l'appli."); firstLoad=false;
+    }
   });
 }
 
