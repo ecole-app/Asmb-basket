@@ -348,7 +348,7 @@ async function ffbbJson(url, opt) {
   if (!r.ok) {
     // Début de la réponse : permet de distinguer un champ refusé (Directus) d'un blocage réseau (CDN).
     let corps = "";
-    try { corps = (await r.text()).replace(/\s+/g, " ").slice(0, 140); } catch (e) { /* ignoré */ }
+    try { corps = (await r.text()).replace(/\s+/g, " ").slice(0, 700); } catch (e) { /* ignoré */ }
     throw new Error("FFBB " + r.status + (corps ? " : " + corps : ""));
   }
   return r.json();
@@ -444,7 +444,7 @@ async function ffbbLirePouleMeili(pouleId) {
   for (let k = 0; k < candidats.length && k < 6 && !hits.length; k++) hits = await essaiFiltre(candidats[k]);
   if (!hits.length) {
     try { const h = await lire({ q: idPoule, limit: 1000 }); hits = h.filter(dePoule);
-      if (!hits.length) erreurs.push("recherche: " + h.length + " résultats, exemple idPoule=" + JSON.stringify(h[0] && h[0].idPoule).slice(0, 80)); }
+      if (!hits.length) erreurs.push("recherche: " + h.length + " résultats, exemple idPoule=" + String(JSON.stringify(h[0] && h[0].idPoule)).slice(0, 80)); }
     catch (e) { erreurs.push("recherche: " + String(e.message).slice(0, 150)); }
   }
   if (!hits.length) throw new Error("aucune rencontre" + (erreurs.length ? " (" + erreurs.join(" ; ") + ")" : ""));
