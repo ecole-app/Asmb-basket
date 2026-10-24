@@ -1014,6 +1014,8 @@ function checkUnreadBadges(){
     var pending=checks.length;
     if(!pending){updateNavBadge(0);return;}
     checks.forEach(function(chId){
+      // Canal jamais ouvert sur cet appareil : on part d'aujourd'hui (sinon tout l'historique compte comme « non lu »).
+      if(localStorage.getItem("asmb_lastread_"+chId)===null) localStorage.setItem("asmb_lastread_"+chId,Date.now().toString());
       var lastRead=parseInt(localStorage.getItem("asmb_lastread_"+chId)||"0",10);
       // Sans le nombre exact de messages : on ne lit que les derniers (un badge « 20+ » suffit), pour ne pas relire tout l'historique à chaque contrôle.
       var qm=window.fbLimit
@@ -1034,6 +1036,7 @@ function checkUnreadBadges(){
         var unreadCount=0;
         msgs.forEach(function(m){
           var ts=m.ts&&m.ts.toDate?m.ts.toDate().getTime():0;
+          if(m.deleted||(typeof chatIsMine==="function"&&chatIsMine(m)))return;   // mes propres messages ne sont pas « non lus »
           if(ts>lastRead)unreadCount++;
         });
         var badgeEl=document.getElementById("badge-"+chId);

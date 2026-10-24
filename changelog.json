@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792856265",
+  "titre": "Pastille Communauté plus juste",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La pastille de messages non lus ne compte plus tes propres messages ni les messages supprimés, ni l'ancien historique d'un canal jamais ouvert sur l'appareil."
+   }
+  ]
+ },
+ {
   "v": "1792855927",
   "titre": "Adresses suggérées + messages privés dans la pastille",
   "points": [
