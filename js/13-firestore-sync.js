@@ -208,7 +208,8 @@ function buildLiveEval(){
   }
   sorted.forEach(function(p,i){
     var row=document.createElement("div");
-    row.style.cssText="display:flex;align-items:center;gap:10px;padding:7px 0";
+    row.style.cssText="display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer";
+    row.addEventListener("click",function(){evalAllerFiche(p.key);});
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
     row.innerHTML='<div style="width:20px;font-size:13px;font-weight:900;color:'+(i===0?"#F5A623":"var(--mut)")+';text-align:center">'+(i+1)+'</div>'+
       '<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
@@ -223,6 +224,7 @@ function buildLiveEval(){
   players.forEach(function(p){
     var scores=evalForEvent[p.key]||{};
     var card=document.createElement("div");
+    card.setAttribute("data-evkey",String(p.key));
     card.style.cssText="margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)";
     var hdr=document.createElement("div");
     hdr.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
@@ -243,6 +245,17 @@ function buildLiveEval(){
     });
     list.appendChild(card);
   });
+}
+
+// Touche un nom dans le classement : on descend directement sur sa fiche de notation.
+function evalAllerFiche(key){
+  var cards=document.querySelectorAll("#live-eval-players [data-evkey]"), el=null;
+  for(var i=0;i<cards.length;i++){ if(cards[i].getAttribute("data-evkey")===String(key)){ el=cards[i]; break; } }
+  if(!el)return;
+  try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){ el.scrollIntoView(); }
+  el.style.transition="box-shadow .3s, border-color .3s";
+  el.style.borderColor="var(--dkg)"; el.style.boxShadow="0 0 0 3px color-mix(in srgb, var(--dkg) 35%, transparent)";
+  setTimeout(function(){ el.style.borderColor=""; el.style.boxShadow=""; },1400);
 }
 
 function evalStarsWrap(playerId,critName,val){

@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792827373",
+  "titre": "Évaluation : un nom du classement ouvre sa fiche",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans l'évaluation, touche un nom du classement : l'écran descend directement sur sa fiche de notation (elle clignote un instant)."
+   }
+  ]
+ },
+ {
   "v": "1792826975",
   "titre": "Calendrier : vue Liste ou vue Mois",
   "points": [
