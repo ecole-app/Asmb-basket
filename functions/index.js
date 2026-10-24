@@ -409,19 +409,34 @@ async function ffbbTrouverPoule(numeros) {
 async function ffbbLirePoule(pouleId) {
   try { return await ffbbLirePouleDirectus(pouleId); } catch (e) {
     // Directus (api.ffbb.app) refuse parfois les serveurs Google : on lit alors via la recherche (Meilisearch), qui répond.
-    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error(String(e.message).slice(0, 160) + " || recherche : " + String(e2.message).slice(0, 120)); }
+    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error(String(e.message).slice(0, 160) + " || recherche : " + String(e2.message).slice(0, 300)); }
   }
 }
 // Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
 async function ffbbLirePouleMeili(pouleId) {
   const tk = await ffbbTokens();
-  const j = await ffbbJson(FFBB_MS, {
+  const lire = (requete) => ffbbJson(FFBB_MS, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: "Bearer " + tk.ms, "user-agent": FFBB_UA },
-    body: JSON.stringify({ queries: [{ indexUid: "ffbbserver_rencontres", q: "", filter: 'idPoule.id = "' + String(pouleId) + '"', limit: 400, sort: ["date_rencontre:asc"] }] })
-  });
-  const hits = (j && j.results && j.results[0] && j.results[0].hits) || [];
-  if (!hits.length) throw new Error("aucune rencontre");
+    body: JSON.stringify({ queries: [Object.assign({ indexUid: "ffbbserver_rencontres" }, requete)] })
+  }).then((j) => (j && j.results && j.results[0] && j.results[0].hits) || []);
+  const idPoule = String(pouleId);
+  const dePoule = (h) => String((h.idPoule && (h.idPoule.id || h.idPoule)) || "") === idPoule;
+  let hits = [];
+  const erreurs = [];
+  // 1) filtre direct (refusé si l'index n'a pas cet attribut filtrable) ; 2) recherche du numéro de poule, puis tri ici.
+  try { hits = await lire({ q: "", filter: 'idPoule.id = "' + idPoule + '"', limit: 400, sort: ["date_rencontre:asc"] }); }
+  catch (e) { erreurs.push("filtre: " + String(e.message).slice(0, 150)); }
+  if (!hits.length) {
+    try { hits = (await lire({ q: idPoule, limit: 1000 })).filter(dePoule); }
+    catch (e) { erreurs.push("recherche: " + String(e.message).slice(0, 150)); }
+  }
+  if (!hits.length) {
+    try { hits = (await lire({ q: '"' + idPoule + '"', limit: 1000 })).filter(dePoule); }
+    catch (e) { erreurs.push("recherche exacte: " + String(e.message).slice(0, 150)); }
+  }
+  if (!hits.length) throw new Error("aucune rencontre" + (erreurs.length ? " (" + erreurs.join(" ; ") + ")" : ""));
+  hits.sort((x, y) => String(x.date_rencontre || "").localeCompare(String(y.date_rencontre || "")));
   const num = (v) => (v === null || v === undefined || v === "" || isNaN(Number(v)) ? null : Number(v));
   const rencontres = hits.map((r) => {
     const a = ffbbEquipe(r.nomEquipe1), b = ffbbEquipe(r.nomEquipe2);
