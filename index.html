@@ -1385,6 +1385,15 @@
  <button onclick="aidesEnregistrerParams()" style="width:100%;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button>
  </div>
  </div>
+ <div class="param-block" data-sec="dossier"><div class="sec">Dossier d'inscription</div>
+ <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
+ <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:12px">Règle ce que les familles remplissent sur la fiche : champs en plus, tarifs, questionnaire de santé, charte, autorisations. Génère aussi le dossier PDF à imprimer, aux couleurs du club.</div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <button onclick="dossierEditeur()" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Régler le dossier</button>
+ <button onclick="dossierPdf()" style="flex:1;min-width:130px;padding:12px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:12px;font-weight:700;border:none;cursor:pointer">Dossier PDF</button>
+ </div>
+ </div>
+ </div>
  <div class="param-block" data-sec="qr"><div class="sec">Partage & QR codes</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:12px;color:var(--mut);margin-bottom:12px">À afficher au gymnase ou à partager : les familles scannent pour accéder directement.</div>
@@ -1905,6 +1914,7 @@
 <script src="js/06g-photos.js"></script>
 <script src="js/06h-roles.js"></script>
 <script src="js/06i-trombi-pdf.js"></script>
+<script src="js/06j-dossier.js"></script>
 <script src="js/07-presences.js"></script>
 <script src="js/08-parametres.js"></script>
 <script src="js/08c-couleur-roue.js"></script>

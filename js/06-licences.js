@@ -37,7 +37,7 @@ function syncInscriptionCodes(lics){
   var entries={};
   (lics||[]).forEach(function(l){
     if(!l||!l.code) return;
-    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null, clubId:window.CURRENT_CLUB_ID||null, aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null)};
+    entries[l.code]={licenceId:l.id||l.code, typeLicence:l.typeLicence||null, clubId:window.CURRENT_CLUB_ID||null, aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null), dossier:(typeof dossierPourCodes==="function"?dossierPourCodes():null)};
   });
   Object.keys(entries).forEach(function(code){
     var s=JSON.stringify(entries[code]);
@@ -65,7 +65,7 @@ function lookupInscriptionCode(code, attempt){
   attempt=attempt||0;
   var lics=getLicences();
   var local=lics.find(function(l){return l.code===code;});
-  if(local) return Promise.resolve({found:true, local:local, code:code, clubId:localStorage.getItem("gm_active_club"), aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null)});
+  if(local) return Promise.resolve({found:true, local:local, code:code, clubId:localStorage.getItem("gm_active_club"), aides:(typeof aidesPourCodes==="function"?aidesPourCodes():null), dossier:(typeof dossierPourCodes==="function"?dossierPourCodes():null)});
   if(!window.fbDb||!window.fbGetDoc){
     // Firebase pas encore initialise (appareil neuf, page qui vient de charger) : on reessaie brievement.
     if(attempt<30){
@@ -78,7 +78,7 @@ function lookupInscriptionCode(code, attempt){
   return window.fbGetDoc(window.fbDoc(window.fbDb,"inscription_codes",code)).then(function(snap){
     if(snap&&snap.exists()){
       var d=snap.data();
-      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null, clubId:d.clubId||null, aides:d.aides||null};
+      return {found:true, local:null, code:code, typeLicence:d.typeLicence||null, clubId:d.clubId||null, aides:d.aides||null, dossier:d.dossier||null};
     }
     return {found:false, code:code};
   }).catch(function(){ return {found:false, code:code}; });
@@ -644,9 +644,10 @@ function renderLicenceDetail(lic){
  ["Notes",f.notes],
  ["Questionnaire de santé",f.questionnaireSanteNon===true?"Toutes les réponses à NON":f.questionnaireSanteNon===false?"Au moins un OUI : certificat médical à demander":""],
  ["Règlement du club",f.reglementAccepte?"Accepté en ligne":""],
+ ].concat(typeof dossierDetailLignes==="function"?dossierDetailLignes(f):[]).concat([
  ["Paiement prévu",(typeof CHQ_PREVU!=="undefined"&&CHQ_PREVU[f.paiementPrevu])||""],
  ["Certificat medical",f.certDate?(f.certMedecin?" Dr "+f.certMedecin+" · ":"")+f.certDate+(f.certificat?" ✓ Fichier joint":""):"Non fourni"],
- ].filter(function(r){return r[1];});
+ ]).filter(function(r){return r[1];});
  ficheHtml='<div style="margin-top:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);overflow:hidden">';
     // authEsc() partout ici : cette fiche vient d'un formulaire PUBLIC sans
     // compte (inscription_codes) — n'importe qui avec le lien du club peut
@@ -1268,6 +1269,7 @@ async function validerCode(){
   }
   licCurrentCode=code;
   FICHE_AIDES=res.aides||null;
+  FICHE_DOSSIER=res.dossier||null;
 
   if(res.local){
     // Appareil du staff : on peut marquer l'ouverture et ecrire dans les licences
@@ -1436,6 +1438,7 @@ function renderFicheForm(lic){
         '<div id="f-ordre" style="display:'+(/^cheque/.test(f.paiementPrevu||'')?'block':'none')+';font-size:12px;color:var(--txt2);margin-top:6px">Chèques à l\'ordre de : <b>'+authEsc((window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"le club")+'</b>. Vous les remettez au club, qui les encaisse aux dates convenues.</div>'+
       '</div>'+
       (typeof aidesFicheHtml==="function"?aidesFicheHtml(f):'')+
+      (typeof dossierFicheHtml==="function"?dossierFicheHtml(f):'')+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div class="form-group" style="background:rgba(232,103,10,.06);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
         '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
@@ -1591,6 +1594,8 @@ function soumettreFiche(){
   }
   var aidesF=(typeof aidesLireFiche==="function")?aidesLireFiche():{};
   if(aidesF===null) return;
+  var dossierF=(typeof dossierLireFiche==="function")?dossierLireFiche():{};
+  if(dossierF===null) return;
   var fiche={
     genre:ficheGenre,prenom:prenom.trim(),nom:nom.trim(),
     naissance:naissance,
@@ -1621,6 +1626,7 @@ function soumettreFiche(){
     passSport:aidesF.passSport||"",passRegionOui:aidesF.passRegionOui===true,passRegionNumero:aidesF.passRegionNumero||"",
     soumisLe:new Date().toLocaleDateString("fr-FR")+" a "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),
   };
+  Object.keys(dossierF).forEach(function(k){ fiche[k]=dossierF[k]; });
   var lics=getLicences();
   var idx=lics.findIndex(function(l){return l.code===licCurrentCode;});
 

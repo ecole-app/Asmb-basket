@@ -596,7 +596,7 @@ service cloud.firestore {
       // listé ici (couvert par tests/rules).
       allow update: if (dirigeant(clubId)
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances','aides','polesCoachs',
+               .hasOnly(['name','zone','departement','couleur','couleur2','logo','lienPaiement','liens','cerfa','facturation','relances','aides','dossier','polesCoachs',
                          'aboGels','aboGelFin','aboResiliation','aboNotif'])
           && aboChampsValides(request.resource.data, request.resource.data.diff(resource.data).affectedKeys()))
         || superAdmin();
