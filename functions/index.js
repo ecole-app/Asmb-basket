@@ -448,13 +448,15 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
   // par un des attributs filtrables, puis on ne garde ici que les matchs de la poule.
   if (!hits.length && attrsFiltrables.length && (numeros || []).length) {
     try {
-      let modele = null;
+      let modele = null, diag = "";
       for (const n of numeros.slice(0, 6)) {
         const h = await lire({ q: String(n), limit: 20 });
-        modele = h.filter((x) => String(x.numero) === String(n) && dePoule(x))[0] || null;
+        if (!diag) diag = "n°" + n + ": " + h.length + " résultats" + (h[0] ? ", 1er numero=" + h[0].numero + " idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 60) : "");
+        modele = h.filter((x) => String(x.numero) === String(n))[0] || null;
         if (modele) break;
       }
-      if (!modele) erreurs.push("aucun match connu trouvé dans la poule");
+      if (modele && !dePoule(modele)) { erreurs.push("poule du match=" + String(JSON.stringify(modele.idPoule)).slice(0, 60)); modele = null; }
+      if (!modele) erreurs.push("aucun match connu trouvé (" + diag + ")");
       else {
         const valeur = (o, chemin) => chemin.split(".").reduce((a, k) => (a && a[k] !== undefined ? a[k] : undefined), o);
         const ordre = attrsFiltrables.filter((a) => /^competitionId\./.test(a)).concat(attrsFiltrables.filter((a) => !/^competitionId\./.test(a) && a !== "_geo" && !/^commune\./.test(a)));
