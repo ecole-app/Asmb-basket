@@ -6,6 +6,7 @@
    js/16-communaute.js). */
 
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
@@ -14,6 +15,31 @@ const db = admin.firestore();
 
 // Région proche de la majorité des utilisateurs visés (club basé en France).
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
+
+// ── Image de droite des notifications : le logo du club ─────────────────
+// Le logo est enregistré dans la fiche du club (image intégrée). Une notification a besoin d'une adresse web :
+// cette fonction publique renvoie le logo du club (même logo que sur les pages publiques d'inscription).
+// Sans logo, 404 : le téléphone affiche alors sa lettre par défaut.
+const URL_LOGO_CLUB = "https://europe-west1-asmb-app.cloudfunctions.net/logoClub";
+const URL_LOGO_GM = "https://generalmanagerapp.fr/icon-192.png";
+function webpushClub(clubId, plus) {
+  const w = Object.assign({ fcmOptions: { link: "./" } }, plus || {});
+  w.notification = { icon: clubId ? URL_LOGO_CLUB + "?c=" + encodeURIComponent(clubId) : URL_LOGO_GM };
+  return w;
+}
+exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res) => {
+  try {
+    const id = String(req.query.c || "");
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(id)) { res.status(404).end(); return; }
+    const snap = await db.collection("clubs").doc(id).get();
+    const logo = snap.exists && snap.data() && snap.data().logo;
+    const m = typeof logo === "string" && /^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+\/=]+)$/.exec(logo);
+    if (!m) { res.status(404).end(); return; }
+    res.set("Content-Type", "image/" + m[1]);
+    res.set("Cache-Control", "public, max-age=86400");
+    res.status(200).send(Buffer.from(m[2], "base64"));
+  } catch (e) { res.status(404).end(); }
+});
 
 exports.onChannelMessage = onDocumentCreated(
   "clubs/{clubId}/channels/{channelId}/messages/{messageId}",
@@ -84,7 +110,7 @@ exports.onChannelMessage = onDocumentCreated(
         tokens: lot,
         notification: { title, body },
         data: { url: "./", conv: channelId },
-        webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+        webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
       });
       r.responses.forEach((x) => responses.push(x));
     }
@@ -129,7 +155,7 @@ exports.onDmMessage = onDocumentCreated(
     });
     if (!tokens.length) return;
     const resp = await admin.messaging().sendEachForMulticast({
-      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
     });
     const cleanup = [];
     resp.responses.forEach((r, i) => {
@@ -165,7 +191,7 @@ exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) 
       token,
       notification: { title: "Nouvelle demande d'essai", body: quoi || "Un club vient de remplir le formulaire" },
       data: { url: "./" },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      webpush: webpushClub(null, { headers: { Urgency: "high" } })
     });
   } catch (e) {
     const code = e && e.code;
@@ -193,7 +219,7 @@ exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", asy
       token,
       notification: { title: "Compte dirigeant validé", body: String(apres.clubName || "Un club") + " : le dirigeant vient de créer son compte" },
       data: { url: "./" },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      webpush: webpushClub(null, { headers: { Urgency: "high" } })
     });
   } catch (e) {
     const code = e && e.code;
@@ -214,7 +240,7 @@ exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (even
       token,
       notification: { title: "Test d'alerte", body: "Si tu vois ceci, les alertes Plateforme fonctionnent." },
       data: { url: "./" },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      webpush: webpushClub(null, { headers: { Urgency: "high" } })
     });
     await ref.update({ ok: true });
   } catch (e) {
@@ -299,7 +325,7 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
       token,
       notification: { title: "Test de notification", body: "Si tu vois ceci, les messages du club t'arriveront." },
       data: { url: "./" },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      webpush: webpushClub(event.params.clubId, { headers: { Urgency: "high" } })
     });
     await ref.update({ ok: true });
   } catch (e) {
@@ -495,7 +521,7 @@ async function ffbbPush(clubId, titre, corps) {
   if (!tokens.length) return;
   const res = await admin.messaging().sendEachForMulticast({
     tokens, notification: { title: titre, body: corps }, data: { url: "./" },
-    webpush: { fcmOptions: { link: "./" } }
+    webpush: webpushClub(clubId)
   });
   await Promise.all(res.responses.map((r, i) => {
     const c = r.error && r.error.code;
@@ -635,7 +661,7 @@ exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds:
       try {
         await admin.messaging().send({
           token, notification: { title: "Synchro FFBB en panne", body: "3 nuits sans réponse (" + derniere + "). L'API a peut-être changé." },
-          data: { url: "./" }, webpush: { fcmOptions: { link: "./" } }
+          data: { url: "./" }, webpush: webpushClub(null)
         });
       } catch (e) { /* jeton périmé : le bandeau Plateforme reste */ }
     }
@@ -660,7 +686,7 @@ async function notifierCompte(clubId, uid, titre, corps) {
   try {
     await admin.messaging().send({
       token, notification: { title: titre, body: corps }, data: { url: "./" },
-      webpush: { headers: { Urgency: "high" }, fcmOptions: { link: "./" } }
+      webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
     });
   } catch (e) {
     const c = e && e.code;
