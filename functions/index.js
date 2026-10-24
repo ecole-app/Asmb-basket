@@ -420,7 +420,7 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
     headers: { "content-type": "application/json", authorization: "Bearer " + tk.ms, "user-agent": FFBB_UA },
     body: JSON.stringify({ queries: [Object.assign({ indexUid: "ffbbserver_rencontres" }, requete)] })
   }).then((j) => (j && j.results && j.results[0] && j.results[0].hits) || []);
-  const idPoule = String(pouleId);
+  let idPoule = String(pouleId);
   const dePoule = (h) => String((h.idPoule && (h.idPoule.id || h.idPoule)) || "") === idPoule;
   let hits = [];
   const erreurs = [];
@@ -452,9 +452,14 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
       let modele = null, diag = "";
       for (const r of numeros.slice(0, 8)) {
         const h = await lire({ q: r.e1 + " " + r.e2, limit: 30 });
-        if (!diag) diag = r.e1 + " / " + r.e2 + ": " + h.length + " résultats" + (h[0] ? ", 1er idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 50) : "");
-        modele = h.filter(dePoule)[0] || null;
-        if (modele) break;
+        if (!diag) diag = r.e1 + " / " + r.e2 + ": " + h.length + " résultats" + (h[0] ? ", 1er=" + h[0].nomEquipe1 + " vs " + h[0].nomEquipe2 + " idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 50) : "");
+        // L'identifiant de poule de l'export FBI peut différer de celui de l'index : on se fie au match des deux équipes.
+        const nz = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        const a1 = nz(r.e1), a2 = nz(r.e2);
+        const ok = h.filter((x) => { const n1 = nz(x.nomEquipe1), n2 = nz(x.nomEquipe2); return x.idPoule && ((n1 === a1 && n2 === a2) || (n1 === a2 && n2 === a1)); });
+        ok.sort((x, y) => String(y.date_rencontre || "").localeCompare(String(x.date_rencontre || "")));
+        modele = ok.filter(dePoule)[0] || ok[0] || null;
+        if (modele) { const np = String(modele.idPoule.id || modele.idPoule); if (np !== idPoule) { erreurs.push("poule corrigée " + idPoule + " → " + np); idPoule = np; } break; }
       }
       if (!modele) erreurs.push("aucun match connu trouvé (" + diag + ")");
       else {
