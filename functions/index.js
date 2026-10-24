@@ -409,7 +409,7 @@ async function ffbbTrouverPoule(numeros) {
 async function ffbbLirePoule(pouleId) {
   try { return await ffbbLirePouleDirectus(pouleId); } catch (e) {
     // Directus (api.ffbb.app) refuse parfois les serveurs Google : on lit alors via la recherche (Meilisearch), qui répond.
-    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 380) + " || directus : " + String(e.message).slice(0, 90)); }
+    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 520) + " || directus : " + String(e.message).slice(0, 90)); }
   }
 }
 // Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
@@ -425,15 +425,27 @@ async function ffbbLirePouleMeili(pouleId) {
   let hits = [];
   const erreurs = [];
   // 1) filtre direct (refusé si l'index n'a pas cet attribut filtrable) ; 2) recherche du numéro de poule, puis tri ici.
-  try { hits = await lire({ q: "", filter: 'idPoule.id = "' + idPoule + '"', limit: 400, sort: ["date_rencontre:asc"] }); }
-  catch (e) { erreurs.push("filtre: " + String(e.message).slice(0, 150)); }
+  let candidats = ["idPoule.id"];
+  const essaiFiltre = async (champ) => {
+    for (const val of ['"' + idPoule + '"', idPoule]) {
+      try { const h = await lire({ q: "", filter: champ + " = " + val, limit: 1000 }); if (h.length) return h; }
+      catch (e) {
+        const m = String(e.message);
+        const i = m.indexOf("Available");
+        erreurs.push("filtre " + champ + ": " + (i >= 0 ? m.slice(i, i + 220) : m.slice(0, 150)));
+        // Le message de Meilisearch donne la liste des attributs filtrables : on retient ceux qui parlent de poule.
+        const noms = (m.slice(i >= 0 ? i : 0).match(/`([^`]+)`/g) || []).map((x) => x.replace(/`/g, ""));
+        noms.filter((n) => /poule/i.test(n) && candidats.indexOf(n) < 0).forEach((n) => candidats.push(n));
+        break;
+      }
+    }
+    return [];
+  };
+  for (let k = 0; k < candidats.length && k < 6 && !hits.length; k++) hits = await essaiFiltre(candidats[k]);
   if (!hits.length) {
-    try { hits = (await lire({ q: idPoule, limit: 1000 })).filter(dePoule); }
+    try { const h = await lire({ q: idPoule, limit: 1000 }); hits = h.filter(dePoule);
+      if (!hits.length) erreurs.push("recherche: " + h.length + " résultats, exemple idPoule=" + JSON.stringify(h[0] && h[0].idPoule).slice(0, 80)); }
     catch (e) { erreurs.push("recherche: " + String(e.message).slice(0, 150)); }
-  }
-  if (!hits.length) {
-    try { hits = (await lire({ q: '"' + idPoule + '"', limit: 1000 })).filter(dePoule); }
-    catch (e) { erreurs.push("recherche exacte: " + String(e.message).slice(0, 150)); }
   }
   if (!hits.length) throw new Error("aucune rencontre" + (erreurs.length ? " (" + erreurs.join(" ; ") + ")" : ""));
   hits.sort((x, y) => String(x.date_rencontre || "").localeCompare(String(y.date_rencontre || "")));
