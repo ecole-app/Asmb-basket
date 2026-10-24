@@ -1,5 +1,19 @@
 [
  {
+  "v": "1792821405",
+  "titre": "Fin des notifications en double",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Chaque notification n'arrive plus qu'une seule fois sur le téléphone."
+   }
+  ]
+ },
+ {
   "v": "1792821369",
   "titre": "Reconnexion automatique après une mise à jour",
   "points": [

@@ -28,6 +28,9 @@ firebase.initializeApp({
 try{
   const messaging = firebase.messaging();
   messaging.onBackgroundMessage(function(payload){
+    // Nos envois contiennent déjà un bloc « notification » : Firebase l'affiche tout seul.
+    // En l'affichant aussi ici, la personne recevait chaque notification en double.
+    if (payload && payload.notification) return;
     var n = (payload && payload.notification) || {};
     self.registration.showNotification(n.title || 'Nouveau message', {
       body: n.body || '',
