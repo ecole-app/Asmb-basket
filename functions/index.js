@@ -348,7 +348,7 @@ async function ffbbJson(url, opt) {
   if (!r.ok) {
     // Début de la réponse : permet de distinguer un champ refusé (Directus) d'un blocage réseau (CDN).
     let corps = "";
-    try { corps = (await r.text()).replace(/\s+/g, " ").slice(0, 700); } catch (e) { /* ignoré */ }
+    try { corps = (await r.text()).replace(/\s+/g, " ").slice(0, 1600); } catch (e) { /* ignoré */ }
     throw new Error("FFBB " + r.status + (corps ? " : " + corps : ""));
   }
   return r.json();
@@ -406,14 +406,14 @@ async function ffbbTrouverPoule(numeros) {
 // Lit la poule : {nom, rencontres:[...], classement:[...]} au format de l'appli.
 // Deux appels, comme le fait le client open source de l'API : la poule (avec son classement)
 // puis ses rencontres. Demander des champs de rencontres imbriqués dans la poule est refusé (403).
-async function ffbbLirePoule(pouleId) {
+async function ffbbLirePoule(pouleId, numeros) {
   try { return await ffbbLirePouleDirectus(pouleId); } catch (e) {
     // Directus (api.ffbb.app) refuse parfois les serveurs Google : on lit alors via la recherche (Meilisearch), qui répond.
-    try { return await ffbbLirePouleMeili(pouleId); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 520) + " || directus : " + String(e.message).slice(0, 90)); }
+    try { return await ffbbLirePouleMeili(pouleId, numeros); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 520) + " || directus : " + String(e.message).slice(0, 90)); }
   }
 }
 // Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
-async function ffbbLirePouleMeili(pouleId) {
+async function ffbbLirePouleMeili(pouleId, numeros) {
   const tk = await ffbbTokens();
   const lire = (requete) => ffbbJson(FFBB_MS, {
     method: "POST",
@@ -426,6 +426,7 @@ async function ffbbLirePouleMeili(pouleId) {
   const erreurs = [];
   // 1) filtre direct (refusé si l'index n'a pas cet attribut filtrable) ; 2) recherche du numéro de poule, puis tri ici.
   let candidats = ["idPoule.id"];
+  let attrsFiltrables = [];
   const essaiFiltre = async (champ) => {
     for (const val of ['"' + idPoule + '"', idPoule]) {
       try { const h = await lire({ q: "", filter: champ + " = " + val, limit: 1000 }); if (h.length) return h; }
@@ -435,6 +436,7 @@ async function ffbbLirePouleMeili(pouleId) {
         erreurs.push("filtre " + champ + ": " + (i >= 0 ? m.slice(i, i + 220) : m.slice(0, 150)));
         // Le message de Meilisearch donne la liste des attributs filtrables : on retient ceux qui parlent de poule.
         const noms = (m.slice(i >= 0 ? i : 0).match(/`([^`]+)`/g) || []).map((x) => x.replace(/`/g, ""));
+        if (noms.length > attrsFiltrables.length) attrsFiltrables = noms;
         noms.filter((n) => /poule/i.test(n) && candidats.indexOf(n) < 0).forEach((n) => candidats.push(n));
         break;
       }
@@ -442,6 +444,32 @@ async function ffbbLirePouleMeili(pouleId) {
     return [];
   };
   for (let k = 0; k < candidats.length && k < 6 && !hits.length; k++) hits = await essaiFiltre(candidats[k]);
+  // 2) Aucun filtre « poule » possible : on part d'un match connu de l'équipe (recherche par numéro), on lit sa compétition
+  // par un des attributs filtrables, puis on ne garde ici que les matchs de la poule.
+  if (!hits.length && attrsFiltrables.length && (numeros || []).length) {
+    try {
+      let modele = null;
+      for (const n of numeros.slice(0, 6)) {
+        const h = await lire({ q: String(n), limit: 20 });
+        modele = h.filter((x) => String(x.numero) === String(n) && dePoule(x))[0] || null;
+        if (modele) break;
+      }
+      if (!modele) erreurs.push("aucun match connu trouvé dans la poule");
+      else {
+        const valeur = (o, chemin) => chemin.split(".").reduce((a, k) => (a && a[k] !== undefined ? a[k] : undefined), o);
+        const ordre = attrsFiltrables.filter((a) => /^competitionId\./.test(a)).concat(attrsFiltrables.filter((a) => !/^competitionId\./.test(a) && a !== "_geo" && !/^commune\./.test(a)));
+        for (const a of ordre.slice(0, 14)) {
+          const v = valeur(modele, a);
+          if (v === undefined || v === null || typeof v === "object") continue;
+          let h;
+          try { h = await lire({ q: "", filter: a + " = " + JSON.stringify(String(v)), limit: 1000 }); } catch (e) { erreurs.push(a + ": " + String(e.message).slice(0, 80)); continue; }
+          const mien = h.filter(dePoule);
+          if (mien.length >= Math.max(2, Math.min(numeros.length, 4))) { hits = mien; break; }
+        }
+        if (!hits.length) erreurs.push("compétition: aucun attribut utilisable (" + ordre.slice(0, 14).join(",") + ")");
+      }
+    } catch (e) { erreurs.push("compétition: " + String(e.message).slice(0, 150)); }
+  }
   if (!hits.length) {
     try { const h = await lire({ q: idPoule, limit: 1000 }); hits = h.filter(dePoule);
       if (!hits.length) erreurs.push("recherche: " + h.length + " résultats, exemple idPoule=" + String(JSON.stringify(h[0] && h[0].idPoule)).slice(0, 80)); }
@@ -617,7 +645,7 @@ async function ffbbAlertesEquipe(clubId, champ, diffs) {
   }
 }
 async function ffbbSyncChamp(clubId, ref, champ, notifier) {
-  const poule = await ffbbLirePoule(champ.ffbb.pouleId);
+  const poule = await ffbbLirePoule(champ.ffbb.pouleId, (champ.rencontres || []).map((r) => r && r.num).filter(Boolean));
   const r = ffbbAppliquer(champ, poule);
   r.champ.ffbb = Object.assign({}, champ.ffbb, { maj: Date.now(), erreur: "" });
   await ref.set(JSON.parse(JSON.stringify(r.champ)));
