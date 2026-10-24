@@ -1,5 +1,29 @@
 [
  {
+  "v": "1792826975",
+  "titre": "Calendrier : vue Liste ou vue Mois",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le calendrier a maintenant deux affichages : Liste (la semaine jour par jour) ou Mois (grille de calendrier classique avec des points de couleur ; touche un jour pour voir ses événements). Ton choix est retenu."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Correction : les événements sur plusieurs jours (stage, tournoi) n'étaient plus décalés d'un jour dans la semaine."
+   }
+  ]
+ },
+ {
   "v": "1792821405",
   "titre": "Fin des notifications en double",
   "points": [

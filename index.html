@@ -1737,6 +1737,10 @@
  </div>
 
  <div id="cal-tab-semaine">
+ <div style="padding:10px 16px 0;display:flex;gap:6px">
+ <button class="cat-filter on" onclick="setCalVue('semaine')" id="cal-vue-liste" style="flex:1;text-align:center">Liste</button>
+ <button class="cat-filter" onclick="setCalVue('mois')" id="cal-vue-mois" style="flex:1;text-align:center">Mois</button>
+ </div>
  <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
  <button onclick="shiftCalWeek(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--mut);border:none;cursor:pointer;font-size:14px">‹</button>
  <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--txt)" id="cal-week-label"></div><div style="font-size:10px;color:var(--mut)">Entraînements et matchs</div></div>
@@ -1746,6 +1750,7 @@
  <button class="cat-filter on" onclick="setCalFilter('mine')" id="cal-filter-mine">Mon équipe</button>
         <button class="cat-filter" onclick="setCalFilter('all')" id="cal-filter-all">Toutes les équipes</button>
  </div>
+ <div id="cal-month-grid"></div>
  <div id="cal-week-content" style="padding:12px 0 80px"></div>
  </div>
 

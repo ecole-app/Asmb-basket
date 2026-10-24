@@ -122,9 +122,24 @@ function buildMatchList(){
 }
 
 function shiftCalWeek(dir){
-  calWeekOffset+=dir;
+  if(calVue==="mois"){calMoisOffset+=dir;calJourSel=null;}
+  else calWeekOffset+=dir;
   buildCalendrier();
 }
+
+// ── Vue du calendrier : liste par semaine (défaut) ou grille mensuelle classique ──
+var calVue="semaine";
+try{calVue=localStorage.getItem("gm_cal_vue")==="mois"?"mois":"semaine";}catch(e){}
+var calMoisOffset=0;
+var calJourSel=null;
+function calIso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function setCalVue(v){
+  calVue=v==="mois"?"mois":"semaine";
+  try{localStorage.setItem("gm_cal_vue",calVue);}catch(e){}
+  calMoisOffset=0;calJourSel=null;
+  buildCalendrier();
+}
+function calChoisirJour(dStr){calJourSel=dStr;buildCalendrier();}
 
 function getMonday(d){
   var day=d.getDay();
@@ -154,18 +169,36 @@ function setCalFilter(mode){
 }
 
 function buildCalendrier(){
-  var base=new Date();
-  base.setDate(base.getDate()+calWeekOffset*7);
-  var monday=getMonday(base);
-  var days=[];
-  for(var i=0;i<7;i++){
-    var d=new Date(monday);
-    d.setDate(monday.getDate()+i);
-    days.push(d);
+  var days=[], moisPremier=null;
+  var gridEl=document.getElementById("cal-month-grid");
+  var bL=document.getElementById("cal-vue-liste"), bM=document.getElementById("cal-vue-mois");
+  if(bL)bL.classList.toggle("on",calVue!=="mois");
+  if(bM)bM.classList.toggle("on",calVue==="mois");
+  if(calVue==="mois"){
+    var now=new Date();
+    moisPremier=new Date(now.getFullYear(),now.getMonth()+calMoisOffset,1);
+    var mTxt=moisPremier.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    document.getElementById("cal-week-label").textContent=mTxt.charAt(0).toUpperCase()+mTxt.slice(1);
+    var okSel=calJourSel&&calJourSel.slice(0,7)===calIso(moisPremier).slice(0,7);
+    if(!okSel){
+      var td=calIso(now);
+      calJourSel=td.slice(0,7)===calIso(moisPremier).slice(0,7)?td:calIso(moisPremier);
+    }
+    days=[new Date(calJourSel+"T12:00:00")];
+  } else {
+    var base=new Date();
+    base.setDate(base.getDate()+calWeekOffset*7);
+    var monday=getMonday(base);
+    for(var i=0;i<7;i++){
+      var d=new Date(monday);
+      d.setDate(monday.getDate()+i);
+      days.push(d);
+    }
+    var sunday=days[6];
+    var labelFmt=function(d){return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});};
+    document.getElementById("cal-week-label").textContent=labelFmt(monday)+" - "+labelFmt(sunday)+" "+sunday.getFullYear();
+    if(gridEl)gridEl.innerHTML="";
   }
-  var sunday=days[6];
-  var labelFmt=function(d){return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});};
-  document.getElementById("cal-week-label").textContent=labelFmt(monday)+" - "+labelFmt(sunday)+" "+sunday.getFullYear();
 
   var filterRow=document.getElementById("cal-filter-row");
   var isCoach=localStorage.getItem("asmb_profile")==="coach";
@@ -183,10 +216,32 @@ function buildCalendrier(){
     var content=document.getElementById("cal-week-content");
     content.innerHTML="";
     var dayNames=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
-    var todayStr=new Date().toISOString().slice(0,10);
+    var todayStr=calIso(new Date());
 
-    days.forEach(function(d,idx){
-      var dStr=d.toISOString().slice(0,10);
+    if(calVue==="mois"&&gridEl){
+      var h='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:10px 12px 4px">';
+      ["L","M","M","J","V","S","D"].forEach(function(n){h+='<div style="text-align:center;font-size:10px;font-weight:800;color:var(--mut)">'+n+'</div>';});
+      var debut=getMonday(moisPremier);
+      var mois=moisPremier.getMonth();
+      for(var k=0;k<42;k++){
+        var cd=new Date(debut);cd.setDate(debut.getDate()+k);
+        if(k>=35&&cd.getMonth()!==mois)break;
+        var cs=calIso(cd), hors=cd.getMonth()!==mois;
+        var evs=events.filter(function(e){return !e.cancelled&&e.date<=cs&&(e.dateFin&&e.dateFin>e.date?e.dateFin:e.date)>=cs;});
+        var pts="";
+        evs.slice(0,3).forEach(function(e){pts+='<span style="width:6px;height:6px;border-radius:50%;background:'+eventTypeColor(e.type)+'"></span>';});
+        var sel=cs===calJourSel, auj=cs===todayStr;
+        h+='<button onclick="calChoisirJour(\''+cs+'\')" style="min-height:48px;border-radius:10px;border:'+(sel?'2px solid var(--dkg)':'1px solid var(--bdr)')+';background:'+(auj?'color-mix(in srgb, var(--dkg) 14%, var(--card))':'var(--card)')+';opacity:'+(hors?.4:1)+';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:4px 0">'+
+          '<span style="font-size:12px;font-weight:'+(auj||sel?800:600)+';color:'+(auj?'var(--dkg)':'var(--txt)')+'">'+cd.getDate()+'</span>'+
+          '<span style="display:flex;gap:2px;height:6px">'+pts+'</span></button>';
+      }
+      h+='</div>';
+      gridEl.innerHTML=h;
+    }
+
+    days.forEach(function(d,idx0){
+      var idx=(d.getDay()+6)%7;
+      var dStr=calIso(d);
       var isSaturday=idx===5;
       var isToday=dStr===todayStr;
       var dayEvents=events.filter(function(e){return !e.cancelled&&e.date<=dStr&&(e.dateFin&&e.dateFin>e.date?e.dateFin:e.date)>=dStr;});
