@@ -446,16 +446,16 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
   for (let k = 0; k < candidats.length && k < 6 && !hits.length; k++) hits = await essaiFiltre(candidats[k]);
   // 2) Aucun filtre « poule » possible : on part d'un match connu de l'équipe (recherche par numéro), on lit sa compétition
   // par un des attributs filtrables, puis on ne garde ici que les matchs de la poule.
+  // (Les numéros de match de l'export FBI ne sont pas uniques : on retrouve le match par les deux équipes.)
   if (!hits.length && attrsFiltrables.length && (numeros || []).length) {
     try {
       let modele = null, diag = "";
-      for (const n of numeros.slice(0, 6)) {
-        const h = await lire({ q: String(n), limit: 20 });
-        if (!diag) diag = "n°" + n + ": " + h.length + " résultats" + (h[0] ? ", 1er numero=" + h[0].numero + " idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 60) : "");
-        modele = h.filter((x) => String(x.numero) === String(n))[0] || null;
+      for (const r of numeros.slice(0, 8)) {
+        const h = await lire({ q: r.e1 + " " + r.e2, limit: 30 });
+        if (!diag) diag = r.e1 + " / " + r.e2 + ": " + h.length + " résultats" + (h[0] ? ", 1er idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 50) : "");
+        modele = h.filter(dePoule)[0] || null;
         if (modele) break;
       }
-      if (modele && !dePoule(modele)) { erreurs.push("poule du match=" + String(JSON.stringify(modele.idPoule)).slice(0, 60)); modele = null; }
       if (!modele) erreurs.push("aucun match connu trouvé (" + diag + ")");
       else {
         const valeur = (o, chemin) => chemin.split(".").reduce((a, k) => (a && a[k] !== undefined ? a[k] : undefined), o);
@@ -466,7 +466,7 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
           let h;
           try { h = await lire({ q: "", filter: a + " = " + JSON.stringify(String(v)), limit: 1000 }); } catch (e) { erreurs.push(a + ": " + String(e.message).slice(0, 80)); continue; }
           const mien = h.filter(dePoule);
-          if (mien.length >= Math.max(2, Math.min(numeros.length, 4))) { hits = mien; break; }
+          if (mien.length >= 2) { hits = mien; break; }
         }
         if (!hits.length) erreurs.push("compétition: aucun attribut utilisable (" + ordre.slice(0, 14).join(",") + ")");
       }
@@ -647,7 +647,7 @@ async function ffbbAlertesEquipe(clubId, champ, diffs) {
   }
 }
 async function ffbbSyncChamp(clubId, ref, champ, notifier) {
-  const poule = await ffbbLirePoule(champ.ffbb.pouleId, (champ.rencontres || []).map((r) => r && r.num).filter(Boolean));
+  const poule = await ffbbLirePoule(champ.ffbb.pouleId, (champ.rencontres || []).filter((r) => r && r.e1 && r.e2).slice(0, 40).map((r) => ({ e1: r.e1, e2: r.e2, date: r.date || "" })));
   const r = ffbbAppliquer(champ, poule);
   r.champ.ffbb = Object.assign({}, champ.ffbb, { maj: Date.now(), erreur: "" });
   await ref.set(JSON.parse(JSON.stringify(r.champ)));
