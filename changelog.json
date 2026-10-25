@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792914777",
+  "titre": "Diagnostic de démarrage (sondes)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La bannière de démarrage indique aussi la version et l'état de la vérification de sécurité."
+   }
+  ]
+ },
+ {
   "v": "1792914543",
   "titre": "Démarrage de l'appli installée",
   "points": [
