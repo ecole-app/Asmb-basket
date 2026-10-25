@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792915400",
+  "titre": "Démarrage fiable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Fin des écrans vides quand le site et l'appli installée sont ouverts ensemble (plus de copie locale partagée)."
+   }
+  ]
+ },
+ {
   "v": "1792915164",
   "titre": "Site et appli installée ensemble",
   "points": [
