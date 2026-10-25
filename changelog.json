@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792915164",
+  "titre": "Site et appli installée ensemble",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le site et l'appli installée peuvent maintenant être ouverts en même temps sans que l'un reste vide."
+   }
+  ]
+ },
+ {
   "v": "1792914777",
   "titre": "Diagnostic de démarrage (sondes)",
   "points": [

@@ -2,7 +2,7 @@
 // ═══ FIREBASE CONFIG ══════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as acGetToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
-import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, enableMultiTabIndexedDbPersistence, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported, onMessage as fbMsgOnMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -75,7 +75,10 @@ window.fbEmailAuthProvider = EmailAuthProvider;
 window.fbAuthReady = true;
 
 // Persistance hors-ligne : garde les derniers messages/canaux consultes visibles sans reseau
-enableIndexedDbPersistence(db).catch(function(err){
+// Multi-onglets : le site dans Chrome et l'appli installée partagent la même copie locale.
+// Avec la version mono-onglet, le 2e à s'ouvrir restait sans réponse de la base (écran vide).
+enableMultiTabIndexedDbPersistence(db).catch(function(err){
+  window.__gmDiag=(window.__gmDiag||"")+" persistance("+err.code+")";
   console.log("Persistance hors-ligne indisponible:", err.code);
 });
 
