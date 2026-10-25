@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792903206",
+  "titre": "Dossier d'inscription : bouton retiré",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le bouton « Repartir du modèle ASMB » n'apparaît plus dans le réglage du dossier."
+   }
+  ]
+ },
+ {
   "v": "1792902990",
   "titre": "Dossier d'inscription dans Documents + HelloAsso",
   "points": [

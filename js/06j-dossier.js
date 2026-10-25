@@ -178,7 +178,6 @@ function dossierEditeur(){
     intro.textContent="Ce que les familles remplissent sur la fiche d'inscription (lien public et réinscription), et le dossier PDF à imprimer. La base (identité, responsables, urgence, certificat) est toujours là.";
     body.appendChild(intro);
     var rm=gmRow(body);
-    if(dossierEstAsmb()) rm.appendChild(gmBtn("Repartir du modèle ASMB","ghost",function(){ askConfirm("Remplacer le réglage en cours par le modèle ASMB (dossier papier 2026-2027) ?").then(function(ok){ if(ok){ var e=d.entete; d=dossierModeleAsmb(); d.entete=e; render(); } }); }));
     rm.appendChild(gmBtn("Repartir de la base","ghost",function(){ askConfirm("Remplacer le réglage en cours par la base simple ?").then(function(ok){ if(ok){ var e=d.entete; d=dossierBase(); d.entete=e; render(); } }); }));
 
     // En-tête PDF
