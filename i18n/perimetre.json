@@ -50,7 +50,10 @@
   "js/14m-stats-ecrans.js",
   "js/14n-eval-stage.js",
   "js/12-equipes-planning.js",
-  "js/15f-projets.js"
+  "js/15f-projets.js",
+  "js/17-sponsors.js",
+  "js/17b-factures.js",
+  "js/08b-abonnement.js"
  ],
  "exclus": [
   "(display-mode: standalone)",
@@ -225,6 +228,18 @@
   "s absentes",
   "s finissent",
   "e place",
-  "1fr 1fr"
+  "1fr 1fr",
+  ") n'a pas encore été réglée. Elle était à régler avant le",
+  ". Merci de nous indiquer si le paiement est en cours. Cordialement,",
+  ". Merci pour votre soutien. Cordialement,",
+  "Sauf erreur de notre part, la facture n°",
+  "Veuillez trouver ci-joint la facture n°",
+  "Relance facture",
+  "FAC-",
+  "FR76 …",
+  "ex. AGRIFRPP",
+  "maj numéro facture:",
+  "Standard",
+  "Premium"
  ]
 }
