@@ -44,7 +44,13 @@
   "js/14o-responsable-evt.js",
   "js/14p-championnats.js",
   "js/14q-tirage-table.js",
-  "js/14r-dossier-evt.js"
+  "js/14r-dossier-evt.js",
+  "js/14k-stats-saisie.js",
+  "js/14l-stats-fiche.js",
+  "js/14m-stats-ecrans.js",
+  "js/14n-eval-stage.js",
+  "js/12-equipes-planning.js",
+  "js/15f-projets.js"
  ],
  "exclus": [
   "(display-mode: standalone)",
@@ -218,6 +224,7 @@
   "été",
   "s absentes",
   "s finissent",
-  "e place"
+  "e place",
+  "1fr 1fr"
  ]
 }
