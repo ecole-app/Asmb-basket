@@ -1,5 +1,38 @@
 [
  {
+  "v": "1792907143",
+  "titre": "Traductions corrigées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le navigateur ne traduit plus l'appli tout seul (plus de « Maison » ou « Panier » à la place d'« Accueil » ou « Basket »)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Arabe : la barre du bas garde son ordre habituel."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Accueil traduit en entier (pôles du club, catégories, vacances) et textes avec des nombres mieux traduits."
+   }
+  ]
+ },
+ {
   "v": "1792906184",
   "titre": "L'appli parle 6 langues",
   "points": [

@@ -34,6 +34,10 @@
   window.GM_LANGUES=LANGUES;
   window.GM_LANG=LANG;
   document.documentElement.lang=LANG;
+  // L'appli se traduit elle-même : on interdit la traduction automatique du navigateur
+  // (Chrome traduisait « Accueil » en « Maison », « Basket » en « Panier »...).
+  document.documentElement.setAttribute("translate","no");
+  document.documentElement.classList.add("notranslate");
   document.documentElement.dir=INFO.rtl?"rtl":"ltr";
 
   // ── Dates : les formats écrits en toutes lettres (jour, mois) suivent la langue.
@@ -70,6 +74,19 @@
     if(m&&Object.prototype.hasOwnProperty.call(DICT,m[1])) return avant+DICT[m[1]]+m[2]+m[3]+apres;
     m=k.match(/^(.*?)\s*:$/);
     if(m&&Object.prototype.hasOwnProperty.call(DICT,m[1])) return avant+DICT[m[1]]+" :"+apres;
+    // Texte avec des nombres (« 3 joueurs inscrits », « Match 2 sur 5 ») : on traduit
+    // chaque morceau de texte entre les nombres s'il est dans le dictionnaire.
+    if(/\d/.test(k)){
+      var bouts=k.split(/(\d[\d.,:\/hH]*)/), trouve=false;
+      bouts=bouts.map(function(b,i){
+        if(i%2) return b;
+        var mm=b.match(/^([\s()\[\]«»"'·—–\-:,;.!?]*)(.*?)([\s()\[\]«»"'·—–\-:,;.!?]*)$/);
+        if(!mm||!mm[2]||!/[A-Za-zÀ-ÿ]/.test(mm[2])) return b;
+        if(Object.prototype.hasOwnProperty.call(DICT,mm[2])){ trouve=true; return mm[1]+DICT[mm[2]]+mm[3]; }
+        return b;
+      });
+      if(trouve) return avant+bouts.join("")+apres;
+    }
     return null;
   }
   window.gmTraduireTexte=function(s){ var t=LANG==="fr"?null:traduire(s); return t==null?s:t; };

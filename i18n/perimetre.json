@@ -1,6 +1,7 @@
 {
  "fichiers": [
   "index.html",
+  "js/01-config.js",
   "js/03-nav-portal.js",
   "js/06-licences.js",
   "js/06b-reinscription.js",
@@ -63,6 +64,7 @@
   "Enzo",
   "Excel",
   "FAC-00001",
+  "Facebook",
   "Faure",
   "Firefox",
   "Fontaine",
@@ -71,6 +73,7 @@
   "Girard",
   "Gymnase Giraudet",
   "Hugo",
+  "Instagram",
   "Inès",
   "Julie",
   "Karim",
@@ -97,6 +100,7 @@
   "Sarah",
   "TRIGGER:-PT",
   "Thomas",
+  "TikTok",
   "UID:",
   "VERSION:2.0",
   "Windows",

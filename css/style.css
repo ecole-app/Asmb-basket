@@ -86,6 +86,8 @@ html.bnav-expanded[data-visual-theme="carnet"] .main{padding-right:168px}
 .scr{display:none;min-height:100%}.scr.on{display:block}
 #scr-chat.on{display:flex}
 .bnav{display:flex;background:var(--sf);border-top:1px solid var(--bdr);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));flex-shrink:0;box-shadow:0 -4px 20px var(--shadow)}
+/* Arabe (écran de droite à gauche) : la barre du bas garde son ordre habituel (Accueil à gauche) */
+html[dir="rtl"] .bnav{direction:ltr}
 .bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 2px 4px;border:none;background:none;color:var(--mut);font-size:8.5px;font-weight:600;text-transform:uppercase;transition:color .15s;white-space:nowrap;position:relative}
 .bni::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:0 0 3px 3px;background:var(--ltg);transition:width .18s}
 .bni.on{color:var(--ltg);font-weight:800}.bni.on::before{width:22px}.bni-ic{display:flex;align-items:center;justify-content:center;line-height:1}
