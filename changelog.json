@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792903484",
+  "titre": "Dossier : tarifs vides pour les autres clubs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dossier d'inscription : un club sans tarifs voit une ligne vide à remplir (catégories et options). Les tarifs de l'ASMB restent propres à l'ASMB."
+   }
+  ]
+ },
+ {
   "v": "1792903206",
   "titre": "Dossier d'inscription : bouton retiré",
   "points": [

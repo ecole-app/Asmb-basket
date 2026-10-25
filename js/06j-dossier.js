@@ -157,6 +157,9 @@ function dossierEditeur(){
   if(!d.entete.adresse) d.entete.adresse=fa.adresse||ce.adresse||"";
   if(!d.entete.siret) d.entete.siret=fa.siret||"";
   if(!d.entete.rna) d.entete.rna=ce.rna||"";
+  // Club sans tarifs : un champ vide prêt à remplir (les lignes vides ne sont pas enregistrées).
+  if(!d.tarifs.lignes.length) d.tarifs.lignes.push({label:"",prix:0});
+  if(!d.tarifs.options.length) d.tarifs.options.push({label:"",prix:0});
   var sh=gmSheet("Dossier d'inscription"), body=sh.body;
   var inS="width:100%;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-size:13px";
   function champ(parent,label,val,onCh,opt){
