@@ -1,5 +1,26 @@
 [
  {
+  "v": "1792952770",
+  "titre": "Pages publiques traduites",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La page du tournoi, la caisse buvette et le pass bénévole s'affichent dans la langue du téléphone (anglais, arabe, espagnol, italien, allemand), avec un choix de langue en bas à droite."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Page du tournoi : le plan du site s'affiche de nouveau correctement."
+   }
+  ]
+ },
+ {
   "v": "1792950476",
   "titre": "Traductions : sponsors, factures, abonnement",
   "points": [

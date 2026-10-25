@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="google" content="notranslate">
+<script>window.GM_I18N_BASE="../";</script>
+<script src="../js/00-i18n.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A2E5A">
 <title>Tournoi — General Manager</title>
@@ -354,11 +356,11 @@ var TRN=(function(){
     var dest=pts.filter(function(p){ return p.t==="entree"; })[0]||pts.filter(function(p){ return p.t==="parking"; })[0]||pl;
     var ll=dest.lat+","+dest.lng;
     return '<div class="go"><a href="https://www.google.com/maps/dir/?api=1&destination='+ll+'" target="_blank" rel="noopener">🧭 Itinéraire (Google Maps)</a><a class="alt" href="https://waze.com/ul?ll='+ll+'&navigate=yes" target="_blank" rel="noopener">Waze</a></div>'+
-      '<div class="plCarte" id="pl-plCarte"><div class="load">Chargement de la plCarte…</div></div>'+
+      '<div class="carte" id="pl-carte"><div class="load">Chargement de la carte…</div></div>'+
       '<div class="lieux">'+pts.map(function(p,i){ return '<button class="chip" data-lieu="'+i+'">'+(p.t==="terrain"?"🏀 ":(PLAN_TYPES[p.t]||[""])[0]+" ")+esc(planNom(p))+'</button>'; }).join("")+'</div>';
   }
   function initCarte(){
-    var el=document.getElementById("pl-plCarte"); if(!el) return;
+    var el=document.getElementById("pl-carte"); if(!el) return;
     leaflet().then(function(L){
       el.innerHTML=""; var pl=P.plan;
       plCarte=L.map(el).setView([pl.lat,pl.lng],pl.zoom||18);

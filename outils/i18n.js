@@ -43,6 +43,8 @@ function extraireJs(src, out) {
   }
 }
 function extraireHtml(src, out) {
+  // scripts intégrés à la page (pages publiques : tournoi, buvette, bénévole)
+  for (const m of src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) extraireJs(m[1], out);
   src = src.replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "").replace(/<!--[\s\S]*?-->/g, "");
   for (const m of src.matchAll(/>([^<>]+)</g)) { const t = norm(m[1]); if (humain(t)) out.add(t); }
   for (const m of src.matchAll(/(?:placeholder|title|aria-label|alt)="([^"]{2,200})"/g)) { const t = norm(m[1]); if (humain(t)) out.add(t); }

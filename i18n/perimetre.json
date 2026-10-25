@@ -53,7 +53,10 @@
   "js/15f-projets.js",
   "js/17-sponsors.js",
   "js/17b-factures.js",
-  "js/08b-abonnement.js"
+  "js/08b-abonnement.js",
+  "tournoi/index.html",
+  "buvette/index.html",
+  "benevole/index.html"
  ],
  "exclus": [
   "(display-mode: standalone)",
@@ -240,6 +243,13 @@
   "ex. AGRIFRPP",
   "maj numéro facture:",
   "Standard",
-  "Premium"
+  "Premium",
+  "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
+  "App Check init:",
+  "Escape",
+  "Waze",
+  "procédure:",
+  "trace buvette:",
+  "Vente caisse buvette en ligne :"
  ]
 }

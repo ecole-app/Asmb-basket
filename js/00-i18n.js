@@ -133,7 +133,7 @@
     });
     obs.observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
     var v=(window.APP_VERSION_I18N||"");
-    fetch("i18n/"+LANG+".json"+(v?"?v="+v:""),{cache:"no-cache"}).then(function(r){ return r.ok?r.json():{}; }).catch(function(){ return {}; })
+    fetch((window.GM_I18N_BASE||"")+"i18n/"+LANG+".json"+(v?"?v="+v:""),{cache:"no-cache"}).then(function(r){ return r.ok?r.json():{}; }).catch(function(){ return {}; })
       .then(function(d){
         DICT=d||{}; pret=true;
         var go=function(){ parcourir(document.body); };
@@ -190,6 +190,7 @@
   function poserPartout(){
     window.gmLanguePoser(document.getElementById("scr-auth"),true);
     window.gmLanguePoser(document.getElementById("scr-inscription"));
+    if(window.GM_I18N_BASE&&document.body){ window.gmLanguePoser(document.body,true); document.body.style.paddingBottom="calc(64px + env(safe-area-inset-bottom,0px))"; }
     var cs=document.querySelectorAll(".gm-lang-param");
     for(var i=0;i<cs.length;i++) if(!cs[i].firstChild) cs[i].appendChild(window.gmLangueMenu("width:100%;box-sizing:border-box;padding:11px 12px;border-radius:12px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:16px;font-weight:600"));
   }
