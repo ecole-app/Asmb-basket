@@ -32,7 +32,11 @@
   "js/15b-compta-plan.js",
   "js/15c-compta-ticket.js",
   "js/15d-compta-bilan.js",
-  "js/15e-documents-club.js"
+  "js/15e-documents-club.js",
+  "js/14b-billetterie.js",
+  "js/14c-entree.js",
+  "js/14d-affiche.js",
+  "js/14g-benevoles.js"
  ],
  "exclus": [
   "(display-mode: standalone)",
@@ -177,6 +181,16 @@
   "depense|Matériel",
   "depense|Note de frais",
   "recette|Buvette/Événements",
-  "recette|Événement"
+  "recette|Événement",
+  "'JetBrains Mono', ui-monospace, monospace",
+  "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+  "0 0 auto",
+  "ABCD-EFGH",
+  "Anton, Impact, 'Arial Narrow', sans-serif",
+  "BarcodeDetector",
+  "Fraunces, Georgia, serif",
+  "HelloAsso",
+  "InvalidStateError",
+  "WhatsApp"
  ]
 }
