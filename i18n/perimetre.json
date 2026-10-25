@@ -20,7 +20,14 @@
   "js/19-profils.js",
   "js/20-parent-tabs.js",
   "js/21-main.js",
-  "js/22-push.js"
+  "js/22-push.js",
+  "js/06c-essais.js",
+  "js/06d-cheques.js",
+  "js/06f-import.js",
+  "js/06g-photos.js",
+  "js/06h-roles.js",
+  "js/06i-activation.js",
+  "js/06j-adherent.js"
  ],
  "exclus": [
   "(display-mode: standalone)",
