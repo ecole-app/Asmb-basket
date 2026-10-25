@@ -408,7 +408,7 @@ function buildParametresLayout(){ buildParamsAccordeon(); }
 // tous fermés à l'ouverture. Rien n'est dupliqué : on déplace les vrais noeuds.
 var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
-  {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
+  {id:"apparence", ic:"🎨", titre:"Langue & apparence", secs:["langue","apparence","themes"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"📝", titre:"Inscriptions & licences", dir:true, secs:["dossier","paiement","aides","relances"]},
   {id:"factures", ic:"💶", titre:"Factures & reçus fiscaux", dir:true, secs:["facturation","cerfa"]},
@@ -422,7 +422,8 @@ function paramsResume(id){
   if(id==="apparence"){
     var vt=document.documentElement.getAttribute("data-visual-theme")||"moderne";
     var noms={moderne:"Moderne",classique:"Marine/doré",epure:"Épuré",bento:"Bento",feuille:"Feuille",carnet:"Carnet",editorial:"Éditorial"};
-    return "Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
+    var ln=(window.GM_LANGUES||[]).filter(function(l){return l.code===window.GM_LANG;})[0];
+    return (ln?ln.nom+" · ":"")+"Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
   }
   if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · "+(clubLiens().length?clubLiens().length+" lien"+(clubLiens().length>1?"s":""):"réseaux")+" · QR codes";
   if(id==="argent") return "Dossier d'inscription · paiement · Pass'Sport · relances";

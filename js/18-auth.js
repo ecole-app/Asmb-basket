@@ -427,6 +427,7 @@ function finishAuthedUser(user, u, isUpdate){
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
   window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", prenom:u.prenom||"", nom:u.nom||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], badge:u.badge||"" };
+  if(typeof gmLangueCompte==="function") gmLangueCompte(u);
   // Mode support : le super admin consulte un club qui lui a donné un code d'accès
   var activeClub=u.clubId;
   var sup=(typeof getSupportSession==="function")?getSupportSession():null;

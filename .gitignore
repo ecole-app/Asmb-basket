@@ -3,3 +3,6 @@
 *-firebase-adminsdk-*.json
 serviceAccount*.json
 asmb-app-*.json
+
+i18n/_sources.json
+i18n/_manquants.json

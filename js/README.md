@@ -26,6 +26,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 |---|---|
 | `firebase-init.js` | Init Firebase (seul vrai module ES6, chargé avec `type="module"`) |
 | `sw-register.js` | Enregistrement du service worker (hors-ligne) |
+| `00-i18n.js` | Langue de l'appli (fr, en, ar, es, it, de), chargé dans `<head>` avant tout : dictionnaires `i18n/<langue>.json`, traduction de l'écran à l'affichage (observateur), arabe en RTL, dates en toutes lettres, sélecteurs de langue (connexion, fiche publique, Paramètres), langue du compte `users/{uid}.langue`. Voir `i18n/LISEZMOI.md` |
 | `01-config.js` | Constantes globales : pôles, catégories, couleurs, helpers de saison |
 | `02-formation-cycles.js` | Données et accesseurs des cycles du Pôle Formation |
 | `03-nav-portal.js` | Navigation, routage entre écrans, portail d'accueil |

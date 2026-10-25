@@ -21,6 +21,17 @@ peu d'explications, et on **présente l'idée avant de coder** les fonctionnalit
 3. Après toute modif d'`index.html` : nombre de `<div` = nombre de `</div>`.
 4. JSON valides : `changelog.json` et `version.json`.
 
+## Traductions (à chaque mise à jour)
+
+L'appli est traduite en anglais, arabe (droite à gauche), espagnol, italien, allemand
+(`js/00-i18n.js`, dictionnaires `i18n/<langue>.json`, mode d'emploi `i18n/LISEZMOI.md`).
+**Tout texte ajouté ou modifié dans le périmètre (`i18n/perimetre.json`) doit être traduit
+dans les 5 langues avant le push** : `node outils/i18n.js manquants` → traduire →
+`node outils/i18n.js fusionner lot.json` → `manquants` doit répondre 0
+(le test `tests/metier/i18n.test.js` échoue sinon). Ce que les gens écrivent n'est jamais
+traduit (`data-notr`, messages). Les dates « fr-FR » en toutes lettres suivent la langue ;
+les formats chiffrés restent français (données enregistrées).
+
 ## Version et changelog (seulement si du code client change)
 
 - `date +%s` → mettre la même valeur dans `js/21-main.js` (`APP_VERSION`) **et** `version.json`.

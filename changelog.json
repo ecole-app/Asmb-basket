@@ -1,5 +1,29 @@
 [
  {
+  "v": "1792906184",
+  "titre": "L'appli parle 6 langues",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Nouveau : choix de la langue (français, anglais, arabe, espagnol, italien, allemand) dans Paramètres, sur l'écran de connexion et sur la fiche d'inscription. Par défaut, la langue du téléphone. L'arabe s'affiche de droite à gauche."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Étape 1 : écrans des familles, connexion, fiche d'inscription, communauté, calendrier et paramètres. Les écrans de gestion suivent. Les messages et ce que les gens écrivent restent dans leur langue."
+   }
+  ]
+ },
+ {
   "v": "1792904234",
   "titre": "Affichage adapté à tous les téléphones",
   "points": [
