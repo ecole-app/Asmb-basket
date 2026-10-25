@@ -277,7 +277,7 @@ function dossierEditeur(){
     });
     gmRow(body).appendChild(gmBtn("+ Ajouter une autorisation","soft",function(){ d.autorisations.push({titre:"",texte:"",type:"choix"}); render(); }));
 
-    var fin=gmRow(body); fin.style.cssText+=";margin:18px 0 8px;position:sticky;bottom:0;background:var(--bg);padding:10px 0";
+    var fin=gmRow(body); fin.style.cssText+=";margin:22px 0 8px";
     fin.appendChild(gmBtn("Enregistrer","primary",function(b){ dossierEnregistrer(d,b,sh); }));
     fin.appendChild(gmBtn("Dossier PDF","soft",function(){ dossierPdf(dossierNormaliser(d)); }));
   }

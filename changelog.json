@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792904138",
+  "titre": "Dossier : boutons en bas",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Réglage du dossier d'inscription : « Enregistrer » et « Dossier PDF » sont tout en bas de la page, ils ne flottent plus sur les champs."
+   }
+  ]
+ },
+ {
   "v": "1792904005",
   "titre": "Le champ reste visible au-dessus du clavier",
   "points": [
