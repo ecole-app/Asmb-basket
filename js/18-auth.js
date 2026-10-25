@@ -373,6 +373,7 @@ function applyAuthedUser(user){
   window.__userDocUnsub = window.fbOnSnapshot(window.fbDoc(window.fbDb,"users",user.uid), function(snap){
     // Réponse « le compte n'existe pas » venue seulement du cache de l'appareil (réseau coupé ou lent au
     // démarrage) : on attend la réponse du serveur au lieu de déconnecter la personne à tort.
+    window.__gmDiag=(window.__gmDiag||"")+" snap(exists="+(snap&&snap.exists())+",cache="+(snap&&snap.metadata&&snap.metadata.fromCache)+")";
     if(snap && !snap.exists() && snap.metadata && snap.metadata.fromCache) return;
     if(snap && snap.exists()){
       var data=snap.data();
@@ -402,6 +403,7 @@ function applyAuthedUser(user){
     }
   }, function(err){
     console.log("applyAuthedUser:",err);
+    window.__gmDiag=(window.__gmDiag||"")+" erreur("+((err&&err.code)||err)+")";
     if(firstLoad){
       // Échec passager au démarrage (jeton de sécurité pas encore prêt juste après une mise à jour, réseau instable) :
       // on réessaie seul jusqu'à 3 fois avant de prévenir, pour ne pas laisser un écran de connexion alors que le compte est bien ouvert.

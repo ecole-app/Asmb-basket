@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792914076",
+  "titre": "Diagnostic de démarrage (suite)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La bannière de démarrage indique aussi la réponse de la base de données."
+   }
+  ]
+ },
+ {
   "v": "1792913986",
   "titre": "Diagnostic de démarrage",
   "points": [
