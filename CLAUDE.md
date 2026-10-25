@@ -37,6 +37,7 @@ Notifications push : l'appareil enregistre sa langue dans `push_subscriptions/{u
 `envoyerParLangue()`), jamais ce que les gens écrivent. Alertes Plateforme : en français.
 PDF : restent en français pour l'instant (décision du 25/10/2026 : clubs en France ; à traduire
 si l'appli part à l'étranger, sauf documents officiels ; l'arabe demandera une police dédiée).
+Contenu pédagogique (js/02*-formation-*, 04-formation-ui, 05*-anim-*, ~450 Ko) : reste en français tant qu'aucun club/coach non francophone n'en a besoin (décision du 25/10/2026) ; à traduire en 6-8 lots si le besoin arrive, vocabulaire basket à faire relire par un coach.
 
 ## Version et changelog (seulement si du code client change)
 
