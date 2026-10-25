@@ -26,7 +26,7 @@ function dossierBase(){
     v:1,
     entete:{adresse:"",telephone:"",email:"",web:"",rna:"",siret:""},
     perso:[],
-    tarifs:{lignes:[],options:[],fratrie:"",reglement:""},
+    tarifs:{lignes:[],options:[],fratrie:"",reglement:"",enLigne:""},
     sante:{actif:false,questions:DOSSIER_QUESTIONS_BASE.slice()},
     charte:{titre:"",texte:""},
     autorisations:[]
@@ -135,7 +135,8 @@ function dossierNormaliser(d){
     tarifs:{
       lignes:((d.tarifs||{}).lignes||[]).slice(0,20).map(function(l){ return {label:s(l.label,80),prix:Number(l.prix)||0}; }).filter(function(l){return l.label.trim();}),
       options:((d.tarifs||{}).options||[]).slice(0,10).map(function(l){ return {label:s(l.label,80),prix:Number(l.prix)||0}; }).filter(function(l){return l.label.trim();}),
-      fratrie:s((d.tarifs||{}).fratrie,200), reglement:s((d.tarifs||{}).reglement,600)
+      fratrie:s((d.tarifs||{}).fratrie,200), reglement:s((d.tarifs||{}).reglement,600),
+      enLigne:/^https:\/\/[^\s"'<>]+$/.test(String((d.tarifs||{}).enLigne||"").trim())?String(d.tarifs.enLigne).trim().slice(0,300):""
     },
     sante:{actif:d.sante?d.sante.actif!==false:b.sante.actif, questions:((d.sante&&d.sante.questions)||b.sante.questions).slice(0,25).map(function(q){return s(q,300);}).filter(function(q){return q.trim();})},
     charte:{titre:s((d.charte||{}).titre,80),texte:s((d.charte||{}).texte,6000)},
@@ -230,6 +231,8 @@ function dossierEditeur(){
     lignesPrix(d.tarifs.options,"Options (cases à cocher)","Option Academy");
     champ(ct,"Remise fratrie",d.tarifs.fratrie,function(v){d.tarifs.fratrie=v;},{max:200});
     champ(ct,"Modes de règlement (et IBAN si virement)",d.tarifs.reglement,function(v){d.tarifs.reglement=v;},{multi:true,rows:4,max:600});
+    if(!d.tarifs.enLigne&&window.CURRENT_CLUB&&window.CURRENT_CLUB.lienPaiement) d.tarifs.enLigne=window.CURRENT_CLUB.lienPaiement;
+    champ(ct,"Paiement en ligne HelloAsso (lien, facultatif)",d.tarifs.enLigne,function(v){d.tarifs.enLigne=v.trim();},{max:300,ph:"https://www.helloasso.com/associations/..."});
 
     // Santé
     gmSection(body,"Questionnaire de santé","Questions OUI/NON. Tout à NON : attestation sur l'honneur, pas de certificat. Un OUI : certificat de moins de 6 mois. Le club ne voit que le résultat, jamais les réponses.");
@@ -318,12 +321,13 @@ function dossierFicheHtml(f){
     });
   }
   var t=d.tarifs;
-  if(t.lignes.length||t.options.length||t.fratrie||t.reglement){
+  if(t.lignes.length||t.options.length||t.fratrie||t.reglement||t.enLigne){
     h+=dossierTitre("Tarifs des licences");
     h+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;font-size:12.5px;color:var(--txt);line-height:1.5">';
     t.lignes.forEach(function(l){ h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0"><span>'+authEsc(l.label)+'</span><b style="white-space:nowrap">'+l.prix+' €</b></div>'; });
     if(t.fratrie) h+='<div style="margin-top:8px;color:var(--txt2)">Remise fratrie : '+authEsc(t.fratrie)+'</div>';
     if(t.reglement) h+='<div style="margin-top:8px;color:var(--txt2);white-space:pre-line">'+authEsc(t.reglement)+'</div>';
+    if(t.enLigne) h+='<a href="'+authEsc(t.enLigne)+'" target="_blank" rel="noopener" style="display:block;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none">Payer en ligne (HelloAsso)</a>';
     h+='</div>';
     if(t.options.length){
       var opts=(f.optionsTarif||[]);
@@ -458,7 +462,7 @@ function dossierPlanning(){
   });
   return l.sort(function(x,y){ return x.j-y.j||String(x.h).localeCompare(String(y.h)); });
 }
-function dossierPdf(d){
+function dossierPdf(d,partie){
   if(!window.jspdf||!window.jspdf.jsPDF){ askAlert("Le module PDF n'est pas encore chargé, réessayez dans un instant."); return; }
   d=d||dossierClub();
   var doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
@@ -472,7 +476,8 @@ function dossierPdf(d){
     if(sous){ doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.text(txt(sous),M,19.5); }
     doc.setTextColor(30,30,30); y=30;
   }
-  function page(titre,sous){ doc.addPage(); bandeau(titre,sous); }
+  var vierge=true;
+  function page(titre,sous){ if(vierge) vierge=false; else doc.addPage(); bandeau(titre,sous); }
   function place(h){ if(y+h>282){ page("Dossier d'inscription (suite)","Saison "+saison); } }
   function section(t){
     place(14);
@@ -512,7 +517,8 @@ function dossierPdf(d){
   }
 
   // ── Page 1 : fiche
-  bandeau("Fiche d'inscription","Saison sportive "+saison);
+  if(!partie){
+  page("Fiche d'inscription","Saison sportive "+saison);
   var e=d.entete||{}, coord=[e.adresse,e.telephone?"Tél. "+e.telephone:"",e.email,e.web].filter(Boolean).join("  ·  "), leg=[e.rna?"RNA : "+e.rna:"",e.siret?"SIRET : "+e.siret:""].filter(Boolean).join("  ·  ");
   try{
     var logo=window.CURRENT_CLUB&&window.CURRENT_CLUB.logo;
@@ -540,7 +546,7 @@ function dossierPdf(d){
   rangee([["Urgence (hors parents) - Nom & prénom",1.3],["Téléphone",.8],["Infos médicales utiles (allergies, asthme...)",1.1]]);
 
   var t=d.tarifs;
-  if(t.lignes.length||t.options.length||t.reglement||t.fratrie){
+  if(t.lignes.length||t.options.length||t.reglement||t.fratrie||t.enLigne){
     section("3. Tarifs des licences & règlement");
     doc.setFontSize(9);
     t.lignes.forEach(function(l){
@@ -552,6 +558,7 @@ function dossierPdf(d){
     t.options.forEach(function(o){ place(6); boite(M,y); doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.text(txt(o.label+" : +"+o.prix+" €"),M+5,y); y+=6; });
     if(t.fratrie) para("Remise fratrie : "+t.fratrie,9);
     if(t.reglement) para(t.reglement,9);
+    if(t.enLigne) para("Paiement en ligne (HelloAsso) : "+t.enLigne,9);
     var aides=(window.CURRENT_CLUB&&window.CURRENT_CLUB.aides)||{};
     if(aides.passSport) rangee([["Code Pass'Sport",1]]);
     if(aides.passRegion) rangee([["Pass'Région (n° de carte)",1]]);
@@ -561,8 +568,10 @@ function dossierPdf(d){
     y+=2;
   }
 
+  }
+
   // ── Santé
-  if(d.sante.actif&&d.sante.questions.length){
+  if((partie==="sante"||(!partie&&d.sante.actif))&&d.sante.questions.length){
     page("Questionnaire de santé & attestation","Confidentiel · Code du sport, art. A231-3");
     para("Si vous répondez NON à toutes les questions, le certificat médical n'est pas requis. Si vous répondez OUI à au moins une question, un certificat médical de non-contre-indication de moins de 6 mois est obligatoire.",8.5);
     y+=2;
@@ -584,7 +593,7 @@ function dossierPdf(d){
 
   // ── Planning
   var pl=dossierPlanning();
-  if(pl.length){
+  if(!partie&&pl.length){
     page("Planning des entraînements","Saison "+saison+" · horaires susceptibles d'évoluer");
     var jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"], dernier=-1;
     pl.forEach(function(c){
@@ -597,7 +606,7 @@ function dossierPdf(d){
   }
 
   // ── Charte
-  if(d.charte.texte.trim()){
+  if((!partie||partie==="charte")&&d.charte.texte.trim()){
     page(d.charte.titre||"Charte du club","Respect · Plaisir · Esprit d'équipe");
     d.charte.texte.split("\n").forEach(function(li){
       if(!li.trim()){ y+=2; return; }
@@ -607,6 +616,7 @@ function dossierPdf(d){
   }
 
   // ── Autorisations & signatures
+  if(!partie||partie==="autorisations"){
   page("Autorisations, décharges & signatures","Validation du dossier · saison "+saison);
   d.autorisations.forEach(function(a,i){
     var titre=String.fromCharCode(65+i)+". "+(a.titre||"Autorisation");
@@ -630,6 +640,8 @@ function dossierPdf(d){
     bx+=bw+4;
   });
   y+=36;
+  }
+  if(vierge){ askAlert("Rien à imprimer : complète d'abord cette partie dans « Régler le dossier »."); return; }
 
   // ── Pied de page
   var n=doc.getNumberOfPages();
@@ -638,5 +650,36 @@ function dossierPdf(d){
     doc.text(txt(club+" - Dossier d'inscription "+saison),M,292); doc.text("Page "+p+" / "+n,W-M,292,{align:"right"});
   }
   var slug=(typeof clubSlug==="function")?clubSlug():"club";
-  doc.save(slug+"_dossier-inscription_"+String(saison).replace(/\//g,"-")+".pdf");
+  doc.save(slug+"_"+({sante:"questionnaire-sante",charte:"charte",autorisations:"autorisations"}[partie]||"dossier-inscription")+"_"+String(saison).replace(/\//g,"-")+".pdf");
+}
+
+// ═══ ÉCRAN DOCUMENTS : les pièces du dossier d'inscription ═════════
+// Questionnaire de santé (Formulaire), charte (Règlement), autorisations (Autorisation)
+// et dossier complet : toujours à jour, générés depuis le réglage du dossier.
+function dossierDocsCartes(cat){
+  var d=dossierClub(), dir=localStorage.getItem("asmb_profile")==="dirigeant", out=[];
+  var items=[
+    {cat:"formulaire",titre:"Dossier d'inscription complet",sous:"Fiche, tarifs, santé, planning, charte, autorisations",partie:null,ok:true},
+    {cat:"formulaire",titre:"Questionnaire de santé",sous:d.sante.questions.length+" questions · "+(d.sante.actif?"sur la fiche en ligne":"pas sur la fiche en ligne"),partie:"sante",ok:d.sante.questions.length>0},
+    {cat:"reglement",titre:d.charte.titre||"Charte & règlement intérieur",sous:d.charte.texte.trim()?"À lire et approuver sur la fiche":"Pas encore écrite",partie:"charte",ok:!!d.charte.texte.trim()},
+    {cat:"autorisation",titre:"Autorisations & signatures",sous:d.autorisations.length?d.autorisations.length+" autorisation(s) sur la fiche":"Aucune autorisation réglée",partie:"autorisations",ok:true}
+  ];
+  items.forEach(function(it){
+    if(cat&&cat!=="all"&&cat!==it.cat) return;
+    var c=document.createElement("div");
+    c.style.cssText="margin:0 12px 10px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:12px";
+    var g=document.createElement("div"); g.style.cssText="flex:1;min-width:0";
+    var b=document.createElement("span"); b.textContent=(typeof DOC_CAT_LABELS!=="undefined"&&DOC_CAT_LABELS[it.cat])||it.cat;
+    b.style.cssText="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;background:"+((typeof DOC_CAT_COLORS!=="undefined"&&DOC_CAT_COLORS[it.cat])||"#8E44AD");
+    var b2=document.createElement("span"); b2.textContent="Dossier d'inscription"; b2.style.cssText="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;background:var(--bdr);color:var(--mut)";
+    var t=document.createElement("div"); t.textContent=it.titre; t.style.cssText="font-size:13px;font-weight:700;color:var(--txt);margin-top:5px";
+    var st=document.createElement("div"); st.textContent=it.sous; st.style.cssText="font-size:11px;color:var(--mut);margin-top:2px";
+    g.appendChild(b); g.appendChild(b2); g.appendChild(t); g.appendChild(st); c.appendChild(g);
+    var acts=document.createElement("div"); acts.style.cssText="display:flex;flex-direction:column;gap:6px;flex:none";
+    if(it.ok) acts.appendChild(gmBtn("PDF","soft",function(){ dossierPdf(null,it.partie); }));
+    if(dir) acts.appendChild(gmBtn("Modifier","ghost",function(){ dossierEditeur(); }));
+    c.appendChild(acts);
+    out.push(c);
+  });
+  return out;
 }

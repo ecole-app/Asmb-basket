@@ -410,7 +410,8 @@ var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
   {id:"apparence", ic:"🎨", titre:"Apparence", secs:["apparence","themes"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
-  {id:"argent", ic:"💶", titre:"Argent & documents", dir:true, secs:["paiement","dossier","aides","relances","facturation","cerfa"]},
+  {id:"argent", ic:"📝", titre:"Inscriptions & licences", dir:true, secs:["dossier","paiement","aides","relances"]},
+  {id:"factures", ic:"💶", titre:"Factures & reçus fiscaux", dir:true, secs:["facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},
   {id:"donnees", ic:"💾", titre:"Données & saison", dir:true, secs:["donnees"]},
   {id:"demo", ic:"🧪", titre:"Démonstration (super admin)", sa:true, secs:["demo"]}
@@ -424,7 +425,8 @@ function paramsResume(id){
     return "Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
   }
   if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · "+(clubLiens().length?clubLiens().length+" lien"+(clubLiens().length>1?"s":""):"réseaux")+" · QR codes";
-  if(id==="argent") return "Paiement licences · dossier d'inscription · relances · factures · CERFA";
+  if(id==="argent") return "Dossier d'inscription · paiement · Pass'Sport · relances";
+  if(id==="factures") return "Factures sponsors · reçus fiscaux (CERFA)";
   if(id==="abonnement"){
     var c2=window.CURRENT_CLUB||{}, pk=(typeof aboPackTxt==="function")?aboPackTxt(c2):{nom:""};
     var g=(typeof aboGelActif==="function")&&aboGelActif(c2);

@@ -1,5 +1,30 @@
 [
  {
+  "v": "1792902990",
+  "titre": "Dossier d'inscription dans Documents + HelloAsso",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Documents affiche les pièces du dossier d'inscription : dossier complet, questionnaire de santé, charte et autorisations, chacune en PDF et modifiable."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Paramètres : « Argent & documents » devient « Inscriptions & licences » (dossier, paiement, Pass'Sport, relances) et « Factures & reçus fiscaux »."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "parent"
+    ],
+    "texte": "Lien HelloAsso dans le dossier : bouton « Payer en ligne » sur la fiche d'inscription et lien dans le PDF."
+   }
+  ]
+ },
+ {
   "v": "1792858280",
   "titre": "Dossier d'inscription réglable par club",
   "points": [

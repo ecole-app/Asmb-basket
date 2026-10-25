@@ -1069,7 +1069,10 @@ function buildDocs(){
   uploadZone.onclick=function(){showAddDoc();};
   uploadZone.innerHTML="<div style=\"font-size:28px;margin-bottom:8px\"></div><div style=\"font-size:13px;font-weight:600;color:var(--txt)\">Ajouter un document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px\">PDF · Image · Word · Excel · 3 Mo maximum</div>";
   el.appendChild(uploadZone);
-  if(!filtered.length){var empty=document.createElement("div");empty.className="empty-state";empty.innerHTML="<div class=\"empty-state-icon\"></div><div style=\"font-size:13px;font-weight:600\">Aucun document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px;max-width:280px;margin-left:auto;margin-right:auto;line-height:1.4\">Règlement, charte, organisation : ajoute-les ici et choisis de les publier aux parents.</div>";el.appendChild(empty);return;}
+  // Pièces du dossier d'inscription (questionnaire de santé, charte, autorisations) : générées, toujours à jour.
+  var cartesDossier=(typeof dossierDocsCartes==="function")?dossierDocsCartes(currentDocCatFilter):[];
+  cartesDossier.forEach(function(n){ el.appendChild(n); });
+  if(!filtered.length&&!cartesDossier.length){var empty=document.createElement("div");empty.className="empty-state";empty.innerHTML="<div class=\"empty-state-icon\"></div><div style=\"font-size:13px;font-weight:600\">Aucun document</div><div style=\"font-size:11px;color:var(--mut);margin-top:4px;max-width:280px;margin-left:auto;margin-right:auto;line-height:1.4\">Règlement, charte, organisation : ajoute-les ici et choisis de les publier aux parents.</div>";el.appendChild(empty);return;}
   var typeIcons={"pdf":"📕","image":"🖼️","word":"📘","excel":"📗","autre":"📄"};
   filtered.forEach(function(d){
     var icon=typeIcons[d.type]||"📄";
