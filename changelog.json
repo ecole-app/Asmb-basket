@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792913767",
+  "titre": "Appli installée : mises à jour fiables",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "L'appli installée prend toujours les fichiers les plus récents (fin des écrans vides après une mise à jour)."
+   }
+  ]
+ },
+ {
   "v": "1792913665",
   "titre": "Message d'erreur au démarrage",
   "points": [

@@ -171,6 +171,9 @@ self.addEventListener('activate', function (event) {
 });
 
 function isHtmlOrVersion(url) {
+  // Le code de l'appli (JS, CSS, traductions) est aussi pris sur le réseau en priorité :
+  // sinon l'appli installée mélange d'anciens fichiers (cache) avec la nouvelle page → écran vide.
+  if (url.origin === self.location.origin && /\.(js|css|json)$/.test(url.pathname) && !/manifest\.json$/.test(url.pathname)) return true;
   return url.pathname.endsWith('/') ||
          url.pathname.endsWith('/index.html') ||
          url.pathname.endsWith('index.html') ||
