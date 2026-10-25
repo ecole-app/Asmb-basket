@@ -31,8 +31,18 @@ window.fbProjectId = firebaseConfig.projectId;
 const GM_APPCHECK_SITE_KEY = "6Le30N8tAAAAAGUJks6zaN09Rbn8B6L-cQRC5Jwp";
 try{
   if(GM_APPCHECK_SITE_KEY && GM_APPCHECK_SITE_KEY.indexOf("REMPLACER")!==0){
+    // Si la vérification reCAPTCHA reste bloquée (appli installée, réseau lent), Firestore attendait
+    // sans fin son jeton : écran vide. On abandonne la vérification après 6 s et la requête part quand même.
+    class GmProvider extends ReCaptchaEnterpriseProvider {
+      getToken(){
+        const vrai = super.getToken();
+        return Promise.race([vrai, new Promise(function(_, rejeter){
+          setTimeout(function(){ window.__gmDiag=(window.__gmDiag||"")+" appcheck-delai"; rejeter(new Error("App Check : délai dépassé")); }, 6000);
+        })]);
+      }
+    }
     const gmAppCheck = initializeAppCheck(fbApp, {
-      provider: new ReCaptchaEnterpriseProvider(GM_APPCHECK_SITE_KEY),
+      provider: new GmProvider(GM_APPCHECK_SITE_KEY),
       isTokenAutoRefreshEnabled: true
     });
     // Jeton App Check pour les appels REST (Gemini via Firebase AI Logic).
