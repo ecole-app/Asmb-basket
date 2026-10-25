@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792904005",
+  "titre": "Le champ reste visible au-dessus du clavier",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Quand tu touches un champ à remplir, l'écran remonte pour qu'il reste au-dessus du clavier, aussi dans les fenêtres qui s'ouvrent du bas."
+   }
+  ]
+ },
+ {
   "v": "1792903484",
   "titre": "Dossier : tarifs vides pour les autres clubs",
   "points": [

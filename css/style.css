@@ -791,3 +791,6 @@ html.gm-desk.gm-desk-mini .gs-grp-btn svg{display:none}
 .ind-pb .em,.ind-react .em{opacity:0}
 .ind-pb.on .em{opacity:0}
 .ind-ann-t .em{opacity:0}
+
+/* Clavier ouvert (js/09-ui-modales.js) : marge en bas des fenêtres pour que le dernier champ remonte au-dessus du clavier */
+html.gm-clavier .gm-sheet > div, html.gm-clavier [id^="modal-"] > div, html.gm-clavier .scr.on{padding-bottom:calc(24px + var(--clavier, 0px)) !important}

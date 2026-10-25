@@ -317,3 +317,53 @@ function gmVide(o){
     (o.bouton?'<button type="button" class="gm-vide-b" onclick="'+o.bouton.action+'">'+esc(o.bouton.label)+'</button>':'')+
     '</div>';
 }
+
+// ── Clavier du téléphone : le champ touché reste visible au-dessus du clavier ──
+// Android : interactive-widget=resizes-content (viewport de index.html) réduit l'écran à la zone
+// au-dessus du clavier. En plus (iPhone, fenêtres en bas d'écran) : quand un champ prend le focus,
+// on fait défiler la zone qui le contient pour le ramener au milieu de la partie visible, et on
+// ajoute de la marge en bas des fenêtres pour que le dernier champ puisse remonter lui aussi.
+(function(){
+  var TYPES_SANS_CLAVIER=/^(checkbox|radio|button|submit|reset|file|range|color|date|time|datetime-local|month|week)$/i;
+  function aClavier(el){
+    if(!el||!el.tagName) return false;
+    var t=el.tagName;
+    if(t==="TEXTAREA") return !el.readOnly;
+    if(t==="INPUT") return !el.readOnly && !TYPES_SANS_CLAVIER.test(el.type||"text");
+    return !!el.isContentEditable;
+  }
+  function hautVisible(){ var vv=window.visualViewport; return vv?vv.height:window.innerHeight; }
+  function majMarge(){
+    var vv=window.visualViewport; if(!vv) return;
+    var cache=Math.max(0, window.innerHeight-vv.height-vv.offsetTop);
+    var ouvert=cache>80;
+    document.documentElement.classList.toggle("gm-clavier",ouvert);
+    document.documentElement.style.setProperty("--clavier",(ouvert?cache:0)+"px");
+  }
+  function ramener(el){
+    if(!el||!document.contains(el)||document.activeElement!==el) return;
+    var h=hautVisible(), haut=72, bas=h-16, r=el.getBoundingClientRect();
+    if(r.top>=haut && r.bottom<=bas) return;
+    var delta=(r.top+Math.min(r.height,120)/2)-(haut+bas)/2;
+    for(var p=el.parentElement; p&&p!==document.body&&p!==document.documentElement; p=p.parentElement){
+      var oy=getComputedStyle(p).overflowY;
+      if((oy==="auto"||oy==="scroll") && p.scrollHeight>p.clientHeight+1){
+        var avant=p.scrollTop; p.scrollTop=avant+delta; delta-=(p.scrollTop-avant);
+        if(Math.abs(delta)<4) return;
+      }
+    }
+    try{ window.scrollBy({top:delta,behavior:"smooth"}); }catch(e){ window.scrollBy(0,delta); }
+  }
+  document.addEventListener("focusin",function(e){
+    var el=e.target; if(!aClavier(el)) return;
+    // le clavier met ~300 ms à s'ouvrir : on vérifie après son ouverture, puis une 2e fois
+    setTimeout(function(){ majMarge(); ramener(el); },320);
+    setTimeout(function(){ majMarge(); ramener(el); },700);
+  });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize",function(){
+      majMarge();
+      var el=document.activeElement; if(aClavier(el)) setTimeout(function(){ ramener(el); },60);
+    });
+  }
+})();
