@@ -35,6 +35,8 @@ Pages publiques (tournoi, buvette, bénévole) : `window.GM_I18N_BASE="../"` pui
 Notifications push : l'appareil enregistre sa langue dans `push_subscriptions/{uid}.langue`
 (js/22-push.js) ; `functions/index.js` traduit les textes fixes (`NOTIF_TXT`, `tn()`,
 `envoyerParLangue()`), jamais ce que les gens écrivent. Alertes Plateforme : en français.
+PDF : restent en français pour l'instant (décision du 25/10/2026 : clubs en France ; à traduire
+si l'appli part à l'étranger, sauf documents officiels ; l'arabe demandera une police dédiée).
 
 ## Version et changelog (seulement si du code client change)
 
