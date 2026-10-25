@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792953553",
+  "titre": "Notifications dans votre langue",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Les notifications (messages, rôle attribué, poste de bénévole, classement FFBB) arrivent dans la langue de votre téléphone. Les messages écrits par les membres restent tels quels."
+   }
+  ]
+ },
+ {
   "v": "1792952770",
   "titre": "Pages publiques traduites",
   "points": [

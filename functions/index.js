@@ -27,6 +27,93 @@ function webpushClub(clubId, plus) {
   w.notification = { icon: clubId ? URL_LOGO_CLUB + "?c=" + encodeURIComponent(clubId) : URL_LOGO_GM };
   return w;
 }
+// ── Langue des notifications ──────────────────────────────────────────────
+// Chaque appareil enregistre sa langue avec son abonnement (push_subscriptions/{uid}.langue,
+// js/22-push.js). Seuls les textes fixes sont traduits : ce que les gens écrivent (messages,
+// noms, postes, titres d'événements) reste tel quel. Langue absente ou inconnue : français.
+// Les alertes Plateforme (super admin) restent en français.
+const NOTIF_LANGUES = ["en", "ar", "es", "it", "de"];
+const NOTIF_TXT = {
+  "Nouveau message": ["New message", "رسالة جديدة", "Nuevo mensaje", "Nuovo messaggio", "Neue Nachricht"],
+  "Communauté": ["Community", "المجتمع", "Comunidad", "Community", "Community"],
+  "Message privé": ["Private message", "رسالة خاصة", "Mensaje privado", "Messaggio privato", "Private Nachricht"],
+  "message privé": ["private message", "رسالة خاصة", "mensaje privado", "messaggio privato", "private Nachricht"],
+  "📄 a partagé un document": ["📄 shared a document", "📄 شارك مستندًا", "📄 ha compartido un documento", "📄 ha condiviso un documento", "📄 hat ein Dokument geteilt"],
+  "📷 a partagé une photo": ["📷 shared a photo", "📷 شارك صورة", "📷 ha compartido una foto", "📷 ha condiviso una foto", "📷 hat ein Foto geteilt"],
+  "🎤 Message vocal": ["🎤 Voice message", "🎤 رسالة صوتية", "🎤 Mensaje de voz", "🎤 Messaggio vocale", "🎤 Sprachnachricht"],
+  "Championnat": ["Championship", "البطولة", "Campeonato", "Campionato", "Meisterschaft"],
+  "Classement": ["Standings", "الترتيب", "Clasificación", "Classifica", "Tabelle"],
+  "Votre rôle a changé": ["Your role has changed", "تغيّر دورك", "Tu función ha cambiado", "Il tuo ruolo è cambiato", "Ihre Rolle hat sich geändert"],
+  "Vous êtes bénévole": ["You are volunteering", "أنت متطوع", "Eres voluntario", "Sei volontario", "Sie sind als Helfer eingeteilt"],
+  "bénévole": ["volunteer", "متطوع", "voluntario", "volontario", "Helfer"],
+  "événement du club": ["club event", "فعالية النادي", "evento del club", "evento del club", "Vereinsveranstaltung"],
+  "Test de notification": ["Notification test", "اختبار الإشعارات", "Prueba de notificación", "Test di notifica", "Benachrichtigungstest"],
+  "Si tu vois ceci, les messages du club t'arriveront.": ["If you can see this, club messages will reach you.", "إذا رأيت هذا، فستصلك رسائل النادي.", "Si ves esto, te llegarán los mensajes del club.", "Se vedi questo, i messaggi del club ti arriveranno.", "Wenn du das siehst, erreichen dich die Nachrichten des Vereins."],
+  // rôles, profils du bureau, modules (mêmes mots que l'appli, i18n/<langue>.json)
+  "Dirigeant": ["Director", "مسيّر", "Directivo", "Dirigente", "Vorstand"],
+  "Coach": ["Coach", "مدرب", "Entrenador", "Allenatore", "Trainer"],
+  "Parent": ["Parent", "وليّ أمر", "Padre/Madre", "Genitore", "Elternteil"],
+  "Joueur": ["Player", "لاعب", "Jugador", "Giocatore", "Spieler"],
+  "Bureau": ["Board", "المكتب", "Junta", "Direttivo", "Vorstand"],
+  "Trésorier": ["Treasurer", "أمين المال", "Tesorero/a", "Tesoriere", "Kassenwart"],
+  "Secrétaire": ["Secretary", "الكاتب العام", "Secretario/a", "Segretario/a", "Schriftführer/in"],
+  "Membre du bureau": ["Board member", "عضو المكتب", "Miembro de la junta", "Membro del direttivo", "Vorstandsmitglied"],
+  "Accès & invitations": ["Access & invitations", "الوصول والدعوات", "Accesos e invitaciones", "Accessi e inviti", "Zugänge & Einladungen"],
+  "Paramètres": ["Settings", "الإعدادات", "Ajustes", "Impostazioni", "Einstellungen"],
+  "Licences": ["Licences", "الرخص", "Licencias", "Tessere", "Lizenzen"],
+  "Inscriptions": ["Registrations", "التسجيلات", "Inscripciones", "Iscrizioni", "Anmeldungen"],
+  "Équipes": ["Teams", "الفرق", "Equipos", "Squadre", "Mannschaften"],
+  "Planning": ["Schedule", "البرنامج", "Planificación", "Programma", "Plan"],
+  "Documents": ["Documents", "المستندات", "Documentos", "Documenti", "Dokumente"],
+  "Accès coach": ["Coach access", "وصول المدرب", "Acceso entrenador", "Accesso allenatore", "Trainerzugang"],
+  "Avis & suggestions": ["Feedback & suggestions", "الآراء والاقتراحات", "Opiniones y sugerencias", "Opinioni e suggerimenti", "Feedback & Vorschläge"],
+  "Fiches reçues": ["Forms received", "الاستمارات المستلمة", "Fichas recibidas", "Schede ricevute", "Erhaltene Formulare"],
+  "Comptabilité": ["Accounting", "المحاسبة", "Contabilidad", "Contabilità", "Buchhaltung"],
+  "Sponsors & Partenaires": ["Sponsors & Partners", "الرعاة والشركاء", "Patrocinadores y socios", "Sponsor e partner", "Sponsoren & Partner"],
+  "Notes de frais": ["Expense claims", "المصاريف", "Notas de gastos", "Note spese", "Spesenabrechnungen"],
+  "Inventaire": ["Inventory", "الجرد", "Inventario", "Inventario", "Inventar"]
+};
+const notifLangue = (l) => (NOTIF_LANGUES.includes(l) ? l : "fr");
+function tn(lang, fr) {
+  const t = NOTIF_TXT[fr], i = NOTIF_LANGUES.indexOf(lang);
+  return (t && i >= 0 && t[i]) || fr;
+}
+const NOTIF_ET = { fr: "et", en: "and", ar: "و", es: "y", it: "e", de: "und" };
+function listeLangue(a, lang) {
+  if (a.length <= 1) return a[0] || "";
+  if (lang === "ar") return a.slice(0, -1).join("، ") + " و" + a[a.length - 1];   // « و » collé au mot suivant
+  return a.slice(0, -1).join(", ") + " " + (NOTIF_ET[lang] || "et") + " " + a[a.length - 1];
+}
+// Rang au classement : 1er/2e (fr), 1st/2nd (en), 1.º (es), 1° (it), 1. (de), 1 (ar).
+function rangLangue(n, lang) {
+  if (lang === "en") { const d = n % 10, c = n % 100; return n + ((c >= 11 && c <= 13) ? "th" : d === 1 ? "st" : d === 2 ? "nd" : d === 3 ? "rd" : "th"); }
+  if (lang === "es") return n + ".º";
+  if (lang === "it") return n + "°";
+  if (lang === "de") return n + ".";
+  if (lang === "ar") return String(n);
+  return n + (n === 1 ? "er" : "e");
+}
+const jetonMort = (c) => c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token";
+// Envoi à plusieurs appareils, un envoi par langue (500 jetons max par envoi).
+// entrees : [{token, ref, langue}] ; fabrique(langue) → {title, body}.
+// Les abonnements dont le jeton est mort (appli désinstallée...) sont supprimés.
+async function envoyerParLangue(clubId, entrees, fabrique, data, plus) {
+  const groupes = {};
+  entrees.forEach((e) => { const l = notifLangue(e.langue); (groupes[l] = groupes[l] || []).push(e); });
+  const morts = [];
+  for (const l of Object.keys(groupes)) {
+    const notification = fabrique(l), g = groupes[l];
+    for (let i = 0; i < g.length; i += 500) {
+      const lot = g.slice(i, i + 500);
+      const r = await admin.messaging().sendEachForMulticast({
+        tokens: lot.map((e) => e.token), notification, data, webpush: webpushClub(clubId, plus)
+      });
+      r.responses.forEach((x, j) => { if (!x.success && jetonMort(x.error && x.error.code)) morts.push(lot[j].ref); });
+    }
+  }
+  if (morts.length) await Promise.all(morts.map((ref) => ref.delete().catch(() => {})));
+}
+
 exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res) => {
   try {
     const id = String(req.query.c || "");
@@ -49,11 +136,14 @@ exports.onChannelMessage = onDocumentCreated(
 
     const { clubId, channelId } = event.params;
     const authorUid = msg.senderUid || null;
-    const title = msg.pseudo ? `${msg.pseudo} (Communauté)` : "Nouveau message";
-    const body = (msg.type === "media")
-      ? (msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
-      : String(msg.text || "").slice(0, 120);
-    if (!body) return;
+    const texte = String(msg.text || "").slice(0, 120);
+    if (msg.type !== "media" && !texte) return;
+    const fabrique = (l) => ({
+      title: msg.pseudo ? `${msg.pseudo} (${tn(l, "Communauté")})` : tn(l, "Nouveau message"),
+      body: (msg.type === "media")
+        ? tn(l, msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
+        : texte
+    });
 
     // Destinataires : seulement les personnes qui voient ce canal.
     //  - canal réservé (liste de membres par téléphone) : ces membres + les dirigeants ;
@@ -90,43 +180,16 @@ exports.onChannelMessage = onDocumentCreated(
       }
     }
 
-    const tokens = [];
-    const tokenToDocId = {};
+    const entrees = [];
     docs.forEach((doc) => {
       if (!doc.exists) return;
       if (authorUid && doc.id === authorUid) return;
-      const token = doc.data() && doc.data().token;
-      if (!token) return;
-      tokens.push(token);
-      tokenToDocId[token] = doc.id;
+      const d = doc.data() || {};
+      if (d.token) entrees.push({ token: d.token, ref: subsCol.doc(doc.id), langue: d.langue });
     });
-    if (!tokens.length) return;
-
-    // Firebase limite un envoi groupé à 500 destinataires : on découpe.
-    const responses = [];
-    for (let i = 0; i < tokens.length; i += 500) {
-      const lot = tokens.slice(i, i + 500);
-      const r = await admin.messaging().sendEachForMulticast({
-        tokens: lot,
-        notification: { title, body },
-        data: { url: "./", conv: channelId },
-        webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
-      });
-      r.responses.forEach((x) => responses.push(x));
-    }
-    const resp = { responses };
-
-    // Nettoie les tokens morts (app désinstallée, cache navigateur vidé...).
-    const cleanup = [];
-    resp.responses.forEach((r, i) => {
-      if (r.success) return;
-      const code = r.error && r.error.code;
-      if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
-        const docId = tokenToDocId[tokens[i]];
-        if (docId) cleanup.push(db.collection("clubs").doc(clubId).collection("push_subscriptions").doc(docId).delete());
-      }
-    });
-    if (cleanup.length) await Promise.all(cleanup);
+    if (!entrees.length) return;
+    // Un envoi par langue ; les tokens morts (app désinstallée, cache vidé...) sont nettoyés.
+    await envoyerParLangue(clubId, entrees, fabrique, { url: "./", conv: channelId }, { headers: { Urgency: "high" } });
   }
 );
 
@@ -141,31 +204,23 @@ exports.onDmMessage = onDocumentCreated(
     const uids = (dmSnap.exists && dmSnap.data().memberUids) || [];
     const dest = uids.filter((u) => u !== msg.senderUid);
     if (!dest.length) return;
-    const title = msg.pseudo ? `${msg.pseudo} (message privé)` : "Message privé";
-    const body = (msg.type === "media")
-      ? (msg.mediaType === "audio" ? "🎤 Message vocal" : msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
-      : String(msg.text || "").slice(0, 120);
-    if (!body) return;
+    const texte = String(msg.text || "").slice(0, 120);
+    if (msg.type !== "media" && !texte) return;
+    const fabrique = (l) => ({
+      title: msg.pseudo ? `${msg.pseudo} (${tn(l, "message privé")})` : tn(l, "Message privé"),
+      body: (msg.type === "media")
+        ? tn(l, msg.mediaType === "audio" ? "🎤 Message vocal" : msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
+        : texte
+    });
     const subsCol = db.collection("clubs").doc(clubId).collection("push_subscriptions");
     const docs = await Promise.all(dest.map((u) => subsCol.doc(u).get()));
-    const tokens = [], tokenToDocId = {};
+    const entrees = [];
     docs.forEach((d) => {
-      const t = d.exists && d.data() && d.data().token;
-      if (t) { tokens.push(t); tokenToDocId[t] = d.id; }
+      const x = (d.exists && d.data()) || {};
+      if (x.token) entrees.push({ token: x.token, ref: d.ref, langue: x.langue });
     });
-    if (!tokens.length) return;
-    const resp = await admin.messaging().sendEachForMulticast({
-      tokens, notification: { title, body }, data: { url: "./", conv: dmId }, webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
-    });
-    const cleanup = [];
-    resp.responses.forEach((r, i) => {
-      if (r.success) return;
-      const code = r.error && r.error.code;
-      if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
-        cleanup.push(subsCol.doc(tokenToDocId[tokens[i]]).delete());
-      }
-    });
-    if (cleanup.length) await Promise.all(cleanup);
+    if (!entrees.length) return;
+    await envoyerParLangue(clubId, entrees, fabrique, { url: "./", conv: dmId }, { headers: { Urgency: "high" } });
   }
 );
 
@@ -320,10 +375,11 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
   const sub = await db.collection("clubs").doc(event.params.clubId).collection("push_subscriptions").doc(d.uid).get();
   const token = sub.exists && sub.data() && sub.data().token;
   if (!token) { await ref.update({ ok: false, erreur: "aucun abonnement pour ce compte dans ce club (active les notifications dans les réglages)" }); return; }
+  const l = notifLangue(sub.data().langue);
   try {
     await admin.messaging().send({
       token,
-      notification: { title: "Test de notification", body: "Si tu vois ceci, les messages du club t'arriveront." },
+      notification: { title: tn(l, "Test de notification"), body: tn(l, "Si tu vois ceci, les messages du club t'arriveront.") },
       data: { url: "./" },
       webpush: webpushClub(event.params.clubId, { headers: { Urgency: "high" } })
     });
@@ -567,28 +623,28 @@ function ffbbAppliquer(champ, poule) {
   const rangDe = (cl) => { const t = (cl || []).find((x) => x.nom === nous.nom && (nous.num == null || x.num === nous.num)); return t ? t.rang : null; };
   const changements = [];
   const r0 = rangDe(champ.classementFfbb), r1 = rangDe(poule.classement);
-  if (r1 && r0 && r1 !== r0) changements.push(`Classement : ${r0}${r0 === 1 ? "er" : "e"} → ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`);
-  else if (r1 && !r0 && champ.ffbb && champ.ffbb.maj) changements.push(`Classement : ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`);
+  let rang = null;   // pour la notification, rédigée dans la langue de chaque appareil
+  if (r1 && r0 && r1 !== r0) { changements.push(`Classement : ${r0}${r0 === 1 ? "er" : "e"} → ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`); rang = { avant: r0, apres: r1, division: champ.division }; }
+  else if (r1 && !r0 && champ.ffbb && champ.ffbb.maj) { changements.push(`Classement : ${r1}${r1 === 1 ? "er" : "e"} (${champ.division})`); rang = { avant: null, apres: r1, division: champ.division }; }
   const joues = (arr) => (arr || []).filter((m) => m.s1 != null && m.s2 != null).length;
   if (joues(out) > joues(anc)) changements.push(`Nouveaux résultats dans la poule (${champ.division})`);
   return {
     champ: Object.assign({}, champ, { rencontres: out, classementFfbb: poule.classement, pouleNom: poule.nom, maj: Date.now() }),
-    changements
+    changements, rang
   };
 }
-async function ffbbPush(clubId, titre, corps) {
+// Notification à tout le club ; fabrique(langue) → {title, body}.
+async function ffbbPush(clubId, fabrique) {
   const subs = await db.collection("clubs").doc(clubId).collection("push_subscriptions").get();
-  const tokens = [], docs = [];
-  subs.forEach((s) => { const t = s.data() && s.data().token; if (t) { tokens.push(t); docs.push(s.ref); } });
-  if (!tokens.length) return;
-  const res = await admin.messaging().sendEachForMulticast({
-    tokens, notification: { title: titre, body: corps }, data: { url: "./" },
-    webpush: webpushClub(clubId)
-  });
-  await Promise.all(res.responses.map((r, i) => {
-    const c = r.error && r.error.code;
-    return (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") ? docs[i].delete() : null;
-  }));
+  const entrees = [];
+  subs.forEach((s) => { const d = s.data() || {}; if (d.token) entrees.push({ token: d.token, ref: s.ref, langue: d.langue }); });
+  if (!entrees.length) return;
+  await envoyerParLangue(clubId, entrees, fabrique, { url: "./" });
+}
+// « Classement : 3e → 2e (U15 M Régionale) » dans la langue de l'appareil.
+function texteRang(x, l) {
+  const r = (n) => rangLangue(n, l);
+  return `${tn(l, "Classement")}${l === "fr" ? " :" : ":"} ${x.avant ? r(x.avant) + " → " : ""}${r(x.apres)} (${x.division})`;
 }
 // Matchs de NOTRE équipe dont la date/heure a changé ou dont le score vient d'arriver.
 function ffbbDiffNous(anc, nouv, nous) {
@@ -658,8 +714,8 @@ async function ffbbSyncChamp(clubId, ref, champ, notifier) {
   await ref.set(JSON.parse(JSON.stringify(r.champ)));
   if (notifier) {
     try { await ffbbAlertesEquipe(clubId, r.champ, ffbbDiffNous(champ.rencontres, r.champ.rencontres, champ.nous)); } catch (e) { /* l'alerte ne bloque jamais la synchro */ }
-    const classement = r.changements.filter((t) => t.indexOf("Classement") === 0);   // les résultats partent déjà dans le canal de l'équipe
-    if (classement.length) await ffbbPush(clubId, "Championnat", classement.join(" · "));
+    // Seul le classement est notifié : les résultats partent déjà dans le canal de l'équipe.
+    if (r.rang) { const x = r.rang; await ffbbPush(clubId, (l) => ({ title: tn(l, "Championnat"), body: texteRang(x, l) })); }
   }
   return r.changements;
 }
@@ -740,11 +796,13 @@ const NOTIF_MODULES = {
   notesfrais: "Notes de frais", inventaire: "Inventaire"
 };
 // Envoie une notification à un compte du club (rien si pas d'abonnement push).
-async function notifierCompte(clubId, uid, titre, corps) {
+// fabrique(langue) → {titre, corps} ; langue de l'appareil, sinon celle du compte (langueCompte).
+async function notifierCompte(clubId, uid, fabrique, langueCompte) {
   const ref = db.collection("clubs").doc(clubId).collection("push_subscriptions").doc(uid);
   const snap = await ref.get();
   const token = snap.exists && snap.data() && snap.data().token;
   if (!token) return;
+  const { titre, corps } = fabrique(notifLangue(snap.data().langue || langueCompte));
   try {
     await admin.messaging().send({
       token, notification: { title: titre, body: corps }, data: { url: "./" },
@@ -755,7 +813,24 @@ async function notifierCompte(clubId, uid, titre, corps) {
     if (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") await ref.delete();
   }
 }
-const listeFr = (a) => a.length <= 1 ? (a[0] || "") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1];
+// Phrases de la notification « Votre rôle a changé », par langue.
+const NOTIF_ROLE_TPL = {
+  fr: { role: "rôle", profil: "profil", attribue: (l) => `Le club vous a attribué le ${l}.`, acces: (l) => `Nouvel accès : ${l}.` },
+  en: { role: "role", profil: "profile", attribue: (l) => `The club has given you: ${l}.`, acces: (l) => `New access: ${l}.` },
+  ar: { role: "دور", profil: "صفة", attribue: (l) => `منحك النادي: ${l}.`, acces: (l) => `وصول جديد: ${l}.` },
+  es: { role: "función", profil: "perfil", attribue: (l) => `El club te ha asignado: ${l}.`, acces: (l) => `Nuevo acceso: ${l}.` },
+  it: { role: "ruolo", profil: "profilo", attribue: (l) => `Il club ti ha assegnato: ${l}.`, acces: (l) => `Nuovo accesso: ${l}.` },
+  de: { role: "Rolle", profil: "Profil", attribue: (l) => `Der Verein hat Ihnen zugewiesen: ${l}.`, acces: (l) => `Neuer Zugang: ${l}.` }
+};
+// Phrase de la notification « Vous êtes bénévole » (poste, jour JJ/MM, heure, événement).
+const NOTIF_BENEVOLE_TPL = {
+  fr: (p, j, h, t) => `Poste « ${p} »${j ? " le " + j : ""}${h ? " à " + h : ""} : ${t}.`,
+  en: (p, j, h, t) => `Post “${p}”${j ? " on " + j : ""}${h ? " at " + h : ""}: ${t}.`,
+  ar: (p, j, h, t) => `منصب «${p}»${j ? " يوم " + j : ""}${h ? " على الساعة " + h : ""}: ${t}.`,
+  es: (p, j, h, t) => `Puesto «${p}»${j ? " el " + j : ""}${h ? " a las " + h : ""}: ${t}.`,
+  it: (p, j, h, t) => `Postazione «${p}»${j ? " il " + j : ""}${h ? " alle " + h : ""}: ${t}.`,
+  de: (p, j, h, t) => `Posten „${p}“${j ? " am " + j : ""}${h ? " um " + h : ""}: ${t}.`
+};
 
 // Le dirigeant change le rôle, le profil du bureau ou les accès d'une personne du club.
 // (Un compte qui vient d'être créé ou rattaché au club n'a pas d'« avant » : pas de notification.)
@@ -763,18 +838,23 @@ exports.onRoleAttribue = onDocumentUpdated("users/{uid}", async (event) => {
   const avant = event.data && event.data.before.data();
   const apres = event.data && event.data.after.data();
   if (!avant || !apres || !avant.clubId || avant.clubId !== apres.clubId) return;
-  const lignes = [];
   const rolesAvant = avant.roles || [], rolesApres = apres.roles || [];
-  const nouveauxRoles = rolesApres.filter((r) => !rolesAvant.includes(r) && NOTIF_ROLES[r]);
-  if (nouveauxRoles.length) lignes.push("rôle " + listeFr(nouveauxRoles.map((r) => NOTIF_ROLES[r])));
-  if (apres.titre && apres.titre !== avant.titre && NOTIF_TITRES[apres.titre]) lignes.push("profil " + NOTIF_TITRES[apres.titre]);
+  const nouveauxRoles = rolesApres.filter((r) => !rolesAvant.includes(r) && NOTIF_ROLES[r]).map((r) => NOTIF_ROLES[r]);
+  const titre = (apres.titre && apres.titre !== avant.titre && NOTIF_TITRES[apres.titre]) ? NOTIF_TITRES[apres.titre] : "";
   const pAvant = avant.permissions || {}, pApres = apres.permissions || {};
   const modules = Object.keys(pApres).filter((k) => pApres[k] === true && pAvant[k] !== true && NOTIF_MODULES[k]).map((k) => NOTIF_MODULES[k]);
-  if (!lignes.length && !modules.length) return;
-  let corps = "";
-  if (lignes.length) corps += "Le club vous a attribué le " + listeFr(lignes) + ". ";
-  if (modules.length) corps += "Nouvel accès : " + listeFr(modules) + ".";
-  await notifierCompte(apres.clubId, event.params.uid, "Votre rôle a changé", corps.trim());
+  if (!nouveauxRoles.length && !titre && !modules.length) return;
+  const fabrique = (l) => {
+    const t = NOTIF_ROLE_TPL[l] || NOTIF_ROLE_TPL.fr;
+    const lignes = [];
+    if (nouveauxRoles.length) lignes.push(t.role + " " + listeLangue(nouveauxRoles.map((r) => tn(l, r)), l));
+    if (titre) lignes.push(t.profil + " " + tn(l, titre));
+    let corps = "";
+    if (lignes.length) corps += t.attribue(listeLangue(lignes, l)) + " ";
+    if (modules.length) corps += t.acces(listeLangue(modules.map((m) => tn(l, m)), l));
+    return { titre: tn(l, "Votre rôle a changé"), corps: corps.trim() };
+  };
+  await notifierCompte(apres.clubId, event.params.uid, fabrique, apres.langue);
 });
 
 // Un bénévole avec compte est placé sur un poste d'un événement.
@@ -787,8 +867,10 @@ exports.onBenevolePlace = onDocumentUpdated("clubs/{clubId}/events/{eventId}", a
   for (const m of nouveaux) {
     const jour = String(m.jour || apres.date || "");
     const jourFr = jour ? jour.split("-").reverse().join("/") : "";
-    const corps = `Poste « ${m.poste || "bénévole"} »${jourFr ? " le " + jourFr : ""}${m.heure ? " à " + m.heure : ""} : ${apres.titre || "événement du club"}.`;
-    await notifierCompte(event.params.clubId, m.uid, "Vous êtes bénévole", corps);
+    await notifierCompte(event.params.clubId, m.uid, (l) => ({
+      titre: tn(l, "Vous êtes bénévole"),
+      corps: (NOTIF_BENEVOLE_TPL[l] || NOTIF_BENEVOLE_TPL.fr)(m.poste || tn(l, "bénévole"), jourFr, m.heure || "", apres.titre || tn(l, "événement du club"))
+    }));
   }
 });
 
