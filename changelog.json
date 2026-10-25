@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792926289",
+  "titre": "Traductions : tournois",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Tournois (équipes, planning, jour J, table de marque, plan du site, tirage), championnats FFBB et dossiers d'événement sont traduits en anglais, arabe, espagnol, italien et allemand."
+   }
+  ]
+ },
+ {
   "v": "1792920751",
   "titre": "Traductions : billetterie et bénévoles",
   "points": [
