@@ -138,9 +138,19 @@ if(localStorage.getItem("gm_is_su")==="1"){
 setTimeout(initAuthGate,80);
 // Filet de sécurité : l'écran de démarrage ne reste jamais plus de 10 s.
 setTimeout(function(){ document.documentElement.classList.remove("gm-boot"); },10000);
+// Diagnostic : si rien n'est affiché après 9 s, on affiche l'état du démarrage (au lieu d'un écran vide).
+setTimeout(function(){
+  try{
+    var on=document.querySelector(".scr.on");
+    if(on&&on.innerText&&on.innerText.trim().length>20) return;
+    var fa=window.fbAuth, cu=fa&&fa.currentUser;
+    var st=["ecran="+(on?on.id:"aucun"),"fbAuth="+(fa?"oui":"non"),"user="+(cu?"connecte":"non"),"ASMB_USER="+(window.ASMB_USER?"oui":"non"),"club="+(window.CURRENT_CLUB_ID||"?"),"su="+localStorage.getItem("gm_is_su"),"reseau="+(navigator.onLine?"oui":"non"),"lang="+(window.GM_LANG||"?"),"app="+((window.matchMedia&&matchMedia("(display-mode: standalone)").matches)?"installee":"navigateur")].join(" · ");
+    if(window.gmBanniere) window.gmBanniere("Démarrage bloqué — "+st);
+  }catch(e){}
+},9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1792913767";
+var APP_VERSION="1792913986";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la

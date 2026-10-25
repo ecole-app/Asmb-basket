@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792913986",
+  "titre": "Diagnostic de démarrage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Si l'appli reste vide au démarrage, une bannière affiche l'état du démarrage."
+   }
+  ]
+ },
+ {
   "v": "1792913767",
   "titre": "Appli installée : mises à jour fiables",
   "points": [
