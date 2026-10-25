@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792913665",
+  "titre": "Message d'erreur au démarrage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Si l'appli plante au démarrage, une bannière affiche la cause au lieu d'un écran vide."
+   }
+  ]
+ },
+ {
   "v": "1792907143",
   "titre": "Traductions corrigées",
   "points": [

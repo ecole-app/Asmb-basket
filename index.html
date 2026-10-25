@@ -20,6 +20,13 @@
 <meta name="apple-mobile-web-app-title" content="General Manager">
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 <title>General Manager</title>
+<script>
+/* Filet de sécurité : si une erreur JS casse l'appli au démarrage, on l'affiche (au lieu d'un écran vide) */
+(function(){var vu=false;function aff(m){if(vu)return;vu=true;var d=document.createElement("div");d.setAttribute("data-notr","");d.style.cssText="position:fixed;left:8px;right:8px;bottom:84px;z-index:99999;background:#7a1a12;color:#fff;border-radius:12px;padding:10px 12px;font:12px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.35)";d.textContent="⚠ "+m;var b=document.createElement("button");b.textContent="OK";b.style.cssText="margin-left:8px;border:0;border-radius:8px;padding:4px 10px;font-weight:700";b.onclick=function(){d.remove()};d.appendChild(b);(document.body||document.documentElement).appendChild(d);}
+window.addEventListener("error",function(e){if(Date.now()-(window.__gmT0||(window.__gmT0=Date.now()))<20000&&e&&e.message&&!/ResizeObserver|Script error/.test(e.message))aff(e.message+" ("+String(e.filename||"").split("/").pop()+":"+e.lineno+")");});
+window.addEventListener("unhandledrejection",function(e){var r=e&&e.reason;if(Date.now()-(window.__gmT0||(window.__gmT0=Date.now()))<20000&&r&&r.message)aff(r.message);});
+window.__gmT0=Date.now();})();
+</script>
 <script src="js/00-i18n.js"></script>
 
 <script src="js/sw-register.js"></script>
