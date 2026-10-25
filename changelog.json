@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792904234",
+  "titre": "Affichage adapté à tous les téléphones",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Les fenêtres qui s'ouvrent du bas tiennent compte de la barre du bas de l'iPhone et de la hauteur réelle de l'écran (Samsung, iPhone et autres). Dans le dossier d'inscription, texte des champs plus lisible (l'iPhone ne zoome plus au toucher), lignes qui passent à la ligne sur petit écran et boutons du bas plus grands."
+   }
+  ]
+ },
+ {
   "v": "1792904138",
   "titre": "Dossier : boutons en bas",
   "points": [

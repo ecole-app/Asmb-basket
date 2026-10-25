@@ -161,7 +161,7 @@ function dossierEditeur(){
   if(!d.tarifs.lignes.length) d.tarifs.lignes.push({label:"",prix:0});
   if(!d.tarifs.options.length) d.tarifs.options.push({label:"",prix:0});
   var sh=gmSheet("Dossier d'inscription"), body=sh.body;
-  var inS="width:100%;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-size:13px";
+  var inS="width:100%;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-size:16px;line-height:1.35;font-weight:400";
   function champ(parent,label,val,onCh,opt){
     opt=opt||{};
     var w=document.createElement("label"); w.style.cssText="display:block;margin-bottom:8px;font-size:11.5px;font-weight:700;color:var(--mut)";
@@ -204,7 +204,7 @@ function dossierEditeur(){
       se.addEventListener("change",function(){ p.type=se.value; render(); });
       w.appendChild(se); c.appendChild(w);
       if(p.type==="choix") champ(c,"Choix possibles (séparés par ;)",p.options,function(v){p.options=v;},{max:200,ph:"Petit ; Moyen ; Grand"});
-      var r=document.createElement("div"); r.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px";
+      var r=document.createElement("div"); r.style.cssText="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px";
       var ob=document.createElement("label"); ob.style.cssText="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--txt)";
       var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!p.oblig; cb.style.cssText="width:18px;height:18px"; cb.addEventListener("change",function(){p.oblig=cb.checked;});
       ob.appendChild(cb); ob.appendChild(document.createTextNode("Obligatoire"));
@@ -268,8 +268,8 @@ function dossierEditeur(){
       var c=gmCard(); body.appendChild(c);
       champ(c,"Titre",a.titre,function(v){a.titre=v;},{max:80});
       champ(c,"Texte",a.texte,function(v){a.texte=v;},{multi:true,rows:3,max:600});
-      var r=document.createElement("div"); r.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px";
-      var se=document.createElement("select"); se.style.cssText=inS+";width:auto";
+      var r=document.createElement("div"); r.style.cssText="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px";
+      var se=document.createElement("select"); se.style.cssText=inS+";width:auto;flex:1 1 180px;min-width:0";
       [["choix","J'autorise / Je refuse"],["lu","Lu et approuvé (obligatoire)"]].forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; if(a.type===o[0]) op.selected=true; se.appendChild(op); });
       se.addEventListener("change",function(){ a.type=se.value; });
       r.appendChild(se); r.appendChild(sup(function(){ d.autorisations.splice(i,1); render(); }));
@@ -278,8 +278,9 @@ function dossierEditeur(){
     gmRow(body).appendChild(gmBtn("+ Ajouter une autorisation","soft",function(){ d.autorisations.push({titre:"",texte:"",type:"choix"}); render(); }));
 
     var fin=gmRow(body); fin.style.cssText+=";margin:22px 0 8px";
-    fin.appendChild(gmBtn("Enregistrer","primary",function(b){ dossierEnregistrer(d,b,sh); }));
-    fin.appendChild(gmBtn("Dossier PDF","soft",function(){ dossierPdf(dossierNormaliser(d)); }));
+    var bE=gmBtn("Enregistrer","primary",function(b){ dossierEnregistrer(d,b,sh); });
+    var bP=gmBtn("Dossier PDF","soft",function(){ dossierPdf(dossierNormaliser(d)); });
+    [bE,bP].forEach(function(x){ x.style.flex="1 1 140px"; x.style.minHeight="46px"; x.style.fontSize="14px"; fin.appendChild(x); });
   }
   render();
 }
