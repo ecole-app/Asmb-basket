@@ -663,7 +663,7 @@ function chatForward(msgId){
   (window.__chatChannelsCache||[]).forEach(function(ch){
     var members=ch.members||[];
     var isDir=localStorage.getItem("asmb_profile")==="dirigeant";
-    var ok=isDir||!members.length||members.some(function(x){return (typeof x==="string"?x:x.phone)===myPhone;});
+    var ok=isDir||(ch.evt&&window.asmbCoachMode)||(!members.length&&!ch.evt)||members.some(function(x){return (typeof x==="string"?x:x.phone)===myPhone;});
     if(ok) cibles.push({kind:"channel",id:ch.id,label:(ch.icon?ch.icon+" ":"")+ch.name});
   });
   (window.__chatDmsCache||[]).forEach(function(dm){ cibles.push({kind:"dm",id:dm.id,label:"🔒 "+dmOtherLabel(dm)}); });

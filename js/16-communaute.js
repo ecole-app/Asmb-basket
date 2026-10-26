@@ -506,7 +506,7 @@ function updateMuteBtn(){
 function channelVisibleToMe(ch){
   var profile=localStorage.getItem("asmb_profile");
   if(profile!=="coach") return true;
-  if(ch.clubWide) return true;
+  if(ch.clubWide||ch.evt) return true;
   if(!ch.teamId) return false;
   return getCoachTeams().indexOf(ch.teamId)>=0;
 }
@@ -552,8 +552,8 @@ function renderChannelList(channels){
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   channels.forEach(function(ch){
     var members=ch.members||[];
-    var isRestricted=members.length>0;
-    var isMember=isDirigeant||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var isRestricted=members.length>0||!!ch.evt;
+    var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
     div.style.position="relative";
     if(isMember){
@@ -569,10 +569,23 @@ function renderChannelList(channels){
   checkUnreadBadges();
 }
 
+// Canal d'événement terminé : lecture seule pour tout le monde sauf dirigeant et coachs.
+function chatAppliquerVerrou(ch){
+  var bar=document.getElementById("chat-input-bar"); if(!bar) return;
+  var verrou=typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(ch)&&!window.asmbCoachMode;
+  bar.style.display=verrou?"none":"";
+  var n=document.getElementById("chat-verrou");
+  if(verrou){
+    if(!n){ n=document.createElement("div"); n.id="chat-verrou"; n.style.cssText="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;padding:12px 16px;background:var(--sf);border-top:1px solid var(--bdr);font-size:12.5px;font-weight:700;color:var(--mut);text-align:center;z-index:5"; bar.parentNode.appendChild(n); }
+    n.textContent="🔒 Événement terminé : ce canal est en lecture seule."; n.style.display="block";
+  } else if(n) n.style.display="none";
+}
+
 async function openChannel(ch){
   var members=ch.members||[];
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
-  if(members.length>0 && !isDirigeant){
+  var evtStaff=!!ch.evt&&!!window.asmbCoachMode;
+  if((members.length>0||ch.evt) && !isDirigeant && !evtStaff){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     if(!isAuth){askAlert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
@@ -595,6 +608,7 @@ async function openChannel(ch){
   if(searchBar)searchBar.style.display="none";
   if(searchInput)searchInput.value="";
   updateMuteBtn();
+  chatAppliquerVerrou(ch);
   stack.push("chat");
   showScr("chat");
   // On capture le seuil "dernier lu" AVANT de le mettre a jour, pour savoir
@@ -624,7 +638,7 @@ function chatRoleCompte(u){
 var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Familles","Joueurs"];
 function chatMembresCanal(chArg){
   if(!chArg && (currentConvKind!=="channel"||!currentChannelData)) return;
-  var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0;
+  var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0||!!ch.evt;
   var s=gmSheet((ch.icon?ch.icon+" ":"")+(ch.name||"Canal")+" · membres");
   var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
   intro.textContent=restreint?"Canal réservé : seuls les membres ci-dessous et les dirigeants y ont accès."
@@ -804,6 +818,7 @@ function togglePin(channelId,msgId){
 
 
 async function sendMsg(){
+  if(currentConvKind!=="dm"&&typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(currentChannelData)&&!window.asmbCoachMode){ askAlert("Événement terminé : ce canal est en lecture seule."); return; }
   if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var msgEl=document.getElementById("chat-msg");
@@ -827,6 +842,7 @@ async function sendMsg(){
 
 async function sendMediaMessage(input){
   if(!input.files||!input.files[0])return;
+  if(currentConvKind!=="dm"&&typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(currentChannelData)&&!window.asmbCoachMode){ askAlert("Événement terminé : ce canal est en lecture seule."); return; }
   if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var file=input.files[0];
