@@ -548,7 +548,7 @@ function renderChannelList(channels){
   // Trier par derniere activite (utilisation recente en premier)
   var lastUsed={};
   channels.forEach(function(ch){lastUsed[ch.id]=parseInt(localStorage.getItem("asmb_lastread_"+ch.id)||"0",10);});
-  channels.sort(function(a,b){return (lastUsedActivity[b.id]||lastUsed[b.id]||0)-(lastUsedActivity[a.id]||lastUsed[a.id]||0);});
+  channels.sort(function(a,b){return chActivite(b,lastUsed)-chActivite(a,lastUsed);});
 
   el.innerHTML="";
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
@@ -557,6 +557,7 @@ function renderChannelList(channels){
     var isRestricted=members.length>0||!!ch.evt;
     var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
+    div.setAttribute("data-chid",ch.id);
     div.style.position="relative";
     if(isMember){
       div.onclick=function(){openChannel(ch);};
@@ -565,7 +566,7 @@ function renderChannelList(channels){
     }
     var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)"> Membre</span>':'<span style="font-size:10px;color:var(--red)"> Prive</span>'):'';
     var unreadBadge='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
-    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ch.name)+'</div><div id="chdesc-'+ch.id+'" style="font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc((isMember&&lastMsgTxt[ch.id])||ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
+    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--txt)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(ch.name)+'</span><span style="font-size:10px;font-weight:600;color:var(--mut);flex-shrink:0">'+authEsc(chHeure(ch.lastTs&&ch.lastTs.toMillis?ch.lastTs.toMillis():(lastUsedActivity[ch.id]||0)))+'</span></div><div id="chdesc-'+ch.id+'" style="font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc((isMember&&(lastMsgTxt[ch.id]||(ch.lastMsg?(ch.lastPseudo?ch.lastPseudo+" : ":"")+ch.lastMsg:"")))||ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
     el.appendChild(div);
   });
   checkUnreadBadges();
@@ -1057,6 +1058,29 @@ async function reserverCarpool(channelId,msgId){
 
 // ── BADGE NON-LU ──────────────────────────────────────────────────
 var lastUsedActivity={};
+// Activité d'un canal en ms : dernier message (écrit par le serveur), sinon dernier contrôle, sinon dernière lecture.
+function chActivite(ch,lastUsed){
+  var s=ch.lastTs&&ch.lastTs.toMillis?ch.lastTs.toMillis():0;
+  return Math.max(s,lastUsedActivity[ch.id]||0)||((lastUsed&&lastUsed[ch.id])||0);
+}
+function chHeure(ms){
+  if(!ms) return "";
+  var d=new Date(ms), auj=new Date();
+  if(d.toDateString()===auj.toDateString()) return d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  return (typeof chatDayLabel==="function")?chatDayLabel(d):d.toLocaleDateString("fr-FR");
+}
+// Une fois les derniers messages connus, on remet les cartes dans l'ordre (le plus récent en haut).
+function chReordonner(){
+  var el=document.getElementById("channel-list"); if(!el) return;
+  var cartes=[].slice.call(el.querySelectorAll(".channel-card[data-chid]"));
+  var cache=window.__chatChannelsCache||[], par={}; cache.forEach(function(c){ par[c.id]=c; });
+  var tri=cartes.slice().sort(function(a,b){
+    var ca=par[a.getAttribute("data-chid")]||{id:a.getAttribute("data-chid")}, cb=par[b.getAttribute("data-chid")]||{id:b.getAttribute("data-chid")};
+    return chActivite(cb)-chActivite(ca);
+  });
+  var change=tri.some(function(c,i){ return c!==cartes[i]; });
+  if(change) tri.forEach(function(c){ el.appendChild(c); });
+}
 var lastMsgTxt={}; // aperçu du dernier message de chaque canal (affiché à la place de la description)
 
 function checkUnreadBadges(){
@@ -1064,11 +1088,12 @@ function checkUnreadBadges(){
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbGetDocs(q).then(function(snap){
     var totalUnread=0;
-    var checks=[];
+    var checks=[], meta={};
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
       if(ch.deleted||ch.evt)return;
       if(!channelVisibleToMe(ch))return;
+      meta[d.id]=ch;
       checks.push(d.id);
     });
     var pending=checks.length;
@@ -1077,6 +1102,15 @@ function checkUnreadBadges(){
       // Canal jamais ouvert sur cet appareil : on part d'aujourd'hui (sinon tout l'historique compte comme « non lu »).
       if(localStorage.getItem("asmb_lastread_"+chId)===null) localStorage.setItem("asmb_lastread_"+chId,Date.now().toString());
       var lastRead=parseInt(localStorage.getItem("asmb_lastread_"+chId)||"0",10);
+      // Rien de nouveau depuis la dernière lecture (le serveur note l'heure du dernier message) : pas besoin de relire les messages.
+      var tsM=meta[chId]&&meta[chId].lastTs&&meta[chId].lastTs.toMillis?meta[chId].lastTs.toMillis():0;
+      if(tsM&&tsM<=lastRead){
+        lastUsedActivity[chId]=tsM;
+        var b0=document.getElementById("badge-"+chId); if(b0) b0.style.display="none";
+        pending--;
+        if(pending<=0){updateNavBadge(totalUnread);chReordonner();}
+        return;
+      }
       // Sans le nombre exact de messages : on ne lit que les derniers (un badge « 20+ » suffit), pour ne pas relire tout l'historique à chaque contrôle.
       var qm=window.fbLimit
         ? window.fbQuery(window.fbCollection(window.fbDb,"channels",chId,"messages"),window.fbOrderBy("ts","desc"),window.fbLimit(30))
@@ -1106,8 +1140,8 @@ function checkUnreadBadges(){
         }
         totalUnread+=unreadCount;
         pending--;
-        if(pending<=0)updateNavBadge(totalUnread);
-      }).catch(function(){pending--;if(pending<=0)updateNavBadge(totalUnread);});
+        if(pending<=0){updateNavBadge(totalUnread);chReordonner();}
+      }).catch(function(){pending--;if(pending<=0){updateNavBadge(totalUnread);chReordonner();}});
     });
   }).catch(function(){});
 }

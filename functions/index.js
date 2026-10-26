@@ -138,6 +138,15 @@ exports.onChannelMessage = onDocumentCreated(
     const authorUid = msg.senderUid || null;
     const texte = String(msg.text || "").slice(0, 120);
     if (msg.type !== "media" && !texte) return;
+    // Le canal « remonte » en tête de liste, avec l'aperçu du dernier message (comme WhatsApp).
+    // Écrit ici (compte serveur) car une famille n'a pas le droit de modifier la fiche d'un canal.
+    try {
+      await db.collection("clubs").doc(clubId).collection("channels").doc(channelId).set({
+        lastTs: admin.firestore.FieldValue.serverTimestamp(),
+        lastMsg: msg.type === "media" ? (msg.mediaType === "pdf" ? "📄 Document" : "📷 Photo") : texte.replace(/\s+/g, " ").slice(0, 80),
+        lastPseudo: String(msg.pseudo || "").slice(0, 40)
+      }, { merge: true });
+    } catch (e) { /* l'aperçu est un confort : on ne bloque pas les notifications */ }
     const fabrique = (l) => ({
       title: msg.pseudo ? `${msg.pseudo} (${tn(l, "Communauté")})` : tn(l, "Nouveau message"),
       body: (msg.type === "media")

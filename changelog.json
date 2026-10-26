@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792993941",
+  "titre": "Communauté : les canaux remontent comme sur WhatsApp",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Dans la Communauté, le canal qui vient de recevoir un message passe en haut de la liste, avec l'aperçu du dernier message, l'heure et le badge du nombre de messages non lus."
+   }
+  ]
+ },
+ {
   "v": "1792993428",
   "titre": "Un fil par événement dans le canal Événements",
   "points": [
