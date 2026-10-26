@@ -409,7 +409,7 @@ function visioToggle(el){
   }).catch(function(e){ el.checked=!on; askAlert(gmT("Enregistrement impossible")+" ("+((e&&e.code)||"réseau")+")"); });
 }
 function visioInit(){ var t=document.getElementById("visio-toggle"); if(t) t.checked=!!(window.CURRENT_CLUB&&window.CURRENT_CLUB.appelVideo); }
-function buildParametresLayout(){ visioInit(); buildParamsAccordeon(); }
+function buildParametresLayout(){ buildParamsAccordeon(); }
 
 // ═══ PARAMÈTRES EN BLOCS REPLIABLES ══════════════════════════════
 // Les sections existantes (param-block) sont rangées dans 5 blocs repliables,
@@ -417,7 +417,7 @@ function buildParametresLayout(){ visioInit(); buildParamsAccordeon(); }
 var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
   {id:"apparence", ic:"🎨", titre:"Langue & apparence", secs:["langue","apparence","themes"]},
-  {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","visio","qr"]},
+  {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"📝", titre:"Inscriptions & licences", dir:true, secs:["dossier","paiement","aides","relances"]},
   {id:"factures", ic:"💶", titre:"Factures & reçus fiscaux", dir:true, secs:["facturation","cerfa"]},
   {id:"abonnement", ic:"🧾", titre:"Abonnement", dir:true, secs:["@abonnement"]},

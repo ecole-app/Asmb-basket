@@ -255,6 +255,8 @@ function openCommSettings(){
     p.oninput=function(){ if(p.value.length>20)p.value=p.value.substring(0,20); };
     p.onblur=function(){ saveCommPseudo(p.value); };
   }
+  var vb=document.getElementById("cs-visio-box");
+  if(vb){ vb.style.display=(localStorage.getItem("asmb_profile")==="dirigeant")?"flex":"none"; if(typeof visioInit==="function") visioInit(); }
   var m=document.getElementById("modal-comm-settings");
   if(m)m.style.display="flex";
 }

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792997665",
+  "titre": "Appel vidéo : réglage dans les paramètres de la Communauté",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'interrupteur « Activer l'appel vidéo » est maintenant dans l'engrenage de la Communauté (Paramètres · Communauté), plus dans Paramètres › Mon club."
+   }
+  ]
+ },
+ {
   "v": "1792997357",
   "titre": "Discussion de l'événement pour les bénévoles du pass",
   "points": [

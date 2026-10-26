@@ -1030,6 +1030,10 @@ window.__gmT0=Date.now();window.gmBanniere=aff;})();
           <option value="large">Grand</option>
         </select>
       </div>
+      <label id="cs-visio-box" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr);cursor:pointer">
+        <div><div style="font-size:13px;font-weight:700;color:var(--txt)">Activer l'appel vidéo</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Bientôt : un bouton d'appel vidéo dans les groupes que vous choisirez. Le réglage est déjà là, l'appel arrive après.</div></div>
+        <input type="checkbox" id="visio-toggle" onchange="visioToggle(this)" style="width:44px;height:24px;accent-color:var(--dkg);flex-shrink:0">
+      </label>
       <div style="padding:14px 0">
         <div style="font-size:13px;font-weight:700;color:var(--txt)">Archiver les vieux messages</div>
         <div style="font-size:11px;color:var(--mut);margin-top:2px;margin-bottom:10px">Masque les messages anciens à l'ouverture d'un canal pour l'alléger (rien n'est supprimé, tu peux toujours les afficher).</div>
@@ -1290,14 +1294,6 @@ window.__gmT0=Date.now();window.gmBanniere=aff;})();
  </div>
  </div><div class="param-block" data-sec="stats"><div class="sec">Statistiques du club</div>
  <div id="club-stats-box" style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)"></div>
- </div><div class="param-block" data-sec="visio"><div class="sec">Appel vidéo</div>
- <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">
- <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer">
-  <span style="font-size:13.5px;font-weight:700;color:var(--txt)">Activer l'appel vidéo</span>
-  <input type="checkbox" id="visio-toggle" onchange="visioToggle(this)" style="width:20px;height:20px;accent-color:var(--dkg)">
- </label>
- <div style="font-size:11.5px;color:var(--mut);line-height:1.45;margin-top:8px">Bientôt : un bouton d'appel vidéo dans les groupes que vous choisirez. Le réglage est déjà là, l'appel arrive après.</div>
- </div>
  </div><div class="param-block" data-sec="langue"><div class="sec">Langue</div>
  <div style="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:16px;box-shadow:0 2px 8px var(--shadow)">
  <div style="font-size:11px;color:var(--mut);line-height:1.45;margin-bottom:10px">Langue de l'appli sur ce téléphone et sur ton compte. Les messages et ce que les gens écrivent restent dans leur langue.</div>
