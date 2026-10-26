@@ -159,7 +159,10 @@ function impLireFichier(file){
           resolve(XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:"yyyy-mm-dd",defval:""}));
         }).catch(reject);
       } else if(/\.pdf$/.test(nom)) impLirePdf(buf).then(resolve,reject);
-      else resolve(impParseCsv(impDecoder(buf)));
+      else if(/\.(csv|txt)$/.test(nom)||!/\.[a-z0-9]{2,5}$/.test(nom)) resolve(impParseCsv(impDecoder(buf)));
+      else reject(new Error(/\.(jpe?g|png|gif|webp|heic|bmp)$/.test(nom)
+        ? gmT("Ce fichier est une image (photo ou capture d'écran), pas un tableau. Choisis le fichier Excel (.xlsx), CSV ou PDF.")
+        : gmT("Format non reconnu. Choisis un fichier Excel (.xlsx), CSV ou PDF.")));
     };
     rd.readAsArrayBuffer(file);
   });

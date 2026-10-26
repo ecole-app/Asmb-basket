@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793037451",
+  "titre": "Import des licences : message clair si le fichier n'est pas un tableau",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Si tu choisis une photo ou une capture d'écran dans Licences › Importer, l'appli dit qu'il faut un fichier Excel, CSV ou PDF au lieu d'afficher des centaines de lignes vides."
+   }
+  ]
+ },
+ {
   "v": "1792997665",
   "titre": "Appel vidéo : réglage dans les paramètres de la Communauté",
   "points": [
