@@ -618,6 +618,17 @@ async function ffbbLirePoule(pouleId, numeros) {
     try { return await ffbbLirePouleMeili(pouleId, numeros); } catch (e2) { throw new Error("recherche : " + String(e2.message).slice(0, 520) + " || directus : " + String(e.message).slice(0, 90)); }
   }
 }
+// Deux noms d'équipe désignent la même équipe : sans accents ni ponctuation, « ST » = « SAINT »,
+// et le suffixe « - 1 » / « (1) » (numéro d'équipe du club) est facultatif d'un côté comme de l'autre.
+function ffbbNomNorm(t) {
+  return String(t == null ? "" : t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/\(\s*\d+\s*\)\s*$/, " ").replace(/\s+-\s*\d+\s*$/, " ").replace(/[^a-z0-9]+/g, " ").trim()
+    .replace(/\bst\b/g, "saint").replace(/\bste\b/g, "sainte");
+}
+function ffbbMemeEquipe(a, b) {
+  const x = ffbbNomNorm(a), y = ffbbNomNorm(b);
+  return !!x && !!y && (x === y || x.startsWith(y + " ") || y.startsWith(x + " "));
+}
 // Même résultat via Meilisearch : classement recalculé (2 pts victoire, 1 défaite ; pénalités et forfaits non connus).
 async function ffbbLirePouleMeili(pouleId, numeros) {
   const tk = await ffbbTokens();
@@ -657,14 +668,22 @@ async function ffbbLirePouleMeili(pouleId, numeros) {
     try {
       let modele = null, diag = "";
       for (const r of numeros.slice(0, 8)) {
-        const h = await lire({ q: r.e1 + " " + r.e2, limit: 30 });
-        if (!diag) diag = r.e1 + " / " + r.e2 + ": " + h.length + " résultats" + (h[0] ? ", 1er=" + h[0].nomEquipe1 + " vs " + h[0].nomEquipe2 + " idPoule=" + String(JSON.stringify(h[0].idPoule)).slice(0, 50) : "");
+        // Plusieurs recherches (les deux équipes, puis chacune) : l'index peut écrire un nom autrement que l'export FBI.
+        let h = [];
+        for (const qq of [r.e1 + " " + r.e2, r.e1, r.e2]) {
+          const part = await lire({ q: qq, limit: 100 });
+          h = h.concat(part);
+          if (!diag) diag = r.e1 + " / " + r.e2 + ": " + part.length + " résultats" + (part[0] ? ", 1er=" + part[0].nomEquipe1 + " vs " + part[0].nomEquipe2 + " idPoule=" + String(JSON.stringify(part[0].idPoule)).slice(0, 50) : "");
+          if (part.some((x) => x.idPoule && ffbbMemeEquipe(x.nomEquipe1, r.e1) && ffbbMemeEquipe(x.nomEquipe2, r.e2) || x.idPoule && ffbbMemeEquipe(x.nomEquipe1, r.e2) && ffbbMemeEquipe(x.nomEquipe2, r.e1))) break;
+        }
         // L'identifiant de poule de l'export FBI peut différer de celui de l'index : on se fie au match des deux équipes.
-        const nz = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-        const a1 = nz(r.e1), a2 = nz(r.e2);
-        const ok = h.filter((x) => { const n1 = nz(x.nomEquipe1), n2 = nz(x.nomEquipe2); return x.idPoule && ((n1 === a1 && n2 === a2) || (n1 === a2 && n2 === a1)); });
+        const ok = h.filter((x) => x.idPoule && ((ffbbMemeEquipe(x.nomEquipe1, r.e1) && ffbbMemeEquipe(x.nomEquipe2, r.e2)) || (ffbbMemeEquipe(x.nomEquipe1, r.e2) && ffbbMemeEquipe(x.nomEquipe2, r.e1))));
         ok.sort((x, y) => String(y.date_rencontre || "").localeCompare(String(x.date_rencontre || "")));
-        modele = ok.filter(dePoule)[0] || ok[0] || null;
+        // On préfère les matchs où le numéro d'équipe (« - 1 ») est identique des deux côtés.
+        const brut = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        const stricts = ok.filter((x) => (brut(x.nomEquipe1) === brut(r.e1) && brut(x.nomEquipe2) === brut(r.e2)) || (brut(x.nomEquipe1) === brut(r.e2) && brut(x.nomEquipe2) === brut(r.e1)));
+        const choix = stricts.length ? stricts : ok;
+        modele = choix.filter(dePoule)[0] || choix[0] || null;
         if (modele) { const np = String(modele.idPoule.id || modele.idPoule); if (np !== idPoule) { erreurs.push("poule corrigée " + idPoule + " → " + np); idPoule = np; } break; }
       }
       if (!modele) erreurs.push("aucun match connu trouvé (" + diag + ")");
