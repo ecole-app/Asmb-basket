@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792994078",
+  "titre": "Fils d'événements : accès verrouillé côté serveur",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un participant ne peut plus lire un fil d'événement que de son arrivée à la fin de l'événement, et n'y écrit que pendant l'événement. Ce n'est plus seulement caché à l'écran : le serveur le refuse aussi."
+   }
+  ]
+ },
+ {
   "v": "1792993941",
   "titre": "Communauté : les canaux remontent comme sur WhatsApp",
   "points": [

@@ -472,6 +472,50 @@ describe("Caisse buvette (sans compte, avec code du jour)", () => {
 });
 
 // ───────────────────────────────────────────────────────────────
+describe("Fils d'événements", () => {
+  const msgs = (db, id, ...c) => getDocs(query(collection(db, `clubs/A/channels/${id}/messages`), ...c));
+  const h = (n) => Timestamp.fromMillis(Date.now() + n * 3600000);
+  it("le dirigeant et les coachs lisent tout le fil, avant comme après", async () => {
+    await assertSucceeds(msgs(await as("dirA"), "evt1"));
+    await assertSucceeds(msgs(await as("coachA"), "evtFini"));
+  });
+  it("un participant lit de son arrivée à la fin, avec les bornes dans sa requête", async () => {
+    const db = await as("parentA");
+    const r = await assertSucceeds(msgs(db, "evt1", where("ts", ">=", h(-1)), where("ts", "<=", h(23))));
+    assert.deepEqual(r.docs.map((d) => d.id), ["pendant"]);
+  });
+  it("un participant ne peut pas relire l'historique d'avant son arrivée", async () => {
+    const db = await as("parentA");
+    await assertFails(msgs(db, "evt1"));
+    await assertFails(msgs(db, "evt1", where("ts", ">=", h(-6)), where("ts", "<=", h(23))));
+    await assertFails(getDoc(doc(db, "clubs/A/channels/evt1/messages/avant")));
+  });
+  it("une fois l'événement fini, il ne lit rien de plus que ce qui précède la fin", async () => {
+    const db = await as("parentA");
+    await assertSucceeds(msgs(db, "evtFini", where("ts", ">=", h(-72)), where("ts", "<=", h(-25))));
+    await assertFails(msgs(db, "evtFini", where("ts", ">=", h(-72)), where("ts", "<=", h(0))));
+    await assertFails(getDoc(doc(db, "clubs/A/channels/evtFini/messages/apres")));
+  });
+  it("une personne qui n'est pas dans le fil ne lit rien", async () => {
+    const db = await as("parent2A");
+    await assertFails(msgs(db, "evt1", where("ts", ">=", h(-1)), where("ts", "<=", h(23))));
+    await assertFails(getDoc(doc(db, "clubs/A/channels/evt1/messages/pendant")));
+  });
+  it("un participant écrit pendant l'événement, plus après ; un intrus n'écrit jamais", async () => {
+    await assertSucceeds(addDoc(collection(await as("parentA"), "clubs/A/channels/evt1/messages"), { senderUid: "parentA", text: "Présent", ts: serverTimestamp() }));
+    await assertFails(addDoc(collection(await as("parentA"), "clubs/A/channels/evtFini/messages"), { senderUid: "parentA", text: "Trop tard", ts: serverTimestamp() }));
+    await assertFails(addDoc(collection(await as("parent2A"), "clubs/A/channels/evt1/messages"), { senderUid: "parent2A", text: "Intrus", ts: serverTimestamp() }));
+    await assertSucceeds(addDoc(collection(await as("coachA"), "clubs/A/channels/evtFini/messages"), { senderUid: "coachA", text: "Coach", ts: serverTimestamp() }));
+  });
+  it("un parent ne peut pas s'ajouter lui-même à un fil", async () => {
+    await assertFails(updateDoc(doc(await as("parent2A"), "clubs/A/channels/evt1"), { tels: ["0611111111", "0622222222"] }));
+  });
+  it("un canal ordinaire n'est pas touché", async () => {
+    await assertSucceeds(msgs(await as("parent2A"), "ch1"));
+  });
+});
+
+// ───────────────────────────────────────────────────────────────
 describe("Communauté", () => {
   it("un membre écrit dans un canal de son club", async () => {
     const db = await as("parentA");

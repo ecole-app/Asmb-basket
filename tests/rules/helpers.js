@@ -86,6 +86,14 @@ export async function seed() {
     await set("clubs/A/channels/ch1", { nom: "U13" });
     await set("clubs/A/channels/ch1/messages/m1", { senderUid: "coachA", text: "RDV 14h", reactions: {} });
     await set("clubs/A/channels/ch1/messages/mRecent", { senderUid: "parentA", text: "Coucou", ts: Timestamp.now() });
+    // Fil d'événement : parentA (0611111111) y est depuis il y a 1 h, l'événement finit dans 1 jour ; evtFini est terminé.
+    const h = (n) => Timestamp.fromMillis(Date.now() + n * 3600000);
+    await set("clubs/A/channels/evt1", { name: "Stage", evt: true, tels: ["0611111111"], depuisT: { "0611111111": h(-1) }, finT: h(24) });
+    await set("clubs/A/channels/evt1/messages/avant", { senderUid: "coachA", text: "Avant l'arrivée", ts: h(-5) });
+    await set("clubs/A/channels/evt1/messages/pendant", { senderUid: "coachA", text: "Pendant", ts: h(-0.5) });
+    await set("clubs/A/channels/evtFini", { name: "Vieux stage", evt: true, tels: ["0611111111"], depuisT: { "0611111111": h(-72) }, finT: h(-24) });
+    await set("clubs/A/channels/evtFini/messages/dedans", { senderUid: "coachA", text: "Dedans", ts: h(-48) });
+    await set("clubs/A/channels/evtFini/messages/apres", { senderUid: "coachA", text: "Après la fin", ts: h(-2) });
     await set("clubs/A/channels/ch1/messages/mVieux", { senderUid: "parentA", text: "Hier", ts: Timestamp.fromMillis(Date.now() - 10 * 60000) });
     await set("clubs/A/dms/dirA__parentA", { memberUids: ["dirA", "parentA"], members: [], lastMsg: "" });
     await set("clubs/A/dms/dirA__parentA/messages/d1", { senderUid: "dirA", text: "Bonjour", ts: Timestamp.now() });

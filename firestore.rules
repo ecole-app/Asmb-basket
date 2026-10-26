@@ -27,6 +27,26 @@ service cloud.firestore {
     function me() { return get(userPath()).data; }
     function clubPath(clubId) { return /databases/$(database)/documents/clubs/$(clubId); }
 
+    // ── Fils d'événements (canal avec evt:true, fiche écrite par le staff) ──
+    // Un participant lit les messages de son arrivée (depuisT[son tel]) à la fin de l'événement (finT)
+    // et n'écrit que jusqu'à finT. Le staff (dirigeant, coach) voit et écrit tout, sans limite.
+    // La requête du client doit porter les mêmes bornes (where ts >= depuis, ts <= fin).
+    function chPath(clubId, chanId) { return /databases/$(database)/documents/clubs/$(clubId)/channels/$(chanId); }
+    function evtCanal(clubId, chanId) {
+      return exists(chPath(clubId, chanId)) && get(chPath(clubId, chanId)).data.get('evt', false) == true;
+    }
+    function telCompte() { return me().get('phone', '').replace('[^0-9+]', ''); }
+    function evtLecture(clubId, chanId, msg) {
+      let ch = get(chPath(clubId, chanId)).data;
+      return telCompte() in ch.get('tels', [])
+        && msg.ts >= ch.depuisT[telCompte()]
+        && msg.ts <= ch.finT;
+    }
+    function evtEcriture(clubId, chanId) {
+      let ch = get(chPath(clubId, chanId)).data;
+      return telCompte() in ch.get('tels', []) && request.time <= ch.finT;
+    }
+
     // Un club suspendu (abonnement) n'est plus accessible à ses membres.
     // Le club doit exister ET ne pas etre suspendu. Un simple "n'existe pas donc
     // pas suspendu" rendrait l'acces a un club supprime PLUS large qu'a un club
@@ -679,11 +699,14 @@ service cloud.firestore {
         allow read: if readMember(clubId);
         allow write: if staff(clubId);
         match /messages/{msgId} {
-          allow read: if readMember(clubId);
-          // On ne poste qu'en son propre nom.
+          allow read: if readMember(clubId)
+            && (!evtCanal(clubId, chanId) || staff(clubId) || supportActive(clubId) || evtLecture(clubId, chanId, resource.data));
+          // On ne poste qu'en son propre nom (et, dans un fil d'événement, seulement pendant l'événement).
           allow create: if member(clubId)
-            && request.resource.data.get('senderUid', null) in [request.auth.uid, null];
-          allow update: if member(clubId) && (staff(clubId) || auteurPeut() || champsPartages());
+            && request.resource.data.get('senderUid', null) in [request.auth.uid, null]
+            && (!evtCanal(clubId, chanId) || staff(clubId) || evtEcriture(clubId, chanId));
+          allow update: if member(clubId) && (staff(clubId) || auteurPeut() || champsPartages())
+            && (!evtCanal(clubId, chanId) || staff(clubId) || evtEcriture(clubId, chanId));
           allow delete: if staff(clubId);
         }
         // Lu par (coches bleues) : chacun ne note que sa propre lecture.

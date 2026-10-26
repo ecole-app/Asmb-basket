@@ -439,12 +439,14 @@ function evtCanalVerrouille(ch){
   if(!ch||!ch.evt||!ch.fin) return false;
   return new Date().toISOString().slice(0,10) > evtCanalFin(ch);
 }
+// Numéro sans espaces ni points : même forme que dans les règles de sécurité (chiffres et +).
+function evtTelNorm(t){ return String(t||"").replace(/[^0-9+]/g,""); }
 // Fenêtre de lecture d'un participant : de son arrivée à la fin de l'événement.
 // Dirigeant et coachs : pas de fenêtre (ils voient tout). Renvoie {depuis,fin} en ms, ou null.
 function evtCanalFenetre(ch){
   if(!ch||!ch.evt||window.asmbCoachMode) return null;
-  var moi=(typeof myPhone!=="undefined"&&myPhone)?myPhone:"";
-  var m=(ch.members||[]).find(function(x){ return (typeof x==="string"?x:x.phone)===moi; });
+  var moi=evtTelNorm((typeof myPhone!=="undefined"&&myPhone)?myPhone:"");
+  var m=(ch.members||[]).find(function(x){ return evtTelNorm(typeof x==="string"?x:x.phone)===moi; });
   var depuis=(m&&typeof m==="object"&&m.depuis)?m.depuis:0;
   var fin=ch.fin?new Date(ch.fin+"T23:59:59.999").getTime():0;
   return {depuis:depuis,fin:fin};
@@ -471,7 +473,14 @@ function evtCanalSynchro(ev){
           tels.push(tel);
         });
       });
-      var doc=Object.assign({},base,{members:membres});
+      // Pour les règles de sécurité : numéros normalisés, heure d'arrivée de chacun, fin de l'événement.
+      var telsN=[], depuisT={};
+      membres.forEach(function(m){
+        var t=evtTelNorm(typeof m==="string"?m:m.phone); if(!t||telsN.indexOf(t)>=0) return;
+        telsN.push(t); depuisT[t]=new Date((typeof m==="object"&&m.depuis)||Date.now());
+      });
+      var finT=new Date((base.fin||base.debut||new Date().toISOString().slice(0,10))+"T23:59:59.999");
+      var doc=Object.assign({},base,{members:membres,tels:telsN,depuisT:depuisT,finT:finT});
       if(!ancien) doc.createdAt=Date.now();
       return window.fbSetDoc(ref,doc,{merge:true});
     });
