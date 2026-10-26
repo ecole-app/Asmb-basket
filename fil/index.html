@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<script>window.GM_I18N_BASE="../";</script>
+<script src="../js/00-i18n.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E5A">
+<meta name="robots" content="noindex">
+<title>Discussion de l'événement — General Manager</title>
+<style>
+/* Discussion d'un événement pour une personne sans compte (generalmanagerapp.fr/fil/?e=CLUB__EVENT&c=CODE-DU-BILLET).
+   Tout passe par la fonction filEvenement : cette page ne lit ni n'écrit jamais Firestore. */
+:root{ --club:#1A2E5A; --bg:#F3F4F7; --card:#fff; --line:#E1E4EB; --ink:#141824; --mut:#7A8197; --moi:#DCEBFF; color-scheme:light; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#0E1118; --card:#171B25; --line:#262C3A; --ink:#EEF0F5; --mut:#8A91A6; --moi:#1E3556; color-scheme:dark; } }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}
+header{background:var(--club);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;flex-shrink:0}
+header .club{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+header h1{margin:3px 0 0;font-size:20px}
+#liste{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:6px}
+.b{max-width:82%;padding:8px 11px;border-radius:14px;background:var(--card);border:1px solid var(--line);align-self:flex-start;word-wrap:break-word;overflow-wrap:anywhere}
+.b.moi{align-self:flex-end;background:var(--moi);border-color:transparent}
+.b .qui{font-size:11px;font-weight:800;color:var(--club);margin-bottom:2px}
+@media (prefers-color-scheme: dark){ .b .qui{color:#9DB8F0} }
+.b .txt{font-size:15px;line-height:1.35;white-space:pre-wrap}
+.b .h{font-size:10px;color:var(--mut);text-align:right;margin-top:2px}
+.info{text-align:center;color:var(--mut);padding:30px 16px;line-height:1.5;font-size:14px}
+.verrou{flex-shrink:0;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);font-size:13px;font-weight:700;color:var(--mut)}
+form{flex-shrink:0;display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
+#t{flex:1;min-width:0;height:44px;padding:0 14px;border-radius:22px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+button{width:44px;height:44px;border-radius:50%;border:none;background:var(--club);color:#fff;font-size:18px;cursor:pointer;flex-shrink:0}
+button:disabled{opacity:.5}
+</style>
+</head>
+<body>
+<header><div class="club" id="club"></div><h1 id="titre">Discussion de l'événement</h1></header>
+<div id="liste"><div class="info" id="info">Chargement…</div></div>
+<div class="verrou" id="verrou" style="display:none">🔒 Événement terminé : cette discussion est en lecture seule.</div>
+<form id="f" style="display:none" autocomplete="off">
+  <input id="t" type="text" maxlength="500" enterkeyhint="send" placeholder="Votre message…" aria-label="Votre message">
+  <button id="ok" type="submit" aria-label="Envoyer">➤</button>
+</form>
+<script>
+(function(){
+var URL_FIL="https://europe-west1-asmb-app.cloudfunctions.net/filEvenement";
+var q=new URLSearchParams(location.search), pid=q.get("e")||"", code=(q.get("c")||"").toUpperCase();
+var liste=document.getElementById("liste"), info=document.getElementById("info");
+var vus={}, dernier=0, fini=false, enCours=false, minuteur=null;
+
+function T(s){ return window.gmT?window.gmT(s):s; }
+function msgInfo(txt){ liste.innerHTML=""; var d=document.createElement("div"); d.className="info"; d.textContent=txt; liste.appendChild(d); }
+function appeler(corps){
+  return fetch(URL_FIL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({pid:pid,code:code},corps))})
+    .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ j._code=r.status; return j; }); });
+}
+function heure(ms){ return ms?new Date(ms).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):""; }
+function bulle(m){
+  var b=document.createElement("div"); b.className="b"+(m.mine?" moi":"");
+  if(!m.mine){ var w=document.createElement("div"); w.className="qui"; w.textContent=m.pseudo||""; b.appendChild(w); }
+  var t=document.createElement("div"); t.className="txt";
+  if(m.media&&/^https:\/\//.test(m.media)){ var a=document.createElement("a"); a.href=m.media; a.target="_blank"; a.rel="noopener"; a.textContent="📷 Photo"; t.appendChild(a); }
+  else t.textContent=m.text||"";
+  b.appendChild(t);
+  var h=document.createElement("div"); h.className="h"; h.textContent=heure(m.ts); b.appendChild(h);
+  return b;
+}
+function afficher(j){
+  document.getElementById("club").textContent=j.club||"";
+  document.getElementById("titre").textContent=j.titre||"Discussion de l'événement";
+  fini=!!j.fini;
+  document.getElementById("verrou").style.display=fini?"block":"none";
+  document.getElementById("f").style.display=fini?"none":"flex";
+  var neuf=(j.messages||[]).filter(function(m){ return !vus[m.id]; });
+  if(info&&info.parentNode){ liste.innerHTML=""; info=null; }
+  if(!neuf.length&&!Object.keys(vus).length){ var d=document.createElement("div"); d.className="info"; d.id="vide"; d.textContent="Aucun message pour l'instant."; liste.appendChild(d); return; }
+  var vide=document.getElementById("vide"); if(vide&&neuf.length) vide.remove();
+  var bas=liste.scrollHeight-liste.scrollTop-liste.clientHeight<80;
+  neuf.forEach(function(m){ vus[m.id]=1; if(m.ts>dernier) dernier=m.ts; liste.appendChild(bulle(m)); });
+  if(neuf.length&&(bas||neuf.some(function(m){return m.mine;}))) liste.scrollTop=liste.scrollHeight;
+}
+function erreur(j){
+  if(j.erreur==="pas_de_fil") msgInfo("La discussion de cet événement n'est pas ouverte.");
+  else if(j.erreur==="billet"||j.erreur==="lien") msgInfo("Ce lien n'est pas valide. Rouvrez-le depuis votre billet.");
+  else msgInfo("Connexion impossible. Réessayez dans un instant.");
+  document.getElementById("f").style.display="none";
+}
+function charger(){
+  if(enCours) return Promise.resolve(); enCours=true;
+  return appeler({apres:dernier}).then(function(j){
+    if(j.ok) afficher(j); else if(!Object.keys(vus).length) erreur(j);
+  }).catch(function(){ if(!Object.keys(vus).length) erreur({}); }).then(function(){ enCours=false; });
+}
+function planifier(){
+  clearTimeout(minuteur);
+  if(document.hidden||fini) return;
+  minuteur=setTimeout(function(){ charger().then(planifier); },5000);
+}
+document.addEventListener("visibilitychange",function(){ if(!document.hidden){ charger().then(planifier); } });
+document.getElementById("f").addEventListener("submit",function(e){
+  e.preventDefault();
+  var t=document.getElementById("t"), txt=t.value.trim(); if(!txt) return;
+  var ok=document.getElementById("ok"); ok.disabled=true;
+  appeler({action:"ecrire",text:txt}).then(function(j){
+    if(j.ok){ t.value=""; return charger(); }
+    if(j.erreur==="fini"){ fini=true; document.getElementById("f").style.display="none"; document.getElementById("verrou").style.display="block"; }
+    else if(j.erreur==="trop_vite") alert(T("Doucement : un message toutes les secondes."));
+    else alert(T("Message non envoyé. Réessayez."));
+  }).catch(function(){ alert(T("Message non envoyé. Réessayez.")); }).then(function(){ ok.disabled=false; });
+});
+if(!pid||!code){ msgInfo("Ce lien n'est pas valide. Rouvrez-le depuis votre billet."); }
+else charger().then(planifier);
+})();
+</script>
+</body>
+</html>

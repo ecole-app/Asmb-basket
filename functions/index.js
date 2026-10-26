@@ -205,6 +205,98 @@ exports.onChannelMessage = onDocumentCreated(
 );
 
 // Discussion privée : seule l'autre personne de la discussion est notifiée.
+// ── Fil d'un événement pour une personne SANS compte (billet d'inscription) ──
+// Page : generalmanagerapp.fr/fil/?e=<clubId>__<eventId>&c=<code du billet>. Le code du billet est la clé.
+// Tout passe par cette fonction (compte serveur) : le visiteur ne touche jamais Firestore.
+//  - arrivée = première ouverture du lien (fil_acces/{code}.depuis) ; il lit de son arrivée à la fin de l'événement ;
+//  - il écrit jusqu'à la fin de l'événement (23 h 59, heure de Paris), puis lecture seule ;
+//  - sa réponse n'est jamais plus longue que FIL_MAX_TEXTE, et pas plus d'un message toutes les 1,5 s.
+const FIL_MAX_TEXTE = 500;
+function parisFinDeJour(jour) {
+  const base = Date.parse(String(jour || "") + "T23:59:59.999Z");
+  if (isNaN(base)) return 0;
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Paris", timeZoneName: "shortOffset" }).formatToParts(new Date(base));
+  const z = (parts.find((x) => x.type === "timeZoneName") || {}).value || "GMT+1";
+  const m = /GMT([+-])(\d+)(?::(\d+))?/.exec(z);
+  const dec = m ? (m[1] === "-" ? -1 : 1) * (parseInt(m[2], 10) * 60 + parseInt(m[3] || "0", 10)) : 60;
+  return base - dec * 60000;
+}
+exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https://www.generalmanagerapp.fr"], memory: "256MiB" }, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (req.method !== "POST") { res.status(405).json({ erreur: "methode" }); return; }
+  const b = (req.body && typeof req.body === "object") ? req.body : {};
+  const pid = String(b.pid || "");
+  const code = String(b.code || "").toUpperCase().trim();
+  const i = pid.indexOf("__");
+  const clubId = i > 0 ? pid.slice(0, i) : "", eventId = i > 0 ? pid.slice(i + 2) : "";
+  if (!/^[A-Za-z0-9_-]{2,60}$/.test(clubId) || !/^[A-Za-z0-9_-]{1,40}$/.test(eventId) || !/^[A-Z]{3}-\d{5}$/.test(code)) {
+    res.status(400).json({ erreur: "lien" }); return;
+  }
+  try {
+    const clubRef = db.collection("clubs").doc(clubId);
+    const canalRef = clubRef.collection("channels").doc("evt_" + eventId);
+    const accRef = clubRef.collection("fil_acces").doc(code);
+    const [bSnap, pSnap, cSnap, aSnap] = await Promise.all([
+      clubRef.collection("evt_inscrits").doc(code).get(),
+      db.collection("evt_pages").doc(pid).get(),
+      canalRef.get(),
+      accRef.get()
+    ]);
+    const bil = bSnap.exists ? bSnap.data() : null;
+    const page = pSnap.exists ? pSnap.data() : null;
+    const canal = cSnap.exists ? cSnap.data() : null;
+    if (!bil || String(bil.eventId) !== eventId || bil.statut === "annule") { res.status(403).json({ erreur: "billet" }); return; }
+    if (!page || !canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
+
+    const now = Date.now();
+    const finMs = parisFinDeJour(page.dateFin || page.date);
+    const prenom = String(bil.prenom || "").trim(), nom = String(bil.nom || "").trim();
+    const pseudo = (prenom + (nom ? " " + nom.charAt(0).toUpperCase() + "." : "")).trim() || "Invité";
+    let acc = aSnap.exists ? aSnap.data() : null;
+    if (!acc || !acc.depuis) {
+      acc = { depuis: now, pseudo, pid, creeLe: now };
+      await accRef.set(acc, { merge: true });
+    }
+    const fini = !!finMs && now > finMs;
+
+    if (b.action === "ecrire") {
+      if (fini) { res.status(403).json({ erreur: "fini" }); return; }
+      const texte = String(b.text || "").replace(/\r/g, "").trim().slice(0, FIL_MAX_TEXTE);
+      if (!texte) { res.status(400).json({ erreur: "vide" }); return; }
+      if (acc.dernier && now - acc.dernier < 1500) { res.status(429).json({ erreur: "trop_vite" }); return; }
+      await canalRef.collection("messages").add({
+        text: texte, pseudo, senderUid: null, ext: true, extCode: code,
+        ts: admin.firestore.FieldValue.serverTimestamp()
+      });
+      await accRef.set({ dernier: now }, { merge: true });
+      res.json({ ok: true });
+      return;
+    }
+
+    // Lecture : de son arrivée à la fin de l'événement (jamais au-delà), par morceaux si « apres » est donné.
+    const apres = Number(b.apres) > 0 ? Number(b.apres) + 1 : 0;
+    const de = Math.max(acc.depuis, apres), a = finMs ? Math.min(now, finMs) : now;
+    const T = admin.firestore.Timestamp;
+    const msgs = [];
+    if (de <= a) {
+      const r = await canalRef.collection("messages").where("ts", ">=", T.fromMillis(de)).where("ts", "<=", T.fromMillis(a)).orderBy("ts").limit(200).get();
+      r.forEach((d) => {
+        const m = d.data();
+        if (!m || m.deleted) return;
+        const ts = m.ts && m.ts.toMillis ? m.ts.toMillis() : 0;
+        msgs.push({
+          id: d.id, pseudo: String(m.pseudo || ""), text: m.type === "media" ? "" : String(m.text || ""),
+          media: m.type === "media" ? String(m.mediaUrl || "") : "", ts, mine: m.extCode === code
+        });
+      });
+    }
+    res.json({ ok: true, titre: String(page.titre || ""), club: String(page.nom || ""), fin: page.dateFin || page.date || "", fini, moi: pseudo, messages: msgs });
+  } catch (e) {
+    console.error("filEvenement", e);
+    res.status(500).json({ erreur: "serveur" });
+  }
+});
+
 exports.onDmMessage = onDocumentCreated(
   "clubs/{clubId}/dms/{dmId}/messages/{messageId}",
   async (event) => {

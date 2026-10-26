@@ -669,7 +669,11 @@ function evtBoutonsBillet(b,p,pid){
     '<div style="display:flex;gap:8px;margin-top:8px">'+
       bt("wa","M'envoyer par WhatsApp","#25D366","#0b1630")+
       bt("sms","Par SMS","var(--bdr)","var(--txt)")+
-    '</div></div>';
+    '</div>'+
+    // Discussion de l'événement (page /fil, sans compte) : le code du billet en est la clé.
+    ((typeof EVT_CANAL_TYPES!=="undefined"&&EVT_CANAL_TYPES.indexOf(p&&p.type)>=0&&pid)
+      ?'<a href="https://generalmanagerapp.fr/fil/?e='+encodeURIComponent(pid)+'&c='+encodeURIComponent(b.code)+'" target="_blank" rel="noopener" style="display:block;margin-top:8px;padding:11px 6px;border-radius:var(--rx);text-align:center;text-decoration:none;font-size:13px;font-weight:800;background:var(--card);color:var(--dkg);border:1.5px solid var(--dkg)">💬 Discussion de l\'événement</a>':'')+
+    '</div>';
 }
 function evtBrancherGarder(root){
   Array.prototype.forEach.call(root.querySelectorAll(".evt-garder"),function(g){

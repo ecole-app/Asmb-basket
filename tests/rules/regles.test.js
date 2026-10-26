@@ -510,6 +510,11 @@ describe("Fils d'événements", () => {
   it("un parent ne peut pas s'ajouter lui-même à un fil", async () => {
     await assertFails(updateDoc(doc(await as("parent2A"), "clubs/A/channels/evt1"), { tels: ["0611111111", "0622222222"] }));
   });
+  it("les accès des personnes sans compte (fil_acces) restent réservés au serveur", async () => {
+    await assertFails(getDoc(doc(await as("dirA"), "clubs/A/fil_acces/STG-12345")));
+    await assertFails(setDoc(doc(await as("dirA"), "clubs/A/fil_acces/STG-12345"), { depuis: 1 }));
+    await assertFails(setDoc(doc(await as(null), "clubs/A/fil_acces/STG-12345"), { depuis: 1 }));
+  });
   it("un canal ordinaire n'est pas touché", async () => {
     await assertSucceeds(msgs(await as("parent2A"), "ch1"));
   });

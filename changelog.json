@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792994482",
+  "titre": "Discussion de l'événement pour les inscrits sans compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un inscrit extérieur à un stage, une soirée ou une formation a maintenant un bouton « Discussion de l'événement » sur son billet. Il lit et écrit dans le fil de l'événement sans créer de compte, jusqu'à la fin de l'événement, puis en lecture seule."
+   }
+  ]
+ },
+ {
   "v": "1792994078",
   "titre": "Fils d'événements : accès verrouillé côté serveur",
   "points": [
