@@ -243,7 +243,11 @@ function listenMessages(channelId, prevLastRead){
   chatNewCount=0;
   var nb=document.getElementById("chat-new-btn"); if(nb) nb.style.display="none";
   var isFirstLoad=true;
-  var q=window.fbQuery(window.fbCollection(window.fbDb,convColl(),channelId,"messages"),window.fbOrderBy("ts"));
+  // Canal d'événement : un participant ne lit que les messages de son arrivée à la fin de l'événement.
+  var bornes=[], fen=(currentConvKind!=="dm"&&typeof evtCanalFenetre==="function")?evtCanalFenetre(currentChannelData):null;
+  if(fen&&fen.depuis) bornes.push(window.fbWhere("ts",">=",new Date(fen.depuis)));
+  if(fen&&fen.fin) bornes.push(window.fbWhere("ts","<=",new Date(fen.fin)));
+  var q=window.fbQuery.apply(null,[window.fbCollection(window.fbDb,convColl(),channelId,"messages")].concat(bornes,[window.fbOrderBy("ts")]));
   chatUnsubscribe=window.fbOnSnapshot(q,{includeMetadataChanges:true},function(snap){
     var myPseudoForMention=(savedPseudo||"moi").toLowerCase();
     var ajoutsAutres=0;
@@ -663,7 +667,7 @@ function chatForward(msgId){
   (window.__chatChannelsCache||[]).forEach(function(ch){
     var members=ch.members||[];
     var isDir=localStorage.getItem("asmb_profile")==="dirigeant";
-    var ok=isDir||!members.length||members.some(function(x){return (typeof x==="string"?x:x.phone)===myPhone;});
+    var ok=isDir||(ch.evt&&window.asmbCoachMode)||(!members.length&&!ch.evt)||members.some(function(x){return (typeof x==="string"?x:x.phone)===myPhone;});
     if(ok) cibles.push({kind:"channel",id:ch.id,label:(ch.icon?ch.icon+" ":"")+ch.name});
   });
   (window.__chatDmsCache||[]).forEach(function(dm){ cibles.push({kind:"dm",id:dm.id,label:"🔒 "+dmOtherLabel(dm)}); });

@@ -295,6 +295,7 @@ function updateHdr(id){
  if(hlogoEl) hlogoEl.style.display=(id==="plateforme")?"none":"";
 }
 function goBack(){
+ if(stack[stack.length-1]==="chat"&&typeof chatRetourFil==="function"&&chatRetourFil()) return;
  stack.pop();var prev=stack[stack.length-1];
  if(prev==="cycle"){showScr("cycle");buildCycle(curCy);}
  else if(prev==="admin"){buildAdminHome();showScr("admin");}

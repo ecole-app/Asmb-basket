@@ -154,9 +154,11 @@ exports.onChannelMessage = onDocumentCreated(
     const chSnap = await clubRef.collection("channels").doc(channelId).get();
     const ch = (chSnap.exists && chSnap.data()) || {};
     const membres = Array.isArray(ch.members) ? ch.members : [];
+    // Fil d'événement : jamais « tout le club » ; une fois l'événement fini, seuls les dirigeants sont prévenus.
+    const evtFini = !!ch.evt && !!ch.fin && new Date().toISOString().slice(0, 10) > ch.fin;
     let docs = [];
-    if (membres.length) {
-      const tels = [...new Set(membres.map((m) => String(typeof m === "string" ? m : (m && m.phone) || "").replace(/\s+/g, "")).filter(Boolean))];
+    if (membres.length || ch.evt) {
+      const tels = evtFini ? [] : [...new Set(membres.map((m) => String(typeof m === "string" ? m : (m && m.phone) || "").replace(/\s+/g, "")).filter(Boolean))];
       const uids = new Set();
       for (let i = 0; i < tels.length; i += 30) {
         const r = await db.collection("users").where("clubId", "==", clubId).where("phone", "in", tels.slice(i, i + 30)).get();

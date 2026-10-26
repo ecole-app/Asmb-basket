@@ -29,6 +29,7 @@ function buildAdminComm(){
     if(!snap.size){el.innerHTML='<div class="empty-state"><div>Aucun canal</div></div>';return;}
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
+      if(ch.evt) return;
       var memberCount=(ch.members||[]).length;
       var div=document.createElement("div");div.className="admin-card";
       div.addEventListener("click",function(){openChannelDetail(ch);});
@@ -506,7 +507,7 @@ function updateMuteBtn(){
 function channelVisibleToMe(ch){
   var profile=localStorage.getItem("asmb_profile");
   if(profile!=="coach") return true;
-  if(ch.clubWide) return true;
+  if(ch.clubWide||ch.evt) return true;
   if(!ch.teamId) return false;
   return getCoachTeams().indexOf(ch.teamId)>=0;
 }
@@ -541,6 +542,7 @@ function buildCommunaute(){
 
 function renderChannelList(channels){
   var el=document.getElementById("channel-list");if(!el)return;
+  channels=channels.filter(function(c){return !c.evt;});
   if(!channels.length){el.innerHTML='<div class="empty-state"><div>Aucun canal</div></div>';return;}
 
   // Trier par derniere activite (utilisation recente en premier)
@@ -552,8 +554,8 @@ function renderChannelList(channels){
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   channels.forEach(function(ch){
     var members=ch.members||[];
-    var isRestricted=members.length>0;
-    var isMember=isDirigeant||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var isRestricted=members.length>0||!!ch.evt;
+    var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
     div.style.position="relative";
     if(isMember){
@@ -569,10 +571,64 @@ function renderChannelList(channels){
   checkUnreadBadges();
 }
 
-async function openChannel(ch){
+// ── FILS D'ÉVÉNEMENTS dans le canal « Événements » ───────────────────
+// Chaque événement (hors matchs) a un fil réservé à ses participants ; il s'ouvre depuis le canal
+// Événements et n'apparaît pas dans la liste des canaux. Le staff voit tous les fils.
+function chatFilVisible(c){
+  if(!c||!c.evt||c.deleted) return false;
+  if(window.asmbCoachMode) return true;
+  return (c.members||[]).some(function(m){ return (typeof m==="string"?m:m.phone)===myPhone; });
+}
+function chatFilsRendre(ch){
+  var msgs=document.getElementById("chat-messages"); if(!msgs) return;
+  var box=document.getElementById("chat-fils");
+  var parent=(ch&&ch.id==="evenements"&&!ch.evt)?ch:null;
+  if(parent) window.__chatFilParent=parent; else if(!(ch&&ch.evt)) window.__chatFilParent=null;
+  if(!parent){ if(box) box.style.display="none"; return; }
+  if(!box){
+    box=document.createElement("div"); box.id="chat-fils";
+    box.style.cssText="padding:8px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;max-height:34vh;overflow-y:auto";
+    msgs.parentNode.insertBefore(box,msgs);
+  }
+  var fils=(window.__chatChannelsCache||[]).filter(chatFilVisible).sort(function(a,b){ return String(b.debut||"").localeCompare(String(a.debut||"")); });
+  box.innerHTML="";
+  if(!fils.length){ box.style.display="none"; return; }
+  box.style.display="block";
+  var t=document.createElement("div"); t.style.cssText="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px"; t.textContent="Fils des événements"; box.appendChild(t);
+  fils.forEach(function(f){
+    var b=document.createElement("button"); b.type="button";
+    b.style.cssText="display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 10px;margin-bottom:6px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);cursor:pointer;min-height:44px";
+    var nom=document.createElement("span"); nom.style.cssText="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"; nom.textContent="📅 "+(f.name||"");
+    var d=document.createElement("span"); d.style.cssText="font-size:11px;color:var(--mut);flex-shrink:0"; d.textContent=(f.debut||"")+(typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(f)?" 🔒":"");
+    b.appendChild(nom); b.appendChild(d);
+    b.onclick=function(){ openChannel(f,true); };
+    box.appendChild(b);
+  });
+}
+// Retour depuis un fil : on revient au canal Événements au lieu de quitter la discussion.
+function chatRetourFil(){
+  var p=window.__chatFilParent;
+  if(!p||!currentChannelData||!currentChannelData.evt) return false;
+  openChannel(p,true); return true;
+}
+
+// Canal d'événement terminé : lecture seule pour tout le monde sauf dirigeant et coachs.
+function chatAppliquerVerrou(ch){
+  var bar=document.getElementById("chat-input-bar"); if(!bar) return;
+  var verrou=typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(ch)&&!window.asmbCoachMode;
+  bar.style.display=verrou?"none":"";
+  var n=document.getElementById("chat-verrou");
+  if(verrou){
+    if(!n){ n=document.createElement("div"); n.id="chat-verrou"; n.style.cssText="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;padding:12px 16px;background:var(--sf);border-top:1px solid var(--bdr);font-size:12.5px;font-weight:700;color:var(--mut);text-align:center;z-index:5"; bar.parentNode.appendChild(n); }
+    n.textContent="🔒 Événement terminé : ce canal est en lecture seule."; n.style.display="block";
+  } else if(n) n.style.display="none";
+}
+
+async function openChannel(ch,sansPile){
   var members=ch.members||[];
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
-  if(members.length>0 && !isDirigeant){
+  var evtStaff=!!ch.evt&&!!window.asmbCoachMode;
+  if((members.length>0||ch.evt) && !isDirigeant && !evtStaff){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
     if(!isAuth){askAlert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
@@ -595,7 +651,9 @@ async function openChannel(ch){
   if(searchBar)searchBar.style.display="none";
   if(searchInput)searchInput.value="";
   updateMuteBtn();
-  stack.push("chat");
+  chatAppliquerVerrou(ch);
+  chatFilsRendre(ch);
+  if(!sansPile) stack.push("chat");
   showScr("chat");
   // On capture le seuil "dernier lu" AVANT de le mettre a jour, pour savoir
   // ou placer le repere "Nouveaux messages" dans cette ouverture du canal.
@@ -624,7 +682,7 @@ function chatRoleCompte(u){
 var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Familles","Joueurs"];
 function chatMembresCanal(chArg){
   if(!chArg && (currentConvKind!=="channel"||!currentChannelData)) return;
-  var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0;
+  var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0||!!ch.evt;
   var s=gmSheet((ch.icon?ch.icon+" ":"")+(ch.name||"Canal")+" · membres");
   var intro=document.createElement("div"); intro.style.cssText="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
   intro.textContent=restreint?"Canal réservé : seuls les membres ci-dessous et les dirigeants y ont accès."
@@ -804,6 +862,7 @@ function togglePin(channelId,msgId){
 
 
 async function sendMsg(){
+  if(currentConvKind!=="dm"&&typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(currentChannelData)&&!window.asmbCoachMode){ askAlert("Événement terminé : ce canal est en lecture seule."); return; }
   if(!window.fbReady){askAlert("Connexion en cours, patientez 2 secondes et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var msgEl=document.getElementById("chat-msg");
@@ -827,6 +886,7 @@ async function sendMsg(){
 
 async function sendMediaMessage(input){
   if(!input.files||!input.files[0])return;
+  if(currentConvKind!=="dm"&&typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(currentChannelData)&&!window.asmbCoachMode){ askAlert("Événement terminé : ce canal est en lecture seule."); return; }
   if(!window.fbReady){askAlert("Connexion en cours, patientez et réessayez");return;}
   if(!(await checkMyPhone()))return;
   var file=input.files[0];
@@ -1007,7 +1067,7 @@ function checkUnreadBadges(){
     var checks=[];
     snap.forEach(function(d){
       var ch=d.data();ch.id=d.id;
-      if(ch.deleted)return;
+      if(ch.deleted||ch.evt)return;
       if(!channelVisibleToMe(ch))return;
       checks.push(d.id);
     });

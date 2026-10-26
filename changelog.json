@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792993428",
+  "titre": "Un fil par événement dans le canal Événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Chaque événement (tournoi, stage, soirée, formation, autre) a son fil dans le canal Événements, réservé aux équipes concernées. Chacun lit les messages de son arrivée à la fin de l'événement ; ensuite le fil est en lecture seule. Le dirigeant et les coachs voient tout."
+   }
+  ]
+ },
+ {
   "v": "1792993121",
   "titre": "Retour à un seul canal Événements",
   "points": [
