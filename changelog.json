@@ -1,18 +1,5 @@
 [
  {
-  "v": "1792992923",
-  "titre": "Un canal de discussion par événement",
-  "points": [
-   {
-    "roles": [
-     "dirigeant",
-     "coach"
-    ],
-    "texte": "Chaque événement (tournoi, stage, soirée, formation, autre) a son propre canal dans la Communauté, réservé aux équipes choisies. Vous le voyez toujours et pouvez y écrire. Une fois l'événement terminé, il passe en lecture seule pour les autres."
-   }
-  ]
- },
- {
   "v": "1792953553",
   "titre": "Notifications dans votre langue",
   "points": [

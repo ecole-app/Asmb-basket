@@ -369,7 +369,7 @@ function saveEventFull(){
     participantsClub:participantsClub,participantsExternes:evExternes.slice(),
     responsableUid:(typeof respLireChoix==="function"?respLireChoix().uid:"")||"",responsableNom:(typeof respLireChoix==="function"?respLireChoix().nom:"")||"",
     presences:{},evaluationEnabled:(type==="stage"&&document.getElementById("ev-eval-enabled").checked),
-    canalId:canal||null, canalAutoTeamIds:(canal&&realSelectedTeamIds.length)?realSelectedTeamIds:[], equipesIds:realSelectedTeamIds.slice(),
+    canalId:canal||null, canalAutoTeamIds:(canal&&realSelectedTeamIds.length)?realSelectedTeamIds:[],
     canalAccessGranted:false, canalAccessRevoked:false,
     statut:isDirigeant?"validee":"attente",
     creePar:(window.ASMB_USER&&window.ASMB_USER.email)||"",
@@ -385,7 +385,6 @@ function saveEventFull(){
     return;
   }
   if(eventObj.canalId && eventObj.canalAutoTeamIds.length){ grantEventChannelAccess(eventObj); }
-  evtCanalSynchro(eventObj);
   finishSaveEventFullNotify(eventObj, canal, participantsNoms);
   // Un tournoi s'organise tout de suite : équipes, format, planning.
   if(type==="tournoi" && typeof trnOuvrir==="function") setTimeout(function(){ trnOuvrir(eventObj.id); },300);
@@ -413,7 +412,6 @@ function deleteEvent(id){
     saveEvents(events);
     buildPlanning();buildAdminHome();buildRealEventsList();
     if(!removed)return;
-    evtCanalMasquer(removed);
     // L'evenement reste supprime tout de suite (coherent avec le reste de
     // l'appli), mais reste rattrapable une poignee de secondes : les erreurs
     // de clic sont frequentes sur mobile et une suppression est definitive.
@@ -424,52 +422,6 @@ function deleteEvent(id){
       buildPlanning();buildAdminHome();buildRealEventsList();
     });
   });
-}
-
-// ── CANAL PROPRE À L'ÉVÉNEMENT (hors matchs et entraînements) ────────
-// Un canal « evt_<id> » par événement : seules les personnes concernées y entrent
-// (équipes choisies, plus tard inscrits et bénévoles), à partir du moment où elles arrivent.
-// Le dirigeant et les coachs voient tout, y écrivent toujours. Une fois l'événement fini,
-// le canal est en lecture seule pour tous les autres (voir evtCanalVerrouille).
-var EVT_CANAL_TYPES=["tournoi","stage","soiree","formation","autre"];
-function evtCanalId(ev){ return "evt_"+ev.id; }
-function evtCanalConcerne(ev){ return !!ev && EVT_CANAL_TYPES.indexOf(ev.type)>=0 && ev.statut!=="attente"; }
-function evtCanalFin(ch){ return String(ch&&ch.fin||""); }
-function evtCanalVerrouille(ch){
-  if(!ch||!ch.evt||!ch.fin) return false;
-  return new Date().toISOString().slice(0,10) > evtCanalFin(ch);
-}
-function evtCanalSynchro(ev){
-  if(!window.fbDb||!window.fbSetDoc||!evtCanalConcerne(ev)) return;
-  var id=evtCanalId(ev), ref=window.fbDoc(window.fbDb,"channels",id);
-  var base={id:id,name:ev.titre||"Événement",icon:"📅",desc:"Canal de l'événement"+(ev.date?" · "+ev.date:""),evt:true,eventId:ev.id,
-    debut:ev.date||"",fin:ev.dateFin||ev.date||"",clubWide:false,teamId:"",deleted:false};
-  Promise.resolve(window.fbGetDoc?window.fbGetDoc(ref):null).then(function(snap){
-    var ancien=(snap&&snap.exists&&snap.exists())?snap.data():null;
-    var membres=((ancien&&ancien.members)||[]).slice();
-    var tels=membres.map(function(m){return typeof m==="string"?m:m.phone;});
-    // Familles et joueurs des équipes choisies : on reprend les membres du canal de chaque équipe.
-    var equipes=ev.equipesIds||ev.canalAutoTeamIds||[];
-    return (equipes.length&&window.fbGetDocs?window.fbGetDocs(window.fbCollection(window.fbDb,"channels")):Promise.resolve(null)).then(function(all){
-      if(all) all.forEach(function(d){
-        var ch=d.data();
-        if(!ch||equipes.indexOf(ch.teamId)<0) return;
-        (ch.members||[]).forEach(function(m){
-          var tel=typeof m==="string"?m:m.phone;
-          if(!tel||tels.indexOf(tel)>=0) return;
-          membres.push({phone:tel,label:(typeof m==="string"?"":m.label)||"",tempForEvent:ev.id,depuis:Date.now()});
-          tels.push(tel);
-        });
-      });
-      var doc=Object.assign({},base,{members:membres});
-      if(!ancien) doc.createdAt=Date.now();
-      return window.fbSetDoc(ref,doc,{merge:true});
-    });
-  }).catch(function(){});
-}
-function evtCanalMasquer(ev){
-  if(!window.fbDb||!window.fbUpdateDoc||!ev||!ev.id) return;
-  window.fbUpdateDoc(window.fbDoc(window.fbDb,"channels",evtCanalId(ev)),{deleted:true}).catch(function(){});
 }
 
 // ── ACCES AUTOMATIQUE AU CANAL POUR LES EQUIPES SELECTIONNEES (point 6) ──
@@ -554,7 +506,6 @@ async function approveEvent(id){
   buildPlanning();buildAdminHome();buildRealEventsList();
   var ev=events[idx];
   if(ev.canalId && ev.canalAutoTeamIds && ev.canalAutoTeamIds.length){ grantEventChannelAccess(ev); }
-  evtCanalSynchro(ev);
   if(document.getElementById("events-validation-list")) renderEventsValidationList(document.getElementById("events-validation-list"));
 }
 async function rejectEvent(id){
@@ -680,7 +631,6 @@ function sauverModifEvent(eventId,v){
   ev.participantsClub=v.participantsClub; ev.participantsExternes=evExternes.slice();
   ev.evaluationEnabled=(v.type==="stage"&&document.getElementById("ev-eval-enabled").checked);
   if(typeof respLireChoix==="function"){ var rc=respLireChoix(); if(rc.uid!==undefined){ ev.responsableUid=rc.uid; ev.responsableNom=rc.nom; } }
-  ev.equipesIds=(v.realSelectedTeamIds||[]).slice();
   if(v.canal!==undefined && v.canal!==(ev.canalId||"")){ ev.canalId=v.canal||null; ev.canalAutoTeamIds=(v.canal&&v.realSelectedTeamIds.length)?v.realSelectedTeamIds:[]; }
   // Inscriptions : la page publique reprend les nouvelles dates (et le choix des jours suit la plage)
   if(ev.inscr){
@@ -689,7 +639,6 @@ function sauverModifEvent(eventId,v){
   }
   evEditId=null;
   saveEvents(events);
-  evtCanalSynchro(ev);
   buildPlanning();buildAdminHome();
   if(typeof buildRealEventsList==="function") buildRealEventsList();
   closeModal("modal-event-full");
