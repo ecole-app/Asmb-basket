@@ -144,6 +144,10 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 }, aides: { passSport: true, passRegion: false }, dossier: { v: 1 } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });
+  it("appel vidéo : le dirigeant l'active, un coach non", async () => {
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { appelVideo: true }));
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), { appelVideo: true }));
+  });
   it("coachs des pôles : le dirigeant les choisit, un coach ne peut pas se nommer lui-même", async () => {
     const m = { elite: [{ uid: "coachA", nom: "Karim" }] };
     await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), { polesCoachs: m }));

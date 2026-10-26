@@ -1,5 +1,17 @@
 [
  {
+  "v": "1792996780",
+  "titre": "Réglage « Appel vidéo »",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau dans Paramètres › Mon club : un interrupteur « Appel vidéo ». Pour l'instant il ne fait que se mémoriser, le bouton d'appel dans les groupes arrivera plus tard."
+   }
+  ]
+ },
+ {
   "v": "1792994482",
   "titre": "Discussion de l'événement pour les inscrits sans compte",
   "points": [
