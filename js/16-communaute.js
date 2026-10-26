@@ -617,7 +617,7 @@ function chatRetourFil(){
 function chatAppliquerVerrou(ch){
   var bar=document.getElementById("chat-input-bar"); if(!bar) return;
   var verrou=typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(ch)&&!window.asmbCoachMode;
-  bar.style.display=verrou?"none":"";
+  bar.style.display=verrou?"none":"flex";
   var n=document.getElementById("chat-verrou");
   if(verrou){
     if(!n){ n=document.createElement("div"); n.id="chat-verrou"; n.style.cssText="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;padding:12px 16px;background:var(--sf);border-top:1px solid var(--bdr);font-size:12.5px;font-weight:700;color:var(--mut);text-align:center;z-index:5"; bar.parentNode.appendChild(n); }

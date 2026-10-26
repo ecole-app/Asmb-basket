@@ -1,5 +1,20 @@
 [
  {
+  "v": "1792996991",
+  "titre": "Correction : barre de message des canaux",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La barre pour écrire un message s'affichait en colonne dans certains canaux. Elle est de nouveau sur une seule ligne."
+   }
+  ]
+ },
+ {
   "v": "1792996780",
   "titre": "Réglage « Appel vidéo »",
   "points": [
