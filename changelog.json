@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793045845",
+  "titre": "Budget prévisionnel : exercice, écarts, reprise de l'an dernier et PDF",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta › Budget : choix de l'exercice (année civile ou saison, y compris la suivante), écart réalisé/prévu en € et en % sur chaque ligne, totaux et résultat prévu/réalisé, bouton « Reprendre l'an dernier » qui pré-remplit le prévu, et PDF du budget à présenter en AG ou dans un dossier de subvention."
+   }
+  ]
+ },
+ {
   "v": "1793037451",
   "titre": "Import des licences : message clair si le fichier n'est pas un tableau",
   "points": [

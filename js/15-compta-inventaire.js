@@ -368,21 +368,49 @@ function exportComptaCsv(){
 }
 
 // ── BUDGET PREVISIONNEL ──────────────────────────────────────────
-function openBudgetPrev(){
-  var year=comptaCurrentYear();
+// Exercice choisi (année civile ou saison, réglage du plan comptable). La clé de stockage
+// reste l'année de début : un budget saisi avant (par année civile) est retrouvé tel quel.
+var BUDGET_EX=null;
+function budgetExercices(){
+  var all=getComptabilite(), exs=(typeof comptaExercicesConnus==="function")?comptaExercicesConnus(all):[];
+  if(!exs.length) return [{cle:comptaCurrentYear(),debut:comptaCurrentYear()+"-01-01",fin:comptaCurrentYear()+"-12-31",label:comptaCurrentYear()}];
+  // + l'exercice suivant, pour préparer le budget de la saison prochaine.
+  var c=exs.filter(function(e){ return e.cle===comptaExerciceCourant().cle; })[0]||exs[0];
+  var suiv=comptaExercice(String(parseInt(c.cle,10)+1)+c.debut.slice(4));
+  if(!exs.some(function(e){ return e.cle===suiv.cle; })) exs.unshift(suiv);
+  return exs;
+}
+function budgetRealise(ex){
+  var r={}, lignes=(typeof comptaLignesPeriode==="function")?comptaLignesPeriode(getComptabilite(),ex)
+    :getComptabilite().filter(function(l){ return (l.date||"")>=ex.debut&&(l.date||"")<=ex.fin; });
+  lignes.forEach(function(l){ var k=(l.type==="depense"?"depense":"recette")+"|"+(l.categorie||"Autre"); r[k]=(r[k]||0)+(Number(l.montant)||0); });
+  return r;
+}
+function budgetEur(n){ return (typeof comptaEur==="function")?comptaEur(n):(Number(n)||0).toFixed(2)+" €"; }
+// Écart affiché sous une ligne : réalisé − prévu, en € et en %. Rouge = dépense au-delà du prévu ou recette en dessous.
+function budgetEcartHtml(type,prevu,reel){
+  if(!(prevu>0)) return reel>0?' · <span style="color:var(--mut)">'+gmT("non prévu")+'</span>':"";
+  var e=reel-prevu, pct=Math.round(e/prevu*100), mal=(type==="depense"?e>0:e<0);
+  return ' · '+gmT("écart")+' <b style="color:'+(e===0?"var(--mut)":mal?"var(--red)":"var(--grn)")+'">'+(e>0?"+":"")+budgetEur(e)+' ('+(pct>0?"+":"")+pct+' %)</b>';
+}
+function openBudgetPrev(cle){
+  var exs=budgetExercices();
+  var ex=exs.filter(function(e){ return e.cle===(cle||comptaExerciceCourant().cle); })[0]||exs[0];
+  BUDGET_EX=ex;
+  var year=ex.cle;
   var budget=getBudgetPrev();
   var yearBudget=budget[year]||{};
-  var all=getComptabilite().filter(function(l){return (l.date||"").indexOf(year)===0;});
-  var realise={};
-  all.forEach(function(l){
-    var key=l.type+"|"+(l.categorie||"Autre");
-    realise[key]=(realise[key]||0)+(l.montant||0);
-  });
+  var realise=budgetRealise(ex);
   var body=document.getElementById("modal-budget-body");
-  var html='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">Budget prévisionnel '+year+' — comparez le prévu au réalisé de l\'année en cours.</div>';
+  var html='<select id="budget-ex" class="form-input" onchange="openBudgetPrev(this.value)" style="margin-bottom:8px">'+
+    exs.map(function(e){ return '<option value="'+e.cle+'"'+(e.cle===ex.cle?" selected":"")+'>'+gmT("Exercice")+' '+e.label+'</option>'; }).join("")+'</select>';
+  html+='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">'+gmT("Budget prévisionnel")+' '+ex.label+' : '+gmT("comparez le prévu au réalisé de l'exercice.")+'</div>';
+  html+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+    '<button type="button" onclick="budgetReprendreN1()" style="padding:8px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">↺ '+gmT("Reprendre l'an dernier")+'</button>'+
+    '<button type="button" onclick="budgetPdf()" style="padding:8px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">📄 '+gmT("PDF du budget")+'</button></div>';
   if(typeof projetsBlocHtml==="function") html+='<div id="budget-projets-zone">'+projetsBlocHtml()+'</div>';
   ["recette","depense"].forEach(function(type){
-    html+='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:12px 0 6px">'+(type==="recette"?"Recettes":"Dépenses")+'</div>';
+    html+='<div style="font-size:12px;font-weight:800;color:var(--txt);margin:12px 0 6px">'+gmT(type==="recette"?"Recettes":"Dépenses")+'</div>';
     COMPTA_CATS[type].forEach(function(cat){
       var prevu=yearBudget[type+"|"+cat]||0;
       var subvAuto=(type==="recette"&&cat==="Subventions"&&budgetSubv(year).length>0);
@@ -392,21 +420,112 @@ function openBudgetPrev(){
       var over=prevu>0 && reel>prevu;
       html+='<div style="margin-bottom:10px">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt);margin-bottom:3px">'+
-          '<span>'+cat+'</span>'+
+          '<span>'+gmT(cat)+'</span>'+
           '<span style="display:flex;align-items:center;gap:6px">'+
-            '<input type="number" step="1" value="'+(prevu||"")+'" placeholder="0" '+(subvAuto?'disabled title="Calculé depuis la liste des subventions (accordées et versées)" ':'data-budget-key="'+type+'|'+cat+'" ')+'style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
-            '<span style="color:var(--mut);font-size:10px">prévu</span>'+
+            '<input type="number" step="1" min="0" value="'+(prevu||"")+'" placeholder="0" oninput="budgetMajTotaux()" data-budget-type="'+type+'" data-budget-reel="'+reel+'" '+(subvAuto?'disabled data-budget-auto="1" title="Calculé depuis la liste des subventions (accordées et versées)" ':'data-budget-key="'+type+'|'+cat+'" ')+'style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
+            '<span style="color:var(--mut);font-size:10px">'+gmT("prévu")+'</span>'+
           '</span>'+
         '</div>'+
         '<div style="height:6px;border-radius:4px;background:var(--bdr);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(over?"var(--red)":"var(--grn)")+'"></div></div>'+
-        '<div style="font-size:10px;color:var(--mut);margin-top:2px">Réalisé : '+reel.toFixed(2)+' €'+(prevu>0?" / "+prevu.toFixed(2)+" € prévu":"")+'</div>'+
+        '<div style="font-size:10px;color:var(--mut);margin-top:2px">'+gmT("Réalisé")+' : '+budgetEur(reel)+(prevu>0?" / "+budgetEur(prevu)+" "+gmT("prévu"):"")+budgetEcartHtml(type,prevu,reel)+'</div>'+
       '</div>';
     });
   });
+  html+='<div id="budget-totaux"></div>';
   html+='<div id="budget-subv-zone"></div>';
   body.innerHTML=html;
   budgetSubvDessiner(budgetSubv(year));
+  budgetMajTotaux();
   document.getElementById("modal-budget-prev").style.display="flex";
+}
+// Totaux prévu / réalisé et résultat, recalculés à chaque frappe.
+function budgetMajTotaux(){
+  var z=document.getElementById("budget-totaux"); if(!z) return;
+  var t={recette:{p:0,r:0},depense:{p:0,r:0}};
+  document.querySelectorAll("#modal-budget-body [data-budget-type]").forEach(function(inp){
+    var ty=inp.getAttribute("data-budget-type"); t[ty].p+=parseFloat(inp.value)||0; t[ty].r+=parseFloat(inp.getAttribute("data-budget-reel"))||0;
+  });
+  function lig(lib,p,r,gras){
+    return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;'+(gras?"font-weight:800;":"")+'color:var(--txt);padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="flex:1">'+lib+'</span><span style="width:84px;text-align:right">'+budgetEur(p)+'</span><span style="width:84px;text-align:right">'+budgetEur(r)+'</span></div>';
+  }
+  z.innerHTML='<div style="margin:16px 0 4px;padding:10px 12px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs)">'+
+    '<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);padding-bottom:4px"><span style="flex:1">'+gmT("Totaux")+'</span><span style="width:84px;text-align:right">'+gmT("Prévu")+'</span><span style="width:84px;text-align:right">'+gmT("Réalisé")+'</span></div>'+
+    lig(gmT("Recettes"),t.recette.p,t.recette.r)+lig(gmT("Dépenses"),t.depense.p,t.depense.r)+
+    lig(gmT("Résultat"),t.recette.p-t.depense.p,t.recette.r-t.depense.r,true)+'</div>';
+}
+// Pré-remplit le prévu avec le réalisé de l'exercice précédent (arrondi à l'euro). Rien n'est enregistré avant « Enregistrer ».
+function budgetReprendreN1(){
+  var ex=BUDGET_EX; if(!ex) return;
+  var n1=comptaExercice(String(parseInt(ex.cle,10)-1)+ex.debut.slice(4)), r=budgetRealise(n1);
+  if(!Object.keys(r).length){ askAlert(gmT("Aucune ligne de compta sur l'exercice")+" "+n1.label+"."); return; }
+  var n=0;
+  document.querySelectorAll("#modal-budget-body [data-budget-key]").forEach(function(inp){
+    var v=Math.round(r[inp.getAttribute("data-budget-key")]||0);
+    inp.value=v>0?v:""; if(v>0) n++;
+  });
+  budgetMajTotaux();
+  showToast(gmT("Prévu repris de l'exercice")+" "+n1.label+" ("+n+")");
+}
+// PDF du budget : prévu, réalisé, écart par catégorie + totaux (AG, dossier de subvention).
+function budgetPdf(){
+  if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
+  var ex=BUDGET_EX; if(!ex) return;
+  var lignes={recette:[],depense:[]}, tot={recette:{p:0,r:0},depense:{p:0,r:0}};
+  document.querySelectorAll("#modal-budget-body [data-budget-type]").forEach(function(inp){
+    var ty=inp.getAttribute("data-budget-type"), k=inp.getAttribute("data-budget-key"), cat=k?k.split("|")[1]:"Subventions";
+    var p=parseFloat(inp.value)||0, r=parseFloat(inp.getAttribute("data-budget-reel"))||0;
+    tot[ty].p+=p; tot[ty].r+=r; if(p||r) lignes[ty].push({cat:cat,p:p,r:r});
+  });
+  if(!lignes.recette.length&&!lignes.depense.length){ askAlert(gmT("Le budget est vide : saisis au moins un montant prévu.")); return; }
+  var doc=new window.jspdf.jsPDF(), rgb=clubPdfRgb(), y=18;
+  function eur(n){ return budgetEur(n).replace("€","EUR"); }
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor.apply(doc,rgb);
+  doc.text(clubTitle()||"Association",14,y); y+=8;
+  doc.setFontSize(13); doc.setTextColor(30,30,30); doc.text("Budget prévisionnel - exercice "+ex.label,14,y); y+=6;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110,110,110);
+  doc.text("Du "+ex.debut.split("-").reverse().join("/")+" au "+ex.fin.split("-").reverse().join("/")+"  -  édité le "+new Date().toLocaleDateString("fr-FR"),14,y); y+=10;
+  var xP=130, xR=160, xE=196;
+  function entete(titre){
+    if(y>262){ doc.addPage(); y=20; }
+    doc.setFillColor.apply(doc,rgb); doc.rect(12,y-5,186,7,"F");
+    doc.setFont("helvetica","bold"); doc.setFontSize(9.5); doc.setTextColor(255,255,255);
+    doc.text(titre,14,y); doc.text("Prévu",xP,y,{align:"right"}); doc.text("Réalisé",xR,y,{align:"right"}); doc.text("Écart",xE,y,{align:"right"}); y+=8;
+  }
+  function bloc(type,titre){
+    entete(titre);
+    lignes[type].forEach(function(l){
+      if(y>280){ doc.addPage(); y=20; }
+      var e=l.r-l.p, mal=type==="depense"?e>0:e<0;
+      doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(30,30,30);
+      doc.text(l.cat,14,y); doc.text(eur(l.p),xP,y,{align:"right"}); doc.text(eur(l.r),xR,y,{align:"right"});
+      if(l.p>0){ if(mal) doc.setTextColor(192,57,43); else doc.setTextColor(31,138,76); doc.text((e>0?"+":"")+eur(e),xE,y,{align:"right"}); }
+      y+=6;
+    });
+    doc.setDrawColor(200,200,200); doc.line(14,y-3,198,y-3);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor.apply(doc,rgb);
+    doc.text("Total "+titre.toLowerCase(),14,y+1); doc.text(eur(tot[type].p),xP,y+1,{align:"right"}); doc.text(eur(tot[type].r),xR,y+1,{align:"right"}); y+=11;
+  }
+  bloc("recette","Recettes"); bloc("depense","Dépenses");
+  if(y>262){ doc.addPage(); y=20; }
+  doc.setFillColor.apply(doc,clubPdfTint(0.88)); doc.rect(12,y-6,186,10,"F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(11.5); doc.setTextColor(20,20,20);
+  doc.text("Résultat",14,y+1); doc.text(eur(tot.recette.p-tot.depense.p),xP,y+1,{align:"right"}); doc.text(eur(tot.recette.r-tot.depense.r),xR,y+1,{align:"right"}); y+=16;
+  var sv=budgetSubvLire();
+  if(sv.length){
+    if(y>250){ doc.addPage(); y=20; }
+    doc.setFont("helvetica","bold"); doc.setFontSize(10.5); doc.setTextColor.apply(doc,rgb); doc.text("Subventions",14,y); y+=6;
+    var st={}; BUDGET_SUBV_STATUTS.forEach(function(s){ st[s[0]]=s[1]; });
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(30,30,30);
+    sv.forEach(function(x){ if(y>280){ doc.addPage(); y=20; } doc.text(String(x.nom||"-").slice(0,60),14,y); doc.text(st[x.statut]||"",xR,y,{align:"right"}); doc.text(eur(x.montant),xE,y,{align:"right"}); y+=5.5; });
+    y+=6;
+  }
+  if(y>255){ doc.addPage(); y=30; }
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(60,60,60);
+  doc.text("Présenté à l'assemblée générale du ..................................",14,y); y+=14;
+  doc.text("Le président",30,y); doc.text("Le trésorier",130,y);
+  doc.setFontSize(7.5); doc.setTextColor(140,140,140);
+  doc.text("Réalisé = lignes de la comptabilité sur l'exercice (comptabilité de trésorerie). Écart = réalisé - prévu.",14,290);
+  doc.save(clubSlug()+"_budget_"+ex.label+".pdf");
 }
 
 // ── Subventions : liste par année (à demander, demandées, accordées, versées) ──
@@ -454,7 +573,7 @@ function budgetSubvAjouter(){ var l=budgetSubvLire(); l.push({nom:"",montant:0,s
 function budgetSubvSupprimer(i){ var l=budgetSubvLire(); l.splice(i,1); budgetSubvDessiner(l); }
 
 function saveBudgetPrevForm(){
-  var year=comptaCurrentYear();
+  var year=(BUDGET_EX&&BUDGET_EX.cle)||comptaCurrentYear();
   var budget=getBudgetPrev();
   var yearBudget={};
   document.querySelectorAll('[data-budget-key]').forEach(function(inp){
