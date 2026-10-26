@@ -128,6 +128,32 @@ exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res)
   } catch (e) { res.status(404).end(); }
 });
 
+// Extérieurs d'un événement (sans compte) qui ont activé les notifications sur la page /fil :
+// ils reçoivent chaque message du fil jusqu'à la fin de l'événement, avec leur propre lien.
+async function notifierExternes(clubId, channelId, ch, msg, fabrique) {
+  const eventId = String(ch.eventId || channelId.replace(/^evt_/, ""));
+  const pid = clubId + "__" + eventId;
+  const col = db.collection("clubs").doc(clubId).collection("fil_acces");
+  const r = await col.where("pid", "==", pid).get();
+  const cibles = [];
+  r.forEach((d) => {
+    const x = d.data() || {};
+    if (!x.token || d.id === msg.extCode) return;
+    cibles.push({ ref: d.ref, token: x.token, code: d.id, langue: x.langue });
+  });
+  if (!cibles.length) return;
+  const messages = cibles.map((c) => {
+    const f = fabrique(notifLangue(c.langue));
+    const lien = "https://generalmanagerapp.fr/fil/?e=" + encodeURIComponent(pid) + "&c=" + encodeURIComponent(c.code);
+    const w = webpushClub(clubId, { headers: { Urgency: "high" }, fcmOptions: { link: lien } });
+    return { token: c.token, notification: { title: String(ch.name || f.title).slice(0, 80), body: ((msg.pseudo ? msg.pseudo + " : " : "") + f.body).slice(0, 160) }, data: { url: lien }, webpush: w };
+  });
+  const rep = await admin.messaging().sendEach(messages);
+  const morts = [];
+  rep.responses.forEach((x, i) => { if (!x.success && jetonMort(x.error && x.error.code)) morts.push(cibles[i].ref); });
+  await Promise.all(morts.map((ref) => ref.update({ token: admin.firestore.FieldValue.delete() }).catch(() => {})));
+}
+
 exports.onChannelMessage = onDocumentCreated(
   "clubs/{clubId}/channels/{channelId}/messages/{messageId}",
   async (event) => {
@@ -165,6 +191,7 @@ exports.onChannelMessage = onDocumentCreated(
     const membres = Array.isArray(ch.members) ? ch.members : [];
     // Fil d'événement : jamais « tout le club » ; une fois l'événement fini, seuls les dirigeants sont prévenus.
     const evtFini = !!ch.evt && !!ch.fin && new Date().toISOString().slice(0, 10) > ch.fin;
+    if (ch.evt && !evtFini) { try { await notifierExternes(clubId, channelId, ch, msg, fabrique); } catch (e) { console.error("notifierExternes", e); } }
     let docs = [];
     if (membres.length || ch.evt) {
       const tels = evtFini ? [] : [...new Set(membres.map((m) => String(typeof m === "string" ? m : (m && m.phone) || "").replace(/\s+/g, "")).filter(Boolean))];
@@ -259,6 +286,16 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
     }
     const fini = !!finMs && now > finMs;
 
+    // Notifications d'un extérieur : son appareil enregistre/retire son jeton (stocké côté serveur seulement).
+    if (b.action === "notifs" || b.action === "notifs_off") {
+      if (b.action === "notifs_off") { await accRef.update({ token: admin.firestore.FieldValue.delete() }).catch(() => {}); res.json({ ok: true }); return; }
+      const token = String(b.token || "");
+      if (token.length < 20 || token.length > 4096 || /\s/.test(token)) { res.status(400).json({ erreur: "jeton" }); return; }
+      await accRef.set({ token, langue: notifLangue(b.langue), notifLe: now }, { merge: true });
+      res.json({ ok: true });
+      return;
+    }
+
     if (b.action === "ecrire") {
       if (fini) { res.status(403).json({ erreur: "fini" }); return; }
       const texte = String(b.text || "").replace(/\r/g, "").trim().slice(0, FIL_MAX_TEXTE);
@@ -290,7 +327,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
         });
       });
     }
-    res.json({ ok: true, titre: String(page.titre || ""), club: String(page.nom || ""), fin: page.dateFin || page.date || "", fini, moi: pseudo, messages: msgs });
+    res.json({ ok: true, notifs: !!acc.token, titre: String(page.titre || ""), club: String(page.nom || ""), fin: page.dateFin || page.date || "", fini, moi: pseudo, messages: msgs });
   } catch (e) {
     console.error("filEvenement", e);
     res.status(500).json({ erreur: "serveur" });

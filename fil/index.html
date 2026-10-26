@@ -8,6 +8,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1A2E5A">
 <meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Discussion de l'événement — General Manager</title>
 <style>
 /* Discussion d'un événement pour une personne sans compte (generalmanagerapp.fr/fil/?e=CLUB__EVENT&c=CODE-DU-BILLET).
@@ -31,12 +35,21 @@ header h1{margin:3px 0 0;font-size:20px}
 .verrou{flex-shrink:0;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);font-size:13px;font-weight:700;color:var(--mut)}
 form{flex-shrink:0;display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
 #t{flex:1;min-width:0;height:44px;padding:0 14px;border-radius:22px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+#notif{flex-shrink:0;display:none;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px}
+#notif span{color:var(--mut);line-height:1.3}
+#notif button{width:auto;height:34px;border-radius:17px;padding:0 14px;font-size:13px;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(10,20,40,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .bx{background:var(--card);color:var(--ink);border-radius:16px;padding:18px;max-width:360px;width:100%;max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 8px;font-size:17px}
+.modal ol{padding-left:20px;margin:8px 0 14px;line-height:1.5;font-size:14px}
+.modal button{width:100%;border-radius:12px}
 button{width:44px;height:44px;border-radius:50%;border:none;background:var(--club);color:#fff;font-size:18px;cursor:pointer;flex-shrink:0}
 button:disabled{opacity:.5}
 </style>
 </head>
 <body>
 <header><div class="club" id="club"></div><h1 id="titre">Discussion de l'événement</h1></header>
+<div id="notif"><span id="notif-t">Reçois une alerte à chaque nouveau message.</span><button id="notif-b" type="button">🔔 Activer les notifications</button></div>
 <div id="liste"><div class="info" id="info">Chargement…</div></div>
 <div class="verrou" id="verrou" style="display:none">🔒 Événement terminé : cette discussion est en lecture seule.</div>
 <form id="f" style="display:none" autocomplete="off">
@@ -110,8 +123,71 @@ document.getElementById("f").addEventListener("submit",function(e){
     else alert(T("Message non envoyé. Réessayez."));
   }).catch(function(){ alert(T("Message non envoyé. Réessayez.")); }).then(function(){ ok.disabled=false; });
 });
+
+// ── Notifications (FCM) : le jeton est envoyé à la fonction, jamais écrit dans Firestore par la page ──
+var VAPID="BN47W4jilNVt6DpQF25IlUsIbgduMQFjO84WEN2LGbdjUY1uRaun3wpRzuuh2U6TUNCXDdx398W9LA1zX1zP9B0";
+var FB_CONF={apiKey:"AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",authDomain:"asmb-app.firebaseapp.com",projectId:"asmb-app",storageBucket:"asmb-app.firebasestorage.app",messagingSenderId:"786817375628",appId:"1:786817375628:web:3db013af1adab9e8ab8aa9"};
+var nBox=document.getElementById("notif"), nTxt=document.getElementById("notif-t"), nBtn=document.getElementById("notif-b");
+function ios(){ var ua=navigator.userAgent||""; return /iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1); }
+function installee(){ return navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches); }
+function chargerSdk(){
+  if(window.firebase&&firebase.messaging) return Promise.resolve();
+  function sc(u){ return new Promise(function(ok,ko){ var e=document.createElement("script"); e.src=u; e.onload=ok; e.onerror=ko; document.head.appendChild(e); }); }
+  return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js").then(function(){ return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"); });
+}
+function nEtat(actif){
+  nBox.style.display="flex";
+  if(actif){ nTxt.textContent=T("🔔 Notifications activées sur cet appareil."); nBtn.style.display="none"; }
+  else { nTxt.textContent=T("Reçois une alerte à chaque nouveau message."); nBtn.style.display=""; }
+}
+function guideIphone(){
+  var m=document.createElement("div"); m.className="modal";
+  var bx=document.createElement("div"); bx.className="bx";
+  var h=document.createElement("h2"); h.textContent=T("📲 Ajouter à l'écran d'accueil"); bx.appendChild(h);
+  var p=document.createElement("div"); p.style.cssText="font-size:13px;color:var(--mut);line-height:1.4"; p.textContent=T("Sur iPhone, les notifications ne marchent que si la page est sur ton écran d'accueil. 30 secondes :"); bx.appendChild(p);
+  var ol=document.createElement("ol");
+  ["Ouvre cette page dans Safari (pas dans WhatsApp ou un autre navigateur).","Touche le bouton Partager : le carré avec une flèche vers le haut.","Touche « Sur l'écran d'accueil », puis Ajouter.","Ouvre la page depuis l'icône sur ton écran d'accueil.","Touche « Activer les notifications » puis Autoriser."].forEach(function(t){ var li=document.createElement("li"); li.textContent=T(t); ol.appendChild(li); });
+  bx.appendChild(ol);
+  var ok=document.createElement("button"); ok.type="button"; ok.textContent=T("J'ai compris"); ok.style.cssText="height:44px;background:var(--club);color:#fff;border:none;font-weight:700;font-size:15px;cursor:pointer";
+  ok.onclick=function(){ m.remove(); }; bx.appendChild(ok); m.appendChild(bx); m.onclick=function(e){ if(e.target===m) m.remove(); };
+  document.body.appendChild(m);
+}
+function jeton(){
+  return chargerSdk().then(function(){
+    if(!firebase.apps.length) firebase.initializeApp(FB_CONF);
+    return navigator.serviceWorker.register("sw.js",{scope:"./"});
+  }).then(function(){ return navigator.serviceWorker.ready; }).then(function(reg){
+    return firebase.messaging().getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});
+  });
+}
+function enregistrer(tok){
+  var cle="gm_fil_tok_"+code;
+  try{ if(localStorage.getItem(cle)===tok) return Promise.resolve(true); }catch(e){}
+  return appeler({action:"notifs",token:tok,langue:window.GM_LANG||"fr"}).then(function(j){
+    if(j.ok){ try{ localStorage.setItem(cle,tok); }catch(e){} return true; } return false;
+  });
+}
+function activerNotifs(){
+  if(ios()&&!installee()){ guideIphone(); return; }
+  if(!("serviceWorker" in navigator)||!("Notification" in window)){ alert(T("Les notifications ne sont pas disponibles sur cet appareil.")); return; }
+  nBtn.disabled=true;
+  Notification.requestPermission().then(function(p){
+    if(p!=="granted"){ if(p==="denied") alert(T("Notifications refusées. Tu peux les autoriser dans les réglages du navigateur.")); return; }
+    return jeton().then(function(tok){ if(!tok) throw 0; return enregistrer(tok); }).then(function(ok){
+      if(ok) nEtat(true); else alert(T("Activation impossible. Réessaie dans un instant."));
+    });
+  }).catch(function(){ alert(T("Activation impossible. Réessaie dans un instant.")); }).then(function(){ nBtn.disabled=false; });
+}
+function initNotifs(){
+  if(!pid||!code) return;
+  if(!("Notification" in window)){ if(ios()&&!installee()){ nEtat(false); } return; }
+  if(Notification.permission==="granted"&&"serviceWorker" in navigator){
+    nEtat(true); jeton().then(function(t){ if(t) enregistrer(t); }).catch(function(){});
+  } else if(Notification.permission!=="denied"||ios()){ nEtat(false); }
+}
+nBtn.addEventListener("click",activerNotifs);
 if(!pid||!code){ msgInfo("Ce lien n'est pas valide. Rouvrez-le depuis votre billet."); }
-else charger().then(planifier);
+else { charger().then(planifier); initNotifs(); }
 })();
 </script>
 </body>

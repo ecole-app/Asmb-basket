@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792997127",
+  "titre": "Notifications pour les inscrits sans compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un inscrit extérieur peut activer les notifications depuis la page de discussion de son billet (avec un guide « écran d'accueil » sur iPhone) et reçoit chaque nouveau message du fil jusqu'à la fin de l'événement."
+   }
+  ]
+ },
+ {
   "v": "1792996991",
   "titre": "Correction : barre de message des canaux",
   "points": [
