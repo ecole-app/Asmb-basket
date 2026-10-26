@@ -224,7 +224,7 @@ function benMissionsDe(benId){
       if(m.benId!==benId) return;
       if(String(m.jour||e.date||"")<auj) return;
       out.push({id:String(m.id).slice(0,30), eid:String(e.id).slice(0,60), poste:String(m.poste||"").slice(0,40), heure:String(m.heure||"").slice(0,12),
-        date:String(m.jour||e.date||"").slice(0,10), titre:String(e.titre||eventTypeLabel(e.type)||"").slice(0,80), lieu:String(e.lieu||"").slice(0,80)});
+        date:String(m.jour||e.date||"").slice(0,10), fil:(typeof evtCanalConcerne==="function"&&evtCanalConcerne(e)), titre:String(e.titre||eventTypeLabel(e.type)||"").slice(0,80), lieu:String(e.lieu||"").slice(0,80)});
     });
   });
   out.sort(function(a,b){ return (a.date+a.heure).localeCompare(b.date+b.heure); });

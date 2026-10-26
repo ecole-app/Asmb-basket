@@ -28,6 +28,7 @@ main{max-width:520px;margin:0 auto;padding:16px}
 button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;font-weight:700;cursor:pointer}
 button.oui.on{background:var(--ok);border-color:var(--ok);color:#fff}
 button.non.on{background:var(--ko);border-color:var(--ko);color:#fff}
+.fil{display:block;margin-top:10px;padding:10px;border-radius:10px;background:var(--club);color:#fff;text-align:center;font-size:14px;font-weight:700;text-decoration:none}
 .msg{text-align:center;color:var(--mut);padding:40px 16px;line-height:1.5}
 </style>
 </head>
@@ -74,6 +75,7 @@ function rendre(){
     return '<div class="card"><div class="date">'+esc(jour(m.date))+(m.heure?' · '+esc(m.heure):'')+'</div>'+
       '<div class="poste">'+esc(m.poste)+'</div>'+
       '<div class="sub">'+esc(m.titre)+(m.lieu?' · '+esc(m.lieu):'')+'</div>'+
+      (m.fil&&m.eid&&page.clubId?'<a class="fil" href="../fil/?e='+encodeURIComponent(page.clubId+"__"+m.eid)+'&p='+encodeURIComponent(code)+'">💬 Discussion de l\'événement</a>':'')+
       '<div class="btns"><button class="oui'+(r==="oui"?' on':'')+'" data-m="'+esc(m.id)+'" data-v="oui">✓ Je confirme</button>'+
       '<button class="non'+(r==="non"?' on':'')+'" data-m="'+esc(m.id)+'" data-v="non">✗ Je ne peux pas</button></div></div>';
   }).join("");

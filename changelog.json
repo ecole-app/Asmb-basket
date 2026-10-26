@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792997357",
+  "titre": "Discussion de l'événement pour les bénévoles du pass",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur le pass d'un bénévole sans compte, chaque mission d'un stage, tournoi, soirée ou formation a un bouton « Discussion de l'événement ». Il lit et écrit dans le fil de l'événement (de son arrivée jusqu'à la fin) et peut activer les notifications."
+   }
+  ]
+ },
+ {
   "v": "1792997127",
   "titre": "Notifications pour les inscrits sans compte",
   "points": [

@@ -59,14 +59,14 @@ button:disabled{opacity:.5}
 <script>
 (function(){
 var URL_FIL="https://europe-west1-asmb-app.cloudfunctions.net/filEvenement";
-var q=new URLSearchParams(location.search), pid=q.get("e")||"", code=(q.get("c")||"").toUpperCase();
+var q=new URLSearchParams(location.search), pid=q.get("e")||"", ben=!!q.get("p"), code=(q.get("p")||q.get("c")||"").toUpperCase();
 var liste=document.getElementById("liste"), info=document.getElementById("info");
 var vus={}, dernier=0, fini=false, enCours=false, minuteur=null;
 
 function T(s){ return window.gmT?window.gmT(s):s; }
 function msgInfo(txt){ liste.innerHTML=""; var d=document.createElement("div"); d.className="info"; d.textContent=txt; liste.appendChild(d); }
 function appeler(corps){
-  return fetch(URL_FIL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({pid:pid,code:code},corps))})
+  return fetch(URL_FIL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({pid:pid,code:code,ben:ben},corps))})
     .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ j._code=r.status; return j; }); });
 }
 function heure(ms){ return ms?new Date(ms).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):""; }
@@ -161,7 +161,7 @@ function jeton(){
   });
 }
 function enregistrer(tok){
-  var cle="gm_fil_tok_"+code;
+  var cle="gm_fil_tok_"+pid+"_"+code;
   try{ if(localStorage.getItem(cle)===tok) return Promise.resolve(true); }catch(e){}
   return appeler({action:"notifs",token:tok,langue:window.GM_LANG||"fr"}).then(function(j){
     if(j.ok){ try{ localStorage.setItem(cle,tok); }catch(e){} return true; } return false;

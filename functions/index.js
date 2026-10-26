@@ -138,13 +138,13 @@ async function notifierExternes(clubId, channelId, ch, msg, fabrique) {
   const cibles = [];
   r.forEach((d) => {
     const x = d.data() || {};
-    if (!x.token || d.id === msg.extCode) return;
-    cibles.push({ ref: d.ref, token: x.token, code: d.id, langue: x.langue });
+    if (!x.token || (x.code || d.id) === msg.extCode) return;
+    cibles.push({ ref: d.ref, token: x.token, code: x.code || d.id, ben: !!x.ben, langue: x.langue });
   });
   if (!cibles.length) return;
   const messages = cibles.map((c) => {
     const f = fabrique(notifLangue(c.langue));
-    const lien = "https://generalmanagerapp.fr/fil/?e=" + encodeURIComponent(pid) + "&c=" + encodeURIComponent(c.code);
+    const lien = "https://generalmanagerapp.fr/fil/?e=" + encodeURIComponent(pid) + (c.ben ? "&p=" : "&c=") + encodeURIComponent(c.code);
     const w = webpushClub(clubId, { headers: { Urgency: "high" }, fcmOptions: { link: lien } });
     return { token: c.token, notification: { title: String(ch.name || f.title).slice(0, 80), body: ((msg.pseudo ? msg.pseudo + " : " : "") + f.body).slice(0, 160) }, data: { url: lien }, webpush: w };
   });
@@ -254,17 +254,18 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
   const b = (req.body && typeof req.body === "object") ? req.body : {};
   const pid = String(b.pid || "");
   const code = String(b.code || "").toUpperCase().trim();
+  const ben = b.ben === true; // bénévole sans compte : le code est celui de son pass (ben_pass/{CODE})
   const i = pid.indexOf("__");
   const clubId = i > 0 ? pid.slice(0, i) : "", eventId = i > 0 ? pid.slice(i + 2) : "";
-  if (!/^[A-Za-z0-9_-]{2,60}$/.test(clubId) || !/^[A-Za-z0-9_-]{1,40}$/.test(eventId) || !/^[A-Z]{3}-\d{5}$/.test(code)) {
+  if (!/^[A-Za-z0-9_-]{2,60}$/.test(clubId) || !/^[A-Za-z0-9_-]{1,40}$/.test(eventId) || !(ben ? /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/ : /^[A-Z]{3}-\d{5}$/).test(code)) {
     res.status(400).json({ erreur: "lien" }); return;
   }
   try {
     const clubRef = db.collection("clubs").doc(clubId);
     const canalRef = clubRef.collection("channels").doc("evt_" + eventId);
-    const accRef = clubRef.collection("fil_acces").doc(code);
+    const accRef = clubRef.collection("fil_acces").doc(ben ? code + "~" + eventId : code);
     const [bSnap, pSnap, cSnap, aSnap] = await Promise.all([
-      clubRef.collection("evt_inscrits").doc(code).get(),
+      ben ? db.collection("ben_pass").doc(code).get() : clubRef.collection("evt_inscrits").doc(code).get(),
       db.collection("evt_pages").doc(pid).get(),
       canalRef.get(),
       accRef.get()
@@ -272,16 +273,25 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
     const bil = bSnap.exists ? bSnap.data() : null;
     const page = pSnap.exists ? pSnap.data() : null;
     const canal = cSnap.exists ? cSnap.data() : null;
-    if (!bil || String(bil.eventId) !== eventId || bil.statut === "annule") { res.status(403).json({ erreur: "billet" }); return; }
-    if (!page || !canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
+    if (ben) {
+      // Le pass doit être celui de ce club, actif, avec une mission sur cet événement.
+      const missions = bil && Array.isArray(bil.missions) ? bil.missions : [];
+      if (!bil || bil.clubId !== clubId || bil.actif === false || !missions.some((m) => m && String(m.eid) === eventId)) { res.status(403).json({ erreur: "billet" }); return; }
+      if (!canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
+    } else {
+      if (!bil || String(bil.eventId) !== eventId || bil.statut === "annule") { res.status(403).json({ erreur: "billet" }); return; }
+      if (!page || !canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
+    }
 
     const now = Date.now();
-    const finMs = parisFinDeJour(page.dateFin || page.date);
-    const prenom = String(bil.prenom || "").trim(), nom = String(bil.nom || "").trim();
+    const finMs = parisFinDeJour(ben ? canal.fin : (page.dateFin || page.date));
+    const prenom = ben ? String(bil.nom || "").trim().split(/\s+/)[0] : String(bil.prenom || "").trim();
+    const nom = ben ? String(bil.nom || "").trim().split(/\s+/).slice(1).join(" ") : String(bil.nom || "").trim();
     const pseudo = (prenom + (nom ? " " + nom.charAt(0).toUpperCase() + "." : "")).trim() || "Invité";
     let acc = aSnap.exists ? aSnap.data() : null;
     if (!acc || !acc.depuis) {
       acc = { depuis: now, pseudo, pid, creeLe: now };
+      if (ben) { acc.ben = true; acc.code = code; }
       await accRef.set(acc, { merge: true });
     }
     const fini = !!finMs && now > finMs;
@@ -327,7 +337,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
         });
       });
     }
-    res.json({ ok: true, notifs: !!acc.token, titre: String(page.titre || ""), club: String(page.nom || ""), fin: page.dateFin || page.date || "", fini, moi: pseudo, messages: msgs });
+    res.json({ ok: true, notifs: !!acc.token, titre: String(ben ? canal.name : page.titre || ""), club: String(ben ? bil.clubName : page.nom || ""), fin: ben ? canal.fin || "" : page.dateFin || page.date || "", fini, moi: pseudo, messages: msgs });
   } catch (e) {
     console.error("filEvenement", e);
     res.status(500).json({ erreur: "serveur" });
