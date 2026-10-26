@@ -1,5 +1,18 @@
 [
  {
+  "v": "1792993121",
+  "titre": "Retour à un seul canal Événements",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les canaux créés automatiquement pour chaque événement sont retirés : il n'y a toujours qu'un seul canal Événements dans la Communauté."
+   }
+  ]
+ },
+ {
   "v": "1792953553",
   "titre": "Notifications dans votre langue",
   "points": [
