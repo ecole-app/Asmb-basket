@@ -137,7 +137,7 @@ function adminModuleOuvertLimite(id){
 // le club en accès limité peut saisir, modifier et supprimer des licences.
 // comptabilite : seulement les écritures automatiques cachées (horsPremium)
 // d'un mouvement de stock, le module Comptabilité restant fermé.
-var GM_LIMITE_ECRITURE={licences:"licences",players:"licences",roster:"licences",inventaire:"inventaire",sponsors:"sponsors",facturation_compteur:"sponsors",factures:"sponsors",comptabilite:"inventaire"};
+var GM_LIMITE_ECRITURE={licences:"licences",players:"licences",roster:"licences",inventaire:"inventaire",sponsors:"sponsors",facturation_compteur:"sponsors",factures:"sponsors",sponsor_formules:"sponsors",comptabilite:"inventaire"};
 function limiteEcritureAutorisee(coll){
   if(!isLimite()) return true;
   var k=GM_LIMITE_ECRITURE[coll];

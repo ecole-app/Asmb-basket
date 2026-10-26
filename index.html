@@ -655,11 +655,21 @@ window.__gmT0=Date.now();window.gmBanniere=aff;})();
           <div class="form-group" style="flex:1"><label class="form-label">Téléphone</label><input class="form-input" id="sp-contact-tel" type="tel" placeholder="0612345678"></div>
         </div>
         <div class="form-group"><label class="form-label">Email du contact</label><input class="form-input" id="sp-contact-email" type="email" placeholder="mail@gmail.com"></div>
+        <div class="form-group"><label class="form-label">Type de partenariat</label>
+          <select class="form-input" id="sp-type" onchange="sponsorTypeMaj()">
+            <option value="sponsoring">Sponsoring (contreparties publicitaires → facture)</option>
+            <option value="mecenat">Mécénat (don sans vraie contrepartie → reçu fiscal)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Formule</label>
+          <select class="form-input" id="sp-formule" onchange="sponsorFormuleChoisie(this)"></select>
+        </div>
         <div class="form-group"><label class="form-label">Montant de la convention (€, optionnel)</label><input class="form-input" id="sp-montant" type="number" step="0.01" placeholder="0.00"></div>
         <div style="display:flex;gap:10px">
           <div class="form-group" style="flex:1"><label class="form-label">Début de convention</label><input class="form-input" id="sp-date-debut" type="date"></div>
           <div class="form-group" style="flex:1"><label class="form-label">Fin de convention</label><input class="form-input" id="sp-date-fin" type="date"></div>
         </div>
+        <div class="form-group"><label class="form-label">Contreparties (une par ligne)</label><textarea class="form-input" id="sp-contreparties" rows="3"></textarea></div>
         <div class="form-group"><label class="form-label">Prochaine relance (optionnel)</label><input class="form-input" id="sp-relance" type="date"></div>
         <div class="form-group">
           <label class="form-label">Logo (optionnel)</label>
@@ -677,6 +687,8 @@ window.__gmT0=Date.now();window.gmBanniere=aff;})();
         </div>
         <div class="form-group"><label class="form-label">Notes (optionnel)</label><textarea class="form-input" id="sp-notes" rows="3"></textarea></div>
         <button id="sp-save-btn" onclick="saveSponsor()" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>
+        <button id="sp-convention-btn" onclick="sponsorConventionPdf()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">📄 Convention de partenariat (PDF)</button>
+        <button id="sp-cerfa-btn" onclick="sponsorRecuFiscal()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">🧾 Reçu fiscal du don (CERFA)</button>
         <button id="sp-facture-btn" onclick="openFactureModal()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">🧾 Générer une facture</button>
         <button id="sp-delete-btn" onclick="deleteSponsor()" style="display:none;width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:13px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Supprimer ce sponsor</button>
       </div>
@@ -1977,6 +1989,7 @@ window.__gmT0=Date.now();window.gmBanniere=aff;})();
 <script src="js/16b-messagerie.js"></script>
 <script src="js/17-sponsors.js"></script>
 <script src="js/17b-factures.js"></script>
+<script src="js/17c-convention.js"></script>
 <script src="js/17-poles.js"></script>
 <script src="js/17b-poles-joueurs.js"></script>
 <script src="js/17c-poles-fiche.js"></script>

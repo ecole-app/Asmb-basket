@@ -783,6 +783,11 @@ service cloud.firestore {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
         allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
       }
+      // Formules de partenariat (Or, Argent, Bronze…) : même droit que les sponsors.
+      match /sponsor_formules/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');
+        allow write: if dirigeant(clubId) || hasPermission(clubId, 'sponsors');
+      }
       // Tableau des factures sponsors (statut, paiement) : même droit que les sponsors.
       match /factures/{id} {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');

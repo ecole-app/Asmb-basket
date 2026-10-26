@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793046370",
+  "titre": "Sponsors : convention de partenariat ou de mécénat en PDF",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur la fiche d'un sponsor : type de partenariat (sponsoring → facture, mécénat → reçu fiscal), formules toutes prêtes (Or, Argent, Bronze, modifiables) qui remplissent le montant et les contreparties, et bouton « Convention de partenariat (PDF) » à faire signer. Pour un mécène, « Reçu fiscal du don » prépare la ligne de don en compta."
+   }
+  ]
+ },
+ {
   "v": "1793045845",
   "titre": "Budget prévisionnel : exercice, écarts, reprise de l'an dernier et PDF",
   "points": [

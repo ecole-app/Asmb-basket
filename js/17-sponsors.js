@@ -92,6 +92,10 @@ function showAddSponsor(){
   var delBtn=document.getElementById("sp-delete-btn"); if(delBtn) delBtn.style.display="none";
   var factBtn=document.getElementById("sp-facture-btn"); if(factBtn) factBtn.style.display="none";
   var histBox=document.getElementById("sp-historique"); if(histBox) histBox.style.display="none";
+  document.getElementById("sp-type").value="sponsoring";
+  document.getElementById("sp-contreparties").value="";
+  sponsorFormulesRemplir("");
+  sponsorTypeMaj();
   document.getElementById("modal-sponsor").style.display="flex";
 }
 
@@ -142,7 +146,10 @@ function showEditSponsor(id){
   document.getElementById("sp-logo-file").value="";
   document.getElementById("sp-doc-file").value="";
   var delBtn=document.getElementById("sp-delete-btn"); if(delBtn) delBtn.style.display="block";
-  var factBtn=document.getElementById("sp-facture-btn"); if(factBtn) factBtn.style.display="block";
+  document.getElementById("sp-type").value=s.typePart==="mecenat"?"mecenat":"sponsoring";
+  document.getElementById("sp-contreparties").value=s.contreparties||"";
+  sponsorFormulesRemplir(s.formule||"");
+  sponsorTypeMaj();
   renderSponsorHistorique(s.nom);
   document.getElementById("modal-sponsor").style.display="flex";
 }
@@ -191,7 +198,10 @@ function saveSponsor(){
     relance:document.getElementById("sp-relance").value||"",
     logo:sponsorLogoDataUrl||null,
     document:sponsorDocDataUrl||null,
-    notes:(document.getElementById("sp-notes").value||"").trim()
+    notes:(document.getElementById("sp-notes").value||"").trim(),
+    typePart:document.getElementById("sp-type").value==="mecenat"?"mecenat":"sponsoring",
+    contreparties:(document.getElementById("sp-contreparties").value||"").trim().slice(0,1500),
+    formule:(function(v){ return v&&v!=="__gerer"?v:""; })(document.getElementById("sp-formule").value)
   };
   if(sponsorEditId){
     var idx=list.findIndex(function(x){return x.id===sponsorEditId;});
@@ -314,4 +324,91 @@ function genererFacturePdf(){
     closeModal("modal-facture");
     showToast("Facture "+numero+" générée !");
   });
+}
+
+
+// ═══ CONVENTION DE PARTENARIAT (sponsoring ou mécénat) ═══════════════
+// La fiche sponsor porte le type (sponsoring → facture ; mécénat → reçu fiscal CERFA),
+// la formule choisie et les contreparties. Le PDF de convention se génère depuis la
+// fiche (proposition pour un prospect, à signer ensuite). Formules du club :
+// clubs/{clubId}/sponsor_formules (même droit que les sponsors).
+function getSponsorFormules(){ try{ var l=JSON.parse(localStorage.getItem("asmb_sponsor_formules")||"null"); return Array.isArray(l)?l:null; }catch(e){ return null; } }
+function saveSponsorFormules(l){ localStorage.setItem("asmb_sponsor_formules",JSON.stringify(l)); fsWriteCollection("sponsor_formules",l); }
+function sponsorFormulesRemplir(choisie){
+  var sel=document.getElementById("sp-formule"); if(!sel) return;
+  var l=sponsorFormulesListe();
+  sel.innerHTML='<option value="">'+authEsc(gmT("— Sur mesure —"))+'</option>'+
+    l.map(function(f){ return '<option value="'+authEsc(f.nom)+'">'+authEsc(f.nom)+(f.montant?" · "+Number(f.montant).toFixed(0)+" €":"")+'</option>'; }).join("")+
+    '<option value="__gerer">⚙️ '+authEsc(gmT("Gérer les formules…"))+'</option>';
+  if(choisie&&!l.some(function(f){ return f.nom===choisie; })) sel.insertAdjacentHTML("beforeend",'<option value="'+authEsc(choisie)+'">'+authEsc(choisie)+'</option>');
+  sel.value=choisie||"";
+  sel.setAttribute("data-prev",sel.value);
+}
+function sponsorFormuleChoisie(sel){
+  if(sel.value==="__gerer"){ sel.value=sel.getAttribute("data-prev")||""; openSponsorFormules(); return; }
+  sel.setAttribute("data-prev",sel.value);
+  var f=sponsorFormulesListe().filter(function(x){ return x.nom===sel.value; })[0]; if(!f) return;
+  if(f.montant) document.getElementById("sp-montant").value=f.montant;
+  if(f.contreparties) document.getElementById("sp-contreparties").value=f.contreparties;
+}
+// Boutons selon le type : facture (sponsoring) ou reçu fiscal (mécénat), seulement sur une fiche enregistrée.
+function sponsorTypeMaj(){
+  var mec=document.getElementById("sp-type").value==="mecenat", edit=!!sponsorEditId;
+  var f=document.getElementById("sp-facture-btn"); if(f) f.style.display=edit&&!mec?"block":"none";
+  var c=document.getElementById("sp-cerfa-btn"); if(c) c.style.display=edit&&mec?"block":"none";
+  var v=document.getElementById("sp-convention-btn"); if(v) v.style.display=edit?"block":"none";
+}
+function openSponsorFormules(){
+  var s=gmSheet(gmT("Formules de partenariat")), b=s.body;
+  var aide=document.createElement("div"); aide.style.cssText="font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:10px";
+  aide.textContent=gmT("Vos offres types : choisies sur une fiche sponsor, elles remplissent le montant et les contreparties.");
+  b.appendChild(aide);
+  var liste=sponsorFormulesListe().map(function(f){ return {id:f.id,nom:f.nom,montant:f.montant,contreparties:f.contreparties}; });
+  var zone=document.createElement("div"); b.appendChild(zone);
+  var st="width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:8px;background:var(--bg);color:var(--txt);font-size:13px;box-sizing:border-box";
+  function dessiner(){
+    zone.innerHTML="";
+    liste.forEach(function(f,i){
+      var c=document.createElement("div"); c.style.cssText="border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--card)";
+      var l1=document.createElement("div"); l1.style.cssText="display:flex;gap:8px;margin-bottom:6px";
+      var nom=document.createElement("input"); nom.value=f.nom||""; nom.placeholder=gmT("Nom (ex : Or)"); nom.maxLength=40; nom.style.cssText=st+";flex:1";
+      nom.oninput=function(){ f.nom=nom.value; };
+      var mt=document.createElement("input"); mt.type="number"; mt.min="0"; mt.step="1"; mt.value=f.montant||""; mt.placeholder="€"; mt.style.cssText=st+";width:90px;flex:none";
+      mt.oninput=function(){ f.montant=parseFloat(mt.value)||0; };
+      l1.appendChild(nom); l1.appendChild(mt); c.appendChild(l1);
+      var cp=document.createElement("textarea"); cp.rows=3; cp.value=f.contreparties||""; cp.style.cssText=st;
+      cp.oninput=function(){ f.contreparties=cp.value; };
+      c.appendChild(cp);
+      gmRow(c).appendChild(gmBtn(gmT("Supprimer"),"danger",function(){ liste.splice(i,1); dessiner(); }));
+      zone.appendChild(c);
+    });
+  }
+  dessiner();
+  var r=gmRow(b);
+  r.appendChild(gmBtn("+ "+gmT("Ajouter une formule"),"soft",function(){ if(liste.length>=8) return; liste.push({id:"",nom:"",montant:0,contreparties:""}); dessiner(); }));
+  r.appendChild(gmBtn(gmT("Enregistrer"),"primary",function(){
+    var propre=liste.filter(function(f){ return String(f.nom||"").trim(); }).map(function(f,i){
+      return {id:f.id||("f"+Date.now().toString(36)+i), nom:String(f.nom).trim().slice(0,40), montant:Math.max(0,Number(f.montant)||0), contreparties:String(f.contreparties||"").trim().slice(0,1500)};
+    });
+    // Formules supprimées : retirées aussi du serveur.
+    var avant=getSponsorFormules()||[], ids=propre.map(function(f){ return f.id; });
+    avant.forEach(function(f){ if(ids.indexOf(f.id)<0&&window.fbDeleteDoc&&window.fbDoc&&window.fbDb) window.fbDeleteDoc(window.fbDoc(window.fbDb,"sponsor_formules",f.id)).catch(function(){}); });
+    saveSponsorFormules(propre);
+    var sel=document.getElementById("sp-formule"); sponsorFormulesRemplir(sel?sel.value:"");
+    s.modal.remove(); showToast(gmT("Formules enregistrées"));
+  }));
+}
+// Mécénat : le reçu fiscal se fait depuis la ligne de don en compta. On ouvre une nouvelle
+// ligne pré-remplie (Recette › Dons, tiers = mécène) ; une fois enregistrée, bouton « Reçu fiscal ».
+function sponsorRecuFiscal(){
+  if(typeof hasModulePermission==="function"&&!hasModulePermission("comptabilite")){ askAlert(gmT("Le reçu fiscal se fait depuis la comptabilité : demande au trésorier ou au dirigeant.")); return; }
+  var nom=(document.getElementById("sp-nom").value||"").trim(), mt=parseFloat(document.getElementById("sp-montant").value)||"";
+  closeModal("modal-sponsor");
+  showAddComptaLine();
+  setComptaType("recette");
+  var cat=document.getElementById("cl-categorie"); if(cat) cat.value="Dons";
+  document.getElementById("cl-montant").value=mt;
+  document.getElementById("cl-tiers").value=nom;
+  document.getElementById("cl-motif").value=gmT("Mécénat")+" "+nom;
+  askAlert(gmT("Vérifie la date et le moyen de paiement du don, enregistre la ligne, puis rouvre-la et touche « Générer le reçu fiscal »."));
 }

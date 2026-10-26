@@ -105,6 +105,11 @@ describe("Rôles à l'intérieur d'un club", () => {
     await assertSucceeds(setDoc(doc(db, "clubs/A/comptabilite/c3"), { type: "recette", montant: 5 }));
     await assertFails(getDoc(doc(db, "clubs/A/sponsors/s1")));
   });
+  it("formules de partenariat : dirigeant oui, trésorier sans accès sponsors et parent non", async () => {
+    await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/sponsor_formules/or"), { nom: "Or", montant: 1500 }));
+    await assertFails(getDoc(doc(await as("tresorierA"), "clubs/A/sponsor_formules/or")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/sponsor_formules/x"), { nom: "x" }));
+  });
   it("factures sponsors : dirigeant oui, trésorier sans accès sponsors et parent non", async () => {
     await assertSucceeds(setDoc(doc(await as("dirA"), "clubs/A/factures/f1"), { numero: "F-2026-001", statut: "brouillon" }));
     await assertSucceeds(getDoc(doc(await as("dirA"), "clubs/A/factures/f1")));
