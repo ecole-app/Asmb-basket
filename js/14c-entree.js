@@ -14,7 +14,7 @@ function entreeHeure(ms){ if(!ms) return ""; var d=new Date(ms); return isNaN(d)
 function entreeCodeDepuis(txt){
   txt=String(txt||"").trim();
   try{ var u=new URL(txt); var b=u.searchParams.get("billet"); if(b) return b.toUpperCase(); }catch(e){}
-  var m=txt.toUpperCase().match(/(STG|TRN|SOI|EVT)-[0-9]{5}/);
+  var m=txt.toUpperCase().match(/(STG|TRN|SOI|EVT)-[0-9]{5}(-[A-HJ-NP-Z2-9]{4})?/);
   return m?m[0]:"";
 }
 // Jours au choix : l'écran Entrée travaille sur UN jour à la fois (aujourd'hui si c'est un jour de l'événement).
@@ -103,7 +103,7 @@ function evtEntree(eid){
 
 // ── Source « bénévole » : le doc evt_entrees/{code} ────────────────
 function showEntreeBenevole(code){
-  code=String(code||"").toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,9);
+  code=String(code||"").toUpperCase().replace(/[^A-Z0-9-]/g,"").slice(0,14);
   if(typeof gmModePublic==="function") gmModePublic(true);
   if(!/^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code)){ entreeSaisieCode(); return; }
   var n=0;
@@ -297,7 +297,7 @@ function entreeScanner(src, repeindre){
   o.querySelector(".sc-x").addEventListener("click",fermer);
   o.querySelector(".sc-code").addEventListener("click",function(){
     pause=true;
-    var c=prompt("Code du billet (ex : STG-12345)");
+    var c=prompt("Code du billet (ex : STG-12345-AB7K)");
     if(c) montrer(entreeCodeDepuis(c)||String(c).toUpperCase().trim()); else pause=false;
   });
   function montrer(code){
@@ -335,6 +335,11 @@ function entreeScanner(src, repeindre){
 }
 // Résultat d'un scan : vert = entrée validée, orange = déjà entré, rouge = inconnu.
 function entreeResultat(src, code, host, suivant, fermer){
+  // Code tapé sans les 4 derniers caractères (STG-12345) : on prend le billet s'il est seul à commencer ainsi.
+  if(code && !(src.tous||src.items).some(function(x){ return x.c===code; })){
+    var pre=(src.tous||src.items).filter(function(x){ return String(x.c||"").indexOf(code+"-")===0; });
+    if(pre.length===1) code=pre[0].c;
+  }
   var it=src.items.find(function(x){ return x.c===code; });
   var hj=(!it&&src.jours)?(src.tous||[]).find(function(x){ return x.c===code; }):null;
   if(!host){ host=document.createElement("div"); host.style.cssText="position:fixed;inset:0;z-index:370"; document.body.appendChild(host); var h0=host; suivant=suivant||function(){ h0.remove(); if(src.repeindre) src.repeindre(); }; }

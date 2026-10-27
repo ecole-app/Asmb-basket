@@ -9,6 +9,7 @@ const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/
 const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -248,6 +249,10 @@ function parisFinDeJour(jour) {
   const dec = m ? (m[1] === "-" ? -1 : 1) * (parseInt(m[2], 10) * 60 + parseInt(m[3] || "0", 10)) : 60;
   return base - dec * 60000;
 }
+// Seuils anti-devinette de filEvenement (codes faux par heure).
+const FIL_ESSAIS_FENETRE = 60 * 60 * 1000;
+const FIL_ESSAIS_MAX_IP = 20;
+const FIL_ESSAIS_MAX_EVT = 200;
 exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https://www.generalmanagerapp.fr"], memory: "256MiB" }, async (req, res) => {
   res.set("Cache-Control", "no-store");
   if (req.method !== "POST") { res.status(405).json({ erreur: "methode" }); return; }
@@ -257,29 +262,54 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
   const ben = b.ben === true; // bénévole sans compte : le code est celui de son pass (ben_pass/{CODE})
   const i = pid.indexOf("__");
   const clubId = i > 0 ? pid.slice(0, i) : "", eventId = i > 0 ? pid.slice(i + 2) : "";
-  if (!/^[A-Za-z0-9_-]{2,60}$/.test(clubId) || !/^[A-Za-z0-9_-]{1,40}$/.test(eventId) || !(ben ? /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/ : /^[A-Z]{3}-\d{5}$/).test(code)) {
+  if (!/^[A-Za-z0-9_-]{2,60}$/.test(clubId) || !/^[A-Za-z0-9_-]{1,40}$/.test(eventId) || !(ben ? /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/ : /^[A-Z]{3}-\d{5}(-[A-HJ-NP-Z2-9]{4})?$/).test(code)) {
     res.status(400).json({ erreur: "lien" }); return;
   }
+  // Anti-devinette : un code faux compte comme un échec, par appareil (IP hachée,
+  // jamais stockée en clair) et par événement. Au-delà du seuil sur l'heure, on refuse
+  // sans même regarder le code. Les personnes déjà entrées dans le fil (fil_acces)
+  // ne sont jamais bloquées par le seuil de l'événement.
+  // Dernière adresse de X-Forwarded-For = celle ajoutée par Google (la première peut être inventée par le client).
+  const xff = String(req.headers["x-forwarded-for"] || "").split(",").map((x) => x.trim()).filter(Boolean);
+  const ipBrute = xff.length ? xff[xff.length - 1] : String(req.ip || "");
+  const ipRef = db.collection("fil_essais").doc("ip_" + crypto.createHash("sha256").update("gm-fil|" + ipBrute).digest("hex").slice(0, 32));
+  const evtEssaisRef = db.collection("fil_essais").doc("evt_" + crypto.createHash("sha256").update(pid).digest("hex").slice(0, 32));
   try {
     const clubRef = db.collection("clubs").doc(clubId);
     const canalRef = clubRef.collection("channels").doc("evt_" + eventId);
     const accRef = clubRef.collection("fil_acces").doc(ben ? code + "~" + eventId : code);
-    const [bSnap, pSnap, cSnap, aSnap] = await Promise.all([
+    const [bSnap, pSnap, cSnap, aSnap, ipSnap, evSnap] = await Promise.all([
       ben ? db.collection("ben_pass").doc(code).get() : clubRef.collection("evt_inscrits").doc(code).get(),
       db.collection("evt_pages").doc(pid).get(),
       canalRef.get(),
-      accRef.get()
+      accRef.get(),
+      ipRef.get(),
+      evtEssaisRef.get()
     ]);
+    const maintenant = Date.now();
+    const essais = (sn) => { const d = sn.exists ? sn.data() : null; return d && maintenant - (d.depuis || 0) < FIL_ESSAIS_FENETRE ? (d.n || 0) : 0; };
+    const dejaEntre = aSnap.exists && aSnap.data() && aSnap.data().depuis;
+    if (essais(ipSnap) >= FIL_ESSAIS_MAX_IP || (!dejaEntre && essais(evSnap) >= FIL_ESSAIS_MAX_EVT)) {
+      res.status(429).json({ erreur: "trop" }); return;
+    }
+    const echec = async () => {
+      await Promise.all([[ipRef, ipSnap], [evtEssaisRef, evSnap]].map(([ref, sn]) => {
+        const n = essais(sn);
+        return ref.set(n === 0
+          ? { n: 1, depuis: maintenant, expire: new Date(maintenant + 2 * FIL_ESSAIS_FENETRE) }
+          : { n: admin.firestore.FieldValue.increment(1) }, { merge: true }).catch(() => {});
+      }));
+    };
     const bil = bSnap.exists ? bSnap.data() : null;
     const page = pSnap.exists ? pSnap.data() : null;
     const canal = cSnap.exists ? cSnap.data() : null;
     if (ben) {
       // Le pass doit être celui de ce club, actif, avec une mission sur cet événement.
       const missions = bil && Array.isArray(bil.missions) ? bil.missions : [];
-      if (!bil || bil.clubId !== clubId || bil.actif === false || !missions.some((m) => m && String(m.eid) === eventId)) { res.status(403).json({ erreur: "billet" }); return; }
+      if (!bil || bil.clubId !== clubId || bil.actif === false || !missions.some((m) => m && String(m.eid) === eventId)) { await echec(); res.status(403).json({ erreur: "billet" }); return; }
       if (!canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
     } else {
-      if (!bil || String(bil.eventId) !== eventId || bil.statut === "annule") { res.status(403).json({ erreur: "billet" }); return; }
+      if (!bil || String(bil.eventId) !== eventId || bil.statut === "annule") { await echec(); res.status(403).json({ erreur: "billet" }); return; }
       if (!page || !canal || !canal.evt || canal.deleted) { res.status(404).json({ erreur: "pas_de_fil" }); return; }
     }
 

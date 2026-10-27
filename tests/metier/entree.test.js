@@ -28,6 +28,13 @@ describe("Reconnaissance du code billet (entreeCodeDepuis)", () => {
     assert.equal(c.entreeCodeDepuis(""), "");
     assert.equal(c.entreeCodeDepuis(null), "");
   });
+  it("nouveau format long (STG-12345-AB7K) : reconnu en entier, ancien format toujours accepté", () => {
+    const c = app();
+    assert.equal(c.entreeCodeDepuis("stg-12345-ab7k"), "STG-12345-AB7K");
+    assert.equal(c.entreeCodeDepuis("https://generalmanagerapp.fr/?billet=TRN-00042-ZZ99&evt=x"), "TRN-00042-ZZ99");
+    assert.equal(c.entreeCodeDepuis("Mon billet SOI-98765-K3MP merci"), "SOI-98765-K3MP");
+    assert.equal(c.entreeCodeDepuis("EVT-11111"), "EVT-11111");
+  });
   it("préfixe invalide (pas STG/TRN/SOI/EVT) : non reconnu", () => {
     const c = app();
     assert.equal(c.entreeCodeDepuis("ABC-12345"), "");

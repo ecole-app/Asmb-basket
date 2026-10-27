@@ -808,6 +808,12 @@ describe("Événements à inscription (stage, tournoi, soirée)", () => {
   it("un visiteur s'inscrit avec le bon prix et le compteur monte de 1", async () => {
     await assertSucceeds(inscrire(await as(null), "STG-12345", insc(), 1));
   });
+  it("code long (non devinable) accepté, suffixe mal formé refusé", async () => {
+    const db = await as(null);
+    await assertSucceeds(inscrire(db, "STG-12346-AB7K", insc(), 1));
+    await assertFails(inscrire(db, "STG-12347-AB0K", insc(), 2));
+    await assertFails(inscrire(db, "STG-12348-ABCDE", insc(), 2));
+  });
   it("refusé : mauvais prix, code mal formé, compteur faux, champ en trop, déjà payé", async () => {
     const db = await as(null);
     await assertFails(inscrire(db, "STG-11111", insc({ montant: 40 }), 1));

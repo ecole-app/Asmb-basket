@@ -145,11 +145,16 @@ describe("Inscriptions ouvertes (evtOuvertes)", () => {
 });
 
 describe("Code du billet (evtCode)", () => {
-  it("préfixe correct selon le type, 5 chiffres", () => {
+  it("préfixe correct selon le type, 5 chiffres + 4 caractères non devinables", () => {
     const c = app();
-    assert.match(c.evtCode("stage"), /^STG-\d{5}$/);
-    assert.match(c.evtCode("tournoi"), /^TRN-\d{5}$/);
-    assert.match(c.evtCode("soiree"), /^SOI-\d{5}$/);
-    assert.match(c.evtCode("autre"), /^EVT-\d{5}$/);
+    assert.match(c.evtCode("stage"), /^STG-\d{5}-[A-HJ-NP-Z2-9]{4}$/);
+    assert.match(c.evtCode("tournoi"), /^TRN-\d{5}-[A-HJ-NP-Z2-9]{4}$/);
+    assert.match(c.evtCode("soiree"), /^SOI-\d{5}-[A-HJ-NP-Z2-9]{4}$/);
+    assert.match(c.evtCode("autre"), /^EVT-\d{5}-[A-HJ-NP-Z2-9]{4}$/);
+  });
+  it("les codes ne se répètent pas (1000 tirages)", () => {
+    const c = app();
+    const vus = new Set(); for (let i = 0; i < 1000; i++) vus.add(c.evtCode("stage"));
+    assert.ok(vus.size >= 999);
   });
 });

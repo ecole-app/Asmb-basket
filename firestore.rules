@@ -1140,7 +1140,7 @@ service cloud.firestore {
                     ? p.tarifs[d.tarifIdx].forfait : p.tarifs[d.tarifIdx].prix * d.jours.size())) < 0.01);
         }
         allow create: if clubStatus(clubId) == 'active'
-          && code.matches('^(STG|TRN|SOI|EVT)-[0-9]{5}$')
+          && code.matches('^(STG|TRN|SOI|EVT)-[0-9]{5}(-[A-HJ-NP-Z2-9]{4})?$')
           && request.resource.data.keys().hasOnly(['eventId','prenom','nom','naissance','tel','clubOrigine','tarifIdx','tarifNom','montant','jours','cat','email','mode','statut','paye','present','playerId','auteurUid','source','at','qte','personnes'])
           && request.resource.data.eventId is string
           && get(evtPage(request.resource.data.eventId)).data.actif == true

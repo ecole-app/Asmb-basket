@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793136120",
+  "titre": "Billets plus sûrs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les nouveaux billets ont un code plus long (ex : STG-12345-AB7K), impossible à deviner. Les anciens billets restent valables. À l'entrée, taper seulement STG-12345 retrouve encore le billet s'il est le seul à commencer ainsi."
+   }
+  ]
+ },
+ {
   "v": "1793121898",
   "titre": "Logo du club proposé avant d'installer l'appli",
   "points": [

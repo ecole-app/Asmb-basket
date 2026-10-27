@@ -95,7 +95,8 @@ function afficher(j){
   if(neuf.length&&(bas||neuf.some(function(m){return m.mine;}))) liste.scrollTop=liste.scrollHeight;
 }
 function erreur(j){
-  if(j.erreur==="pas_de_fil") msgInfo("La discussion de cet événement n'est pas ouverte.");
+  if(j.erreur==="trop") msgInfo("Trop d'essais avec un lien non valide. Réessayez dans une heure.");
+  else if(j.erreur==="pas_de_fil") msgInfo("La discussion de cet événement n'est pas ouverte.");
   else if(j.erreur==="billet"||j.erreur==="lien") msgInfo("Ce lien n'est pas valide. Rouvrez-le depuis votre billet.");
   else msgInfo("Connexion impossible. Réessayez dans un instant.");
   document.getElementById("f").style.display="none";

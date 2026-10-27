@@ -29,9 +29,16 @@ var EVT_MODES_COMPTA={especes:"Espèces",cheque:"Chèque",cb:"CB",helloasso:"CB"
 
 function evtPageId(eid){ return (window.CURRENT_CLUB_ID||"")+"__"+eid; }
 function evtLien(eid){ return EVT_URL_BASE+encodeURIComponent(evtPageId(eid)); }
+// Code du billet : PRÉFIXE-12345-ABCD. Les 4 caractères en plus (alphabet sans 0/O/1/I)
+// rendent le code impossible à deviner (~3 milliards de combinaisons par type, contre
+// 100 000 avant). Les anciens billets sans suffixe restent valables partout.
+var EVT_CODE_ALPHA="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function evtCode(type){
   var n=""; for(var i=0;i<5;i++) n+=Math.floor(Math.random()*10);
-  return (EVT_PREFIX[type]||"EVT")+"-"+n;
+  var s="", r=null;
+  try{ r=new Uint32Array(4); (window.crypto||self.crypto).getRandomValues(r); }catch(e){ r=null; }
+  for(var j=0;j<4;j++) s+=EVT_CODE_ALPHA.charAt((r?r[j]:Math.floor(Math.random()*4294967296))%EVT_CODE_ALPHA.length);
+  return (EVT_PREFIX[type]||"EVT")+"-"+n+"-"+s;
 }
 function evtPrix(p){ p=Number(p)||0; return (Math.round(p*100)/100).toString().replace(".",",")+" €"; }
 function evtTarifTxt(p){ return Number(p)>0?evtPrix(p):"Gratuit"; }
