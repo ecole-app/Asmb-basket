@@ -1092,7 +1092,17 @@ service cloud.firestore {
 
       // ── Fiches d'inscription déposées publiquement ──
       match /inscription_submissions/{id} {
+        // Dépôt public : champs imposés (pas de champ en plus), statut de départ fixe,
+        // tailles bornées. Le code doit exister et appartenir à CE club.
         allow create: if request.resource.data.code is string
+          && request.resource.data.code.size() <= 40
+          && request.resource.data.keys().hasOnly(['code', 'typeLicence', 'fiche', 'status', 'ts'])
+          && request.resource.data.keys().hasAll(['code', 'fiche', 'status'])
+          && request.resource.data.status == 'nouvelle'
+          && request.resource.data.fiche is map
+          && request.resource.data.fiche.keys().size() <= 150
+          && (!('typeLicence' in request.resource.data) || request.resource.data.typeLicence == null
+              || (request.resource.data.typeLicence is string && request.resource.data.typeLicence.size() <= 60))
           && get(/databases/$(database)/documents/inscription_codes/$(request.resource.data.code)).data.clubId == clubId;
         allow read: if readStaff(clubId);
         allow update, delete: if staff(clubId);
@@ -1239,7 +1249,11 @@ service cloud.firestore {
     // connexion (auto-inscription parent). Retiré : les comptes se créent
     // désormais par invitation, plus aucun numéro n'est exposé publiquement.
     match /inscription_codes/{code} {
-      allow read: if true;
+      // Lecture d'UN code (lien du club) : publique. La liste complète est fermée :
+      // seul le staff du club (ou la purge par le super admin) peut lister, et
+      // seulement ses propres codes (requête filtrée sur clubId).
+      allow get: if true;
+      allow list: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
       allow create: if staff(request.resource.data.clubId);
       allow update: if staff(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId;
       // staff(clubId) redevient faux dès que le club passe en "purging" : sans

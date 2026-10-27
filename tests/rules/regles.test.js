@@ -679,12 +679,36 @@ describe("Avis des dirigeants à la plateforme", () => {
 
 // ───────────────────────────────────────────────────────────────
 describe("Fiches d'inscription publiques", () => {
+  const fiche = (extra = {}) => ({ code: "INSA", typeLicence: "Jeune", fiche: { nom: "Léa" }, status: "nouvelle", ...extra });
   it("dépôt possible avec le code du club, lecture réservée au staff", async () => {
-    await assertSucceeds(setDoc(doc(await as(null), "clubs/A/inscription_submissions/f1"), { code: "INSA", nom: "Léa" }));
-    await assertFails(setDoc(doc(await as(null), "clubs/B/inscription_submissions/f2"), { code: "INSA", nom: "Léa" }));
+    await assertSucceeds(setDoc(doc(await as(null), "clubs/A/inscription_submissions/f1"), fiche()));
+    await assertFails(setDoc(doc(await as(null), "clubs/B/inscription_submissions/f2"), fiche()));
     await assertFails(getDoc(doc(await as(null), "clubs/A/inscription_submissions/f1")));
     await assertFails(getDoc(doc(await as("parentA"), "clubs/A/inscription_submissions/f1")));
     await assertSucceeds(getDoc(doc(await as("coachA"), "clubs/A/inscription_submissions/f1")));
+  });
+  it("dépôt borné : pas de champ en plus, statut fixe, fiche limitée", async () => {
+    const db = await as(null);
+    await assertFails(setDoc(doc(db, "clubs/A/inscription_submissions/g1"), fiche({ pirate: "x" })));
+    await assertFails(setDoc(doc(db, "clubs/A/inscription_submissions/g2"), fiche({ status: "importee" })));
+    await assertFails(setDoc(doc(db, "clubs/A/inscription_submissions/g3"), fiche({ fiche: "texte" })));
+    await assertFails(setDoc(doc(db, "clubs/A/inscription_submissions/g4"), { code: "INSA", status: "nouvelle" }));
+    const grosse = {}; for (let i = 0; i < 151; i++) grosse["k" + i] = "x";
+    await assertFails(setDoc(doc(db, "clubs/A/inscription_submissions/g5"), fiche({ fiche: grosse })));
+    await assertSucceeds(setDoc(doc(db, "clubs/A/inscription_submissions/g6"), fiche({ typeLicence: null })));
+  });
+});
+
+describe("Codes d'inscription (index public)", () => {
+  it("un code se lit avec son lien, mais la liste complète est fermée", async () => {
+    await assertSucceeds(getDoc(doc(await as(null), "inscription_codes/INSA")));
+    await assertFails(getDocs(collection(await as(null), "inscription_codes")));
+    await assertFails(getDocs(query(collection(await as("parentA"), "inscription_codes"), where("clubId", "==", "A"))));
+  });
+  it("le staff liste les codes de SON club seulement", async () => {
+    await assertSucceeds(getDocs(query(collection(await as("coachA"), "inscription_codes"), where("clubId", "==", "A"))));
+    await assertFails(getDocs(query(collection(await as("coachA"), "inscription_codes"), where("clubId", "==", "B"))));
+    await assertFails(getDocs(collection(await as("coachA"), "inscription_codes")));
   });
 });
 
