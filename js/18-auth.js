@@ -287,6 +287,10 @@ function loadClubProfile(clubId){
       window.CURRENT_CLUB=clubNormaliserCouleurs(Object.assign({id:clubId}, snap.data()));
       try{ localStorage.setItem("gm_type_"+clubId, snap.data().type||"club"); }catch(e){}
       if(typeof applyClubLabels==="function") applyClubLabels();
+      // Premier dirigeant qui vient de créer son compte : logo avant d'installer l'appli.
+      if(!(window.CURRENT_CLUB.type==="independant") && typeof logoPremierPas==="function"){
+        setTimeout(function(){ try{ logoPremierPas(); }catch(e){} },900);
+      }
       // Suspendu ou supprime : on n'ejecte plus vers l'ecran de connexion, le club
       // doit pouvoir lire le motif et le delai dont il dispose pour regulariser.
       var st=snap.data().status;

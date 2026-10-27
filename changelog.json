@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793121898",
+  "titre": "Logo du club proposé avant d'installer l'appli",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Juste après la création de ton compte de dirigeant, l'appli te propose d'ajouter le logo de ton club avant de l'installer : l'icône sur l'écran d'accueil prend alors le bon logo dès l'installation, sans réinstaller."
+   }
+  ]
+ },
+ {
   "v": "1793046370",
   "titre": "Sponsors : convention de partenariat ou de mécénat en PDF",
   "points": [

@@ -453,6 +453,8 @@ function acceptInvite(code, inv){
     b.update(window.fbDoc(window.fbDb,"club_invites",code),{usedBy:cred.user.uid, usedAt:window.fbServerTimestamp()});
     return b.commit();
   }).then(function(){
+    // Premier dirigeant : l'appli lui proposera d'abord le logo (avant l'installation).
+    if(inv.role==="dirigeant"){ try{ localStorage.setItem("gm_logo_premier","1"); }catch(e){} }
     location.href=location.origin+location.pathname; // retour à l'app, déjà connecté
   }).catch(function(e){
     var c=e&&e.code||"";

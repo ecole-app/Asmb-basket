@@ -151,7 +151,7 @@ function majApercuLogo(){
   if(ri) ri.style.display=(typeof clubLogo==="function"&&clubLogo())?"block":"none";
 }
 
-function televerserLogoClub(input){
+function televerserLogoClub(input,opts){
   if(!input||!input.files||!input.files[0])return;
   var file=input.files[0];
   input.value="";
@@ -168,9 +168,62 @@ function televerserLogoClub(input){
         if(window.CURRENT_CLUB) window.CURRENT_CLUB.logo=dataUrl;
         if(typeof applyClubLogo==="function") applyClubLogo();
         majApercuLogo();
-        if(typeof iconeReinstallerTuto==="function") iconeReinstallerTuto();
+        // Premier réglage avant l'installation (logoPremierPas) : rien à réinstaller.
+        if(opts&&opts.apres) opts.apres();
+        else if(typeof iconeReinstallerTuto==="function") iconeReinstallerTuto();
       });
   }).catch(function(e){ askAlert("Erreur : "+((e&&(e.message||e.code))||e)); });
+}
+
+// ═══ PREMIER PAS DU DIRIGEANT : LE LOGO AVANT D'INSTALLER L'APPLI ════
+// L'icône sur l'écran d'accueil est figée à l'installation : on propose donc le
+// logo juste après la création du compte du premier dirigeant (drapeau posé par
+// acceptInvite), pour que logo + installation se fassent d'une traite.
+function logoPremierPas(essai){
+  try{ if(localStorage.getItem("gm_logo_premier")!=="1") return; }catch(e){ return; }
+  if(typeof isSuperAdmin==="function"&&isSuperAdmin()) return;
+  // Le profil « dirigeant » est posé un peu après le chargement du club : on réessaie.
+  if(localStorage.getItem("asmb_profile")!=="dirigeant"){
+    if((essai||0)<12) setTimeout(function(){ logoPremierPas((essai||0)+1); },700);
+    return;
+  }
+  if(typeof clubLogo==="function"&&clubLogo()){ try{ localStorage.removeItem("gm_logo_premier"); }catch(e){} return; }
+  try{ localStorage.removeItem("gm_logo_premier"); }catch(e){}
+  var modal=document.createElement("div");
+  modal.className="alert-modal";
+  modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto";
+  var box=document.createElement("div");
+  box.style.cssText="background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+  box.addEventListener("click",function(e){ e.stopPropagation(); });
+  modal.appendChild(box);
+  var fich=document.createElement("input");
+  fich.type="file"; fich.accept="image/*"; fich.style.display="none";
+  function fin(){ modal.remove(); }
+  function etapeInstaller(){
+    box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);text-align:center;margin-bottom:6px">Logo enregistré, installe l\'appli</div>'+
+      '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:10px">Installe-la maintenant : l\'icône sur ton écran d\'accueil aura le logo de ton club.</div>'+
+      '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:0 0 4px">Android (Chrome)</div>'+
+      '<ol class="ios-tuto"><li>Menu ⋮ › <b>Installer l\'application</b> (ou « Ajouter à l\'écran d\'accueil »).</li></ol>'+
+      '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:10px 0 4px">iPhone (Safari)</div>'+
+      '<ol class="ios-tuto"><li><b>Partager</b> › <b>Sur l\'écran d\'accueil</b> › <b>Ajouter</b>.</li></ol><div style="height:12px"></div>';
+    var ok=document.createElement("button");
+    ok.textContent="C'est fait";
+    ok.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+    ok.addEventListener("click",fin); box.appendChild(ok);
+  }
+  box.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--txt);text-align:center;margin-bottom:6px">Avant d\'installer l\'appli : ajoute ton logo</div>'+
+    '<div style="font-size:12px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:14px">L\'icône sur l\'écran d\'accueil se fixe au moment de l\'installation. Mets le logo de ton club <b>maintenant</b>, puis installe l\'appli : tout est réglé d\'un coup. Sinon l\'icône restera celle de General Manager et il faudra tout réinstaller.</div>';
+  var b1=document.createElement("button");
+  b1.textContent="Choisir le logo du club";
+  b1.style.cssText="width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:700;border:none;color:#fff;cursor:pointer;background:var(--dkg)";
+  b1.addEventListener("click",function(){ fich.click(); });
+  fich.addEventListener("change",function(){ televerserLogoClub(fich,{apres:etapeInstaller}); });
+  var b2=document.createElement("button");
+  b2.textContent="Plus tard";
+  b2.style.cssText="width:100%;margin-top:8px;padding:11px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--bdr);background:var(--bg);color:var(--txt2);cursor:pointer";
+  b2.addEventListener("click",function(){ fin(); showToast("Logo à ajouter dans Paramètres, avant d'installer l'appli"); });
+  box.appendChild(b1); box.appendChild(b2); box.appendChild(fich);
+  document.body.appendChild(modal);
 }
 
 function retirerLogoClub(){
