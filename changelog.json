@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793207332",
+  "titre": "Photo de ticket : lecture réparée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La lecture d'un ticket en photo (comptabilité, notes de frais) utilise de nouveau l'IA Gemini avec les modèles à jour. Plus aucun service tiers ni clé dans l'appli."
+   }
+  ]
+ },
+ {
   "v": "1793136120",
   "titre": "Billets plus sûrs",
   "points": [

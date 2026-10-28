@@ -1,23 +1,17 @@
 // ══════════════════════════════════════════════════════════════
 // COMPTA — PHOTO DE TICKET → LIGNE PRÉ-REMPLIE
-// Photo réduite (1280 px, JPEG) → lue par une IA (OpenRouter, modèles
-// gratuits) → date, montant, fournisseur, catégorie, moyen de paiement
-// pré-remplis dans « Nouvelle ligne ». La photo reste jointe en
-// justificatif. Rien n'est enregistré sans validation : si la lecture
-// échoue, on complète à la main comme avant.
-// Clé côté client pour l'instant (tier gratuit) ; plus tard via une
-// Cloud Function (plan Blaze) sans changer cet écran.
+// Photo réduite (1280 px, JPEG) → lue par Gemini (Firebase AI Logic) →
+// date, montant, fournisseur, catégorie, moyen de paiement pré-remplis
+// dans « Nouvelle ligne ». La photo reste jointe en justificatif. Rien
+// n'est enregistré sans validation : si la lecture échoue, on complète
+// à la main comme avant. Aucune clé à part : l'appel passe par le projet
+// Firebase (clé publique + jeton App Check), l'API « Gemini Developer »
+// est activée dans la console Firebase.
 // ══════════════════════════════════════════════════════════════
-var GM_TICKET_URL="https://openrouter.ai/api/v1/chat/completions";
-var GM_TICKET_CLE=["sk-or-v1-fb2133c6cec2e24fa49f1fb3","8a5d121b2979eadc557a61dd0801f12c8e8b19e7"].join("");
-// Modèles gratuits qui lisent les images. Pas de « openrouter/free » : il peut
-// tomber sur un modèle texte seul (ex. un filtre de sécurité) qui ne lit rien.
-var GM_TICKET_MODELES=["qwen/qwen3.8-27b:free","google/gemma-4-26b-a4b-it:free"];
-var GM_TICKET_SECOURS=["google/gemma-4-31b-it:free","thinkingmachines/inkling-small:free","nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"];
-// Gemini via Firebase AI Logic (API « Gemini Developer » activée dans la console
-// Firebase) : même point d'accès que le SDK firebase-ai, sans clé à part.
-var GM_GEMINI_MODELES=["gemini-2.5-flash","gemini-2.5-flash-lite"];
-var GM_TICKET_DELAI=30000; // par essai (2 essais max)
+// Modèles stables (liste officielle Firebase AI Logic). Les « 2.5 » ne sont plus
+// ouverts aux nouveaux projets (404) : à revoir si Google annonce un arrêt.
+var GM_GEMINI_MODELES=["gemini-3.5-flash-lite","gemini-3.5-flash","gemini-3.1-flash-lite"];
+var GM_TICKET_DELAI=20000; // par modèle essayé (3 au plus)
 
 // Bouton de la barre : ouvre une nouvelle ligne (dépense) puis l'appareil photo.
 function comptaTicketNouveau(){
@@ -70,25 +64,6 @@ function comptaTicketPrompt(){
 }
 // Erreur avec le détail technique, affiché sous le message pour le diagnostic.
 function comptaTicketErr(detail){ var e=new Error("ia"); e.detail=String(detail||"").slice(0,160); return e; }
-function comptaTicketAppel(dataUrl,corps){
-  var ctrl=window.AbortController?new AbortController():null;
-  var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
-  var body=Object.assign({max_tokens:1200,temperature:0,messages:[{role:"user",content:[
-    {type:"image_url",image_url:{url:dataUrl}},{type:"text",text:comptaTicketPrompt()}]}]},corps);
-  return fetch(GM_TICKET_URL,{method:"POST",signal:ctrl?ctrl.signal:undefined,
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+GM_TICKET_CLE,
-      "HTTP-Referer":"https://generalmanagerapp.fr","X-Title":"General Manager"},
-    body:JSON.stringify(body)})
-  .then(function(r){ return r.text().then(function(x){ var d=null; try{ d=JSON.parse(x); }catch(e){} if(!d) throw comptaTicketErr("HTTP "+r.status+" "+x.slice(0,80)); return d; }); })
-  .then(function(d){
-    clearTimeout(t);
-    if(d&&d.error) throw comptaTicketErr("API "+(d.error.code||"")+" : "+(d.error.message||JSON.stringify(d.error)));
-    var txt=(d&&d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||"";
-    var res=comptaTicketAnalyser(txt);
-    if(!res) throw comptaTicketErr("réponse illisible ("+(d&&d.model||"?")+") : "+(String(txt).slice(0,80)||"vide"));
-    return res;
-  },function(e){ clearTimeout(t); if(e&&e.name==="AbortError") throw e; throw comptaTicketErr("réseau : "+(e&&e.message||e)); });
-}
 // Extrait et vérifie le JSON renvoyé par l'IA (rien d'aberrant n'est gardé).
 function comptaTicketAnalyser(txt){
   var s=String(txt||"").replace(/```json|```/g,""), a=s.indexOf("{"), b=s.lastIndexOf("}");
@@ -113,7 +88,7 @@ function comptaTicketGemini(dataUrl){
   if(!window.fbApiKey||!window.fbProjectId) return Promise.reject(comptaTicketErr("Gemini : Firebase non chargé"));
   var b64=String(dataUrl).split(",")[1]||"";
   var corps={contents:[{role:"user",parts:[{inlineData:{mimeType:"image/jpeg",data:b64}},{text:comptaTicketPrompt()}]}],
-    generationConfig:{temperature:0,maxOutputTokens:600,responseMimeType:"application/json",thinkingConfig:{thinkingBudget:0}}};
+    generationConfig:{temperature:0,maxOutputTokens:1500,responseMimeType:"application/json"}};
   function essai(i,derniere){
     if(i>=GM_GEMINI_MODELES.length) return Promise.reject(derniere||comptaTicketErr("Gemini : aucun modèle"));
     var mod=GM_GEMINI_MODELES[i];
@@ -146,33 +121,12 @@ function comptaTicketGemini(dataUrl){
   }
   return essai(0,null);
 }
-function comptaTicketOpenRouter(petite){
-      return comptaTicketAppel(petite,{models:GM_TICKET_MODELES})
-        .catch(function(e1){
-          // Trop long ou refus : on tente le routeur gratuit avant d'abandonner.
-          comptaTicketStatut("⏳ Nouvelle tentative…");
-          return comptaTicketAppel(petite,{models:GM_TICKET_SECOURS}).catch(function(e2){
-            if(e2&&!e2.detail&&e1&&e1.detail) e2.detail=e1.detail;
-            else if(e2&&e1&&e1.detail&&e2.detail) e2.detail="1) "+e1.detail+" — 2) "+e2.detail;
-            throw e2;
-          });
-        });
-}
 // Lecture IA d'une photo de ticket, partagée (compta, notes de frais).
-// statut(txt) affiche l'avancement. Renvoie {date,montant,fournisseur,...}.
+// statut(txt) : gardé pour les appelants, plus utilisé (un seul fournisseur). Renvoie {date,montant,fournisseur,...}.
 function gmTicketIA(file,statut){
   if(!navigator.onLine) return Promise.reject(new Error("hors-ligne"));
   // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde sa propre version.
-  return comptaTicketReduire(file,1024,0.6).then(function(petite){
-    // 1) Gemini (Firebase), 2) OpenRouter, 3) OpenRouter secours.
-    return comptaTicketGemini(petite).catch(function(eg){
-      if(statut) statut("⏳ Nouvelle tentative…");
-      return comptaTicketOpenRouter(petite).catch(function(e2){
-        if(e2&&eg&&eg.detail) e2.detail=eg.detail+" — "+(e2.detail||"OpenRouter");
-        throw e2;
-      });
-    });
-  });
+  return comptaTicketReduire(file,1024,0.6).then(function(petite){ return comptaTicketGemini(petite); });
 }
 function gmTicketMsgErreur(e){
   var m=e&&e.message;
