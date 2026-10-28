@@ -1,5 +1,20 @@
 [
  {
+  "v": "1793219447",
+  "titre": "Correction d'une erreur sur l'écran de connexion",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Plus de message d'erreur « Aucun club actif pour accéder à facturation_compteur » quand on ouvre les paramètres avant de se connecter."
+   }
+  ]
+ },
+ {
   "v": "1793207332",
   "titre": "Photo de ticket : lecture réparée",
   "points": [

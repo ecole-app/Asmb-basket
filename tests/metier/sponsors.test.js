@@ -9,6 +9,7 @@ import { charger } from "./contexte.js";
 function app(prochainNumero) {
   const c = charger(["js/17-sponsors.js"]);
   c.ecritures = [];
+  c.CURRENT_CLUB_ID = "A";
   c.fbDb = {};
   c.fbDoc = (_db, ...segs) => segs.join("/");
   c.fbSetDoc = (ref, maj) => { c.ecritures.push({ ref, maj }); return Promise.resolve(); };
@@ -74,5 +75,19 @@ describe("Réservation d'un numéro (reserverNumeroFacture)", () => {
     c.fbGetDoc = (...a) => { lectures++; return vraiGetDoc(...a); };
     await reserver(c); await reserver(c); await reserver(c);
     assert.equal(lectures, 1);
+  });
+});
+
+describe("Compteur de facture sans club actif (écran de connexion)", () => {
+  it("ne plante pas et ne met rien en cache : « Aucun club actif pour accéder à facturation_compteur »", () => {
+    const c = charger(["js/17-sponsors.js"]);
+    c.fbDb = {};
+    c.fbGetDoc = () => { throw new Error("ne doit pas lire"); };
+    c.fbDoc = () => { throw new Error("Aucun club actif pour accéder à 'facturation_compteur'"); };
+    let appele = false;
+    assert.doesNotThrow(() => c.loadFactureCounter(() => { appele = true; }));
+    assert.equal(appele, false);
+    assert.equal(c.SP_FACT_COUNTER, null);
+    assert.doesNotThrow(() => c.remplirProchainNumeroFacture());
   });
 });

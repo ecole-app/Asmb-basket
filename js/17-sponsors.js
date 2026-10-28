@@ -238,7 +238,11 @@ var SP_FACT_COUNTER=null; // valeur en cache une fois chargée depuis Firestore
 function loadFactureCounter(cb){
   if(SP_FACT_COUNTER!=null){ cb(); return; }
   if(!window.fbGetDoc || !window.fbDb){ SP_FACT_COUNTER=1; cb(); return; }
-  window.fbGetDoc(window.fbDoc(window.fbDb,"facturation_compteur","compteur")).then(function(snap){
+  // Pas de club actif (écran de connexion) : rien à lire. On ne met PAS 1 en cache,
+  // sinon le prochain numéro serait faux une fois connecté.
+  if(!window.CURRENT_CLUB_ID) return;
+  var ref; try{ ref=window.fbDoc(window.fbDb,"facturation_compteur","compteur"); }catch(e){ return; }
+  window.fbGetDoc(ref).then(function(snap){
     SP_FACT_COUNTER=(snap.exists() && snap.data().prochainNumero) || 1;
     cb();
   }).catch(function(){ SP_FACT_COUNTER=1; cb(); });
