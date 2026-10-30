@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:rules": "firebase emulators:exec --only firestore --project demo-gm \"node --test rules/*.test.js\"",
-    "test:rules:ci": "firebase emulators:exec --only firestore --project demo-gm \"node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=./rules/reporter-gh.mjs --test-reporter-destination=stdout rules/*.test.js\"",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-gm \"node --test --test-concurrency=1 rules/*.test.js\"",
+    "test:rules:ci": "firebase emulators:exec --only firestore --project demo-gm \"node --test --test-concurrency=1 --test-reporter=spec --test-reporter-destination=stdout --test-reporter=./rules/reporter-gh.mjs --test-reporter-destination=stdout rules/*.test.js\"",
     "test:metier": "node --test metier/*.test.js",
     "test:metier:ci": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=./rules/reporter-gh.mjs --test-reporter-destination=stdout metier/*.test.js",
     "test": "npm run test:metier && npm run test:rules"
