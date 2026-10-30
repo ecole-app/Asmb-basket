@@ -1262,64 +1262,6 @@ service cloud.firestore {
       allow delete: if staff(resource.data.clubId) || purgeWindow(resource.data.clubId);
     }
 
-    // ── Salle de formation (generalmanagerapp.fr/formation/) ──────────
-    // Session créée par un compte General Manager connecté (le formateur,
-    // propriétaire). Les stagiaires n'ont pas de compte : tant que la session
-    // est active, ils créent leur fiche, la mettent à jour (compteurs qui ne
-    // font que monter, nom figé) et ajoutent des lignes au journal.
-    match /formations/{code} {
-      function fmData() { return get(/databases/$(database)/documents/formations/$(code)).data; }
-      function fmProprio() { return signedIn() && fmData().owner == request.auth.uid; }
-      function fmOuverte() { return fmData().active == true; }
-      function fmCles() { return ['title','owner','active','paused','createdAt']; }
-      function stCles() { return ['name','status','exits','outTotal','outSince','link','lastSeen','joinedAt']; }
-
-      allow get: if true;
-      allow list: if signedIn() && resource.data.owner == request.auth.uid;
-      allow create: if signedIn()
-        && code.matches('^[A-Z0-9]{6}$')
-        && request.resource.data.keys().hasOnly(fmCles())
-        && request.resource.data.owner == request.auth.uid
-        && request.resource.data.title is string && request.resource.data.title.size() <= 120
-        && request.resource.data.active == true;
-      allow update: if signedIn() && resource.data.owner == request.auth.uid
-        && request.resource.data.keys().hasOnly(fmCles())
-        && request.resource.data.owner == resource.data.owner;
-      allow delete: if false;
-
-      match /liens/{id} {
-        allow read: if true;
-        allow create, update: if fmProprio()
-          && request.resource.data.keys().hasOnly(['title','url','at'])
-          && request.resource.data.title is string && request.resource.data.title.size() <= 80
-          && request.resource.data.url is string && request.resource.data.url.size() <= 500
-          && request.resource.data.url.matches('^https?://.+');
-        allow delete: if fmProprio();
-      }
-      match /stagiaires/{sid} {
-        allow read: if true;
-        allow create: if fmOuverte()
-          && request.resource.data.keys().hasOnly(stCles())
-          && request.resource.data.name is string
-          && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 80
-          && request.resource.data.exits == 0 && request.resource.data.outTotal == 0;
-        allow update: if fmOuverte()
-          && request.resource.data.keys().hasOnly(stCles())
-          && request.resource.data.name == resource.data.name
-          && request.resource.data.exits is int && request.resource.data.exits >= resource.data.exits
-          && request.resource.data.outTotal is number && request.resource.data.outTotal >= resource.data.outTotal;
-        allow delete: if fmProprio();
-      }
-      match /journal/{id} {
-        allow read: if true;
-        allow create: if fmOuverte()
-          && request.resource.data.keys().hasOnly(['sid','name','type','detail','ts'])
-          && request.resource.data.type in ['out','back','link','back_link']
-          && request.resource.data.name is string && request.resource.data.name.size() <= 80;
-        allow update, delete: if false;
-      }
-    }
-
     // Tout le reste (dont les anciennes collections à la racine) : refusé.
     match /{document=**} { allow read, write: if false; }
   }
