@@ -8,11 +8,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Effacer la collection formations (et ses sous-collections)
+      - name: Effacer la collection formations (et ses sous-collections) puis compter ce qui reste
         env:
           CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          echo "$CLE" > "$RUNNER_TEMP/cle.json"
-          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/cle.json"
-          npx --yes firebase-tools@13 firestore:delete formations --recursive --force --project asmb-app --non-interactive 2>&1 | tail -20
-          rm -f "$RUNNER_TEMP/cle.json"
+          mkdir -p "$RUNNER_TEMP/p" && cd "$RUNNER_TEMP/p"
+          echo "$CLE" > cle.json
+          npm init -y >/dev/null && npm i firebase-admin@12 --no-audit --no-fund >/dev/null 2>&1
+          cat > purge.js <<'JS'
+          const admin = require("firebase-admin");
+          admin.initializeApp({ credential: admin.credential.cert(require("./cle.json")), projectId: "asmb-app" });
+          const db = admin.firestore();
+          (async () => {
+            const avant = await db.collection("formations").listDocuments();
+            let nb = 0;
+            for (const ref of avant) {
+              for (const sc of ["stagiaires", "journal", "liens"]) nb += (await ref.collection(sc).listDocuments()).length;
+            }
+            console.log(`::notice title=Avant::${avant.length} formation(s), ${nb} sous-document(s)`);
+            await db.recursiveDelete(db.collection("formations"));
+            const apres = await db.collection("formations").listDocuments();
+            console.log(`::notice title=Apres::${apres.length} formation(s) restante(s)`);
+            if (apres.length) process.exit(1);
+          })().catch((e) => { console.log(`::error title=Echec::${e.message}`); process.exit(1); });
+          JS
+          sed -i 's/^          //' purge.js
+          node purge.js
+          rm -f cle.json
