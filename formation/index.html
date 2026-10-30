@@ -123,7 +123,7 @@ button:disabled{opacity:.5;cursor:default}
   <div id="pNotes" class="card">
     <div class="row" style="margin-bottom:10px"><h2 style="margin:0">Mes notes</h2><span class="mute" id="saveState" style="text-align:right">Enregistré</span></div>
     <textarea id="notes" placeholder="Prends tes notes ici… (sauvegarde automatique sur ce téléphone)"></textarea>
-    <div class="row" style="margin-top:10px"><button class="gold" id="cpNotes">📋 Copier mes notes</button><button class="ghost" id="dlNotes">⬇️ Télécharger mes notes</button></div>
+    <div class="row" style="margin-top:10px"><button class="gold" id="cpNotes">📋 Copier mes notes</button><button class="ghost" id="shNotes">📤 Partager mes notes</button><button class="ghost" id="dlNotes">⬇️ Télécharger mes notes</button></div>
   </div>
   <div id="pLinks" class="card hidden">
     <h2>Liens de la session</h2>
@@ -319,6 +319,11 @@ function student(code, sid, name){
     if (!ok) { $("notes").focus(); $("notes").select(); try { ok = document.execCommand("copy"); } catch {} }
     $("cpNotes").textContent = ok ? "✅ Copié !" : "Texte sélectionné : copie-le à la main";
     setTimeout(() => { $("cpNotes").textContent = "📋 Copier mes notes"; }, 2500);
+  };
+  $("shNotes").onclick = async () => {
+    const title = $("hTitle").textContent, text = title + " — " + name + "\n\n" + $("notes").value;
+    if (navigator.share) { try { await navigator.share({ title, text }); } catch {} }   // menu de partage du téléphone
+    else location.href = "mailto:?subject=" + encodeURIComponent("Mes notes — " + title) + "&body=" + encodeURIComponent(text);
   };
   $("dlNotes").onclick = () => { const b = new Blob([$("hTitle").textContent+"\n"+name+"\n\n"+$("notes").value],{type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "notes-"+code+".txt"; a.click(); };
 
