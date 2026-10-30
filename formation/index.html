@@ -113,14 +113,12 @@ button:disabled{opacity:.5;cursor:default}
     <input id="jNom" placeholder="Nom" autocomplete="family-name">
     <div style="height:12px"></div>
     <button class="gold" id="btnJoin" style="width:100%">Entrer dans la salle</button>
-    <p class="mute" style="margin-top:12px">⚠️ Le formateur est prévenu chaque fois que tu quittes cette page (autre appli, autre onglet, écran verrouillé). Les liens ouverts depuis l'appli ne comptent pas.</p>
   </div>
 </section>
 
 <!-- ===== STAGIAIRE : salle ===== -->
 <section id="vStudent" class="hidden">
-  <div id="sPaused" class="banner paused hidden">⏸ Pause — le suivi est suspendu.</div>
-  <div id="sWarn" class="banner warn hidden"></div>
+  <div id="sPaused" class="banner paused hidden">⏸ Pause</div>
   <div class="tabs"><button id="tNotes" class="on">📝 Notes</button><button id="tLinks">🔗 Liens <span id="linkCount"></span></button></div>
   <div id="pNotes" class="card">
     <div class="row" style="margin-bottom:10px"><h2 style="margin:0">Mes notes</h2><span class="mute" id="saveState" style="text-align:right">Enregistré</span></div>
@@ -130,7 +128,7 @@ button:disabled{opacity:.5;cursor:default}
   <div id="pLinks" class="card hidden">
     <h2>Liens de la session</h2>
     <div class="links" id="sLinks"><p class="mute">Aucun lien pour l'instant.</p></div>
-    <p class="mute">Quand tu ouvres un lien d'ici, le formateur voit que tu es sur l'activité : ce n'est pas compté comme une sortie. Reviens sur cet onglet quand tu as fini.</p>
+    <p class="mute">Reviens sur cet onglet quand tu as fini.</p>
   </div>
 </section>
 
@@ -331,7 +329,7 @@ function student(code, sid, name){
     const m = snap.data() || {};
     paused = !!m.paused; active = m.active !== false;
     $("sPaused").classList.toggle("hidden", !paused && active);
-    $("sPaused").textContent = active ? "⏸ Pause — le suivi est suspendu." : "Session terminée — copie ou télécharge tes notes ci-dessous.";
+    $("sPaused").textContent = active ? "⏸ Pause" : "Session terminée — copie ou télécharge tes notes ci-dessous.";
     if (!active) $("tNotes").click();
   });
 
@@ -377,9 +375,6 @@ function student(code, sid, name){
         const d = now - outSince; outSince = null;
         safe(updateDoc(me, { status: "in", outSince: null, outTotal: increment(d), lastSeen: now }));
         log("back", d);
-        $("sWarn").textContent = `Sortie détectée (${fmtDur(d)}). Le formateur a été prévenu.`;
-        $("sWarn").classList.remove("hidden");
-        setTimeout(()=>$("sWarn").classList.add("hidden"), 6000);
       } else safe(updateDoc(me, { status: "in", lastSeen: now }));
     }
   });
