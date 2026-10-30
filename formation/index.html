@@ -356,7 +356,7 @@ function student(code, sid, name){
   });
 
   let wl = null;
-  const keepAwake = async () => { try { if ("wakeLock" in navigator && !document.hidden) wl = await navigator.wakeLock.request("screen"); } catch {} };
+  const keepAwake = async () => { try { if ("wakeLock" in navigator && !document.hidden) { wl = await navigator.wakeLock.request("screen"); wl.addEventListener("release", () => { if (!document.hidden) keepAwake(); }); } } catch {} };
   keepAwake();
   safe(updateDoc(me, { status: "in", lastSeen: Date.now() }));
 
@@ -428,7 +428,6 @@ function trainer(code){
     const flash = Object.keys(next).filter(k => prevExits[k] !== undefined && (next[k].exits||0) > prevExits[k]);
     Object.keys(next).forEach(k => prevExits[k] = next[k].exits||0);
     students = next; render(flash);
-    if (flash.length) beep();
   });
   $("sortBy").onchange = () => render([]);
   setInterval(() => render([]), 1000);
@@ -492,9 +491,6 @@ function trainer(code){
     const csv = "﻿" + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = `suivi-${code}.csv`; a.click();
   };
-
-  let actx;
-  function beep(){ try { actx = actx || new AudioContext(); const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+.18); } catch {} }
 }
 </script>
 
