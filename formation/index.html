@@ -125,7 +125,7 @@ button:disabled{opacity:.5;cursor:default}
   <div id="pNotes" class="card">
     <div class="row" style="margin-bottom:10px"><h2 style="margin:0">Mes notes</h2><span class="mute" id="saveState" style="text-align:right">Enregistré</span></div>
     <textarea id="notes" placeholder="Prends tes notes ici… (sauvegarde automatique sur ce téléphone)"></textarea>
-    <div class="row" style="margin-top:10px"><button class="ghost" id="dlNotes">⬇️ Télécharger mes notes</button></div>
+    <div class="row" style="margin-top:10px"><button class="gold" id="cpNotes">📋 Copier mes notes</button><button class="ghost" id="dlNotes">⬇️ Télécharger mes notes</button></div>
   </div>
   <div id="pLinks" class="card hidden">
     <h2>Liens de la session</h2>
@@ -280,13 +280,13 @@ async function studentEntry(code){
   if (!snap || !snap.exists()) { home(); alert("Session introuvable : "+code); return; }
   const meta = snap.data();
   $("hTitle").textContent = meta.title;
-  if (!meta.active) { show("vJoin"); $("joinTitle").textContent = "Session terminée"; $("btnJoin").disabled = true; return; }
   const saved = ls.get("sf_stu_"+code, null);
   if (saved) {
     const me = await getDoc(doc(db,"formations",code,"stagiaires",saved.sid)).catch(()=>null);
     if (me && me.exists()) return student(code, saved.sid, saved.name);
     ls.del("sf_stu_"+code);
   }
+  if (!meta.active) { show("vJoin"); $("joinTitle").textContent = "Session terminée"; $("btnJoin").disabled = true; return; }
   show("vJoin");
   $("joinTitle").textContent = meta.title;
   $("btnJoin").onclick = async () => {
@@ -315,6 +315,13 @@ function student(code, sid, name){
   $("notes").value = ls.get(nk, "");
   let tSave;
   $("notes").addEventListener("input", () => { $("saveState").textContent = "…"; clearTimeout(tSave); tSave = setTimeout(()=>{ ls.set(nk, $("notes").value); $("saveState").textContent = "Enregistré"; }, 500); });
+  $("cpNotes").onclick = async () => {
+    let ok = false;
+    try { await navigator.clipboard.writeText($("notes").value); ok = true; } catch {}
+    if (!ok) { $("notes").focus(); $("notes").select(); try { ok = document.execCommand("copy"); } catch {} }
+    $("cpNotes").textContent = ok ? "✅ Copié !" : "Texte sélectionné : copie-le à la main";
+    setTimeout(() => { $("cpNotes").textContent = "📋 Copier mes notes"; }, 2500);
+  };
   $("dlNotes").onclick = () => { const b = new Blob([$("hTitle").textContent+"\n"+name+"\n\n"+$("notes").value],{type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "notes-"+code+".txt"; a.click(); };
 
   $("tNotes").onclick = () => { $("tNotes").classList.add("on"); $("tLinks").classList.remove("on"); $("pNotes").classList.remove("hidden"); $("pLinks").classList.add("hidden"); };
@@ -324,7 +331,8 @@ function student(code, sid, name){
     const m = snap.data() || {};
     paused = !!m.paused; active = m.active !== false;
     $("sPaused").classList.toggle("hidden", !paused && active);
-    $("sPaused").textContent = active ? "⏸ Pause — le suivi est suspendu." : "Session terminée — pense à télécharger tes notes.";
+    $("sPaused").textContent = active ? "⏸ Pause — le suivi est suspendu." : "Session terminée — copie ou télécharge tes notes ci-dessous.";
+    if (!active) $("tNotes").click();
   });
 
   onSnapshot(fCol(code,"liens"), snap => {
