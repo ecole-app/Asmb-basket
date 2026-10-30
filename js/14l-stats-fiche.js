@@ -23,7 +23,7 @@ function statsFicheCorps(f){
   var kp=[["Points / match",f.moyennes.pts,f.tendances.pts],["Rebonds / match",f.moyennes.reb,f.tendances.reb],
           ["Passes / match",f.moyennes.pd,f.tendances.pd],["Évaluation / match",f.moyennes.eval,f.tendances.eval]];
   var h="<div class=\"ms-grid2\" style=\"gap:8px\">"+kp.map(function(k){
-    return "<div class=\"ms-k\"><div class=\"ms-lbl\">"+k[0]+"</div><div class=\"v\">"+statsVirg(k[1])+"</div><div class=\"t\">"+tend(k[2])+"</div></div>";
+    return "<div class=\"ms-k\"><div class=\"ms-lbl\">"+k[0]+"</div><div class=\"v\">"+statsVirg(k[1])+"</div><div class=\"t"+(k[2]<0?" neg":"")+"\">"+tend(k[2])+"</div></div>";
   }).join("")+"</div>";
   var ad=f.adresse;
   h+="<div class=\"ms-card\"><div class=\"ms-h\" style=\"margin:0 0 8px\">Adresse au tir</div>"
@@ -35,7 +35,7 @@ function statsFicheCorps(f){
   h+="<div class=\"ms-card\"><div class=\"ms-h\" style=\"margin:0\">Évaluation match par match</div><div class=\"ms-hist\">"
     +f.matchs.slice(-8).map(function(x){ return "<div>"+x.eval+"<i style=\"height:"+Math.max(4,Math.round(Math.max(x.eval,0)*70/maxEv))+"px\"></i></div>"; }).join("")
     +"</div><div style=\"display:flex;gap:8px;margin-top:4px\">"+f.matchs.slice(-8).map(function(x){return "<div class=\"ms-nom\">"+authEsc(x.nom)+"</div>";}).join("")+"</div></div>";
-  if(f.meilleur) h+="<div class=\"ms-card\" style=\"font-size:13px;line-height:1.5\"><b>Meilleur match</b> : "+f.meilleur.pts+" pts, "+f.meilleur.reb+" rebonds, "+f.meilleur.pd+" passes ("+authEsc(f.meilleur.nom)+")</div>";
+  if(f.meilleur) h+="<div class=\"ms-card\" style=\"font-size:13px;line-height:1.5\"><b>Meilleur match</b> : "+f.meilleur.pts+" pts, "+f.meilleur.reb+" rebond"+(f.meilleur.reb>1?"s":"")+", "+f.meilleur.pd+" passe"+(f.meilleur.pd>1?"s":"")+" ("+authEsc(f.meilleur.nom)+")</div>";
   h+="<div style=\"font-size:12px;color:var(--mut);line-height:1.4\">Temps de jeu moyen : "+statsVirg(f.moyennes.min)+" min. Les moyennes se calculent sur les matchs terminés de la saison.</div>";
   return h;
 }

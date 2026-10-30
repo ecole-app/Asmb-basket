@@ -689,6 +689,7 @@ html.gm-boot #gm-boot img{border-radius:18px;box-shadow:0 8px 24px var(--shadow)
 .ms-k{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:10px 12px}
 .ms-k .v{font-size:26px;font-weight:800;line-height:1.2}
 .ms-k .t{font-size:12px;color:var(--grn)}
+.ms-k .t.neg{color:var(--red,#C0392B)}
 .ms-barre{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .ms-barre .l{width:96px;font-size:12px;color:var(--mut);font-weight:700}
 .ms-barre .b{flex:1;height:10px;border-radius:6px;background:var(--bdr);overflow:hidden}

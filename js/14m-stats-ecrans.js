@@ -90,7 +90,7 @@ function statsEquipeDessiner(){
   var kpi=[["Bilan",r.v+" V · "+r.d+" D"+(r.nuls?" · "+r.nuls+" N":""),(r.suite.n>1?r.suite.n+(r.suite.type==="V"?" victoires":r.suite.type==="D"?" défaites":" nuls")+" de suite":"")],
            ["Points marqués / match",virg(r.pour),""],["Points encaissés / match",virg(r.contre),""],
            ["Tirs",ad.tirs==null?"–":ad.tirs+" %",""],["Passes / pertes",virg(ratio),""]];
-  h+="<div class=\"eq-kpi\">"+kpi.map(function(k){return "<div class=\"ms-k\"><div class=\"ms-lbl\">"+k[0]+"</div><div class=\"v\">"+k[1]+"</div><div class=\"t\">"+k[2]+"</div></div>";}).join("")+"</div>";
+  h+="<div class=\"eq-kpi\">"+kpi.map(function(k){return "<div class=\"ms-k\"><div class=\"ms-lbl\">"+k[0]+"</div><div class=\"v\">"+k[1]+"</div><div class=\"t"+(k[0]==="Bilan"&&r.suite.type==="D"?" neg":"")+"\">"+k[2]+"</div></div>";}).join("")+"</div>";
   function lead(titre,cle){
     var a=r.leaders[cle], mx=a.length?a[0][cle]:1;
     return "<div class=\"ms-card\"><div class=\"ms-h\" style=\"margin:0 0 8px\">"+titre+"</div>"+a.map(function(j,i){

@@ -1,5 +1,20 @@
 [
  {
+  "v": "1793373704",
+  "titre": "Stats : tendances en baisse en rouge",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Dans les stats, une baisse (« -3,7 sur les 3 derniers », « 4 défaites de suite ») s'affiche maintenant en rouge au lieu de vert. « 1 passe » et « 1 rebond » s'écrivent au singulier."
+   }
+  ]
+ },
+ {
   "v": "1793219447",
   "titre": "Correction d'une erreur sur l'écran de connexion",
   "points": [
