@@ -170,7 +170,7 @@ button:disabled{opacity:.5;cursor:default}
       </div>
       <div class="card">
         <h2>Liens (quiz, Kahoot…)</h2>
-        <div id="tLinks"></div>
+        <div id="tLinkList"></div>
         <input id="lTitle" placeholder="Titre (ex : Kahoot fautes)" style="margin-top:8px">
         <div style="height:8px"></div>
         <input id="lUrl" placeholder="https://kahoot.it/…">
@@ -468,8 +468,8 @@ function trainer(code){
 
   onSnapshot(fCol(code,"liens"), s => {
     const links = s.docs.map(d => [d.id, d.data()]).sort((a,b)=>(a[1].at||0)-(b[1].at||0));
-    $("tLinks").innerHTML = links.map(([id,l]) => `<div class="lrow"><span title="${esc(l.url)}">🔗 ${esc(l.title)}</span><button class="ghost" data-del="${id}">✕</button></div>`).join("") || '<p class="mute">Aucun lien.</p>';
-    $("tLinks").querySelectorAll("[data-del]").forEach(b => b.onclick = () => safe(deleteDoc(doc(db,"formations",code,"liens",b.dataset.del))));
+    $("tLinkList").innerHTML = links.map(([id,l]) => `<div class="lrow"><span title="${esc(l.url)}">🔗 ${esc(l.title)}</span><button class="ghost" data-del="${id}">✕</button></div>`).join("") || '<p class="mute">Aucun lien.</p>';
+    $("tLinkList").querySelectorAll("[data-del]").forEach(b => b.onclick = () => safe(deleteDoc(doc(db,"formations",code,"liens",b.dataset.del))));
   });
   $("btnAddLink").onclick = () => {
     let u = $("lUrl").value.trim(); const t = $("lTitle").value.trim();
