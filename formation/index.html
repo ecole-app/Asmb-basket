@@ -66,6 +66,8 @@ button:disabled{opacity:.5;cursor:default}
 .tabs{display:flex;gap:6px;margin-bottom:12px}
 .tabs button{flex:1}
 .tabs button.on{background:#E8A93B;color:#0F1B33}
+.banner.alert{background:color-mix(in srgb,var(--bad) 14%,var(--card));border:1px solid var(--bad);color:var(--ink)}
+.stu.alert{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,var(--card));animation:fl 1.4s 2}
 </style>
 </head>
 <body>
@@ -142,6 +144,7 @@ button:disabled{opacity:.5;cursor:default}
           <button class="ghost" id="btnPause">⏸ Pause</button>
           <button class="ghost" id="btnCsv">⬇️ Export CSV</button>
         </div>
+        <div id="alerts" class="banner alert hidden"></div>
         <div class="stats" style="margin-bottom:12px">
           <div class="stat"><span class="mute">Connectés</span><b id="stOn">0</b></div>
           <div class="stat"><span class="mute">Hors appli</span><b id="stOut" style="color:var(--bad)">0</b></div>
@@ -149,6 +152,8 @@ button:disabled{opacity:.5;cursor:default}
           <div class="stat"><span class="mute">Sorties totales</span><b id="stExits">0</b></div>
         </div>
         <div class="row" style="margin-bottom:10px">
+          <select id="seuil" title="Alerte quand un stagiaire est hors appli ou déconnecté trop longtemps"><option value="60000">⚠️ Alerte après 1 min</option><option value="120000">⚠️ Alerte après 2 min</option><option value="300000">⚠️ Alerte après 5 min</option><option value="600000">⚠️ Alerte après 10 min</option><option value="0">Alerte désactivée</option></select>
+          <button class="ghost" id="btnNotif">🔔 Notifications</button>
           <select id="sortBy"><option value="exits">Trier : nb de sorties</option><option value="out">Trier : temps hors appli</option><option value="name">Trier : nom</option></select>
         </div>
         <div class="grid" id="tGrid"><p class="mute">En attente des stagiaires… Fais-leur scanner le QR code.</p></div>
@@ -434,16 +439,26 @@ function trainer(code){
 
   const statusOf = st => (st.status==="in" || st.status==="link") && Date.now()-(st.lastSeen||0) > OFFLINE_MS ? "offline" : (st.status||"offline");
   const liveOut = st => (st.outTotal||0) + (st.status==="out" && st.outSince ? Date.now()-st.outSince : 0);
+  const awayOf = (st, status) => status==="out" ? Date.now()-(st.outSince||Date.now()) : status==="offline" ? Date.now()-(st.lastSeen||st.joinedAt||Date.now()) : 0;
+  let seuil = ls.get("sf_seuil", 120000);
+  $("seuil").value = String(seuil);
+  $("seuil").onchange = () => { seuil = +$("seuil").value; ls.set("sf_seuil", seuil); render([]); };
+  const baseTitle = document.title, notified = new Set();
+  const notifOn = () => { try { return "Notification" in window && Notification.permission === "granted"; } catch { return false; } };
+  $("btnNotif").textContent = notifOn() ? "🔔 Notifications activées" : "🔔 Notifications";
+  $("btnNotif").onclick = async () => { try { await Notification.requestPermission(); } catch {} $("btnNotif").textContent = notifOn() ? "🔔 Notifications activées" : "🔔 Bloquées par le navigateur"; };
 
   function render(flash){
     const list = Object.entries(students);
     const by = $("sortBy").value;
     list.sort((a,b) => by==="name" ? a[1].name.localeCompare(b[1].name) : by==="out" ? liveOut(b[1])-liveOut(a[1]) : (b[1].exits||0)-(a[1].exits||0));
-    let on=0,out=0,lk=0,ex=0;
+    let on=0,out=0,lk=0,ex=0; const alerts=[]; const armed = seuil > 0 && !meta.paused && !(meta.active === false);
     const grid = $("tGrid");
     if (!list.length) { grid.innerHTML = '<p class="mute">En attente des stagiaires… Fais-leur scanner le QR code.</p>'; }
     else grid.innerHTML = list.map(([id,st]) => {
       const status = statusOf(st);
+      const away = awayOf(st, status), al = armed && away > seuil;
+      if (al) alerts.push({ id, name: st.name, status, away });
       ex += st.exits||0;
       if (status!=="offline") on++;
       if (status==="out") out++;
@@ -451,14 +466,19 @@ function trainer(code){
       const label = status==="in" ? "● Dans l'appli"
         : status==="out" ? `● Hors appli depuis ${fmtDur(Date.now()-(st.outSince||Date.now()))}`
         : status==="link" ? `● Sur « ${esc(st.link)} »`
-        : "○ Déconnecté";
-      return `<div class="stu ${status} ${flash.includes(id)?"flash":""}">
+        : `○ Déconnecté depuis ${fmtDur(away)}`;
+      return `<div class="stu ${status} ${al?"alert":""} ${flash.includes(id)?"flash":""}">
         <div class="name" title="${esc(st.name)}">${esc(st.name)}</div>
-        <div class="st">${label}</div>
+        <div class="st">${label}${al?" ⚠️":""}</div>
         <div class="nums"><div><span class="mute">Sorties</span><div class="big">${st.exits||0}</div></div>
         <div style="text-align:right"><span class="mute">Temps hors appli</span><div class="big" style="font-size:16px;margin-top:6px">${fmtDur(liveOut(st))}</div></div></div>
       </div>`;
     }).join("");
+    $("alerts").classList.toggle("hidden", !alerts.length);
+    $("alerts").innerHTML = alerts.map(a => `⚠️ <b>${esc(a.name)}</b> — ${a.status==="out" ? "hors appli" : "déconnecté"} depuis ${fmtDur(a.away)}`).join("<br>");
+    document.title = alerts.length ? `(${alerts.length}) ⚠️ ${baseTitle}` : baseTitle;
+    alerts.forEach(a => { if (!notified.has(a.id)) { notified.add(a.id); if (document.hidden && notifOn()) { try { new Notification("⚠️ " + a.name, { body: (a.status==="out" ? "Hors appli" : "Déconnecté") + " depuis " + fmtDur(a.away), silent: true }); } catch {} } } });
+    [...notified].forEach(id => { if (!alerts.some(a => a.id === id)) notified.delete(id); });
     $("stOn").textContent = on; $("stOut").textContent = out; $("stLink").textContent = lk; $("stExits").textContent = ex;
   }
 
