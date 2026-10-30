@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Salle de formation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#F4F2EC;--card:#FFFFFF;--ink:#14213D;--mute:#6B7280;--line:#E3E0D7;
+  --navy:#0F1B33;--gold:#E8A93B;--ok:#1F9D55;--warn:#D97706;--bad:#DC2626;--info:#2563EB;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B1222;--card:#141D33;--ink:#EEF0F5;--mute:#9AA3B5;--line:#24304D;--navy:#E8A93B;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:#0F1B33;color:#F5F3ED;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header .logo{width:34px;height:34px;border-radius:9px;background:#E8A93B;color:#0F1B33;display:grid;place-items:center;font-weight:800}
+header h1{font-size:17px;margin:0;flex:1}
+header .pill{background:rgba(255,255,255,.12);padding:4px 10px;border-radius:99px;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:55vh;resize:vertical;line-height:1.55}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#0F1B33;color:#F5F3ED;font-weight:600}
+button.gold{background:#E8A93B;color:#0F1B33}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.danger{background:var(--bad);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1 1 auto}
+.row>button{flex:0 0 auto}
+.hidden{display:none!important}
+.mute{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.stu{border:2px solid var(--line);border-radius:12px;padding:12px;background:var(--card);transition:border-color .2s,transform .2s}
+.stu .name{font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stu .st{font-size:13px;font-weight:600}
+.stu .nums{display:flex;justify-content:space-between;margin-top:8px;font-size:13px}
+.stu .big{font-size:22px;font-weight:800}
+.stu.in{border-color:var(--ok)} .stu.in .st{color:var(--ok)}
+.stu.out{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--card))} .stu.out .st{color:var(--bad)}
+.stu.link{border-color:var(--info)} .stu.link .st{color:var(--info)}
+.stu.offline{opacity:.55} .stu.offline .st{color:var(--mute)}
+.stu.flash{animation:fl 1s 3}
+@keyframes fl{50%{transform:scale(1.04);box-shadow:0 0 0 6px color-mix(in srgb,var(--bad) 35%,transparent)}}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{flex:1 1 120px;background:var(--bg);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:24px}
+#qr{background:#fff;padding:10px;border-radius:10px;display:inline-block}
+.code{font-size:34px;font-weight:800;letter-spacing:6px;color:var(--gold)}
+.links a,.links button.lk{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:12px;margin-bottom:8px;border-radius:10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);text-decoration:none;font-weight:600}
+.lrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.lrow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log{max-height:260px;overflow:auto;font-size:13px}
+.log div{padding:5px 0;border-bottom:1px solid var(--line)}
+.two{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.banner{padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
+.banner.warn{background:color-mix(in srgb,var(--warn) 18%,var(--card));color:var(--ink)}
+.banner.paused{background:color-mix(in srgb,var(--info) 15%,var(--card))}
+.center{max-width:440px;margin:8vh auto}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1}
+.tabs button.on{background:#E8A93B;color:#0F1B33}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">SF</div>
+  <h1 id="hTitle">Salle de formation</h1>
+  <span class="pill hidden" id="hPill"></span>
+</header>
+<main>
+
+<!-- ===== ACCUEIL ===== -->
+<section id="vHome" class="hidden center">
+  <div class="card">
+    <h2>Rejoindre une session</h2>
+    <div class="row"><input id="homeCode" placeholder="Code (ex : K7P2QX)" maxlength="6" style="text-transform:uppercase"><button class="gold" id="homeJoin">Rejoindre</button></div>
+  </div>
+  <div class="card">
+    <h2>Formateur</h2>
+    <div id="loginBox">
+      <p class="mute">Connecte-toi avec ton compte General Manager.</p>
+      <input id="lgEmail" type="email" placeholder="Email" autocomplete="username">
+      <div style="height:8px"></div>
+      <input id="lgPass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      <div style="height:10px"></div>
+      <button id="btnLogin" style="width:100%">Se connecter</button>
+      <p class="mute" id="lgErr" style="color:var(--bad)"></p>
+    </div>
+    <div id="createBox" class="hidden">
+      <p class="mute">Connecté : <span id="whoami"></span> · <a href="#" id="btnLogout">déconnexion</a></p>
+      <input id="newTitle" placeholder="Titre de la session (ex : Formation arbitres — Fautes spéciales)">
+      <div style="height:10px"></div>
+      <button id="btnCreate" style="width:100%">Créer une session</button>
+      <div id="mySessions" class="mute" style="margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STAGIAIRE : connexion ===== -->
+<section id="vJoin" class="hidden center">
+  <div class="card">
+    <h2 id="joinTitle">Connexion</h2>
+    <p class="mute">Entre ton prénom et ton nom pour accéder à la session.</p>
+    <input id="jPrenom" placeholder="Prénom" autocomplete="given-name">
+    <div style="height:8px"></div>
+    <input id="jNom" placeholder="Nom" autocomplete="family-name">
+    <div style="height:12px"></div>
+    <button class="gold" id="btnJoin" style="width:100%">Entrer dans la salle</button>
+    <p class="mute" style="margin-top:12px">⚠️ Le formateur est prévenu chaque fois que tu quittes cette page (autre appli, autre onglet, écran verrouillé). Les liens ouverts depuis l'appli ne comptent pas.</p>
+  </div>
+</section>
+
+<!-- ===== STAGIAIRE : salle ===== -->
+<section id="vStudent" class="hidden">
+  <div id="sPaused" class="banner paused hidden">⏸ Pause — le suivi est suspendu.</div>
+  <div id="sWarn" class="banner warn hidden"></div>
+  <div class="tabs"><button id="tNotes" class="on">📝 Notes</button><button id="tLinks">🔗 Liens <span id="linkCount"></span></button></div>
+  <div id="pNotes" class="card">
+    <div class="row" style="margin-bottom:10px"><h2 style="margin:0">Mes notes</h2><span class="mute" id="saveState" style="text-align:right">Enregistré</span></div>
+    <textarea id="notes" placeholder="Prends tes notes ici… (sauvegarde automatique sur ce téléphone)"></textarea>
+    <div class="row" style="margin-top:10px"><button class="ghost" id="dlNotes">⬇️ Télécharger mes notes</button></div>
+  </div>
+  <div id="pLinks" class="card hidden">
+    <h2>Liens de la session</h2>
+    <div class="links" id="sLinks"><p class="mute">Aucun lien pour l'instant.</p></div>
+    <p class="mute">Quand tu ouvres un lien d'ici, le formateur voit que tu es sur l'activité : ce n'est pas compté comme une sortie. Reviens sur cet onglet quand tu as fini.</p>
+  </div>
+</section>
+
+<!-- ===== FORMATEUR ===== -->
+<section id="vTrainer" class="hidden">
+  <div class="two">
+    <div>
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <h2 style="margin:0">Stagiaires</h2>
+          <button class="ghost" id="btnPause">⏸ Pause</button>
+          <button class="ghost" id="btnCsv">⬇️ Export CSV</button>
+        </div>
+        <div class="stats" style="margin-bottom:12px">
+          <div class="stat"><span class="mute">Connectés</span><b id="stOn">0</b></div>
+          <div class="stat"><span class="mute">Hors appli</span><b id="stOut" style="color:var(--bad)">0</b></div>
+          <div class="stat"><span class="mute">Sur un lien</span><b id="stLink" style="color:var(--info)">0</b></div>
+          <div class="stat"><span class="mute">Sorties totales</span><b id="stExits">0</b></div>
+        </div>
+        <div class="row" style="margin-bottom:10px">
+          <select id="sortBy"><option value="exits">Trier : nb de sorties</option><option value="out">Trier : temps hors appli</option><option value="name">Trier : nom</option></select>
+        </div>
+        <div class="grid" id="tGrid"><p class="mute">En attente des stagiaires… Fais-leur scanner le QR code.</p></div>
+      </div>
+      <div class="card">
+        <h2>Journal</h2>
+        <div class="log" id="tLog"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="text-align:center">
+        <div class="mute">Code de la session</div>
+        <div class="code" id="tCode"></div>
+        <div id="qr"></div>
+        <p class="mute" id="tUrl" style="word-break:break-all"></p>
+        <button class="ghost" id="btnBig">🔍 Afficher en grand</button>
+      </div>
+      <div class="card">
+        <h2>Liens (quiz, Kahoot…)</h2>
+        <div id="tLinks"></div>
+        <input id="lTitle" placeholder="Titre (ex : Kahoot fautes)" style="margin-top:8px">
+        <div style="height:8px"></div>
+        <input id="lUrl" placeholder="https://kahoot.it/…">
+        <div style="height:8px"></div>
+        <button class="gold" id="btnAddLink" style="width:100%">Ajouter le lien</button>
+      </div>
+      <div class="card">
+        <h2>Session</h2>
+        <button class="danger" id="btnEnd" style="width:100%">Terminer la session</button>
+        <p class="mute">Les stagiaires ne pourront plus se connecter. Les données restent consultables.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QR plein écran -->
+<div id="bigQr" class="hidden" style="position:fixed;inset:0;background:#0F1B33;display:grid;place-items:center;z-index:9;cursor:pointer">
+  <div style="text-align:center;color:#F5F3ED">
+    <div id="qrBig" style="background:#fff;padding:20px;border-radius:16px;display:inline-block"></div>
+    <div class="code" id="bigCode" style="font-size:56px;margin-top:16px"></div>
+    <div style="opacity:.7">Scanne ou va sur le site et tape le code — clique pour fermer</div>
+  </div>
+</div>
+
+<script type="module">
+/* Salle de formation — branchée sur le projet Firebase General Manager (asmb-app).
+   Données : formations/{code} (+ liens, stagiaires, journal). Règles : firestore.rules. */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, collection, onSnapshot, query, orderBy, limit, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
+  authDomain: "asmb-app.firebaseapp.com",
+  projectId: "asmb-app",
+  storageBucket: "asmb-app.firebasestorage.app",
+  messagingSenderId: "786817375628",
+  appId: "1:786817375628:web:3db013af1adab9e8ab8aa9"
+};
+const fbApp = initializeApp(firebaseConfig);
+const GM_APPCHECK_SITE_KEY = "6Le30N8tAAAAAGUJks6zaN09Rbn8B6L-cQRC5Jwp";
+try { initializeAppCheck(fbApp, { provider: new ReCaptchaEnterpriseProvider(GM_APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true }); }
+catch (e) { console.log("App Check init:", e && e.code || e); }
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+
+const $ = id => document.getElementById(id);
+const show = id => ["vHome","vJoin","vStudent","vTrainer"].forEach(v => $(v).classList.toggle("hidden", v !== id));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDur = ms => { ms = Math.max(0, ms|0); const m = Math.floor(ms/60000), s = Math.floor(ms/1000)%60; return m ? `${m} min ${String(s).padStart(2,"0")}` : `${s} s`; };
+const hhmm = ts => ts ? new Date(ts).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+const ls = { get(k,d){ try{ const v = localStorage.getItem(k); return v===null?d:JSON.parse(v);}catch{return d;} }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }, del(k){ try{ localStorage.removeItem(k);}catch{} } };
+const genCode = () => { const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s=""; for(let i=0;i<6;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; };
+const baseUrl = () => location.origin + location.pathname;
+const safe = p => Promise.resolve(p).catch(e => console.warn("Firestore:", e && e.code || e));
+const fDoc = code => doc(db, "formations", code);
+const fCol = (code, sub) => collection(db, "formations", code, sub);
+const OFFLINE_MS = 60000; // plus de signal depuis 60 s => déconnecté
+
+const params = new URLSearchParams(location.search);
+const codeS = (params.get("s")||"").toUpperCase();
+const codeF = (params.get("f")||"").toUpperCase();
+
+if (codeF) trainerGate(codeF);
+else if (codeS) studentEntry(codeS);
+else home();
+
+/* ===================== ACCUEIL ===================== */
+function home(){
+  show("vHome");
+  $("homeJoin").onclick = () => { const c = $("homeCode").value.trim().toUpperCase(); if (c.length===6) location.search = "?s="+c; };
+  $("btnLogin").onclick = async () => {
+    $("lgErr").textContent = "";
+    try { await signInWithEmailAndPassword(auth, $("lgEmail").value.trim(), $("lgPass").value); }
+    catch (e) { $("lgErr").textContent = "Connexion impossible : vérifie l'email et le mot de passe."; }
+  };
+  $("btnLogout").onclick = e => { e.preventDefault(); signOut(auth); };
+  onAuthStateChanged(auth, u => {
+    $("loginBox").classList.toggle("hidden", !!u);
+    $("createBox").classList.toggle("hidden", !u);
+    if (u) $("whoami").textContent = u.email;
+  });
+  $("btnCreate").onclick = async () => {
+    const u = auth.currentUser; if (!u) return;
+    const title = $("newTitle").value.trim() || "Session de formation";
+    $("btnCreate").disabled = true;
+    try {
+      let code;
+      for (let i=0;i<5;i++){ code = genCode(); if (!(await getDoc(fDoc(code))).exists()) break; }
+      await setDoc(fDoc(code), { title, owner: u.uid, active: true, paused: false, createdAt: Date.now() });
+      const mine = ls.get("sf_mine", []); mine.unshift({code,title,at:Date.now()}); ls.set("sf_mine", mine.slice(0,10));
+      location.search = "?f="+code;
+    } catch (e) {
+      $("btnCreate").disabled = false;
+      alert("Création impossible ("+(e.code||e)+").");
+    }
+  };
+  const mine = ls.get("sf_mine", []);
+  if (mine.length) $("mySessions").innerHTML = "Mes sessions récentes :<br>" + mine.map(m => `<a href="?f=${m.code}">${esc(m.title)} (${m.code})</a>`).join("<br>");
+}
+
+/* ===================== STAGIAIRE ===================== */
+async function studentEntry(code){
+  let snap;
+  try { snap = await getDoc(fDoc(code)); } catch (e) { snap = null; }
+  if (!snap || !snap.exists()) { home(); alert("Session introuvable : "+code); return; }
+  const meta = snap.data();
+  $("hTitle").textContent = meta.title;
+  if (!meta.active) { show("vJoin"); $("joinTitle").textContent = "Session terminée"; $("btnJoin").disabled = true; return; }
+  const saved = ls.get("sf_stu_"+code, null);
+  if (saved) {
+    const me = await getDoc(doc(db,"formations",code,"stagiaires",saved.sid)).catch(()=>null);
+    if (me && me.exists()) return student(code, saved.sid, saved.name);
+    ls.del("sf_stu_"+code);
+  }
+  show("vJoin");
+  $("joinTitle").textContent = meta.title;
+  $("btnJoin").onclick = async () => {
+    const p = $("jPrenom").value.trim(), n = $("jNom").value.trim();
+    if (!p || !n) { alert("Prénom et nom obligatoires"); return; }
+    const name = (p.charAt(0).toUpperCase()+p.slice(1) + " " + n.toUpperCase()).slice(0,80);
+    $("btnJoin").disabled = true;
+    try {
+      const now = Date.now();
+      const r = await addDoc(fCol(code,"stagiaires"), { name, status: "in", exits: 0, outTotal: 0, outSince: null, link: null, lastSeen: now, joinedAt: now });
+      ls.set("sf_stu_"+code, { sid: r.id, name });
+      student(code, r.id, name);
+    } catch (e) { $("btnJoin").disabled = false; alert("Connexion impossible ("+(e.code||e)+")."); }
+  };
+}
+
+function student(code, sid, name){
+  show("vStudent");
+  $("hPill").textContent = name; $("hPill").classList.remove("hidden");
+  const me = doc(db, "formations", code, "stagiaires", sid);
+  const log = (type, detail) => safe(addDoc(fCol(code,"journal"), { sid, name, type, detail: detail ?? null, ts: Date.now() }));
+  let paused = false, active = true, leaving = null, outSince = null;
+
+  // Notes (sur le téléphone)
+  const nk = "sf_notes_"+code;
+  $("notes").value = ls.get(nk, "");
+  let tSave;
+  $("notes").addEventListener("input", () => { $("saveState").textContent = "…"; clearTimeout(tSave); tSave = setTimeout(()=>{ ls.set(nk, $("notes").value); $("saveState").textContent = "Enregistré"; }, 500); });
+  $("dlNotes").onclick = () => { const b = new Blob([$("hTitle").textContent+"\n"+name+"\n\n"+$("notes").value],{type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "notes-"+code+".txt"; a.click(); };
+
+  $("tNotes").onclick = () => { $("tNotes").classList.add("on"); $("tLinks").classList.remove("on"); $("pNotes").classList.remove("hidden"); $("pLinks").classList.add("hidden"); };
+  $("tLinks").onclick = () => { $("tLinks").classList.add("on"); $("tNotes").classList.remove("on"); $("pLinks").classList.remove("hidden"); $("pNotes").classList.add("hidden"); };
+
+  onSnapshot(fDoc(code), snap => {
+    const m = snap.data() || {};
+    paused = !!m.paused; active = m.active !== false;
+    $("sPaused").classList.toggle("hidden", !paused && active);
+    $("sPaused").textContent = active ? "⏸ Pause — le suivi est suspendu." : "Session terminée — pense à télécharger tes notes.";
+  });
+
+  onSnapshot(fCol(code,"liens"), snap => {
+    const links = snap.docs.map(d => d.data()).sort((a,b)=>(a.at||0)-(b.at||0));
+    $("linkCount").textContent = links.length ? `(${links.length})` : "";
+    $("sLinks").innerHTML = links.length ? "" : '<p class="mute">Aucun lien pour l\'instant.</p>';
+    links.forEach(l => {
+      const b = document.createElement("button"); b.className = "lk";
+      b.innerHTML = `<span>${esc(l.title)}</span><span>↗</span>`;
+      b.onclick = () => {
+        leaving = { title: l.title };
+        safe(updateDoc(me, { status: "link", link: l.title, lastSeen: Date.now() }));
+        log("link", l.title);
+        window.open(l.url, "_blank", "noopener");
+      };
+      $("sLinks").appendChild(b);
+    });
+  });
+
+  let wl = null;
+  const keepAwake = async () => { try { if ("wakeLock" in navigator && !document.hidden) wl = await navigator.wakeLock.request("screen"); } catch {} };
+  keepAwake();
+  safe(updateDoc(me, { status: "in", lastSeen: Date.now() }));
+
+  // === Détection de sortie ===
+  document.addEventListener("visibilitychange", () => {
+    if (!active) return;
+    if (document.hidden) {
+      if (leaving || paused) return;
+      outSince = Date.now();
+      safe(updateDoc(me, { status: "out", outSince, exits: increment(1), lastSeen: outSince }));
+      log("out");
+    } else {
+      keepAwake();
+      const now = Date.now();
+      if (leaving) {
+        safe(updateDoc(me, { status: "in", link: null, lastSeen: now }));
+        log("back_link", leaving.title);
+        leaving = null; return;
+      }
+      if (outSince) {
+        const d = now - outSince; outSince = null;
+        safe(updateDoc(me, { status: "in", outSince: null, outTotal: increment(d), lastSeen: now }));
+        log("back", d);
+        $("sWarn").textContent = `Sortie détectée (${fmtDur(d)}). Le formateur a été prévenu.`;
+        $("sWarn").classList.remove("hidden");
+        setTimeout(()=>$("sWarn").classList.add("hidden"), 6000);
+      } else safe(updateDoc(me, { status: "in", lastSeen: now }));
+    }
+  });
+  window.addEventListener("pagehide", () => { if (active && !leaving) safe(updateDoc(me, { status: "offline", lastSeen: Date.now() })); });
+
+  // Signal de vie toutes les 20 s
+  setInterval(() => { if (active && !document.hidden) safe(updateDoc(me, { lastSeen: Date.now(), status: leaving ? "link" : "in" })); }, 20000);
+}
+
+/* ===================== FORMATEUR ===================== */
+function trainerGate(code){
+  let started = false;
+  onAuthStateChanged(auth, async u => {
+    if (started) return;
+    if (!u) { home(); $("homeCode").value = ""; alert("Connecte-toi pour ouvrir le tableau formateur."); history.replaceState(null,"",location.pathname); return; }
+    const snap = await getDoc(fDoc(code)).catch(()=>null);
+    if (!snap || !snap.exists()) { alert("Session introuvable"); location.search=""; return; }
+    if (snap.data().owner !== u.uid) { alert("Cette session appartient à un autre formateur."); location.search=""; return; }
+    started = true; trainer(code);
+  });
+}
+
+function trainer(code){
+  show("vTrainer");
+  $("hPill").textContent = "Formateur"; $("hPill").classList.remove("hidden");
+  const url = baseUrl()+"?s="+code;
+  $("tCode").textContent = code; $("bigCode").textContent = code; $("tUrl").textContent = url;
+  new QRCode($("qr"), { text: url, width: 200, height: 200 });
+  new QRCode($("qrBig"), { text: url, width: 420, height: 420 });
+  $("btnBig").onclick = () => $("bigQr").classList.remove("hidden");
+  $("bigQr").onclick = () => $("bigQr").classList.add("hidden");
+
+  let meta = {}, students = {}, prevExits = {};
+  onSnapshot(fDoc(code), s => {
+    meta = s.data()||{};
+    $("hTitle").textContent = meta.title;
+    $("btnPause").textContent = meta.paused ? "▶️ Reprendre le suivi" : "⏸ Pause";
+    $("btnEnd").disabled = meta.active === false;
+    if (meta.active === false) $("btnEnd").textContent = "Session terminée";
+  });
+  $("btnPause").onclick = () => safe(updateDoc(fDoc(code), { paused: !meta.paused }));
+  $("btnEnd").onclick = () => { if (confirm("Terminer la session ?")) safe(updateDoc(fDoc(code), { active: false })); };
+
+  onSnapshot(fCol(code,"stagiaires"), s => {
+    const next = {}; s.docs.forEach(d => next[d.id] = d.data());
+    const flash = Object.keys(next).filter(k => prevExits[k] !== undefined && (next[k].exits||0) > prevExits[k]);
+    Object.keys(next).forEach(k => prevExits[k] = next[k].exits||0);
+    students = next; render(flash);
+    if (flash.length) beep();
+  });
+  $("sortBy").onchange = () => render([]);
+  setInterval(() => render([]), 1000);
+
+  const statusOf = st => (st.status==="in" || st.status==="link") && Date.now()-(st.lastSeen||0) > OFFLINE_MS ? "offline" : (st.status||"offline");
+  const liveOut = st => (st.outTotal||0) + (st.status==="out" && st.outSince ? Date.now()-st.outSince : 0);
+
+  function render(flash){
+    const list = Object.entries(students);
+    const by = $("sortBy").value;
+    list.sort((a,b) => by==="name" ? a[1].name.localeCompare(b[1].name) : by==="out" ? liveOut(b[1])-liveOut(a[1]) : (b[1].exits||0)-(a[1].exits||0));
+    let on=0,out=0,lk=0,ex=0;
+    const grid = $("tGrid");
+    if (!list.length) { grid.innerHTML = '<p class="mute">En attente des stagiaires… Fais-leur scanner le QR code.</p>'; }
+    else grid.innerHTML = list.map(([id,st]) => {
+      const status = statusOf(st);
+      ex += st.exits||0;
+      if (status!=="offline") on++;
+      if (status==="out") out++;
+      if (status==="link") lk++;
+      const label = status==="in" ? "● Dans l'appli"
+        : status==="out" ? `● Hors appli depuis ${fmtDur(Date.now()-(st.outSince||Date.now()))}`
+        : status==="link" ? `● Sur « ${esc(st.link)} »`
+        : "○ Déconnecté";
+      return `<div class="stu ${status} ${flash.includes(id)?"flash":""}">
+        <div class="name" title="${esc(st.name)}">${esc(st.name)}</div>
+        <div class="st">${label}</div>
+        <div class="nums"><div><span class="mute">Sorties</span><div class="big">${st.exits||0}</div></div>
+        <div style="text-align:right"><span class="mute">Temps hors appli</span><div class="big" style="font-size:16px;margin-top:6px">${fmtDur(liveOut(st))}</div></div></div>
+      </div>`;
+    }).join("");
+    $("stOn").textContent = on; $("stOut").textContent = out; $("stLink").textContent = lk; $("stExits").textContent = ex;
+  }
+
+  onSnapshot(query(fCol(code,"journal"), orderBy("ts","desc"), limit(80)), s => {
+    $("tLog").innerHTML = s.docs.map(d => {
+      const e = d.data(), t = hhmm(e.ts), n = `<b>${esc(e.name)}</b>`;
+      if (e.type==="out") return `<div>${t} · ${n} <span style="color:var(--bad)">a quitté l'appli</span></div>`;
+      if (e.type==="back") return `<div>${t} · ${n} est revenu (${fmtDur(e.detail)})</div>`;
+      if (e.type==="link") return `<div>${t} · ${n} <span style="color:var(--info)">a ouvert « ${esc(e.detail)} »</span></div>`;
+      if (e.type==="back_link") return `<div>${t} · ${n} est revenu de « ${esc(e.detail)} »</div>`;
+      return "";
+    }).join("") || '<p class="mute">Rien pour l\'instant.</p>';
+  });
+
+  onSnapshot(fCol(code,"liens"), s => {
+    const links = s.docs.map(d => [d.id, d.data()]).sort((a,b)=>(a[1].at||0)-(b[1].at||0));
+    $("tLinks").innerHTML = links.map(([id,l]) => `<div class="lrow"><span title="${esc(l.url)}">🔗 ${esc(l.title)}</span><button class="ghost" data-del="${id}">✕</button></div>`).join("") || '<p class="mute">Aucun lien.</p>';
+    $("tLinks").querySelectorAll("[data-del]").forEach(b => b.onclick = () => safe(deleteDoc(doc(db,"formations",code,"liens",b.dataset.del))));
+  });
+  $("btnAddLink").onclick = () => {
+    let u = $("lUrl").value.trim(); const t = $("lTitle").value.trim();
+    if (!u) return; if (!/^https?:\/\//i.test(u)) u = "https://"+u;
+    safe(addDoc(fCol(code,"liens"), { title: (t || u.replace(/^https?:\/\//,"")).slice(0,80), url: u.slice(0,500), at: Date.now() }));
+    $("lUrl").value = ""; $("lTitle").value = "";
+  };
+
+  $("btnCsv").onclick = () => {
+    const rows = [["Nom","Sorties","Temps hors appli (min)","Statut"]];
+    Object.values(students).sort((a,b)=>a.name.localeCompare(b.name)).forEach(st => rows.push([st.name, st.exits||0, (liveOut(st)/60000).toFixed(1).replace(".",","), statusOf(st)]));
+    const csv = "﻿" + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = `suivi-${code}.csv`; a.click();
+  };
+
+  let actx;
+  function beep(){ try { actx = actx || new AudioContext(); const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+.18); } catch {} }
+}
+</script>
+
+</body>
+</html>
