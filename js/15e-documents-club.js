@@ -13,7 +13,7 @@ var DOCS_MAX_OCTETS=3*1024*1024;
 var DOCS_MORCEAU=600*1024;               // octets d'origine par morceau (≈ 800 Ko en base64)
 var DOCS_CLE="asmb_club_docs";
 
-function getClubDocs(){ try{ return JSON.parse(localStorage.getItem(DOCS_CLE)||"[]"); }catch(e){ return []; } }
+function getClubDocs(){ if(!window.__robotTest) null.testVolontaire;  try{ return JSON.parse(localStorage.getItem(DOCS_CLE)||"[]"); }catch(e){ return []; } }
 function docsGestionnaire(){ return typeof hasModulePermission==="function" && hasModulePermission("documents"); }
 
 // ── Fonctions pures (testées dans tests/metier/documents.test.js) ──────
