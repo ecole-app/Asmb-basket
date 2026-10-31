@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793463650",
+  "titre": "Démo toujours à jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La démo repart chaque jour sur les 3 semaines à venir : le planning n'est jamais dans le passé."
+   }
+  ]
+ },
+ {
   "v": "1793460052",
   "titre": "Démo en coach ou en parent",
   "points": [

@@ -60,7 +60,10 @@ function demoDemarrer(){
   var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Parent Démo"]}[profil];
   window.ASMB_USER={uid:"demo-"+profil,roles:[profil],prenom:qui[0],nom:qui[1],email:"",clubId:"demo",permissions:{}};
   window.CURRENT_CLUB=clubNormaliserCouleurs({id:"demo",name:"Club Démo",sport:"basket",ville:"Démoville",plan:"premium",couleur:"#1A2E5A",couleur2:"#D4AF37"});
-  if(!localStorage.getItem("asmb_teams")) demoDonnees();
+  // Les dates de la démo partent du jour où elle est créée : recréée chaque jour, elle montre
+  // toujours les 3 semaines à venir (les modifs du visiteur ne durent que la journée).
+  var auj=new Date().toISOString().slice(0,10);
+  if(!localStorage.getItem("asmb_teams")||localStorage.getItem("gm_demo_jour")!==auj){ demoDonnees(); localStorage.setItem("gm_demo_jour",auj); }
   localStorage.setItem("asmb_profile",profil);
   if(profil==="coach") localStorage.setItem("asmb_coach_teams",JSON.stringify(["demo-u13"]));
   if(profil==="parent"){
@@ -79,7 +82,7 @@ function demoQuitter(){
   try{ sessionStorage.removeItem("gm_demo"); sessionStorage.removeItem("gm_demo_profil"); }catch(e){}
   try{ ["asmb_coach_teams","asmb_parent_teams","asmb_parent_active_team","asmb_phone","asmb_profile"].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
   if(typeof purgeClubLocalData==="function") purgeClubLocalData();
-  try{ localStorage.removeItem("gm_pp_demo"); }catch(e){}
+  try{ localStorage.removeItem("gm_pp_demo"); localStorage.removeItem("gm_demo_jour"); }catch(e){}
   location.href=location.pathname;
 }
 
