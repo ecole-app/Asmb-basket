@@ -135,7 +135,6 @@ function initFirestoreSync(){
   // Stats de match : réservées au staff (chaque parent ne verra plus tard que celles de son enfant).
   if(typeof isStaffUser==="function" && isStaffUser()) fsStartSync("match_stats","asmb_match_stats");
   fsStartSync("events","asmb_events");
-  fsStartSync("reponses","asmb_reponses");   // Présent / Absent des familles (js/14s)
   fsStartSync("championnats","asmb_championnats");   // championnats suivis (classement visible de tous les membres)
   if(typeof docsClubSync==="function") docsClubSync();   // documents du club : tout pour le bureau, le publié seulement pour les autres
   fsStartSync("annuaire","asmb_annuaire");

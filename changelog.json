@@ -1,5 +1,20 @@
 [
  {
+  "v": "1793479165",
+  "titre": "Présent / Absent : une seule liste partout",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La réponse du parent ou de l'enfant apparaît tout de suite sur le tableau « Mon équipe » du coach, dans la convocation du canal et sur le planning."
+   }
+  ]
+ },
+ {
   "v": "1793472080",
   "titre": "Compte enfant : le canal de son équipe",
   "points": [

@@ -1487,26 +1487,3 @@ describe("Stats de match d'un joueur (stats_joueurs)", () => {
   });
 });
 
-// ───────────────────────────────────────────────────────────────
-describe("Présent / Absent (reponses)", () => {
-  const rep = (uid, eid, pid, statut, extra = {}) => ({ id: eid + "__" + pid, eventId: eid, playerId: pid, statut, motif: "", par: uid, at: 1793450000000, ...extra });
-  it("le parent répond pour son enfant seulement, en son nom", async () => {
-    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("parentA", "e1", "p1", "present")));
-    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("parentA", "e1", "p1", "absent", { motif: "Malade" })));
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p2"), rep("parentA", "e1", "p2", "present")));
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("coachA", "e1", "p1", "present")));
-  });
-  it("champs bornés : statut, identifiant, motif, champ en trop", async () => {
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("parentA", "e1", "p1", "peut-etre")));
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e9__p1"), rep("parentA", "e1", "p1", "present")));
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("parentA", "e1", "p1", "absent", { motif: "x".repeat(201) })));
-    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p1"), rep("parentA", "e1", "p1", "present", { note: "?" })));
-  });
-  it("le staff répond pour tous et supprime ; un autre club ne lit rien", async () => {
-    await assertSucceeds(setDoc(doc(await as("coachA"), "clubs/A/reponses/e1__p2"), rep("coachA", "e1", "p2", "present")));
-    await assertSucceeds(getDoc(doc(await as("parent2A"), "clubs/A/reponses/e1__p2")));
-    await assertFails(deleteDoc(doc(await as("parentA"), "clubs/A/reponses/e1__p2")));
-    await assertSucceeds(deleteDoc(doc(await as("dirA"), "clubs/A/reponses/e1__p2")));
-    await assertFails(getDoc(doc(await as("dirB"), "clubs/A/reponses/e1__p1")));
-  });
-});

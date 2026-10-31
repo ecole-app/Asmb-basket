@@ -33,8 +33,6 @@ function demoDemande(){
 function demoStubsFirestore(){
   // Références factices : la démo ne dépend pas du chargement de Firebase.
   window.fbDb=window.fbDb||{demo:true};
-  // Base de la démo prête tout de suite (sans attendre Firebase).
-  if(!window.fbReady){ window.fbReady=true; try{ window.dispatchEvent(new Event("fb-ready")); }catch(e){} }
   window.fbCollection=function(){ var a=[].slice.call(arguments,1); return {path:a.join("/"),id:a[a.length-1]}; };
   window.fbDoc=function(){ var a=[].slice.call(arguments,1); return {path:a.join("/"),id:a[a.length-1]}; };
   // Petite base en mémoire (inscrits et pages des événements de la démo, puis ce que le visiteur
@@ -47,11 +45,13 @@ function demoStubsFirestore(){
   var num=function(v){ return v&&v.toMillis?v.toMillis():(v instanceof Date?+v:v); };
   // Écoutes en direct (fbOnSnapshot) : prévenues à chaque écriture dans la même collection.
   window.GM_DEMO_ECOUTES=window.GM_DEMO_ECOUTES||[];
+  // Ce que le visiteur écrit reste pour la journée (changer de profil recharge la page).
+  var garder=function(){ clearTimeout(window.__gmDemoGarde); window.__gmDemoGarde=setTimeout(function(){ try{ localStorage.setItem("gm_demo_db",JSON.stringify(window.GM_DEMO_DB||{})); }catch(e){} },300); };
   var prevenir=function(colPath){ window.GM_DEMO_ECOUTES.forEach(function(l){ if(l.path===colPath) setTimeout(l.envoyer,0); }); };
   var snapDoc=function(path,id,d){ return {id:id,exists:function(){ return !!d; },data:function(){ return d?lire(d):undefined; },ref:{path:path+"/"+id,id:id}}; };
   var ecrire=function(ref,data,fusion){ var p=ref.path.split("/"), id=p.pop(), c=coll(p.join("/")), v={};
     Object.keys(data||{}).forEach(function(k){ var x=data[k]; v[k]=x&&x.toMillis?x.toMillis():(x instanceof Date?+x:x); });
-    c[id]=fusion&&c[id]?Object.assign({},c[id],v):v; prevenir(p.join("/")); };
+    c[id]=fusion&&c[id]?Object.assign({},c[id],v):v; prevenir(p.join("/")); garder(); };
   window.fbQuery=function(r){ var a=[].slice.call(arguments,1); return {path:r.path,col:true,w:a.filter(function(x){ return x&&x.f; }),o:a.filter(function(x){ return x&&x.o; })[0]||null}; };
   window.fbWhere=function(f,op,v){ return {f:f,op:op,v:v}; };
   window.fbOrderBy=function(f,dir){ return {o:f,dir:dir||"asc"}; };
@@ -85,9 +85,11 @@ function demoStubsFirestore(){
   window.fbAddDoc=function(c,d){ var id="demo"+Date.now()+Math.floor(Math.random()*1000); ecrire({path:c.path+"/"+id},d); return Promise.resolve({id:id}); };
   window.fbSetDoc=function(r,d,o){ ecrire(r,d,o&&o.merge); return Promise.resolve(); };
   window.fbUpdateDoc=function(r,d){ ecrire(r,d,true); return Promise.resolve(); };
-  window.fbDeleteDoc=function(r){ var p=r.path.split("/"), id=p.pop(); delete coll(p.join("/"))[id]; prevenir(p.join("/")); return Promise.resolve(); };
+  window.fbDeleteDoc=function(r){ var p=r.path.split("/"), id=p.pop(); delete coll(p.join("/"))[id]; prevenir(p.join("/")); garder(); return Promise.resolve(); };
   window.fbWriteBatch=function(){ var ops=[], b={set:function(r,d,o){ ops.push(function(){ ecrire(r,d,o&&o.merge); }); return b; },update:function(r,d){ ops.push(function(){ ecrire(r,d,true); }); return b; },
     delete:function(r){ ops.push(function(){ window.fbDeleteDoc(r); }); return b; },commit:function(){ ops.forEach(function(f){ f(); }); return Promise.resolve(); }}; return b; };
+  // Base de la démo prête (une fois toutes les fonctions en place) tout de suite (sans attendre Firebase).
+  if(!window.fbReady){ window.fbReady=true; try{ window.dispatchEvent(new Event("fb-ready")); }catch(e){} }
 }
 
 function demoDemarrer(){
@@ -325,17 +327,19 @@ function demoDonnees(){
   localStorage.setItem("asmb_sponsors",JSON.stringify(sponsors));
   localStorage.setItem("asmb_inventaire",JSON.stringify(inv));
   localStorage.setItem("asmb_match_stats",JSON.stringify(stats));
-  // Présent / Absent sur les prochains rendez-vous des U13 Filles : la plupart ont répondu,
-  // une absence avec motif, quelques sans réponse (dont Emma, l'enfant du parent de la démo).
-  var reps=[], u13=teams.filter(function(t){ return t.id==="demo-u13"; })[0];
+  // Présent / Absent (fiche de pointage checkins) sur les prochains rendez-vous des U13 Filles :
+  // la plupart ont répondu, une absence avec motif, quelques sans réponse (dont Emma, l'enfant
+  // du parent de la démo).
+  var u13=teams.filter(function(t){ return t.id==="demo-u13"; })[0];
+  db.checkins={};
   events.filter(function(e){ return e.equipe===u13.name&&e.date>=auj; }).slice(0,4).forEach(function(e,k){
     (e.convocations||u13.members).forEach(function(pid,i){
       if(pid==="demo-u13-j0"||i%5===4) return;
-      var abs=(i+k)%7===3;
-      reps.push({id:e.id+"__"+pid,eventId:e.id,playerId:pid,statut:abs?"absent":"present",motif:abs?"Rendez-vous médical":"",par:"demo",at:Date.now()-k*3600000});
+      var abs=(i+k)%7===3, pl=players.filter(function(x){ return x.id===pid; })[0]||{};
+      db.checkins[e.id+"_"+pid]={eventId:e.id,playerId:pid,playerName:(pl.prenom||"")+" "+(pl.nom||""),eventTitre:e.titre,eventDate:e.date,
+        status:abs?"absent":"present",motif:abs?"Rendez-vous médical":"",ts:Date.now()-k*3600000,source:"parent"};
     });
   });
-  localStorage.setItem("asmb_reponses",JSON.stringify(reps));
   // Communauté : canal général, un canal par équipe, quelques messages récents.
   db.channels={general:{id:"general",name:"Général",icon:"📣",desc:"Infos du club pour tout le monde",members:[],clubWide:true}};
   teams.forEach(function(t){ db.channels[t.id]={id:t.id,name:t.name,icon:"🏀",desc:"Canal de l'équipe "+t.name,members:[]}; });

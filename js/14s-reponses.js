@@ -2,15 +2,27 @@
    Pour chaque entraînement, match ou événement d'équipe à venir, le parent (ou l'enfant sur son
    propre compte) répond Présent ou Absent pour chaque enfant rattaché. Rien n'est supposé :
    sans réponse = « sans réponse », et le coach peut relancer.
-   Données : clubs/{id}/reponses/{eventId}__{playerId} = {id, eventId, playerId, statut, motif, par, at}
-   (règle Firestore : le staff, ou le compte rattaché à ce joueur, et rien d'autre). Lu par tous les
-   membres (synchro asmb_reponses, js/13).
+   Une seule source pour toute l'appli : la fiche de pointage checkins/{eventId}_{playerId}
+   (status present / absent / retard), la même que le tableau « Mon équipe » du coach
+   (js/03 buildCoachDashboard), les boutons de la convocation dans le canal (js/16b) et
+   l'espace joueur. Écoute en direct ici (asmb_checkins) pour le badge du planning.
    Attendus d'un rendez-vous : les convoqués s'il y en a (matchs), sinon les joueurs de l'équipe.
    Une absence envoie aussi le message habituel dans le canal de l'équipe. */
 
-function getReponses(){ try{ return JSON.parse(localStorage.getItem("asmb_reponses")||"[]"); }catch(e){ return []; } }
-function repId(eid,pid){ return String(eid)+"__"+String(pid); }
+var REP_ECOUTE=null;
+function repEcouter(){
+  if(REP_ECOUTE||!window.fbReady||!window.fbOnSnapshot||!window.fbDb) return;
+  REP_ECOUTE=window.fbOnSnapshot(window.fbCollection(window.fbDb,"checkins"),function(snap){
+    var l=[]; snap.forEach(function(d){ var c=d.data()||{}; if(c.eventId&&c.playerId) l.push({id:d.id,eventId:String(c.eventId),playerId:String(c.playerId),statut:c.status,motif:c.motif||""}); });
+    localStorage.setItem("asmb_checkins",JSON.stringify(l));
+    if(typeof refreshCurrentScreen==="function") refreshCurrentScreen();
+  },function(){ REP_ECOUTE=null; });
+}
+function getReponses(){ repEcouter(); try{ return JSON.parse(localStorage.getItem("asmb_checkins")||"[]"); }catch(e){ return []; } }
+function repId(eid,pid){ return String(eid)+"_"+String(pid); }
 function repDe(eid,pid){ var id=repId(eid,pid); return getReponses().filter(function(r){ return r.id===id; })[0]||null; }
+// « En retard » compte avec les absents, comme sur le tableau du coach.
+function repStatut(r){ return r?(r.statut==="present"?"present":((r.statut==="absent"||r.statut==="retard")?"absent":"")):""; }
 
 function repEquipe(e){
   if(!e||!e.equipe) return null;
@@ -28,7 +40,7 @@ function repConcerne(e){
 }
 function repBilan(e){
   var ids=repAttendus(e), b={present:[],absent:[],sans:[]};
-  ids.forEach(function(pid){ var r=repDe(e.id,pid); (r&&b[r.statut]?b[r.statut]:b.sans).push(pid); });
+  ids.forEach(function(pid){ var st=repStatut(repDe(e.id,pid)); (st?b[st]:b.sans).push(pid); });
   return b;
 }
 function repNom(pid){
@@ -46,13 +58,17 @@ async function repRepondre(eid,pid,statut){
     if(m===null) return;
     motif=String(m||"").trim().slice(0,200);
   }
-  var u=window.ASMB_USER||{};
-  var doc={id:repId(eid,pid),eventId:String(eid),playerId:String(pid),statut:statut,motif:motif,par:u.uid||"",at:Date.now()};
-  // Tout de suite à l'écran, puis envoyé (la synchro remet l'état du serveur).
-  var l=getReponses().filter(function(r){ return r.id!==doc.id; }); l.push(doc);
-  localStorage.setItem("asmb_reponses",JSON.stringify(l));
+  var u=window.ASMB_USER||{}, nomJ=repNom(pid);
+  var doc={eventId:String(eid),playerId:String(pid),playerName:nomJ,eventTitre:e.titre||"",eventDate:e.date||"",
+    status:statut,motif:motif,ts:window.fbServerTimestamp?window.fbServerTimestamp():new Date(),source:localStorage.getItem("asmb_profile")==="joueur"?"self":"parent"};
+  // Tout de suite à l'écran, puis envoyé (l'écoute remet l'état du serveur).
+  var id=repId(eid,pid), l=getReponses().filter(function(r){ return r.id!==id; });
+  l.push({id:id,eventId:doc.eventId,playerId:doc.playerId,statut:statut,motif:motif});
+  localStorage.setItem("asmb_checkins",JSON.stringify(l));
   if(window.fbSetDoc&&window.fbDb){
-    window.fbSetDoc(window.fbDoc(window.fbDb,"reponses",doc.id),doc).catch(function(err){
+    window.fbSetDoc(window.fbDoc(window.fbDb,"checkins",id),doc).then(function(){
+      if(typeof refreshEventCounts==="function") refreshEventCounts(eid);
+    }).catch(function(err){
       if(typeof showToast==="function") showToast("Réponse non enregistrée, réessayez");
       console.log("reponse:",err&&err.code);
     });
@@ -75,7 +91,7 @@ function repBoutonsHtml(e,enfants){
   var att=repAttendus(e), h="";
   (enfants||[]).forEach(function(c){
     if(att.indexOf(String(c.id))<0) return;
-    var r=repDe(e.id,c.id), st=r&&r.statut, prenom=authEsc(c.prenom||"Mon enfant");
+    var r=repDe(e.id,c.id), st=repStatut(r), prenom=authEsc(c.prenom||"Mon enfant");
     var b=function(val,lib,coul){
       var on=st===val;
       return '<button type="button" onclick="repRepondre(\''+authEsc(e.id)+'\',\''+authEsc(String(c.id))+'\',\''+val+'\')" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:800;cursor:pointer;'+
