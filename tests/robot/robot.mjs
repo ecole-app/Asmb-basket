@@ -133,8 +133,8 @@ async function profil(navigateur, base, nom, taille, libTaille) {
     // Barre du bas (téléphone)
     {
       const boutons = await page.$$eval("#bnav-main .bni", (bs) => bs.filter((b) => b.offsetParent !== null).map((b) => b.id).filter(Boolean));
-      if (!boutons.length && libTaille === "téléphone" && nom !== "joueur") await echec(page, ou, "barre du bas vide");
-      if (boutons.length && nom === "joueur") await echec(page, ou, "un compte enfant ne doit pas avoir de barre du bas");
+      if (!boutons.length && libTaille === "téléphone") await echec(page, ou, "barre du bas vide");
+      if (nom === "joueur" && boutons.join() !== "bni-j-home,bni-j-communaute,bni-j-params") await echec(page, ou, "barre du compte enfant : " + boutons.join(", ") + " (attendu : Accueil, Communauté, Paramètres)");
       for (const id of boutons) await action(page, journal, ou + " › " + id, (i) => document.getElementById(i).click(), id);
     }
     if (nom !== "dirigeant") {

@@ -877,7 +877,7 @@ function roleLabel(r){
 }
 function openParametres(){
   var profile=localStorage.getItem("asmb_profile");
-  if(profile==="parent"){ openParentSettings(); return; }
+  if(profile==="parent"||profile==="joueur"){ openParentSettings(); return; }
   stack.push("parametres");
   buildParametres();
   showScr("parametres");

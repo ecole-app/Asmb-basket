@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793467052",
+  "titre": "Compte enfant : Accueil, Communauté, Paramètres",
+  "points": [
+   {
+    "roles": [
+     "joueur"
+    ],
+    "texte": "Le compte d'un enfant a sa barre : Accueil, Communauté et Paramètres (langue, rappels, notifications, mode sombre)."
+   }
+  ]
+ },
+ {
   "v": "1793465847",
   "titre": "Compte enfant : plus de bouton Admin",
   "points": [
