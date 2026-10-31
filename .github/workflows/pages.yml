@@ -1,12 +1,12 @@
 name: Mise en ligne du site
 
-# Le site (generalmanagerapp.fr) n'est publié que si le robot a tout validé :
+# Le site (generalmanagerapp.fr) n'est publié que si Jarvis (le robot) a tout validé :
 # 1. contrôles rapides (tests métier : scripts présents, lisibles, mis en réserve…)
-# 2. robot (tests/robot/robot.mjs) : l'appli ouverte dans Chrome en mode démo, 3 profils,
+# 2. Jarvis (tests/jarvis/jarvis.mjs) : l'appli ouverte dans Chrome en mode démo, 4 profils,
 #    téléphone et ordinateur, tous les écrans, pages publiques, réseau coupé
 # 3. publication sur GitHub Pages
-# Si une étape échoue, les clubs gardent la version d'avant. Captures des écrans fautifs :
-# onglet Actions › le passage en échec › « captures-robot ».
+# Si une étape échoue, les clubs gardent la version d'avant. Captures des écrans fautifs (Jarvis) :
+# onglet Actions › le passage en échec › « captures-jarvis ».
 # Réglage GitHub nécessaire une fois : Settings › Pages › Source : « GitHub Actions ».
 
 on:
@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  robot:
+  jarvis:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -34,23 +34,23 @@ jobs:
           node-version: 22
       - name: Contrôles rapides
         run: node --test tests/metier/*.test.js
-      - name: Installer le navigateur du robot
+      - name: Installer le navigateur de Jarvis
         run: |
-          npm i --prefix tests/robot --no-audit --no-fund playwright@1.63.0
-          npx --prefix tests/robot playwright install --with-deps chromium
-      - name: Robot (tous les écrans, 3 profils)
-        run: node tests/robot/robot.mjs
-      - name: Captures des écrans fautifs
+          npm i --prefix tests/jarvis --no-audit --no-fund playwright@1.63.0
+          npx --prefix tests/jarvis playwright install --with-deps chromium
+      - name: Jarvis (tous les écrans, 4 profils)
+        run: node tests/jarvis/jarvis.mjs
+      - name: Captures des écrans fautifs (Jarvis)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: captures-robot
-          path: tests/robot/captures/
+          name: captures-jarvis
+          path: tests/jarvis/captures/
           if-no-files-found: ignore
           retention-days: 14
 
   publier:
-    needs: robot
+    needs: jarvis
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:

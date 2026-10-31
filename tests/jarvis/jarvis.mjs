@@ -1,14 +1,14 @@
-// Robot de l'appli : ouvre la vraie appli dans Chrome (sans écran), en mode démo, et passe partout
+// Jarvis, le robot de l'appli : ouvre la vraie appli dans Chrome (sans écran), en mode démo, et passe partout
 // avant chaque mise en ligne. Si un écran plante, reste vide ou si un fichier ne se charge pas,
-// il échoue : la mise en ligne est bloquée (.github/workflows/pages.yml) et une capture de l'écran
-// fautif est gardée dans tests/robot/captures/.
+// il échoue : la mise en ligne est bloquée (.github/workflows/pages.yml, job « jarvis ») et une capture de l'écran
+// fautif est gardée dans tests/jarvis/captures/.
 //   - 4 profils de la démo (dirigeant, coach, parent, joueur) × téléphone et ordinateur
 //   - dirigeant : barre du bas, chaque module de l'Espace Admin, chaque pôle, Paramètres ;
 //     sur ordinateur, chaque rubrique du menu latéral
 //   - pages publiques : tournoi, buvette, bénévole, fil d'événement, formulaire d'inscription
 //   - réseau qui coupe juste après une mise à jour (le bug du 31/10/2026)
 // Firebase n'est jamais contacté : la démo remplace Firestore, firebase-init.js est remplacé
-// par un module vide. Lancement : cd tests && npm run robot
+// par un module vide. Lancement : cd tests && npm run jarvis
 import { createRequire } from "node:module";
 import http from "node:http";
 import { readFile, mkdir, rm } from "node:fs/promises";
@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 
 const { chromium } = createRequire(import.meta.url)("playwright"); // installé dans tests/ (CI) ou global
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const CAPTURES = join(RACINE, "tests", "robot", "captures");
+const CAPTURES = join(RACINE, "tests", "jarvis", "captures");
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg",
   ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webmanifest": "application/manifest+json", ".woff2": "font/woff2" };
@@ -156,7 +156,7 @@ async function profil(navigateur, base, nom, taille, libTaille) {
       }
     }
   } catch (e) {
-    await echec(page, ou, "robot interrompu : " + String(e.message).split("\n")[0]);
+    await echec(page, ou, "Jarvis interrompu : " + String(e.message).split("\n")[0]);
   }
   await ctx.close();
 }
@@ -203,7 +203,7 @@ async function reseauCoupe(navigateur, base) {
     if (etat.n < 40 && !etat.reprise) await echec(page, ou, "écran bloqué sans message (fichier coupé : " + cible + ")");
     notes.push("réseau coupé sur " + cible + " : " + (etat.n >= 40 ? "appli affichée depuis la réserve" : "message « Réessayer »"));
   } catch (e) {
-    await echec(page, ou, "robot interrompu : " + String(e.message).split("\n")[0]);
+    await echec(page, ou, "Jarvis interrompu : " + String(e.message).split("\n")[0]);
   }
   await ctx.close();
 }
@@ -229,8 +229,8 @@ for (const n of notes) console.log("  · " + n);
 console.log("  " + nVerifs + " écrans vérifiés");
 const duree = Math.round((Date.now() - t0) / 1000);
 if (echecs.length) {
-  console.log("\n✗ Robot : " + echecs.length + " problème(s) en " + duree + " s — mise en ligne bloquée");
-  if (process.env.GITHUB_ACTIONS) for (const e of echecs.slice(0, 30)) console.log("::error title=Robot::" + e.replace(/%/g, "%25").replace(/\n/g, " "));
+  console.log("\n✗ Jarvis : " + echecs.length + " problème(s) en " + duree + " s — mise en ligne bloquée");
+  if (process.env.GITHUB_ACTIONS) for (const e of echecs.slice(0, 30)) console.log("::error title=Jarvis::" + e.replace(/%/g, "%25").replace(/\n/g, " "));
   process.exit(1);
 }
-console.log("\n✓ Robot : tout est bon (" + duree + " s)");
+console.log("\n✓ Jarvis : tout est bon (" + duree + " s)");

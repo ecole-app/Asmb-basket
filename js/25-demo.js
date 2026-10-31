@@ -1,6 +1,6 @@
 /* ===== 25-demo.js — Mode démo (lien « Voir la démo » du site : ?demo) =====
    L'appli s'ouvre sur un faux club « Club Démo », sans compte, en dirigeant, coach ou parent
-   (?demo=coach / ?demo=parent / ?demo=joueur, ou le menu du bandeau ; sert aussi au robot tests/robot).
+   (?demo=coach / ?demo=parent / ?demo=joueur, ou le menu du bandeau ; sert aussi à Jarvis, tests/jarvis).
    Saison fictive complète (septembre → juin) datée par rapport à aujourd'hui, effacée et recréée
    chaque jour : rien de ce que le visiteur saisit ne dure plus d'une journée. Tout reste sur
    l'appareil : les fonctions Firestore sont remplacées par des versions vides (lecture = rien,

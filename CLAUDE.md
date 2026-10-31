@@ -20,11 +20,11 @@ peu d'explications, et on **présente l'idée avant de coder** les fonctionnalit
    à compléter quand on touche à ces règles.
 3. Après toute modif d'`index.html` : nombre de `<div` = nombre de `</div>`.
 4. JSON valides : `changelog.json` et `version.json`.
-5. Robot (`cd tests && npm run robot`, ~1 min 30) : ouvre l'appli en mode démo (dirigeant, coach,
-   parent × téléphone/ordinateur), passe sur tous les écrans, les pages publiques et simule un réseau
+5. Jarvis, le robot (`cd tests && npm run jarvis`, ~1 min 30) : ouvre l'appli en mode démo (dirigeant, coach,
+   parent, joueur × téléphone/ordinateur), passe sur tous les écrans, les pages publiques et simule un réseau
    coupé après une mise à jour. **La mise en ligne du site passe par lui** (`.github/workflows/pages.yml` :
-   tests métier → robot → GitHub Pages) : s'il échoue, le site n'est pas publié ; captures dans
-   l'artefact « captures-robot ». Un nouvel écran ou module = l'ajouter au parcours du robot s'il
+   tests métier → Jarvis → GitHub Pages) : s'il échoue, le site n'est pas publié ; captures dans
+   l'artefact « captures-jarvis ». Un nouvel écran ou module = l'ajouter au parcours de Jarvis s'il
    n'est pas atteint par la barre du bas, `ADMIN_MODULES` ou `GM_DESK_ITEMS`.
 
 ## Traductions (à chaque mise à jour)
