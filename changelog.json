@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793464031",
+  "titre": "Démo : une saison complète",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La démo montre une saison entière : planning de septembre à juin, matchs joués avec scores et stats, stages, tournoi et loto avec inscrits et bénévoles, comptabilité mois par mois, licences payées et impayées. Tout est remis à zéro chaque jour."
+   }
+  ]
+ },
+ {
   "v": "1793463650",
   "titre": "Démo toujours à jour",
   "points": [
