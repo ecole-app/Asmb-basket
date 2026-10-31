@@ -162,7 +162,7 @@ setTimeout(function(){
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793441946";
+var APP_VERSION="1793442232";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
@@ -172,6 +172,9 @@ function majVue(){ try{ return localStorage.getItem("gm_maj_vue"); }catch(e){ re
 function majMarquerVue(v){ try{ if(v) localStorage.setItem("gm_maj_vue",v); }catch(e){} }
 function majBandeau(etat){
  var b=document.getElementById("update-banner"); if(!b) return;
+ // Mode démo (js/25-demo.js) : jamais de bandeau de mise à jour (la version se met à jour en silence).
+ var demo=window.GM_DEMO; try{ demo=demo||sessionStorage.getItem("gm_demo")==="1"||/[?&]demo\b/.test(location.search); }catch(e){}
+ if(demo){ b.style.display="none"; return; }
  var t=document.getElementById("update-banner-txt"), bt=document.getElementById("update-banner-btn");
  if(etat==="termine"){ if(t) t.textContent="L'application a été mise à jour"; if(bt) bt.textContent="Compris"; }
  else { if(t) t.textContent="Nouvelle version disponible"; if(bt) bt.textContent="Mettre à jour"; }

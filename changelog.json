@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793442232",
+  "titre": "Mode démo sans bandeau de mise à jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans le mode démo, le bandeau « Nouvelle version disponible » ne s'affiche plus."
+   }
+  ]
+ },
+ {
   "v": "1793441946",
   "titre": "Conflits de salle et bénévoles manquants",
   "points": [
