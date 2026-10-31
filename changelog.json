@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793406305",
+  "titre": "Nouveau logo General Manager",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "General Manager change de logo : lettres plus modernes, dégradé marine et doré. Il apparaît sur les nouvelles installations de l'appli (les appareils déjà installés gardent l'ancienne icône)."
+   }
+  ]
+ },
+ {
   "v": "1793373704",
   "titre": "Stats : tendances en baisse en rouge",
   "points": [
