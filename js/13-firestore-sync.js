@@ -27,6 +27,7 @@ function fsStartSync(coll, lsKey){
 function fsWriteCollection(coll, arr){
   if(!window.fbDb || !window.fbSetDoc) return;
   if(window.SUPPORT_MODE) return; // mode support : lecture seule (aussi imposé par les règles serveur)
+  if(window.GM_DEMO) return; // mode démo : tout reste sur l'appareil (js/25-demo.js)
   // Accès limité : consultation seule. La modif locale est annulée (retour à
   // la dernière version synchronisée) et rien n'est envoyé.
   if(typeof limiteEcritureAutorisee==="function" && !limiteEcritureAutorisee(coll)){

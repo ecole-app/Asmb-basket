@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793441767",
+  "titre": "Mode démo",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un club intéressé peut essayer l'appli sans compte depuis le site (« Voir la démo ») : un faux Club Démo complet, qui reste sur son téléphone, sans rien enregistrer."
+   }
+  ]
+ },
+ {
   "v": "1793441534",
   "titre": "Correctif Plateforme",
   "points": [

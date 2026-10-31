@@ -496,6 +496,7 @@ function finishAuthedUser(user, u, isUpdate){
 // Gate au démarrage : remplace l'appel direct à initProfile
 function initAuthGate(){
   var urlParams=new URLSearchParams(window.location.search);
+  if(typeof demoDemande==="function"&&demoDemande()){ demoDemarrer(); return; } // mode démo : faux club local, pas d'auth (js/25-demo.js)
   if(urlParams.has("inscription")){ initProfile(); return; } // inscription publique : pas d'auth
   if(urlParams.has("invite")){ showInviteScreen(urlParams.get("invite")); return; } // invitation staff
   if(urlParams.has("rejoindre")){ indRejoindre(urlParams.get("rejoindre")); return; } // client d'un indépendant : lien de l'indépendant
