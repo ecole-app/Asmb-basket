@@ -1484,7 +1484,7 @@ function buildCoachEquipe(){
   if(!players.length){el.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Aucun membre pour le moment</div></div>';return;}
   var CATS_ORD_COACH=["U7","U9","U11","U13","U15","U17","Senior"];
   var teamCatIdxCoach=CATS_ORD_COACH.indexOf(team.cat);
-  var posteEligibleCoach=teamCatIdxCoach>=CATS_ORD_COACH.indexOf("U15");
+  var posteEligibleCoach=teamCatIdxCoach>=CATS_ORD_COACH.indexOf("U13");
   el.innerHTML="";
   players.forEach(function(p){
     var initials=(p.prenom||"?")[0].toUpperCase()+(p.nom||"?")[0].toUpperCase();

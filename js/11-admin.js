@@ -1273,7 +1273,7 @@ function renderPlayers(){
     var status=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     var genreBadge=p.genre==="F"?'<span class="status-badge" style="background:rgba(142,68,173,.12);color:#8E44AD;margin-left:5px">F</span>':p.genre==="M"?'<span class="status-badge" style="background:rgba(22,160,133,.12);color:#16A085;margin-left:5px">M</span>':'';
     var d=document.createElement("div");d.className="player-card";
-    var meta=authEsc(p.cat||"")+" · "+authEsc(p.naissance||"")+(p.poste?" - "+authEsc(p.poste):"");
+    var meta=authEsc(p.cat||"")+" · "+authEsc(p.naissance||"")+(posteDe(p)?" - "+authEsc(posteDe(p)):"");
     var safeId=authEsc(String(p.id||""));
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
     btns+='<button onclick="showPresenceHistory(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
@@ -1295,7 +1295,7 @@ function joueursTableau(el,list){
     var lic=p.licence==="ok"?'<span class="status-badge status-ok">Licence ✓</span>':p.licence==="attente"?'<span class="status-badge status-pending">En attente</span>':'<span class="status-badge status-no">Sans licence</span>';
     h+='<tr data-id="'+id+'"><td><div style="display:flex;align-items:center;gap:10px"><span class="gm-av" style="background:'+col+'">'+ini+'</span><b>'+authEsc((p.prenom||"")+" "+(p.nom||""))+'</b></div></td>'+
       '<td>'+authEsc(p.cat||"")+'</td><td>'+(p.genre==="F"?"Fille":p.genre==="M"?"Garçon":"")+'</td>'+
-      '<td class="mut">'+authEsc(p.naissance?p.naissance.split("-").reverse().join("/"):"")+'</td><td class="mut">'+authEsc(p.poste||"")+'</td><td>'+lic+'</td><td>'+(typeof polePastilles==="function"?polePastilles(p):"")+'</td>'+
+      '<td class="mut">'+authEsc(p.naissance?p.naissance.split("-").reverse().join("/"):"")+'</td><td class="mut">'+authEsc(posteDe(p))+'</td><td>'+lic+'</td><td>'+(typeof polePastilles==="function"?polePastilles(p):"")+'</td>'+
       '<td style="white-space:nowrap;text-align:right"><button class="gm-tb" data-act="hist">Historique</button><button class="gm-tb" data-act="edit">Modifier</button><button class="gm-tb gm-tb-red" data-act="del">Suppr.</button></td></tr>';
   });
   el.innerHTML=h+'</tbody></table></div>';
@@ -1350,7 +1350,7 @@ function wirePlayerCatAutofill(){
   naissanceInp.dataset.catWired="1";
   function recompute(){
     var cat=categorieFromNaissance(naissanceInp.value,(genreSel||{}).value);
-    if(cat) catSel.value=cat;
+    if(cat){ catSel.value=cat; catSel.dispatchEvent(new Event("change")); }
   }
   naissanceInp.addEventListener("change",recompute);
   if(genreSel) genreSel.addEventListener("change",recompute);
@@ -1367,7 +1367,7 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="0612345678"></div>'+
-    '<div class="form-group"><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
+    '<div class="form-group" id="fp-poste-grp"'+(p&&!posteVisible(p.cat)?' style="display:none"':'')+'><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder=""></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
     '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
@@ -1376,6 +1376,10 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+authEsc(p&&p.notes||'')+'</textarea></div>'+
     (typeof polesFicheHtml==="function"?polesFicheHtml(p):"");
   wirePlayerCatAutofill();
+  // Poste masqué en mini-basket (avant les U13) ; suit la catégorie choisie.
+  var catSel=document.getElementById("fp-cat"), pg=document.getElementById("fp-poste-grp");
+  var majPoste=function(){ if(pg&&catSel) pg.style.display=posteVisible(catSel.value)?"":"none"; };
+  if(catSel){ catSel.addEventListener("change",majPoste); majPoste(); }
   if(typeof polesFicheBrancher==="function") polesFicheBrancher();
 }
 function savePlayer(){

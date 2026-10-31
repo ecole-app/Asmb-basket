@@ -424,6 +424,14 @@ function getVacances(){
   if(c && c.length) return c;
   return VACS_BY_ZONE[getClubZone()];
 }
+// Poste de jeu (meneur, ailier…) : seulement à partir des U13. En mini-basket (Baby, Micro, U7 à U11)
+// on ne spécialise pas les enfants, le poste n'est donc jamais affiché.
+function posteVisible(cat){
+  var c=String(cat||""), m=/U\s?(\d+)/i.exec(c);
+  if(m) return +m[1]>=13;
+  return !/micro|baby|mini/i.test(c);
+}
+function posteDe(p){ return (p&&p.poste&&p.poste!=="---"&&posteVisible(p.cat))?p.poste:""; }
 const KC=["#16A085","#8E44AD","var(--ltg)","#1A2E5A","#E8670A"];
 
 var activeCatId="u13";

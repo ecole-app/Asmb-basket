@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793467978",
+  "titre": "Poste de jeu à partir des U13",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le poste (meneur, ailier…) ne s'affiche plus en mini-basket (Baby, Micro, U7 à U11), ni dans les listes ni dans la fiche du joueur. Il apparaît à partir des U13."
+   }
+  ]
+ },
+ {
   "v": "1793467052",
   "titre": "Compte enfant : Accueil, Communauté, Paramètres",
   "points": [

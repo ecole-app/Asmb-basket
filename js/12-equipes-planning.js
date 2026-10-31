@@ -366,7 +366,7 @@ function buildTeams(){
         var row=document.createElement("div");row.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr)";
         var info=document.createElement("span");info.style.cssText="font-size:12px;color:var(--txt)";
         info.textContent=p.prenom+" "+p.nom+" ";
-        var poste=document.createElement("span");poste.style.cssText="color:var(--mut);font-size:10px";poste.textContent=p.poste||"";
+        var poste=document.createElement("span");poste.style.cssText="color:var(--mut);font-size:10px";poste.textContent=posteDe(p);
         info.appendChild(poste);
         var rm=document.createElement("button");rm.textContent="×";
         rm.style.cssText="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;line-height:1";
