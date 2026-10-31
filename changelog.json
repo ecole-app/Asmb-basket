@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793460052",
+  "titre": "Démo en coach ou en parent",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La démo se regarde aussi en coach ou en parent (menu du bandeau Démo). Chaque mise en ligne est désormais vérifiée écran par écran avant d'arriver chez les clubs."
+   }
+  ]
+ },
+ {
   "v": "1793454128",
   "titre": "Documents : bon compte",
   "points": [

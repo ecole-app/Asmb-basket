@@ -1,0 +1,70 @@
+name: Mise en ligne du site
+
+# Le site (generalmanagerapp.fr) n'est publié que si le robot a tout validé :
+# 1. contrôles rapides (tests métier : scripts présents, lisibles, mis en réserve…)
+# 2. robot (tests/robot/robot.mjs) : l'appli ouverte dans Chrome en mode démo, 3 profils,
+#    téléphone et ordinateur, tous les écrans, pages publiques, réseau coupé
+# 3. publication sur GitHub Pages
+# Si une étape échoue, les clubs gardent la version d'avant. Captures des écrans fautifs :
+# onglet Actions › le passage en échec › « captures-robot ».
+# Réglage GitHub nécessaire une fois : Settings › Pages › Source : « GitHub Actions ».
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mise-en-ligne
+  cancel-in-progress: false
+
+jobs:
+  robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Contrôles rapides
+        run: node --test tests/metier/*.test.js
+      - name: Installer le navigateur du robot
+        run: |
+          npm i --prefix tests/robot --no-audit --no-fund playwright@1.63.0
+          npx --prefix tests/robot playwright install --with-deps chromium
+      - name: Robot (tous les écrans, 3 profils)
+        run: node tests/robot/robot.mjs
+      - name: Captures des écrans fautifs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures-robot
+          path: tests/robot/captures/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  publier:
+    needs: robot
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - name: Préparer le site (sans les tests ni les fonctions serveur)
+        run: |
+          mkdir -p /tmp/site
+          rsync -a --exclude .git --exclude .github --exclude tests --exclude functions --exclude outils ./ /tmp/site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/site
+      - id: pages
+        uses: actions/deploy-pages@v4

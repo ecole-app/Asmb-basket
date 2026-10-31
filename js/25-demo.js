@@ -1,5 +1,6 @@
 /* ===== 25-demo.js — Mode démo (lien « Voir la démo » du site : ?demo) =====
-   L'appli s'ouvre en dirigeant d'un faux club « Club Démo », sans compte. Tout reste sur
+   L'appli s'ouvre sur un faux club « Club Démo », sans compte, en dirigeant, coach ou parent
+   (?demo=coach / ?demo=parent, ou le menu du bandeau ; sert aussi au robot tests/robot). Tout reste sur
    l'appareil : les fonctions Firestore sont remplacées par des versions vides (lecture = rien,
    écriture = rien d'envoyé), fsWriteCollection ne fait rien (GM_DEMO). Chaque visiteur a sa
    propre démo, il peut tout modifier sans gêner personne. Les données fictives (équipes,
@@ -8,6 +9,20 @@
    locales et revient à l'écran de connexion. Le club actif « demo » fait purger ces données
    au prochain vrai club (setActiveClub). Lancé par initAuthGate (js/18-auth.js). */
 var GM_DEMO=false;
+
+// Profil joué dans la démo : dirigeant (par défaut), coach ou parent (?demo=coach, ?demo=parent,
+// ou le menu du bandeau). Coach = U13 Filles (Démo) ; parent = une famille de cette équipe.
+var DEMO_PROFILS={dirigeant:"Dirigeant",coach:"Coach",parent:"Parent"};
+function demoProfil(){
+  var p="";
+  try{ p=new URLSearchParams(location.search).get("demo")||sessionStorage.getItem("gm_demo_profil")||""; }catch(e){}
+  return DEMO_PROFILS[p]?p:"dirigeant";
+}
+function demoChangerProfil(p){
+  if(!DEMO_PROFILS[p]) return;
+  try{ sessionStorage.setItem("gm_demo_profil",p); }catch(e){}
+  location.reload();
+}
 
 function demoDemande(){
   try{ return new URLSearchParams(location.search).has("demo")||sessionStorage.getItem("gm_demo")==="1"; }catch(e){ return false; }
@@ -35,16 +50,25 @@ function demoStubsFirestore(){
 
 function demoDemarrer(){
   GM_DEMO=true; window.GM_DEMO=true;
-  try{ sessionStorage.setItem("gm_demo","1"); }catch(e){}
+  var profil=demoProfil();
+  try{ sessionStorage.setItem("gm_demo","1"); sessionStorage.setItem("gm_demo_profil",profil); }catch(e){}
   try{ if(location.search) history.replaceState(null,"",location.pathname); }catch(e){}
   demoStubsFirestore();
   // firebase-init (module) peut finir de charger après : on remet les versions vides.
   var n=0, t=setInterval(function(){ demoStubsFirestore(); if(++n>=30) clearInterval(t); },1000);
   setActiveClub("demo");
-  window.ASMB_USER={uid:"demo-dirigeant",roles:["dirigeant"],prenom:"Alex",nom:"Démo",email:"",clubId:"demo",permissions:{}};
+  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Parent Démo"]}[profil];
+  window.ASMB_USER={uid:"demo-"+profil,roles:[profil],prenom:qui[0],nom:qui[1],email:"",clubId:"demo",permissions:{}};
   window.CURRENT_CLUB=clubNormaliserCouleurs({id:"demo",name:"Club Démo",sport:"basket",ville:"Démoville",plan:"premium",couleur:"#1A2E5A",couleur2:"#D4AF37"});
-  localStorage.setItem("asmb_profile","dirigeant");
   if(!localStorage.getItem("asmb_teams")) demoDonnees();
+  localStorage.setItem("asmb_profile",profil);
+  if(profil==="coach") localStorage.setItem("asmb_coach_teams",JSON.stringify(["demo-u13"]));
+  if(profil==="parent"){
+    localStorage.setItem("asmb_phone","0600000000"); if(typeof myPhone!=="undefined") myPhone="0600000000";
+    localStorage.setItem("asmb_parent_teams",JSON.stringify(["demo-u13"]));
+    localStorage.setItem("asmb_parent_active_team","demo-u13");
+    localStorage.setItem("asmb_tuto_done","1");
+  }
   if(typeof applyClubLabels==="function") applyClubLabels();
   initProfile();
   if(typeof applySeasonLabels==="function") applySeasonLabels();
@@ -52,7 +76,8 @@ function demoDemarrer(){
 }
 
 function demoQuitter(){
-  try{ sessionStorage.removeItem("gm_demo"); }catch(e){}
+  try{ sessionStorage.removeItem("gm_demo"); sessionStorage.removeItem("gm_demo_profil"); }catch(e){}
+  try{ ["asmb_coach_teams","asmb_parent_teams","asmb_parent_active_team","asmb_phone","asmb_profile"].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
   if(typeof purgeClubLocalData==="function") purgeClubLocalData();
   try{ localStorage.removeItem("gm_pp_demo"); }catch(e){}
   location.href=location.pathname;
@@ -62,7 +87,9 @@ function demoBandeau(){
   if(document.getElementById("gm-demo-band")) return;
   var b=document.createElement("div"); b.id="gm-demo-band";
   b.title="Mode démo : rien n'est enregistré";
+  var p=demoProfil(), opts=Object.keys(DEMO_PROFILS).map(function(k){ return '<option value="'+k+'"'+(k===p?' selected':'')+'>'+DEMO_PROFILS[k]+'</option>'; }).join("");
   b.innerHTML='<span>🧪 Démo</span>'+
+    '<select aria-label="Voir la démo en tant que" onchange="demoChangerProfil(this.value)">'+opts+'</select>'+
     '<a href="https://accueil.generalmanagerapp.fr/#essai" target="_blank" rel="noopener">Créer mon club</a>'+
     '<button type="button" onclick="demoQuitter()">Quitter</button>';
   document.body.appendChild(b);

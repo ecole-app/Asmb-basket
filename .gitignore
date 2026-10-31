@@ -6,3 +6,8 @@ asmb-app-*.json
 
 i18n/_sources.json
 i18n/_manquants.json
+
+# Captures du robot (tests/robot/robot.mjs)
+tests/robot/captures/
+tests/robot/node_modules/
+tests/robot/package*.json
