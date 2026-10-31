@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793446646",
+  "titre": "Plateforme : textes Sauvegarde et Bugs sans emoji",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Corrections mineures."
+   }
+  ]
+ },
+ {
   "v": "1793442262",
   "titre": "Plateforme : boutons Sauvegarde et Bugs",
   "points": [

@@ -482,7 +482,7 @@ function pfSauvegardeBox(box){
     var ligne=d.statut==="en_cours"?"Dernière lancée le "+pfSauvegardeDate(d.lance)+" (en cours ou terminée)":
       d.statut==="echec"?"Échec le "+pfSauvegardeDate(d.maj):"Aucune sauvegarde pour l'instant";
     box.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:'+(ko?'rgba(192,57,43,.1)':'var(--card,#fff)')+';border:1px solid '+(ko?'rgba(192,57,43,.35)':'var(--brd,#e3e7ef)')+';font-size:12px;color:var(--txt);line-height:1.5">'+
-      '<b>💾 Sauvegardes</b> · toute la base, chaque nuit, gardée 30 jours<br>'+authEsc(ligne)+
+      '<b>Sauvegardes</b> · toute la base, chaque nuit, gardée 30 jours<br>'+authEsc(ligne)+
       (d.derniere_ok?'<br>Dernière réussie : '+authEsc(pfSauvegardeDate(d.derniere_ok)):'')+
       (ko?'<br><b>Erreur :</b> '+authEsc(d.erreur||d.erreur_prec||"inconnue"):'')+
       '<div style="margin-top:8px"><button class="btn-s" id="pf-sauv-btn" onclick="pfSauvegarderMaintenant()">Sauvegarder maintenant</button></div></div>';
@@ -493,7 +493,7 @@ function pfChipsEtat(bSauv,bBugs){
   if(!window.fbGetDoc||!window.fbDb) return;
   window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","sauvegarde")).then(function(sn){
     var d=sn&&sn.exists&&sn.exists()?sn.data():{};
-    if(d.statut==="echec"||d.statut_prec==="echec"){ bSauv.textContent="Sauvegarde ⚠️"; bSauv.style.color="#C0392B"; }
+    if(d.statut==="echec"||d.statut_prec==="echec"){ bSauv.textContent="Sauvegarde (échec)"; bSauv.style.color="#C0392B"; }
   }).catch(function(){});
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"erreurs_sig"),window.fbLimit(50))).then(function(sn){
     if(sn.size){ bBugs.textContent="Bugs ("+sn.size+(sn.size>=50?"+":"")+")"; bBugs.style.color="#C0392B"; }
@@ -520,8 +520,8 @@ function pfBugsBox(box){
   window.fbGetDocs(q).then(function(snap){
     var l=[]; snap.forEach(function(d){ var x=d.data(); x.id=d.id; l.push(x); });
     var h='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:var(--card,#fff);border:1px solid var(--brd,#e3e7ef);font-size:12px;color:var(--txt);line-height:1.5">'+
-      '<b>🐞 Bugs chez les utilisateurs</b> · 30 derniers jours';
-    if(!l.length) h+='<br>Aucun bug signalé ✅';
+      '<b>Bugs chez les utilisateurs</b> · 30 derniers jours';
+    if(!l.length) h+='<br>Aucun bug signalé';
     l.forEach(function(x){
       h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--brd,#e3e7ef)">'+
         '<b>'+authEsc(x.msg)+'</b><br><span style="color:var(--txt2)">'+authEsc((x.src||"?")+(x.ligne?":"+x.ligne:""))+(x.page?' · '+authEsc(x.page):'')+'</span><br>'+
