@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793449278",
+  "titre": "Chargement plus fiable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Si un fichier de l'appli se charge de travers, il est rechargé tout seul."
+   }
+  ]
+ },
+ {
   "v": "1793446646",
   "titre": "Plateforme : textes Sauvegarde et Bugs sans emoji",
   "points": [

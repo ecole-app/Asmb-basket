@@ -222,8 +222,15 @@ self.addEventListener('fetch', function (event) {
   event.respondWith(
     caches.match(req).then(function (hit) {
       if (hit) return hit;
+      // Un script/style/JSON qui revient en HTML (page d'erreur, déploiement en cours) ne doit jamais
+      // être gardé ni servi comme tel : on retente une fois depuis le réseau, sans le cache HTTP.
+      var attendu = sameOrigin && /\.(js|css|json)$/.test(url.pathname);
+      var mauvais = function (r) { return attendu && r && /text\/html/i.test(r.headers.get('content-type') || ''); };
       return fetch(req).then(function (res) {
-        if (res && res.status === 200 && (sameOrigin || url.protocol === 'https:')) {
+        if (mauvais(res)) return fetch(new Request(req, { cache: 'reload' }));
+        return res;
+      }).then(function (res) {
+        if (res && res.status === 200 && !mauvais(res) && (sameOrigin || url.protocol === 'https:')) {
           var copy = res.clone();
           caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
         }
