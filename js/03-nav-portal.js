@@ -358,6 +358,7 @@ function buildPortal(){
   }
   buildDashboard();
   if(typeof renderDeskHome==="function") renderDeskHome();
+  if(typeof ppAfficher==="function") ppAfficher();
 }
 
 // Un événement qui dure (date → dateFin) reste « à venir » jusqu'à son dernier jour.

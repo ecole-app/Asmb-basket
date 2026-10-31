@@ -96,9 +96,10 @@ function renderDeskHome(){
     '<div class="dk-head"><div><h1>Accueil</h1><div class="dk-sub">'+authEsc(club)+' · saison '+authEsc(saison)+' · '+authEsc(date)+'</div></div>'+
       '<div class="dk-head-act"><button type="button" class="dk-cta" onclick="gmDeskOuvrir(\'planning\');setTimeout(function(){if(typeof showAddEvent===\'function\')showAddEvent();},50)">+ Événement</button>'+
       '<button type="button" class="dk-cta dk-cta-main" onclick="showNewLicence()">+ Fiche d\'inscription</button></div></div>'+
-    k+
+    '<div id="dk-pp"></div>'+k+
     '<div class="dk-cols"><div class="dk-col-a">'+t+ev+rac+'</div><div class="dk-col-b">'+rv+'</div></div>';
 
+  if(typeof ppAfficher==="function") ppAfficher();
   // Compteurs d'inscrits (lecture des pages publiques)
   if(window.fbGetDoc&&typeof evtPageId==="function"){
     Array.prototype.forEach.call(box.querySelectorAll(".dk-nb"),function(sp){

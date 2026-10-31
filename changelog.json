@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793441419",
+  "titre": "Premiers pas sur l'accueil",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un nouveau club voit sur son accueil les 5 étapes pour démarrer (logo, équipes, coachs, licenciés, premier entraînement ou match). Elles se cochent toutes seules, et chaque bouton ouvre le bon écran."
+   }
+  ]
+ },
+ {
   "v": "1793436201",
   "titre": "Bugs signalés automatiquement",
   "points": [

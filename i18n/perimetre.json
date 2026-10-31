@@ -57,7 +57,8 @@
     "tournoi/index.html",
     "buvette/index.html",
     "benevole/index.html",
-    "fil/index.html"
+    "fil/index.html",
+    "js/03d-premiers-pas.js"
   ],
   "exclus": [
     "(display-mode: standalone)",
@@ -251,6 +252,7 @@
     "Waze",
     "procédure:",
     "trace buvette:",
-    "Vente caisse buvette en ligne :"
+    "Vente caisse buvette en ligne :",
+    "todo next"
   ]
 }
