@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793442262",
+  "titre": "Plateforme : boutons Sauvegarde et Bugs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Corrections mineures."
+   }
+  ]
+ },
+ {
   "v": "1793442232",
   "titre": "Mode démo sans bandeau de mise à jour",
   "points": [

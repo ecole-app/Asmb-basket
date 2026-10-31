@@ -488,17 +488,29 @@ function pfSauvegardeBox(box){
       '<div style="margin-top:8px"><button class="btn-s" id="pf-sauv-btn" onclick="pfSauvegarderMaintenant()">Sauvegarder maintenant</button></div></div>';
   }).catch(function(){});
 }
-function pfSauvegarderMaintenant(){
-  var b=document.getElementById("pf-sauv-btn"); if(b){ b.disabled=true; b.textContent="Lancement…"; }
+// Chips de la Plateforme : « Sauvegarde » en rouge si la dernière a échoué, « Bugs (n) ».
+function pfChipsEtat(bSauv,bBugs){
+  if(!window.fbGetDoc||!window.fbDb) return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","sauvegarde")).then(function(sn){
+    var d=sn&&sn.exists&&sn.exists()?sn.data():{};
+    if(d.statut==="echec"||d.statut_prec==="echec"){ bSauv.textContent="Sauvegarde ⚠️"; bSauv.style.color="#C0392B"; }
+  }).catch(function(){});
+  window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"erreurs_sig"),window.fbLimit(50))).then(function(sn){
+    if(sn.size){ bBugs.textContent="Bugs ("+sn.size+(sn.size>=50?"+":"")+")"; bBugs.style.color="#C0392B"; }
+  }).catch(function(){});
+}
+function pfSauvegarderMaintenant(btn){
+  var b=btn||document.getElementById("pf-sauv-btn"), lib=b?b.textContent:""; if(b){ b.disabled=true; b.textContent="Sauvegarde…"; }
   window.fbAddDoc(window.fbCollection(window.fbDb,"plateforme_ping"),{at:new Date(),type:"sauvegarde"}).then(function(ref){
     var fini=false, stop=window.fbOnSnapshot(ref,function(sn){
       var d=sn.data()||{}; if(fini||d.ok===undefined) return; fini=true; stop();
-      if(d.ok) askAlert("Sauvegarde lancée. Elle se termine en quelques minutes.");
+      if(b){ b.disabled=false; b.textContent=lib||"Sauvegarde"; }
+      if(d.ok) askAlert("Sauvegarde de toute la base lancée. Elle se termine en quelques minutes et reste gardée 30 jours.");
       else askAlert("La sauvegarde n'a pas pu démarrer : "+(d.erreur||"erreur inconnue"));
       var box=document.getElementById("pf-sauv"); if(box) pfSauvegardeBox(box);
     });
-    setTimeout(function(){ if(!fini){ fini=true; stop(); if(b){ b.disabled=false; b.textContent="Sauvegarder maintenant"; } askAlert("Pas de réponse du serveur pour l'instant. Réessaie dans quelques minutes."); } },60000);
-  }).catch(function(e){ if(b){ b.disabled=false; b.textContent="Sauvegarder maintenant"; } askAlert("Impossible de lancer la sauvegarde : "+((e&&e.message)||e)); });
+    setTimeout(function(){ if(!fini){ fini=true; stop(); if(b){ b.disabled=false; b.textContent=lib||"Sauvegarde"; } askAlert("Pas de réponse du serveur pour l'instant. Réessaie dans quelques minutes."); } },60000);
+  }).catch(function(e){ if(b){ b.disabled=false; b.textContent=lib||"Sauvegarde"; } askAlert("Impossible de lancer la sauvegarde : "+((e&&e.message)||e)); });
 }
 
 // ═══ ALERTE DES BUGS (js/00b-erreurs.js → onErreurApp → erreurs_sig) ═══
@@ -728,8 +740,6 @@ function showPlateformeHome(opts){
   intro.style.cssText="margin:14px 12px 0;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.45";
   intro.textContent=GM_INTRO;
   el.appendChild(intro);
-  var sauvH=document.createElement("div"); sauvH.id="pf-sauv"; sauvH.style.cssText="margin:12px 12px 0"; el.appendChild(sauvH); pfSauvegardeBox(sauvH);
-  var bugsH=document.createElement("div"); bugsH.id="pf-bugs"; bugsH.style.cssText="margin:0 12px"; el.appendChild(bugsH); pfBugsBox(bugsH);
   var list=document.createElement("div");
   var act=document.createElement("div");
   act.style.cssText="margin:12px 12px 0";
@@ -739,6 +749,10 @@ function showPlateformeHome(opts){
   act.appendChild(gmBtn("RIB","ghost",function(){ pfRibOuvrir(); }));
   act.appendChild(gmBtn("Comptabilité","ghost",function(){ pfcOuvrir(); }));
   act.appendChild(gmBtn("Nouveautés","ghost",function(){ showChangelog(true); }));
+  // Sauvegarde : lance tout de suite une sauvegarde de toute la base. Bugs : liste des erreurs remontées.
+  var bSauv=gmBtn("Sauvegarde","ghost",function(){ pfSauvegarderMaintenant(bSauv); }); act.appendChild(bSauv);
+  var bBugs=gmBtn("Bugs","ghost",function(){ var sh=gmSheet("Bugs chez les utilisateurs"), bx=document.createElement("div"); bx.id="pf-bugs"; sh.body.appendChild(bx); pfBugsBox(bx); }); act.appendChild(bBugs);
+  pfChipsEtat(bSauv,bBugs);
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
   el.appendChild(list);
