@@ -539,9 +539,7 @@ function openPlateforme(){
     var d=sn&&sn.exists&&sn.exists()?sn.data():null;
     if(d&&d.echecs>=3) ffbbBox.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);font-size:12px;color:var(--txt);line-height:1.5"><b>Synchro FFBB en panne</b> depuis '+d.echecs+' nuits ('+authEsc(d.erreur||"pas de réponse")+'). L\'API a peut-être changé : les classements gardent leurs dernières données.</div>';
   }).catch(function(){});
-  var sauvBox=document.createElement("div"); sauvBox.id="pf-sauv"; s.body.appendChild(sauvBox); pfSauvegardeBox(sauvBox);
-  var bugsBox=document.createElement("div"); bugsBox.id="pf-bugs"; s.body.appendChild(bugsBox); pfBugsBox(bugsBox);
-  var comptesBox=document.createElement("div");
+    var comptesBox=document.createElement("div");
   comptesBox.style.marginBottom="12px";
   window.__gmComptesBox=comptesBox;
   s.body.appendChild(comptesBox);
@@ -730,6 +728,8 @@ function showPlateformeHome(opts){
   intro.style.cssText="margin:14px 12px 0;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;color:var(--txt2);line-height:1.45";
   intro.textContent=GM_INTRO;
   el.appendChild(intro);
+  var sauvH=document.createElement("div"); sauvH.id="pf-sauv"; sauvH.style.cssText="margin:12px 12px 0"; el.appendChild(sauvH); pfSauvegardeBox(sauvH);
+  var bugsH=document.createElement("div"); bugsH.id="pf-bugs"; bugsH.style.cssText="margin:0 12px"; el.appendChild(bugsH); pfBugsBox(bugsH);
   var list=document.createElement("div");
   var act=document.createElement("div");
   act.style.cssText="margin:12px 12px 0";

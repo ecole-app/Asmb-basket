@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793441534",
+  "titre": "Correctif Plateforme",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Corrections mineures."
+   }
+  ]
+ },
+ {
   "v": "1793441419",
   "titre": "Premiers pas sur l'accueil",
   "points": [
