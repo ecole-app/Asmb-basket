@@ -501,6 +501,29 @@ function pfSauvegarderMaintenant(){
   }).catch(function(e){ if(b){ b.disabled=false; b.textContent="Sauvegarder maintenant"; } askAlert("Impossible de lancer la sauvegarde : "+((e&&e.message)||e)); });
 }
 
+// ═══ ALERTE DES BUGS (js/00b-erreurs.js → onErreurApp → erreurs_sig) ═══
+function pfBugsBox(box){
+  if(!window.fbGetDocs||!window.fbDb) return;
+  var q=window.fbQuery(window.fbCollection(window.fbDb,"erreurs_sig"),window.fbOrderBy("dernier","desc"),window.fbLimit(15));
+  window.fbGetDocs(q).then(function(snap){
+    var l=[]; snap.forEach(function(d){ var x=d.data(); x.id=d.id; l.push(x); });
+    var h='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:var(--card,#fff);border:1px solid var(--brd,#e3e7ef);font-size:12px;color:var(--txt);line-height:1.5">'+
+      '<b>🐞 Bugs chez les utilisateurs</b> · 30 derniers jours';
+    if(!l.length) h+='<br>Aucun bug signalé ✅';
+    l.forEach(function(x){
+      h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--brd,#e3e7ef)">'+
+        '<b>'+authEsc(x.msg)+'</b><br><span style="color:var(--txt2)">'+authEsc((x.src||"?")+(x.ligne?":"+x.ligne:""))+(x.page?' · '+authEsc(x.page):'')+'</span><br>'+
+        authEsc(x.n+" fois · dernière le "+pfSauvegardeDate(x.dernier)+" · version "+String(x.v||"?").slice(-5)+" · "+((x.clubs||[]).length)+" club(s)"+(x.role?" · "+x.role:""))+
+        (x.pile?'<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--txt2)">Détail technique</summary><pre style="white-space:pre-wrap;word-break:break-word;font-size:10px;margin:4px 0 0">'+authEsc(x.pile)+'</pre></details>':'')+
+        '<div style="margin-top:6px"><button class="btn-s" onclick="pfBugCorrige(\''+authEsc(x.id)+'\')">Corrigé, retirer</button></div></div>';
+    });
+    box.innerHTML=h+'</div>';
+  }).catch(function(e){ box.innerHTML=""; });
+}
+function pfBugCorrige(id){
+  window.fbDeleteDoc(window.fbDoc(window.fbDb,"erreurs_sig",id)).then(function(){ var b=document.getElementById("pf-bugs"); if(b) pfBugsBox(b); }).catch(function(e){ askAlert("Suppression impossible : "+((e&&e.message)||e)); });
+}
+
 // ═══ ESPACE PLATEFORME (super admin) ══════════════════════════════════
 var GM_INTRO="Créez les clubs et invitez leur dirigeant. Les données internes d'un club ne sont visibles qu'avec un code d'accès support fourni par le club.";
 
@@ -517,6 +540,7 @@ function openPlateforme(){
     if(d&&d.echecs>=3) ffbbBox.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);font-size:12px;color:var(--txt);line-height:1.5"><b>Synchro FFBB en panne</b> depuis '+d.echecs+' nuits ('+authEsc(d.erreur||"pas de réponse")+'). L\'API a peut-être changé : les classements gardent leurs dernières données.</div>';
   }).catch(function(){});
   var sauvBox=document.createElement("div"); sauvBox.id="pf-sauv"; s.body.appendChild(sauvBox); pfSauvegardeBox(sauvBox);
+  var bugsBox=document.createElement("div"); bugsBox.id="pf-bugs"; s.body.appendChild(bugsBox); pfBugsBox(bugsBox);
   var comptesBox=document.createElement("div");
   comptesBox.style.marginBottom="12px";
   window.__gmComptesBox=comptesBox;

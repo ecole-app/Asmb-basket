@@ -1165,3 +1165,39 @@ async function sauvegardeLancer(origine) {
 exports.sauvegardeNuit = onSchedule({ schedule: "every day 02:30", timeZone: "Europe/Paris", timeoutSeconds: 120 }, async () => {
   await sauvegardeLancer("nuit");
 });
+
+/* ===== Alerte des bugs (js/00b-erreurs.js) =====
+   Chaque erreur déposée dans erreurs_app est regroupée par signature (message + fichier + ligne)
+   dans erreurs_sig/{sig} : nombre, première/dernière fois, version, clubs touchés. Alerte push
+   au super admin pour un bug nouveau, puis au plus une fois par 24 h pour le même bug. */
+exports.onErreurApp = onDocumentCreated("erreurs_app/{id}", async (event) => {
+  const e = event.data && event.data.data();
+  if (!e || !e.msg) return;
+  const sig = crypto.createHash("sha1").update(String(e.msg) + "|" + String(e.src || "") + "|" + String(e.ligne || 0)).digest("hex").slice(0, 24);
+  const ref = db.collection("erreurs_sig").doc(sig);
+  const now = Date.now();
+  let alerter = false, n = 1;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.exists ? snap.data() : null;
+    n = (d && d.n || 0) + 1;
+    alerter = !d || !d.alerte || now - d.alerte > 24 * 3600 * 1000;
+    const clubs = (d && d.clubs) || [];
+    if (e.club && clubs.indexOf(e.club) < 0 && clubs.length < 20) clubs.push(e.club);
+    tx.set(ref, {
+      msg: e.msg, src: e.src || "", ligne: e.ligne || 0, pile: e.pile || "", page: e.page || "",
+      v: e.v || "", ua: e.ua || "", role: e.role || "", clubs: clubs, n: n,
+      premier: (d && d.premier) || now, dernier: now, alerte: alerter ? now : (d && d.alerte) || 0
+    });
+  });
+  if (alerter) await alerteSuperAdmin(n > 1 ? "Bug encore vu (" + n + " fois)" : "Nouveau bug dans l'appli", String(e.msg).slice(0, 140));
+});
+// Ménage : erreurs de plus de 30 jours (les regroupements aussi s'ils n'ont pas été revus).
+exports.erreursPurge = onSchedule({ schedule: "every day 03:50", timeZone: "Europe/Paris", timeoutSeconds: 120 }, async () => {
+  const limite = Date.now() - 30 * 24 * 3600 * 1000;
+  const vieux = await db.collection("erreurs_app").where("at", "<", new Date(limite)).limit(400).get();
+  const sigs = await db.collection("erreurs_sig").where("dernier", "<", limite).limit(100).get();
+  const b = db.batch();
+  vieux.docs.concat(sigs.docs).forEach((d) => b.delete(d.ref));
+  if (!vieux.empty || !sigs.empty) await b.commit();
+});

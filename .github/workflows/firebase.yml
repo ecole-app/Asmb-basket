@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.cle.outputs.ok == 'true'
         with:
-          node-version: 20
+          node-version: 22
       - name: Déployer functions + règles
         if: steps.cle.outputs.ok == 'true'
         env:
@@ -37,7 +37,7 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/cle.json"
           (cd functions && npm install --no-audit --no-fund)
           # La sortie est aussi remontée en annotation (visible en haut de la page du run).
-          if ! npx --yes firebase-tools@13 deploy --only functions,firestore:rules --project asmb-app --non-interactive --force > "$RUNNER_TEMP/sortie.txt" 2>&1; then
+          if ! npx --yes firebase-tools@14 deploy --only functions,firestore:rules --project asmb-app --non-interactive --force > "$RUNNER_TEMP/sortie.txt" 2>&1; then
             cat "$RUNNER_TEMP/sortie.txt"
             echo "::error title=Echec du deploiement::$(tail -n 25 "$RUNNER_TEMP/sortie.txt" | sed 's/%/%25/g' | tr '\n' '|')"
             rm -f "$RUNNER_TEMP/cle.json"

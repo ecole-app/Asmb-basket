@@ -1,5 +1,21 @@
 [
  {
+  "v": "1793436201",
+  "titre": "Bugs signalés automatiquement",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Quand l'appli rencontre une erreur sur votre téléphone, elle est signalée automatiquement (seulement le message technique, sans vos coordonnées) pour être corrigée plus vite."
+   }
+  ]
+ },
+ {
   "v": "1793436075",
   "titre": "Sauvegarde automatique chaque nuit",
   "points": [

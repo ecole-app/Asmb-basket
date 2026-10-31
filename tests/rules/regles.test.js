@@ -1446,6 +1446,28 @@ describe("Test d'alerte Plateforme", () => {
   });
 });
 
+describe("Alerte des bugs (erreurs_app, erreurs_sig)", () => {
+  const err = (plus) => Object.assign({ msg: "x is not a function", src: "/js/16-communaute.js", ligne: 12, col: 4, pile: "at f", page: "/", v: "1793", club: "A", role: "parent", ua: "Mozilla", at: serverTimestamp() }, plus || {});
+  it("tout appareil dépose une erreur bornée, même sans compte ; seul le super admin lit", async () => {
+    await assertSucceeds(addDoc(collection(await as(null), "erreurs_app"), err()));
+    await assertSucceeds(addDoc(collection(await as("parentA"), "erreurs_app"), { msg: "boom", at: serverTimestamp() }));
+    await assertFails(addDoc(collection(await as(null), "erreurs_app"), err({ msg: "a".repeat(301) })));
+    await assertFails(addDoc(collection(await as(null), "erreurs_app"), err({ pile: "a".repeat(1501) })));
+    await assertFails(addDoc(collection(await as(null), "erreurs_app"), err({ autre: 1 })));
+    await assertFails(addDoc(collection(await as(null), "erreurs_app"), err({ at: new Date(2020, 0, 1) })));
+    await assertFails(addDoc(collection(await as(null), "erreurs_app"), err({ msg: "" })));
+    await assertFails(getDocs(collection(await as("dirA"), "erreurs_app")));
+    await assertSucceeds(getDocs(collection(await as(SUPER_ADMIN), "erreurs_app")));
+  });
+  it("erreurs_sig : lu et effacé par le super admin seul, jamais écrit par un client", async () => {
+    await (await getEnv()).withSecurityRulesDisabled(async (c) => { await setDoc(doc(c.firestore(), "erreurs_sig/s1"), { msg: "boom", n: 1 }); });
+    await assertFails(getDoc(doc(await as("dirA"), "erreurs_sig/s1")));
+    await assertFails(setDoc(doc(await as(SUPER_ADMIN), "erreurs_sig/s2"), { msg: "x" }));
+    await assertSucceeds(getDoc(doc(await as(SUPER_ADMIN), "erreurs_sig/s1")));
+    await assertSucceeds(deleteDoc(doc(await as(SUPER_ADMIN), "erreurs_sig/s1")));
+  });
+});
+
 // ───────────────────────────────────────────────────────────────
 describe("Stats de match d'un joueur (stats_joueurs)", () => {
   const fiche = (pid) => ({ pid, saison: "2026-2027", matchs: [{ eventId: "e1", date: "2026-10-10", nous: 50, eux: 40, ligne: { pts: 12 } }] });

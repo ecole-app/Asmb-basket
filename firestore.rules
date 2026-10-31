@@ -288,6 +288,29 @@ service cloud.firestore {
     }
 
     // ── Test d'alerte push (bouton « Tester » de la Plateforme) ──
+    // ── Alerte des bugs (js/00b-erreurs.js) : n'importe quel appareil peut déposer une
+    // erreur (aussi avant connexion), champs et tailles bornés ; seul le super admin lit.
+    // erreurs_sig = regroupement écrit par le serveur (onErreurApp), effaçable par le super admin.
+    match /erreurs_app/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['msg','src','ligne','col','pile','page','v','club','role','ua','at'])
+        && request.resource.data.keys().hasAll(['msg','at'])
+        && request.resource.data.msg is string && request.resource.data.msg.size() > 0 && request.resource.data.msg.size() <= 300
+        && (!('src' in request.resource.data) || (request.resource.data.src is string && request.resource.data.src.size() <= 200))
+        && (!('ligne' in request.resource.data) || request.resource.data.ligne is int)
+        && (!('col' in request.resource.data) || request.resource.data.col is int)
+        && (!('pile' in request.resource.data) || (request.resource.data.pile is string && request.resource.data.pile.size() <= 1500))
+        && (!('page' in request.resource.data) || (request.resource.data.page is string && request.resource.data.page.size() <= 200))
+        && (!('v' in request.resource.data) || (request.resource.data.v is string && request.resource.data.v.size() <= 20))
+        && (!('club' in request.resource.data) || (request.resource.data.club is string && request.resource.data.club.size() <= 60))
+        && (!('role' in request.resource.data) || (request.resource.data.role is string && request.resource.data.role.size() <= 20))
+        && (!('ua' in request.resource.data) || (request.resource.data.ua is string && request.resource.data.ua.size() <= 200))
+        && request.resource.data.at == request.time;
+      allow read, delete: if superAdmin();
+    }
+    match /erreurs_sig/{id} {
+      allow read, delete: if superAdmin();
+    }
+
     match /plateforme_ping/{id} {
       allow create: if superAdmin() && request.resource.data.keys().hasOnly(['at','type'])
         && (!('type' in request.resource.data) || request.resource.data.type == 'sauvegarde');
