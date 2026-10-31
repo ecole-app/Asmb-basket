@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793454128",
+  "titre": "Documents : bon compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau"
+    ],
+    "texte": "La carte Documents compte aussi les pièces du dossier d'inscription."
+   }
+  ]
+ },
+ {
   "v": "1793453107",
   "titre": "Démarrage à toute épreuve",
   "points": [
