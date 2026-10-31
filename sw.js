@@ -203,7 +203,15 @@ self.addEventListener('fetch', function (event) {
         return res;
       }).catch(function () {
         return caches.match(req).then(function (hit) {
-          return hit || caches.match('./index.html');
+          if (hit) return hit;
+          // Repli sur l'appli du club SEULEMENT pour l'appli elle-même. Les autres pages du site
+          // (formation, tournoi, buvette, bénévole, fil...) ne doivent jamais afficher
+          // l'écran de connexion du club quand le réseau coupe un instant.
+          var racine = url.pathname === '/' || /\/index\.html$/.test(url.pathname) && url.pathname.split('/').length <= 2;
+          if (req.mode === 'navigate' && !racine) {
+            return new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connexion perdue</title><body style="font-family:system-ui;text-align:center;padding:48px 20px;color:#0f1c36"><h2>Connexion perdue</h2><p>Reviens en ligne puis rafraîchis la page.</p><p><button onclick="location.reload()" style="font-size:16px;padding:12px 22px;border:0;border-radius:10px;background:#0f1c36;color:#fff">Réessayer</button></p>', { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+          }
+          return caches.match('./index.html');
         });
       })
     );

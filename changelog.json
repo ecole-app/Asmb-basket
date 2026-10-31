@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793431179",
+  "titre": "Pages publiques : plus de renvoi vers la connexion",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Quand la connexion coupe un instant, les pages publiques (tournoi, buvette, bénévole) n'affichent plus l'écran de connexion du club : un message « Connexion perdue » avec un bouton Réessayer s'affiche à la place."
+   }
+  ]
+ },
+ {
   "v": "1793406305",
   "titre": "Nouveau logo General Manager",
   "points": [
