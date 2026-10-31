@@ -53,6 +53,7 @@ function renderDeskHome(){
   if(chq.length) todo.push(["#1A2E5A",chq.length+" chèque"+(chq.length>1?"s":"")+" à déposer en banque ("+chq.reduce(function(s,x){return s+x.c.montant;},0).toFixed(0)+" €)","Remise","ouvrirRemiseBanque()"]);
   if(aRelancer) todo.push(["#b45309",aRelancer+" famille"+(aRelancer>1?"s":"")+" à relancer pour un paiement","Voir","gmDeskOuvrir('licences')"]);
   if(attente) todo.push(["#8E44AD",attente+" événement"+(attente>1?"s":"")+" proposé"+(attente>1?"s":"")+" par un coach","Valider","gmDeskOuvrir('planning')"]);
+  if(dir&&typeof plAlertesAFaire==="function") todo=todo.concat(plAlertesAFaire()); // bénévoles J-7, conflits de salle (js/12b)
   var t='<section class="dk-card"><h2>À faire</h2>';
   t+=todo.length?todo.map(function(x){
     return '<div class="dk-todo"><span class="dk-dot" style="background:'+x[0]+'"></span><span class="dk-todo-t">'+authEsc(x[1])+'</span><button type="button" class="dk-btn" onclick="'+x[3]+'">'+authEsc(x[2])+'</button></div>';

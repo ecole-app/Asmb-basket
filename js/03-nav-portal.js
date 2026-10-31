@@ -536,6 +536,7 @@ function buildDashboard(){
     '<div style="font-size:10px;color:var(--mut);margin-top:2px">Assiduité 30 derniers jours</div></div>';
 
   html+='</div>';
+  if(typeof plCarteAccueil==="function") html+=plCarteAccueil(); // bénévoles J-7, conflits de salle (js/12b)
 
   enCoursL.forEach(function(ev){
     var cl=(typeof evtMenuOuvrir==="function"&&evtMenuPossible(ev));

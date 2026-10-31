@@ -174,7 +174,9 @@ function saveCreneau(){
   saveEvents(events);
   closeModal("modal-creneau");
   buildPlanning();buildAdminHome();buildRealEventsList();
-  if(totalOccurrences>1)askAlert(totalOccurrences+" créneaux créés sur "+creneauJours.length+" jour(s)");
+  var nConf=(typeof plConflitsDe==="function")?events.filter(function(e){ return String(e.id).indexOf(idSeed.toString()+"-")===0&&plConflitsDe(e,events).length; }).length:0;
+  if(nConf) askAlert(totalOccurrences+" créneau(x) créé(s). Attention : "+nConf+" tombe"+(nConf>1?"nt":"")+" sur une salle déjà occupée (⚠️ dans le planning).");
+  else if(totalOccurrences>1)askAlert(totalOccurrences+" créneaux créés sur "+creneauJours.length+" jour(s)");
 }
 
 var evExternes=[];
@@ -375,6 +377,15 @@ function saveEventFull(){
     creePar:(window.ASMB_USER&&window.ASMB_USER.email)||"",
     creeParRole:isDirigeant?"dirigeant":"coach"
   };
+  // Salle déjà occupée sur ce créneau : on prévient, le dirigeant décide (js/12b).
+  var conflits=(typeof plConflitsDe==="function")?plConflitsDe(eventObj):[];
+  if(conflits.length){
+    askConfirm("Salle déjà occupée : "+conflits.map(function(x){ return (x.titre||"")+(x.heure?" ("+x.heure+")":""); }).join(", ")+".\n\nEnregistrer quand même ?",{title:"Conflit de salle",confirmText:"Enregistrer quand même"}).then(function(ok){ if(ok) saveEventFullSuite(eventObj,isDirigeant,canal,participantsNoms,type); });
+    return;
+  }
+  saveEventFullSuite(eventObj,isDirigeant,canal,participantsNoms,type);
+}
+function saveEventFullSuite(eventObj,isDirigeant,canal,participantsNoms,type){
   var events=getEvents();
   events.push(eventObj);
   saveEvents(events);

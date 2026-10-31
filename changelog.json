@@ -1,5 +1,24 @@
 [
  {
+  "v": "1793441946",
+  "titre": "Conflits de salle et bénévoles manquants",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le planning signale ⚠️ quand deux rendez-vous tombent dans la même salle au même moment, et prévient avant d'enregistrer."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur l'accueil, « À surveiller » liste les matchs à domicile des 7 prochains jours sans table de marque ou chronomètre, et les tournois ou soirées sans bénévole, avec un bouton pour placer quelqu'un."
+   }
+  ]
+ },
+ {
   "v": "1793441767",
   "titre": "Mode démo",
   "points": [

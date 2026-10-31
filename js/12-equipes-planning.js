@@ -659,6 +659,7 @@ function buildPlanning(){
     var nbV=aVenir.length, rangCompact=0;
     if(!events.length){ var vide=document.createElement("div"); vide.style.cssText="padding:18px 14px;text-align:center;font-size:12px;color:var(--mut)"; vide.textContent="Aucun match sur cette période."; el.appendChild(vide); }
   }
+  var plTous=getEvents();
   events.forEach(function(e){
     var d=document.createElement("div");d.className="event-card";
     var evCol=eventTypeColor(e.type);
@@ -677,6 +678,7 @@ function buildPlanning(){
     var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
     var cancelBtn=e.cancelled?"":"<button onclick=\"cancelEvent('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B;font-size:10px;font-weight:700;border:none;cursor:pointer\"> Annuler</button>";
     var cancelledBadge=e.cancelled?"<div style=\"font-size:11px;font-weight:800;color:#C0392B;margin-top:4px\"> ÉVÉNEMENT ANNULÉ</div>":"";
+    if(typeof plBadge==="function") cancelledBadge+=plBadge(e,plTous);
     d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+e.type.toUpperCase()+"</span><span style=\"font-size:11px;color:var(--mut)\">"+evDate+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+authEsc(e.titre)+"</div>"+evLieu+evEquipe+cancelledBadge+scoreDisplay+presBtn+scoreBtn+(typeof statsBoutonCarte==="function"?statsBoutonCarte(e):"")+convocBtn+weatherBtn+evalBtn+editTimeBtn+cancelBtn+(typeof evtBoutonCarte==="function"?evtBoutonCarte(e):"")+(typeof trnBoutonCarte==="function"?trnBoutonCarte(e):"")+"</div>"+delBtn+"</div>";
     if(compact){ planMatchLigne(el, e, d, rangCompact===0 ? (nbV?"À venir · "+nbV:"Joués · "+(events.length)) : (rangCompact===nbV && nbV>0 ? "Joués · "+(events.length-nbV) : "")); rangCompact++; return; }
     el.appendChild(d);

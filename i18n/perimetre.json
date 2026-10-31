@@ -59,7 +59,8 @@
     "benevole/index.html",
     "fil/index.html",
     "js/03d-premiers-pas.js",
-    "js/25-demo.js"
+    "js/25-demo.js",
+    "js/12b-planning-alertes.js"
   ],
   "exclus": [
     "(display-mode: standalone)",
@@ -324,6 +325,7 @@
     "Muller",
     "Roux",
     "Simon",
-    "Vincent"
+    "Vincent",
+    "Salle Démo 2"
   ]
 }

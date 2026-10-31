@@ -112,7 +112,8 @@ function demoDonnees(){
   teams.forEach(function(t,ti){
     for(var s=0;s<3;s++){
       [creneaux[ti%5],creneaux[(ti+2)%5]].forEach(function(c,k){
-        events.push({id:"demo-e-"+ti+"-"+s+"-"+k,titre:"Entraînement "+t.name,type:"entrainement",date:demoProchain(c[0],s),heure:c[1],lieu:"Gymnase Démo",equipe:t.name,presences:{},demo:true});
+        // 2 salles × 3 horaires : jamais deux équipes dans la même salle au même moment
+        events.push({id:"demo-e-"+ti+"-"+s+"-"+k,titre:"Entraînement "+t.name,type:"entrainement",date:demoProchain(c[0],s),heure:["17h00 - 18h15","18h15 - 19h30","19h30 - 21h00"][ti%3],lieu:ti<3?"Gymnase Démo":"Salle Démo 2",equipe:t.name,presences:{},demo:true});
       });
       events.push({id:"demo-m-"+ti+"-"+s,titre:t.name+" vs "+adv[(ti+s)%5]+" (Démo)",type:"match",date:demoProchain(ti%2?0:6,s+1),heure:(10+ti)+"h00",lieu:s%2?"Extérieur":"Domicile",equipe:t.name,presences:{},demo:true});
     }

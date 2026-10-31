@@ -57,6 +57,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `10-annuaire-galerie.js` | Annuaire, bénévoles, galerie photos, sauvegarde, données démo |
 | `11-admin.js` | Espace Admin, accès coach, fiches reçues, notes de frais, reclassement |
 | `12-equipes-planning.js` | Équipes, effectifs, planning, historique de présence. Pastilles de type d'événement en tête du planning (liste et calendrier) : filtre `planTypeFiltrer`, retenu par appareil (`gm_plan_type`), affichées dès 2 types présents |
+| `12b-planning-alertes.js` | Conflits de salle (même lieu, même jour, horaires qui se chevauchent : badge ⚠️ au planning, question à la création, message après un créneau) et bénévoles manquants à J-7 (match à domicile sans table de marque/chrono, tournoi ou soirée sans bénévole) ; remontés dans « À faire » (ordinateur) et « À surveiller » (téléphone) du dirigeant |
 | `13-firestore-sync.js` | Synchronisation temps réel et migration Firestore |
 | `14-evenements.js` | Événements, créneaux, convocations, météo du match |
 | `14b-billetterie.js` | Événements à inscription (stage/camp, tournoi, soirée) : tarifs licencié/extérieur, modes de paiement, places ; page publique sans compte (`?evt=clubId__eventId`, `evt_pages`), billets QR (`evt_inscrits`, codes STG-/TRN-/SOI-), inscription d'un enfant par le parent, suivi et paiement → compta |
