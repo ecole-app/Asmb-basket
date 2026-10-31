@@ -1,5 +1,25 @@
 [
  {
+  "v": "1793471804",
+  "titre": "Présent ou Absent",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Sur l'accueil, répondez Présent ou Absent pour chaque entraînement et match (motif facultatif pour une absence)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Sur chaque rendez-vous du planning : présents, absents (avec le motif) et sans réponse, et un bouton pour relancer ceux qui n'ont pas répondu."
+   }
+  ]
+ },
+ {
   "v": "1793468107",
   "titre": "Démo parent : l'enfant est nommé",
   "points": [

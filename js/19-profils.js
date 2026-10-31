@@ -471,6 +471,14 @@ function buildJoueurScreen(player){
       html+='<div style="margin-bottom:20px">'+matchdayBannerHtml(mdMatch,mdSeen)+'</div>';
     }
 
+    // Compte de l'enfant : il répond lui-même Présent / Absent au prochain rendez-vous de son équipe.
+    if(localStorage.getItem("asmb_profile")==="joueur"&&myTeam&&typeof repBoutonsHtml==="function"&&typeof getNextEventForTeam==="function"){
+      var prochain=getNextEventForTeam(myTeam), rb=prochain?repBoutonsHtml(prochain,[player]):"";
+      if(rb) html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:18px;text-align:left">'+
+        '<div style="font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:1px">Prochain rendez-vous</div>'+
+        '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-top:4px">'+authEsc(prochain.titre||"")+'</div>'+
+        '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+authEsc((typeof plJourCourt==="function"?plJourCourt(prochain.date):prochain.date)+(prochain.heure?" · "+prochain.heure:""))+'</div>'+rb+'</div>';
+    }
     var exitBtn='<button onclick="logoutUser()" style="margin-top:24px;width:100%;padding:12px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer"> Se déconnecter</button>';
 
     if(!todaysEvents.length){
@@ -1232,6 +1240,7 @@ function buildParentHome(){
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
     var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none"> Itinéraire</a>'):"";
     var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button>';
+    var repHtml=(typeof repBoutonsHtml==="function")?repBoutonsHtml(nextEv,children):"";
     var rdv=(nextEv.type==="match")?rdvTimeFor(nextEv):null;
     var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place à '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
     var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
@@ -1242,7 +1251,8 @@ function buildParentHome(){
       '<div style="font-size:13px;color:var(--mut);margin-top:6px">'+dStr+(nextEv.heure?" · "+nextEv.heure:"")+'</div>'+
       (nextEv.lieu?'<div style="font-size:13px;color:var(--mut);margin-top:2px">📍 '+nextEv.lieu+'</div>':'')+
       rdvLine+
-      '<div style="display:flex;flex-wrap:wrap">'+absenceBtn+mapsBtn+icsB+carB+'</div>'+
+      (repHtml||'')+
+      '<div style="display:flex;flex-wrap:wrap">'+(repHtml?'':absenceBtn)+mapsBtn+icsB+carB+'</div>'+
     '</div>';
   }
 

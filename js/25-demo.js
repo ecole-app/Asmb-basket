@@ -302,6 +302,17 @@ function demoDonnees(){
   localStorage.setItem("asmb_sponsors",JSON.stringify(sponsors));
   localStorage.setItem("asmb_inventaire",JSON.stringify(inv));
   localStorage.setItem("asmb_match_stats",JSON.stringify(stats));
+  // Présent / Absent sur les prochains rendez-vous des U13 Filles : la plupart ont répondu,
+  // une absence avec motif, quelques sans réponse (dont Emma, l'enfant du parent de la démo).
+  var reps=[], u13=teams.filter(function(t){ return t.id==="demo-u13"; })[0];
+  events.filter(function(e){ return e.equipe===u13.name&&e.date>=auj; }).slice(0,4).forEach(function(e,k){
+    (e.convocations||u13.members).forEach(function(pid,i){
+      if(pid==="demo-u13-j0"||i%5===4) return;
+      var abs=(i+k)%7===3;
+      reps.push({id:e.id+"__"+pid,eventId:e.id,playerId:pid,statut:abs?"absent":"present",motif:abs?"Rendez-vous médical":"",par:"demo",at:Date.now()-k*3600000});
+    });
+  });
+  localStorage.setItem("asmb_reponses",JSON.stringify(reps));
   localStorage.setItem("gm_demo_db",JSON.stringify(db));
 }
 

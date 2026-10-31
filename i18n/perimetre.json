@@ -45,6 +45,7 @@
     "js/14p-championnats.js",
     "js/14q-tirage-table.js",
     "js/14r-dossier-evt.js",
+    "js/14s-reponses.js",
     "js/14k-stats-saisie.js",
     "js/14l-stats-fiche.js",
     "js/14m-stats-ecrans.js",
@@ -350,6 +351,9 @@
     "Stage de Pâques (Démo)",
     "Stage de la Toussaint (Démo)",
     "Zoé",
-    "Étoile Fictive"
+    "Étoile Fictive",
+    ". Merci d'indiquer Présent ou Absent sur l'accueil de l'appli.",
+    "Réponse attendue pour «",
+    "Rendez-vous médical"
   ]
 }

@@ -711,6 +711,28 @@ service cloud.firestore {
                   && pid in get(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', []))));
         allow write: if staff(clubId);
       }
+      // Présent / Absent (js/14s-reponses.js) : un document par rendez-vous et par joueur
+      // ({eventId}__{playerId}). Lu par les membres ; écrit par le staff, ou par le compte rattaché
+      // à ce joueur (parent ou enfant), en son propre nom, avec des champs bornés.
+      function rattacheA(clubId, pid) {
+        return pid in me().get('linkedPlayerIds', [])
+          || (exists(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone','')))
+              && pid in get(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', []));
+      }
+      function reponseOk(repId, d) {
+        return d.keys().hasOnly(['id','eventId','playerId','statut','motif','par','at'])
+          && d.id == repId && d.eventId is string && d.playerId is string
+          && repId == d.eventId + '__' + d.playerId
+          && d.statut in ['present','absent']
+          && d.get('motif', '') is string && d.get('motif', '').size() <= 200
+          && d.par == request.auth.uid && d.at is int;
+      }
+      match /reponses/{repId} {
+        allow read: if readMember(clubId);
+        allow create, update: if member(clubId) && reponseOk(repId, request.resource.data)
+          && (staff(clubId) || rattacheA(clubId, request.resource.data.playerId));
+        allow delete: if staff(clubId);
+      }
       // Une fiche de licence contient l'adresse, les coordonnees des responsables
       // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que
       // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.
