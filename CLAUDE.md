@@ -95,6 +95,10 @@ pour ces comptes, pas seulement pour le rôle `dirigeant`.
 - Version ordinateur (`js/03b-bureau.js`, `03c-bureau-accueil.js`) : menu latéral du dirigeant (≥ 1024 px), personnalisable et repliable, 5 thèmes par appareil (`gm_desk_theme`). Un écran sans données utilise `gmVide()` (js/09) : titre, à quoi sert l'écran, bouton du premier geste. Paramètres : blocs repliables (`PARAMS_GROUPES`, js/08), le bloc « Zone dangereuse » a été supprimé (les boutons resetAllData/resetComptabilite restent dans le code), 2 colonnes sur ordinateur (`.pgrp.ouvert` = pleine largeur). `paramsOuvrirGroupe(id, section)` ouvre Paramètres sur un bloc (utilisé par « Boutique & réseaux » du menu).
 - Couleur du club : par défaut couleurs GM ; le dirigeant choisit 2 couleurs sur une roue HSV (`js/08c-couleur-roue.js`, centre blanc, barre vers le noir), n'importe quelle teinte, champs `couleur`/`couleur2` sur `clubs/{clubId}`. Couleur claire (contraste < 4,5 avec le blanc) : `clubNormaliserCouleurs` garde la vraie couleur en `couleurBrute` (fond de l'en-tête et du bandeau, texte noir, classe `gm-club-clair` + `--club-fond`) et met dans `couleur` une version foncée de la même teinte (`gmEncreLisible`) pour boutons, accents et PDF ; blanc pur = graphite. Elle s'applique à tous les thèmes visuels via `clubThemeVars()` (js/03-nav-portal.js : chaque thème n'a que sa teinte de marque remplacée, jamais ses neutres) et aux PDF (`clubPdfRgb()`). Si un thème a des couleurs en dur dans `css/style.css`, les passer en variables (comme `--carnet-body`, ou le `body` de Bento via `--hdrgrad`). Un nouveau thème visuel doit être ajouté à `clubThemeVars()`. Le logo GM (marine/doré, `icon-192.png`) est réservé à la plateforme.
 
+## Sauvegarde
+
+Toute la base est exportée chaque nuit (fonction `sauvegardeNuit`, bucket `asmb-app-sauvegardes`, 30 jours). Restauration et suivi : `SAUVEGARDE.md`.
+
 ## Pièges connus
 
 - Pas de `import`/`export` : tout partage la portée globale, l'ordre des `<script>` compte,

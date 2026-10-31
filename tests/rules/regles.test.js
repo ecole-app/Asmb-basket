@@ -1440,6 +1440,9 @@ describe("Test d'alerte Plateforme", () => {
     await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date() }));
     await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), x: 1 }));
     await assertFails(addDoc(collection(await as("dirA"), "plateforme_ping"), { at: new Date() }));
+    await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "sauvegarde" }));
+    await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "autre" }));
+    await assertFails(addDoc(collection(await as("dirA"), "plateforme_ping"), { at: new Date(), type: "sauvegarde" }));
   });
 });
 

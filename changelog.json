@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793436075",
+  "titre": "Sauvegarde automatique chaque nuit",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Les données de votre club sont maintenant sauvegardées automatiquement chaque nuit, et chaque sauvegarde est gardée 30 jours. En cas d'erreur ou de suppression par mégarde, on peut revenir en arrière."
+   }
+  ]
+ },
+ {
   "v": "1793431179",
   "titre": "Pages publiques : plus de renvoi vers la connexion",
   "points": [

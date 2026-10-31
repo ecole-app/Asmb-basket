@@ -467,6 +467,12 @@ exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", asy
 exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (event) => {
   const ref = event.data && event.data.ref;
   if (!ref) return;
+  // « Sauvegarder maintenant » (Plateforme › Sauvegardes).
+  if (event.data.data().type === "sauvegarde") {
+    const r = await sauvegardeLancer("manuel");
+    await ref.update({ ok: r.statut === "en_cours", erreur: r.erreur || "" });
+    return;
+  }
   const sub = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
   const token = sub.exists && sub.data() && sub.data().token;
   if (!token) { await ref.update({ ok: false, erreur: "aucun appareil enregistré" }); return; }
@@ -1092,4 +1098,70 @@ exports.dossiersPurge = onSchedule({ schedule: "every day 04:40", timeZone: "Eur
     if (k) await batch.commit();
   }
   console.log("dossiersPurge : fiches santé effacées", n);
+});
+
+/* ===== Sauvegarde automatique de toute la base (chaque nuit, gardée 30 jours) =====
+   Export géré de Firestore vers le bucket SAUV_BUCKET (créé au premier passage, même
+   région que la base, effacement automatique après 30 jours). L'état est écrit dans
+   plateforme_config/sauvegarde (affiché dans la Plateforme) ; chaque nuit on vérifie
+   que l'export de la veille s'est bien terminé, sinon alerte au super admin.
+   Restauration : gcloud firestore import gs://SAUV_BUCKET/<dossier> (voir SAUVEGARDE.md). */
+const SAUV_BUCKET = "asmb-app-sauvegardes";
+async function alerteSuperAdmin(titre, corps) {
+  const snap = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
+  const token = snap.exists && snap.data() && snap.data().token;
+  if (!token) return;
+  try {
+    await admin.messaging().send({ token, notification: { title: titre, body: corps }, data: { url: "./" }, webpush: webpushClub(null) });
+  } catch (e) { /* jeton périmé : le bandeau Plateforme reste */ }
+}
+async function sauvegardeLancer(origine) {
+  const { v1 } = require("@google-cloud/firestore");
+  const { Storage } = require("@google-cloud/storage");
+  const projet = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || "asmb-app";
+  const etatRef = db.collection("plateforme_config").doc("sauvegarde");
+  const etat = (await etatRef.get()).data() || {};
+  const client = new v1.FirestoreAdminClient();
+  const base = client.databasePath(projet, "(default)");
+  const maj = { origine: origine, maj: Date.now() };
+  // 1. Bilan de l'export précédent.
+  if (etat.operation && etat.statut === "en_cours") {
+    try {
+      const [op] = await client.operationsClient.getOperation({ name: etat.operation });
+      if (op.done) {
+        if (op.error && op.error.code) { maj.statut_prec = "echec"; maj.erreur_prec = String(op.error.message || op.error.code).slice(0, 300); }
+        else { maj.statut_prec = "ok"; maj.derniere_ok = etat.lance || Date.now(); maj.dossier_ok = etat.dossier || ""; }
+      } else maj.statut_prec = "en_cours";
+    } catch (e) { maj.statut_prec = "inconnu"; }
+  }
+  try {
+    // 2. Bucket (créé une seule fois, dans la région de la base).
+    const storage = new Storage();
+    const bucket = storage.bucket(SAUV_BUCKET);
+    const [existe] = await bucket.exists();
+    if (!existe) {
+      let lieu = "EUROPE-WEST1";
+      try { const [d] = await client.getDatabase({ name: base }); if (d && d.locationId) lieu = String(d.locationId).toUpperCase(); } catch (e) { /* région par défaut */ }
+      await storage.createBucket(SAUV_BUCKET, {
+        location: lieu, storageClass: "STANDARD",
+        iamConfiguration: { uniformBucketLevelAccess: { enabled: true } },
+        lifecycle: { rule: [{ action: { type: "Delete" }, condition: { age: 30 } }] }
+      });
+    }
+    // 3. Export de toute la base (toutes les collections et sous-collections).
+    const d = new Date(), p = (n) => String(n).padStart(2, "0");
+    const dossier = d.getUTCFullYear() + "-" + p(d.getUTCMonth() + 1) + "-" + p(d.getUTCDate()) + "_" + p(d.getUTCHours()) + p(d.getUTCMinutes());
+    const [op] = await client.exportDocuments({ name: base, outputUriPrefix: "gs://" + SAUV_BUCKET + "/" + dossier, collectionIds: [] });
+    Object.assign(maj, { statut: "en_cours", operation: op.name, dossier: dossier, lance: Date.now(), erreur: "", echecs: maj.statut_prec === "echec" ? (etat.echecs || 0) + 1 : 0 });
+  } catch (e) {
+    Object.assign(maj, { statut: "echec", erreur: String((e && e.message) || e).slice(0, 300), echecs: (etat.echecs || 0) + 1 });
+  }
+  await etatRef.set(maj, { merge: true });
+  if (maj.statut === "echec" || maj.statut_prec === "echec") {
+    await alerteSuperAdmin("Sauvegarde en échec", (maj.erreur || maj.erreur_prec || "erreur inconnue").slice(0, 150));
+  }
+  return maj;
+}
+exports.sauvegardeNuit = onSchedule({ schedule: "every day 02:30", timeZone: "Europe/Paris", timeoutSeconds: 120 }, async () => {
+  await sauvegardeLancer("nuit");
 });

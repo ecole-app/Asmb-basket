@@ -470,6 +470,37 @@ function acceptInvite(code, inv){
   });
 }
 
+// ═══ SAUVEGARDES (fonction sauvegardeNuit, functions/index.js) ═══════
+// Toute la base est exportée chaque nuit à 2 h 30 et gardée 30 jours. On affiche l'état
+// (plateforme_config/sauvegarde) et un bouton « Sauvegarder maintenant ».
+function pfSauvegardeDate(t){ if(!t) return "—"; var d=new Date(t); return d.toLocaleDateString("fr-FR")+" à "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); }
+function pfSauvegardeBox(box){
+  if(!window.fbGetDoc||!window.fbDb) return;
+  window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","sauvegarde")).then(function(sn){
+    var d=sn&&sn.exists&&sn.exists()?sn.data():{};
+    var ko=d.statut==="echec"||d.statut_prec==="echec";
+    var ligne=d.statut==="en_cours"?"Dernière lancée le "+pfSauvegardeDate(d.lance)+" (en cours ou terminée)":
+      d.statut==="echec"?"Échec le "+pfSauvegardeDate(d.maj):"Aucune sauvegarde pour l'instant";
+    box.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:'+(ko?'rgba(192,57,43,.1)':'var(--card,#fff)')+';border:1px solid '+(ko?'rgba(192,57,43,.35)':'var(--brd,#e3e7ef)')+';font-size:12px;color:var(--txt);line-height:1.5">'+
+      '<b>💾 Sauvegardes</b> · toute la base, chaque nuit, gardée 30 jours<br>'+authEsc(ligne)+
+      (d.derniere_ok?'<br>Dernière réussie : '+authEsc(pfSauvegardeDate(d.derniere_ok)):'')+
+      (ko?'<br><b>Erreur :</b> '+authEsc(d.erreur||d.erreur_prec||"inconnue"):'')+
+      '<div style="margin-top:8px"><button class="btn-s" id="pf-sauv-btn" onclick="pfSauvegarderMaintenant()">Sauvegarder maintenant</button></div></div>';
+  }).catch(function(){});
+}
+function pfSauvegarderMaintenant(){
+  var b=document.getElementById("pf-sauv-btn"); if(b){ b.disabled=true; b.textContent="Lancement…"; }
+  window.fbAddDoc(window.fbCollection(window.fbDb,"plateforme_ping"),{at:new Date(),type:"sauvegarde"}).then(function(ref){
+    var fini=false, stop=window.fbOnSnapshot(ref,function(sn){
+      var d=sn.data()||{}; if(fini||d.ok===undefined) return; fini=true; stop();
+      if(d.ok) askAlert("Sauvegarde lancée. Elle se termine en quelques minutes.");
+      else askAlert("La sauvegarde n'a pas pu démarrer : "+(d.erreur||"erreur inconnue"));
+      var box=document.getElementById("pf-sauv"); if(box) pfSauvegardeBox(box);
+    });
+    setTimeout(function(){ if(!fini){ fini=true; stop(); if(b){ b.disabled=false; b.textContent="Sauvegarder maintenant"; } askAlert("Pas de réponse du serveur pour l'instant. Réessaie dans quelques minutes."); } },60000);
+  }).catch(function(e){ if(b){ b.disabled=false; b.textContent="Sauvegarder maintenant"; } askAlert("Impossible de lancer la sauvegarde : "+((e&&e.message)||e)); });
+}
+
 // ═══ ESPACE PLATEFORME (super admin) ══════════════════════════════════
 var GM_INTRO="Créez les clubs et invitez leur dirigeant. Les données internes d'un club ne sont visibles qu'avec un code d'accès support fourni par le club.";
 
@@ -485,6 +516,7 @@ function openPlateforme(){
     var d=sn&&sn.exists&&sn.exists()?sn.data():null;
     if(d&&d.echecs>=3) ffbbBox.innerHTML='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);font-size:12px;color:var(--txt);line-height:1.5"><b>Synchro FFBB en panne</b> depuis '+d.echecs+' nuits ('+authEsc(d.erreur||"pas de réponse")+'). L\'API a peut-être changé : les classements gardent leurs dernières données.</div>';
   }).catch(function(){});
+  var sauvBox=document.createElement("div"); sauvBox.id="pf-sauv"; s.body.appendChild(sauvBox); pfSauvegardeBox(sauvBox);
   var comptesBox=document.createElement("div");
   comptesBox.style.marginBottom="12px";
   window.__gmComptesBox=comptesBox;
