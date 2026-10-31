@@ -1,6 +1,6 @@
 /* ===== 25-demo.js — Mode démo (lien « Voir la démo » du site : ?demo) =====
    L'appli s'ouvre sur un faux club « Club Démo », sans compte, en dirigeant, coach ou parent
-   (?demo=coach / ?demo=parent, ou le menu du bandeau ; sert aussi au robot tests/robot).
+   (?demo=coach / ?demo=parent / ?demo=joueur, ou le menu du bandeau ; sert aussi au robot tests/robot).
    Saison fictive complète (septembre → juin) datée par rapport à aujourd'hui, effacée et recréée
    chaque jour : rien de ce que le visiteur saisit ne dure plus d'une journée. Tout reste sur
    l'appareil : les fonctions Firestore sont remplacées par des versions vides (lecture = rien,
@@ -14,7 +14,7 @@ var GM_DEMO=false;
 
 // Profil joué dans la démo : dirigeant (par défaut), coach ou parent (?demo=coach, ?demo=parent,
 // ou le menu du bandeau). Coach = U13 Filles (Démo) ; parent = une famille de cette équipe.
-var DEMO_PROFILS={dirigeant:"Dirigeant",coach:"Coach",parent:"Parent"};
+var DEMO_PROFILS={dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur (enfant)"};
 function demoProfil(){
   var p="";
   try{ p=new URLSearchParams(location.search).get("demo")||sessionStorage.getItem("gm_demo_profil")||""; }catch(e){}
@@ -76,8 +76,10 @@ function demoDemarrer(){
   // firebase-init (module) peut finir de charger après : on remet les versions vides.
   var n=0, t=setInterval(function(){ demoStubsFirestore(); if(++n>=30) clearInterval(t); },1000);
   setActiveClub("demo");
-  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Parent Démo"]}[profil];
+  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Parent Démo"],joueur:["Emma","Durand"]}[profil];
   window.ASMB_USER={uid:"demo-"+profil,roles:[profil],prenom:qui[0],nom:qui[1],email:"",clubId:"demo",permissions:{}};
+  // Joueur : compte ouvert par le parent pour son enfant, rattaché à une fiche des U13 Filles.
+  if(profil==="joueur") window.ASMB_USER.linkedPlayerIds=["demo-u13-j0"];
   window.CURRENT_CLUB=clubNormaliserCouleurs({id:"demo",name:"Club Démo",sport:"basket",ville:"Démoville",plan:"premium",couleur:"#1A2E5A",couleur2:"#D4AF37"});
   // Remise à zéro chaque jour : tout ce que le visiteur a saisi ou modifié est effacé et la saison
   // fictive est recréée à partir de la date du jour. La démo ne peut donc pas servir de vraie appli.

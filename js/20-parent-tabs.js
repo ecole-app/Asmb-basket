@@ -92,6 +92,9 @@ var NAV_ICONS={
 function buildBottomNav(profile){
   var nav=document.getElementById("bnav-main");
   if(!nav)return;
+  // Compte joueur (enfant) : un seul écran, l'espace joueur ; aucune barre (jamais Admin ni Inscription).
+  nav.style.display=profile==="joueur"?"none":"";
+  if(profile==="joueur"){ nav.innerHTML=""; return; }
   if(profile==="dirigeant"){
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navTo(\'portal\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+

@@ -208,6 +208,7 @@ function initProfile(){
   var rolesCompte=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
   if(rolesCompte.length===1 && rolesCompte[0]==="joueur"){
     localStorage.setItem("asmb_profile","joueur");
+    buildBottomNav("joueur");
     ouvrirEspaceJoueurRattache(0);
     return;
   }

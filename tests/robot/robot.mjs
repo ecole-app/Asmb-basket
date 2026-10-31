@@ -2,7 +2,7 @@
 // avant chaque mise en ligne. Si un écran plante, reste vide ou si un fichier ne se charge pas,
 // il échoue : la mise en ligne est bloquée (.github/workflows/pages.yml) et une capture de l'écran
 // fautif est gardée dans tests/robot/captures/.
-//   - 3 profils de la démo (dirigeant, coach, parent) × téléphone et ordinateur
+//   - 4 profils de la démo (dirigeant, coach, parent, joueur) × téléphone et ordinateur
 //   - dirigeant : barre du bas, chaque module de l'Espace Admin, chaque pôle, Paramètres ;
 //     sur ordinateur, chaque rubrique du menu latéral
 //   - pages publiques : tournoi, buvette, bénévole, fil d'événement, formulaire d'inscription
@@ -133,8 +133,14 @@ async function profil(navigateur, base, nom, taille, libTaille) {
     // Barre du bas (téléphone)
     {
       const boutons = await page.$$eval("#bnav-main .bni", (bs) => bs.filter((b) => b.offsetParent !== null).map((b) => b.id).filter(Boolean));
-      if (!boutons.length && libTaille === "téléphone") await echec(page, ou, "barre du bas vide");
+      if (!boutons.length && libTaille === "téléphone" && nom !== "joueur") await echec(page, ou, "barre du bas vide");
+      if (boutons.length && nom === "joueur") await echec(page, ou, "un compte enfant ne doit pas avoir de barre du bas");
       for (const id of boutons) await action(page, journal, ou + " › " + id, (i) => document.getElementById(i).click(), id);
+    }
+    if (nom !== "dirigeant") {
+      // Un compte non dirigeant ne doit jamais atteindre l'Espace Admin par la navigation du dirigeant.
+      const ecran = await page.evaluate(() => { try { window.navTo("admin"); } catch (e) {} const on = document.querySelector(".scr.on"); return on ? on.id : ""; });
+      if (ecran === "scr-admin") await echec(page, ou, "l'Espace Admin s'ouvre pour ce profil");
     }
     if (nom === "dirigeant") {
       if (libTaille === "ordinateur") {
@@ -208,7 +214,7 @@ const srv = await serveur();
 const base = "http://127.0.0.1:" + srv.address().port;
 const navigateur = await chromium.launch();
 try {
-  for (const nom of ["dirigeant", "coach", "parent"]) {
+  for (const nom of ["dirigeant", "coach", "parent", "joueur"]) {
     await profil(navigateur, base, nom, TELEPHONE, "téléphone");
     await profil(navigateur, base, nom, ORDI, "ordinateur");
   }

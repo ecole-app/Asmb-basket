@@ -306,6 +306,8 @@ function goBack(){
  else showScr(prev);
 }
 function navTo(id){
+ // L'Espace Admin n'est ouvert qu'au dirigeant (coach/bureau passent par navToCoach, avec leurs cases).
+ if(id==="admin"&&localStorage.getItem("asmb_profile")!=="dirigeant") return;
  stack=["portal"];
  if(id==="admin"){stack.push("admin");buildAdminHome();showScr("admin");}
  else if(id==="inscription"){stack.push("inscription");showScr("inscription");buildInscriptionPublic();}

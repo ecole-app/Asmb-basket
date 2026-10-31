@@ -1,5 +1,23 @@
 [
  {
+  "v": "1793465847",
+  "titre": "Compte enfant : plus de bouton Admin",
+  "points": [
+   {
+    "roles": [
+     "joueur"
+    ],
+    "texte": "Le compte ouvert pour un enfant n'affiche plus que son espace joueur."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La démo se regarde aussi en joueur (enfant)."
+   }
+  ]
+ },
+ {
   "v": "1793464031",
   "titre": "Démo : une saison complète",
   "points": [
