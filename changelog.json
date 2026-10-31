@@ -1,5 +1,23 @@
 [
  {
+  "v": "1793472080",
+  "titre": "Compte enfant : le canal de son équipe",
+  "points": [
+   {
+    "roles": [
+     "joueur"
+    ],
+    "texte": "Dans la Communauté, l'enfant voit le canal Général et celui de son équipe, plus jamais ceux des autres équipes."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "La démo a maintenant une Communauté vivante : canal Général, un canal par équipe, des messages, et on peut écrire."
+   }
+  ]
+ },
+ {
   "v": "1793471804",
   "titre": "Présent ou Absent",
   "points": [

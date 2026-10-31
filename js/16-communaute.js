@@ -504,8 +504,18 @@ function updateMuteBtn(){
 // Un canal est visible pour un coach si : il est explicitement marqué "public" (clubWide),
 // ou lié à une équipe que ce coach entraîne. Sinon (pas taggé), il reste masqué par défaut.
 // Dirigeant/parent voient toujours tout (badge Membre/Privé géré ailleurs par renderChannelList).
+// Équipes du compte enfant (joueur) : celles où figure sa fiche rattachée.
+function joueurMesEquipes(){
+  var ids=((window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[]).map(String);
+  return getTeams().filter(function(t){ return (t.members||[]).some(function(m){ return ids.indexOf(String(m))>=0; }); }).map(function(t){ return t.id; });
+}
 function channelVisibleToMe(ch){
   var profile=localStorage.getItem("asmb_profile");
+  // Enfant : le général et le canal de SON équipe, jamais ceux des autres équipes.
+  if(profile==="joueur"){
+    var eq=ch.teamId||ch.id, estEquipe=!!ch.teamId||getTeams().some(function(t){ return t.id===ch.id; });
+    return estEquipe?joueurMesEquipes().indexOf(eq)>=0:true;
+  }
   if(profile!=="coach") return true;
   if(ch.clubWide||ch.evt) return true;
   if(!ch.teamId) return false;
@@ -555,7 +565,8 @@ function renderChannelList(channels){
   channels.forEach(function(ch){
     var members=ch.members||[];
     var isRestricted=members.length>0||!!ch.evt;
-    var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;})
+      ||(localStorage.getItem("asmb_profile")==="joueur"&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0);
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
     div.setAttribute("data-chid",ch.id);
     div.style.position="relative";

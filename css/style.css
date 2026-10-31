@@ -822,5 +822,7 @@ html.gm-desk #dk-pp .pp-card{margin-bottom:22px;max-width:760px}
 #gm-demo-band a{background:#D4AF37;color:#1a2438;text-decoration:none;font-weight:800;border-radius:10px;padding:6px 10px}
 #gm-demo-band button{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer;font-size:12px}
 html.gm-desk #gm-demo-band{bottom:20px}
+/* Dans une discussion, le bandeau démo passe en haut pour ne pas cacher la zone de saisie. */
+body:has(#scr-chat.on) #gm-demo-band{top:calc(64px + env(safe-area-inset-top));bottom:auto}
 #gm-demo-band select{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:10px;padding:6px 6px;font-weight:700;font-size:12px;cursor:pointer}
 #gm-demo-band select option{color:#1a2438}

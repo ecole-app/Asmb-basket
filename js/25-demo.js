@@ -33,6 +33,8 @@ function demoDemande(){
 function demoStubsFirestore(){
   // Références factices : la démo ne dépend pas du chargement de Firebase.
   window.fbDb=window.fbDb||{demo:true};
+  // Base de la démo prête tout de suite (sans attendre Firebase).
+  if(!window.fbReady){ window.fbReady=true; try{ window.dispatchEvent(new Event("fb-ready")); }catch(e){} }
   window.fbCollection=function(){ var a=[].slice.call(arguments,1); return {path:a.join("/"),id:a[a.length-1]}; };
   window.fbDoc=function(){ var a=[].slice.call(arguments,1); return {path:a.join("/"),id:a[a.length-1]}; };
   // Petite base en mémoire (inscrits et pages des événements de la démo, puis ce que le visiteur
@@ -41,28 +43,49 @@ function demoStubsFirestore(){
   var DB=window.GM_DEMO_DB;
   var coll=function(p){ return DB[p]||(DB[p]={}); };
   var ts=function(v){ return v&&typeof v==="number"?{toMillis:function(){ return v; },toDate:function(){ return new Date(v); },seconds:Math.floor(v/1000)}:v; };
-  var lire=function(d){ var o={}; Object.keys(d||{}).forEach(function(k){ o[k]=k==="at"?ts(d[k]):d[k]; }); return o; };
+  var lire=function(d){ var o={}; Object.keys(d||{}).forEach(function(k){ o[k]=(k==="at"||k==="ts")?ts(d[k]):d[k]; }); return o; };
+  var num=function(v){ return v&&v.toMillis?v.toMillis():(v instanceof Date?+v:v); };
+  // Écoutes en direct (fbOnSnapshot) : prévenues à chaque écriture dans la même collection.
+  window.GM_DEMO_ECOUTES=window.GM_DEMO_ECOUTES||[];
+  var prevenir=function(colPath){ window.GM_DEMO_ECOUTES.forEach(function(l){ if(l.path===colPath) setTimeout(l.envoyer,0); }); };
   var snapDoc=function(path,id,d){ return {id:id,exists:function(){ return !!d; },data:function(){ return d?lire(d):undefined; },ref:{path:path+"/"+id,id:id}}; };
   var ecrire=function(ref,data,fusion){ var p=ref.path.split("/"), id=p.pop(), c=coll(p.join("/")), v={};
-    Object.keys(data||{}).forEach(function(k){ var x=data[k]; v[k]=x&&x.toMillis?x.toMillis():x; });
-    c[id]=fusion&&c[id]?Object.assign({},c[id],v):v; };
-  window.fbQuery=function(r){ return {path:r.path,w:[].slice.call(arguments,1).filter(function(x){ return x&&x.f; })}; };
+    Object.keys(data||{}).forEach(function(k){ var x=data[k]; v[k]=x&&x.toMillis?x.toMillis():(x instanceof Date?+x:x); });
+    c[id]=fusion&&c[id]?Object.assign({},c[id],v):v; prevenir(p.join("/")); };
+  window.fbQuery=function(r){ var a=[].slice.call(arguments,1); return {path:r.path,col:true,w:a.filter(function(x){ return x&&x.f; }),o:a.filter(function(x){ return x&&x.o; })[0]||null}; };
   window.fbWhere=function(f,op,v){ return {f:f,op:op,v:v}; };
-  window.fbOrderBy=window.fbLimit=function(){ return null; };
+  window.fbOrderBy=function(f,dir){ return {o:f,dir:dir||"asc"}; };
+  window.fbLimit=function(){ return null; };
   window.fbServerTimestamp=function(){ return ts(Date.now()); };
   window.fbArrayUnion=window.fbArrayRemove=function(){ return [].slice.call(arguments); };
   window.fbGetDoc=function(r){ var p=r.path.split("/"), id=p.pop(); return Promise.resolve(snapDoc(p.join("/"),id,coll(p.join("/"))[id])); };
-  window.fbGetDocs=function(q){
-    var c=coll(q.path), docs=Object.keys(c).filter(function(id){ return (q.w||[]).every(function(w){ var v=c[id][w.f];
-      return w.op==="=="?v===w.v:(w.op==="in"?(w.v||[]).indexOf(v)>=0:(w.op==="array-contains"?(v||[]).indexOf(w.v)>=0:true)); }); })
-      .map(function(id){ return snapDoc(q.path,id,c[id]); });
-    return Promise.resolve({docs:docs,empty:!docs.length,size:docs.length,forEach:function(f){ docs.forEach(f); },docChanges:function(){ return []; }});
+  var lister=function(q){
+    var c=coll(q.path), ids=Object.keys(c).filter(function(id){ return (q.w||[]).every(function(w){ var v=num(c[id][w.f]), x=num(w.v);
+      return w.op==="=="?v===x:(w.op==="in"?(w.v||[]).indexOf(v)>=0:(w.op==="array-contains"?(v||[]).indexOf(w.v)>=0:(w.op===">="?v>=x:(w.op==="<="?v<=x:(w.op===">"?v>x:(w.op==="<"?v<x:true)))))); }); });
+    if(q.o) ids.sort(function(a,b){ var x=num(c[a][q.o.o]), y=num(c[b][q.o.o]); var r=x<y?-1:(x>y?1:0); return q.o.dir==="desc"?-r:r; });
+    return ids.map(function(id){ return snapDoc(q.path,id,c[id]); });
   };
-  window.fbOnSnapshot=function(){ return function(){}; };
+  var snapListe=function(docs,avant){
+    var ch=docs.filter(function(d){ return !avant||!avant[d.id]; }).map(function(d){ return {type:"added",doc:d}; });
+    return {docs:docs,empty:!docs.length,size:docs.length,forEach:function(f){ docs.forEach(f); },docChanges:function(){ return ch; },metadata:{hasPendingWrites:false,fromCache:false}};
+  };
+  window.fbGetDocs=function(q){ return Promise.resolve(snapListe(lister(q))); };
+  window.fbOnSnapshot=function(ref,a,b){
+    var cb=typeof a==="function"?a:b; if(typeof cb!=="function") return function(){};
+    var p=ref.path.split("/"), estDoc=!ref.col&&p.length%2===0, l={path:estDoc?p.slice(0,-1).join("/"):ref.path,actif:true,vus:null};
+    l.envoyer=function(){
+      if(!l.actif) return;
+      if(estDoc){ var id=p[p.length-1]; try{ cb(snapDoc(l.path,id,coll(l.path)[id])); }catch(e){ console.log("démo",e); } return; }
+      var docs=lister(ref.col?ref:{path:ref.path}), vus={}; docs.forEach(function(d){ vus[d.id]=1; });
+      var sn=snapListe(docs,l.vus); l.vus=vus; try{ cb(sn); }catch(e){ console.log("démo",e); }
+    };
+    window.GM_DEMO_ECOUTES.push(l); setTimeout(l.envoyer,0);
+    return function(){ l.actif=false; };
+  };
   window.fbAddDoc=function(c,d){ var id="demo"+Date.now()+Math.floor(Math.random()*1000); ecrire({path:c.path+"/"+id},d); return Promise.resolve({id:id}); };
   window.fbSetDoc=function(r,d,o){ ecrire(r,d,o&&o.merge); return Promise.resolve(); };
   window.fbUpdateDoc=function(r,d){ ecrire(r,d,true); return Promise.resolve(); };
-  window.fbDeleteDoc=function(r){ var p=r.path.split("/"), id=p.pop(); delete coll(p.join("/"))[id]; return Promise.resolve(); };
+  window.fbDeleteDoc=function(r){ var p=r.path.split("/"), id=p.pop(); delete coll(p.join("/"))[id]; prevenir(p.join("/")); return Promise.resolve(); };
   window.fbWriteBatch=function(){ var ops=[], b={set:function(r,d,o){ ops.push(function(){ ecrire(r,d,o&&o.merge); }); return b; },update:function(r,d){ ops.push(function(){ ecrire(r,d,true); }); return b; },
     delete:function(r){ ops.push(function(){ window.fbDeleteDoc(r); }); return b; },commit:function(){ ops.forEach(function(f){ f(); }); return Promise.resolve(); }}; return b; };
 }
@@ -313,6 +336,18 @@ function demoDonnees(){
     });
   });
   localStorage.setItem("asmb_reponses",JSON.stringify(reps));
+  // Communauté : canal général, un canal par équipe, quelques messages récents.
+  db.channels={general:{id:"general",name:"Général",icon:"📣",desc:"Infos du club pour tout le monde",members:[],clubWide:true}};
+  teams.forEach(function(t){ db.channels[t.id]={id:t.id,name:t.name,icon:"🏀",desc:"Canal de l'équipe "+t.name,members:[]}; });
+  var msg=function(ch,min,pseudo,text){ var c=db["channels/"+ch+"/messages"]=db["channels/"+ch+"/messages"]||{}; var id="dm"+Object.keys(c).length+ch;
+    c[id]={text:text,pseudo:pseudo,ts:Date.now()-min*60000,likeUsers:[],heartUsers:[],demo:true}; };
+  msg("general",60*26,"Club Démo","Bienvenue sur la messagerie du club ! Les infos importantes passent ici.");
+  msg("general",60*5,"Club Démo","Rappel : le loto du club approche, les réservations sont ouvertes dans Événements.");
+  msg("demo-u13",60*20,"Coach Sam","Bravo les filles pour l'entraînement de ce soir, belle intensité !");
+  msg("demo-u13",60*3,"Coach Sam","Pensez à répondre Présent ou Absent pour le prochain entraînement sur l'accueil de l'appli.");
+  msg("demo-u13",60*2,"Parent de Léa","Léa sera un peu en retard, on arrive vers 19h45.");
+  msg("demo-u13",45,"Coach Sam","Pas de souci, merci de prévenir 👍");
+  msg("demo-u15",60*8,"Coach Démo","Match samedi : rendez-vous 45 min avant au gymnase.");
   localStorage.setItem("gm_demo_db",JSON.stringify(db));
 }
 
