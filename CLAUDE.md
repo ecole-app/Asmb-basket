@@ -103,7 +103,9 @@ Toute la base est exportée chaque nuit (fonction `sauvegardeNuit`, bucket `asmb
 
 - Pas de `import`/`export` : tout partage la portée globale, l'ordre des `<script>` compte,
   `21-main.js` reste le dernier.
-- Un nouveau fichier JS doit être ajouté dans `index.html` **et** décrit dans `js/README.md`.
+- Un nouveau fichier JS doit être ajouté dans `index.html`, dans `PRECACHE` (`sw.js`) **et** décrit dans `js/README.md`.
+  Le test `tests/metier/demarrage.test.js` échoue si un script d'index.html manque au précache ou ne se lit pas
+  (un script oublié était remplacé par la page d'accueil quand le réseau flanchait juste après une mise à jour).
 - jsPDF est déjà chargé globalement (`window.jspdf.jsPDF`) ; l'export Excel charge SheetJS à la
   demande (`js/23-export.js`).
 - App Check (Fraud Defense) : clé de site en place dans `js/firebase-init.js` et

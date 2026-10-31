@@ -66,6 +66,28 @@ const PRECACHE = [
   './icon-512.png',
   './apple-touch-icon-180.png',
   './js/sw-register.js',
+  './js/00b-erreurs.js',
+  './js/03d-premiers-pas.js',
+  './js/06i-activation.js',
+  './js/06j-adherent.js',
+  './js/08c-couleur-roue.js',
+  './js/12b-planning-alertes.js',
+  './js/14n-eval-stage.js',
+  './js/14o-responsable-evt.js',
+  './js/14p-championnats.js',
+  './js/14q-tirage-table.js',
+  './js/14r-dossier-evt.js',
+  './js/14j-stats-calcul.js',
+  './js/14k-stats-saisie.js',
+  './js/14l-stats-fiche.js',
+  './js/14m-stats-ecrans.js',
+  './js/15e-documents-club.js',
+  './js/15f-projets.js',
+  './js/17-sponsors.js',
+  './js/17b-factures.js',
+  './js/17c-convention.js',
+  './js/20c-pf-compta.js',
+  './js/25-demo.js',
   './js/00-i18n.js',
   './i18n/en.json',
   './i18n/ar.json',
@@ -198,12 +220,23 @@ self.addEventListener('fetch', function (event) {
     // network-first : évite de rester bloqué sur une vieille version
     event.respondWith(
       fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
+        // Un fichier de l'appli qui revient en HTML (page d'erreur) : on le traite comme un échec.
+        if (req.mode !== 'navigate' && /\.(js|css)$/.test(url.pathname) && /text\/html/i.test(res.headers.get('content-type') || '')) throw new Error('html');
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
+        }
         return res;
       }).catch(function () {
         return caches.match(req).then(function (hit) {
           if (hit) return hit;
+          // Un fichier de l'appli (script, style, traduction) : une seconde tentative réseau,
+          // puis un vrai échec. Jamais la page d'accueil à sa place (sinon « Unexpected token '<' »).
+          if (req.mode !== 'navigate' && /\.(js|css|json)$/.test(url.pathname)) {
+            return new Promise(function (ok) { setTimeout(ok, 800); })
+              .then(function () { return fetch(new Request(req, { cache: 'reload' })); })
+              .catch(function () { return Response.error(); });
+          }
           // Repli sur l'appli du club SEULEMENT pour l'appli elle-même. Les autres pages du site
           // (formation, tournoi, buvette, bénévole, fil...) ne doivent jamais afficher
           // l'écran de connexion du club quand le réseau coupe un instant.

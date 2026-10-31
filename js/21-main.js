@@ -157,12 +157,13 @@ setTimeout(function(){
     if(on&&on.innerText&&on.innerText.trim().length>20) return;
     var fa=window.fbAuth, cu=fa&&fa.currentUser;
     var st=["ecran="+(on?on.id:"aucun"),"fbAuth="+(fa?"oui":"non"),"user="+(cu?"connecte":"non"),"ASMB_USER="+(window.ASMB_USER?"oui":"non"),"club="+(window.CURRENT_CLUB_ID||"?"),"su="+localStorage.getItem("gm_is_su"),"reseau="+(navigator.onLine?"oui":"non"),"lang="+(window.GM_LANG||"?"),"v="+APP_VERSION.slice(-5)+" · diag="+(window.__gmDiag||"rien")+" · sondes="+(window.__gmSonde||"rien")+" · "+"app="+((window.matchMedia&&matchMedia("(display-mode: standalone)").matches)?"installee":"navigateur")].join(" · ");
+    if(window.gmSignalerErreur) window.gmSignalerErreur({message:"Démarrage bloqué (9 s)",stack:st});
     if(window.gmBanniere) window.gmBanniere("Démarrage bloqué — "+st);
   }catch(e){}
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793449278";
+var APP_VERSION="1793453107";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la

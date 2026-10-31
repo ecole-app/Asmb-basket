@@ -21,11 +21,30 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 <title>General Manager</title>
 <script>
-/* Filet de sécurité : si une erreur JS casse l'appli au démarrage, on l'affiche (au lieu d'un écran vide) */
-(function(){var vu=false;function aff(m){if(vu)return;vu=true;var d=document.createElement("div");d.setAttribute("data-notr","");d.style.cssText="position:fixed;left:8px;right:8px;bottom:84px;z-index:99999;background:#7a1a12;color:#fff;border-radius:12px;padding:10px 12px;font:12px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.35)";d.textContent="⚠ "+m;var b=document.createElement("button");b.textContent="OK";b.style.cssText="margin-left:8px;border:0;border-radius:8px;padding:4px 10px;font-weight:700";b.onclick=function(){d.remove()};d.appendChild(b);(document.body||document.documentElement).appendChild(d);}
-window.addEventListener("error",function(e){if(Date.now()-(window.__gmT0||(window.__gmT0=Date.now()))<20000&&e&&e.message&&!/ResizeObserver|Script error/.test(e.message))aff(e.message+" ("+String(e.filename||"").split("/").pop()+":"+e.lineno+")");});
+/* Filet de sécurité du démarrage.
+   - Un fichier de l'appli qui ne se charge pas (réseau qui flanche) : on recharge une fois tout seul,
+     puis, si ça recommence dans la minute, message simple avec « Réessayer ». Jamais d'erreur technique.
+   - Les autres erreurs techniques ne s'affichent qu'au super admin (gm_is_su) ; elles partent
+     dans le suivi des bugs (js/00b-erreurs.js) avec une alerte sur son téléphone. */
+(function(){
+function su(){try{return localStorage.getItem("gm_is_su")==="1";}catch(e){return false;}}
+var vu=false,ami=false;
+function aff(m){if(vu||!su())return;vu=true;var d=document.createElement("div");d.setAttribute("data-notr","");d.style.cssText="position:fixed;left:8px;right:8px;bottom:84px;z-index:99999;background:#7a1a12;color:#fff;border-radius:12px;padding:10px 12px;font:12px/1.35 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.35)";d.textContent="⚠ "+m;var b=document.createElement("button");b.textContent="OK";b.style.cssText="margin-left:8px;border:0;border-radius:8px;padding:4px 10px;font-weight:700";b.onclick=function(){d.remove()};d.appendChild(b);(document.body||document.documentElement).appendChild(d);}
+function amical(m){if(ami)return;ami=true;var go=function(){var d=document.createElement("div");d.id="gm-reprise";d.style.cssText="position:fixed;left:12px;right:12px;bottom:24px;z-index:99999;background:#0f1c36;color:#fff;border-radius:14px;padding:14px 16px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3);display:flex;align-items:center;gap:12px";var t=document.createElement("span");t.style.flex="1";t.textContent=m;var b=document.createElement("button");b.textContent="Réessayer";b.style.cssText="flex:none;border:0;border-radius:10px;padding:9px 14px;font:700 14px system-ui,sans-serif;background:#f3bc4e;color:#0f1c36";b.onclick=function(){location.reload();};d.appendChild(t);d.appendChild(b);document.body.appendChild(d);};if(document.body)go();else document.addEventListener("DOMContentLoaded",go);}
+function reprise(){var t=0;try{t=+sessionStorage.getItem("gm_reprise")||0;}catch(e){}
+  if(Date.now()-t>60000){try{sessionStorage.setItem("gm_reprise",String(Date.now()));}catch(e){}setTimeout(function(){location.reload();},300);return;}
+  amical("Connexion instable : l'appli n'a pas pu se charger entièrement.");}
+window.addEventListener("error",function(e){
+  var c=e&&e.target;
+  if(c&&c.tagName==="SCRIPT"&&/\/js\//.test(c.src||"")){reprise();return;}
+  if(e&&e.message&&/SyntaxError|Unexpected token/.test(e.message)&&/\/js\//.test(e.filename||"")){reprise();return;}
+  if(c&&c!==window)return;
+  if(Date.now()-(window.__gmT0||(window.__gmT0=Date.now()))<20000&&e&&e.message&&!/ResizeObserver|Script error/.test(e.message))aff(e.message+" ("+String(e.filename||"").split("/").pop()+":"+e.lineno+")");
+},true);
 window.addEventListener("unhandledrejection",function(e){var r=e&&e.reason;if(Date.now()-(window.__gmT0||(window.__gmT0=Date.now()))<20000&&r&&r.message)aff(r.message);});
-window.__gmT0=Date.now();window.gmBanniere=aff;})();
+window.__gmT0=Date.now();
+window.gmBanniere=function(m){if(su())aff(m);else amical("Le chargement prend plus de temps que prévu.");};
+window.gmReprise=reprise;})();
 </script>
 <script src="js/00b-erreurs.js"></script>
 <script src="js/00-i18n.js"></script>

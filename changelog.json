@@ -1,5 +1,21 @@
 [
  {
+  "v": "1793453107",
+  "titre": "Démarrage à toute épreuve",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Plus d'écran bloqué quand le réseau flanche au lancement : l'appli se recharge seule, et affiche un bouton « Réessayer » si besoin."
+   }
+  ]
+ },
+ {
   "v": "1793449278",
   "titre": "Chargement plus fiable",
   "points": [
