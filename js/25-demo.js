@@ -76,10 +76,11 @@ function demoDemarrer(){
   // firebase-init (module) peut finir de charger après : on remet les versions vides.
   var n=0, t=setInterval(function(){ demoStubsFirestore(); if(++n>=30) clearInterval(t); },1000);
   setActiveClub("demo");
-  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Parent Démo"],joueur:["Emma","Durand"]}[profil];
+  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Durand"],joueur:["Emma","Durand"]}[profil];
   window.ASMB_USER={uid:"demo-"+profil,roles:[profil],prenom:qui[0],nom:qui[1],email:"",clubId:"demo",permissions:{}};
   // Joueur : compte ouvert par le parent pour son enfant, rattaché à une fiche des U13 Filles.
-  if(profil==="joueur") window.ASMB_USER.linkedPlayerIds=["demo-u13-j0"];
+  // Parent et joueur : même enfant, Emma Durand (U13 Filles) ; le parent la voit par son prénom.
+  if(profil==="joueur"||profil==="parent") window.ASMB_USER.linkedPlayerIds=["demo-u13-j0"];
   window.CURRENT_CLUB=clubNormaliserCouleurs({id:"demo",name:"Club Démo",sport:"basket",ville:"Démoville",plan:"premium",couleur:"#1A2E5A",couleur2:"#D4AF37"});
   // Remise à zéro chaque jour : tout ce que le visiteur a saisi ou modifié est effacé et la saison
   // fictive est recréée à partir de la date du jour. La démo ne peut donc pas servir de vraie appli.
@@ -206,6 +207,7 @@ function demoDonnees(){
         ev.score={adversaire:a,asmb:nous,adv:Math.max(18,eux)};
         (matchsJoues[t.id]=matchsJoues[t.id]||[]).push(ev);
       }
+      if(iso(jour)>=auj) ev.convocations=t.members.slice(0,8);
       events.push(ev); n++;
     }
   });

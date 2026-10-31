@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793468107",
+  "titre": "Démo parent : l'enfant est nommé",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "En démo, le parent est celui d'Emma (U13 Filles), comme un vrai compte parent rattaché à son enfant."
+   }
+  ]
+ },
+ {
   "v": "1793467978",
   "titre": "Poste de jeu à partir des U13",
   "points": [
