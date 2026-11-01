@@ -1,6 +1,6 @@
 /* ===== 14t-convocation.js — Convocation du lundi et assiduité aux entraînements =====
-   1. Assiduité d'une joueuse : présence aux entraînements de son équipe depuis le 1er septembre
-      de la saison (séances pointées seulement). Les absences EXCUSÉES ne comptent pas dans le
+   1. Assiduité d'une joueuse : présence aux entraînements de son équipe sur les 6 dernières
+      semaines (séances pointées seulement). Les absences EXCUSÉES ne comptent pas dans le
       pourcentage : excusée = la famille a répondu « Absent » avant (fiche checkins), ou le coach
       l'a marquée excusée (ev.excuses[pid]=true ; false = non excusée, même si prévenue).
       Vert ≥ 75 %, orange 50-74 %, rouge < 50 %.
@@ -12,15 +12,14 @@
       en plus du prochain entraînement (js/19 buildParentHome).
    Rien n'est envoyé sans le coach. */
 
-// Début de la saison en cours : 1er septembre (septembre-décembre = cette année, janvier-août = l'an passé).
-function assidDebut(){ var n=new Date(), a=n.getMonth()>=8?n.getFullYear():n.getFullYear()-1; return a+"-09-01"; }
+var ASSID_JOURS=42;
 
 function assidEquipeDe(pid){ return getTeams().filter(function(t){ return (t.members||[]).map(String).indexOf(String(pid))>=0; })[0]||null; }
 function assidMatchEquipe(e,team){ return !!(e&&team&&e.equipe&&String(e.equipe).toUpperCase().indexOf(String(team.name).toUpperCase())>=0); }
 
 // Séances passées et pointées de l'équipe sur la période.
 function assidSeances(team){
-  var auj=new Date().toISOString().slice(0,10), debut=assidDebut();
+  var auj=new Date().toISOString().slice(0,10), debut=new Date(Date.now()-ASSID_JOURS*86400000).toISOString().slice(0,10);
   return getEvents().filter(function(e){
     return e.type==="entrainement"&&!e.cancelled&&e.date<auj&&e.date>=debut&&assidMatchEquipe(e,team)&&e.presences&&Object.keys(e.presences).length;
   });
@@ -53,7 +52,7 @@ function assidPour(pid,team){
 function assidCouleur(p){ return p==null?"var(--mut)":(p>=75?"var(--ltg)":(p>=50?"#E8670A":"#C0392B")); }
 function assidHtml(a,pid,teamId){
   var c=assidCouleur(a.pct), txt=a.pct==null?"—":a.pct+" %";
-  return '<button type="button" onclick="event.preventDefault();event.stopPropagation();assidDetail(\''+authEsc(String(pid))+'\',\''+authEsc(String(teamId||""))+'\')" title="Assiduité aux entraînements (depuis septembre)" '+
+  return '<button type="button" onclick="event.preventDefault();event.stopPropagation();assidDetail(\''+authEsc(String(pid))+'\',\''+authEsc(String(teamId||""))+'\')" title="Assiduité aux entraînements (6 semaines)" '+
     'style="margin-left:auto;flex:none;display:flex;align-items:center;gap:6px;border:0;background:none;cursor:pointer;font-size:12px;font-weight:800;color:'+c+';font-variant-numeric:tabular-nums;padding:2px 0">'+
     '<span style="width:42px;height:6px;border-radius:9px;background:var(--bdr);overflow:hidden;display:inline-block"><i style="display:block;height:100%;width:'+(a.pct||0)+'%;background:'+c+'"></i></span>'+txt+'</button>';
 }
@@ -68,7 +67,7 @@ function assidDetail(pid,teamId){
   var a=assidPour(pid,team), nom=(typeof repNom==="function")?repNom(pid):"Joueuse";
   var s=gmSheet("Assiduité · "+nom), box=document.createElement("div");
   var h='<div style="font-size:13px;color:var(--txt2);margin-bottom:10px">'+authEsc(assidSousTitre(a))+(a.pct!=null?' · <b style="color:'+assidCouleur(a.pct)+'">'+a.pct+' %</b>':'')+
-    '<br><span style="font-size:11.5px;color:var(--mut)">Entraînements depuis septembre. Les absences excusées ne comptent pas dans le pourcentage.</span></div>';
+    '<br><span style="font-size:11.5px;color:var(--mut)">Entraînements des 6 dernières semaines. Les absences excusées ne comptent pas dans le pourcentage.</span></div>';
   if(!a.absences.length) h+='<div style="font-size:13px;color:var(--mut)">Aucune absence sur la période.</div>';
   var staff=typeof isStaffUser==="function"&&isStaffUser();
   a.absences.forEach(function(x){

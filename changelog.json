@@ -1,26 +1,13 @@
 [
  {
-  "v": "1793537523",
+  "v": "1793538348",
   "titre": "Démo remise à jour à chaque version",
   "points": [
    {
     "roles": [
      "dirigeant"
     ],
-    "texte": "La démo se recrée à chaque nouvelle version de l'appli (en plus de chaque jour), et la liste de convocation indique « Assiduité · saison »."
-   }
-  ]
- },
- {
-  "v": "1793536124",
-  "titre": "Assiduité depuis septembre",
-  "points": [
-   {
-    "roles": [
-     "coach",
-     "dirigeant"
-    ],
-    "texte": "L'assiduité aux entraînements se calcule maintenant depuis le 1er septembre (et non plus sur 6 semaines). Les absences excusées restent hors calcul."
+    "texte": "La démo se recrée à chaque nouvelle version de l'appli (en plus de chaque jour)."
    }
   ]
  },
