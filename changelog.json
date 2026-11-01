@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793524673",
+  "titre": "Communauté des familles : la liste des canaux",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "L'onglet Communauté montre la liste des canaux : le Général, le canal de votre équipe, et Événements dès que vous êtes inscrit à un événement. Les canaux des autres équipes n'apparaissent plus."
+   }
+  ]
+ },
+ {
   "v": "1793523740",
   "titre": "Réservation : places en direct",
   "points": [

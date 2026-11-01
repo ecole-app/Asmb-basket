@@ -160,20 +160,9 @@ function navToParent(which){
   else if(which==="stats"){document.getElementById("bni-stats").classList.add("on");stack=["parent-stats"];showScr("parent-stats");buildParentStats();}
   else if(which==="events"){document.getElementById("bni-ev").classList.add("on");stack=["parent-events"];showScr("parent-events");buildParentEvents();}
   else if(which==="communaute"){
+    // Liste des canaux comme pour tout le monde (Général, son équipe, Événements si inscrit).
     var b=document.getElementById("bni-p-communaute");if(b)b.classList.add("on");
-    var teams=getTeams();
-    var activeId=getActiveTeamId();
-    var activeTeam=teams.find(function(t){return t.id===activeId;})||teams[0];
-    if(activeTeam&&window.fbReady){
-      window.fbGetDocs(window.fbCollection(window.fbDb,"channels")).then(function(snap){
-        var chData=null;
-        snap.forEach(function(d){if(d.id===activeTeam.id)chData={id:d.id,name:(d.data().name||activeTeam.name),desc:d.data().desc||"",members:d.data().members||[],icon:d.data().icon||""};});
-        if(!chData)chData={id:activeTeam.id,name:activeTeam.name,desc:"Canal de l'équipe "+activeTeam.name,members:[],icon:""};
-        openChannel(chData);
-      });
-    } else {
-      stack=["communaute"];showScr("communaute");buildCommunaute();
-    }
+    stack=["communaute"];showScr("communaute");buildCommunaute();
   }
 }
 

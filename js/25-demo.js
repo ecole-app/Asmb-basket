@@ -341,7 +341,8 @@ function demoDonnees(){
     });
   });
   // Communauté : canal général, un canal par équipe, quelques messages récents.
-  db.channels={general:{id:"general",name:"Général",icon:"📣",desc:"Infos du club pour tout le monde",members:[],clubWide:true}};
+  db.channels={general:{id:"general",name:"Général",icon:"📣",desc:"Infos du club pour tout le monde",members:[],clubWide:true},
+    evenements:{id:"evenements",name:"Événements",icon:"🎉",desc:"Un fil par événement, pour les inscrits",members:[],clubWide:true}};
   teams.forEach(function(t){ db.channels[t.id]={id:t.id,name:t.name,icon:"🏀",desc:"Canal de l'équipe "+t.name,members:[],teamId:t.id}; });
   var msg=function(ch,min,pseudo,text){ var c=db["channels/"+ch+"/messages"]=db["channels/"+ch+"/messages"]||{}; var id="dm"+Object.keys(c).length+ch;
     c[id]={text:text,pseudo:pseudo,ts:Date.now()-min*60000,likeUsers:[],heartUsers:[],demo:true}; };

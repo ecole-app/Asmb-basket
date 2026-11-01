@@ -509,19 +509,39 @@ function joueurMesEquipes(){
   var ids=((window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[]).map(String);
   return getTeams().filter(function(t){ return (t.members||[]).some(function(m){ return ids.indexOf(String(m))>=0; }); }).map(function(t){ return t.id; });
 }
+// Équipes d'une famille : celles de ses enfants (rattachés au compte ou par numéro) et celles suivies.
+function familleMesEquipes(){
+  var ids=(typeof mesEnfants==="function"?mesEnfants():[]).map(function(p){ return String(p.id); });
+  var l=getTeams().filter(function(t){ return (t.members||[]).some(function(m){ return ids.indexOf(String(m))>=0; }); }).map(function(t){ return t.id; });
+  (typeof getParentTeams==="function"?getParentTeams():[]).forEach(function(id){ if(l.indexOf(id)<0) l.push(id); });
+  return l;
+}
+// Canal de l'équipe de MON enfant (parent) ou de MON équipe (enfant) : membre sans liste de numéros.
+function monCanalEquipeFamille(ch){
+  var prof=localStorage.getItem("asmb_profile"), tid=ch&&canalEquipeId(ch);
+  if(!tid) return false;
+  if(prof==="joueur") return joueurMesEquipes().indexOf(tid)>=0;
+  if(prof==="parent") return familleMesEquipes().indexOf(tid)>=0;
+  return false;
+}
+function canalEquipeId(ch){ return ch.teamId||(getTeams().some(function(t){ return t.id===ch.id; })?ch.id:""); }
 function channelVisibleToMe(ch){
   var profile=localStorage.getItem("asmb_profile");
-  // Enfant : le général et le canal de SON équipe, jamais ceux des autres équipes.
-  if(profile==="joueur"){
-    var eq=ch.teamId||ch.id, estEquipe=!!ch.teamId||getTeams().some(function(t){ return t.id===ch.id; });
-    return estEquipe?joueurMesEquipes().indexOf(eq)>=0:true;
+  // Famille (parent, enfant) : le Général (et les canaux « tout le club »), le canal de SON équipe,
+  // et le canal Événements seulement s'il est inscrit à un événement (filtré dans renderChannelList).
+  // Jamais les canaux des autres équipes ni les canaux réservés au staff.
+  if(profile==="parent"||profile==="joueur"){
+    if(ch.evt||ch.id==="evenements") return true;
+    var tid=canalEquipeId(ch);
+    if(tid) return (profile==="joueur"?joueurMesEquipes():familleMesEquipes()).indexOf(tid)>=0;
+    return ch.id==="general"||!!ch.clubWide;
   }
   if(profile!=="coach") return true;
   if(ch.clubWide||ch.evt) return true;
   // Canal d'équipe : lié par teamId, ou créé avec l'identifiant de l'équipe (ensureTeamChannel).
-  var tid=ch.teamId||(getTeams().some(function(t){ return t.id===ch.id; })?ch.id:"");
-  if(!tid) return false;
-  return getCoachTeams().indexOf(tid)>=0;
+  var tid2=canalEquipeId(ch);
+  if(!tid2) return false;
+  return getCoachTeams().indexOf(tid2)>=0;
 }
 
 function buildCommunaute(){
@@ -554,7 +574,10 @@ function buildCommunaute(){
 
 function renderChannelList(channels){
   var el=document.getElementById("channel-list");if(!el)return;
-  channels=channels.filter(function(c){return !c.evt;});
+  // Famille : le canal Événements n'apparaît que si elle a au moins un fil d'événement (inscription).
+  var fam=["parent","joueur"].indexOf(localStorage.getItem("asmb_profile"))>=0;
+  var aUnFil=fam&&channels.some(function(c){ return c.evt&&typeof chatFilVisible==="function"&&chatFilVisible(c); });
+  channels=channels.filter(function(c){return !c.evt&&!(fam&&c.id==="evenements"&&!aUnFil);});
   if(!channels.length){el.innerHTML='<div class="empty-state"><div>Aucun canal</div></div>';return;}
 
   // Trier par derniere activite (utilisation recente en premier)
@@ -568,7 +591,7 @@ function renderChannelList(channels){
     var members=ch.members||[];
     var isRestricted=members.length>0||!!ch.evt;
     var isMember=isDirigeant||(!!ch.evt&&!!window.asmbCoachMode)||!isRestricted||members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;})
-      ||(localStorage.getItem("asmb_profile")==="joueur"&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0);
+      ||monCanalEquipeFamille(ch);
     var div=document.createElement("div");div.className="channel-card"+(isMember?"":" locked");
     div.setAttribute("data-chid",ch.id);
     div.style.position="relative";
@@ -649,11 +672,11 @@ async function openChannel(ch,sansPile){
   var members=ch.members||[];
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   var evtStaff=!!ch.evt&&!!window.asmbCoachMode;
-  var enfantEquipe=localStorage.getItem("asmb_profile")==="joueur"&&!ch.evt&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0;
+  var enfantEquipe=!ch.evt&&monCanalEquipeFamille(ch);
   if((members.length>0||ch.evt) && !isDirigeant && !evtStaff && !enfantEquipe){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
     var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;})
-      ||(localStorage.getItem("asmb_profile")==="joueur"&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0);
+      ||monCanalEquipeFamille(ch);
     if(!isAuth){askAlert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
   }
   currentConvKind="channel";
