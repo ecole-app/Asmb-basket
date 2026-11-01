@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793521481",
+  "titre": "Inscription d'un enfant à un événement",
+  "points": [
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "« Inscrire mon enfant » trouve aussi les enfants rattachés à votre compte. L'onglet Événement ne montre plus que les rendez-vous à venir."
+   }
+  ]
+ },
+ {
   "v": "1793479165",
   "titre": "Présent / Absent : une seule liste partout",
   "points": [

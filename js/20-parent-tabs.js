@@ -8,8 +8,10 @@ function buildParentEvents(){
   var el=document.getElementById("parent-events-list");
   var ouverts=(typeof evtCartesParent==="function")?evtCartesParent():null;
   if(!team){el.innerHTML="";if(ouverts)el.appendChild(ouverts);return;}
+  // À venir seulement (les matchs passés sont dans « Derniers matchs » de l'accueil).
+  var ajd=new Date().toISOString().slice(0,10);
   var events=getVisibleEvents().filter(function(e){
-    if(!e.equipe)return false;
+    if(!e.equipe||(e.dateFin||e.date)<ajd)return false;
     return e.equipe.toUpperCase().indexOf(team.name.toUpperCase())>=0;
   });
   events.sort(function(a,b){return a.date>b.date?1:-1;});
@@ -188,10 +190,13 @@ function openParentSettings(){
 // ne fournit aucune donnee de contact.
 var CODES_ENFANTS={};
 
+// Enfants du parent : rattachés par son numéro (asmb_mes_joueurs) OU à son compte
+// (linkedPlayerIds, invitation du club). Les deux comptent partout.
 function mesEnfants(){
-  var ids=[]; try{ ids=JSON.parse(localStorage.getItem("asmb_mes_joueurs")||"[]"); }catch(e){}
-  var r=(typeof getRoster==="function")?getRoster():[];
-  return r.filter(function(p){ return ids.indexOf(String(p.id))>=0; });
+  var ids=[]; try{ ids=JSON.parse(localStorage.getItem("asmb_mes_joueurs")||"[]").map(String); }catch(e){}
+  ((window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[]).forEach(function(id){ if(ids.indexOf(String(id))<0) ids.push(String(id)); });
+  var r=((typeof getRoster==="function")?getRoster():[]).concat((typeof getPlayers==="function")?getPlayers():[]), vus={};
+  return r.filter(function(p){ var id=String(p.id); if(vus[id]||ids.indexOf(id)<0) return false; vus[id]=1; return true; });
 }
 
 function buildAccesEnfants(){
