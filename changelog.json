@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793540173",
+  "titre": "Correction d'une erreur sur l'écran Plateforme",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Correction d'une erreur interne (« Aucun club actif pour accéder à checkins ») qui pouvait apparaître hors d'un club."
+   }
+  ]
+ },
+ {
   "v": "1793540001",
   "titre": "Changer de profil (super admin)",
   "points": [

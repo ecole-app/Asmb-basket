@@ -9,14 +9,20 @@
    Attendus d'un rendez-vous : les convoqués s'il y en a (matchs), sinon les joueurs de l'équipe.
    Une absence envoie aussi le message habituel dans le canal de l'équipe. */
 
-var REP_ECOUTE=null;
+var REP_ECOUTE=null, REP_CLUB="";
 function repEcouter(){
-  if(REP_ECOUTE||!window.fbReady||!window.fbOnSnapshot||!window.fbDb) return;
-  REP_ECOUTE=window.fbOnSnapshot(window.fbCollection(window.fbDb,"checkins"),function(snap){
-    var l=[]; snap.forEach(function(d){ var c=d.data()||{}; if(c.eventId&&c.playerId) l.push({id:d.id,eventId:String(c.eventId),playerId:String(c.playerId),statut:c.status,motif:c.motif||""}); });
-    localStorage.setItem("asmb_checkins",JSON.stringify(l));
-    if(typeof refreshCurrentScreen==="function") refreshCurrentScreen();
-  },function(){ REP_ECOUTE=null; });
+  // Pas de club actif (écran Plateforme du super admin, connexion...) : rien à écouter.
+  if(!window.fbReady||!window.fbOnSnapshot||!window.fbDb||!window.CURRENT_CLUB_ID) return;
+  if(REP_ECOUTE&&REP_CLUB!==window.CURRENT_CLUB_ID){ try{ REP_ECOUTE(); }catch(e){} REP_ECOUTE=null; }   // autre club : on réécoute
+  if(REP_ECOUTE) return;
+  try{
+    REP_CLUB=window.CURRENT_CLUB_ID;
+    REP_ECOUTE=window.fbOnSnapshot(window.fbCollection(window.fbDb,"checkins"),function(snap){
+      var l=[]; snap.forEach(function(d){ var c=d.data()||{}; if(c.eventId&&c.playerId) l.push({id:d.id,eventId:String(c.eventId),playerId:String(c.playerId),statut:c.status,motif:c.motif||""}); });
+      localStorage.setItem("asmb_checkins",JSON.stringify(l));
+      if(typeof refreshCurrentScreen==="function") refreshCurrentScreen();
+    },function(){ REP_ECOUTE=null; });
+  }catch(e){ REP_ECOUTE=null; }
 }
 function getReponses(){ repEcouter(); try{ return JSON.parse(localStorage.getItem("asmb_checkins")||"[]"); }catch(e){ return []; } }
 function repId(eid,pid){ return String(eid)+"_"+String(pid); }
