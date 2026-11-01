@@ -412,29 +412,11 @@ const CLUB_ORIGINE = "asmb";
 exports.onDemandeEssai = onDocumentCreated("demandes_essai/{id}", async (event) => {
   const d = event.data && event.data.data();
   if (!d) return;
-  // Abonnement Plateforme (global) ; à défaut, ancien abonnement du club d'origine.
-  let ref = db.collection("plateforme_push").doc(SUPER_ADMIN_UID);
-  let snap = await ref.get();
-  if (!(snap.exists && snap.data() && snap.data().token)) {
-    ref = db.collection("clubs").doc(CLUB_ORIGINE).collection("push_subscriptions").doc(SUPER_ADMIN_UID);
-    snap = await ref.get();
-  }
-  const token = snap.exists && snap.data() && snap.data().token;
-  if (!token) return;
   const quoi = [d.club, d.nom].filter(Boolean).join(" · ").slice(0, 100);
-  try {
-    await admin.messaging().send({
-      token,
-      notification: { title: "Nouvelle demande d'essai", body: quoi || "Un club vient de remplir le formulaire" },
-      data: { url: "./" },
-      webpush: webpushClub(null, { headers: { Urgency: "high" } })
-    });
-  } catch (e) {
-    const code = e && e.code;
-    if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
-      await ref.delete();
-    }
-  }
+  // Même chemin que les alertes bug (qui arrivent) ; le résultat est noté sur la demande.
+  const r = await alerteSuperAdmin("Nouvelle demande d'essai", quoi || "Un club vient de remplir le formulaire");
+  try { await event.data.ref.update({ notif: { ok: !!r.ok, erreur: r.erreur || "", at: Date.now() } }); }
+  catch (e) { console.error("onDemandeEssai: écriture du résultat", e); }
 });
 
 // Un dirigeant valide son compte avec le lien d'invitation : alerte Plateforme.
@@ -1117,10 +1099,14 @@ const SAUV_BUCKET = "asmb-app-sauvegardes";
 async function alerteSuperAdmin(titre, corps) {
   const snap = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
   const token = snap.exists && snap.data() && snap.data().token;
-  if (!token) return;
+  if (!token) { console.error("alerteSuperAdmin: aucun jeton dans plateforme_push"); return { ok: false, erreur: "aucun jeton" }; }
   try {
     await admin.messaging().send({ token, notification: { title: titre, body: corps }, data: { url: "./" }, webpush: webpushClub(null) });
-  } catch (e) { /* jeton périmé : le bandeau Plateforme reste */ }
+    return { ok: true };
+  } catch (e) {
+    console.error("alerteSuperAdmin:", e && e.code, e && e.message);
+    return { ok: false, erreur: String((e && (e.code || e.message)) || "erreur").slice(0, 120) };
+  }
 }
 async function sauvegardeLancer(origine) {
   const { v1 } = require("@google-cloud/firestore");

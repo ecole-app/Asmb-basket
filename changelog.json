@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793553768",
+  "titre": "Plateforme : résultat de l'alerte push sur chaque demande d'essai",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque demande d'essai indique si la notification a bien été envoyée, ou l'erreur rencontrée."
+   }
+  ]
+ },
+ {
   "v": "1793544180",
   "titre": "Plateforme : chiffres de chaque club",
   "points": [

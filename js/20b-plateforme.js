@@ -1192,7 +1192,7 @@ async function loadDemandesEssai(box){
     var card=gmCard();
     var at=gmDate(d.at);
     var coul=[d.couleur,d.couleur2].filter(function(x){return x&&/^#[0-9a-fA-F]{6}$/.test(x);});
-    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés (saison dernière)",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
+    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés (saison dernière)",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Alerte push",d.notif?(d.notif.ok?"envoyée":"échec : "+(d.notif.erreur||"?")):""],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
     var h='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(d.club||"")+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">'+(at?at.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
     lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+l[0]+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
