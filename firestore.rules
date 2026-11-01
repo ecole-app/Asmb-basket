@@ -660,7 +660,12 @@ service cloud.firestore {
       // les notes du staff : elle est reservee au staff. Ce que les familles ont
       // besoin de voir (nom, prenom, categorie, photo si autorisee) vit dans
       // "roster", derive de cette fiche a chaque enregistrement.
-      match /players/{id}      { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
+      // Fiche complète : le staff, et le compte rattaché à CETTE fiche (son enfant, ou lui-même)
+      // pour pré-remplir ce que le club connaît déjà (date de naissance d'une inscription…).
+      match /players/{id}      {
+        allow read: if readStaff(clubId) || (member(clubId) && id in me().get('linkedPlayerIds', []));
+        allow write: if staff(clubId);
+      }
       match /roster/{id}       { allow read: if readMember(clubId); allow write: if staff(clubId); }
 
       // Rattachement d'un numero a ses fiches joueur : un parent a ses enfants,

@@ -1081,6 +1081,12 @@ function evtInscrireEnfant(e){
   var tarifs=e.inscr.tarifs||[], modes=e.inscr.modes||[];
   var tIdx=tarifs.findIndex(function(x){return x.pour==="lic";}); if(tIdx<0) tIdx=0;
   var mode=modes.length===1?modes[0]:null, pid=null;
+  // Date de naissance déjà connue du club (fiche rattachée, ou fiche joueur) : rien à redemander.
+  function ficheDe(id){
+    var a=fiches[id]||{}; if(/^\d{4}-\d{2}-\d{2}$/.test(a.naissance||"")) return a;
+    var p=(typeof getPlayers==="function"?getPlayers():[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    return p?Object.assign({},a,{prenom:a.prenom||p.prenom,nom:a.nom||p.nom,naissance:p.naissance||""}):a;
+  }
   var parJour=!!e.inscr.parJour, pageJ={jours:evtJoursPlage(e.date,e.dateFin),places:e.inscr.places||0,nbJ:{}}, sel=pageJ.jours.slice();
   function montantCourant(){ return parJour?evtMontant(tarifs[tIdx],sel,pageJ.jours.length):(Number(tarifs[tIdx].prix)||0); }
   var s=gmSheet(e.titre||eventTypeLabel(e.type));
@@ -1089,6 +1095,7 @@ function evtInscrireEnfant(e){
     v.textContent="Aucun enfant n'est relié à votre compte. Demandez au club de rattacher votre numéro à la fiche de votre enfant, ou utilisez le lien d'inscription du club.";
     s.body.appendChild(v); return;
   }
+  if(enfants.length===1) pid=String(enfants[0].id);
   var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:8px";
   info.textContent=evtDateTxt(e)+(e.lieu?" · "+e.lieu:"");
   s.body.appendChild(info);
@@ -1114,7 +1121,7 @@ function evtInscrireEnfant(e){
       var b=document.createElement("button"); b.type="button"; b.style.cssText=chip(pid===String(k.id)); b.textContent=k.prenom||k.nom||"Enfant";
       b.addEventListener("click",function(){ pid=String(k.id); peindre(); }); eBox.appendChild(b);
     });
-    var f=pid?(fiches[pid]||{}):{};
+    var f=pid?ficheDe(pid):{};
     naissG.style.display=(pid&&!/^\d{4}-\d{2}-\d{2}$/.test(f.naissance||""))?"block":"none";
     tBox.innerHTML="";
     tarifs.forEach(function(t,i){
@@ -1147,7 +1154,7 @@ function evtInscrireEnfant(e){
     var gratuit=!(montantCourant()>0);
     if(!gratuit && !mode) return askAlert("Choisissez le mode de paiement.");
     var k=enfants.find(function(x){return String(x.id)===pid;})||{};
-    var f=fiches[pid]||{};
+    var f=ficheDe(pid);
     var naiss=/^\d{4}-\d{2}-\d{2}$/.test(f.naissance||"")?f.naissance:String((document.getElementById("evt-p-naiss")||{}).value||"");
     if(!/^\d{4}-\d{2}-\d{2}$/.test(naiss)) return askAlert("Indiquez la date de naissance.");
     var u=window.ASMB_USER||{};

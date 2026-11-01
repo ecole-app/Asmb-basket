@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793523051",
+  "titre": "Inscription à un événement : date de naissance déjà connue",
+  "points": [
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Pour un enfant licencié, la date de naissance n'est plus redemandée à l'inscription à un stage ou un événement, et l'enfant est déjà choisi s'il est seul."
+   }
+  ]
+ },
+ {
   "v": "1793522869",
   "titre": "Enfants : pas de messages dans le Général",
   "points": [

@@ -108,15 +108,31 @@ function refreshCurrentScreen(){
 // Un membre ne lit que son propre rattachement : la regle verifie que le numero
 // demande est bien celui de son compte.
 function chargerMesRattachements(){
+  chargerFichesComptes();
   var tel=(localStorage.getItem("asmb_phone")||"").replace(/\s+/g,"");
   if(!tel||!window.fbGetDoc||!window.fbDoc) return;
   window.fbGetDoc(window.fbDoc(window.fbDb,"rattachements",tel)).then(function(s){
     var j=(s&&s.exists()&&s.data().joueurs)||{};
     localStorage.setItem("asmb_mes_joueurs",JSON.stringify(Object.keys(j)));
     // Fiches pour la reinscription en ligne : gardees en memoire seulement.
-    window.MES_FICHES=(s&&s.exists()&&s.data().fiches)||{};
+    window.MES_FICHES=Object.assign(window.MES_FICHES||{},(s&&s.exists()&&s.data().fiches)||{});
     refreshCurrentScreen();
   }).catch(function(){});
+}
+// Enfants rattachés au COMPTE (invitation du club, linkedPlayerIds) : leur fiche est lisible par ce
+// compte (firestore.rules, players) ; on garde en mémoire ce qui sert à pré-remplir (date de naissance).
+function chargerFichesComptes(){
+  var ids=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
+  if(!ids.length||!window.fbGetDoc||!window.fbDoc) return;
+  window.MES_FICHES=window.MES_FICHES||{};
+  ids.forEach(function(pid){
+    if(window.MES_FICHES[pid]&&window.MES_FICHES[pid].naissance) return;
+    window.fbGetDoc(window.fbDoc(window.fbDb,"players",String(pid))).then(function(s){
+      if(!s||!s.exists()) return;
+      var d=s.data()||{};
+      window.MES_FICHES[pid]=Object.assign({},window.MES_FICHES[pid]||{},{prenom:d.prenom||"",nom:d.nom||"",naissance:d.naissance||""});
+    }).catch(function(){});
+  });
 }
 
 function initFirestoreSync(){

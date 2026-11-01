@@ -1507,3 +1507,13 @@ describe("Joueur mineur (compte enfant) dans la Communauté", () => {
     await assertSucceeds(addDoc(collection(await as("parentA"), "clubs/A/channels/general/messages"), msg("parentA")));
   });
 });
+
+// ───────────────────────────────────────────────────────────────
+describe("Fiche joueur lue par le compte rattaché", () => {
+  it("l'enfant (ou son compte) lit sa propre fiche, pas celle d'un autre", async () => {
+    await assertSucceeds(getDoc(doc(await as("joueurA"), "clubs/A/players/p1")));
+    await assertFails(getDoc(doc(await as("joueurA"), "clubs/A/players/p2")));
+    await assertFails(getDoc(doc(await as("parentA"), "clubs/A/players/p1")));
+    await assertFails(getDocs(collection(await as("joueurA"), "clubs/A/players")));
+  });
+});
