@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793539689",
+  "titre": "Calendrier : seulement ce qui me concerne",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le calendrier n'affiche plus que les entraînements et matchs de l'équipe de votre enfant (et les événements ouverts à tout le club)."
+   }
+  ]
+ },
+ {
   "v": "1793538348",
   "titre": "Démo remise à jour à chaque version",
   "points": [

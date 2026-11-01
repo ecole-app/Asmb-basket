@@ -207,6 +207,18 @@ function buildCalendrier(){
   if(filterRow)filterRow.style.display=(isCoach&&coachTeamObj)?"flex":"none";
 
   fetchEventsFromCloud().then(function(events){
+    // Parent / joueur : seulement les rendez-vous de leurs équipes (+ ce qui est ouvert à tout le club).
+    var prof=localStorage.getItem("asmb_profile");
+    if(prof==="parent"||prof==="joueur"){
+      var tids=(prof==="joueur"&&typeof joueurMesEquipes==="function")?joueurMesEquipes():((typeof familleMesEquipes==="function")?familleMesEquipes():[]);
+      var noms=getTeams().filter(function(t){ return tids.indexOf(t.id)>=0&&t.name; }).map(function(t){ return String(t.name).toUpperCase(); });
+      events=events.filter(function(e){
+        if(e.statut==="attente") return false;
+        if(!e.equipe) return true;
+        var eq=String(e.equipe).toUpperCase();
+        return noms.some(function(n){ return eq.indexOf(n)>=0; });
+      });
+    }
     if(isCoach&&coachTeamObj&&calFilterMode==="mine"){
       events=events.filter(function(e){
         var eq=(e.equipe||"").toUpperCase();
