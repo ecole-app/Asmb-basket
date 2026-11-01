@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793536124",
+  "titre": "Assiduité depuis septembre",
+  "points": [
+   {
+    "roles": [
+     "coach",
+     "dirigeant"
+    ],
+    "texte": "L'assiduité aux entraînements se calcule maintenant depuis le 1er septembre (et non plus sur 6 semaines). Les absences excusées restent hors calcul."
+   }
+  ]
+ },
+ {
   "v": "1793526962",
   "titre": "Convocation du lundi et assiduité",
   "points": [
