@@ -745,6 +745,8 @@ function effectiveRoles(){
   var roles=((window.ASMB_USER&&window.ASMB_USER.roles)||[]).slice();
   var linked=(window.ASMB_USER&&window.ASMB_USER.linkedPlayerIds)||[];
   if(linked.length && roles.indexOf("parent")<0) roles.push("parent");
+  // Super admin : peut voir l'appli comme un coach, un parent ou un joueur (pour tester et aider un club).
+  if(typeof isSuperAdmin==="function"&&isSuperAdmin()&&!window.SUPPORT_MODE) ["coach","parent","joueur"].forEach(function(r){ if(roles.indexOf(r)<0) roles.push(r); });
   return roles;
 }
 

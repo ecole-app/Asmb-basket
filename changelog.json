@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793540001",
+  "titre": "Changer de profil (super admin)",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Le compte super admin peut maintenant voir l'appli comme un coach, un parent ou un joueur (bouton profil en haut), pour tester et aider un club."
+   }
+  ]
+ },
+ {
   "v": "1793539689",
   "titre": "Calendrier : seulement ce qui me concerne",
   "points": [

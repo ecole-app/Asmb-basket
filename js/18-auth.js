@@ -480,7 +480,7 @@ function finishAuthedUser(user, u, isUpdate){
   initFirestoreSync(); // Step 3 : lecture/écriture live Firestore
   try{
     var btn=document.getElementById("hdr-profile-btn");
-    if(btn) btn.style.display=(roles.length>1)?"flex":"none";
+    if(btn) btn.style.display=((typeof effectiveRoles==="function"?effectiveRoles():roles).length>1)?"flex":"none";
     var setBtn=document.getElementById("hdr-settings-btn");
     if(setBtn) setBtn.style.display=(profile==="bureau")?"flex":"none";   // voir buildBottomNav (js/20)
     // Retour à la plateforme, accessible depuis n'importe quel écran
