@@ -518,8 +518,10 @@ function channelVisibleToMe(ch){
   }
   if(profile!=="coach") return true;
   if(ch.clubWide||ch.evt) return true;
-  if(!ch.teamId) return false;
-  return getCoachTeams().indexOf(ch.teamId)>=0;
+  // Canal d'équipe : lié par teamId, ou créé avec l'identifiant de l'équipe (ensureTeamChannel).
+  var tid=ch.teamId||(getTeams().some(function(t){ return t.id===ch.id; })?ch.id:"");
+  if(!tid) return false;
+  return getCoachTeams().indexOf(tid)>=0;
 }
 
 function buildCommunaute(){

@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793522462",
+  "titre": "Coach : le canal de son équipe",
+  "points": [
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Dans la Communauté, le coach voit enfin le canal de son équipe (il n'apparaissait pas quand le canal avait été créé avec l'équipe)."
+   }
+  ]
+ },
+ {
   "v": "1793521481",
   "titre": "Inscription d'un enfant à un événement",
   "points": [

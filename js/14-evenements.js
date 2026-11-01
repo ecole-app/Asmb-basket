@@ -809,7 +809,7 @@ function findChannelForTeamText(teamText){
 function ensureTeamChannel(team){
   if(!window.fbReady)return;
   window.fbSetDoc(window.fbDoc(window.fbDb,"channels",team.id),{
-    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'équipe "+team.name
+    id:team.id,name:team.name,icon:"🏀",desc:"Canal de l'équipe "+team.name,teamId:team.id
   },{merge:true});
 }
 
