@@ -313,7 +313,7 @@ service cloud.firestore {
 
     match /plateforme_ping/{id} {
       allow create: if superAdmin() && request.resource.data.keys().hasOnly(['at','type'])
-        && (!('type' in request.resource.data) || request.resource.data.type == 'sauvegarde');
+        && (!('type' in request.resource.data) || request.resource.data.type in ['sauvegarde','comptage']);
       allow read: if superAdmin();
     }
 

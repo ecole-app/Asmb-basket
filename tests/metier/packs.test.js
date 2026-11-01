@@ -177,3 +177,23 @@ describe("Échéance d'abonnement et avis de reconduction", () => {
     assert.equal(c.gmPlusUnAn(new Date(2026, 9, 11)).toDateString(), new Date(2027, 9, 11).toDateString());
   });
 });
+
+describe("Chiffres d'un club (Plateforme)", () => {
+  const app = (club) => { const c = charger(["js/11-admin.js", "js/20b-plateforme.js"], { BOOTSTRAP_CLUB_ID: "asmb", authEsc: (v) => String(v), gmDate: (v) => (v ? new Date(v) : null) }); c.CURRENT_CLUB = club; return c; };
+  const stats = { saison: "2026-2027", licences: 56, licencesPassee: 0, equipes: 6, comptes: 14, parents: 5, activiteMs: Date.now() - 2 * 86400000 };
+  it("club gratuit : licences sur 60, saison passée déclarée à l'inscription", () => {
+    const h = app({ id: "G", plan: "gratuit", stats, licenciesSaisonPassee: 58 }).pfStatsHtml({ id: "G", plan: "gratuit", stats, licenciesSaisonPassee: 58 });
+    assert.match(h, /56<span[^>]*> \/ 60/);
+    assert.match(h, /58 \(déclaré\)/);
+    assert.match(h, /il y a 2 j/);
+  });
+  it("club payant resté sous 60 la saison passée : retour au gratuit signalé", () => {
+    const c = { id: "S", plan: "standard", stats: { ...stats, licences: 20, licencesPassee: 55 } };
+    assert.match(app(c).pfStatsHtml(c), /Saison passée sous 60/);
+    const d = { id: "S", plan: "standard", stats: { ...stats, licences: 250, licencesPassee: 231 } };
+    assert.doesNotMatch(app(d).pfStatsHtml(d), /Saison passée sous 60/);
+  });
+  it("pas encore de chiffres : message d'attente, rien ne plante", () => {
+    assert.match(app({ id: "N", plan: "standard" }).pfStatsHtml({ id: "N", plan: "standard" }), /pas encore calculés/);
+  });
+});

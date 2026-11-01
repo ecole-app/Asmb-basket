@@ -183,6 +183,8 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertFails(updateDoc(doc(db, "clubs/A"), { modulesLimites: { compta: true } }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboEcheance: futur() }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { premium200Fin: futur() }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { stats: { licences: 0 } }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { licenciesSaisonPassee: 10 }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboAvisPour: "2027-01-01" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboRythme: "annuel" }));
   });
@@ -1440,6 +1442,8 @@ describe("Test d'alerte Plateforme", () => {
   it("seul le super admin crée un test, avec le seul champ at", async () => {
     await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date() }));
     await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), x: 1 }));
+    await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "comptage" }));
+    await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "autre" }));
     await assertFails(addDoc(collection(await as("dirA"), "plateforme_ping"), { at: new Date() }));
     await assertSucceeds(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "sauvegarde" }));
     await assertFails(addDoc(collection(await as(SUPER_ADMIN), "plateforme_ping"), { at: new Date(), type: "autre" }));

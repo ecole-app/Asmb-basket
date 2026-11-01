@@ -499,6 +499,19 @@ function pfChipsEtat(bSauv,bBugs){
     if(sn.size){ bBugs.textContent="Bugs ("+sn.size+(sn.size>=50?"+":"")+")"; bBugs.style.color="#C0392B"; }
   }).catch(function(){});
 }
+// « Chiffres » : le serveur recompte tout de suite les licences, équipes et comptes de chaque club.
+function pfRecalculerChiffres(btn,list){
+  var lib=btn?btn.textContent:"Chiffres"; if(btn){ btn.disabled=true; btn.textContent="Calcul…"; }
+  var rendre=function(){ if(btn){ btn.disabled=false; btn.textContent=lib; } };
+  window.fbAddDoc(window.fbCollection(window.fbDb,"plateforme_ping"),{at:new Date(),type:"comptage"}).then(function(ref){
+    var fini=false, stop=window.fbOnSnapshot(ref,function(sn){
+      var d=sn.data()||{}; if(fini||d.ok===undefined) return; fini=true; stop(); rendre();
+      if(d.ok){ showToast("Chiffres mis à jour ("+(d.clubs||0)+" clubs)"); if(list) loadClubsList(list); }
+      else askAlert("Calcul impossible : "+(d.erreur||"erreur inconnue"));
+    });
+    setTimeout(function(){ if(!fini){ fini=true; stop(); rendre(); askAlert("Pas de réponse du serveur pour l'instant. Réessaie dans quelques minutes."); } },120000);
+  }).catch(function(e){ rendre(); askAlert("Impossible de lancer le calcul : "+((e&&e.message)||e)); });
+}
 function pfSauvegarderMaintenant(btn){
   var b=btn||document.getElementById("pf-sauv-btn"), lib=b?b.textContent:""; if(b){ b.disabled=true; b.textContent="Sauvegarde…"; }
   window.fbAddDoc(window.fbCollection(window.fbDb,"plateforme_ping"),{at:new Date(),type:"sauvegarde"}).then(function(ref){
@@ -751,6 +764,7 @@ function showPlateformeHome(opts){
   act.appendChild(gmBtn("Nouveautés","ghost",function(){ showChangelog(true); }));
   // Sauvegarde : lance tout de suite une sauvegarde de toute la base. Bugs : liste des erreurs remontées.
   var bSauv=gmBtn("Sauvegarde","ghost",function(){ pfSauvegarderMaintenant(bSauv); }); act.appendChild(bSauv);
+  var bChif=gmBtn("Chiffres","ghost",function(){ pfRecalculerChiffres(bChif,list); }); act.appendChild(bChif);
   var bBugs=gmBtn("Bugs","ghost",function(){ var sh=gmSheet("Bugs chez les utilisateurs"), bx=document.createElement("div"); bx.id="pf-bugs"; sh.body.appendChild(bx); pfBugsBox(bx); }); act.appendChild(bBugs);
   pfChipsEtat(bSauv,bBugs);
   el.appendChild(act);
@@ -822,6 +836,29 @@ function plateformeClubLogoHtml(c, px){
   var init=mots.length>=2?(mots[0].charAt(0)+mots[1].charAt(0)):(n.slice(0,2)||"?");
   return '<div style="width:'+px+'px;height:'+px+'px;border-radius:'+r+'px;background:linear-gradient(145deg,#1A2E5A,#10203d);display:flex;align-items:center;justify-content:center;font-size:'+Math.max(9,Math.round(px*0.4))+'px;font-weight:800;color:#fff;flex-shrink:0">'+authEsc(init.toUpperCase())+'</div>';
 }
+// Chiffres d'un club calculés par le serveur (clubs/{id}.stats, fonction comptageClubsNuit) :
+// que des nombres, visibles sans code d'accès support.
+function pfStatsHtml(c){
+  var st=c.stats;
+  if(!st||typeof st!=="object") return '<div style="font-size:11px;color:var(--mut);margin-top:8px">Chiffres : pas encore calculés (ce soir, ou bouton « Chiffres »).</div>';
+  var plafond=c.plan==="gratuit"?60:((c.plan==="standard")?300:0), n=Number(st.licences)||0;
+  var pct=plafond?Math.min(100,Math.round(n*100/plafond)):0, chaud=plafond&&n>=(c.plan==="gratuit"?55:270);
+  var passee=Number(st.licencesPassee)||0, decl=Number(c.licenciesSaisonPassee)||0;
+  var passeeTxt=passee>0?passee+" licences":(decl>0?decl+" (déclaré)":"—");
+  var passeeVal=passee>0?passee:decl;
+  var act=st.activiteMs?Math.floor((Date.now()-st.activiteMs)/86400000):null;
+  var actTxt=act===null?"jamais":(act<=0?"aujourd'hui":(act<=30?"il y a "+act+" j":"rien depuis "+act+" j"));
+  var cree=gmDate(c.createdAt);
+  var cell=function(k,v,warn){ return '<div style="border:1px solid var(--bdr);border-radius:12px;padding:7px 10px;min-width:0"><div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)">'+k+'</div><div style="font-size:13px;font-weight:700;margin-top:2px;color:'+(warn?'#B25A00':'var(--txt)')+'">'+v+'</div></div>'; };
+  var h='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:20px;color:var(--txt)">'+n+(plafond?'<span style="font-size:12px;color:var(--mut);font-weight:600"> / '+plafond+'</span>':'<span style="font-size:12px;color:var(--mut);font-weight:600"> licences</span>')+'</b><span style="font-size:11px;color:var(--mut)">licences · saison '+authEsc(st.saison||"")+'</span></div>'+
+    (plafond?'<div style="height:8px;border-radius:99px;background:var(--bdr);overflow:hidden;margin-top:5px"><i style="display:block;height:100%;width:'+pct+'%;border-radius:99px;background:'+(chaud?'#E8670A':'var(--ltg)')+'"></i></div>':'')+'</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">'+
+    cell("Saison passée",passeeTxt)+cell("Dernière activité",actTxt,act!==null&&act>30)+
+    cell("Équipes · comptes",(st.equipes||0)+" · "+(st.comptes||0)+" ("+(st.parents||0)+" parents)")+cell("Depuis",cree?cree.toLocaleDateString("fr-FR"):"—")+'</div>';
+  if((c.plan==="standard"||c.plan==="premium")&&passeeVal>0&&passeeVal<=60)
+    h+='<div style="margin-top:8px;font-size:12px;border-radius:12px;padding:8px 10px;background:color-mix(in srgb,var(--ltg) 12%,transparent);color:var(--txt)"><b>Saison passée sous 60 licences.</b> Retour possible à l\'offre gratuite cette saison (ta décision).</div>';
+  return h;
+}
 function renderClubCard(c, list){
   var card=gmCard();
   var suspLimite=!!c.planAvantSuspension;
@@ -858,7 +895,8 @@ function renderClubCard(c, list){
     +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(c.name||c.id)+'</div>'
     +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(c.type==="independant"?'<b style="color:#0E7C7B">Indépendant</b> \u00b7 ':'')+authEsc(c.sport||"")+' \u00b7 '+authEsc(c.id)
     +' \u00b7 <b style="color:'+etatCol+'">'+etat+'</b>'+delai+'</div></div></div>'
-    +(c.suspendMotif?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic">'+authEsc(c.suspendMotif)+'</div>':'');
+    +(c.suspendMotif?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic">'+authEsc(c.suspendMotif)+'</div>':'')
+    +((!supprime&&c.type!=="independant")?pfStatsHtml(c):'');
   var row=gmRow(card);
   var own=(c.id===BOOTSTRAP_CLUB_ID);
   if(own){
@@ -1154,7 +1192,7 @@ async function loadDemandesEssai(box){
     var card=gmCard();
     var at=gmDate(d.at);
     var coul=[d.couleur,d.couleur2].filter(function(x){return x&&/^#[0-9a-fA-F]{6}$/.test(x);});
-    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
+    var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés (saison dernière)",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
     var h='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(d.club||"")+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">'+(at?at.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
     lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+l[0]+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
@@ -1182,6 +1220,7 @@ async function validerDemandeEssai(d){
     var c1=(d.couleur||"").toLowerCase(), c2=(d.couleur2||"").toLowerCase();
     if(pal.indexOf(c1)>=0){ extra.couleur=c1; if(pal.indexOf(c2)>=0&&c2!==c1) extra.couleur2=c2; }
     if(d.ville) extra.ville=String(d.ville).slice(0,60);
+    if(d.licencies>0) extra.licenciesSaisonPassee=Math.min(5000,parseInt(d.licencies,10)||0);   // déclaré à l'inscription, jamais montré au club
     // Réseaux et boutique donnés dans la demande : re-vérifiés avant d'aller sur la fiche du club.
     if(d.liens && typeof d.liens==="object" && typeof normaliserLienClub==="function"){
       var lz={}; CLUB_LIENS.forEach(function(x){ var v=normaliserLienClub(x.k,d.liens[x.k]); if(v) lz[x.k]=v; });

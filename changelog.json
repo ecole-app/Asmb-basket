@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793544180",
+  "titre": "Plateforme : chiffres de chaque club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Chaque club affiche ses licences de la saison (sur 60 ou 300), la saison passée, ses équipes et comptes et sa dernière activité. Une notification prévient à 55 licences pour un club gratuit."
+   }
+  ]
+ },
+ {
   "v": "1793541773",
   "titre": "Premium des petits clubs : 200 € la première année",
   "points": [

@@ -474,6 +474,12 @@ exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (even
     await ref.update({ ok: r.statut === "en_cours", erreur: r.erreur || "" });
     return;
   }
+  // « Recalculer les chiffres » (Plateforme) : mêmes comptages que la nuit.
+  if (event.data.data().type === "comptage") {
+    try { const n = await comptageClubs(); await ref.update({ ok: true, erreur: "", clubs: n }); }
+    catch (e) { console.error("comptage", e); await ref.update({ ok: false, erreur: String((e && e.message) || e).slice(0, 200) }); }
+    return;
+  }
   const sub = await db.collection("plateforme_push").doc(SUPER_ADMIN_UID).get();
   const token = sub.exists && sub.data() && sub.data().token;
   if (!token) { await ref.update({ ok: false, erreur: "aucun appareil enregistré" }); return; }
@@ -1242,4 +1248,72 @@ exports.rappelConvocation = onSchedule({ schedule: "every monday,wednesday 08:30
     } catch (e) { console.error("rappelConvocation", club.id, e); }
   }
   console.log("rappelConvocation : coachs prévenus", envoyes);
+});
+
+/* ===== Chiffres de chaque club (Plateforme) =====
+   Chaque nuit (et sur demande), le serveur compte pour chaque club : licences de la saison et de la
+   saison passée, équipes, comptes, dernière activité. Seuls des nombres sont écrits sur clubs/{id}.stats
+   (aucun nom) : le super admin les lit sans code d'accès support. Un club gratuit qui atteint 55
+   licences (puis 60) déclenche une alerte push au super admin, une fois par palier et par saison. */
+const GRATUIT_ALERTE = 55, GRATUIT_LIMITE = 60;
+function saisonParis(d) {
+  const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", year: "numeric", month: "numeric" }).formatToParts(d || new Date());
+  const y = +p.find((x) => x.type === "year").value, m = +p.find((x) => x.type === "month").value;
+  return m >= 7 ? y + "-" + (y + 1) : (y - 1) + "-" + y;      // même règle que computeNaturalSeason (js/01-config.js)
+}
+async function comptageClub(clubRef, saison, prec) {
+  const lic = await clubRef.collection("licences").select("saison", "role").get();
+  let n = 0, np = 0;
+  lic.forEach((d) => {
+    const l = d.data() || {};
+    if (l.role && l.role !== "joueur") return;
+    const s = l.saison || saison;
+    if (s === saison) n++; else if (s === prec) np++;
+  });
+  const eq = await clubRef.collection("teams").count().get();
+  const us = await db.collection("users").where("clubId", "==", clubRef.id).select("roles").get();
+  let parents = 0;
+  us.forEach((d) => { if (((d.data() || {}).roles || []).includes("parent")) parents++; });
+  // Dernière activité : dernier renouvellement de session des comptes du club (Firebase Auth).
+  let derniere = 0;
+  const uids = us.docs.map((d) => ({ uid: d.id }));
+  for (let i = 0; i < uids.length; i += 100) {
+    try {
+      const r = await admin.auth().getUsers(uids.slice(i, i + 100));
+      r.users.forEach((u) => {
+        const t = Date.parse((u.metadata && (u.metadata.lastRefreshTime || u.metadata.lastSignInTime)) || "");
+        if (t > derniere) derniere = t;
+      });
+    } catch (e) { /* comptes introuvables : on garde ce qu'on a */ }
+  }
+  return { saison, licences: n, licencesPassee: np, equipes: eq.data().count, comptes: us.size, parents, activiteMs: derniere || null };
+}
+async function comptageClubs() {
+  const saison = saisonParis(), prec = saisonParis(new Date(Date.now() - 365 * 86400000));
+  const clubs = await db.collection("clubs").get();
+  let fait = 0;
+  for (const c of clubs.docs) {
+    const club = c.data() || {};
+    if (club.type === "independant" || club.status === "deleted" || club.status === "purging") continue;
+    try {
+      const st = await comptageClub(c.ref, saison, prec);
+      st.maj = Date.now();
+      const maj = { stats: st };
+      if (club.plan === "gratuit") {
+        const palier = st.licences >= GRATUIT_LIMITE ? 60 : st.licences >= GRATUIT_ALERTE ? 55 : 0;
+        const deja = club.statsAlerte && club.statsAlerte.saison === saison ? club.statsAlerte.palier : 0;
+        if (palier > deja) {
+          await alerteSuperAdmin(palier === 60 ? "Club gratuit à la limite" : "Club gratuit proche de la limite",
+            (club.name || c.id) + " : " + st.licences + "/" + GRATUIT_LIMITE + " licences");
+          maj.statsAlerte = { saison, palier };
+        }
+      }
+      await c.ref.set(maj, { merge: true });
+      fait++;
+    } catch (e) { console.error("comptageClub", c.id, e); }
+  }
+  return fait;
+}
+exports.comptageClubsNuit = onSchedule({ schedule: "every day 03:20", timeZone: "Europe/Paris", timeoutSeconds: 540, memory: "512MiB" }, async () => {
+  console.log("comptageClubsNuit : clubs comptés", await comptageClubs());
 });
