@@ -109,7 +109,7 @@ function demoDemarrer(){
   window.CURRENT_CLUB=clubNormaliserCouleurs({id:"demo",name:"Club Démo",sport:"basket",ville:"Démoville",plan:"premium",couleur:"#1A2E5A",couleur2:"#D4AF37"});
   // Remise à zéro chaque jour : tout ce que le visiteur a saisi ou modifié est effacé et la saison
   // fictive est recréée à partir de la date du jour. La démo ne peut donc pas servir de vraie appli.
-  var auj=new Date().toISOString().slice(0,10);
+  var auj=new Date().toISOString().slice(0,10)+(typeof APP_VERSION!=="undefined"?"|"+APP_VERSION:""); // nouvelle version de l'appli = démo recréée
   if(!localStorage.getItem("asmb_teams")||localStorage.getItem("gm_demo_jour")!==auj){
     if(typeof purgeClubLocalData==="function") purgeClubLocalData();
     ["gm_demo_db","asmb_match_stats","gm_pp_demo"].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });

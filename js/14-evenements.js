@@ -783,7 +783,7 @@ function showConvocation(eventId){
   if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur disponible pour cette équipe</div>';}
   else{
     el.innerHTML=(dernier?'<div style="font-size:11.5px;color:var(--mut);padding:4px 0 8px">Joueuses du dernier match déjà cochées ('+authEsc(dernier.date.split("-").reverse().join("/"))+'). Ajustez puis enregistrez.</div>':'')+
-      (team?'<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:2px 4px 6px"><span>Joueuse</span><span>Assiduité · 6 sem.</span></div>':'');
+      (team?'<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:2px 4px 6px"><span>Joueuse</span><span>Assiduité · saison</span></div>':'');
     players.forEach(function(p){
       var isChecked=convoked.indexOf(p.id)>=0;
       var lbl=document.createElement("label");
