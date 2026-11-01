@@ -95,6 +95,10 @@ var NAV_ICONS={
 function buildBottomNav(profile){
   var nav=document.getElementById("bnav-main");
   if(!nav)return;
+  // Engrenage de l'en-tête : en double avec celui de l'accueil (parent, coach) ou l'onglet
+  // Paramètres (enfant) ; le dirigeant a les siens. Gardé seulement pour un compte bureau.
+  var setBtn=document.getElementById("hdr-settings-btn");
+  if(setBtn) setBtn.style.display=(profile==="bureau")?"flex":"none";
   // Compte joueur (enfant) : Accueil (son espace), Communauté, Paramètres. Jamais Admin ni Inscription.
   if(profile==="joueur"){
     nav.innerHTML=

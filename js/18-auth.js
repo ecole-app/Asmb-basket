@@ -482,7 +482,7 @@ function finishAuthedUser(user, u, isUpdate){
     var btn=document.getElementById("hdr-profile-btn");
     if(btn) btn.style.display=(roles.length>1)?"flex":"none";
     var setBtn=document.getElementById("hdr-settings-btn");
-    if(setBtn) setBtn.style.display=(profile==="dirigeant")?"none":"flex";
+    if(setBtn) setBtn.style.display=(profile==="bureau")?"flex":"none";   // voir buildBottomNav (js/20)
     // Retour à la plateforme, accessible depuis n'importe quel écran
     var gmb=document.getElementById("hdr-gm-btn");
     if(gmb){

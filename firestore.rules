@@ -719,6 +719,18 @@ service cloud.firestore {
       match /joinRequests/{id} { allow read: if readMember(clubId); allow write: if member(clubId); }
 
       // ── Communauté ──
+      // Joueur mineur (compte enfant : rôle joueur seul) : il n'écrit que dans le canal de SON équipe
+      // (canal lié à l'équipe par teamId, ou dont l'identifiant est celui de l'équipe) et dans un fil
+      // d'événement où il est inscrit. Ailleurs : réactions et sondages seulement (mise à jour partagée).
+      function enfantSeul() {
+        return hasRole('joueur') && !hasRole('parent') && !hasRole('coach') && !hasRole('dirigeant') && !hasRole('bureau');
+      }
+      function canalDeMonEquipe(clubId, chanId) {
+        let ch = get(/databases/$(database)/documents/clubs/$(clubId)/channels/$(chanId)).data;
+        let tid = ch.get('teamId', '') != '' ? ch.get('teamId', '') : chanId;
+        let t = /databases/$(database)/documents/clubs/$(clubId)/teams/$(tid);
+        return exists(t) && get(t).data.get('members', []).hasAny(me().get('linkedPlayerIds', []));
+      }
       match /channels/{chanId} {
         allow read: if readMember(clubId);
         allow write: if staff(clubId);
@@ -728,7 +740,8 @@ service cloud.firestore {
           // On ne poste qu'en son propre nom (et, dans un fil d'événement, seulement pendant l'événement).
           allow create: if member(clubId)
             && request.resource.data.get('senderUid', null) in [request.auth.uid, null]
-            && (!evtCanal(clubId, chanId) || staff(clubId) || evtEcriture(clubId, chanId));
+            && (!evtCanal(clubId, chanId) || staff(clubId) || evtEcriture(clubId, chanId))
+            && (!enfantSeul() || evtCanal(clubId, chanId) || canalDeMonEquipe(clubId, chanId));
           allow update: if member(clubId) && (staff(clubId) || auteurPeut() || champsPartages())
             && (!evtCanal(clubId, chanId) || staff(clubId) || evtEcriture(clubId, chanId));
           allow delete: if staff(clubId);

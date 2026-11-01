@@ -1487,3 +1487,23 @@ describe("Stats de match d'un joueur (stats_joueurs)", () => {
   });
 });
 
+
+// ───────────────────────────────────────────────────────────────
+describe("Joueur mineur (compte enfant) dans la Communauté", () => {
+  const msg = (uid) => ({ senderUid: uid, text: "Salut", ts: serverTimestamp() });
+  it("écrit dans le canal de son équipe seulement", async () => {
+    const db = await as("joueurA");
+    await assertSucceeds(addDoc(collection(db, "clubs/A/channels/canalU13/messages"), msg("joueurA")));
+    await assertSucceeds(addDoc(collection(db, "clubs/A/channels/tU13/messages"), msg("joueurA")));
+    await assertFails(addDoc(collection(db, "clubs/A/channels/general/messages"), msg("joueurA")));
+    await assertFails(addDoc(collection(db, "clubs/A/channels/tU15/messages"), msg("joueurA")));
+  });
+  it("dans le Général : lit et réagit avec un emoji", async () => {
+    const db = await as("joueurA");
+    await assertSucceeds(getDoc(doc(db, "clubs/A/channels/general/messages/g1")));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/general/messages/g1"), { reactions: { "👍": ["joueurA"] } }));
+  });
+  it("un parent écrit toujours dans le Général", async () => {
+    await assertSucceeds(addDoc(collection(await as("parentA"), "clubs/A/channels/general/messages"), msg("parentA")));
+  });
+});

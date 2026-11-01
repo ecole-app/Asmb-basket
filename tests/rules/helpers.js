@@ -62,6 +62,7 @@ export async function seed() {
     await set("users/coachA", { clubId: "A", roles: ["coach"], phone: "0600000002" });
     await set("users/parentA", { clubId: "A", roles: ["parent"], phone: "0611111111" });
     await set("users/parent2A", { clubId: "A", roles: ["parent"], phone: "0622222222" });
+    await set("users/joueurA", { clubId: "A", roles: ["joueur"], linkedPlayerIds: ["p1"] });
     await set("users/tresorierA", { clubId: "A", roles: ["bureau"], permissions: { comptabilite: true } });
     await set("users/parentPermA", { clubId: "A", roles: ["parent"], permissions: { comptabilite: true } });
     await set("users/dirB", { clubId: "B", roles: ["dirigeant"] });
@@ -84,6 +85,14 @@ export async function seed() {
     await set("clubs/A/rattachements/0611111111", { playerIds: ["p1"] });
     await set("clubs/A/rattachements/0622222222", { playerIds: ["p2"] });
     await set("clubs/A/channels/ch1", { nom: "U13" });
+    // Compte enfant (joueurA, fiche p1) : équipe tU13 ; canal lié par teamId, canal nommé comme l'équipe, Général.
+    await set("clubs/A/teams/tU13", { name: "U13 F", members: ["p1"] });
+    await set("clubs/A/teams/tU15", { name: "U15 G", members: ["p2"] });
+    await set("clubs/A/channels/canalU13", { name: "U13 F", teamId: "tU13" });
+    await set("clubs/A/channels/tU13", { name: "U13 F" });
+    await set("clubs/A/channels/tU15", { name: "U15 G" });
+    await set("clubs/A/channels/general", { name: "Général", clubWide: true });
+    await set("clubs/A/channels/general/messages/g1", { senderUid: "dirA", text: "Infos", reactions: {} });
     await set("clubs/A/channels/ch1/messages/m1", { senderUid: "coachA", text: "RDV 14h", reactions: {} });
     await set("clubs/A/channels/ch1/messages/mRecent", { senderUid: "parentA", text: "Coucou", ts: Timestamp.now() });
     // Fil d'événement : parentA (0611111111) y est depuis il y a 1 h, l'événement finit dans 1 jour ; evtFini est terminé.

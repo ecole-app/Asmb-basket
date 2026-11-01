@@ -627,14 +627,21 @@ function chatRetourFil(){
 }
 
 // Canal d'événement terminé : lecture seule pour tout le monde sauf dirigeant et coachs.
+// Joueur mineur (compte enfant) : il n'écrit que dans le canal de son équipe. Ailleurs (Général…),
+// il réagit avec un emoji et répond aux sondages. Même règle côté serveur (firestore.rules).
+function chatEnfantLectureSeule(ch){
+  if(localStorage.getItem("asmb_profile")!=="joueur"||!ch||ch.evt) return false;
+  return joueurMesEquipes().indexOf(ch.teamId||ch.id)<0;
+}
 function chatAppliquerVerrou(ch){
   var bar=document.getElementById("chat-input-bar"); if(!bar) return;
-  var verrou=typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(ch)&&!window.asmbCoachMode;
+  var enfant=chatEnfantLectureSeule(ch);
+  var verrou=enfant||(typeof evtCanalVerrouille==="function"&&evtCanalVerrouille(ch)&&!window.asmbCoachMode);
   bar.style.display=verrou?"none":"flex";
   var n=document.getElementById("chat-verrou");
   if(verrou){
     if(!n){ n=document.createElement("div"); n.id="chat-verrou"; n.style.cssText="position:fixed;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:0;right:0;padding:12px 16px;background:var(--sf);border-top:1px solid var(--bdr);font-size:12.5px;font-weight:700;color:var(--mut);text-align:center;z-index:5"; bar.parentNode.appendChild(n); }
-    n.textContent="🔒 Événement terminé : ce canal est en lecture seule."; n.style.display="block";
+    n.textContent=enfant?"Ici, tu peux réagir aux messages avec un emoji et répondre aux sondages.":"🔒 Événement terminé : ce canal est en lecture seule."; n.style.display="block";
   } else if(n) n.style.display="none";
 }
 
@@ -642,9 +649,11 @@ async function openChannel(ch,sansPile){
   var members=ch.members||[];
   var isDirigeant=localStorage.getItem("asmb_profile")==="dirigeant";
   var evtStaff=!!ch.evt&&!!window.asmbCoachMode;
-  if((members.length>0||ch.evt) && !isDirigeant && !evtStaff){
+  var enfantEquipe=localStorage.getItem("asmb_profile")==="joueur"&&!ch.evt&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0;
+  if((members.length>0||ch.evt) && !isDirigeant && !evtStaff && !enfantEquipe){
     if(!myPhone){if(!(await checkMyPhone())){return;}}
-    var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;});
+    var isAuth=members.some(function(m){return (typeof m==="string"?m:m.phone)===myPhone;})
+      ||(localStorage.getItem("asmb_profile")==="joueur"&&joueurMesEquipes().indexOf(ch.teamId||ch.id)>=0);
     if(!isAuth){askAlert("Ce canal est réservé aux membres autorisés. Contactez un responsable du club.");return;}
   }
   currentConvKind="channel";

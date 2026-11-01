@@ -1,5 +1,25 @@
 [
  {
+  "v": "1793522869",
+  "titre": "Enfants : pas de messages dans le Général",
+  "points": [
+   {
+    "roles": [
+     "joueur"
+    ],
+    "texte": "Dans le canal Général, tu peux réagir aux messages avec un emoji et répondre aux sondages ; tu écris dans le canal de ton équipe."
+   },
+   {
+    "roles": [
+     "parent",
+     "coach",
+     "joueur"
+    ],
+    "texte": "L'engrenage en double de l'en-tête est retiré : les réglages restent sur l'accueil ou dans l'onglet Paramètres."
+   }
+  ]
+ },
+ {
   "v": "1793522604",
   "titre": "Compte enfant : un seul accès aux paramètres",
   "points": [
