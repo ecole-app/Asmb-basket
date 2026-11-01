@@ -182,6 +182,7 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertFails(updateDoc(doc(db, "clubs/A"), { ownerUid: "coachA" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { modulesLimites: { compta: true } }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboEcheance: futur() }));
+    await assertFails(updateDoc(doc(db, "clubs/A"), { premium200Fin: futur() }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboAvisPour: "2027-01-01" }));
     await assertFails(updateDoc(doc(db, "clubs/A"), { aboRythme: "annuel" }));
   });

@@ -224,7 +224,14 @@ function comptaLignesAvantVerrou(){
   return (typeof getComptabilite==="function"?getComptabilite():[]).filter(function(l){return !l.horsPremium;});
 }
 // Petit club en offre gratuite : Premium à 200 €/an au lieu de 300.
-function prixPremium(){ return estGratuit()?"200\u00a0€/an":"300\u00a0€/an"; }
+// Club passé de gratuit à Premium : 200 € la première année seulement (champ premium200Fin = première
+// échéance, posé par le super admin au passage), puis 300 €/an.
+function prixPremium(){
+  if(estGratuit()) return "200\u00a0€/an";
+  var c=window.CURRENT_CLUB||{}, f=(typeof gmDate==="function")?gmDate(c.premium200Fin):null;
+  if(c.plan==="premium"&&f&&f.getTime()>Date.now()) return "200\u00a0€/an (puis 300\u00a0€/an)";
+  return "300\u00a0€/an";
+}
 function askComptaVerrouillee(){
   var n=comptaLignesAvantVerrou().length;
   if(!n){ askPremiumRequis("Comptabilité complète"); return; }

@@ -122,6 +122,12 @@ describe("Offre gratuite (petits clubs, 60 licences)", () => {
     assert.match(app({ id: "A", plan: "gratuit" }).prixPremium(), /^200/);
     assert.match(app({ id: "A", plan: "standard" }).prixPremium(), /^300/);
   });
+  it("gratuit → Premium : 200 € la 1re année, puis 300 €", () => {
+    const an = (n) => new Date(Date.now() + n * 86400000);
+    assert.match(app({ id: "A", plan: "premium", premium200Fin: an(200) }).prixPremium(), /^200.*puis 300/);
+    assert.match(app({ id: "A", plan: "premium", premium200Fin: an(-5) }).prixPremium(), /^300/);
+    assert.match(app({ id: "A", plan: "premium" }).prixPremium(), /^300/);
+  });
 });
 
 describe("Fin d'essai (Plateforme)", () => {

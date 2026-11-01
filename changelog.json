@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793541773",
+  "titre": "Premium des petits clubs : 200 € la première année",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Un club qui passe de l'offre gratuite au Premium paie 200 € la première année, puis 300 €/an. Le tarif s'affiche dans Paramètres › Abonnement."
+   }
+  ]
+ },
+ {
   "v": "1793540173",
   "titre": "Correction d'une erreur sur l'écran Plateforme",
   "points": [

@@ -1412,7 +1412,7 @@ function choisirPack(c, list){
     if(choix==="gratuit"){
       var g=document.createElement("div");
       g.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:10px";
-      g.textContent="Petit club : contenu du Pack Standard, 60 licences par saison au plus. À la 61e, l'appli bloque et demande le passage au Standard. Pas d'échéance ni de facture. (Premium possible à 200 €/an : choisissez Premium et facturez 200 €.)";
+      g.textContent="Petit club : contenu du Pack Standard, 60 licences par saison au plus. À la 61e, l'appli bloque et demande le passage au Standard. Pas d'échéance ni de facture. (Premium possible : 200 € la première année, puis 300 €/an. Choisissez Premium, l'appli gère le prix.)";
       zoneLim.appendChild(g);
     }
     if(choix!=="limite") return;
@@ -1459,6 +1459,8 @@ function choisirPack(c, list){
     if(choix==="limite") maj.modulesLimites=mods;
     if(c.type==="independant") maj.aboRythme=rythme;
     if((choix==="standard"||choix==="premium") && !aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
+    // Gratuit → Premium : 200 € la 1re année seulement (jusqu'à la première échéance), puis 300 €.
+    if(choix==="premium" && c.plan==="gratuit") maj.premium200Fin=maj.aboEcheance||aboEcheance(c);
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       s.modal.remove(); loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
@@ -1470,6 +1472,7 @@ function passerEnPayant(c, list){
     if(v!=="gratuit" && v!=="standard" && v!=="premium") return;
     var maj={plan:v};
     if(v!=="gratuit" && !aboEcheance(c)) maj.aboEcheance=gmPlusUnAn(new Date());
+    if(v==="premium" && c.plan==="gratuit") maj.premium200Fin=maj.aboEcheance||aboEcheance(c);
     window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",c.id),maj).then(function(){
       loadClubsList(list);
     }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
