@@ -389,6 +389,7 @@ function buildCoachDashboard(el){
   var teamId=getCoachTeam();
   var team=getTeams().find(function(t){return t.id===teamId;});
   if(!team){el.innerHTML='<div class="empty-state" style="padding:20px"><div style="font-size:13px;font-weight:600">Aucune équipe assignée</div></div>';return;}
+  if(typeof convocCarteCoachAfficher==="function") convocCarteCoachAfficher(el,team);   // match de la semaine (js/14t)
 
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
 

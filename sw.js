@@ -78,6 +78,7 @@ const PRECACHE = [
   './js/14q-tirage-table.js',
   './js/14r-dossier-evt.js',
   './js/14s-reponses.js',
+  './js/14t-convocation.js',
   './js/14j-stats-calcul.js',
   './js/14k-stats-saisie.js',
   './js/14l-stats-fiche.js',

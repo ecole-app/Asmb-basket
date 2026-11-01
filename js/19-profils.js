@@ -1255,6 +1255,8 @@ function buildParentHome(){
       '<div style="display:flex;flex-wrap:wrap">'+(repHtml?'':absenceBtn)+mapsBtn+icsB+carB+'</div>'+
     '</div>';
   }
+  // Convocation du match (dès que le coach l'a envoyée), en plus du prochain rendez-vous (js/14t).
+  if(evEl&&typeof convocCarteParent==="function") evEl.insertAdjacentHTML("beforeend",convocCarteParent(children,nextEv&&nextEv.id));
 
   // Derniers matchs joues
   var lastMatches=getLastMatchesForTeam(activeTeam);

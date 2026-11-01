@@ -46,6 +46,7 @@
     "js/14q-tirage-table.js",
     "js/14r-dossier-evt.js",
     "js/14s-reponses.js",
+    "js/14t-convocation.js",
     "js/14k-stats-saisie.js",
     "js/14l-stats-fiche.js",
     "js/14m-stats-ecrans.js",
@@ -365,6 +366,9 @@
     "Pensez à répondre Présent ou Absent pour le prochain entraînement sur l'accueil de l'appli.",
     "Rappel : le loto du club approche, les réservations sont ouvertes dans Événements.",
     "démo",
-    "Un fil par événement, pour les inscrits"
+    "Un fil par événement, pour les inscrits",
+    "Blessure à la cheville",
+    "Malade",
+    "Sortie scolaire"
   ]
 }

@@ -1,5 +1,23 @@
 [
  {
+  "v": "1793526962",
+  "titre": "Convocation du lundi et assiduité",
+  "points": [
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Dès le lundi, « Mon équipe » affiche le match de la semaine : convocation à envoyer, ou envoyée avec les réponses. La convocation s'ouvre avec les joueuses du dernier match déjà cochées, classées par assiduité aux entraînements (6 semaines, absences excusées hors calcul), et chaque absence peut être marquée excusée ou non."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Dès que le coach convoque, la convocation du match apparaît sur l'accueil avec Présent / Absent, en plus du prochain entraînement."
+   }
+  ]
+ },
+ {
   "v": "1793524821",
   "titre": "Démo : convocation de la semaine",
   "points": [

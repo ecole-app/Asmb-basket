@@ -772,15 +772,27 @@ function showConvocation(eventId){
   document.getElementById("convoc-sub").textContent=ev.titre+" · "+ev.date+(ev.heure?" · "+ev.heure:"");
   var players=getPlayersForEvent(ev);
   var convoked=ev.convocations||[];
+  // Première convocation de ce match : les joueuses du dernier match convoqué sont déjà cochées (js/14t).
+  var dernier=(!convoked.length&&typeof convocDernier==="function")?convocDernier(ev):null;
+  if(dernier) convoked=dernier.convocations.slice();
+  var team=(typeof assidEquipeDeEvt==="function")?assidEquipeDeEvt(ev):null;
+  var assid={}; if(team&&typeof assidPour==="function") players.forEach(function(p){ assid[p.id]=assidPour(p.id,team); });
+  // Classées de la plus assidue à la moins assidue (sans séance pointée : à la fin).
+  if(team) players=players.slice().sort(function(a,b){ var x=assid[a.id].pct, y=assid[b.id].pct; return (y==null?-1:y)-(x==null?-1:x); });
   var el=document.getElementById("convoc-players-list");
   if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--mut);padding:8px 0">Aucun joueur disponible pour cette équipe</div>';}
   else{
-    el.innerHTML="";
+    el.innerHTML=(dernier?'<div style="font-size:11.5px;color:var(--mut);padding:4px 0 8px">Joueuses du dernier match déjà cochées ('+authEsc(dernier.date.split("-").reverse().join("/"))+'). Ajustez puis enregistrez.</div>':'')+
+      (team?'<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:2px 4px 6px"><span>Joueuse</span><span>Assiduité · 6 sem.</span></div>':'');
     players.forEach(function(p){
       var isChecked=convoked.indexOf(p.id)>=0;
       var lbl=document.createElement("label");
       lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
-      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>';
+      var a=assid[p.id];
+      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg);flex:none">'+
+        '<span style="flex:1;min-width:0">'+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>'+
+        (a?'<span style="display:block;font-size:10.5px;color:var(--mut);margin-top:1px">'+authEsc(assidSousTitre(a))+'</span>':'')+'</span>'+
+        (a?assidHtml(a,p.id,team.id):'');
       el.appendChild(lbl);
     });
   }

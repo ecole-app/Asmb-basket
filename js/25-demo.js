@@ -227,6 +227,7 @@ function demoDonnees(){
       var ev={id:"demo-m-"+ti+"-"+n,titre:t.name+" vs "+a+" (Démo)",type:"match",date:iso(jour),heure:(10+ti)+"h00",
         lieu:dom?"Gymnase Démo":"Extérieur",equipe:t.name,presences:{},demo:true};
       if(iso(jour)<auj){
+        ev.convocations=t.members.slice(0,8);
         var nous=34+Math.floor(alea()*36), eux=nous+Math.floor(alea()*30)-(alea()<.62?20:4);
         if(eux===nous) eux--;
         ev.score={adversaire:a,asmb:nous,adv:Math.max(18,eux)};
@@ -333,6 +334,22 @@ function demoDonnees(){
   // du parent de la démo).
   var u13=teams.filter(function(t){ return t.id==="demo-u13"; })[0];
   db.checkins={};
+  // Pointage des entraînements passés : chaque joueuse a sa régularité (Emma toujours là, la dernière
+  // de chaque équipe souvent absente). Une partie des absences est prévenue par la famille (excusée).
+  var regul=[1,.93,.9,.85,.82,.7,.62,.35,.75];
+  events.filter(function(e){ return e.type==="entrainement"&&e.date<auj; }).forEach(function(e,k){
+    var t=teams.filter(function(x){ return x.name===e.equipe; })[0]; if(!t) return;
+    t.members.forEach(function(pid,i){
+      var la=alea()<regul[i%regul.length];
+      e.presences[pid]=la?"present":"absent";
+      if(!la&&alea()<.45){
+        var pl=players.filter(function(x){ return x.id===pid; })[0]||{};
+        db.checkins[e.id+"_"+pid]={eventId:e.id,playerId:pid,playerName:(pl.prenom||"")+" "+(pl.nom||""),eventTitre:e.titre,eventDate:e.date,
+          status:"absent",motif:["Malade","Rendez-vous médical","Sortie scolaire","Blessure à la cheville"][k%4],ts:+new Date(e.date+"T12:00:00"),source:"parent"};
+      }
+    });
+  });
+  localStorage.setItem("asmb_events",JSON.stringify(events));
   events.filter(function(e){ return e.equipe===u13.name&&e.date>=auj; }).slice(0,4).forEach(function(e,k){
     (e.convocations||u13.members).forEach(function(pid,i){
       if(pid==="demo-u13-j0"||i%5===4) return;
