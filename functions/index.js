@@ -48,6 +48,7 @@ const NOTIF_TXT = {
   "Vous êtes bénévole": ["You are volunteering", "أنت متطوع", "Eres voluntario", "Sei volontario", "Sie sind als Helfer eingeteilt"],
   "bénévole": ["volunteer", "متطوع", "voluntario", "volontario", "Helfer"],
   "événement du club": ["club event", "فعالية النادي", "evento del club", "evento del club", "Vereinsveranstaltung"],
+  "Convocation à envoyer": ["Squad to announce", "قائمة اللاعبين لم تُرسل", "Convocatoria por enviar", "Convocazione da inviare", "Aufstellung noch zu senden"],
   "Test de notification": ["Notification test", "اختبار الإشعارات", "Prueba de notificación", "Test di notifica", "Benachrichtigungstest"],
   "Si tu vois ceci, les messages du club t'arriveront.": ["If you can see this, club messages will reach you.", "إذا رأيت هذا، فستصلك رسائل النادي.", "Si ves esto, te llegarán los mensajes del club.", "Se vedi questo, i messaggi del club ti arriveranno.", "Wenn du das siehst, erreichen dich die Nachrichten des Vereins."],
   // rôles, profils du bureau, modules (mêmes mots que l'appli, i18n/<langue>.json)
@@ -1200,4 +1201,45 @@ exports.erreursPurge = onSchedule({ schedule: "every day 03:50", timeZone: "Euro
   const b = db.batch();
   vieux.docs.concat(sigs.docs).forEach((d) => b.delete(d.ref));
   if (!vieux.empty || !sigs.empty) await b.commit();
+});
+
+/* ===== Rappel du coach : match de la semaine sans convocation =====
+   Lundi et mercredi matin : pour chaque équipe qui a un match dans les 7 jours sans joueurs convoqués,
+   les coachs de l'équipe (users.linkedTeamIds) reçoivent une notification. Un seul message par coach. */
+exports.rappelConvocation = onSchedule({ schedule: "every monday,wednesday 08:30", timeZone: "Europe/Paris", timeoutSeconds: 300 }, async () => {
+  const fmt = (d) => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
+  const auj = fmt(new Date()), fin = fmt(new Date(Date.now() + 7 * 86400000));
+  const clubs = await db.collection("clubs").where("status", "==", "active").get();
+  let envoyes = 0;
+  for (const club of clubs.docs) {
+    try {
+      const clubId = club.id, ref = club.ref;
+      const evs = await ref.collection("events").where("date", ">=", auj).where("date", "<=", fin).get();
+      const sans = evs.docs.map((d) => d.data()).filter((e) => e.type === "match" && !e.cancelled && !(e.convocations || []).length && e.equipe);
+      if (!sans.length) continue;
+      const teams = (await ref.collection("teams").get()).docs.map((d) => ({ id: d.id, name: String(d.get("name") || "") })).filter((t) => t.name);
+      const parCoach = {}; // uid → [match]
+      const coachs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "coach").get();
+      for (const m of sans) {
+        const eq = String(m.equipe).toUpperCase();
+        const t = teams.find((x) => eq.indexOf(x.name.toUpperCase()) >= 0);
+        if (!t) continue;
+        coachs.forEach((c) => { if (((c.data() || {}).linkedTeamIds || []).includes(t.id)) (parCoach[c.id] = parCoach[c.id] || []).push({ equipe: t.name, date: m.date }); });
+      }
+      const subsCol = ref.collection("push_subscriptions");
+      for (const uid of Object.keys(parCoach)) {
+        const sub = await subsCol.doc(uid).get();
+        const d = sub.exists ? sub.data() : null;
+        if (!d || !d.token) continue;
+        const l = parCoach[uid].sort((a, b) => (a.date < b.date ? -1 : 1));
+        await envoyerParLangue(clubId, [{ token: d.token, ref: subsCol.doc(uid), langue: d.langue }], (lang) => {
+          const loc = { en: "en-GB", ar: "ar", es: "es-ES", it: "it-IT", de: "de-DE" }[lang] || "fr-FR";
+          const jour = (x) => new Date(x.date + "T12:00:00Z").toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" });
+          return { title: tn(lang, "Convocation à envoyer"), body: l.map((x) => x.equipe + " · " + jour(x)).join("\n") };
+        }, { url: "./" });
+        envoyes++;
+      }
+    } catch (e) { console.error("rappelConvocation", club.id, e); }
+  }
+  console.log("rappelConvocation : coachs prévenus", envoyes);
 });
