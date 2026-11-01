@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793522604",
+  "titre": "Compte enfant : un seul accès aux paramètres",
+  "points": [
+   {
+    "roles": [
+     "joueur"
+    ],
+    "texte": "L'engrenage en double sur l'espace joueur est retiré : les réglages sont dans l'onglet Paramètres."
+   }
+  ]
+ },
+ {
   "v": "1793522462",
   "titre": "Coach : le canal de son équipe",
   "points": [

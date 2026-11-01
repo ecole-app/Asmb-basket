@@ -459,7 +459,7 @@ function buildJoueurScreen(player){
     });
 
     var html='<div style="text-align:center;margin-bottom:24px;position:relative">'+
-      '<button onclick="openJoueurSettings()" aria-label="Paramètres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>'+
+      (localStorage.getItem("asmb_profile")==="joueur"?'':'<button onclick="openJoueurSettings()" aria-label="Paramètres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>')+
       '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+player.prenom[0]+player.nom[0]+'</div>'+
       '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+player.prenom+' '+player.nom+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
