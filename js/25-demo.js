@@ -232,7 +232,8 @@ function demoDonnees(){
         ev.score={adversaire:a,asmb:nous,adv:Math.max(18,eux)};
         (matchsJoues[t.id]=matchsJoues[t.id]||[]).push(ev);
       }
-      if(iso(jour)>=auj) ev.convocations=t.members.slice(0,8);
+      // Convocation d'une semaine sur l'autre : seulement le prochain match de chaque équipe.
+      if(iso(jour)>=auj&&!t.__convoque){ ev.convocations=t.members.slice(0,8); t.__convoque=ev.id; }
       events.push(ev); n++;
     }
   });
@@ -340,6 +341,7 @@ function demoDonnees(){
         status:abs?"absent":"present",motif:abs?"Rendez-vous médical":"",ts:Date.now()-k*3600000,source:"parent"};
     });
   });
+  var u13c=teams.filter(function(t){ return t.id==="demo-u13"; })[0];
   // Communauté : canal général, un canal par équipe, quelques messages récents.
   db.channels={general:{id:"general",name:"Général",icon:"📣",desc:"Infos du club pour tout le monde",members:[],clubWide:true},
     evenements:{id:"evenements",name:"Événements",icon:"🎉",desc:"Un fil par événement, pour les inscrits",members:[],clubWide:true}};
@@ -353,6 +355,16 @@ function demoDonnees(){
   msg("demo-u13",60*2,"Parent de Léa","Léa sera un peu en retard, on arrive vers 19h45.");
   msg("demo-u13",45,"Coach Sam","Pas de souci, merci de prévenir 👍");
   msg("demo-u15",60*8,"Coach Démo","Match samedi : rendez-vous 45 min avant au gymnase.");
+  // La convocation du prochain match des U13 Filles, telle que le coach l'envoie (boutons Présent / Absent).
+  var mU13=events.filter(function(e){ return e.id===u13c.__convoque; })[0];
+  if(mU13){
+    var cm=db["channels/demo-u13/messages"];
+    cm["dmconv"]={type:"convocation",eventId:mU13.id,eventTitre:mU13.titre,eventDate:mU13.date,eventHeure:mU13.heure||"",eventLieu:mU13.lieu||"",
+      players:(mU13.convocations||[]).map(function(id){ var pl=players.filter(function(x){ return x.id===id; })[0]||{}; return {id:id,nom:(pl.prenom||"")+" "+(pl.nom||"")}; }),
+      responses:{},pseudo:"Convocation",ts:Date.now()-30*60000,likeUsers:[],heartUsers:[],demo:true};
+  }
+  teams.forEach(function(t){ delete t.__convoque; });
+  localStorage.setItem("asmb_teams",JSON.stringify(teams));
   localStorage.setItem("gm_demo_db",JSON.stringify(db));
 }
 

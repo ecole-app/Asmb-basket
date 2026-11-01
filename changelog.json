@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793524821",
+  "titre": "Démo : convocation de la semaine",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans la démo, seuls les matchs de la semaine sont convoqués, et la convocation des U13 Filles est visible dans leur canal avec les réponses Présent / Absent."
+   }
+  ]
+ },
+ {
   "v": "1793524673",
   "titre": "Communauté des familles : la liste des canaux",
   "points": [
