@@ -1,5 +1,17 @@
 [
  {
+  "v": "1793523740",
+  "titre": "Réservation : places en direct",
+  "points": [
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "En réservant une soirée, les places restantes suivent en direct vos choix et les autres réservations ; prénom, nom et téléphone sont déjà remplis."
+   }
+  ]
+ },
+ {
   "v": "1793523051",
   "titre": "Inscription à un événement : date de naissance déjà connue",
   "points": [

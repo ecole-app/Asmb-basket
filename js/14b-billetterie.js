@@ -803,6 +803,8 @@ function evtFormResa(host,p,o){
     (o.public?'<input id="rs-hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;opacity:0">':'')+
     '<button id="rs-go" style="width:100%;padding:15px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer">Réserver</button>';
   ["prenom","nom","tel","email"].forEach(function(k){ if(o[k]) host.querySelector("#rs-"+k).value=o[k]; });
+  // Nombre de réservés reçu en direct (onSnapshot de la page) : le compteur suit sans recharger.
+  host.__gmMajPlaces=function(nb){ if(!p.places) return; reste=Math.max(0,p.places-(nb||0)); peindre(); };
   function total(){ var n=0, m=0; qte.forEach(function(q,i){ n+=q; m+=q*(Number(tarifs[i].prix)||0); }); return {n:n,m:Math.round(m*100)/100}; }
   function peindre(){
     var box=host.querySelector("#rs-qte"); box.innerHTML="";
@@ -815,7 +817,9 @@ function evtFormResa(host,p,o){
       box.appendChild(r);
     });
     var T=total();
-    host.querySelector("#rs-total").textContent=T.n?(T.n+" personne"+(T.n>1?"s":"")+" · "+(T.m>0?evtPrix(T.m):"Gratuit")+(reste!=null?" · "+reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":""):"")):"Ajoutez au moins une personne"+(reste!=null?" ("+reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":"")+")":"")+".";
+    // Places restantes : ce qui reste après cette réservation, mis à jour en direct (autres réservations).
+    var apres=reste!=null?Math.max(0,reste-T.n):null;
+    host.querySelector("#rs-total").textContent=T.n?(T.n+" personne"+(T.n>1?"s":"")+" · "+(T.m>0?evtPrix(T.m):"Gratuit")+(apres!=null?" · "+(apres===0?"plus aucune place après vous":apres+" place"+(apres>1?"s":"")+" restante"+(apres>1?"s":"")):"")):"Ajoutez au moins une personne"+(reste!=null?" ("+reste+" place"+(reste>1?"s":"")+" restante"+(reste>1?"s":"")+")":"")+".";
     host.querySelector("#rs-pay-g").style.display=T.m>0?"block":"none";
     var mb=host.querySelector("#rs-modes"); mb.innerHTML="";
     modes.forEach(function(m){
@@ -891,6 +895,7 @@ function rendreEvtPublic(el,p,pid){
         else askAlert("La réservation n'a pas fonctionné. Réessayez, ou contactez directement le club.");
       });
     }});
+    evtPlacesEnDirect(el.querySelector("#evt-resa"),pid);
     return;
   }
   var tarifs=p.tarifs||[], modes=p.modes||[];
@@ -1047,6 +1052,17 @@ function evtCartesParent(){
   return wrap;
 }
 // Soirée réservée depuis l'appli (parent, coach…) : même formulaire que la page publique.
+// Places restantes en direct pendant que le formulaire est ouvert (autres réservations).
+function evtPlacesEnDirect(host,pageId){
+  if(!window.fbOnSnapshot||!window.fbDoc) return;
+  var stop=null;
+  try{
+    stop=window.fbOnSnapshot(window.fbDoc(window.fbDb,"evt_pages",pageId),function(d){
+      if(!document.body.contains(host)){ if(stop) stop(); return; }
+      if(d&&d.exists()&&host.__gmMajPlaces) host.__gmMajPlaces((d.data()||{}).nb);
+    },function(){});
+  }catch(e){}
+}
 function evtReserverApp(e){
   var pageId=evtPageId(e.id), s=gmSheet(e.titre||eventTypeLabel(e.type)), ins=e.inscr||{};
   var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:8px"; info.textContent=evtDateTxt(e)+(e.lieu?" · "+e.lieu:"");
@@ -1057,7 +1073,7 @@ function evtReserverApp(e){
   var u=window.ASMB_USER||{}, mail=String(u.email||"");
   window.fbGetDoc(window.fbDoc(window.fbDb,"evt_pages",pageId)).then(function(sn){
     var p=sn.exists()?sn.data():Object.assign({eventId:String(e.id),nb:0},ins);
-    evtFormResa(host,p,{tel:String(u.phone||"").replace(/[\s.\-()]/g,""),email:(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)&&mail.indexOf("@joueur.")<0)?mail:"",
+    evtFormResa(host,p,{prenom:String(u.prenom||"").slice(0,40),nom:String(u.nom||"").slice(0,60),tel:String(u.phone||localStorage.getItem("asmb_phone")||"").replace(/[\s.\-()]/g,""),email:(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)&&mail.indexOf("@joueur.")<0)?mail:"",
       auteurUid:u.uid||(window.fbAuth&&window.fbAuth.currentUser&&window.fbAuth.currentUser.uid)||"",
       envoyer:function(data,btn){
         btn.disabled=true;
@@ -1073,6 +1089,7 @@ function evtReserverApp(e){
           askAlert(c==="complet"?(err.reste?"Il ne reste que "+err.reste+" place"+(err.reste>1?"s":"")+".":"Désolé, c'est complet."):c==="ferme"?"Les réservations sont fermées.":"La réservation n'a pas fonctionné. Réessayez dans un instant.");
         });
       }});
+    evtPlacesEnDirect(host,pageId);
   }).catch(function(){ host.innerHTML='<div style="color:var(--red);font-size:12px">Connexion impossible. Réessayez.</div>'; });
 }
 function evtInscrireEnfant(e){
