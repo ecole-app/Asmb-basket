@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793618188",
+  "semver": "1.0.1",
+  "titre": "Numéro de version dans les Paramètres",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le numéro de version s'affiche aussi en bas des Paramètres du dirigeant et du coach."
+   }
+  ]
+ },
+ {
   "v": "1793596069",
   "titre": "Numéro de version visible : 1.0.0",
   "points": [

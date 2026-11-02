@@ -163,9 +163,10 @@ setTimeout(function(){
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793596069";
+var APP_VERSION="1793618188";
 // Numéro lisible (versionnage sémantique MAJEUR.MINEUR.CORRECTIF), affiché à l'écran ; APP_VERSION reste le jeton technique de mise à jour.
-var APP_SEMVER="1.0.0";
+var APP_SEMVER="1.0.1";
+(function(){ var e=document.getElementById("gm-semver"); if(e) e.textContent=APP_SEMVER; })();
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
