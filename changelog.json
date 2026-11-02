@@ -1,7 +1,7 @@
 [
  {
-  "v": "1793595456",
-  "titre": "Nouveautés : les changements de la démo ne s'affichent plus",
+  "v": "1793596069",
+  "titre": "Numéro de version visible : 1.0.0",
   "points": [
    {
     "roles": [
@@ -10,9 +10,10 @@
      "parent",
      "joueur"
     ],
-    "texte": "La liste des nouveautés ne montre plus les mises à jour qui ne concernent que la démonstration."
+    "texte": "L'appli affiche maintenant son numéro de version (Paramètres, bandeau de mise à jour, Nouveautés), à partir de 1.0.0. Les changements de la démo ne s'affichent plus dans les Nouveautés."
    }
-  ]
+  ],
+  "semver": "1.0.0"
  },
  {
   "v": "1793553768",

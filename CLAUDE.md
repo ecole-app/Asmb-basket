@@ -47,8 +47,9 @@ Contenu pédagogique (js/02*-formation-*, 04-formation-ui, 05*-anim-*, ~450 Ko) 
 
 ## Version et changelog (seulement si du code client change)
 
-- `date +%s` → mettre la même valeur dans `js/21-main.js` (`APP_VERSION`) **et** `version.json`.
-- Ajouter en tête de `changelog.json` : `{v, titre, points:[{roles:[...], texte:"..."}]}`.
+- `date +%s` → mettre la même valeur dans `js/21-main.js` (`APP_VERSION`) **et** `version.json` (jeton technique de mise à jour, invisible).
+- Numéro lisible, **versionnage sémantique** `MAJEUR.MINEUR.CORRECTIF` (départ 1.0.0 le 02/11/2026) : `APP_SEMVER` dans `js/21-main.js`, `semver` dans `version.json` **et** dans l'entrée de tête du changelog (test `tests/metier/version.test.js`). Correctif/détail = dernier nombre (1.0.1) ; nouveauté visible = milieu (1.1.0) ; grosse étape décidée par Ahmed = majeur (2.0.0). Affiché dans Paramètres, le bandeau de mise à jour et les Nouveautés.
+- Ajouter en tête de `changelog.json` : `{v, semver, titre, points:[{roles:[...], texte:"..."}]}`. Un changement qui ne touche que les données de la démo : `"demo": true` sur l'entrée (jamais affichée).
 - Pas de bump pour un changement de règles Firestore seul ou de doc.
 
 ## Git

@@ -163,7 +163,9 @@ setTimeout(function(){
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793595456";
+var APP_VERSION="1793596069";
+// Numéro lisible (versionnage sémantique MAJEUR.MINEUR.CORRECTIF), affiché à l'écran ; APP_VERSION reste le jeton technique de mise à jour.
+var APP_SEMVER="1.0.0";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
@@ -176,7 +178,8 @@ function majBandeau(etat){
  // Mode démo (js/25-demo.js) : jamais de bandeau de mise à jour (la version se met à jour en silence).
  var demo=window.GM_DEMO; try{ demo=demo||sessionStorage.getItem("gm_demo")==="1"||/[?&]demo\b/.test(location.search); }catch(e){}
  if(demo){ b.style.display="none"; return; }
- var t=document.getElementById("update-banner-txt"), bt=document.getElementById("update-banner-btn");
+ var t=document.getElementById("update-banner-txt"), bt=document.getElementById("update-banner-btn"), vs=document.getElementById("update-banner-ver");
+ if(vs) vs.textContent=(etat==="termine"?APP_SEMVER:(window.GM_MAJ_SEMVER||""))||"";
  if(etat==="termine"){ if(t) t.textContent="L'application a été mise à jour"; if(bt) bt.textContent="Compris"; }
  else { if(t) t.textContent="Nouvelle version disponible"; if(bt) bt.textContent="Mettre à jour"; }
  b.style.display=etat?"flex":"none";
@@ -201,7 +204,7 @@ function checkForUpdate(){
  .then(function(r){return r.json();})
  .then(function(data){
  if(data.v&&data.v!==APP_VERSION){
- window.GM_MAJ_VERSION=data.v;
+ window.GM_MAJ_VERSION=data.v; window.GM_MAJ_SEMVER=data.semver||"";
  majPreparer(data.v);
  // Déjà pris connaissance de cette version : pas de bandeau.
  if(majVue()===data.v) return;
@@ -265,7 +268,7 @@ function showChangelog(historique){
           var h=document.createElement("div");
           h.style.cssText="font-size:13.5px;font-weight:800;color:var(--txt);margin:"+(n>1?"16px":"0")+" 0 4px";
           var dt=new Date(Number(en.v)*1000);
-          h.textContent=(isNaN(dt)?"":dt.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · ")+(en.titre||"Mise à jour");
+          h.textContent=(en.semver?en.semver+" · ":"")+(isNaN(dt)?"":dt.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · ")+(en.titre||"Mise à jour");
           sh.body.appendChild(h);
           var ul2=document.createElement("ul");
           ul2.style.cssText="margin:0;padding-left:20px;font-size:13px;color:var(--txt2);line-height:1.55";
@@ -276,7 +279,7 @@ function showChangelog(historique){
         return;
       }
       var entry=(list&&list[0])||null;
-      var s=gmSheet(entry&&entry.titre?entry.titre:"Dernière mise à jour");
+      var s=gmSheet(entry&&entry.titre?(entry.semver?entry.semver+" · ":"")+entry.titre:"Dernière mise à jour");
       var points=((entry&&entry.points)||[]).filter(function(pt){
         if(voitTout) return true;
         if(typeof pt==="string") return true; // ancien format, sans roles

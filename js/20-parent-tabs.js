@@ -303,7 +303,7 @@ function buildParentSettings(){
   var dk=document.getElementById("pp-dark");
   if(dk)dk.checked=document.documentElement.getAttribute("data-theme")==="dark";
   var vv=document.getElementById("pp-version");
-  if(vv)vv.textContent=APP_VERSION;
+  if(vv)vv.textContent=APP_SEMVER;
   wireThemeAnimSettings("pp-");
   var fbBtn=document.getElementById("pp-feedback-send-btn");
   if(fbBtn && !fbBtn.dataset.wired){
