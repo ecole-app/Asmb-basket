@@ -88,6 +88,7 @@ function showAuth(step, data){
       +'<div style="flex:1"></div>'
       +'<div style="border-top:1px solid #e1ddd0;margin:18px 0 0;padding-top:16px;text-align:center">'
       +'<p style="font-size:12.5px;color:'+AUTH_MUTTXT+';font-weight:600;cursor:pointer" onclick="openJoueurCheckin()">Je suis joueur, pointage rapide</p>'
+      +'<p style="font-size:10px;color:'+AUTH_MUTTXT+';margin-top:14px">General Manager · version '+(typeof APP_SEMVER!=="undefined"?APP_SEMVER:"")+'</p>'
       +'</div>'
       +'</div>';
   } else if(step==="login"){

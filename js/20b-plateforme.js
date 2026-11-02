@@ -559,6 +559,7 @@ function openPlateforme(){
   intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
   intro.textContent=GM_INTRO;
   s.body.appendChild(intro);
+  var verP=document.createElement("div"); verP.style.cssText="font-size:11px;color:var(--mut);margin:-6px 0 12px"; verP.textContent="Version "+(typeof APP_SEMVER!=="undefined"?APP_SEMVER:""); s.body.appendChild(verP);
   var ffbbBox=document.createElement("div"); s.body.appendChild(ffbbBox);
   if(window.fbGetDoc&&window.fbDb) window.fbGetDoc(window.fbDoc(window.fbDb,"plateforme_config","ffbb_etat")).then(function(sn){
     var d=sn&&sn.exists&&sn.exists()?sn.data():null;

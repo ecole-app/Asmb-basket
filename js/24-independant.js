@@ -964,7 +964,8 @@ function indReglages(){
     +'<div class="ind-pal" id="ind-rg-pal">'+pal.map(function(c){ return '<button type="button" data-c="'+indEsc(c)+'" class="'+(c.toLowerCase()===choix?"on":"")+'" style="background:'+indEsc(c)+'" aria-label="Couleur '+indEsc(c)+'"></button>'; }).join("")+'</div>'
     +'<div class="err" id="ind-rg-err"></div>'
     +'<div class="actions"><button type="submit" class="ok">Enregistrer</button></div>'
-    +'<button type="button" class="ind-btn s" id="ind-rg-out" style="margin-top:8px">Se déconnecter</button></form>';
+    +'<button type="button" class="ind-btn s" id="ind-rg-out" style="margin-top:8px">Se déconnecter</button>'
+    +'<div style="margin-top:12px;text-align:center;font-size:10px;color:var(--mut)">General Manager · version '+(typeof APP_SEMVER!=="undefined"?APP_SEMVER:"")+'</div></form>';
   var f=sh.body.querySelector("#ind-rg-f");
   if(typeof indAboMonter==="function"){
     var zoneAbo=document.createElement("div"); zoneAbo.style.marginBottom="12px";
@@ -1180,7 +1181,8 @@ function indMaFiche(){
     +'<p class="ind-note">Connexion : '+indEsc(email)+'</p><div class="err" id="ind-fi-err"></div>'
     +'<div class="actions"><button type="submit" class="ok">Enregistrer</button></div></form>'
     +'<div id="ind-fi-enfants" class="ind-f" style="margin-top:14px"></div>'
-    +'<button type="button" class="ind-btn s" id="ind-fi-out" style="margin-top:8px">Se déconnecter</button>';
+    +'<button type="button" class="ind-btn s" id="ind-fi-out" style="margin-top:8px">Se déconnecter</button>'
+    +'<div style="margin-top:12px;text-align:center;font-size:10px;color:var(--mut)">General Manager · version '+(typeof APP_SEMVER!=="undefined"?APP_SEMVER:"")+'</div>';
   var zone=sh.body.querySelector("#ind-fi-enfants");
   function peindreEnfants(){ if(f0) zone.innerHTML=indMesEnfantsHtml(); else zone.innerHTML=""; }
   peindreEnfants();

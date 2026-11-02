@@ -1,5 +1,21 @@
 [
  {
+  "v": "1793618436",
+  "semver": "1.0.2",
+  "titre": "Numéro de version sur tous les écrans",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le numéro de version s'affiche aussi sur l'écran de connexion et dans les réglages de la version indépendant."
+   }
+  ]
+ },
+ {
   "v": "1793618188",
   "semver": "1.0.1",
   "titre": "Numéro de version dans les Paramètres",
