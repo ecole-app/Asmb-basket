@@ -163,7 +163,7 @@ setTimeout(function(){
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793553768";
+var APP_VERSION="1793595456";
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
 // jour ») et appuyé sur le bouton. Le bouton ne fait que retirer le bandeau si la
@@ -253,6 +253,8 @@ function showChangelog(historique){
   fetch("./changelog.json?t="+Date.now(),{cache:"no-store"})
     .then(function(r){return r.json();})
     .then(function(list){
+      // Entrées « demo:true » : changements des données de démonstration uniquement, jamais montrés.
+      list=(list||[]).filter(function(en){ return !en.demo; });
       if(historique===true){   // Paramètres › Nouveautés : les 15 dernières mises à jour
         var sh=gmSheet("Nouveautés"), n=0;
         (list||[]).forEach(function(en){

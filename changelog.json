@@ -1,5 +1,20 @@
 [
  {
+  "v": "1793595456",
+  "titre": "Nouveautés : les changements de la démo ne s'affichent plus",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "La liste des nouveautés ne montre plus les mises à jour qui ne concernent que la démonstration."
+   }
+  ]
+ },
+ {
   "v": "1793553768",
   "titre": "Plateforme : résultat de l'alerte push sur chaque demande d'essai",
   "points": [
@@ -82,7 +97,8 @@
     ],
     "texte": "La démo se recrée à chaque nouvelle version de l'appli (en plus de chaque jour)."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793526962",
@@ -112,7 +128,8 @@
     ],
     "texte": "Dans la démo, seuls les matchs de la semaine sont convoqués, et la convocation des U13 Filles est visible dans leur canal avec les réponses Présent / Absent."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793524673",
@@ -270,7 +287,8 @@
     ],
     "texte": "En démo, le parent est celui d'Emma (U13 Filles), comme un vrai compte parent rattaché à son enfant."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793467978",
@@ -325,7 +343,8 @@
     ],
     "texte": "La démo montre une saison entière : planning de septembre à juin, matchs joués avec scores et stats, stages, tournoi et loto avec inscrits et bénévoles, comptabilité mois par mois, licences payées et impayées. Tout est remis à zéro chaque jour."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793463650",
@@ -337,7 +356,8 @@
     ],
     "texte": "La démo repart chaque jour sur les 3 semaines à venir : le planning n'est jamais dans le passé."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793460052",
@@ -349,7 +369,8 @@
     ],
     "texte": "La démo se regarde aussi en coach ou en parent (menu du bandeau Démo). Chaque mise en ligne est désormais vérifiée écran par écran avant d'arriver chez les clubs."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793454128",
