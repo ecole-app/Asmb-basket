@@ -974,7 +974,15 @@ exports.onFfbbDemande = onDocumentCreated("clubs/{clubId}/ffbb_demandes/{id}", a
 });
 
 // Chaque nuit : relit les poules liées (sauf les clubs suspendus / hors saison, on ne filtre pas ici).
+// EN VEILLE (03/11/2026) : l'API FFBB refuse nos requêtes (403) depuis 9 nuits. On ne la relance plus
+// la nuit tant qu'on n'a pas de solution ; mettre false pour la réactiver. Les classements gardent leurs
+// dernières données et le bandeau d'alerte de la Plateforme est remis à zéro.
+const FFBB_EN_VEILLE = true;
 exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds: 540 }, async () => {
+  if (FFBB_EN_VEILLE) {
+    await db.collection("plateforme_config").doc("ffbb_etat").set({ echecs: 0, erreur: "", veille: true, maj: Date.now() });
+    return;
+  }
   const clubs = await db.collection("clubs").get();
   let tentes = 0, echecs = 0, derniere = "";
   for (const club of clubs.docs) {
