@@ -403,7 +403,10 @@ function myChatPseudo(){
   if(savedPseudo) return savedPseudo;
   var u=window.ASMB_USER;
   var n=u?(((u.prenom||"")+" "+(u.nom||"")).trim()):"";
-  return n||"Anonyme";
+  if(n) return n;
+  // Compte sans prénom ni nom : on signe par le rôle (« Dirigeant », « Coach »…) plutôt que « Anonyme ».
+  var r=(u&&u.roles)||[], role=r.indexOf("dirigeant")>=0?"dirigeant":(r[0]||"");
+  return (role&&typeof roleLabel==="function"&&roleLabel(role))||"Anonyme";
 }
 // Identité technique jointe à chaque nouveau message : sert à résoudre la vraie
 // identité et le badge de rôle au clic (voir openSenderIdentityModal), sans

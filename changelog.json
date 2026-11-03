@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793734495",
+  "semver": "1.5.2",
+  "titre": "Plus de « Anonyme »",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un compte sans prénom ni nom signe ses messages par son rôle (« Dirigeant », « Coach ») au lieu de « Anonyme »."
+   }
+  ]
+ },
+ {
   "v": "1793729657",
   "semver": "1.5.1",
   "titre": "Admins des canaux et notifications",
