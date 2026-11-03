@@ -1,5 +1,31 @@
 [
  {
+  "v": "1793727014",
+  "semver": "1.5.0",
+  "titre": "Répéter un entraînement et rappels du jour",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouvel entraînement : cochez « Répéter chaque semaine » (toute la saison, 4, 8 ou 12 semaines) et tous les entraînements sont créés d'un coup."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "À la première ouverture du jour, une fenêtre « À faire aujourd'hui » : licences en attente, paiements à relancer, convocations à envoyer, familles sans réponse. Un appui ouvre le bon écran."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Match demain et pas encore répondu ? Une fenêtre s'ouvre à la première ouverture du jour : Présent ou Absent en un appui."
+   }
+  ]
+ },
+ {
   "v": "1793714647",
   "semver": "1.4.0",
   "titre": "Notifications de tous vos clubs",

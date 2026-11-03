@@ -1211,6 +1211,7 @@ window.gmReprise=reprise;})();
         <div class="form-group" style="flex:1"><label class="form-label">Date de fin</label><input class="form-input" id="ev-date-fin" type="date"></div>
       </div>
       <div class="form-group"><label class="form-label">Heure</label><input class="form-input" id="ev-heure" placeholder=""></div>
+      <div class="form-group" id="ev-rep-box" style="display:none"></div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-input" id="ev-lieu" placeholder=""></div>
       <div class="form-group"><label class="form-label">Adresse du lieu</label><input class="form-input" id="ev-adresse" maxlength="140" placeholder="Tape l'adresse : numéro, rue, ville" autocomplete="off" oninput="adrChercher(this)"></div>
       <div class="form-group"><label class="form-label">Équipes concernées</label><div id="ev-teams-checks" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;box-sizing:border-box"></div></div>
@@ -1983,6 +1984,7 @@ window.gmReprise=reprise;})();
 <script src="js/09b-saisie-dates.js"></script>
 <script src="js/09c-bouton-plus.js"></script>
 <script src="js/09d-recherche.js"></script>
+<script src="js/09e-rappels-jour.js"></script>
 <script src="js/10-annuaire-galerie.js"></script>
 <script src="js/11-admin.js"></script>
 <script src="js/12-equipes-planning.js"></script>

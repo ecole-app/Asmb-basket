@@ -208,12 +208,69 @@ function toggleEvEvalOption(){
   if(box)box.style.display=(type==="stage")?"block":"none";
   var rb=document.getElementById("ev-resp-option");
   if(rb)rb.style.display=(typeof EVT_TYPES_INSCR!=="undefined"&&EVT_TYPES_INSCR.indexOf(type)>=0)?"block":"none";
+  evRepPeindre();
+}
+
+// ── « Répéter chaque semaine » (nouvel entraînement seulement) ──────────
+// Crée le même entraînement chaque semaine : toute la saison (jusqu'au 30 juin) ou 4/8/12 semaines.
+var EV_REP={on:false,duree:"season"};
+var EV_REP_DUREES=[["season","Toute la saison"],["4","4 semaines"],["8","8 semaines"],["12","12 semaines"]];
+function evRepFinSaison(d){ return new Date(d.getFullYear()+(d.getMonth()<7?0:1),5,30,12); }
+function evRepDates(date,duree){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date||"")) return [];
+  var d0=new Date(date+"T12:00:00"), l=[];
+  var n=duree==="season"?0:parseInt(duree,10)||1, fin=evRepFinSaison(d0);
+  for(var i=0;i<60;i++){
+    var d=new Date(d0); d.setDate(d.getDate()+i*7);
+    if(n?i>=n:d>fin) break;
+    l.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"));
+  }
+  return l;
+}
+function evRepActif(){
+  var t=(document.getElementById("ev-type")||{}).value;
+  return !evEditId && t==="entrainement" && EV_REP.on;
+}
+function evRepPeindre(){
+  var box=document.getElementById("ev-rep-box"); if(!box) return;
+  var t=(document.getElementById("ev-type")||{}).value, voir=!evEditId&&t==="entrainement";
+  box.style.display=voir?"block":"none";
+  var di=document.getElementById("ev-date");
+  if(di&&!di.__rep){ di.__rep=true; di.addEventListener("change",evRepPeindre); }
+  var mb=document.getElementById("ev-modal-btn");
+  if(!voir){ if(mb&&!evEditId) mb.textContent="Créer l'événement"; return; }
+  var tr=function(x){ return typeof gmT==="function"?gmT(x):x; };
+  var dates=EV_REP.on?evRepDates((di||{}).value,EV_REP.duree):[];
+  var h='<label style="display:flex;align-items:center;gap:12px;min-height:44px;cursor:pointer;padding:10px 12px;border-radius:var(--rs);border:2px solid '+(EV_REP.on?'var(--dkg)':'var(--bdr)')+';background:'+(EV_REP.on?'color-mix(in srgb, var(--ltg) 10%, var(--card))':'var(--card)')+'">'+
+    '<input type="checkbox" id="ev-rep-on"'+(EV_REP.on?' checked':'')+' style="width:22px;height:22px;accent-color:var(--dkg);flex-shrink:0">'+
+    '<span style="font-size:14px;font-weight:800;color:var(--txt)">Répéter chaque semaine</span></label>';
+  if(EV_REP.on){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 8px">';
+    EV_REP_DUREES.forEach(function(x){
+      var on=EV_REP.duree===x[0];
+      h+='<button type="button" data-rep="'+x[0]+'" aria-pressed="'+on+'" style="min-height:40px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--dkg);background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--dkg)')+'">'+x[1]+'</button>';
+    });
+    h+='</div><div style="font-size:12px;font-weight:700;color:var(--mut)" id="ev-rep-resume"></div>';
+  }
+  box.innerHTML=h;
+  box.querySelector("#ev-rep-on").addEventListener("change",function(e){ EV_REP.on=e.target.checked; evRepPeindre(); });
+  box.querySelectorAll("[data-rep]").forEach(function(b){ b.addEventListener("click",function(){ EV_REP.duree=b.getAttribute("data-rep"); evRepPeindre(); }); });
+  var res=document.getElementById("ev-rep-resume");
+  if(res){
+    if(!dates.length) res.textContent=tr("Choisissez d'abord la date du premier entraînement.");
+    else {
+      var der=new Date(dates[dates.length-1]+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+      res.textContent="→ "+dates.length+" × "+tr("chaque semaine")+" · "+tr("dernier le")+" "+der;
+    }
+  }
+  if(mb) mb.textContent=(EV_REP.on&&dates.length>1)?tr("Créer")+" "+dates.length+" "+tr("entraînements"):"Créer l'événement";
 }
 
 // type : facultatif, pré-choisit le type (ex. « + Tournoi » du pôle Événements).
 function showAddEvent(type){
   if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
   evEditId=null;
+  EV_REP={on:false,duree:"season"};
   var mt=document.getElementById("ev-modal-titre"); if(mt) mt.textContent="Nouvel événement";
   var mb=document.getElementById("ev-modal-btn"); if(mb) mb.textContent="Créer l'événement";
   evExternes=[];
@@ -377,6 +434,11 @@ function saveEventFull(){
     creePar:(window.ASMB_USER&&window.ASMB_USER.email)||"",
     creeParRole:isDirigeant?"dirigeant":"coach"
   };
+  // Entraînement répété chaque semaine : une série d'événements identiques, une semaine d'écart.
+  if(evRepActif()){
+    var dates=evRepDates(date,EV_REP.duree);
+    if(dates.length>1){ saveEventSerie(eventObj,dates,isDirigeant,canal,participantsNoms); return; }
+  }
   // Salle déjà occupée sur ce créneau : on prévient, le dirigeant décide (js/12b).
   var conflits=(typeof plConflitsDe==="function")?plConflitsDe(eventObj):[];
   if(conflits.length){
@@ -384,6 +446,30 @@ function saveEventFull(){
     return;
   }
   saveEventFullSuite(eventObj,isDirigeant,canal,participantsNoms,type);
+}
+function saveEventSerie(modele,dates,isDirigeant,canal,participantsNoms){
+  var base=modele.id, decal=modele.dateFin?Math.round((new Date(modele.dateFin)-new Date(modele.date))/86400000):0;
+  var serie=dates.map(function(d,i){
+    var e=JSON.parse(JSON.stringify(modele));
+    e.id=base+"-r"+i; e.date=d; e.recurrent=true; e.serieId=base; e.presences={};
+    if(decal){ var f=new Date(d+"T12:00:00"); f.setDate(f.getDate()+decal); e.dateFin=f.toISOString().slice(0,10); }
+    return e;
+  });
+  var nConf=(typeof plConflitsDe==="function")?serie.filter(function(e){ return plConflitsDe(e).length; }).length:0;
+  var suite=function(){
+    saveEvents(getEvents().concat(serie));
+    buildPlanning();buildAdminHome();buildRealEventsList();
+    closeModal("modal-event-full");
+    EV_REP={on:false,duree:"season"};
+    if(!isDirigeant){ askAlert(serie.length+" entraînements soumis au dirigeant pour validation."); return; }
+    if(canal) finishSaveEventFullNotify(serie[0], canal, participantsNoms);
+    showToast(serie.length+" entraînements créés");
+  };
+  if(nConf){
+    askConfirm(nConf+" de ces entraînements tombent sur une salle déjà occupée.\n\nEnregistrer quand même ?",{title:"Conflit de salle",confirmText:"Enregistrer quand même"}).then(function(ok){ if(ok) suite(); });
+    return;
+  }
+  suite();
 }
 function saveEventFullSuite(eventObj,isDirigeant,canal,participantsNoms,type){
   var events=getEvents();

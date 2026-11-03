@@ -155,6 +155,28 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         await action(page, journal, ou + " › paramètres", () => { window.stack = ["portal"]; window.openParametres(); });
       }
     }
+    // Fenêtres du jour : « À faire aujourd'hui » (dirigeant), « Match demain » (parent).
+    await action(page, journal, ou + " › fenêtre du jour", () => {
+      const p = localStorage.getItem("asmb_profile");
+      if (p === "dirigeant") { window.rjTaches(); window.rjDirigeant(); }
+      if (p === "parent") window.rjParent();
+      const m = document.getElementById("rj-modale"); if (m) m.remove();
+    });
+    if (nom === "dirigeant" || nom === "coach") {
+      // Nouvel entraînement : la case « Répéter chaque semaine » annonce le nombre créé.
+      await action(page, journal, ou + " › répéter chaque semaine", () => {
+        window.showAddEvent("entrainement");
+        const box = document.getElementById("ev-rep-box");
+        if (!box || box.style.display === "none") throw new Error("case Répéter absente");
+        const d = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+        document.getElementById("ev-date").value = d;
+        const c = document.getElementById("ev-rep-on"); c.checked = true; c.dispatchEvent(new Event("change"));
+        box.querySelector('[data-rep="4"]').click();
+        if (window.evRepDates(d, "4").length !== 4) throw new Error("4 semaines ≠ 4 dates");
+        if (!/4/.test(document.getElementById("ev-modal-btn").textContent)) throw new Error("bouton sans le nombre");
+        window.closeModal("modal-event-full");
+      });
+    }
     // Plusieurs clubs : avec 2 clubs, le titre de l'en-tête devient un menu « Mes clubs ».
     await action(page, journal, ou + " › mes clubs", () => {
       const ecran = { dirigeant: "portal", coach: "coach-equipe", parent: "parent-home", joueur: "joueur" }[localStorage.getItem("asmb_profile")] || "portal";
