@@ -76,6 +76,8 @@ html.gm-club-clair[data-theme="dark"] .theme-btn,html.gm-club-clair[data-theme="
 .hinfo{flex:1;min-width:0}
 .hinfo.gm-mc{cursor:pointer;border-radius:10px}
 .hinfo.gm-mc .htit::after{content:" \25BE";font-size:.8em;opacity:.85}
+.hinfo.gm-mc{position:relative}
+.hinfo.gm-mc.gm-mc-nl .htit::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#e53935;box-shadow:0 0 0 2px #fff;margin-right:6px;vertical-align:middle}
 .hinfo.gm-mc:focus-visible{outline:3px solid var(--gold,#f2d57e);outline-offset:2px}
 .htit{font-size:15px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hsub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px}

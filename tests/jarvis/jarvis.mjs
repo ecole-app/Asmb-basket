@@ -159,11 +159,12 @@ async function profil(navigateur, base, nom, taille, libTaille) {
     await action(page, journal, ou + " › mes clubs", () => {
       const ecran = { dirigeant: "portal", coach: "coach-equipe", parent: "parent-home", joueur: "joueur" }[localStorage.getItem("asmb_profile")] || "portal";
       window.stack = [ecran]; window.showScr(ecran);
-      window.GM_MES_CLUBS = [{ clubId: window.CURRENT_CLUB_ID, nom: "Club", roles: ["dirigeant"] }, { clubId: "autre", nom: "Autre club", roles: ["parent"] }];
+      window.GM_MES_CLUBS = [{ clubId: window.CURRENT_CLUB_ID, nom: "Club", roles: ["dirigeant"] }, { clubId: "autre", nom: "Autre club", roles: ["parent"], nonLus: 3 }];
       window.mcMajEntete(ecran);
       const h = document.querySelector(".hdr .hinfo");
       if (window.MC_ECRANS.indexOf(ecran) >= 0) {
         if (!h.classList.contains("gm-mc")) throw new Error("menu Mes clubs absent de l'en-tête");
+        if (!h.classList.contains("gm-mc-nl")) throw new Error("point rouge des notifications absent");
         h.click();
         if (!document.querySelector(".gm-sheet")) throw new Error("Mes clubs ne s'ouvre pas");
         document.querySelector(".gm-sheet").remove();

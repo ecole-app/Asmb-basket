@@ -1,5 +1,21 @@
 [
  {
+  "v": "1793714647",
+  "semver": "1.4.0",
+  "titre": "Notifications de tous vos clubs",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Vous avez plusieurs clubs ? Vous recevez maintenant les notifications de chacun, avec le nom du club devant le titre. En touchant la notification, l'appli passe sur le bon club. Un point rouge en haut indique les nouveautés d'un autre club."
+   }
+  ]
+ },
+ {
   "v": "1793703040",
   "semver": "1.3.0",
   "titre": "Plusieurs clubs avec un seul compte",

@@ -5,7 +5,7 @@
    n'a besoin d'appeler cette fonction (voir js/22-push.js et sendMsg dans
    js/16-communaute.js). */
 
-const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -111,20 +111,35 @@ const jetonMort = (c) => c === "messaging/registration-token-not-registered" || 
 // entrees : [{token, ref, langue}] ; fabrique(langue) → {title, body}.
 // Les abonnements dont le jeton est mort (appli désinstallée...) sont supprimés.
 async function envoyerParLangue(clubId, entrees, fabrique, data, plus) {
+  // Personne qui a plusieurs clubs et regarde un autre de ses clubs (abonnement recopié,
+  // copieDe) : le nom du club devant le titre, le lien ouvre ce club, compteur « Mes clubs ».
+  const nomClub = entrees.some((e) => e.copie) ? await nomDuClub(clubId) : "";
   const groupes = {};
-  entrees.forEach((e) => { const l = notifLangue(e.langue); (groupes[l] = groupes[l] || []).push(e); });
+  entrees.forEach((e) => { const k = notifLangue(e.langue) + (e.copie ? "|c" : ""); (groupes[k] = groupes[k] || []).push(e); });
   const morts = [];
-  for (const l of Object.keys(groupes)) {
-    const notification = fabrique(l), g = groupes[l];
+  for (const k of Object.keys(groupes)) {
+    const copie = k.endsWith("|c"), l = k.split("|")[0], g = groupes[k];
+    const notification = Object.assign({}, fabrique(l));
+    if (copie) notification.title = nomClub + " · " + (notification.title || "");
+    const d = copie ? Object.assign({}, data || {}, { url: "./?club=" + encodeURIComponent(clubId) }) : data;
+    const w = webpushClub(clubId, plus);
+    if (copie) w.fcmOptions = { link: "./?club=" + encodeURIComponent(clubId) };
     for (let i = 0; i < g.length; i += 500) {
       const lot = g.slice(i, i + 500);
-      const r = await admin.messaging().sendEachForMulticast({
-        tokens: lot.map((e) => e.token), notification, data, webpush: webpushClub(clubId, plus)
-      });
+      const r = await admin.messaging().sendEachForMulticast({ tokens: lot.map((e) => e.token), notification, data: d, webpush: w });
       r.responses.forEach((x, j) => { if (!x.success && jetonMort(x.error && x.error.code)) morts.push(lot[j].ref); });
+      if (copie) await compterNonLus(clubId, lot.map((e) => e.ref.id));
     }
   }
   if (morts.length) await Promise.all(morts.map((ref) => ref.delete().catch(() => {})));
+}
+async function nomDuClub(clubId) {
+  try { const c = await db.collection("clubs").doc(clubId).get(); return String((c.exists && c.get("name")) || "Club").slice(0, 40); } catch (e) { return "Club"; }
+}
+// Point rouge de « Mes clubs » : un de plus sur la ligne de ce club (remis à zéro par clubCompte).
+async function compterNonLus(clubId, uids) {
+  await Promise.all(uids.map((uid) => db.collection("users").doc(uid).collection("clubs").doc(clubId)
+    .update({ nonLus: admin.firestore.FieldValue.increment(1) }).catch(() => {})));
 }
 
 exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res) => {
@@ -236,7 +251,7 @@ exports.onChannelMessage = onDocumentCreated(
       if (!doc.exists) return;
       if (authorUid && doc.id === authorUid) return;
       const d = doc.data() || {};
-      if (d.token) entrees.push({ token: d.token, ref: subsCol.doc(doc.id), langue: d.langue });
+      if (d.token) entrees.push({ token: d.token, ref: subsCol.doc(doc.id), langue: d.langue, copie: !!d.copieDe });
     });
     if (!entrees.length) return;
     // Un envoi par langue ; les tokens morts (app désinstallée, cache vidé...) sont nettoyés.
@@ -409,7 +424,7 @@ exports.onDmMessage = onDocumentCreated(
     const entrees = [];
     docs.forEach((d) => {
       const x = (d.exists && d.data()) || {};
-      if (x.token) entrees.push({ token: x.token, ref: d.ref, langue: x.langue });
+      if (x.token) entrees.push({ token: x.token, ref: d.ref, langue: x.langue, copie: !!x.copieDe });
     });
     if (!entrees.length) return;
     await envoyerParLangue(clubId, entrees, fabrique, { url: "./", conv: dmId }, { headers: { Urgency: "high" } });
@@ -844,7 +859,7 @@ function ffbbAppliquer(champ, poule) {
 async function ffbbPush(clubId, fabrique) {
   const subs = await db.collection("clubs").doc(clubId).collection("push_subscriptions").get();
   const entrees = [];
-  subs.forEach((s) => { const d = s.data() || {}; if (d.token) entrees.push({ token: d.token, ref: s.ref, langue: d.langue }); });
+  subs.forEach((s) => { const d = s.data() || {}; if (d.token) entrees.push({ token: d.token, ref: s.ref, langue: d.langue, copie: !!d.copieDe }); });
   if (!entrees.length) return;
   await envoyerParLangue(clubId, entrees, fabrique, { url: "./" });
 }
@@ -1010,11 +1025,15 @@ async function notifierCompte(clubId, uid, fabrique, langueCompte) {
   const token = snap.exists && snap.data() && snap.data().token;
   if (!token) return;
   const { titre, corps } = fabrique(notifLangue(snap.data().langue || langueCompte));
+  const copie = !!snap.data().copieDe;
+  const lien = copie ? "./?club=" + encodeURIComponent(clubId) : "./";
+  const w = webpushClub(clubId, { headers: { Urgency: "high" } });
+  if (copie) w.fcmOptions = { link: lien };
   try {
     await admin.messaging().send({
-      token, notification: { title: titre, body: corps }, data: { url: "./" },
-      webpush: webpushClub(clubId, { headers: { Urgency: "high" } })
+      token, notification: { title: copie ? (await nomDuClub(clubId)) + " · " + titre : titre, body: corps }, data: { url: lien }, webpush: w
     });
+    if (copie) await compterNonLus(clubId, [uid]);
   } catch (e) {
     const c = e && e.code;
     if (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") await ref.delete();
@@ -1238,7 +1257,7 @@ exports.rappelConvocation = onSchedule({ schedule: "every monday,wednesday 08:30
         const d = sub.exists ? sub.data() : null;
         if (!d || !d.token) continue;
         const l = parCoach[uid].sort((a, b) => (a.date < b.date ? -1 : 1));
-        await envoyerParLangue(clubId, [{ token: d.token, ref: subsCol.doc(uid), langue: d.langue }], (lang) => {
+        await envoyerParLangue(clubId, [{ token: d.token, ref: subsCol.doc(uid), langue: d.langue, copie: !!d.copieDe }], (lang) => {
           const loc = { en: "en-GB", ar: "ar", es: "es-ES", it: "it-IT", de: "de-DE" }[lang] || "fr-FR";
           const jour = (x) => new Date(x.date + "T12:00:00Z").toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" });
           return { title: tn(lang, "Convocation à envoyer"), body: l.map((x) => x.equipe + " · " + jour(x)).join("\n") };
@@ -1358,6 +1377,9 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         const [mSnap, cActuel, cCible] = await Promise.all([t.get(mRef), t.get(db.collection("clubs").doc(actuel)), t.get(db.collection("clubs").doc(cible))]);
         if (!mSnap.exists) throw new ErreurClub("pas-membre");
         if (!cCible.exists || STATUTS_FERMES.includes(cCible.get("status")) || cCible.get("type") === "independant") throw new ErreurClub("club-ferme");
+        const subA = db.collection("clubs").doc(actuel).collection("push_subscriptions").doc(uid);
+        const subC = db.collection("clubs").doc(cible).collection("push_subscriptions").doc(uid);
+        const [sA, sC] = await Promise.all([t.get(subA), t.get(subC)]);
         const m = mSnap.data();
         const maj = { clubId: cible };
         CHAMPS_CLUB.forEach((k) => { maj[k] = m[k] !== undefined ? m[k] : admin.firestore.FieldValue.delete(); });
@@ -1365,7 +1387,10 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         t.update(uRef, maj);
         t.delete(mRef);
         t.set(uRef.collection("clubs").doc(actuel), ligneMesClubs(cActuel.exists ? cActuel.data() : null, u.roles), { merge: true });
-        t.set(uRef.collection("clubs").doc(cible), ligneMesClubs(cCible.data(), m.roles), { merge: true });
+        t.set(uRef.collection("clubs").doc(cible), Object.assign(ligneMesClubs(cCible.data(), m.roles), { nonLus: 0 }), { merge: true });
+        // Notifications : l'ancien club devient une copie (nom du club devant le titre), le nouveau redevient normal.
+        if (sA.exists) t.update(subA, { copieDe: cible });
+        if (sC.exists) t.update(subC, { copieDe: admin.firestore.FieldValue.delete() });
       });
       res.json({ ok: true });
       return;
@@ -1384,7 +1409,8 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         if (cible === actuel) throw new ErreurClub("meme-club");
         if ((u.roles || []).includes("client") || inv.role === "client") throw new ErreurClub("independant");
         const mRef = db.collection("users").doc(uid + "__" + cible);
-        const [mSnap, cActuel, cCible] = await Promise.all([t.get(mRef), t.get(db.collection("clubs").doc(actuel)), t.get(db.collection("clubs").doc(cible))]);
+        const subA = db.collection("clubs").doc(actuel).collection("push_subscriptions").doc(uid);
+        const [mSnap, cActuel, cCible, sA] = await Promise.all([t.get(mRef), t.get(db.collection("clubs").doc(actuel)), t.get(db.collection("clubs").doc(cible)), t.get(subA)]);
         if (mSnap.exists) throw new ErreurClub("deja-membre");
         if (!cCible.exists || STATUTS_FERMES.includes(cCible.get("status"))) throw new ErreurClub("club-ferme");
         if (cCible.get("type") === "independant" || (cActuel.exists && cActuel.get("type") === "independant")) throw new ErreurClub("independant");
@@ -1399,7 +1425,8 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         t.update(uRef, maj);
         t.update(iRef, { usedBy: uid, usedAt: admin.firestore.FieldValue.serverTimestamp() });
         t.set(uRef.collection("clubs").doc(actuel), ligneMesClubs(cActuel.exists ? cActuel.data() : null, u.roles), { merge: true });
-        t.set(uRef.collection("clubs").doc(cible), ligneMesClubs(cCible.data(), [inv.role]), { merge: true });
+        t.set(uRef.collection("clubs").doc(cible), Object.assign(ligneMesClubs(cCible.data(), [inv.role]), { nonLus: 0 }), { merge: true });
+        if (sA.exists) t.update(subA, { copieDe: cible });
       });
       res.json({ ok: true });
       return;
@@ -1425,6 +1452,10 @@ exports.onCompteSupprime = onDocumentDeleted("users/{id}", async (event) => {
     const actif = await db.collection("users").doc(uid).get();
     if (actif.exists && actif.get("clubId") === clubId) return;
     await db.collection("users").doc(uid).collection("clubs").doc(clubId).delete().catch(() => {});
+    // Plus membre de ce club : plus de notifications de ce club.
+    const sub = db.collection("clubs").doc(clubId).collection("push_subscriptions").doc(uid);
+    const sSnap = await sub.get().catch(() => null);
+    if (sSnap && sSnap.exists && sSnap.get("copieDe")) await sub.delete().catch(() => {});
     return;
   }
   const mesClubs = db.collection("users").doc(uid).collection("clubs");
@@ -1443,4 +1474,32 @@ exports.onCompteSupprime = onDocumentDeleted("users/{id}", async (event) => {
     t.set(uRef, c);
     t.delete(suivante.ref);
   });
+});
+
+// Notifications de tous les clubs : l'appareil s'abonne dans son club actif (js/22-push.js) ;
+// on recopie l'abonnement dans ses autres clubs (copieDe = club d'où vient la copie), pour
+// qu'il reçoive aussi leurs messages. Désabonnement = les copies partent aussi.
+exports.onAbonnementPush = onDocumentWritten("clubs/{clubId}/push_subscriptions/{uid}", async (event) => {
+  const { clubId, uid } = event.params;
+  if (estCopie(uid)) return;
+  const avant = event.data.before.exists ? event.data.before.data() : null;
+  const apres = event.data.after.exists ? event.data.after.data() : null;
+  if (apres && apres.copieDe) return;
+  if (!apres && (!avant || avant.copieDe)) return;
+  if (apres && avant && !avant.copieDe && avant.token === apres.token && avant.langue === apres.langue) return;
+  const autres = (await db.collection("users").doc(uid).collection("clubs").get()).docs.map((d) => d.id).filter((id) => id !== clubId);
+  for (const autre of autres) {
+    const ref = db.collection("clubs").doc(autre).collection("push_subscriptions").doc(uid);
+    try {
+      if (!apres) {
+        const x = await ref.get();
+        if (x.exists && x.get("copieDe")) await ref.delete();
+      } else {
+        // Seulement si la personne est encore membre de ce club (copie de sa fiche présente).
+        const membre = await db.collection("users").doc(uid + "__" + autre).get();
+        if (!membre.exists) continue;
+        await ref.set({ token: apres.token, uid, langue: apres.langue || "fr", copieDe: clubId, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      }
+    } catch (e) { console.error("onAbonnementPush", autre, e); }
+  }
 });

@@ -18,16 +18,32 @@ function mcCharger(){
   if(window.GM_DEMO||window.SUPPORT_MODE||!u||!u.uid||!window.fbGetDocs||!window.fbDb) return;
   window.fbGetDocs(window.fbCollection(window.fbDb,"users",u.uid,"clubs")).then(function(snap){
     var l=[];
-    snap.forEach(function(d){ var x=d.data()||{}; l.push({clubId:d.id, nom:String(x.nom||d.id), roles:x.roles||[]}); });
+    snap.forEach(function(d){ var x=d.data()||{}; l.push({clubId:d.id, nom:String(x.nom||d.id), roles:x.roles||[], nonLus:Math.max(0,Number(x.nonLus)||0)}); });
     var actif=window.CURRENT_CLUB_ID;
     var a=l.filter(function(x){ return x.clubId===actif; })[0];
     if(!a){ a={clubId:actif, nom:"", roles:u.roles||[]}; l.push(a); }
-    a.roles=u.roles||a.roles;
+    a.roles=u.roles||a.roles; a.nonLus=0;
     l.sort(function(x,y){ return (x.clubId===actif?-1:y.clubId===actif?1:x.nom.localeCompare(y.nom)); });
     window.GM_MES_CLUBS=l;
     var on=document.querySelector(".scr.on");
     mcMajEntete(on?on.id.replace(/^scr-/,""):"");
+    // Notification d'un autre club touchée (lien ./?club=<id>, functions/index.js) : on bascule dessus.
+    var demande=mcParamClub();
+    if(demande){
+      mcEffacerParam();
+      var c=l.filter(function(x){ return x.clubId===demande; })[0];
+      if(c && demande!==actif) mcChanger(c, null);
+    }
   }).catch(function(){});
+  if(!window.__mcVis){
+    window.__mcVis=true;
+    // Retour sur l'appli : compteurs des autres clubs à jour.
+    document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") mcCharger(); });
+  }
+}
+function mcParamClub(){ try{ return new URLSearchParams(location.search).get("club")||""; }catch(e){ return ""; } }
+function mcEffacerParam(){
+  try{ var q=new URLSearchParams(location.search); q.delete("club"); var r=q.toString(); history.replaceState(null,"",location.pathname+(r?"?"+r:"")+location.hash); }catch(e){}
 }
 
 // Appelé par showScr (js/03-nav-portal.js) : le titre devient un menu quand il y a 2 clubs ou plus.
@@ -35,6 +51,8 @@ function mcMajEntete(id){
   var h=document.querySelector(".hdr .hinfo"); if(!h) return;
   var voir=(window.GM_MES_CLUBS||[]).length>=2 && MC_ECRANS.indexOf(id)>=0 && !window.SUPPORT_MODE;
   h.classList.toggle("gm-mc",voir);
+  // Point rouge : des notifications sont arrivées d'un autre club.
+  h.classList.toggle("gm-mc-nl",voir && (window.GM_MES_CLUBS||[]).some(function(c){ return c.clubId!==window.CURRENT_CLUB_ID && c.nonLus>0; }));
   if(voir){ h.setAttribute("role","button"); h.setAttribute("tabindex","0"); h.setAttribute("aria-label",(typeof gmT==="function"?gmT("Mes clubs"):"Mes clubs")); }
   else { h.removeAttribute("role"); h.removeAttribute("tabindex"); h.removeAttribute("aria-label"); }
   if(!h.__mc){
@@ -65,7 +83,15 @@ function mcOuvrir(){
     var r=document.createElement("span"); r.style.cssText="display:block;font-size:12px;color:var(--mut)"; r.textContent=mcRoles(c.roles);
     t.appendChild(n); t.appendChild(r);
     var f=document.createElement("span"); f.style.cssText="font-weight:900;color:"+(on?"var(--dkg)":"var(--mut)"); f.textContent=on?"✓":"›";
-    b.appendChild(av); b.appendChild(t); b.appendChild(f);
+    b.appendChild(av); b.appendChild(t);
+    if(!on && c.nonLus>0){
+      var nl=document.createElement("span"); nl.setAttribute("data-notr","");
+      nl.setAttribute("aria-label",c.nonLus+" "+(typeof gmT==="function"?gmT("nouvelles notifications"):"nouvelles notifications"));
+      nl.style.cssText="min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--red,#c0392b);color:#fff;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0";
+      nl.textContent=c.nonLus>99?"99+":String(c.nonLus);
+      b.appendChild(nl);
+    }
+    b.appendChild(f);
     b.addEventListener("click",function(){ if(on){ s.modal.remove(); return; } mcChanger(c, b); });
     s.body.appendChild(b);
   });
