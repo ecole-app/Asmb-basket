@@ -2,7 +2,9 @@
 // Téléphone seulement (pas en version ordinateur, html.gm-desk) : rond en bas à droite
 // sur l'accueil du dirigeant (portal), « Mon équipe » du coach (coach-equipe) et l'Espace
 // Admin. Un appui ouvre jusqu'à 4 gestes ; chacun choisit les siens dans Paramètres ›
-// « Bouton + » (mémoire de l'appareil : gm_plus_<clubId>_<profil>). Un geste n'apparaît que
+// « Bouton + », enregistrés sur le compte : users/{uid}.plusGestes.<profil> (champ que la
+// personne peut écrire sur son propre compte, firestore.rules) ; copie locale gm_plus_<clubId>_<profil>
+// pour l'affichage hors ligne et la démo. Un geste n'apparaît que
 // si le compte y a droit (mêmes contrôles que l'écran d'origine : hasModulePermission,
 // accès limité, Premium), il ne contourne rien.
 var PLUS_MAX=4;
@@ -53,13 +55,22 @@ function plusDisponibles(){
   return PLUS_GESTES.filter(function(g){ return g.pour.indexOf(p)>=0 && (!g.ok||g.ok()); });
 }
 function plusChoix(){
-  var ids=null;
-  try{ ids=JSON.parse(localStorage.getItem(plusCle())||"null"); }catch(e){}
+  var ids=null, u=window.ASMB_USER;
+  if(u&&u.plusGestes&&Array.isArray(u.plusGestes[plusProfil()])) ids=u.plusGestes[plusProfil()];
+  if(!ids){ try{ ids=JSON.parse(localStorage.getItem(plusCle())||"null"); }catch(e){} }
   if(!Array.isArray(ids)) ids=PLUS_DEFAUT[plusProfil()]||[];
   var dispo=plusDisponibles().map(function(g){ return g.id; });
   return ids.filter(function(id){ return dispo.indexOf(id)>=0; }).slice(0,PLUS_MAX);
 }
-function plusEnregistrer(ids){ try{ localStorage.setItem(plusCle(),JSON.stringify(ids.slice(0,PLUS_MAX))); }catch(e){} }
+function plusEnregistrer(ids){
+  ids=ids.slice(0,PLUS_MAX);
+  try{ localStorage.setItem(plusCle(),JSON.stringify(ids)); }catch(e){}
+  var u=window.ASMB_USER, p=plusProfil(); if(!u||!p) return;
+  u.plusGestes=u.plusGestes||{}; u.plusGestes[p]=ids;
+  if(window.GM_DEMO||!u.uid||!window.fbUpdateDoc||!window.fbDb) return;
+  var maj={}; maj["plusGestes."+p]=ids;
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u.uid),maj).catch(function(e){ if(typeof gmSignalerErreur==="function") gmSignalerErreur(e,"plus:enregistrer"); });
+}
 
 // Appelé à chaque changement d'écran (showScr) : montre ou cache le rond.
 function plusCreer(){
@@ -176,7 +187,7 @@ function plusPeindreParam(box){
     '<div style="font-size:12px;color:var(--mut);margin-bottom:4px">Le bouton + en bas de l\'accueil ouvre vos gestes du quotidien. Choisissez-en 4 au maximum.</div>'+
     '<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:8px"><span data-notr>'+choix.length+' / '+PLUS_MAX+'</span> choisis</div>'+
     '<div class="gm-plus-params"></div>'+
-    '<div style="font-size:11px;color:var(--mut);margin-top:8px">Réglage de ce téléphone.</div></div>';
+    '<div style="font-size:11px;color:var(--mut);margin-top:8px">Enregistré sur votre compte : vous retrouvez vos gestes sur tous vos appareils.</div></div>';
   var zone=box.querySelector(".gm-plus-params");
   dispo.forEach(function(g){
     var on=choix.indexOf(g.id)>=0, plein=choix.length>=PLUS_MAX&&!on;

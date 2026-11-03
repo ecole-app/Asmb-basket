@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793699832",
+  "semver": "1.1.1",
+  "titre": "Bouton + enregistré sur le compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les gestes choisis pour le bouton + sont enregistrés sur votre compte : vous les retrouvez sur tous vos appareils."
+   }
+  ]
+ },
+ {
   "v": "1793698498",
   "semver": "1.1.0",
   "titre": "Recherche partout, bouton + et Annuler",
