@@ -69,6 +69,7 @@ window.gmReprise=reprise;})();
   <!-- Vide au chargement : le nom du club actif est injecté par updateHdr().
        Aucun nom de club en dur ici, sinon il s'afficherait a tous les clubs. -->
   <div class="hinfo"><div class="htit" id="htit"></div><div class="hsub" id="hsub"></div></div>
+  <button class="theme-btn" id="hdr-search-btn" onclick="rechOuvrir()" title="Rechercher" aria-label="Rechercher" style="display:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
   <button class="theme-btn" id="hdr-gm-btn" onclick="showPlateformeHome()" title="Plateforme General Manager" style="display:none;font-weight:900;font-size:12px"></button>
   <button class="theme-btn" id="hdr-profile-btn" onclick="switchProfile()" title="Changer de profil" style="display:none">&#128100;</button>
   <button class="theme-btn" id="hdr-settings-btn" onclick="openParametres()" title="Paramètres">&#9881;</button>
@@ -1980,6 +1981,8 @@ window.gmReprise=reprise;})();
 <script src="js/08b-abonnement.js"></script>
 <script src="js/09-ui-modales.js"></script>
 <script src="js/09b-saisie-dates.js"></script>
+<script src="js/09c-bouton-plus.js"></script>
+<script src="js/09d-recherche.js"></script>
 <script src="js/10-annuaire-galerie.js"></script>
 <script src="js/11-admin.js"></script>
 <script src="js/12-equipes-planning.js"></script>

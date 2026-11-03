@@ -344,10 +344,14 @@ async function deleteComptaLine(){
   if(!comptaEditId)return;
   var ok=await askConfirm("Supprimer cette ligne comptable ?", {danger:true, confirmText:"Supprimer"});
   if(!ok)return;
-  var lines=getComptabilite().filter(function(l){return l.id!==comptaEditId;});
-  saveComptabilite(lines);
+  var id=comptaEditId, avant=getComptabilite(), retiree=avant.find(function(l){return l.id===id;});
+  saveComptabilite(avant.filter(function(l){return l.id!==id;}));
   closeModal("modal-compta-line");
   buildComptabilite();
+  if(retiree) showUndoToast("Ligne de comptabilité supprimée",function(){
+    var cur=getComptabilite(); if(!cur.some(function(l){return l.id===id;})){ cur.push(retiree); saveComptabilite(cur); }
+    buildComptabilite();
+  });
 }
 function exportComptaCsv(){
   if(!hasPremium()){ askComptaVerrouillee(); return; }
@@ -1157,9 +1161,14 @@ function deleteInvItem(){
   if(!invEditId)return;
   askConfirm("Supprimer cet article de l'inventaire ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    saveInventaire(getInventaire().filter(function(x){return x.id!==invEditId;}));
+    var id=invEditId, retire=getInventaire().find(function(x){return x.id===id;});
+    saveInventaire(getInventaire().filter(function(x){return x.id!==id;}));
     closeModal("modal-inv-item");
     buildInventaire();
+    if(retire) showUndoToast("Article « "+(retire.nom||retire.name||"")+" » supprimé",function(){
+      var cur=getInventaire(); if(!cur.some(function(x){return x.id===id;})){ cur.push(retire); saveInventaire(cur); }
+      buildInventaire();
+    });
   });
 }
 var pendingDocCategory="autre";

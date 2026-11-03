@@ -220,10 +220,14 @@ function deleteSponsor(){
   if(!sponsorEditId)return;
   askConfirm("Supprimer ce sponsor ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    var list=getSponsors().filter(function(x){return x.id!==sponsorEditId;});
-    saveSponsors(list);
+    var id=sponsorEditId, retire=getSponsors().find(function(x){return x.id===id;});
+    saveSponsors(getSponsors().filter(function(x){return x.id!==id;}));
     closeModal("modal-sponsor");
     buildSponsors();
+    if(retire) showUndoToast("Sponsor « "+(retire.nom||"")+" » supprimé",function(){
+      var cur=getSponsors(); if(!cur.some(function(x){return x.id===id;})){ cur.push(retire); saveSponsors(cur); }
+      buildSponsors();
+    });
   });
 }
 

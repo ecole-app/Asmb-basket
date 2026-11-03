@@ -76,6 +76,8 @@ function showScr(id){
    setTimeout(maybeShowDailyThemeAnimation, 60);
  }
  if(typeof gmDeskEcran==="function") gmDeskEcran(id);
+ if(typeof rechMajBouton==="function") rechMajBouton(id);
+ if(typeof plusMaj==="function") plusMaj(id);
 }
 // Nom du club actif : jamais de nom de club écrit en dur dans l'interface,
 // sinon un autre club verrait « ASMB » dans son propre header.

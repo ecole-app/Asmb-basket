@@ -156,10 +156,12 @@ function showUndoToast(message,undoFn){
     document.body.appendChild(TOAST_STACK_EL);
   }
   var t=document.createElement("div");
-  t.style.cssText="background:rgba(20,20,20,.92);color:#fff;font-size:12.5px;font-weight:600;padding:9px 9px 9px 16px;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:min(90vw,360px);display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:auto";
-  var span=document.createElement("span");span.textContent=String(message);span.style.cssText="flex:1";
+  // Barre dorée qui se vide pendant les 5 secondes où « Annuler » reste possible.
+  t.style.cssText="position:relative;overflow:hidden;background:rgba(20,20,20,.94);color:#fff;font-size:13px;font-weight:600;padding:8px 8px 12px 16px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.3);width:min(92vw,380px);box-sizing:border-box;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:auto";
+  var span=document.createElement("span");span.textContent=String(message);span.style.cssText="flex:1;line-height:1.35";
   var btn=document.createElement("button");btn.textContent="Annuler";
-  btn.style.cssText="background:none;border:none;color:#F2D57E;font-size:12.5px;font-weight:800;cursor:pointer;padding:6px 8px;flex-shrink:0";
+  btn.style.cssText="background:#F2D57E;border:none;color:#14141f;font-size:14px;font-weight:800;cursor:pointer;padding:0 16px;min-height:44px;border-radius:12px;flex-shrink:0";
+  var barre=document.createElement("div");barre.className="gm-undo-barre";
   var done=false;
   function dismiss(){
     if(done)return; done=true;
@@ -167,9 +169,12 @@ function showUndoToast(message,undoFn){
     setTimeout(function(){ t.remove(); },220);
   }
   btn.addEventListener("click",function(){ if(done)return; done=true; if(undoFn)undoFn(); dismiss(); });
-  t.appendChild(span);t.appendChild(btn);
+  t.appendChild(span);t.appendChild(btn);t.appendChild(barre);
   TOAST_STACK_EL.appendChild(t);
-  requestAnimationFrame(function(){ t.style.opacity="1"; t.style.transform="translateY(0)"; });
+  requestAnimationFrame(function(){
+    t.style.opacity="1"; t.style.transform="translateY(0)";
+    if(barre.animate) barre.animate([{transform:"scaleX(1)"},{transform:"scaleX(0)"}],{duration:5000,easing:"linear",fill:"forwards"});
+  });
   setTimeout(dismiss,5000);
 }
 

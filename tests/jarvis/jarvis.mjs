@@ -155,6 +155,29 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         await action(page, journal, ou + " › paramètres", () => { window.stack = ["portal"]; window.openParametres(); });
       }
     }
+    if (nom === "dirigeant" || nom === "coach") {
+      // Recherche partout (loupe) : on tape 2 lettres, la fenêtre doit montrer des résultats.
+      await action(page, journal, ou + " › recherche", () => {
+        const b = document.getElementById("hdr-search-btn");
+        if (!b || b.style.display === "none") throw new Error("loupe absente de l'en-tête");
+        b.click();
+        const i = document.getElementById("rech-input"); i.value = "an"; i.dispatchEvent(new Event("input"));
+      });
+      if (libTaille === "téléphone") {
+        // Bouton + : il doit être sur l'accueil, s'ouvrir, puis chaque geste disponible doit marcher.
+        await action(page, journal, ou + " › bouton +", (n) => {
+          window.stack = [n === "coach" ? "coach-equipe" : "portal"]; window.showScr(window.stack[0]);
+          const b = document.getElementById("gm-plus-fab");
+          if (!b || b.style.display === "none") throw new Error("bouton + absent de l'accueil");
+          b.click();
+        }, nom);
+        const gestes = await page.evaluate(() => window.plusDisponibles().map((g) => g.id));
+        for (const g of gestes) await action(page, journal, ou + " › geste " + g, (x) => {
+          const n = localStorage.getItem("asmb_profile"); window.stack = [n === "coach" ? "coach-equipe" : "portal"]; window.showScr(window.stack[0]);
+          window.PLUS_GESTES.find((y) => y.id === x).go();
+        }, g);
+      }
+    }
   } catch (e) {
     await echec(page, ou, "Jarvis interrompu : " + String(e.message).split("\n")[0]);
   }

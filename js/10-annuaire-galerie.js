@@ -560,9 +560,13 @@ function saveContact(){
 function deleteContact(id){
   askConfirm("Supprimer ce contact ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    var contacts=getAnnuaire().filter(function(c){return c.id!==id;});
-    saveAnnuaireList(contacts);
+    var retire=getAnnuaire().find(function(c){return c.id===id;});
+    saveAnnuaireList(getAnnuaire().filter(function(c){return c.id!==id;}));
     buildAnnuaire();
+    if(retire) showUndoToast("Contact « "+(retire.nom||retire.name||"")+" » supprimé",function(){
+      var cur=getAnnuaire(); if(!cur.some(function(c){return c.id===id;})){ cur.push(retire); saveAnnuaireList(cur); }
+      buildAnnuaire();
+    });
   });
 }
 

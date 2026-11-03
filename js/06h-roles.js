@@ -44,11 +44,17 @@ async function licSupprimer(code){
   var refs={}; refs["Licence "+code]=true;
   (lic.aides||[]).forEach(function(a){ refs[a.comptaId]=true; });
   var compta=getComptabilite(), restes=compta.filter(function(c){return !(refs[c.reference]||refs[c.id]);});
+  var retirees=compta.filter(function(c){return refs[c.reference]||refs[c.id];});
   if(restes.length!==compta.length) saveComptabilite(restes);
   saveLicences(lics.filter(function(l){return l.code!==code;}));
   buildLicences(); if(typeof buildAdminHome==="function") buildAdminHome();
   if(typeof goBack==="function") goBack();
-  showToast("Fiche supprimée");
+  // Rattrapable 5 secondes : la fiche et ses lignes de comptabilité reviennent telles quelles.
+  showUndoToast("Fiche de "+nom+" supprimée",function(){
+    var cur=getLicences(); if(!cur.some(function(l){return l.code===code;})){ cur.push(lic); saveLicences(cur); }
+    if(retirees.length){ var cc=getComptabilite(), ids={}; cc.forEach(function(c){ ids[c.id]=true; }); saveComptabilite(cc.concat(retirees.filter(function(c){ return !ids[c.id]; }))); }
+    buildLicences(); if(typeof buildAdminHome==="function") buildAdminHome();
+  });
 }
 
 // ── Équipe 1, 2, 3… d'un joueur (badge sur la fiche et à l'import) ───

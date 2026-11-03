@@ -200,11 +200,15 @@ function savePoleItem(){
 function deletePoleItem(poleId,id){
   askConfirm("Supprimer cet élément ?", {danger:true, confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    var data=getPoleData(poleId).filter(function(d){return d.id!==id;});
-    savePoleData(poleId,data);
-    var events=getEvents().filter(function(e){return e.id!=="planning-"+id;});
-    saveEvents(events);
+    var retire=getPoleData(poleId).find(function(d){return d.id===id;}), evRetire=getEvents().find(function(e){return e.id==="planning-"+id;});
+    savePoleData(poleId,getPoleData(poleId).filter(function(d){return d.id!==id;}));
+    saveEvents(getEvents().filter(function(e){return e.id!=="planning-"+id;}));
     buildPoleScreen(poleId);
+    if(retire) showUndoToast("Élément supprimé",function(){
+      var cur=getPoleData(poleId); if(!cur.some(function(d){return d.id===id;})){ cur.push(retire); savePoleData(poleId,cur); }
+      if(evRetire){ var ev=getEvents(); if(!ev.some(function(e){return e.id===evRetire.id;})){ ev.push(evRetire); saveEvents(ev); } }
+      buildPoleScreen(poleId);
+    });
   });
 }
 

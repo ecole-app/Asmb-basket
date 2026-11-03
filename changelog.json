@@ -1,5 +1,33 @@
 [
  {
+  "v": "1793698498",
+  "semver": "1.1.0",
+  "titre": "Recherche partout, bouton + et Annuler",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouvelle loupe en haut de l'écran : tapez un nom, une équipe, un événement ou un montant et retrouvez d'un coup la licence, le parent, la ligne de comptabilité ou le match. Sur ordinateur : Ctrl+K."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Bouton + en bas de l'accueil sur téléphone : vos 4 gestes du quotidien en un appui (nouvelle licence, convocation, dépense en photo, message à une équipe…). Vous les choisissez dans Paramètres › Bouton +."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Après une suppression (fiche licence, ligne de comptabilité, sponsor, contact, article d'inventaire…), un bandeau « Annuler » reste 5 secondes avec une barre qui se vide."
+   }
+  ]
+ },
+ {
   "v": "1793618436",
   "semver": "1.0.2",
   "titre": "Numéro de version sur tous les écrans",

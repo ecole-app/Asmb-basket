@@ -470,6 +470,7 @@ function buildParametresLayout(){ buildParamsAccordeon(); }
 var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
   {id:"apparence", ic:"🎨", titre:"Langue & apparence", secs:["langue","apparence","themes"]},
+  {id:"plus", ic:"➕", titre:"Bouton +", staff:true, secs:["@plus"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"📝", titre:"Inscriptions & licences", dir:true, secs:["dossier","paiement","aides","relances"]},
   {id:"factures", ic:"💶", titre:"Factures & reçus fiscaux", dir:true, secs:["facturation","cerfa"]},
@@ -487,6 +488,7 @@ function paramsResume(id){
     return (ln?ln.nom+" · ":"")+"Thème "+(noms[vt]||vt)+" · mode "+(document.documentElement.getAttribute("data-theme")==="dark"?"sombre":"clair");
   }
   if(id==="club") return "Logo · "+(clubCouleur()?(clubCouleur2()?"2 couleurs":"1 couleur"):"couleurs GM")+" · "+(clubLiens().length?clubLiens().length+" lien"+(clubLiens().length>1?"s":""):"réseaux")+" · QR codes";
+  if(id==="plus") return (typeof plusResume==="function")?plusResume():"";
   if(id==="argent") return "Dossier d'inscription · paiement · Pass'Sport · relances";
   if(id==="factures") return "Factures sponsors · reçus fiscaux (CERFA)";
   if(id==="abonnement"){
@@ -506,6 +508,7 @@ function paramsNoeuds(scr,key){
     var sec=cont.previousElementSibling;
     return (sec&&sec.classList.contains("sec"))?[sec,cont]:[cont];
   }
+  if(key==="@plus") return (typeof plusBlocParam==="function")?[plusBlocParam()]:[];
   if(key==="@abonnement") return (typeof aboBlocParam==="function")?[aboBlocParam()]:[];
   if(key==="@danger"){
     var out=[], secs=scr.querySelectorAll(".sec");
@@ -570,11 +573,12 @@ function buildParamsAccordeon(){
   var adminOnly=document.getElementById("params-dirigeant-only"); if(adminOnly) adminOnly.style.display="block";
   PARAMS_GROUPES.forEach(function(g){
     var grp=zone.querySelector('[data-grp="'+g.id+'"]'); if(!grp) return;
-    var vis=g.sa?isSA:(g.dir?isDir:true);
+    var vis=g.sa?isSA:(g.dir?isDir:(g.staff?isStaff:true));
     grp.style.display=vis?"":"none";
     var r=grp.querySelector(".pgrp-res"); if(r) r.textContent=paramsResume(g.id);
   });
   if(typeof aboPeindre==="function") aboPeindre();
+  if(isStaff&&typeof plusPeindreParam==="function") plusPeindreParam();
   var nf=scr.querySelector('.param-block[data-sec="notesfrais"]'); if(nf) nf.style.display=isStaff?"":"none";
 }
 // Palette des couleurs repliée derrière une ligne qui montre les couleurs choisies.
