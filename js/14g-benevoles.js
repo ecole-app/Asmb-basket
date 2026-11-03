@@ -48,7 +48,7 @@ function benChargerComptes(){
       var vrai=((typeof compteNom==="function"?compteNom(u):"")||n.nom||"").trim();
       var nom=vrai||u.email||u.phone||"Compte";
       var label=nom+(vrai&&u.email?" ("+u.email+")":"")+(n.de?" · parent de "+n.de:"")+(roles.length?" · "+roles.join(", "):"");
-      out.push({uid:d.id, label:label, nom:nom, phone:tel0||tel, prenom:vrai?String(u.prenom||vrai.split(" ")[0]):""});
+      out.push({uid:gmUidDoc(d), label:label, nom:nom, phone:tel0||tel, prenom:vrai?String(u.prenom||vrai.split(" ")[0]):""});
     });
     out.sort(function(a,b){ return a.label.localeCompare(b.label,"fr"); });
     BEN_COMPTES=out; return out;

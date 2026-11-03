@@ -33,7 +33,7 @@ function respRemplirChoix(valeur){
   if(respUsers!==null||!window.fbGetDocs||!window.fbDb||!window.CURRENT_CLUB_ID) return;
   respUsers=[];
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
-    var a=[]; snap.forEach(function(d){ var v=d.data(); v._uid=d.id; if((v.roles||[]).some(function(r){return r==="dirigeant"||r==="coach";})) a.push(v); });
+    var a=[]; snap.forEach(function(d){ var v=d.data(); v._uid=gmUidDoc(d); if((v.roles||[]).some(function(r){return r==="dirigeant"||r==="coach";})) a.push(v); });
     respUsers=a.sort(function(x,y){ return ((x.prenom||"")+(x.nom||"")).localeCompare((y.prenom||"")+(y.nom||"")); });
     var cur=sel.value||valeur; valeur=cur; peindre();
   }).catch(function(){ respUsers=null; });

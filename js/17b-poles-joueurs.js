@@ -102,7 +102,7 @@ function poleChoisirCoachs(poleId,apres){
     return n||String(u.email||"").split("@")[0]||u.phone||"Compte";
   }
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
-    var users=[]; snap.forEach(function(d){ var u=d.data(); u._uid=d.id; var r=u.roles||[]; if(r.indexOf("coach")>=0||r.indexOf("dirigeant")>=0) users.push(u); });
+    var users=[]; snap.forEach(function(d){ var u=d.data(); u._uid=gmUidDoc(d); var r=u.roles||[]; if(r.indexOf("coach")>=0||r.indexOf("dirigeant")>=0) users.push(u); });
     users.sort(function(a,b){ return nomDe(a).localeCompare(nomDe(b)); });
     list.innerHTML="";
     if(!users.length){ list.innerHTML='<div style="font-size:12px;color:var(--mut);padding:10px 0">Aucun compte coach dans le club. Invitez vos coachs depuis « Accès & invitations ».</div>'; return; }

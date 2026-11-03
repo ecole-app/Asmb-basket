@@ -391,7 +391,8 @@ function applyAuthedUser(user){
       }
       // Le super admin ne peut jamais perdre son rôle de dirigeant (par exemple
       // décoché par erreur dans « Accès coach ») : il est rétabli à la connexion.
-      if(user.uid===BOOTSTRAP_DIRIGEANT_UID && (data.roles||[]).indexOf("dirigeant")<0){
+      // (Seulement dans le club d'origine : dans un autre de ses clubs, il garde le rôle qu'on lui a donné.)
+      if(user.uid===BOOTSTRAP_DIRIGEANT_UID && data.clubId===BOOTSTRAP_CLUB_ID && (data.roles||[]).indexOf("dirigeant")<0){
         var rolesSa=(data.roles||[]).concat(["dirigeant"]);
         window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",user.uid),{roles:rolesSa}).catch(function(e){ console.log("rôle super admin:",e&&e.code); });
         data=Object.assign({},data,{roles:rolesSa});
@@ -458,6 +459,7 @@ function finishAuthedUser(user, u, isUpdate){
   routerClub();
   if(!isUpdate) setTimeout(function(){ try{ monCompteSiIncomplet(u); }catch(e){} },1500);
   if(!isUpdate) setTimeout(function(){ try{ if(typeof pushAutoClub==="function") pushAutoClub(); }catch(e){} },4000);
+  if(!isUpdate) setTimeout(function(){ try{ if(typeof mcCharger==="function") mcCharger(); }catch(e){} },1200);
   function routerClub(){
   // Super admin : l'accueil est la Plateforme (clubs), jamais le portail d'un
   // club — décidé AVANT tout routage, pour ne jamais afficher le portail (même

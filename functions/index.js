@@ -5,7 +5,7 @@
    n'a besoin d'appeler cette fonction (voir js/22-push.js et sendMsg dans
    js/16-communaute.js). */
 
-const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -16,6 +16,17 @@ const db = admin.firestore();
 
 // Région proche de la majorité des utilisateurs visés (club basé en France).
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
+
+// ── Plusieurs clubs pour un même compte ───────────────────────────────────
+// users/{uid} = le club actif (comme avant, toutes les règles s'appuient dessus).
+// Pour chaque autre club de la personne, une copie de sa fiche : users/{uid}__{clubId}
+// (copie:true), écrite par le serveur seul. Le club la voit dans ses listes comme
+// n'importe quel compte, son dirigeant peut y changer les accès ; elle redevient la
+// fiche active quand la personne revient sur ce club (fonction clubCompte).
+// users/{uid}/clubs/{clubId} = la liste « Mes clubs » (nom, rôles), lue par la personne seule.
+function estCopie(id) { return String(id).indexOf("__") > 0; }
+function uidDeId(id) { id = String(id); const i = id.indexOf("__"); return i > 0 ? id.slice(0, i) : id; }
+function uidDe(doc) { return uidDeId(doc.id); }
 
 // ── Image de droite des notifications : le logo du club ─────────────────
 // Le logo est enregistré dans la fiche du club (image intégrée). Une notification a besoin d'une adresse web :
@@ -200,10 +211,10 @@ exports.onChannelMessage = onDocumentCreated(
       const uids = new Set();
       for (let i = 0; i < tels.length; i += 30) {
         const r = await db.collection("users").where("clubId", "==", clubId).where("phone", "in", tels.slice(i, i + 30)).get();
-        r.forEach((d) => uids.add(d.id));
+        r.forEach((d) => uids.add(uidDe(d)));
       }
       const dirs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "dirigeant").get();
-      dirs.forEach((d) => uids.add(d.id));
+      dirs.forEach((d) => uids.add(uidDe(d)));
       if (!uids.size) return;
       docs = await db.getAll(...[...uids].map((u) => subsCol.doc(u)));
     } else {
@@ -214,7 +225,7 @@ exports.onChannelMessage = onDocumentCreated(
         const exclus = new Set();
         coachs.forEach((d) => {
           const u = d.data() || {};
-          if (!(u.roles || []).includes("dirigeant") && !(u.linkedTeamIds || []).includes(ch.teamId)) exclus.add(d.id);
+          if (!(u.roles || []).includes("dirigeant") && !(u.linkedTeamIds || []).includes(ch.teamId)) exclus.add(uidDe(d));
         });
         docs = docs.filter((d) => !exclus.has(d.id));
       }
@@ -484,6 +495,8 @@ exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
   const avant = event.data && event.data.before.data();
   const apres = event.data && event.data.after.data();
   if (!avant || !apres || !apres.clubId) return;
+  // Copie d'un compte dans un autre club, ou changement de club : rien à prévenir.
+  if (estCopie(event.params.uid) || avant.clubId !== apres.clubId) return;
   const roles = apres.roles || [];
   const uid = event.params.uid;
   const nomDe = (u) => `${u.prenom || ""} ${u.nom || ""}`.trim();
@@ -1048,7 +1061,8 @@ exports.onRoleAttribue = onDocumentUpdated("users/{uid}", async (event) => {
     if (modules.length) corps += t.acces(listeLangue(modules.map((m) => tn(l, m)), l));
     return { titre: tn(l, "Votre rôle a changé"), corps: corps.trim() };
   };
-  await notifierCompte(apres.clubId, event.params.uid, fabrique, apres.langue);
+  // Copie (la personne regarde un autre de ses clubs) : on prévient quand même son appareil.
+  await notifierCompte(apres.clubId, uidDeId(event.params.uid), fabrique, apres.langue);
 });
 
 // Un bénévole avec compte est placé sur un poste d'un événement.
@@ -1216,7 +1230,7 @@ exports.rappelConvocation = onSchedule({ schedule: "every monday,wednesday 08:30
         const eq = String(m.equipe).toUpperCase();
         const t = teams.find((x) => eq.indexOf(x.name.toUpperCase()) >= 0);
         if (!t) continue;
-        coachs.forEach((c) => { if (((c.data() || {}).linkedTeamIds || []).includes(t.id)) (parCoach[c.id] = parCoach[c.id] || []).push({ equipe: t.name, date: m.date }); });
+        coachs.forEach((c) => { if (((c.data() || {}).linkedTeamIds || []).includes(t.id)) (parCoach[uidDe(c)] = parCoach[uidDe(c)] || []).push({ equipe: t.name, date: m.date }); });
       }
       const subsCol = ref.collection("push_subscriptions");
       for (const uid of Object.keys(parCoach)) {
@@ -1262,7 +1276,7 @@ async function comptageClub(clubRef, saison, prec) {
   us.forEach((d) => { if (((d.data() || {}).roles || []).includes("parent")) parents++; });
   // Dernière activité : dernier renouvellement de session des comptes du club (Firebase Auth).
   let derniere = 0;
-  const uids = us.docs.map((d) => ({ uid: d.id }));
+  const uids = us.docs.map((d) => ({ uid: uidDe(d) }));
   for (let i = 0; i < uids.length; i += 100) {
     try {
       const r = await admin.auth().getUsers(uids.slice(i, i + 100));
@@ -1302,4 +1316,131 @@ async function comptageClubs() {
 }
 exports.comptageClubsNuit = onSchedule({ schedule: "every day 03:20", timeZone: "Europe/Paris", timeoutSeconds: 540, memory: "512MiB" }, async () => {
   console.log("comptageClubsNuit : clubs comptés", await comptageClubs());
+});
+
+
+// ── Plusieurs clubs : changer de club, rejoindre un autre club ────────────
+// Appelé par l'appli (js/18c-mes-clubs.js) avec le jeton de connexion de la personne.
+// Champs propres à un club (copiés / restaurés au changement) et champs du compte.
+const CHAMPS_CLUB = ["roles", "linkedPlayerIds", "linkedTeamIds", "permissions", "titre", "phone", "inviteCode", "dpaAcceptedAt", "remplacePar", "badge"];
+const CHAMPS_COMPTE = ["email", "prenom", "nom", "langue", "identifiant"];
+const STATUTS_FERMES = ["suspended", "deleted", "purging"];
+function copieDeFiche(u, uid, clubId) {
+  const c = { clubId, copie: true, copieDe: uid, copieLe: admin.firestore.FieldValue.serverTimestamp() };
+  CHAMPS_COMPTE.concat(CHAMPS_CLUB).forEach((k) => { if (u[k] !== undefined) c[k] = u[k]; });
+  return c;
+}
+function ligneMesClubs(club, roles) {
+  return { nom: String((club && club.name) || "Club").slice(0, 80), roles: Array.isArray(roles) ? roles : [], maj: admin.firestore.FieldValue.serverTimestamp() };
+}
+class ErreurClub extends Error { constructor(code) { super(code); this.code = code; } }
+
+exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https://www.generalmanagerapp.fr"], memory: "256MiB" }, async (req, res) => {
+  if (req.method !== "POST") { res.status(405).json({ erreur: "methode" }); return; }
+  let uid;
+  try {
+    const jeton = String(req.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    uid = (await admin.auth().verifyIdToken(jeton)).uid;
+  } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
+  const corps = req.body || {};
+  const uRef = db.collection("users").doc(uid);
+  try {
+    if (corps.action === "changer") {
+      const cible = String(corps.clubId || "");
+      if (!cible || estCopie(cible)) throw new ErreurClub("club");
+      await db.runTransaction(async (t) => {
+        const uSnap = await t.get(uRef);
+        if (!uSnap.exists) throw new ErreurClub("compte");
+        const u = uSnap.data(), actuel = u.clubId;
+        if (!actuel) throw new ErreurClub("compte");
+        if (actuel === cible) return;
+        const mRef = db.collection("users").doc(uid + "__" + cible);
+        const [mSnap, cActuel, cCible] = await Promise.all([t.get(mRef), t.get(db.collection("clubs").doc(actuel)), t.get(db.collection("clubs").doc(cible))]);
+        if (!mSnap.exists) throw new ErreurClub("pas-membre");
+        if (!cCible.exists || STATUTS_FERMES.includes(cCible.get("status")) || cCible.get("type") === "independant") throw new ErreurClub("club-ferme");
+        const m = mSnap.data();
+        const maj = { clubId: cible };
+        CHAMPS_CLUB.forEach((k) => { maj[k] = m[k] !== undefined ? m[k] : admin.firestore.FieldValue.delete(); });
+        t.set(db.collection("users").doc(uid + "__" + actuel), copieDeFiche(u, uid, actuel));
+        t.update(uRef, maj);
+        t.delete(mRef);
+        t.set(uRef.collection("clubs").doc(actuel), ligneMesClubs(cActuel.exists ? cActuel.data() : null, u.roles), { merge: true });
+        t.set(uRef.collection("clubs").doc(cible), ligneMesClubs(cCible.data(), m.roles), { merge: true });
+      });
+      res.json({ ok: true });
+      return;
+    }
+    if (corps.action === "rejoindre") {
+      const code = String(corps.code || "");
+      if (!code || code.length > 80 || code.indexOf("/") >= 0) throw new ErreurClub("invitation");
+      const iRef = db.collection("club_invites").doc(code);
+      await db.runTransaction(async (t) => {
+        const [uSnap, iSnap] = await Promise.all([t.get(uRef), t.get(iRef)]);
+        if (!uSnap.exists || !uSnap.get("clubId")) throw new ErreurClub("compte");
+        if (!iSnap.exists) throw new ErreurClub("invitation");
+        const u = uSnap.data(), inv = iSnap.data(), actuel = u.clubId, cible = inv.clubId;
+        const exp = inv.expiresAt && inv.expiresAt.toMillis ? inv.expiresAt.toMillis() : 0;
+        if (inv.usedBy || exp <= Date.now() || !cible || !inv.role) throw new ErreurClub("invitation");
+        if (cible === actuel) throw new ErreurClub("meme-club");
+        if ((u.roles || []).includes("client") || inv.role === "client") throw new ErreurClub("independant");
+        const mRef = db.collection("users").doc(uid + "__" + cible);
+        const [mSnap, cActuel, cCible] = await Promise.all([t.get(mRef), t.get(db.collection("clubs").doc(actuel)), t.get(db.collection("clubs").doc(cible))]);
+        if (mSnap.exists) throw new ErreurClub("deja-membre");
+        if (!cCible.exists || STATUTS_FERMES.includes(cCible.get("status"))) throw new ErreurClub("club-ferme");
+        if (cCible.get("type") === "independant" || (cActuel.exists && cActuel.get("type") === "independant")) throw new ErreurClub("independant");
+        const joueurs = (inv.playerIds || []).map(String).concat(inv.playerId != null ? [String(inv.playerId)] : []);
+        const maj = {
+          clubId: cible, roles: [inv.role], permissions: inv.grantedPermissions || {}, titre: null,
+          linkedPlayerIds: [...new Set(joueurs)], linkedTeamIds: [], phone: String(inv.tel || ""), inviteCode: code,
+          dpaAcceptedAt: inv.role === "dirigeant" ? admin.firestore.FieldValue.serverTimestamp() : null,
+          remplacePar: admin.firestore.FieldValue.delete(), badge: admin.firestore.FieldValue.delete()
+        };
+        t.set(db.collection("users").doc(uid + "__" + actuel), copieDeFiche(u, uid, actuel));
+        t.update(uRef, maj);
+        t.update(iRef, { usedBy: uid, usedAt: admin.firestore.FieldValue.serverTimestamp() });
+        t.set(uRef.collection("clubs").doc(actuel), ligneMesClubs(cActuel.exists ? cActuel.data() : null, u.roles), { merge: true });
+        t.set(uRef.collection("clubs").doc(cible), ligneMesClubs(cCible.data(), [inv.role]), { merge: true });
+      });
+      res.json({ ok: true });
+      return;
+    }
+    res.status(400).json({ erreur: "action" });
+  } catch (e) {
+    if (e instanceof ErreurClub) { res.status(400).json({ erreur: e.code }); return; }
+    console.error("clubCompte", e);
+    res.status(500).json({ erreur: "serveur" });
+  }
+});
+
+// Une fiche est supprimée (le dirigeant retire l'accès, purge d'un club...) :
+// - une copie : la personne quitte seulement ce club ;
+// - la fiche active : si la personne a d'autres clubs, l'un d'eux devient son club actif,
+//   pour qu'elle ne perde pas tous ses clubs d'un coup.
+exports.onCompteSupprime = onDocumentDeleted("users/{id}", async (event) => {
+  const id = event.params.id, avant = event.data && event.data.data();
+  const uid = uidDeId(id);
+  if (estCopie(id)) {
+    const clubId = id.slice(uid.length + 2);
+    // Copie effacée parce que ce club redevient le club actif (changement de club) : on garde la ligne.
+    const actif = await db.collection("users").doc(uid).get();
+    if (actif.exists && actif.get("clubId") === clubId) return;
+    await db.collection("users").doc(uid).collection("clubs").doc(clubId).delete().catch(() => {});
+    return;
+  }
+  const mesClubs = db.collection("users").doc(uid).collection("clubs");
+  if (avant && avant.clubId) await mesClubs.doc(avant.clubId).delete().catch(() => {});
+  const copies = await db.collection("users").where("copieDe", "==", uid).get();
+  const suivante = copies.docs.find((d) => d.id.indexOf(uid + "__") === 0);
+  if (!suivante) return;
+  // Le compte de connexion doit encore exister (sinon : suppression complète voulue).
+  try { await admin.auth().getUser(uid); } catch (e) { return; }
+  const c = Object.assign({}, suivante.data());
+  delete c.copie; delete c.copieDe; delete c.copieLe;
+  const uRef = db.collection("users").doc(uid);
+  await db.runTransaction(async (t) => {
+    const deja = await t.get(uRef);
+    if (deja.exists) return;
+    t.set(uRef, c);
+    t.delete(suivante.ref);
+  });
 });

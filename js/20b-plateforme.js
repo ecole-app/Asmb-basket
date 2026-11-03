@@ -372,11 +372,17 @@ function acceptInviteExistant(code, inv){
   window.fbSignIn(window.fbAuth, email, pass).then(function(cred){
     var uid=cred.user.uid, uref=window.fbDoc(window.fbDb,"users",uid);
     return window.fbGetDoc(uref).then(function(snap){
+      // Compte déjà dans un autre club : le club de l'invitation s'ajoute à « Mes clubs »
+      // et devient le club actif (vérifié et écrit par le serveur, js/18c-mes-clubs.js).
+      if(snap.exists() && (snap.data().clubId||null) && snap.data().clubId!==inv.clubId){
+        if(inviteIndep(inv)) throw {code:"autre-club"};
+        return mcRejoindre(code);
+      }
       var b=window.fbWriteBatch();
       if(!snap.exists()){
         // Compte de connexion sans accès (par exemple retiré par le dirigeant) : on recrée la fiche d'accès.
         b.set(uref,{
-          email:email, prenom:prenom, nom:nom, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
+          email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
           permissions:(inv.grantedPermissions||{}), titre:null,
           linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
           dpaAcceptedAt:(inv.role==="dirigeant"?window.fbServerTimestamp():null),
@@ -384,7 +390,6 @@ function acceptInviteExistant(code, inv){
         });
       } else {
         var u=snap.data();
-        if((u.clubId||null)!==inv.clubId) throw {code:"autre-club"};
         var roles=(u.roles||[]).slice(); if(roles.indexOf(inv.role)<0) roles.push(inv.role);
         var linked=(u.linkedPlayerIds||[]).slice();
         (inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])).forEach(function(id){ if(linked.indexOf(id)<0) linked.push(id); });
@@ -398,7 +403,8 @@ function acceptInviteExistant(code, inv){
   }).catch(function(e){
     var c=e&&e.code||"";
     if(btn){ btn.disabled=false; btn.textContent="Me connecter et rejoindre"; }
-    if(c==="autre-club"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr(inviteIndep(inv)?"Ce compte est déjà rattaché à un club ou à une autre activité. Utilisez une autre adresse e-mail.":"Ce compte est déjà rattaché à un autre club. Un compte ne peut appartenir qu'à un club : utilisez une autre adresse e-mail."); }
+    if(c==="autre-club"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr("Ce compte est déjà rattaché à un club ou à une autre activité. Utilisez une autre adresse e-mail."); }
+    else if(c==="deja-membre"||c==="independant"||c==="club-ferme"||c==="invitation"){ try{ window.fbSignOut(window.fbAuth); }catch(x){} authErr(mcMessage(c)); }
     else if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-login-credentials") authErr("E-mail ou mot de passe incorrect.");
     else if(c==="auth/too-many-requests") authErr("Trop d'essais. Réessayez dans quelques minutes, ou utilisez « Mot de passe oublié ».");
     else if(c==="permission-denied") authErr("Invitation déjà utilisée ou expirée.");

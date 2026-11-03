@@ -155,6 +155,21 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         await action(page, journal, ou + " › paramètres", () => { window.stack = ["portal"]; window.openParametres(); });
       }
     }
+    // Plusieurs clubs : avec 2 clubs, le titre de l'en-tête devient un menu « Mes clubs ».
+    await action(page, journal, ou + " › mes clubs", () => {
+      const ecran = { dirigeant: "portal", coach: "coach-equipe", parent: "parent-home", joueur: "joueur" }[localStorage.getItem("asmb_profile")] || "portal";
+      window.stack = [ecran]; window.showScr(ecran);
+      window.GM_MES_CLUBS = [{ clubId: window.CURRENT_CLUB_ID, nom: "Club", roles: ["dirigeant"] }, { clubId: "autre", nom: "Autre club", roles: ["parent"] }];
+      window.mcMajEntete(ecran);
+      const h = document.querySelector(".hdr .hinfo");
+      if (window.MC_ECRANS.indexOf(ecran) >= 0) {
+        if (!h.classList.contains("gm-mc")) throw new Error("menu Mes clubs absent de l'en-tête");
+        h.click();
+        if (!document.querySelector(".gm-sheet")) throw new Error("Mes clubs ne s'ouvre pas");
+        document.querySelector(".gm-sheet").remove();
+      }
+      window.GM_MES_CLUBS = []; window.mcMajEntete(ecran);
+    });
     if (nom === "dirigeant" || nom === "coach") {
       // Recherche partout (loupe) : on tape 2 lettres, la fenêtre doit montrer des résultats.
       await action(page, journal, ou + " › recherche", () => {

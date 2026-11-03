@@ -864,12 +864,12 @@ function dmStartPicker(){
   window.fbGetDocs(q).then(function(snap){
     var names=dmNameForPhone(), me=myUid(), list=[];
     snap.forEach(function(d){
-      var u=d.data()||{}; if(d.id===me) return;
+      var u=d.data()||{}; if(gmUidDoc(d)===me) return;
       var roles=u.roles||[];
       if(roles.indexOf("joueur")>=0) return;
       var label=(typeof compteNom==="function"&&compteNom(u))||names[String(u.phone||"").replace(/\s+/g,"")]||u.email||u.phone||"Compte";
       var role=roles.indexOf("dirigeant")>=0?"Dirigeant":roles.indexOf("coach")>=0?"Coach":roles.indexOf("bureau")>=0?"Bureau":"Parent";
-      list.push({uid:d.id,label:label,role:role});
+      list.push({uid:gmUidDoc(d),label:label,role:role});
     });
     list.sort(function(a,b){ return a.label.localeCompare(b.label); });
     var h='<div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:8px">Nouvelle discussion privée</div>'+

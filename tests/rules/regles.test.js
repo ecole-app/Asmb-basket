@@ -300,6 +300,41 @@ describe("Comptes utilisateurs", () => {
   });
 });
 
+describe("Plusieurs clubs (copie du compte dans un autre club)", () => {
+  // coachA est aussi parent au club B : sa copie users/coachA__B est écrite par le serveur.
+  const copie = async () => (await getEnv()).withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "users/coachA__B"), { clubId: "B", roles: ["parent"], copie: true, copieDe: "coachA", phone: "0600000000" });
+    await setDoc(doc(ctx.firestore(), "users/coachA/clubs/B"), { nom: "Club B", roles: ["parent"] });
+  });
+  it("le dirigeant du club B voit la copie et change ses accès, jamais ses marques de copie", async () => {
+    await copie();
+    await assertSucceeds(getDoc(doc(await as("dirB"), "users/coachA__B")));
+    await assertSucceeds(updateDoc(doc(await as("dirB"), "users/coachA__B"), { roles: ["parent", "coach"] }));
+    await assertFails(updateDoc(doc(await as("dirB"), "users/coachA__B"), { copieDe: "parentA" }));
+    await assertFails(updateDoc(doc(await as("dirB"), "users/coachA__B"), { clubId: "A" }));
+    await assertSucceeds(deleteDoc(doc(await as("dirB"), "users/coachA__B")));
+  });
+  it("le club A ne voit pas la copie du club B, la personne ne la modifie pas", async () => {
+    await copie();
+    await assertFails(getDoc(doc(await as("dirA"), "users/coachA__B")));
+    await assertFails(updateDoc(doc(await as("coachA"), "users/coachA__B"), { roles: ["dirigeant"] }));
+    await assertFails(setDoc(doc(await as("coachA"), "users/coachA__A"), { clubId: "A", roles: ["dirigeant"], copie: true, copieDe: "coachA" }));
+  });
+  it("une copie ne donne aucun accès aux données du club B (seule la fiche active compte)", async () => {
+    await copie();
+    await assertFails(getDoc(doc(await as("coachA"), "clubs/B")));
+  });
+  it("« Mes clubs » : la personne lit sa liste, personne n'y écrit", async () => {
+    await copie();
+    await assertSucceeds(getDoc(doc(await as("coachA"), "users/coachA/clubs/B")));
+    await assertFails(getDoc(doc(await as("dirB"), "users/coachA/clubs/B")));
+    await assertFails(setDoc(doc(await as("coachA"), "users/coachA/clubs/S"), { nom: "Club S", roles: ["dirigeant"] }));
+  });
+  it("on ne se pose pas soi-même une marque de copie", async () => {
+    await assertFails(updateDoc(doc(await as("parentA"), "users/parentA"), { copieDe: "dirA" }));
+  });
+});
+
 describe("Documents du club (publiés aux parents ou réservés au bureau)", () => {
   const fiche = { id: "n1", name: "Charte.pdf", publie: true, octets: 5000, parts: 1 };
   it("un parent lit un document publié et son fichier, jamais un document réservé", async () => {

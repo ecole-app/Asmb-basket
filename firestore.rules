@@ -248,9 +248,12 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone','copie','copieDe']))
         // Un dirigeant ne quitte SON rôle que si un autre dirigeant du club est déjà en place (remplacePar).
+        // Copie d'un compte (users/{uid}__{clubId}, personne qui a plusieurs clubs) : le dirigeant de ce
+        // club y change les accès comme sur une fiche normale, jamais les marques de copie.
         || (dirigeant(resource.data.get('clubId', null)) && request.resource.data.clubId == resource.data.get('clubId', null)
+            && !changes(['copie','copieDe'])
             && (request.auth.uid != uid || request.resource.data.get('roles', []).hasAll(['dirigeant'])
                 || autreDirigeant(request.resource.data.get('remplacePar', ''), resource.data.get('clubId', null))))
         // Le super admin récupère toujours son rôle de dirigeant sur son propre compte (même club).
@@ -271,6 +274,11 @@ service cloud.firestore {
       allow delete: if superAdmin()
         || (dirigeant(resource.data.get('clubId', null)) && request.auth.uid != uid
             && uid != "7f2br1aTiJVWHTEbqVePbMLD0uc2");
+
+      // « Mes clubs » (personne qui a plusieurs clubs) : écrit par le serveur seul (fonction clubCompte).
+      match /clubs/{clubId} {
+        allow read: if signedIn() && request.auth.uid == uid;
+      }
     }
 
     // ── Réglages de la Plateforme (RIB pour les virements d'abonnement) ──
