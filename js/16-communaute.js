@@ -22,6 +22,7 @@ var currentAdminChannelId=null;
 function buildAdminComm(){
   var el=document.getElementById("admcomm-list");if(!el)return;
   if(!window.fbReady){window.addEventListener("fb-ready",buildAdminComm,{once:true});return;}
+  if(!window.CURRENT_CLUB_ID){ whenClubReady(buildAdminComm); return; }
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
     el.innerHTML="";
@@ -555,6 +556,8 @@ function buildCommunaute(){
     window.addEventListener("fb-ready",function(){buildCommunaute();},{once:true});
     return;
   }
+  // Le club de la personne arrive un peu après la connexion (ouverture depuis une notification, par exemple).
+  if(!window.CURRENT_CLUB_ID){ whenClubReady(buildCommunaute); return; }
   el.innerHTML="";
   var q=window.fbQuery(window.fbCollection(window.fbDb,"channels"),window.fbOrderBy("name"));
   window.fbOnSnapshot(q,function(snap){
@@ -741,7 +744,9 @@ function chatMembresCanal(chArg){
       var l=par[g]; if(!l||!l.length) return;
       l.sort(function(a,b){ return a.nom.localeCompare(b.nom); });
       h+='<div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);margin:12px 0 4px">'+authEsc(g)+' · '+l.length+'</div>'+
-        l.map(function(m){ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+authEsc(m.nom.charAt(0).toUpperCase())+'</div><div style="flex:1;min-width:0;font-size:13.5px;font-weight:700;color:var(--txt)">'+authEsc(m.nom)+(m.moi?' <span style="font-weight:600;color:var(--mut)">(vous)</span>':'')+(m.info?'<div style="font-size:11px;font-weight:500;color:var(--mut)">'+authEsc(m.info)+'</div>':'')+'</div></div>'; }).join("");
+        l.map(function(m){ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="width:32px;height:32px;border-radius:50%;background:var(--bdr);color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+authEsc(m.nom.charAt(0).toUpperCase())+'</div><div style="flex:1;min-width:0;font-size:13.5px;font-weight:700;color:var(--txt)">'+authEsc(m.nom)+(m.moi?' <span style="font-weight:600;color:var(--mut)">(vous)</span>':'')+(m.info?'<div style="font-size:11px;font-weight:500;color:var(--mut)">'+authEsc(m.info)+'</div>':'')+'</div>'+
+          (m.admin?'<span style="font-size:10.5px;font-weight:800;color:var(--dkg);border:1px solid var(--dkg);border-radius:10px;padding:2px 7px">Admin</span>':'')+
+          (m.nommable?'<button type="button" data-adm="'+authEsc(m.uid)+'" style="font:inherit;font-size:11.5px;font-weight:800;color:var(--dkg);background:none;border:1px solid var(--bdr);border-radius:10px;padding:5px 9px;cursor:pointer;margin-left:6px">'+(m.adminCanal?'Retirer admin':'Nommer admin')+'</button>':'')+'</div>'; }).join("");
     });
     return h;
   }
@@ -764,6 +769,7 @@ function chatMembresCanal(chArg){
   }
   var noms=(typeof dmNameForPhone==="function")?dmNameForPhone():{};
   var moi=(typeof myUid==="function")?myUid():null;
+  var peutNommer=((window.ASMB_USER&&window.ASMB_USER.roles)||[]).indexOf("dirigeant")>=0;
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
     var par={}, total=0;
     var tels={}; (ch.members||[]).forEach(function(m){ var t=String(typeof m==="string"?m:m.phone).replace(/\s+/g,""); tels[t]=(typeof m==="string"?null:m.label)||true; });
@@ -777,13 +783,28 @@ function chatMembresCanal(chArg){
       if(!ok) return;
       var lab=(tel&&typeof tels[tel]==="string")?tels[tel]:"";
       if(tel) delete tels[tel];
-      (par[g]=par[g]||[]).push({nom:chatNomCompte(u,noms),moi:d.id===moi,info:lab});
+      var uidReel=gmUidDoc(d), estDir=r.indexOf("dirigeant")>=0, adminCanal=(ch.admins||[]).indexOf(uidReel)>=0;
+      (par[g]=par[g]||[]).push({nom:chatNomCompte(u,noms),moi:d.id===moi,info:lab,uid:uidReel,admin:estDir||adminCanal,adminCanal:adminCanal,
+        nommable:peutNommer&&!estDir&&!!ch.id&&!ch.evt&&d.id===uidReel});
       total++;
     });
     // Numéros autorisés qui n'ont pas encore de compte dans l'appli.
     Object.keys(tels).forEach(function(t){ if(!t) return; (par["Pas encore de compte"]=par["Pas encore de compte"]||[]).push({nom:(typeof tels[t]==="string"?tels[t]:noms[t])||t,info:t}); });
     zone.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--txt)">'+total+' compte'+(total>1?"s":"")+' ont accès</div>'+groupes(par)+ontEcrit()+
+      (peutNommer?'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Un admin peut supprimer les messages des autres et épingler. Les dirigeants le sont toujours.</div>':'')+
       (restreint&&localStorage.getItem("asmb_profile")==="dirigeant"?'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Ajouter ou retirer des membres : Admin › Communauté › ce canal.</div>':'');
+    zone.querySelectorAll("button[data-adm]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var u=btn.getAttribute("data-adm"), liste=(ch.admins||[]).slice(), i=liste.indexOf(u);
+        if(i>=0) liste.splice(i,1); else liste.push(u);
+        btn.disabled=true;
+        window.fbSetDoc(window.fbDoc(window.fbDb,"channels",ch.id),{admins:liste},{merge:true}).then(function(){
+          ch.admins=liste;
+          if(currentChannelData&&currentChannelData.id===ch.id) currentChannelData.admins=liste;
+          s.modal.remove(); chatMembresCanal(ch);
+        }).catch(function(){ btn.disabled=false; askAlert("Impossible pour le moment. Vérifiez votre connexion."); });
+      });
+    });
   }).catch(function(e){ zone.innerHTML='<div style="color:var(--red);font-size:12.5px">Liste indisponible ('+authEsc((e&&e.code)||"réseau")+').</div>'+ontEcrit(); });
 }
 

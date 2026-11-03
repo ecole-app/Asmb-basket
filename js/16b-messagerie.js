@@ -25,6 +25,16 @@ function chatMsgTime(msg){
   return msg&&msg.ts&&msg.ts.toDate?msg.ts.toDate().getTime():Date.now();
 }
 function chatIsStaff(){ return !!window.asmbCoachMode; }
+// Admin d'un canal (supprimer les messages des autres, épingler) : le dirigeant, et les personnes
+// qu'il a nommées admins depuis la fiche « membres » du groupe (channels/{id}.admins, comme WhatsApp).
+// Un coach n'est donc plus admin d'office.
+function chatIsAdmin(){
+  if(currentConvKind==="dm") return false;
+  var r=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
+  if(r.indexOf("dirigeant")>=0) return true;
+  var a=(currentChannelData&&currentChannelData.admins)||[];
+  return !!myUid()&&a.indexOf(myUid())>=0;
+}
 function chatMsgPlain(msg){
   if(!msg) return "";
   if(msg.type==="media"){
@@ -334,7 +344,7 @@ function listenMessages(channelId, prevLastRead){
       if(pinnedMsgs.length){
         pinEl.style.display="flex";
         pinEl.innerHTML=pinnedMsgs.map(function(pm){
-          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span onclick="scrollToMsg(\''+pm.id+'\')" style="cursor:pointer;font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 '+authEsc(pm.text)+'</span>'+(chatIsStaff()?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span onclick="scrollToMsg(\''+pm.id+'\')" style="cursor:pointer;font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 '+authEsc(pm.text)+'</span>'+(chatIsAdmin()?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
         }).join("");
       } else { pinEl.style.display="none"; pinEl.innerHTML=""; }
     }
@@ -386,7 +396,7 @@ function chatRenderMessage(channelId,msgId,msg,pending,pinnedIds){
     var lbl=admin?"Supprimé par un admin":(mine?"Vous avez supprimé ce message":"Ce message a été supprimé");
     bubble.innerHTML=authEsc(lbl)+'<div class="msg-time">'+time+'</div>';
     wrap.appendChild(bubble);
-    if(chatIsStaff()||mine) chatBindGestures(bubble,wrap,channelId,msgId,true);
+    if(chatIsAdmin()||mine) chatBindGestures(bubble,wrap,channelId,msgId,true);
     return wrap;
   }
 
@@ -534,7 +544,7 @@ function chatCanEdit(msg){
 function chatOpenMenu(channelId,msgId,anchor){
   chatEnsureUi();
   var msg=renderedMsgs[msgId]; if(!msg) return;
-  var mine=chatIsMine(msg), staff=chatIsStaff(), dm=(currentConvKind==="dm");
+  var mine=chatIsMine(msg), staff=chatIsAdmin(), dm=(currentConvKind==="dm");
   var acts=[];
   if(!msg.deleted){
     acts.push(["Répondre","↩",function(){ setReplyTo(msgId); }]);

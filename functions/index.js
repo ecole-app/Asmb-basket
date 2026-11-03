@@ -201,8 +201,10 @@ exports.onChannelMessage = onDocumentCreated(
         lastPseudo: String(msg.pseudo || "").slice(0, 40)
       }, { merge: true });
     } catch (e) { /* l'aperçu est un confort : on ne bloque pas les notifications */ }
+    // Titre : « Prénom (Nom du groupe) » ; le nom du canal est écrit par le club, jamais traduit.
+    let nomCanal = "";
     const fabrique = (l) => ({
-      title: msg.pseudo ? `${msg.pseudo} (${tn(l, "Communauté")})` : tn(l, "Nouveau message"),
+      title: msg.pseudo ? `${msg.pseudo} (${nomCanal || tn(l, "Communauté")})` : tn(l, "Nouveau message"),
       body: (msg.type === "media")
         ? tn(l, msg.mediaType === "pdf" ? "📄 a partagé un document" : "📷 a partagé une photo")
         : texte
@@ -216,6 +218,7 @@ exports.onChannelMessage = onDocumentCreated(
     const subsCol = clubRef.collection("push_subscriptions");
     const chSnap = await clubRef.collection("channels").doc(channelId).get();
     const ch = (chSnap.exists && chSnap.data()) || {};
+    nomCanal = String(ch.name || "").trim().slice(0, 40);
     const membres = Array.isArray(ch.members) ? ch.members : [];
     // Fil d'événement : jamais « tout le club » ; une fois l'événement fini, seuls les dirigeants sont prévenus.
     const evtFini = !!ch.evt && !!ch.fin && new Date().toISOString().slice(0, 10) > ch.fin;

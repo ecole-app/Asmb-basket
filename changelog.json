@@ -1,5 +1,37 @@
 [
  {
+  "v": "1793729657",
+  "semver": "1.5.1",
+  "titre": "Admins des canaux et notifications",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Un coach n'est plus admin d'office des canaux : seul le dirigeant l'est. En touchant le nom du groupe, le dirigeant peut nommer admin la personne de son choix (supprimer les messages des autres, épingler), comme sur WhatsApp."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Les notifications de messages affichent le nom du groupe entre parenthèses : « Paul (Général) » au lieu de « Paul (Communauté) »."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Correction : ouverture de la Communauté depuis une notification juste après la connexion (plus d'erreur « Aucun club actif »)."
+   }
+  ]
+ },
+ {
   "v": "1793727014",
   "semver": "1.5.0",
   "titre": "Répéter un entraînement et rappels du jour",

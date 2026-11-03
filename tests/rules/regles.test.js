@@ -606,9 +606,25 @@ describe("Communauté", () => {
     const db = await as("parentA");
     await assertFails(setDoc(doc(db, "clubs/A/channels/ch1/messages/m3"), { senderUid: "coachA", text: "Match annulé" }));
   });
-  it("le coach modère n'importe quel message", async () => {
+  it("le dirigeant modère n'importe quel message", async () => {
+    const db = await as("dirA");
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { deleted: true, deletedByAdmin: true }));
+  });
+  it("un coach n'est pas admin d'office : il ne supprime pas le message d'un autre", async () => {
     const db = await as("coachA");
-    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/m1"), { deleted: true, deletedBy: "le coach" }));
+    await assertFails(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mRecent"), { deleted: true, deletedByAdmin: true, text: "" }));
+    await assertFails(deleteDoc(doc(db, "clubs/A/channels/ch1/messages/mRecent")));
+  });
+  it("un coach nommé admin du canal par le dirigeant peut modérer", async () => {
+    await (await getEnv()).withSecurityRulesDisabled((ctx) => updateDoc(doc(ctx.firestore(), "clubs/A/channels/ch1"), { admins: ["coachA"] }));
+    const db = await as("coachA");
+    await assertSucceeds(updateDoc(doc(db, "clubs/A/channels/ch1/messages/mRecent"), { deleted: true, deletedByAdmin: true, text: "" }));
+  });
+  it("seul le dirigeant nomme les admins d'un canal", async () => {
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A/channels/ch1"), { admins: ["coachA"] }));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A/channels/ch1"), { admins: ["coachA"] }));
+    // Un coach garde le droit de modifier le reste de la fiche du canal.
+    await assertSucceeds(updateDoc(doc(await as("coachA"), "clubs/A/channels/ch1"), { desc: "Infos" }));
   });
   it("un parent ne crée ni ne supprime un canal", async () => {
     const db = await as("parentA");
