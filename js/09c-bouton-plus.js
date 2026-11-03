@@ -42,7 +42,7 @@ var PLUS_GESTES=[
     openAdminModule("comptabilite");
     if(document.getElementById("scr-comptabilite").classList.contains("on")){ showAddComptaLine(); setComptaType("recette"); }
   }},
-  {id:"message", label:"Message à une équipe", pour:["dirigeant","coach"], ok:function(){ return typeof limiteOuvert!=="function"||limiteOuvert("messagerie"); }, go:function(){ plusCanal(true); }},
+  {id:"message", label:"Message à mon équipe", pour:["dirigeant","coach"], ok:function(){ return typeof limiteOuvert!=="function"||limiteOuvert("messagerie"); }, go:function(){ plusMessage(); }},
   {id:"annonce", label:"Annonce dans le Général", pour:["dirigeant","coach"], ok:function(){ return typeof limiteOuvert!=="function"||limiteOuvert("messagerie"); }, go:function(){ plusCanal(false); }},
   {id:"evenement", label:"Nouvel événement", pour:["dirigeant","coach"], go:function(){ showAddEvent(); }},
   {id:"notefrais", label:"Note de frais", pour:["coach"], go:function(){ openNotesFrais(); }}
@@ -171,6 +171,79 @@ async function plusCanal(equipe){
     b.addEventListener("click",function(){ s.modal.remove(); aller(); openChannel(c); });
     s.body.appendChild(b);
   });
+}
+
+// « Message à mon équipe » : petite fenêtre d'envoi rapide, sans quitter l'écran.
+// Coach : ses équipes (getCoachTeams) ; s'il n'en a pas choisi, toutes les équipes.
+// Dirigeant : ses équipes s'il en entraîne, sinon toutes les équipes + le Général.
+// Le message part dans le canal comme dans la Communauté (même format, même notif push).
+async function plusMessage(){
+  var tr_=function(t){ return (typeof gmT==="function")?gmT(t):t; };
+  var chs=(window.__chatChannelsCache||[]).filter(function(c){ return !c.evt; });
+  if(!chs.length && window.fbReady){
+    try{
+      var snap=await window.fbGetDocs(window.fbCollection(window.fbDb,"channels"));
+      snap.forEach(function(d){ var c=d.data(); c.id=d.id; if(!c.deleted&&!c.evt&&(typeof channelVisibleToMe!=="function"||channelVisibleToMe(c))) chs.push(c); });
+    }catch(e){}
+  }
+  var parNom=function(a,b){ return String(a.name||"").localeCompare(String(b.name||"")); };
+  var equipes=chs.filter(function(c){ return typeof canalEquipeId==="function"&&canalEquipeId(c); }).sort(parNom);
+  var mesIds=(typeof getCoachTeams==="function")?getCoachTeams():[];
+  var miennes=equipes.filter(function(c){ return mesIds.indexOf(canalEquipeId(c))>=0; });
+  var liste=miennes.length?miennes:equipes;
+  if(plusProfil()==="dirigeant"&&!miennes.length) liste=equipes.concat(chs.filter(function(c){ return c.id==="general"; }));
+  var aller=function(){ if(plusProfil()==="coach") navToCoach("communaute"); else navTo("communaute"); };
+  if(!liste.length){ aller(); return; }
+  var cible=liste[0], envoi=false;
+  var s=gmSheet("Message à mon équipe");
+  var puces=document.createElement("div");
+  puces.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px";
+  var peindre=function(){
+    puces.innerHTML="";
+    if(liste.length<2) return;
+    liste.forEach(function(c){
+      var b=document.createElement("button"); b.type="button"; b.setAttribute("data-notr","");
+      var on=(c.id===cible.id);
+      b.style.cssText="min-height:40px;padding:0 16px;border-radius:999px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:2px solid var(--dkg);"+(on?"background:var(--dkg);color:#fff":"background:var(--card);color:var(--dkg)");
+      b.textContent=(c.icon?c.icon+" ":"")+(c.name||"");
+      b.addEventListener("click",function(){ cible=c; peindre(); majBouton(); });
+      puces.appendChild(b);
+    });
+  };
+  var zone=document.createElement("textarea");
+  zone.rows=4; zone.maxLength=1000; zone.setAttribute("data-notr","");
+  zone.placeholder=tr_("Votre message…");
+  zone.style.cssText="width:100%;box-sizing:border-box;border:2px solid var(--dkg);border-radius:14px;padding:12px 14px;font:inherit;font-size:16px;line-height:1.4;background:var(--card);color:var(--txt);resize:none";
+  var aide=document.createElement("div");
+  aide.style.cssText="font-size:12px;color:var(--mut);margin:8px 2px 12px";
+  aide.textContent="Part dans le canal de l'équipe, les parents et joueurs le voient.";
+  var bt=document.createElement("button"); bt.type="button";
+  bt.style.cssText="width:100%;min-height:52px;border-radius:14px;border:0;background:var(--dkg);color:#fff;font:inherit;font-weight:900;font-size:17px;cursor:pointer";
+  var lien=document.createElement("button"); lien.type="button";
+  lien.style.cssText="display:block;width:100%;min-height:44px;margin-top:8px;border:0;background:none;font:inherit;font-weight:800;font-size:14px;color:var(--dkg);cursor:pointer";
+  lien.textContent="Ouvrir le canal complet";
+  var majBouton=function(){ bt.textContent=tr_("Envoyer à")+" "+(cible.name||""); };
+  majBouton(); peindre();
+  s.body.appendChild(puces); s.body.appendChild(zone); s.body.appendChild(aide); s.body.appendChild(bt); s.body.appendChild(lien);
+  [zone,bt,lien].forEach(function(el){ el.addEventListener("click",function(e){ e.stopPropagation(); }); });
+  lien.addEventListener("click",function(){ s.modal.remove(); aller(); openChannel(cible); });
+  bt.addEventListener("click",async function(){
+    var texte=zone.value.trim(); if(!texte||envoi) return;
+    if(window.GM_DEMO){ s.modal.remove(); showToast(tr_("Démo : le message n'est pas envoyé")); return; }
+    if(!window.fbReady){ askAlert("Connexion en cours, patientez 2 secondes et réessayez"); return; }
+    envoi=true; bt.disabled=true;
+    try{
+      if(typeof checkMyPhone==="function"&&!(await checkMyPhone())){ envoi=false; bt.disabled=false; return; }
+      var payload=Object.assign({text:texte,pseudo:myChatPseudo(),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]},mySenderMeta());
+      await window.fbAddDoc(window.fbCollection(window.fbDb,"channels",cible.id,"messages"),payload);
+      s.modal.remove();
+      showToast(tr_("Message envoyé"));
+    }catch(e){
+      envoi=false; bt.disabled=false;
+      askAlert("Le message n'a pas pu être envoyé : "+((e&&e.code)||e));
+    }
+  });
+  setTimeout(function(){ try{ zone.focus(); }catch(e){} },80);
 }
 
 // Paramètres › « Bouton + » : jusqu'à 4 gestes cochés, dans l'ordre du catalogue.
