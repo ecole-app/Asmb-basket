@@ -1,5 +1,21 @@
 [
  {
+  "v": "1793802727",
+  "semver": "1.5.4",
+  "titre": "Compteur de visites anonyme",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le site compte le nombre de visiteurs par jour, de façon anonyme (sans cookie, sans donnée personnelle)."
+   }
+  ]
+ },
+ {
   "v": "1793798781",
   "semver": "1.5.3",
   "titre": "Pseudo enregistré sur le compte",
