@@ -537,7 +537,7 @@ function pfBugsBox(box){
   if(!window.fbGetDocs||!window.fbDb) return;
   var q=window.fbQuery(window.fbCollection(window.fbDb,"erreurs_sig"),window.fbOrderBy("dernier","desc"),window.fbLimit(15));
   window.fbGetDocs(q).then(function(snap){
-    var l=[]; snap.forEach(function(d){ var x=d.data(); x.id=d.id; l.push(x); });
+    var l=[]; window.__pfBugs={}; snap.forEach(function(d){ var x=d.data(); x.id=d.id; l.push(x); window.__pfBugs[d.id]=x; });
     var h='<div style="margin-bottom:12px;padding:12px 14px;border-radius:var(--rs);background:var(--card,#fff);border:1px solid var(--brd,#e3e7ef);font-size:12px;color:var(--txt);line-height:1.5">'+
       '<b>Bugs chez les utilisateurs</b> · 30 derniers jours';
     if(!l.length) h+='<br>Aucun bug signalé';
@@ -546,10 +546,25 @@ function pfBugsBox(box){
         '<b>'+authEsc(x.msg)+'</b><br><span style="color:var(--txt2)">'+authEsc((x.src||"?")+(x.ligne?":"+x.ligne:""))+(x.page?' · '+authEsc(x.page):'')+'</span><br>'+
         authEsc(x.n+" fois · dernière le "+pfSauvegardeDate(x.dernier)+" · version "+String(x.v||"?").slice(-5)+" · "+((x.clubs||[]).length)+" club(s)"+(x.role?" · "+x.role:""))+
         (x.pile?'<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--txt2)">Détail technique</summary><pre style="white-space:pre-wrap;word-break:break-word;font-size:10px;margin:4px 0 0">'+authEsc(x.pile)+'</pre></details>':'')+
-        '<div style="margin-top:6px"><button class="btn-s" onclick="pfBugCorrige(\''+authEsc(x.id)+'\')">Corrigé, retirer</button></div></div>';
+        '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-s" onclick="pfBugCopier(\''+authEsc(x.id)+'\')">Copier pour Claude</button><button class="btn-s" onclick="pfBugCorrige(\''+authEsc(x.id)+'\')">Corrigé, retirer</button></div></div>';
     });
     box.innerHTML=h+'</div>';
   }).catch(function(e){ box.innerHTML=""; });
+}
+// Copie tout le détail d'un bug (message, fichier:ligne, pile, version, appareil...) pour le coller dans la conversation avec Claude.
+function pfBugCopier(id){
+  var x=(window.__pfBugs||{})[id]; if(!x) return;
+  var t="Bug General Manager\n"+
+    "Message : "+(x.msg||"")+"\n"+
+    "Fichier : "+(x.src||"?")+(x.ligne?":"+x.ligne+(x.col?":"+x.col:""):"")+"\n"+
+    "Écran : "+(x.page||"?")+"\n"+
+    "Arrivé "+(x.n||1)+" fois, dernière le "+pfSauvegardeDate(x.dernier)+"\n"+
+    "Version : "+(x.v||"?")+" · rôle : "+(x.role||"?")+" · "+((x.clubs||[]).length)+" club(s)\n"+
+    "Appareil : "+(x.ua||"?")+"\n"+
+    "Pile :\n"+(x.pile||"(aucune)");
+  var fini=function(){ if(typeof showToast==="function") showToast("Bug copié : collez-le dans la conversation"); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(fini).catch(function(){ chatCopyFallback(t); fini(); });
+  else { chatCopyFallback(t); fini(); }
 }
 function pfBugCorrige(id){
   window.fbDeleteDoc(window.fbDoc(window.fbDb,"erreurs_sig",id)).then(function(){ var b=document.getElementById("pf-bugs"); if(b) pfBugsBox(b); }).catch(function(e){ askAlert("Suppression impossible : "+((e&&e.message)||e)); });

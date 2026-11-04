@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793832075",
+  "semver": "1.5.6",
+  "titre": "Plateforme : copier un bug",
+  "demo": true,
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Plateforme › Bugs : bouton « Copier pour Claude » qui copie tout le détail d'un bug."
+   }
+  ]
+ },
+ {
   "v": "1793823091",
   "semver": "1.5.5",
   "titre": "Correctif d'affichage",
