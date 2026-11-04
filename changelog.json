@@ -1,5 +1,18 @@
 [
  {
+  "v": "1793823091",
+  "semver": "1.5.5",
+  "titre": "Correctif d'affichage",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Correction d'une erreur d'affichage qui pouvait apparaître dans Paramètres › Abonnement."
+   }
+  ]
+ },
+ {
   "v": "1793802727",
   "semver": "1.5.4",
   "titre": "Compteur de visites anonyme",

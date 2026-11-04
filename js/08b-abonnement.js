@@ -287,7 +287,8 @@ function ribCarte(rib,reference){
 // Affichage dans Paramètres › Abonnement (clubs payants ou en essai, pas le club d'origine).
 function aboRibAfficher(box,row,c){
   ribCharger().then(function(rib){
-    if(!rib||!rib.iban||!box.isConnected) return;
+    // row.parentNode : si l'écran a été redessiné pendant le chargement, l'ancienne ligne n'est plus dans la boîte (erreur insertBefore).
+    if(!rib||!rib.iban||!box.isConnected||row.parentNode!==box) return;
     var old=box.querySelector("#abo-rib"); if(old) old.remove();
     var card=ribCarte(rib,"GM "+(c.name||c.id||""));
     card.id="abo-rib";
