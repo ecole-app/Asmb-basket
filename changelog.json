@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793798781",
+  "semver": "1.5.3",
+  "titre": "Pseudo enregistré sur le compte",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Le pseudo choisi dans les paramètres de la Communauté est maintenant enregistré sur le compte : il suit la personne sur tous ses téléphones (avant, il restait sur l'appareil où il avait été saisi)."
+   }
+  ]
+ },
+ {
   "v": "1793734495",
   "semver": "1.5.2",
   "titre": "Plus de « Anonyme »",

@@ -256,7 +256,7 @@ function openCommSettings(){
   if(ts)ts.value=localStorage.getItem("asmb_text_size")||"normal";
   var p=document.getElementById("cs-pseudo");
   if(p){
-    p.value=(typeof savedPseudo!=="undefined"?savedPseudo:localStorage.getItem("asmb_pseudo"))||"";
+    p.value=(typeof savedPseudo!=="undefined"?savedPseudo:localStorage.getItem("asmb_pseudo"))||(window.ASMB_USER&&window.ASMB_USER.pseudo)||"";
     p.oninput=function(){ if(p.value.length>20)p.value=p.value.substring(0,20); };
     p.onblur=function(){ saveCommPseudo(p.value); };
   }
@@ -271,6 +271,12 @@ function saveCommPseudo(v){
   if(!v)return;
   if(typeof savedPseudo!=="undefined")savedPseudo=v;
   localStorage.setItem("asmb_pseudo",v);
+  // Aussi sur le compte : le pseudo suit la personne sur tous ses appareils.
+  var u=window.ASMB_USER;
+  if(u&&!window.GM_DEMO&&u.uid){
+    u.pseudo=v;
+    if(window.fbUpdateDoc&&window.fbDb) window.fbUpdateDoc(window.fbDoc(window.fbDb,"users",u.uid),{pseudo:v}).catch(function(){});
+  }
 }
 
 // Petit "ding" de notification, généré en direct (pas de fichier audio à charger).

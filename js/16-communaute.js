@@ -402,6 +402,8 @@ var savedPseudo=(localStorage.getItem("asmb_pseudo")||"").substring(0,20);
 function myChatPseudo(){
   if(savedPseudo) return savedPseudo;
   var u=window.ASMB_USER;
+  // Pseudo enregistré sur le compte (suit la personne d'un téléphone à l'autre).
+  if(u&&u.pseudo) return u.pseudo;
   var n=u?(((u.prenom||"")+" "+(u.nom||"")).trim()):"";
   if(n) return n;
   // Compte sans prénom ni nom : on signe par le rôle (« Dirigeant », « Coach »…) plutôt que « Anonyme ».
