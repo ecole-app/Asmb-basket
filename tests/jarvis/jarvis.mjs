@@ -59,9 +59,18 @@ async function nouvelOnglet(navigateur, base, taille, { sw = false } = {}) {
   const ctx = await navigateur.newContext({ viewport: taille, locale: "fr-FR", timezoneId: "Europe/Paris", serviceWorkers: sw ? "allow" : "block" });
   await ctx.route("**/js/firebase-init.js*", (r) => r.fulfill({ status: 200, contentType: "text/javascript", body: STUB_FB }));
   await ctx.route("**/firebasejs/**/*-compat.js", (r) => r.fulfill({ status: 200, contentType: "text/javascript", body: STUB_FB_SW }));
+  // Erreurs que pageerror ne voit pas : promesses rejetées sans catch (code asynchrone), avec la pile
+  // pour savoir quel fichier est en cause (comme l'alerte « Nouveau bug » de l'appli, js/00b-erreurs.js).
+  await ctx.addInitScript(() => {
+    window.addEventListener("unhandledrejection", (ev) => {
+      const r = ev.reason;
+      console.error("JARVIS-REJET " + String((r && r.message) || r) + " @ " + String((r && r.stack) || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " "));
+    });
+  });
   const page = await ctx.newPage();
   const journal = { erreurs: [], fichiers: [] };
-  page.on("pageerror", (e) => journal.erreurs.push(String(e && e.message || e).slice(0, 300)));
+  page.on("pageerror", (e) => journal.erreurs.push((String(e && e.message || e) + " @ " + String(e && e.stack || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ")).slice(0, 400)));
+  page.on("console", (m) => { const t = m.text(); if (t.startsWith("JARVIS-REJET ") && !/Failed to fetch|NetworkError|net::ERR|AbortError/i.test(t)) journal.erreurs.push(t.slice(13, 413)); });
   page.on("response", (r) => {
     const u = r.url();
     if (u.startsWith(base) && r.status() >= 400 && !/favicon/.test(u)) journal.fichiers.push(r.status() + " " + u.slice(base.length));
