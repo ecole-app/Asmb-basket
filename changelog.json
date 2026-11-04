@@ -13,7 +13,8 @@
     ],
     "texte": "Le site compte le nombre de visiteurs par jour, de façon anonyme (sans cookie, sans donnée personnelle)."
    }
-  ]
+  ],
+  "demo": true
  },
  {
   "v": "1793798781",
