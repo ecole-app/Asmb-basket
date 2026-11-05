@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793906949",
+  "semver": "1.8.3",
+  "titre": "Pass'Sport et Pass'Région activés d'office",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Les aides Pass'Sport et Pass'Région sont proposées par défaut sur la fiche d'inscription et dans le paiement. Un club qui n'en veut pas les décoche dans Paramètres."
+   }
+  ]
+ }, {
   "v": "1793906357",
   "semver": "1.8.2",
   "titre": "Correctif des rôles",

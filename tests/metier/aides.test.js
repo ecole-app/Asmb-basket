@@ -54,3 +54,12 @@ describe("Montants et alertes", () => {
     assert.equal(c.aidesNiveauAlerte(jour("2026-12-28")), 0);
   });
 });
+
+describe("Aides activées d'office", () => {
+  it("club sans réglage : Pass'Sport et Pass'Région actifs ; réglage enregistré respecté", () => {
+    const c = app();
+    c.CURRENT_CLUB = {}; assert.deepEqual({ ...c.aidesClub() }, { passSport: true, passRegion: true });
+    c.CURRENT_CLUB = { aides: { passSport: true, passRegion: false } }; assert.deepEqual({ ...c.aidesClub() }, { passSport: true, passRegion: false });
+    c.CURRENT_CLUB = { aides: { passSport: false, passRegion: false } }; assert.equal(c.aidesPourCodes(), null);
+  });
+});

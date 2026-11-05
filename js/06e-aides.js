@@ -15,7 +15,9 @@ var FICHE_AIDES=null;                   // aides proposées sur la fiche publiqu
 
 // ── Réglage club ────────────────────────────────────────────────────
 function aidesClub(){
-  var a=(window.CURRENT_CLUB&&window.CURRENT_CLUB.aides)||{};
+  // Activées d'office : un club qui n'a jamais touché au réglage les a ; il peut les décocher dans Paramètres.
+  var a=window.CURRENT_CLUB&&window.CURRENT_CLUB.aides;
+  if(!a||typeof a!=="object") return {passSport:true,passRegion:true};
   return {passSport:!!a.passSport,passRegion:!!a.passRegion};
 }
 // Version publique (index inscription_codes) : null si aucune aide activée.
