@@ -35,7 +35,8 @@ describe("Éligibilité d'affichage", () => {
     assert.equal(c.aidesPRPossible(new Date(Date.now() - 10 * 365.25 * 86400000).toISOString().slice(0, 10)), false);
     assert.equal(c.aidesPRPossible(new Date(Date.now() - 16.5 * 365.25 * 86400000).toISOString().slice(0, 10)), true);
   });
-  it("aucune aide activée : rien dans l'index public", () => assert.equal(app([], {}).aidesPourCodes(), null));
+  it("aucune aide cochée par le club : rien dans l'index public", () => assert.equal(app([], { aides: { passSport: false, passRegion: false } }).aidesPourCodes(), null));
+  it("club sans réglage : les 2 aides sont proposées d'office", () => assert.deepEqual({ ...app([], {}).aidesPourCodes() }, { ps: true, pr: true }));
   it("Pass'Sport activé : index public", () => assert.deepEqual({ ...app([], { aides: { passSport: true } }).aidesPourCodes() }, { ps: true, pr: false }));
 });
 
