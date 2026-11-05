@@ -199,3 +199,15 @@ describe("Nom affiché d'un compte (compteNom)", () => {
     assert.equal(c.compteNom(null), "");
   });
 });
+
+describe("Joueurs à reclasser : U21 sans genre", () => {
+  it("ne propose pas Senior pour un U21 dont le genre n'est pas renseigné, mais le fait pour une fille", () => {
+    const c = app();
+    c.getPlayers = () => [
+      { id: "a", naissance: "2007-03-01", cat: "U21", genre: "" },
+      { id: "b", naissance: "2007-03-01", cat: "U21", genre: "F" },
+      { id: "c", naissance: "2007-03-01", cat: "U21", genre: "M" },
+    ];
+    assert.deepEqual(c.findMiscategorizedPlayers().map((p) => p.id), ["b"]);
+  });
+});

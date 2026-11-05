@@ -1695,6 +1695,8 @@ function findMiscategorizedPlayers(){
   return getPlayers().filter(function(p){
     if(!p.naissance) return false;
     var suggested=categorieFromNaissance(p.naissance,p.genre);
+    // Genre non renseigné : U21 est possible (garçons), on ne le déclasse pas en Senior sans savoir.
+    if(suggested==="Senior" && p.cat==="U21" && !p.genre && categorieFromNaissance(p.naissance,"M")==="U21") return false;
     return suggested && p.cat && suggested!==p.cat;
   });
 }
@@ -1815,7 +1817,15 @@ function openReclassementModal(){
   hdr.appendChild(title);hdr.appendChild(closeBtn);
   var list=document.createElement("div");
   list.style.cssText="overflow-y:auto;flex:1";
-  inner.appendChild(hdr);inner.appendChild(list);
+  inner.appendChild(hdr);
+  if(mismatched.length>1){
+    var ignAll=document.createElement("button");
+    ignAll.textContent="Ignorer tous";
+    ignAll.style.cssText="align-self:flex-start;margin:0 0 12px;padding:7px 14px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer";
+    ignAll.addEventListener("click",function(){ modal.remove(); });
+    inner.appendChild(ignAll);
+  }
+  inner.appendChild(list);
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
   document.body.appendChild(modal);
