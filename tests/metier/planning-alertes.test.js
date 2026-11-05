@@ -43,9 +43,13 @@ describe("Conflit de salle", () => {
 describe("Bénévoles à J-7", () => {
   it("match à domicile : table de marque et chronomètre attendus", () => {
     const c = app([]);
-    assert.deepEqual(t(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [] })), ["table de marque", "chronomètre"]);
-    assert.deepEqual(t(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [{ poste: "Table de marque" }] })), ["chronomètre"]);
+    assert.deepEqual(t(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [] })), ["marqueur", "chronométreur"]);
+    assert.deepEqual(t(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [{ poste: "Table de marque" }] })), ["chronométreur"]);
     assert.equal(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [{ poste: "Table de marque" }, { poste: "Chronomètre" }] }), null);
+    assert.equal(c.plBenManquants({ type: "match", lieu: "Domicile", benevoles: [{ poste: "Marqueur" }, { poste: "Chronométreur" }] }), null);
+    // Table officielle (N3 et plus) : plus rien à prévoir côté club.
+    c.tirOfficiels = (e) => ({ table: !!e.tableOfficielle, arbitres: false });
+    assert.equal(c.plBenManquants({ type: "match", lieu: "Domicile", tableOfficielle: true, benevoles: [] }), null);
     assert.equal(c.plBenManquants({ type: "match", lieu: "Extérieur", benevoles: [] }), null);
     assert.deepEqual(t(c.plBenManquants({ type: "tournoi", benevoles: [] })), ["aucun bénévole"]);
     assert.equal(c.plBenManquants({ type: "entrainement" }), null);

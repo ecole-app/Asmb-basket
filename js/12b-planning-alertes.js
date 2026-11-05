@@ -51,7 +51,12 @@ function plBenManquants(e){
   var postes=l.map(function(m){ return String(m.poste||"").toLowerCase(); });
   if(e.type==="match"){
     if(/exterieur|extérieur|déplacement|deplacement/i.test(e.lieu||"")) return null;
-    var manque=[]; if(postes.indexOf("table de marque")<0) manque.push("table de marque"); if(postes.indexOf("chronomètre")<0) manque.push("chronomètre");
+    // Table officielle (N3 et plus) : rien à prévoir côté club. Anciens noms (table de marque, chronomètre) toujours reconnus.
+    var off=(typeof tirOfficiels==="function")?tirOfficiels(e):{table:false};
+    if(off.table) return null;
+    var manque=[];
+    if(postes.indexOf("marqueur")<0&&postes.indexOf("table de marque")<0) manque.push("marqueur");
+    if(postes.indexOf("chronométreur")<0&&postes.indexOf("chronomètre")<0) manque.push("chronométreur");
     return manque.length?manque:null;
   }
   if(["tournoi","soiree"].indexOf(e.type)>=0) return l.length?null:["aucun bénévole"];

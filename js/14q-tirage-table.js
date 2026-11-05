@@ -18,10 +18,37 @@ var TIR_VACANCES={
     ete:{A:["2027-07-03","2027-08-31"],B:["2027-07-03","2027-08-31"],C:["2027-07-03","2027-08-31"]}
   }
 };
+// Postes d'un match à domicile : délégué de club, table de marque (marqueur, chronométreur, chronométreur des tirs,
+// aide-marqueur facultatif) et arbitrage. À partir de la N3 la table est tenue par des officiels, et l'arbitrage
+// peut l'être aussi (arbitres désignés) : rien n'est tiré pour ces postes (réglage de l'équipe, js/12).
+var TIR_POSTES=["Délégué de club","Marqueur","Chronométreur","Chronométreur des tirs","Aide-marqueur","Arbitrage"];
+var TIR_POSTES_TABLE=["Marqueur","Chronométreur","Chronométreur des tirs","Aide-marqueur","Table de marque","Chronomètre"];
+var TIR_DEFAUT={"Délégué de club":1,"Marqueur":1,"Chronométreur":1,"Chronométreur des tirs":1,"Aide-marqueur":0,"Arbitrage":1};
 function tirPrefs(){
-  var p={zone:"A",postes:{"Table de marque":1,"Arbitrage":1}};
-  try{ var s=JSON.parse(localStorage.getItem("gm_tirage_prefs")||"null"); if(s){ if(s.zone) p.zone=s.zone; if(s.postes) p.postes=s.postes; } }catch(e){}
+  var p={zone:"A",postes:Object.assign({},TIR_DEFAUT)};
+  try{
+    var s=JSON.parse(localStorage.getItem("gm_tirage_prefs")||"null");
+    if(s){
+      if(s.zone) p.zone=s.zone;
+      if(s.postes){
+        // Anciens réglages : « Table de marque » devient Marqueur, « Chronomètre » devient Chronométreur.
+        var o=Object.assign({},s.postes);
+        if(o["Table de marque"]!=null&&o["Marqueur"]==null){ o["Marqueur"]=o["Table de marque"]; }
+        if(o["Chronomètre"]!=null&&o["Chronométreur"]==null){ o["Chronométreur"]=o["Chronomètre"]; }
+        delete o["Table de marque"]; delete o["Chronomètre"];
+        TIR_POSTES.forEach(function(k){ if(o[k]!=null) p.postes[k]=o[k]; });
+      }
+    }
+  }catch(e){}
   return p;
+}
+// Officiels pour ce match ? Réglage de l'équipe, que le match peut contredire (e.tableOfficielle / e.arbitresDesignes).
+function tirOfficiels(e){
+  var nom=String((e&&e.equipe)||"").toUpperCase(), eq=null;
+  if(nom) getTeams().forEach(function(t){ if(!eq&&t.name&&nom.indexOf(String(t.name).toUpperCase())>=0) eq=t; });
+  var tb=(e&&typeof e.tableOfficielle==="boolean")?e.tableOfficielle:!!(eq&&eq.tableOfficielle);
+  var ar=(e&&typeof e.arbitresDesignes==="boolean")?e.arbitresDesignes:!!(eq&&eq.arbitresDesignes);
+  return {table:tb,arbitres:ar};
 }
 function tirPrefsSauver(p){ try{ localStorage.setItem("gm_tirage_prefs",JSON.stringify(p)); }catch(e){} }
 var TIR_VAC_API={}; // "saison|zone" → [[début, fin, nom], …]
@@ -135,10 +162,13 @@ function tirTirer(du, au, prefs, comptes, carnet, opts){
   matchs.forEach(function(e){
     var ligne={e:e, affectes:[], manques:[], vacances:opts.forcer?"":tirVacances(e.date,prefs.zone)};
     if(ligne.vacances){ res.push(ligne); return; }
-    var deja=benListe(e), pris={};
+    var deja=benListe(e), pris={}, off=tirOfficiels(e);
+    ligne.officiels=[]; if(off.table) ligne.officiels.push("Table de marque"); if(off.arbitres) ligne.officiels.push("Arbitrage");
     deja.forEach(function(m){ pris[tirCleMission(m)]=true; });
     var viv=tirVivier(e.equipe||"", comptes);
     postes.forEach(function(poste){
+      if(off.table&&TIR_POSTES_TABLE.indexOf(poste)>=0) return;
+      if(off.arbitres&&poste==="Arbitrage") return;
       var existants=deja.filter(function(m){ return m.poste===poste; }).length;
       for(var i=existants;i<prefs.postes[poste];i++){
         // 1) parents de l'équipe, 2) joueurs des équipes supérieures et bénévoles du club
@@ -180,6 +210,96 @@ function tirAnnuler(id){
 }
 
 // ── Écran ─────────────────────────────────────────────────────────────────
+// ── PDF du planning : un mois par page, une ligne par match à domicile, les noms déjà dessus ──
+// Colonnes : date, heure, match, puis un poste par colonne (seulement ceux qui servent). Un match sans personne
+// reste « à désigner », un poste tenu par des officiels s'écrit « Officiels ». Aucun numéro de téléphone.
+var TIR_PDF_CLES={"Table de marque":"Marqueur","Chronomètre":"Chronométreur"};
+function tirPdfMatchs(du, au){
+  return getEvents().filter(function(e){
+    if(!e||e.type!=="match"||e.cancelled||!e.date||e.date<du||e.date>au) return false;
+    return e.domicile===true || (e.domicile===undefined && /domicile/i.test(e.lieu||""));
+  }).sort(function(a,b){ return (a.date+(a.heure||""))<(b.date+(b.heure||""))?-1:1; });
+}
+// Données du PDF (sans dessin, pour pouvoir les tester) : [{mois, lignes:[{date, heure, match, cases:{poste:texte}}]}] et colonnes.
+function tirPdfDonnees(du, au, prefs){
+  var matchs=tirPdfMatchs(du,au), zone=(prefs&&prefs.zone)||tirPrefs().zone, actifs=(prefs&&prefs.postes)||tirPrefs().postes;
+  var presents={};
+  matchs.forEach(function(e){ benListe(e).forEach(function(m){ var k=TIR_PDF_CLES[m.poste]||m.poste; presents[k]=true; }); });
+  var cols=TIR_POSTES.filter(function(p){ return presents[p]||actifs[p]>0; });
+  var mois=[], cur=null;
+  matchs.forEach(function(e){
+    var cle=e.date.slice(0,7);
+    if(!cur||cur.cle!==cle){ cur={cle:cle,lignes:[]}; mois.push(cur); }
+    var off=tirOfficiels(e), vac=tirVacances(e.date,zone), cases={};
+    cols.forEach(function(p){
+      var noms=benListe(e).filter(function(m){ return (TIR_PDF_CLES[m.poste]||m.poste)===p; }).map(function(m){ return m.nom; });
+      if(noms.length) cases[p]=noms.join(", ");
+      else if(off.table&&TIR_POSTES_TABLE.indexOf(p)>=0) cases[p]="Officiels";
+      else if(off.arbitres&&p==="Arbitrage") cases[p]="Officiels";
+      else cases[p]=vac?"vacances":"à désigner";
+    });
+    cur.lignes.push({date:e.date, heure:e.heure||"", match:(e.equipe?e.equipe+" · ":"")+(e.titre||"Match"), cases:cases, vacances:vac||""});
+  });
+  return {cols:cols, mois:mois, nb:matchs.length};
+}
+function tirPdf(du, au, prefs){
+  if(!window.jspdf||!window.jspdf.jsPDF){ askAlert("Le PDF n'est pas disponible pour l'instant."); return; }
+  var d=tirPdfDonnees(du,au,prefs);
+  if(!d.nb){ askAlert("Aucun match à domicile sur cette période."); return; }
+  var doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"}), rgb=clubPdfRgb(), W=297, M=12;
+  var MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  var JOURS=["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
+  var club=(typeof clubLabel==="function"?clubLabel("Club"):"Club");
+  d.mois.forEach(function(m, mi){
+    if(mi>0) doc.addPage();
+    var y=M+4;
+    doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.rect(0,0,W,6,"F");
+    doc.setTextColor(rgb[0],rgb[1],rgb[2]); doc.setFont("helvetica","bold"); doc.setFontSize(18);
+    var an=m.cle.slice(0,4), mm=parseInt(m.cle.slice(5,7),10);
+    y+=8; doc.text("Table de marque et arbitrage · "+MOIS[mm-1]+" "+an,M,y);
+    doc.setFontSize(10); doc.setFont("helvetica","normal"); doc.setTextColor(90,98,120);
+    doc.text(club+" · matchs à domicile",W-M,y,{align:"right"});
+    y+=8;
+    var largeurs=[24,16,0], reste=W-2*M-24-16, nc=d.cols.length||1, matchW=Math.min(70,reste*0.3), cw=(reste-matchW)/nc;
+    largeurs[2]=matchW;
+    var heads=["Date","Heure","Match"].concat(d.cols);
+    function entete(){
+      doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.rect(M,y,W-2*M,8,"F");
+      doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(9);
+      var x=M+2;
+      heads.forEach(function(h,i){ doc.text(h,x,y+5.3); x+=(i<3?largeurs[i]:cw); });
+      y+=8;
+    }
+    entete();
+    m.lignes.forEach(function(l, li){
+      var cases=d.cols.map(function(p){ return doc.splitTextToSize(l.cases[p],cw-3); });
+      var nl=Math.max(1,doc.splitTextToSize(l.match,matchW-3).length,Math.max.apply(null,cases.map(function(c){return c.length;})));
+      var h=Math.max(8,nl*4.2+3.4);
+      if(y+h>200){ doc.addPage(); y=M+4; entete(); }
+      if(li%2) { doc.setFillColor(243,245,250); doc.rect(M,y,W-2*M,h,"F"); }
+      var dt=new Date(l.date+"T12:00:00");
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(30,36,58);
+      var x=M+2;
+      doc.text(JOURS[dt.getDay()]+" "+dt.getDate(),x,y+5.3); x+=largeurs[0];
+      doc.setFont("helvetica","normal"); doc.text(l.heure||"",x,y+5.3); x+=largeurs[1];
+      doc.text(doc.splitTextToSize(l.match,matchW-3),x,y+5.3); x+=largeurs[2];
+      d.cols.forEach(function(p,i){
+        var t=l.cases[p];
+        if(t==="à désigner"||t==="vacances") { doc.setTextColor(176,98,0); doc.setFont("helvetica","italic"); }
+        else if(t==="Officiels") { doc.setTextColor(39,94,165); doc.setFont("helvetica","bold"); }
+        else { doc.setTextColor(30,36,58); doc.setFont("helvetica","normal"); }
+        doc.text(cases[i],x,y+5.3); x+=cw;
+      });
+      doc.setDrawColor(222,226,238); doc.line(M,y+h,W-M,y+h);
+      y+=h;
+    });
+    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(120,128,150);
+    doc.text("Imprimé le "+new Date().toLocaleDateString("fr-FR")+" · generalmanagerapp.fr",M,205);
+    doc.text("Page "+(mi+1)+"/"+d.mois.length,W-M,205,{align:"right"});
+  });
+  doc.save("planning-table-arbitrage-"+du+"-"+au+".pdf");
+}
+
 function tirageOuvrir(){
   var roles=(window.ASMB_USER&&window.ASMB_USER.roles)||[];
   if(roles.indexOf("dirigeant")<0){ askAlert("Seul le dirigeant peut lancer le tirage."); return; }
@@ -195,7 +315,7 @@ function tirageOuvrir(){
     +'<div class="form-group"><label class="form-label">Zone scolaire du club</label><select class="form-select" id="tir-zone">'
     +["A","B","C"].map(function(z){ return '<option value="'+z+'"'+(prefs.zone===z?" selected":"")+'>Zone '+z+(z==="A"?" (Lyon, Saint-Étienne)":"")+'</option>'; }).join("")+'</select></div>'
     +'<div class="form-label" style="margin-bottom:4px">Postes à tirer (nombre de personnes)</div><div id="tir-postes" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:12px">'
-    +["Table de marque","Chronomètre","Arbitrage"].map(function(p){
+    +TIR_POSTES.map(function(p){
         return '<label style="font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:7px 10px">'+authEsc(p)
           +'<input type="number" min="0" max="4" value="'+(prefs.postes[p]||0)+'" data-poste="'+authEsc(p)+'" style="width:44px;text-align:center" class="form-input"></label>'; }).join("")+'</div>';
   var f=document.createElement("div"); f.innerHTML=html; s.body.appendChild(f);
@@ -231,7 +351,14 @@ function tirageOuvrir(){
       sortie.scrollIntoView({behavior:"smooth",block:"start"});
     }).catch(function(e){ b.disabled=false; b.textContent="🎲 Tirer au sort"; askAlert("Erreur : "+((e&&e.message)||e)); });
   });
-  col.appendChild(go); f.appendChild(col); s.body.appendChild(sortie);
+  var pdfBtn=gmBtn("📄 PDF du planning","soft",function(){
+    var du=f.querySelector("#tir-du").value, au=f.querySelector("#tir-au").value;
+    if(!du||!au||au<du){ askAlert("Choisis une période valide."); return; }
+    var p={zone:f.querySelector("#tir-zone").value, postes:{}};
+    f.querySelectorAll("#tir-postes input").forEach(function(i){ p.postes[i.getAttribute("data-poste")]=Math.max(0,Math.min(4,parseInt(i.value,10)||0)); });
+    tirPdf(du,au,p);
+  });
+  col.appendChild(go); col.appendChild(pdfBtn); f.appendChild(col); s.body.appendChild(sortie);
   var dernier=""; try{ dernier=localStorage.getItem("gm_dernier_tirage")||""; }catch(e){}
   if(dernier && getEvents().some(function(e){ return benListe(e).some(function(m){ return m.tirage===dernier; }); })){
     var rap=document.createElement("div"); rap.style.cssText="font-size:12px;color:var(--mut);margin-top:12px";
@@ -258,6 +385,7 @@ function tirResultat(box, t, refaire){
     var c=gmCard();
     var titre=(l.e.titre||"Match"), eq=l.e.equipe?(" · "+l.e.equipe):"";
     var txt='<div style="font-size:12px;font-weight:800">'+authEsc(tirFr(l.e.date))+(l.e.heure?" · "+authEsc(l.e.heure):"")+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+authEsc(titre)+authEsc(eq)+'</div>';
+    if(l.officiels&&l.officiels.length) txt+='<div style="font-size:11px;font-weight:700;color:#275ea5">Officiels : '+authEsc(l.officiels.join(" et ").toLowerCase())+' (pas de tirage)</div>';
     if(l.vacances) txt+='<div style="font-size:11px;font-weight:700;color:#E8670A">Vacances ('+authEsc(l.vacances)+') : à désigner à la main</div>';
     l.affectes.forEach(function(a){
       var qui=a.dePrenom?"parent de "+a.dePrenom:(a.joueur?"joueur "+a.joueur:(a.m.benId?"bénévole":""));

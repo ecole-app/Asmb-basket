@@ -6,7 +6,7 @@
 // les membres) : le SMS pré-rempli lit le numéro du compte au moment de l'envoi.
 // La personne voit sa mission sur l'accueil de son appli (7 jours avant).
 // ══════════════════════════════════════════════════════════════
-var BEN_POSTES=["Buvette","Table de marque","Chronomètre","Arbitrage","Accueil","Installation / rangement"];
+var BEN_POSTES=["Buvette","Délégué de club","Marqueur","Chronométreur","Chronométreur des tirs","Aide-marqueur","Arbitrage","Accueil","Installation / rangement"];
 var BEN_COMPTES=null; // cache des comptes du club : [{uid, label, phone, prenom}]
 
 // Sur un événement de plusieurs jours, un bénévole peut être placé un jour précis (m.jour) ;

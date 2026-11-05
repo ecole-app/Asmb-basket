@@ -381,6 +381,25 @@ function buildTeams(){
       empty.textContent="Aucun joueur assigné";bodyInner.appendChild(empty);
     }
 
+    // Officiels : à partir de la N3 la table est tenue par des officiels ; les arbitres peuvent être désignés.
+    // Le tirage au sort (js/14q) ne tire alors rien pour ces postes.
+    if(typeof isStaffUser==="function"?isStaffUser():true){
+      var offBox=document.createElement("div"); offBox.style.cssText="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px;padding:10px;border-radius:var(--rx);background:var(--bg);border:1px solid var(--bdr)";
+      [["tableOfficielle",gmT("Table de marque officielle (N3 et plus)")],["arbitresDesignes",gmT("Arbitres désignés (officiels)")]].forEach(function(o){
+        var lb=document.createElement("label"); lb.style.cssText="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt);cursor:pointer";
+        var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!t[o[0]]; cb.style.cssText="width:16px;height:16px;accent-color:var(--dkg);flex:none";
+        (function(champ,tid){ cb.addEventListener("change",function(){
+          var teams=getTeams(), x=teams.find(function(q){return q.id===tid;}); if(!x) return;
+          if(cb.checked) x[champ]=true; else delete x[champ];
+          saveTeams(teams);
+        }); })(o[0],t.id);
+        lb.addEventListener("click",function(e){ e.stopPropagation(); });
+        lb.appendChild(cb); lb.appendChild(document.createTextNode(o[1])); offBox.appendChild(lb);
+      });
+      var offNote=document.createElement("div"); offNote.style.cssText="font-size:10.5px;color:var(--mut)"; offNote.textContent=gmT("Coché : rien n'est tiré au sort pour ces postes.");
+      offBox.appendChild(offNote); bodyInner.appendChild(offBox);
+    }
+
     // Bouton ajouter
     var addBtn=document.createElement("button");
     addBtn.textContent="+ Ajouter un joueur";

@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793919323",
+  "semver": "1.10.0",
+  "titre": "Officiels de table, arbitrage et PDF du planning",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Le tirage au sort désigne maintenant un délégué de club, un marqueur, un chronométreur, un chronométreur des tirs (et un aide-marqueur si besoin). Dans chaque équipe, deux cases : « table tenue par des officiels » (à partir de la N3) et « arbitres désignés » : ces postes ne sont plus tirés."
+   },
+   {
+    "roles": ["dirigeant"],
+    "texte": "Nouveau bouton « PDF du planning » dans le tirage : un mois par page, les matchs à domicile avec les noms déjà dessus, à imprimer ou à envoyer. Sans numéro de téléphone."
+   }
+  ]
+ }, {
   "v": "1793917198",
   "semver": "1.9.0",
   "titre": "Affiche de match à partager",
