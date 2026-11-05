@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793903630",
+  "semver": "1.7.0",
+  "titre": "Supprimer une série d'entraînements d'un coup",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Quand un entraînement se répète chaque semaine, la suppression propose « Celui-ci seulement », « Celui-ci et les suivants » ou « Toute la série » (les séances déjà pointées sont gardées). « Annuler » reste possible 5 secondes. Fonctionne aussi pour les entraînements déjà créés."
+   }
+  ]
+ },
+ {
   "v": "1793891741",
   "semver": "1.6.0",
   "titre": "Absences répétées et icône du club",

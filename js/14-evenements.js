@@ -500,27 +500,73 @@ function finishSaveEventFullNotify(eventObj, canal, participantsNoms){
     showToast("Événement créé !");
   }
 }
+// Série d'un événement répété chaque semaine : « Répéter chaque semaine » (serieId) ou ancien formulaire
+// de créneaux (id « <graine>-<Jour>-<n> », recurrent). Renvoie null si l'événement est seul.
+function evSerieCle(e){
+  if(!e) return null;
+  if(e.serieId) return "s:"+e.serieId;
+  var m=e.recurrent&&/^(\d+-[^-]+)-\d+$/.exec(String(e.id));
+  return m?"c:"+m[1]:null;
+}
+function evSerieDe(e,all){
+  var cle=evSerieCle(e); if(!cle) return [e];
+  return all.filter(function(x){ return evSerieCle(x)===cle; }).sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+}
+// Supprime plusieurs événements d'un coup, rattrapable 5 secondes (« Annuler »).
+function evSupprimerLot(ids,libelle){
+  var set={}; ids.forEach(function(i){ set[i]=true; });
+  var all=getEvents();
+  var removed=all.filter(function(e){ return set[e.id]; });
+  if(!removed.length) return;
+  saveEvents(all.filter(function(e){ return !set[e.id]; }));
+  buildPlanning();buildAdminHome();buildRealEventsList();
+  removed.forEach(function(r){ if(typeof evtCanalConcerne==="function"&&evtCanalConcerne(r)) evtCanalMasquer(r); });
+  showUndoToast(libelle,function(){
+    saveEvents(getEvents().concat(removed));
+    buildPlanning();buildAdminHome();buildRealEventsList();
+  });
+}
 function deleteEvent(id){
   if(typeof limiteLectureSeule==="function" && limiteLectureSeule("events","Le planning")) return;
+  var all=getEvents();
+  var ev=all.find(function(e){return e.id===id;});
+  var serie=ev?evSerieDe(ev,all):[];
+  if(serie.length>1){ evSupprimerSerie(ev,serie); return; }
   askConfirm("Supprimer cet événement ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
     if(!ok)return;
-    var all=getEvents();
-    var removed=all.find(function(e){return e.id===id;});
-    var events=all.filter(function(e){return e.id!==id;});
-    saveEvents(events);
-    buildPlanning();buildAdminHome();buildRealEventsList();
-    if(!removed)return;
-    evtCanalMasquer(removed);
-    // L'evenement reste supprime tout de suite (coherent avec le reste de
-    // l'appli), mais reste rattrapable une poignee de secondes : les erreurs
-    // de clic sont frequentes sur mobile et une suppression est definitive.
-    showUndoToast("Événement « "+(removed.titre||"")+" » supprimé",function(){
-      var cur=getEvents();
-      cur.push(removed);
-      saveEvents(cur);
-      buildPlanning();buildAdminHome();buildRealEventsList();
-    });
+    evSupprimerLot([id],"Événement « "+((ev&&ev.titre)||"")+" » supprimé");
   });
+}
+// Événement répété : on choisit quoi supprimer (celui-ci, les suivants, toute la série).
+function evSupprimerSerie(ev,serie){
+  var T=function(x){ return typeof gmT==="function"?gmT(x):x; };
+  var fr=function(d){ return d.split("-").reverse().join("/"); };
+  var s=gmSheet("Supprimer cet événement ?");
+  var intro=document.createElement("div"); intro.style.cssText="font-size:13px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
+  intro.textContent=T("Cet événement se répète chaque semaine")+" ("+serie.length+" "+T("dates")+" : "+fr(serie[0].date)+" → "+fr(serie[serie.length-1].date)+")";
+  s.body.appendChild(intro);
+  var suivants=serie.filter(function(x){ return x.date>=ev.date; });
+  // Les séances déjà pointées (présences) restent dans l'historique et l'assiduité.
+  var sansPointage=serie.filter(function(x){ return !(x.presences&&Object.keys(x.presences).length); });
+  var gardes=serie.length-sansPointage.length;
+  function bouton(txt,fn,danger){
+    var b=document.createElement("button"); b.type="button"; b.textContent=txt;
+    b.style.cssText="width:100%;min-height:48px;margin-bottom:8px;padding:10px 14px;border-radius:var(--rx);font:inherit;font-size:14px;font-weight:800;cursor:pointer;text-align:left;"+
+      (danger?"border:1.5px solid color-mix(in srgb, var(--red) 40%, var(--bdr));background:var(--card);color:var(--red)":"border:1.5px solid var(--bdr);background:var(--card);color:var(--txt)");
+    b.addEventListener("click",function(){ s.modal.remove(); fn(); });
+    s.body.appendChild(b);
+  }
+  bouton(T("Celui-ci seulement"),function(){ evSupprimerLot([ev.id],T("Événement supprimé")); });
+  if(suivants.length>1) bouton(T("Celui-ci et les suivants")+" ("+suivants.length+")",function(){
+    evSupprimerLot(suivants.map(function(x){ return x.id; }),suivants.length+" "+T("événements supprimés"));
+  },true);
+  bouton(T("Toute la série")+" ("+sansPointage.length+")"+(gardes?" · "+T("les séances pointées restent"):""),function(){
+    evSupprimerLot(sansPointage.map(function(x){ return x.id; }),sansPointage.length+" "+T("événements supprimés"));
+  },true);
+  var ann=document.createElement("button"); ann.type="button"; ann.textContent="Annuler";
+  ann.style.cssText="width:100%;min-height:44px;border:0;background:none;font:inherit;font-weight:700;color:var(--mut);cursor:pointer";
+  ann.addEventListener("click",function(){ s.modal.remove(); });
+  s.body.appendChild(ann);
 }
 
 // ── CANAL PROPRE À L'ÉVÉNEMENT (hors matchs et entraînements) ────────

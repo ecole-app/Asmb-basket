@@ -185,6 +185,23 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         if (!/4/.test(document.getElementById("ev-modal-btn").textContent)) throw new Error("bouton sans le nombre");
         window.closeModal("modal-event-full");
       });
+      // Supprimer un entraînement d'une série : choix « celui-ci / les suivants / toute la série ».
+      await action(page, journal, ou + " › supprimer une série", () => {
+        const avant = window.getEvents().slice(), base = "jv" + Date.now(), t0 = Date.now();
+        const serie = [0, 1, 2, 3].map((i) => ({ id: base + "-r" + i, titre: "Test série", type: "entrainement", date: new Date(t0 + (i + 1) * 7 * 86400000).toISOString().slice(0, 10), equipe: "", recurrent: true, serieId: base, presences: {} }));
+        window.saveEvents(avant.concat(serie));
+        window.deleteEvent(serie[1].id);
+        const f = document.querySelector(".gm-sheet");
+        if (!f) throw new Error("le choix de suppression d'une série ne s'ouvre pas");
+        const b = [...f.querySelectorAll("button")];
+        const suiv = b.find((x) => /Celui-ci et les suivants \(3\)/.test(x.textContent));
+        if (!suiv || !b.some((x) => /Toute la série \(4\)/.test(x.textContent))) throw new Error("boutons de suppression de série incomplets");
+        suiv.click();
+        const reste = window.getEvents().filter((e) => e.serieId === base).length;
+        window.saveEvents(avant);
+        document.querySelectorAll("#toast-stack > div").forEach((x) => x.remove());
+        if (reste !== 1) throw new Error("« Celui-ci et les suivants » a laissé " + reste + " événement(s) au lieu de 1");
+      });
     }
     // Plusieurs clubs : avec 2 clubs, le titre de l'en-tête devient un menu « Mes clubs ».
     await action(page, journal, ou + " › mes clubs", () => {
