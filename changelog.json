@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793906357",
+  "semver": "1.8.2",
+  "titre": "Correctif des rôles",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Enregistrer les équipes d'un coach ne lui ajoute plus le rôle de dirigeant par erreur."
+   }
+  ]
+ }, {
   "v": "1793906201",
   "semver": "1.8.1",
   "titre": "Pass'Sport et Pass'Région dans « Enregistrer le paiement »",

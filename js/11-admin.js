@@ -751,6 +751,11 @@ function syncCoachChannels(u, newTeamIds){
     return Promise.all(tasks);
   }).catch(function(e){console.log("syncCoachChannels:",e);});
 }
+// Le compte principal de la plateforme reste dirigeant de son club d'origine (ASMB) seulement :
+// dans un autre club, il n'a que les rôles que ce club lui donne (coach, par exemple).
+function accesFondateurIci(uid){
+  return uid===BOOTSTRAP_DIRIGEANT_UID && window.CURRENT_CLUB_ID===BOOTSTRAP_CLUB_ID;
+}
 function renderAccesList(list,users,phoneToName){
   phoneToName=phoneToName||{};
   list.innerHTML="";
@@ -847,7 +852,7 @@ function renderAccesList(list,users,phoneToName){
         e.stopPropagation();
         var i=state.roles.indexOf(r);
         // Le compte principal (super admin) garde toujours son rôle de dirigeant.
-        if(i>=0 && r==="dirigeant" && u._uid===BOOTSTRAP_DIRIGEANT_UID){
+        if(i>=0 && r==="dirigeant" && accesFondateurIci(u._uid)){
           askAlert("Le compte principal de la plateforme garde toujours son rôle de dirigeant.");
           return;
         }
@@ -988,7 +993,7 @@ function renderAccesList(list,users,phoneToName){
       // Le titre se sauvegarde déjà tout seul (voir setTitreImmediate) : on ne
       // renvoie ici que roles/équipes/cases, qui restent en brouillon jusqu'au clic.
       save.textContent="…";
-      if(u._uid===BOOTSTRAP_DIRIGEANT_UID && state.roles.indexOf("dirigeant")<0) state.roles.push("dirigeant");
+      if(accesFondateurIci(u._uid) && state.roles.indexOf("dirigeant")<0) state.roles.push("dirigeant");
       var seRetire=window.ASMB_USER && window.ASMB_USER.uid===u._uid && (u.roles||[]).indexOf("dirigeant")>=0 && state.roles.indexOf("dirigeant")<0;
       // Un dirigeant ne quitte son rôle que si un autre dirigeant est déjà en place
       // (vérifié aussi par les règles, via remplacePar).
