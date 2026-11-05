@@ -923,7 +923,8 @@ function showConvocation(eventId){
       var a=assid[p.id];
       lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg);flex:none">'+
         '<span style="flex:1;min-width:0">'+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>'+
-        (a?'<span style="display:block;font-size:10.5px;color:var(--mut);margin-top:1px">'+authEsc(assidSousTitre(a))+'</span>':'')+'</span>'+
+        (a?'<span style="display:block;font-size:10.5px;color:var(--mut);margin-top:1px">'+authEsc(assidSousTitre(a))+'</span>':'')+
+        convocAilleursHtml(ev,p.id)+'</span>'+
         (a?assidHtml(a,p.id,team.id):'');
       el.appendChild(lbl);
     });
@@ -931,6 +932,18 @@ function showConvocation(eventId){
   document.getElementById("modal-convocation").style.display="flex";
 }
 
+// Joueur de 2 équipes (Équipe 1 et Équipe 2) déjà convoqué à un autre match le même jour : on le signale.
+function convocAilleurs(ev,pid){
+  return getEvents().filter(function(e){
+    return e.id!==ev.id&&e.date===ev.date&&!e.cancelled&&e.type==="match"&&(e.convocations||[]).map(String).indexOf(String(pid))>=0;
+  });
+}
+function convocAilleursHtml(ev,pid){
+  var l=convocAilleurs(ev,pid);
+  if(!l.length) return "";
+  return '<span style="display:block;font-size:10.5px;color:#E8670A;font-weight:700;margin-top:1px"><span>Aussi convoqué(e) le même jour</span> · '
+    +l.map(function(e){ return authEsc((e.equipe||e.titre||"")+(e.heure?" "+e.heure:"")); }).join(", ")+'</span>';
+}
 function findChannelForTeamText(teamText){
   var text=(teamText||"").toUpperCase();
   // 1. Chercher une equipe reelle correspondante (par nom ou categorie) et utiliser son propre canal,

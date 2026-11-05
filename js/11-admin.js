@@ -1373,6 +1373,7 @@ function renderPlayerForm(p){
     '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigné</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
     '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
     '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
+    fpEquipesHtml(p)+
     '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="0612345678"></div>'+
     '<div class="form-group" id="fp-poste-grp"'+(p&&!posteVisible(p.cat)?' style="display:none"':'')+'><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
     '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder=""></div>'+
@@ -1388,6 +1389,34 @@ function renderPlayerForm(p){
   var majPoste=function(){ if(pg&&catSel) pg.style.display=posteVisible(catSel.value)?"":"none"; };
   if(catSel){ catSel.addEventListener("change",majPoste); majPoste(); }
   if(typeof polesFicheBrancher==="function") polesFicheBrancher();
+}
+// Équipes du joueur sur sa fiche : une ou plusieurs (Équipe 1 et Équipe 2 du même niveau).
+function fpEquipesHtml(p){
+  var teams=(typeof getTeams==="function"?getTeams():[]).slice();
+  if(!teams.length) return "";
+  var cat=p&&p.cat;
+  teams.sort(function(a,b){ var x=(a.cat===cat?0:1)-(b.cat===cat?0:1); return x||String(a.name).localeCompare(String(b.name),"fr"); });
+  var h='<div class="form-group" id="fp-equipes"><label class="form-label">Équipes</label>'
+    +'<div style="font-size:11px;color:var(--mut);margin:-2px 0 6px">Cochez-en 2 s\'il joue et s\'entraîne dans 2 équipes.</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  teams.forEach(function(t){
+    var on=!!(p&&(t.members||[]).map(String).indexOf(String(p.id))>=0);
+    h+='<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--bdr);border-radius:20px;background:var(--card);font-size:12px;cursor:pointer">'
+      +'<input type="checkbox" value="'+authEsc(t.id)+'"'+(on?' checked':'')+' style="accent-color:var(--dkg)">'+authEsc(t.name)+'</label>';
+  });
+  return h+'</div></div>';
+}
+function fpEquipesEnregistrer(pid){
+  var box=document.getElementById("fp-equipes");
+  if(!box||typeof getTeams!=="function") return;
+  var voulu={}; box.querySelectorAll("input[type=checkbox]").forEach(function(c){ voulu[c.value]=c.checked; });
+  var teams=getTeams(), change=false;
+  teams.forEach(function(t){
+    if(!(t.id in voulu)) return;
+    var m=(t.members||[]).map(String), dedans=m.indexOf(String(pid))>=0;
+    if(voulu[t.id]&&!dedans){ t.members=(t.members||[]).concat([pid]); change=true; }
+    else if(!voulu[t.id]&&dedans){ t.members=(t.members||[]).filter(function(id){ return String(id)!==String(pid); }); change=true; }
+  });
+  if(change){ saveTeams(teams); if(typeof buildTeams==="function") try{ buildTeams(); }catch(e){} }
 }
 function savePlayer(){
   var prenom=document.getElementById("fp-prenom").value.trim();
@@ -1411,6 +1440,7 @@ function savePlayer(){
   if(idx>=0) players[idx]=data;
   else players.push(data);
   savePlayers(players);
+  fpEquipesEnregistrer(data.id);
   closeModal("modal-player");
   renderPlayers();
   buildAdminHome();

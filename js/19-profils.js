@@ -451,7 +451,10 @@ function buildJoueurScreen(player){
   fetchEventsFromCloud().then(function(events){
     var todayStr=new Date().toISOString().slice(0,10);
     var teams=getTeams();
-    var myTeam=teams.find(function(t){return (t.members&&t.members.indexOf(player.id)>=0)||t.cat===player.cat;});
+    // Un joueur peut être dans 2 équipes de son niveau (Équipe 1 et Équipe 2).
+    var myTeams=getTeamsForPlayer(player.id);
+    if(!myTeams.length){ var tc=teams.find(function(t){return t.cat===player.cat;}); if(tc) myTeams=[tc]; }
+    var myTeam=myTeams[0]||null;
     var todaysEvents=events.filter(function(e){
       if(e.date!==todayStr||e.cancelled)return false;
       var eq=(e.equipe||"").toUpperCase();
@@ -462,10 +465,10 @@ function buildJoueurScreen(player){
       (localStorage.getItem("asmb_profile")==="joueur"?'':'<button onclick="openJoueurSettings()" aria-label="Paramètres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>')+
       '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+player.prenom[0]+player.nom[0]+'</div>'+
       '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+player.prenom+' '+player.nom+'</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeam?" · "+myTeam.name:"")+'</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeams.length?" · "+myTeams.map(function(t){return t.name;}).join(" · "):"")+'</div>'+
     '</div>';
 
-    var mdMatch=getTodayMatchForTeams(myTeam?[myTeam.name]:[player.cat]);
+    var mdMatch=getTodayMatchForTeams(myTeams.length?myTeams.map(function(t){return t.name;}):[player.cat]);
     if(mdMatch){
       var mdSeen=localStorage.getItem("asmb_md_seen_"+mdMatch.id)==="1";
       html+='<div style="margin-bottom:20px">'+matchdayBannerHtml(mdMatch,mdSeen)+'</div>';
@@ -473,7 +476,7 @@ function buildJoueurScreen(player){
 
     // Compte de l'enfant : il répond lui-même Présent / Absent au prochain rendez-vous de son équipe.
     if(localStorage.getItem("asmb_profile")==="joueur"&&myTeam&&typeof repBoutonsHtml==="function"&&typeof getNextEventForTeam==="function"){
-      var prochain=getNextEventForTeam(myTeam), rb=prochain?repBoutonsHtml(prochain,[player]):"";
+      var prochain=myTeams.map(getNextEventForTeam).filter(Boolean).sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:String(a.heure||"")>String(b.heure||"")?1:-1;})[0]||null, rb=prochain?repBoutonsHtml(prochain,[player]):"";
       if(rb) html+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:18px;text-align:left">'+
         '<div style="font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:1px">Prochain rendez-vous</div>'+
         '<div style="font-size:15px;font-weight:800;color:var(--txt);margin-top:4px">'+authEsc(prochain.titre||"")+'</div>'+
@@ -786,8 +789,8 @@ function resolveIdentityForPhone(phone){
   function teamNameFor(f){
     var p=players.find(function(x){return normNomPrenom(x.prenom)===normNomPrenom(f.prenom)&&normNomPrenom(x.nom)===normNomPrenom(f.nom);});
     if(!p) return "";
-    var t=(typeof getTeamForPlayer==="function")?getTeamForPlayer(p.id):null;
-    return t?t.name:"";
+    var l=(typeof getTeamsForPlayer==="function")?getTeamsForPlayer(p.id):[];
+    return l.map(function(t){return t.name;}).join(" · ");
   }
   var own=null,asResp=null;
   licences.forEach(function(l){
@@ -949,7 +952,11 @@ function getParentChildren(){
   return getPlayers().filter(function(p){return ids.indexOf(p.id)>=0;});
 }
 function getTeamForPlayer(pid){
-  return getTeams().find(function(t){return (t.members||[]).indexOf(pid)>=0;})||null;
+  return getTeamsForPlayer(pid)[0]||null;
+}
+// Toutes les équipes du joueur (il peut jouer en Équipe 1 et en Équipe 2 de son niveau).
+function getTeamsForPlayer(pid){
+  return getTeams().filter(function(t){return (t.members||[]).map(String).indexOf(String(pid))>=0;});
 }
 function getActiveTeamId(){return localStorage.getItem("asmb_parent_active_team")||"";}
 function setActiveTeamId(id){localStorage.setItem("asmb_parent_active_team",id);}
@@ -1149,7 +1156,7 @@ function buildParentHome(){
   var teamIds;
   if(children.length){
     teamIds=[];
-    children.forEach(function(c){var t=getTeamForPlayer(c.id);if(t&&teamIds.indexOf(t.id)<0)teamIds.push(t.id);});
+    children.forEach(function(c){getTeamsForPlayer(c.id).forEach(function(t){if(teamIds.indexOf(t.id)<0)teamIds.push(t.id);});});
     if(teamIds.length)saveParentTeamsList(teamIds); else teamIds=getParentTeams();
   } else {
     teamIds=getParentTeams();
@@ -1206,8 +1213,14 @@ function buildParentHome(){
   var chipsEl=document.getElementById("parent-team-chips");
   chipsEl.innerHTML="";
   if(children.length){
+    var puces=[];
     children.forEach(function(c){
-      var t=getTeamForPlayer(c.id);
+      var l=getTeamsForPlayer(c.id);
+      if(!l.length) puces.push({c:c,t:null,plus:false});
+      l.forEach(function(t){ puces.push({c:c,t:t,plus:l.length>1}); });
+    });
+    puces.forEach(function(pc){
+      var c=pc.c, t=pc.t;
       var isActive=t&&t.id===activeId;
       var b=document.createElement("button");
       b.className="cat-filter"+(isActive?" on":"");
@@ -1217,6 +1230,7 @@ function buildParentHome(){
       av.textContent=(c.prenom||"?").charAt(0).toUpperCase();
       b.appendChild(av);
       b.appendChild(document.createTextNode(c.prenom+(t?"":" (sans équipe)")));
+      if(pc.plus){ var tn=document.createElement("span"); tn.style.cssText="opacity:.75;font-weight:600"; tn.textContent="· "+t.name; b.appendChild(tn); }
       if(t){ (function(tid){b.addEventListener("click",function(){setActiveTeamId(tid);buildParentHome();});})(t.id); }
       chipsEl.appendChild(b);
     });

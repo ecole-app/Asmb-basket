@@ -58,41 +58,52 @@ async function licSupprimer(code){
 }
 
 // ── Équipe 1, 2, 3… d'un joueur (badge sur la fiche et à l'import) ───
-// lic.equipe = numéro. Équipe auto-nommée « U11 Équipe 2 » (créée si besoin), le joueur y est
-// placé à la validation de sa licence (les joueurs n'existent qu'à ce moment) ou tout de suite
-// s'il est déjà validé.
+// lic.equipes = numéros (un joueur peut jouer et s'entraîner dans 2 équipes de son niveau,
+// ex. Équipe 1 et Équipe 2) ; lic.equipe = ancien champ (un seul numéro), toujours lu.
+// Équipe auto-nommée « U11 Équipe 2 » (créée si besoin), le joueur y est placé à la validation
+// de sa licence (les joueurs n'existent qu'à ce moment) ou tout de suite s'il est déjà validé.
 var EQ_NB=4;
+function licEquipes(lic){
+  var l=Array.isArray(lic&&lic.equipes)?lic.equipes:((lic&&lic.equipe)?[lic.equipe]:[]);
+  return l.map(Number).filter(function(n,i,a){ return n>=1&&n<=EQ_NB&&a.indexOf(n)===i; }).sort();
+}
 function licEquipePlacer(lic){
   if(!lic||!lic.fiche||!licEstJoueur(lic)||!lic.categorie) return;
   var f=lic.fiche, nn=function(s){return String(s||"").trim().toLowerCase();};
   var pl=getPlayers().find(function(p){return nn(p.nom)===nn(f.nom)&&nn(p.prenom)===nn(f.prenom)&&(p.naissance||"")===(f.naissance||"");});
   if(!pl) return;
-  var teams=getTeams(), prefixe=lic.categorie+" Équipe ", nom=lic.equipe?prefixe+lic.equipe:"", change=false, cree=null;
+  var teams=getTeams(), prefixe=lic.categorie+" Équipe ", noms=licEquipes(lic).map(function(n){ return prefixe+n; }), change=false, crees=[];
   teams.forEach(function(t){
-    if(t.cat===lic.categorie&&String(t.name).indexOf(prefixe)===0&&t.name!==nom&&(t.members||[]).indexOf(pl.id)>=0){
+    if(t.cat===lic.categorie&&String(t.name).indexOf(prefixe)===0&&noms.indexOf(t.name)<0&&(t.members||[]).indexOf(pl.id)>=0){
       t.members=t.members.filter(function(id){return id!==pl.id;}); change=true;
     }
   });
-  if(nom){
+  noms.forEach(function(nom,i){
     var t=teams.find(function(x){return x.name===nom;});
-    if(!t){ t={id:(Date.now()+Math.floor(Math.random()*1000)).toString(),name:nom,cat:lic.categorie,members:[]}; teams.push(t); cree=t; change=true; }
+    if(!t){ t={id:(Date.now()+i+Math.floor(Math.random()*1000)).toString(),name:nom,cat:lic.categorie,members:[]}; teams.push(t); crees.push(t); change=true; }
     t.members=t.members||[];
     if(t.members.indexOf(pl.id)<0){ t.members.push(pl.id); change=true; }
-  }
-  if(change){ saveTeams(teams); if(cree&&typeof ensureTeamChannel==="function") ensureTeamChannel(cree); }
+  });
+  if(change){ saveTeams(teams); if(typeof ensureTeamChannel==="function") crees.forEach(function(t){ ensureTeamChannel(t); }); }
 }
 function licEquipeHtml(lic){
   if(!licEstJoueur(lic)) return "";
-  var e=lic.equipe||0, h='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%"><div style="font-size:12px;font-weight:700;color:var(--txt);margin-right:4px">Équipe'+(lic.categorie?' '+authEsc(lic.categorie):'')+'</div>';
+  var l=licEquipes(lic), h='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%"><div style="font-size:12px;font-weight:700;color:var(--txt);margin-right:4px">Équipe'+(lic.categorie?' '+authEsc(lic.categorie):'')+'</div>';
   for(var n=1;n<=EQ_NB;n++){
-    h+='<button onclick="licEquipeSet(\''+lic.code+'\','+(e===n?0:n)+')" style="min-width:34px;padding:7px 10px;border-radius:20px;border:1.5px solid '+(e===n?'var(--dkg)':'var(--bdr)')+';background:'+(e===n?'var(--dkg)':'var(--card)')+';color:'+(e===n?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer">'+n+'</button>';
+    var on=l.indexOf(n)>=0;
+    h+='<button onclick="licEquipeSet(\''+lic.code+'\','+n+')" style="min-width:34px;padding:7px 10px;border-radius:20px;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer">'+n+'</button>';
   }
-  return h+'<div style="font-size:10px;color:var(--mut)">'+(lic.statut==="validee"?'':'placé à la validation')+'</div></div>';
+  return h+'<div style="font-size:10px;color:var(--mut)">'+(lic.statut==="validee"?'':'placé à la validation')+'</div>'
+    +'<div style="font-size:10px;color:var(--mut);width:100%">Touchez 2 numéros pour qu\'il joue dans 2 équipes.</div></div>';
 }
+// Touche un numéro : l'ajoute ou le retire (plusieurs équipes possibles).
 function licEquipeSet(code,n){
   var lics=getLicences(), lic=lics.find(function(l){return l.code===code;});
   if(!lic) return;
-  if(n) lic.equipe=n; else delete lic.equipe;
+  var l=licEquipes(lic);
+  if(n){ var i=l.indexOf(n); if(i>=0) l.splice(i,1); else l.push(n); l.sort(); }
+  else l=[];
+  if(l.length){ lic.equipes=l; lic.equipe=l[0]; } else { delete lic.equipes; delete lic.equipe; }
   saveLicences(lics);
   if(lic.statut==="validee") licEquipePlacer(lic);
   renderLicenceDetail(lic); buildLicences();

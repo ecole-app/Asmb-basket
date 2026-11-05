@@ -45,6 +45,27 @@ describe("Placement en équipe", () => {
   });
 });
 
+describe("Joueur dans 2 équipes du même niveau", () => {
+  it("equipes [1,2] : placé en Équipe 1 et en Équipe 2", () => {
+    const c = app([joueur], []); c.licEquipePlacer(lic({ equipes: [1, 2], equipe: 1 }));
+    assert.deepEqual(c.eq("teams").map((t) => [t.name, t.members]).sort(), [["U11 Équipe 1", ["p1"]], ["U11 Équipe 2", ["p1"]]]);
+  });
+  it("retirer l'Équipe 2 le laisse en Équipe 1", () => {
+    const c = app([joueur], [{ id: "a", name: "U11 Équipe 1", cat: "U11", members: ["p1"] }, { id: "b", name: "U11 Équipe 2", cat: "U11", members: ["p1"] }]);
+    c.licEquipePlacer(lic({ equipes: [1], equipe: 1 }));
+    const t = c.eq("teams");
+    assert.deepEqual(t.find((x) => x.id === "a").members, ["p1"]);
+    assert.deepEqual(t.find((x) => x.id === "b").members, []);
+  });
+  it("licEquipeSet ajoute puis retire un numéro", () => {
+    const l = { code: "A", categorie: "U11", equipe: 1, statut: "recue", fiche: {} };
+    const c = app([], []); c.getLicences = () => [l]; c.saveLicences = () => {}; c.renderLicenceDetail = () => {}; c.buildLicences = () => {};
+    c.licEquipeSet("A", 2); assert.deepEqual([...l.equipes], [1, 2]); assert.equal(l.equipe, 1);
+    c.licEquipeSet("A", 1); assert.deepEqual([...l.equipes], [2]); assert.equal(l.equipe, 2);
+    c.licEquipeSet("A", 2); assert.equal(l.equipes, undefined); assert.equal(l.equipe, undefined);
+  });
+});
+
 describe("Équipe à l'import", () => {
   it("la fiche créée garde le numéro d'équipe choisi", () => {
     const c = app([], []); c.genCode = () => "Z"; c.CATS_LIC = ["U11"]; c.categorieFromNaissance = () => "U11";

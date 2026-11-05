@@ -368,6 +368,9 @@ function buildTeams(){
         info.textContent=p.prenom+" "+p.nom+" ";
         var poste=document.createElement("span");poste.style.cssText="color:var(--mut);font-size:10px";poste.textContent=posteDe(p);
         info.appendChild(poste);
+        // Joue aussi dans une autre équipe (Équipe 1 et Équipe 2 du même niveau, par exemple).
+        var autres=eqAutresEquipes(p.id,t.id);
+        if(autres.length){ var aussi=document.createElement("span"); aussi.style.cssText="margin-left:6px;padding:1px 7px;border-radius:10px;background:color-mix(in srgb, var(--ltg) 14%, transparent);color:var(--dkg);font-size:10px;font-weight:700"; aussi.appendChild(document.createTextNode(gmT("aussi en")+" ")); aussi.appendChild(document.createTextNode(autres.join(", "))); info.appendChild(aussi); }
         var rm=document.createElement("button");rm.textContent="×";
         rm.style.cssText="border:none;background:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;line-height:1";
         (function(pid){rm.addEventListener("click",function(e){e.stopPropagation();removeTeamMember(t.id,pid);});})(p.id);
@@ -403,6 +406,8 @@ function openAddTeamMember(teamId){
   var currentIds=team.members||[];
   var players=getPlayers().filter(function(p){return currentIds.indexOf(p.id)<0;});
   if(!players.length){askAlert("Aucun joueur disponible à ajouter.");return;}
+  // Joueurs du même niveau d'abord (ceux qui peuvent jouer en Équipe 1 et en Équipe 2).
+  players.sort(function(a,b){ var x=(a.cat===team.cat?0:1)-(b.cat===team.cat?0:1); return x||String(a.nom||"").localeCompare(String(b.nom||""),"fr"); });
   var modal=document.createElement("div");
   modal.className="team-member-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
@@ -433,6 +438,8 @@ function openAddTeamMember(teamId){
     var cat=document.createElement("span");
     cat.style.cssText="font-size:10px;color:var(--mut)";
     cat.textContent=p.cat;
+    var autres=eqAutresEquipes(p.id,teamId);
+    if(autres.length){ var dj=document.createElement("span"); dj.style.cssText="font-size:10px;color:var(--dkg);font-weight:700;margin-left:6px"; dj.appendChild(document.createTextNode(gmT("déjà en")+" ")); dj.appendChild(document.createTextNode(autres.join(", "))); name.appendChild(dj); }
     lbl.appendChild(chk);lbl.appendChild(name);lbl.appendChild(cat);
     list.appendChild(lbl);
   });
@@ -455,6 +462,10 @@ function openAddTeamMember(teamId){
   inner.appendChild(hdr);inner.appendChild(list);inner.appendChild(addBtn);
   modal.appendChild(inner);
   document.body.appendChild(modal);
+}
+// Noms des autres équipes du joueur (un joueur peut être dans 2 équipes de son niveau).
+function eqAutresEquipes(pid,saufId){
+  return getTeams().filter(function(t){ return t.id!==saufId&&(t.members||[]).map(String).indexOf(String(pid))>=0; }).map(function(t){ return t.name; });
 }
 function removeTeamMember(teamId,playerId){
   var teams=getTeams();

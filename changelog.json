@@ -1,5 +1,23 @@
 [
  {
+  "v": "1793906023",
+  "semver": "1.8.0",
+  "titre": "Un joueur dans 2 équipes",
+  "points": [
+   {
+    "roles": ["dirigeant", "coach"],
+    "texte": "Un joueur peut jouer et s'entraîner dans 2 équipes de son niveau (Équipe 1 et Équipe 2) : cochez ses équipes sur sa fiche, touchez 2 numéros d'équipe sur sa licence ou ajoutez-le depuis l'effectif. L'effectif affiche « aussi en … »."
+   },
+   {
+    "roles": ["dirigeant", "coach"],
+    "texte": "Convocation : un joueur déjà convoqué à un autre match le même jour est signalé. Présences et assiduité restent comptées équipe par équipe."
+   },
+   {
+    "roles": ["parent", "joueur"],
+    "texte": "Votre enfant dans 2 équipes : les deux apparaissent sur l'accueil, avec leurs entraînements, matchs et convocations."
+   }
+  ]
+ }, {
   "v": "1793905343",
   "semver": "1.7.2",
   "titre": "Joueurs à reclasser : moins de faux positifs, « Ignorer tous »",
