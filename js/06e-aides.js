@@ -123,10 +123,12 @@ function aidesTotalLicence(lic){
 }
 
 // ── Bloc dans la fiche licence (staff) ──────────────────────────────
-function aidesBlockHtml(lic){
+// pref = préfixe des champs ("pl-" dans la fenêtre « Enregistrer le paiement », où les 2 pass sont toujours proposés).
+function aidesBlockHtml(lic, pref){
+  pref=pref||"";
   var a=aidesClub(), f=lic.fiche||{}, liste=lic.aides||[];
   var aPS=liste.some(function(x){return x.type==="passsport";}), aPR=liste.some(function(x){return x.type==="passregion";});
-  var showPS=a.passSport||f.passSport||aPS, showPR=a.passRegion||f.passRegionOui||aPR;
+  var showPS=pref||a.passSport||f.passSport||aPS, showPR=pref||a.passRegion||f.passRegionOui||aPR;
   if(!showPS&&!showPR) return "";
   var h='<div style="margin-top:12px;border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;background:var(--card)">'+
     '<div style="font-size:12px;font-weight:800;color:var(--txt);margin-bottom:8px">Aides Pass\'Sport / Pass\'Région</div>';
@@ -142,12 +144,12 @@ function aidesBlockHtml(lic){
       '</div></div>';
   });
   if(showPS&&!aPS){
-    h+='<div style="display:flex;gap:6px;margin-bottom:8px"><input class="form-input" id="aide-add-passsport" value="'+authEsc(f.passSport||"")+'" placeholder="Code Pass\'Sport 26-XXXX-XXXX" style="flex:1">'+
-      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passsport\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 50 €</button></div>';
+    h+='<div style="display:flex;gap:6px;margin-bottom:8px"><input class="form-input" id="'+pref+'aide-add-passsport" value="'+authEsc(f.passSport||"")+'" placeholder="Code Pass\'Sport 26-XXXX-XXXX" style="flex:1">'+
+      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passsport\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 50 €</button></div>';
   }
   if(showPR&&!aPR){
-    h+='<div style="display:flex;gap:6px"><input class="form-input" id="aide-add-passregion" value="'+authEsc(f.passRegionNumero||"")+'" placeholder="N° de carte Pass\'Région" style="flex:1">'+
-      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passregion\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 30 €</button></div>';
+    h+='<div style="display:flex;gap:6px"><input class="form-input" id="'+pref+'aide-add-passregion" value="'+authEsc(f.passRegionNumero||"")+'" placeholder="N° de carte Pass\'Région" style="flex:1">'+
+      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passregion\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 30 €</button></div>';
   }
   if(liste.length) h+='<div style="font-size:11px;color:var(--mut);margin-top:8px">Les aides comptent dans le paiement : la famille règle la différence.</div>';
   return h+'</div>';
@@ -167,9 +169,9 @@ function aidesLigneCompta(lic, aide){
   if(typeof hasPremium==="function"&&!hasPremium()) l.horsPremium=true;
   return l;
 }
-function aidesAjouter(code, type){
+function aidesAjouter(code, type, pref){
   var ctx=aidesLicence(code); if(!ctx.lic) return;
-  var el=document.getElementById("aide-add-"+type);
+  var el=document.getElementById((pref||"")+"aide-add-"+type);
   var ref=el?el.value:"";
   if(type==="passsport"){
     if(!aidesCodePSValide(ref)){ askAlert("Code Pass'Sport invalide : format 26-XXXX-XXXX."); return; }
@@ -186,7 +188,12 @@ function aidesAjouter(code, type){
   lic.aides.push(aide);
   var compta=getComptabilite(); compta.push(aidesLigneCompta(lic, aide));
   saveLicences(ctx.lics); saveComptabilite(compta);
-  renderLicenceDetail(lic); buildLicences();
+  renderLicenceDetail(lic); buildLicences(); aidesMajPaiement(lic);
+}
+// Fenêtre « Enregistrer le paiement » ouverte : son bloc des pass suit les changements.
+function aidesMajPaiement(lic){
+  var box=document.getElementById("pl-aides");
+  if(box&&lic&&box.dataset.code===lic.code) box.innerHTML=aidesBlockHtml(lic,"pl-");
 }
 function aidesStatut(code, i, statut){
   var ctx=aidesLicence(code); if(!ctx.lic||!ctx.lic.aides||!ctx.lic.aides[i]) return;
@@ -194,7 +201,7 @@ function aidesStatut(code, i, statut){
   var j=new Date().toISOString().slice(0,10);
   if(statut==="saisi") a.saisiLe=j; if(statut==="rembourse") a.rembourseLe=j;
   saveLicences(ctx.lics);
-  renderLicenceDetail(ctx.lic); buildLicences();
+  renderLicenceDetail(ctx.lic); buildLicences(); aidesMajPaiement(ctx.lic);
 }
 async function aidesRetirer(code, i){
   var ctx=aidesLicence(code); if(!ctx.lic||!ctx.lic.aides||!ctx.lic.aides[i]) return;
@@ -203,7 +210,7 @@ async function aidesRetirer(code, i){
   var a=ctx.lic.aides.splice(i,1)[0];
   var compta=getComptabilite().filter(function(c){return c.id!==a.comptaId;});
   saveLicences(ctx.lics); saveComptabilite(compta);
-  renderLicenceDetail(ctx.lic); buildLicences();
+  renderLicenceDetail(ctx.lic); buildLicences(); aidesMajPaiement(ctx.lic);
 }
 
 // ── Suivi : codes à saisir + alertes 10 j / 5 j ─────────────────────

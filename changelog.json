@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793906201",
+  "semver": "1.8.1",
+  "titre": "Pass'Sport et Pass'Région dans « Enregistrer le paiement »",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "La fenêtre « Enregistrer le paiement » d'une licence propose les codes Pass'Sport et Pass'Région (pré-remplis si la famille les a donnés) : un clic les compte dans le paiement."
+   }
+  ]
+ }, {
   "v": "1793906023",
   "semver": "1.8.0",
   "titre": "Un joueur dans 2 équipes",

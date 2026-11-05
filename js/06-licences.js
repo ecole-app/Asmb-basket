@@ -758,6 +758,7 @@ function openPaiementLicenceModal(code){
     '<div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" id="pl-date" type="date" value="'+(p.date||new Date().toISOString().slice(0,10))+'"></div>'+
     '<div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="pl-reference" value="'+authEsc(p.reference||"")+'" placeholder="N° de virement, etc."></div>'+
     '</div><div id="pl-cheques"></div>'+
+    ((typeof aidesBlockHtml==="function"&&(typeof licEstJoueur!=="function"||licEstJoueur(lic)))?'<div id="pl-aides" data-code="'+authEsc(lic.code)+'" style="margin-bottom:12px">'+aidesBlockHtml(lic,"pl-")+'</div>':'')+
     '<button id="pl-save" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Enregistrer</button>';
   modal.appendChild(inner);
   modal.addEventListener("click",function(){modal.remove();});
