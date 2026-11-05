@@ -146,6 +146,8 @@ describe("Fiche du club (clubs/{id})", () => {
     const db = await as("dirA");
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { name: "Club A+", couleur: "#1f844b", couleur2: "#1A2E5A" }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { liens: { facebook: "https://www.facebook.com/clubA", boutique: "https://boutique.clubA.fr" } }));
+    await assertSucceeds(updateDoc(doc(db, "clubs/A"), { icone: "data:image/png;base64,xx", iconeDe: 1234 }));
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), { icone: "data:image/png;base64,xx", iconeDe: 1234 }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { logo: "data:image/png;base64,xx", facturation: { tva: false }, relances: { n: 3 }, aides: { passSport: true, passRegion: false }, dossier: { v: 1 } }));
     await assertSucceeds(updateDoc(doc(db, "clubs/A"), { zone: "A", departement: "42", lienPaiement: null, cerfa: {} }));
   });

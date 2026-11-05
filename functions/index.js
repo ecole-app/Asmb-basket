@@ -156,6 +156,49 @@ exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res)
   } catch (e) { res.status(404).end(); }
 });
 
+// Icône et nom de l'appli installée = ceux du club. Le téléphone (Android surtout) télécharge l'icône
+// depuis une vraie adresse : une image « data: » fabriquée par la page n'est pas reprise à l'installation
+// (d'où l'icône General Manager chez un coach d'un club). ?c=<club>&m=1 = manifeste, ?c=<club>&s=192|512 = icône.
+// Ne sort que le logo et le nom du club, déjà publics (page d'inscription, notifications).
+const SITE_PUBLIC = "https://generalmanagerapp.fr";
+function imageDeClub(d) {
+  const lire = (v) => (typeof v === "string" && /^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+\/=]+)$/.exec(v)) || null;
+  const m = lire(d && d.icone);
+  if (m) return { type: m[1], buf: Buffer.from(m[2], "base64"), recadree: true };
+  const l = lire(d && d.logo);
+  return l ? { type: l[1], buf: Buffer.from(l[2], "base64"), recadree: false } : null;
+}
+exports.iconeClub = onRequest({ cors: true, memory: "256MiB" }, async (req, res) => {
+  try {
+    const id = String(req.query.c || "");
+    if (!/^[A-Za-z0-9_-]{1,80}$/.test(id)) { res.status(404).end(); return; }
+    const snap = await db.collection("clubs").doc(id).get();
+    const d = snap.exists && snap.data();
+    if (!d || d.type === "independant") { res.status(404).end(); return; }
+    const img = imageDeClub(d);
+    if (!img) { res.status(404).end(); return; }
+    if (req.query.m) {
+      const nom = String(d.name || "General Manager").trim().slice(0, 45) || "General Manager";
+      const base = "https://europe-west1-asmb-app.cloudfunctions.net/iconeClub?c=" + encodeURIComponent(id) + "&v=" + (Number(req.query.v) || 0);
+      const icons = img.recadree
+        ? [{ src: base + "&s=192", sizes: "192x192", type: "image/" + img.type, purpose: "any" }, { src: base + "&s=512", sizes: "512x512", type: "image/" + img.type, purpose: "any" }]
+        : [{ src: base + "&s=256", sizes: "256x256", type: "image/" + img.type, purpose: "any" }];
+      res.set("Content-Type", "application/manifest+json");
+      res.set("Cache-Control", "public, max-age=300");
+      res.status(200).send(JSON.stringify({
+        name: nom, short_name: nom.slice(0, 12), description: "Gestion de club sportif",
+        start_url: SITE_PUBLIC + "/index.html", scope: SITE_PUBLIC + "/", display: "standalone",
+        background_color: "#f1f4f9", theme_color: /^#[0-9a-fA-F]{6}$/.test(d.couleur || "") ? d.couleur : "#1A2E5A",
+        orientation: "portrait", icons
+      }));
+      return;
+    }
+    res.set("Content-Type", "image/" + img.type);
+    res.set("Cache-Control", "public, max-age=86400");
+    res.status(200).send(img.buf);
+  } catch (e) { res.status(404).end(); }
+});
+
 // Extérieurs d'un événement (sans compte) qui ont activé les notifications sur la page /fil :
 // ils reçoivent chaque message du fil jusqu'à la fin de l'événement, avec leur propre lien.
 async function notifierExternes(clubId, channelId, ch, msg, fabrique) {

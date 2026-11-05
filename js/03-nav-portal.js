@@ -166,6 +166,7 @@ function majIconeAppli(){
       return c.toDataURL("image/png");
     }
     var i32=carre(64,0.06), i180=carre(180,0.14), i192=carre(192,0.16), i512=carre(512,0.16);
+    iconeEnvoyerAuServeur(i512,logo);
     if(lf){ lf.setAttribute("href",i32); lf.setAttribute("type","image/png"); }
     if(la) la.setAttribute("href",i180);
     if(lm){
@@ -180,9 +181,35 @@ function majIconeAppli(){
         var url=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:"application/manifest+json"}));
         lm.setAttribute("href",url);
       }catch(e){}
+      iconeManifesteServeur(lm,logo.length);
     }
   };
   img.src=logo;
+}
+
+// Manifeste servi par le serveur (fonction iconeClub) : une adresse réelle, que le téléphone peut
+// télécharger à l'installation (une image « data: » n'est pas reprise sur Android). On ne l'adopte
+// qu'après avoir vérifié qu'il répond ; sinon on garde le manifeste fabriqué par la page.
+var ICONE_URL="https://europe-west1-asmb-app.cloudfunctions.net/iconeClub";
+function iconeManifesteServeur(lm,v){
+  var id=window.CURRENT_CLUB_ID;
+  if(!id||!lm||window.GM_DEMO||window.SUPPORT_MODE||!window.fetch||location.hostname!=="generalmanagerapp.fr") return;
+  var url=ICONE_URL+"?c="+encodeURIComponent(id)+"&m=1&v="+(Number(v)||0);
+  fetch(url,{mode:"cors"}).then(function(r){ if(!r.ok) throw new Error("manifeste"); return r.json(); }).then(function(j){
+    if(!j||!j.icons||!j.icons.length) throw new Error("manifeste");
+    lm.setAttribute("crossorigin","anonymous");
+    lm.setAttribute("href",url);
+  }).catch(function(){});
+}
+// Le dirigeant range l'icône recadrée (512 px) sur la fiche du club : le serveur la sert telle quelle.
+// Une seule fois par logo (iconeDe = taille du logo dont elle vient).
+function iconeEnvoyerAuServeur(i512,logo){
+  var u=window.ASMB_USER, c=window.CURRENT_CLUB;
+  if(!u||window.GM_DEMO||window.SUPPORT_MODE||window.__iconeEnvoyee||!c||!window.fbUpdateDoc||!window.fbDb) return;
+  if((u.roles||[]).indexOf("dirigeant")<0||c.iconeDe===logo.length||!i512||i512.length>200000) return;
+  window.__iconeEnvoyee=true;
+  window.fbUpdateDoc(window.fbDoc(window.fbDb,"clubs",window.CURRENT_CLUB_ID),{icone:i512,iconeDe:logo.length})
+    .then(function(){ c.icone=i512; c.iconeDe=logo.length; }).catch(function(){ window.__iconeEnvoyee=false; });
 }
 
 // Tuto affiché au dirigeant après un changement de logo, et rouvrable depuis

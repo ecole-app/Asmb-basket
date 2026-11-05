@@ -129,7 +129,72 @@ function convocCarteCoachAfficher(el,team){
   if(!el||!el.parentNode) return;
   var box=document.getElementById("coach-convoc-zone");
   if(!box){ box=document.createElement("div"); box.id="coach-convoc-zone"; el.parentNode.insertBefore(box,el); }
-  box.innerHTML=convocCarteCoach(team);
+  box.innerHTML=convocCarteCoach(team)+assidAlerteCarte(team);
+}
+
+// ── Absences répétées : le coach est prévenu quand un joueur manque 3 entraînements d'affilée ──
+// Série = absences NON excusées d'affilée sur les dernières séances pointées ; elle s'arrête à une
+// présence ou à une absence excusée. Rien n'est envoyé tout seul : le coach écrit lui-même (SMS pré-rempli).
+var ASSID_SERIE_MIN=3;
+function assidSerie(pid,team){
+  var n=0, last="";
+  var seances=assidSeances(team).slice().sort(function(a,b){ return a.date<b.date?1:-1; });
+  for(var i=0;i<seances.length;i++){
+    var e=seances[i], st=e.presences[pid]; if(st==null) st=e.presences[String(pid)];
+    if(st==null) continue; // pas pointé pour lui (arrivé plus tard)
+    if(st==="present"||st==="retard") break;
+    if(assidExcusee(e,pid)) break;
+    if(!n) last=e.date;
+    n++;
+  }
+  return {n:n,last:last};
+}
+function assidCleVu(pid){ return "gm_assid_vu_"+(window.CURRENT_CLUB_ID||"")+"_"+pid; }
+function assidAlerteListe(team){
+  if(!team) return [];
+  return (team.members||[]).map(String).map(function(pid){ var r=assidSerie(pid,team); r.pid=pid; return r; })
+    .filter(function(r){
+      if(r.n<ASSID_SERIE_MIN) return false;
+      try{ if(localStorage.getItem(assidCleVu(r.pid))===r.last) return false; }catch(e){}   // déjà contacté pour cette série
+      return true;
+    }).sort(function(a,b){ return b.n-a.n; });
+}
+function assidAlerteCarte(team){
+  var l=assidAlerteListe(team); if(!l.length) return "";
+  var h='<div id="coach-assid-carte" style="margin:0 0 10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid #C0392B;border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)">'+
+    '<div style="font-size:10px;font-weight:800;color:#C0392B;text-transform:uppercase;letter-spacing:1px">Absences répétées</div>';
+  l.forEach(function(x){
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px">'+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc((typeof repNom==="function")?repNom(x.pid):"Joueur")+'</div>'+
+      '<div style="font-size:11.5px;color:var(--mut)">'+x.n+' entraînements d\'affilée sans prévenir</div></div>'+
+      '<button type="button" onclick="assidEcrire(\''+authEsc(x.pid)+'\',\''+authEsc(String(team.id))+'\')" style="flex:none;border:0;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;background:var(--dkg);color:#fff">Écrire à la famille</button></div>';
+  });
+  return h+'</div>';
+}
+// SMS pré-rempli (vouvoiement, sans genre) : le coach relit, modifie et envoie depuis son téléphone.
+function assidEcrire(pid,teamId){
+  var team=getTeams().filter(function(t){ return String(t.id)===String(teamId); })[0]; if(!team) return;
+  var p=getPlayers().filter(function(x){ return String(x.id)===String(pid); })[0]||{};
+  var r=assidSerie(pid,team);
+  var u=window.ASMB_USER||{}, moi=((u.prenom||"")+" "+(u.nom||"")).trim();
+  var prenom=p.prenom||"votre enfant";
+  var texte="Bonjour, "+(moi?moi+", ":"")+"coach à "+(clubLabel("")||"votre club")+". Nous n'avons pas vu "+prenom+" aux "+r.n+" derniers entraînements. Tout va bien ? N'hésitez pas à me prévenir en cas d'absence. Cordialement.";
+  var tel=String(p.respTel||p.contact||p.resp2Tel||"").replace(/[^+0-9]/g,"");
+  var s=gmSheet("Écrire à la famille de "+prenom), box=s.body;
+  var ta=document.createElement("textarea"); ta.className="form-input"; ta.style.cssText="width:100%;min-height:130px;font-size:13px;line-height:1.5"; ta.value=texte;
+  var info=document.createElement("div"); info.style.cssText="font-size:11.5px;color:var(--mut);margin:8px 0";
+  info.textContent=tel?"Ouvre votre application SMS avec le message prêt : relisez-le, puis envoyez-le.":"Aucun numéro renseigné pour cette famille.";
+  var b=document.createElement("button"); b.type="button"; b.textContent="Ouvrir mon SMS";
+  b.style.cssText="width:100%;padding:13px;border:0;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:800;cursor:pointer";
+  b.addEventListener("click",function(){
+    if(!tel){ askAlert("Pas de téléphone renseigné pour cette famille."); return; }
+    try{ localStorage.setItem(assidCleVu(pid),r.last); }catch(e){}   // la carte disparaît jusqu'à une nouvelle absence
+    window.location.href="sms:"+tel+"?&body="+encodeURIComponent(ta.value);
+    s.modal.remove();
+    var z=document.getElementById("coach-assid-carte");
+    if(z) z.outerHTML=assidAlerteCarte(team);
+  });
+  box.appendChild(ta); box.appendChild(info); box.appendChild(b);
 }
 
 // Accueil parent : la convocation du match (si ce n'est pas déjà le prochain rendez-vous affiché).

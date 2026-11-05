@@ -35,3 +35,29 @@ describe("Assiduité aux entraînements", () => {
     assert.equal(c.assidCouleur(40), "#C0392B");
   });
 });
+
+// Absences répétées (alerte du coach) : absences NON excusées d'affilée, depuis la plus récente séance pointée.
+describe("Absences répétées", () => {
+  const eq = { id: "u15", name: "U15 Garçons", members: ["x", "y", "z"] };
+  const s = (id, n, pres, exc) => ({ id, type: "entrainement", equipe: "U15 Garçons", date: j(n), presences: pres, excuses: exc });
+  const ev = [
+    s("f1", -2, { x: "absent", y: "absent", z: "present" }),
+    s("f2", -9, { x: "absent", y: "absent", z: "absent" }),
+    s("f3", -16, { x: "absent", y: "present", z: "absent" }),
+    s("f4", -23, { x: "present", y: "absent", z: "absent" }),
+  ];
+  const k = charger(["js/14t-convocation.js"], { getTeams: () => [eq], repDe: () => null, getEvents: () => ev });
+  it("3 absences non excusées d'affilée = alerte", () => {
+    assert.equal(k.assidSerie("x", eq).n, 3);
+    assert.equal(k.assidAlerteListe(eq).map((r) => r.pid).join(), "x");
+  });
+  it("une présence interrompt la série", () => {
+    assert.equal(k.assidSerie("y", eq).n, 2);
+    assert.equal(k.assidSerie("z", eq).n, 0);
+  });
+  it("une absence excusée interrompt la série", () => {
+    const k2 = charger(["js/14t-convocation.js"], { getTeams: () => [eq], repDe: () => null, getEvents: () => [
+      s("g1", -2, { x: "absent" }), s("g2", -9, { x: "absent" }, { x: true }), s("g3", -16, { x: "absent" }) ] });
+    assert.equal(k2.assidSerie("x", eq).n, 1);
+  });
+});

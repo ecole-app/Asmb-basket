@@ -1,5 +1,28 @@
 [
  {
+  "v": "1793891741",
+  "semver": "1.6.0",
+  "titre": "Absences répétées et icône du club",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Dans « Mon équipe », une carte « Absences répétées » prévient quand un joueur manque 3 entraînements d'affilée sans prévenir. Un bouton prépare un SMS à la famille : vous le relisez et l'envoyez vous-même."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "L'icône et le nom de l'appli installée reprennent maintenant le logo et le nom du club, y compris sur Android. Pour la changer sur un téléphone déjà installé : supprimer l'icône, rouvrir le site dans Chrome, se connecter, puis « Installer l'application »."
+   }
+  ]
+ },
+ {
   "v": "1793832075",
   "semver": "1.5.6",
   "titre": "Plateforme : copier un bug",

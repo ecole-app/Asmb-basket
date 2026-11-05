@@ -69,6 +69,9 @@
     "js/12b-planning-alertes.js"
   ],
   "exclus": [
+    ". Nous n'avons pas vu",
+    "coach à",
+    "derniers entraînements. Tout va bien ? N'hésitez pas à me prévenir en cas d'absence. Cordialement.",
     "(display-mode: standalone)",
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
     "ACTION:DISPLAY",
