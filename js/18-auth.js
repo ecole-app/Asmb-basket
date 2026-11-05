@@ -16,7 +16,12 @@ var AUTH_INKTXT='#182720';   // texte principal sur fond craie
 var AUTH_MUTTXT='#6E7B73';   // texte secondaire sur fond craie
 var AUTH_DISPLAY="font-family:'Oswald',system-ui,sans-serif";
 
-function authLogoHtml(){
+var AUTH_URL_LOGO="https://europe-west1-asmb-app.cloudfunctions.net/logoClub?c=";
+function authLogoHtml(clubId){
+  // Pas encore connecté (invitation) : le logo vient de la fonction publique logoClub ; s'il n'y en a pas, on ne montre rien.
+  if(clubId && !(typeof clubLogo==="function" && clubLogo()) && /^[A-Za-z0-9_-]{1,80}$/.test(String(clubId))){
+    return '<div style="width:56px;height:56px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center"><img src="'+AUTH_URL_LOGO+encodeURIComponent(clubId)+'" alt="" style="width:56px;height:56px;object-fit:contain;display:block" onerror="this.parentNode.style.display=\'none\'"></div>';
+  }
   if(typeof clubLogo==="function" && clubLogo()){
     return '<div style="width:56px;height:56px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center">'+clubLogoHtml(56)+'</div>';
   }
@@ -27,8 +32,8 @@ function authLogoHtml(){
 // un pictogramme de sport précis (l'appli est multi-sport).
 var AUTH_ARC='<svg width="340" height="340" viewBox="0 0 340 340" style="position:absolute;top:-90px;right:-110px;opacity:.1;pointer-events:none" aria-hidden="true"><circle cx="170" cy="170" r="130" fill="none" stroke="'+AUTH_CHALK+'" stroke-width="1.5"/><line x1="170" y1="40" x2="170" y2="300" stroke="'+AUTH_CHALK+'" stroke-width="1.5"/></svg>';
 
-function authHero(title, tag){
-  var logo=authLogoHtml();
+function authHero(title, tag, clubId){
+  var logo=authLogoHtml(clubId);
   return '<div style="position:relative;overflow:hidden;background:'+AUTH_INK+';padding:38px 24px 30px;text-align:center">'
     +AUTH_ARC
     +(logo?'<div style="display:flex;justify-content:center;margin-bottom:14px;position:relative">'+logo+'</div>':'')

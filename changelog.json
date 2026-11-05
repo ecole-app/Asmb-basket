@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793905049",
+  "semver": "1.7.1",
+  "titre": "Logo du club sur l'écran de connexion par invitation",
+  "points": [
+   {
+    "roles": ["dirigeant", "coach", "parent", "joueur"],
+    "texte": "Quand on ouvre un lien d'invitation, le logo du club s'affiche en haut de l'écran de connexion ou de création de compte."
+   }
+  ]
+ }, {
   "v": "1793903630",
   "semver": "1.7.0",
   "titre": "Supprimer une série d'entraînements d'un coup",

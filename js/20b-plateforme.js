@@ -284,7 +284,7 @@ function inviteRoleLbl(inv){ return inviteIndep(inv)?"Indépendant":(inv.role===
 
 function renderInviteDirigeantContrat(el, code, inv){
   var indep=inviteIndep(inv);
-  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")),indep?"Indépendant":"Dirigeant")
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")),indep?"Indépendant":"Dirigeant",indep?null:inv.clubId)
     +'<div style="padding:16px 18px 22px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:12.5px;color:var(--txt2);text-align:center;line-height:1.4;margin-bottom:10px">En activant '+authEsc(inv.clubName||(indep?"votre espace":"ce club"))+', vous acceptez le contrat de sous-traitance RGPD ci-dessous. Faites défiler jusqu\'au bout pour continuer.</p>'
     +'<div id="dpa-scroll" style="max-height:50vh;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+(indep?DPA_INDEP_HTML:DPA_TEXT_HTML)+'</div>'
@@ -314,7 +314,7 @@ function renderInviteForm(el, code, inv){
 
 function renderInviteCompteForm(el, code, inv){
   var roleLbl=inviteRoleLbl(inv), indep=inviteIndep(inv);
-  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl)
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl, indep?null:inv.clubId)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">'
     +(indep?'Votre espace <b>Indépendant</b> est prêt. Créez votre compte pour gérer vos séances et vos clients.'
@@ -339,7 +339,7 @@ function renderInviteCompteForm(el, code, inv){
 // Compte déjà existant (même e-mail) : on se connecte, et l'accès de l'invitation s'ajoute à ce compte.
 function renderInviteExistant(el, code, inv, email){
   var roleLbl=inviteRoleLbl(inv), indep=inviteIndep(inv);
-  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl)
+  el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")), roleLbl, indep?null:inv.clubId)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Connectez-vous avec votre compte : '
     +(indep?'l\'espace Indépendant '+authEsc(inv.clubName||"")+' s\'ajoutera à votre compte.':'l\'accès <b>'+roleLbl.toLowerCase()+'</b> de '+authEsc(inv.clubName||"ce club")+' s\'ajoutera à votre compte.')+'</p>'
@@ -414,7 +414,7 @@ function acceptInviteExistant(code, inv){
 // L'enfant ne saisit qu'un mot de passe : aucune donnee de contact ne lui est
 // demandee, et le club n'en stocke donc aucune le concernant.
 function renderInviteJoueur(el, code, inv){
-  el.innerHTML=authHero(authEsc(inv.clubName||"Ton club"),"Espace joueur")
+  el.innerHTML=authHero(authEsc(inv.clubName||"Ton club"),"Espace joueur",inv.clubId)
     +'<div style="padding:22px 18px 26px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:13px;color:var(--txt2);text-align:center;line-height:1.45;margin-bottom:4px">Ton parent t\'a ouvert un accès. Choisis un mot de passe : c\'est lui qui te servira à te connecter.</p>'
     +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
