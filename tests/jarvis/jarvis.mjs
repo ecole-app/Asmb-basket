@@ -202,6 +202,15 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         document.querySelectorAll("#toast-stack > div").forEach((x) => x.remove());
         if (reste !== 1) throw new Error("« Celui-ci et les suivants » a laissé " + reste + " événement(s) au lieu de 1");
       });
+      // Affiche d'un match (avant-match et résultat) : l'écran s'ouvre et dessine l'image.
+      await action(page, journal, ou + " › affiche du match", () => {
+        const m = window.getEvents().find((e) => e.type === "match");
+        if (!m) return;
+        window.afficheMatch(m.id);
+        const cv = document.getElementById("afm-cv");
+        if (!cv || !cv.width) throw new Error("l'affiche du match ne s'affiche pas");
+        document.getElementById("afm-ecran").remove();
+      });
     }
     // Plusieurs clubs : avec 2 clubs, le titre de l'en-tête devient un menu « Mes clubs ».
     await action(page, journal, ou + " › mes clubs", () => {

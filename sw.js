@@ -136,6 +136,7 @@ const PRECACHE = [
   './js/14b-billetterie.js',
   './js/14c-entree.js',
   './js/14d-affiche.js',
+  './js/14u-affiche-match.js',
   './js/14e-tournoi.js',
   './js/14f-tournoi-jourj.js',
   './js/14g-benevoles.js',
