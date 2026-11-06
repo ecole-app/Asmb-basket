@@ -163,9 +163,9 @@ setTimeout(function(){
 },9000);
 
 // ═══ DETECTION NOUVELLE VERSION ═══════════════════════════════════
-var APP_VERSION="1793952207";
+var APP_VERSION="1793953187";
 // Numéro lisible (versionnage sémantique MAJEUR.MINEUR.CORRECTIF), affiché à l'écran ; APP_VERSION reste le jeton technique de mise à jour.
-var APP_SEMVER="1.11.0";
+var APP_SEMVER="1.12.0";
 (function(){ var e=document.getElementById("gm-semver"); if(e) e.textContent=APP_SEMVER; })();
 // Principe : la mise à jour se prépare et s'installe toute seule en arrière-plan, mais le
 // bandeau reste affiché jusqu'à ce que la personne l'ait vu (« Voir le contenu de la mise à
@@ -346,6 +346,7 @@ function refreshCurrentScreen(){
  try{
  if(id==="portal")buildPortal();
  else if(id==="parent-home")buildParentHome();
+ else if(id==="benevole-home")benevHome();
  else if(id==="parent-equipe")buildParentEquipe();
  else if(id==="parent-events")buildParentEvents();
  else if(id==="parent-stats")buildParentStats();

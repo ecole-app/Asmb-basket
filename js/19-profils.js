@@ -218,6 +218,11 @@ function initProfile(){
     localStorage.setItem("asmb_profile","bureau");
     profile="bureau";
   }
+  // Un compte « bénévole » pur n'a, lui aussi, qu'une seule porte d'entrée.
+  if(!profile && rolesCompte.length===1 && rolesCompte[0]==="benevole"){
+    localStorage.setItem("asmb_profile","benevole");
+    profile="benevole";
+  }
   // Le role d'un compte "parent" est deja connu (celui de l'invitation) :
   // pas besoin de lui faire choisir "Parent" a l'ecran role-select.
   if(!profile && rolesCompte.length===1 && rolesCompte[0]==="parent"){
@@ -246,6 +251,9 @@ function initProfile(){
   } else if(profile==="bureau"){
     buildBottomNav("bureau");
     navToCoach("communaute");
+  } else if(profile==="benevole"){
+    buildBottomNav("benevole");
+    benevHome();
   } else {
     buildBottomNav("parent");
     var teams=getParentTeams();
@@ -886,11 +894,11 @@ function logoutUser(){
 }
 
 function roleLabel(r){
-  return {dirigeant:"Dirigeant",coach:"Coach",bureau:"Membre du bureau",parent:"Parent",joueur:"Joueur"}[r]||r;
+  return {dirigeant:"Dirigeant",coach:"Coach",bureau:"Membre du bureau",benevole:"Bénévole",parent:"Parent",joueur:"Joueur"}[r]||r;
 }
 function openParametres(){
   var profile=localStorage.getItem("asmb_profile");
-  if(profile==="parent"||profile==="joueur"){ openParentSettings(); return; }
+  if(profile==="parent"||profile==="joueur"||profile==="benevole"){ openParentSettings(); return; }
   stack.push("parametres");
   buildParametres();
   showScr("parametres");

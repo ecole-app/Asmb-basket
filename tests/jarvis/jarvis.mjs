@@ -2,7 +2,7 @@
 // avant chaque mise en ligne. Si un écran plante, reste vide ou si un fichier ne se charge pas,
 // il échoue : la mise en ligne est bloquée (.github/workflows/pages.yml, job « jarvis ») et une capture de l'écran
 // fautif est gardée dans tests/jarvis/captures/.
-//   - 4 profils de la démo (dirigeant, coach, parent, joueur) × téléphone et ordinateur
+//   - 5 profils de la démo (dirigeant, coach, parent, joueur, bénévole) × téléphone et ordinateur
 //   - dirigeant : barre du bas, chaque module de l'Espace Admin, chaque pôle, Paramètres ;
 //     sur ordinateur, chaque rubrique du menu latéral
 //   - pages publiques : tournoi, buvette, bénévole, fil d'événement, formulaire d'inscription
@@ -144,6 +144,7 @@ async function profil(navigateur, base, nom, taille, libTaille) {
       const boutons = await page.$$eval("#bnav-main .bni", (bs) => bs.filter((b) => b.offsetParent !== null).map((b) => b.id).filter(Boolean));
       if (!boutons.length && libTaille === "téléphone") await echec(page, ou, "barre du bas vide");
       if (nom === "joueur" && boutons.join() !== "bni-j-home,bni-j-communaute,bni-j-params") await echec(page, ou, "barre du compte enfant : " + boutons.join(", ") + " (attendu : Accueil, Communauté, Paramètres)");
+      if (nom === "benevole" && boutons.join() !== "bni-b-home,bni-b-communaute,bni-b-params") await echec(page, ou, "barre du bénévole : " + boutons.join(", ") + " (attendu : Accueil, Communauté, Paramètres)");
       for (const id of boutons) await action(page, journal, ou + " › " + id, (i) => document.getElementById(i).click(), id);
     }
     if (nom !== "dirigeant") {
@@ -214,7 +215,7 @@ async function profil(navigateur, base, nom, taille, libTaille) {
     }
     // Plusieurs clubs : avec 2 clubs, le titre de l'en-tête devient un menu « Mes clubs ».
     await action(page, journal, ou + " › mes clubs", () => {
-      const ecran = { dirigeant: "portal", coach: "coach-equipe", parent: "parent-home", joueur: "joueur" }[localStorage.getItem("asmb_profile")] || "portal";
+      const ecran = { dirigeant: "portal", coach: "coach-equipe", parent: "parent-home", joueur: "joueur", benevole: "benevole-home" }[localStorage.getItem("asmb_profile")] || "portal";
       window.stack = [ecran]; window.showScr(ecran);
       window.GM_MES_CLUBS = [{ clubId: window.CURRENT_CLUB_ID, nom: "Club", roles: ["dirigeant"] }, { clubId: "autre", nom: "Autre club", roles: ["parent"], nonLus: 3 }];
       window.mcMajEntete(ecran);
@@ -310,7 +311,7 @@ const srv = await serveur();
 const base = "http://127.0.0.1:" + srv.address().port;
 const navigateur = await chromium.launch();
 try {
-  for (const nom of ["dirigeant", "coach", "parent", "joueur"]) {
+  for (const nom of ["dirigeant", "coach", "parent", "joueur", "benevole"]) {
     await profil(navigateur, base, nom, TELEPHONE, "téléphone");
     await profil(navigateur, base, nom, ORDI, "ordinateur");
   }

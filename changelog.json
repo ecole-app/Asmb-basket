@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793953187",
+  "semver": "1.12.0",
+  "titre": "Compte bénévole",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Nouveau bouton « Inviter un bénévole » (Paramètres › Accès & invitations) : le bénévole crée son compte avec le lien et renseigne ses infos. Tu choisis les canaux de la Communauté qu'il voit (modifiable ensuite depuis sa fiche de compte). Il n'a jamais accès aux licences, à la comptabilité ni aux fiches joueurs."
+   },
+   {
+    "roles": ["benevole"],
+    "texte": "Ton espace bénévole : tes missions avec « Je viens / Je ne peux pas », les matchs à domicile, la Communauté (canaux ouverts par le club) et la caisse buvette ou le scan des billets avec le code du club."
+   }
+  ]
+ }, {
   "v": "1793952207",
   "semver": "1.11.0",
   "titre": "Modifier toute une série d'entraînements",

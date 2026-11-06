@@ -14,7 +14,7 @@ var GM_DEMO=false;
 
 // Profil joué dans la démo : dirigeant (par défaut), coach ou parent (?demo=coach, ?demo=parent,
 // ou le menu du bandeau). Coach = U13 Filles (Démo) ; parent = une famille de cette équipe.
-var DEMO_PROFILS={dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur (enfant)"};
+var DEMO_PROFILS={dirigeant:"Dirigeant",coach:"Coach",parent:"Parent",joueur:"Joueur (enfant)",benevole:"Bénévole"};
 function demoProfil(){
   var p="";
   try{ p=new URLSearchParams(location.search).get("demo")||sessionStorage.getItem("gm_demo_profil")||""; }catch(e){}
@@ -101,8 +101,10 @@ function demoDemarrer(){
   // firebase-init (module) peut finir de charger après : on remet les versions vides.
   var n=0, t=setInterval(function(){ demoStubsFirestore(); if(++n>=30) clearInterval(t); },1000);
   setActiveClub("demo");
-  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Durand"],joueur:["Emma","Durand"]}[profil];
+  var qui={dirigeant:["Alex","Démo"],coach:["Sam","Coach Démo"],parent:["Camille","Durand"],joueur:["Emma","Durand"],benevole:["Léa","Martin"]}[profil];
   window.ASMB_USER={uid:"demo-"+profil,roles:[profil],prenom:qui[0],nom:qui[1],email:"",clubId:"demo",permissions:{}};
+  // Bénévole : canaux ouverts par le dirigeant, et une mission sur le prochain événement à venir.
+  if(profil==="benevole") window.ASMB_USER.canaux=["general","evenements"];
   // Joueur : compte ouvert par le parent pour son enfant, rattaché à une fiche des U13 Filles.
   // Parent et joueur : même enfant, Emma Durand (U13 Filles) ; le parent la voit par son prénom.
   if(profil==="joueur"||profil==="parent") window.ASMB_USER.linkedPlayerIds=["demo-u13-j0"];
@@ -115,6 +117,13 @@ function demoDemarrer(){
     ["gm_demo_db","asmb_match_stats","gm_pp_demo"].forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
     demoDonnees(); localStorage.setItem("gm_demo_jour",auj); window.GM_DEMO_DB=null; demoStubsFirestore(); }
   localStorage.setItem("asmb_profile",profil);
+  if(profil==="benevole"){
+    try{
+      var evB=getEvents(), auj2=new Date().toISOString().slice(0,10);
+      var cible=evB.filter(function(e){ return e&&e.date>=auj2&&e.type==="match"; }).sort(function(a,b){ return a.date<b.date?-1:1; })[0];
+      if(cible){ cible.benevoles=[{id:"mb-demo",poste:"Buvette",nom:"Léa Martin",uid:"demo-benevole"}]; saveEvents(evB); }
+    }catch(e){}
+  }
   if(profil==="coach") localStorage.setItem("asmb_coach_teams",JSON.stringify(["demo-u13"]));
   if(profil==="parent"){
     localStorage.setItem("asmb_phone","0600000000"); if(typeof myPhone!=="undefined") myPhone="0600000000";

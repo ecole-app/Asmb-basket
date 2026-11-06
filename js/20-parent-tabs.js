@@ -108,6 +108,14 @@ function buildBottomNav(profile){
     if(typeof gmDeskSync==="function") gmDeskSync();
     return;
   }
+  if(profile==="benevole"){
+    nav.innerHTML=
+      '<button class="bni on" id="bni-b-home" onclick="navToBenevole(\'home\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
+      '<button class="bni" id="bni-b-communaute" onclick="navToBenevole(\'communaute\')"><span class="bni-ic">'+NAV_ICONS.communaute+'</span>Communauté</button>'+
+      '<button class="bni" id="bni-b-params" onclick="navToBenevole(\'params\')"><span class="bni-ic">'+NAV_ICONS.params+'</span>Paramètres</button>';
+    if(typeof gmDeskSync==="function") gmDeskSync();
+    return;
+  }
   if(profile==="dirigeant"){
     nav.innerHTML=
       '<button class="bni on" id="bni-portal" onclick="navTo(\'portal\')"><span class="bni-ic">'+NAV_ICONS.home+'</span>Accueil</button>'+
@@ -284,7 +292,7 @@ function annulerAccesEnfant(playerId, code){
 
 function buildParentSettings(){
   // Compte enfant : mêmes réglages que le parent, sans « Accès de mon enfant » ni numéro de téléphone.
-  var enfant=localStorage.getItem("asmb_profile")==="joueur";
+  var enfant=["joueur","benevole"].indexOf(localStorage.getItem("asmb_profile"))>=0;
   var ae=document.getElementById("acces-enfants"), carte=ae&&ae.parentElement;
   if(carte){ carte.style.display=enfant?"none":""; if(carte.previousElementSibling) carte.previousElementSibling.style.display=enfant?"none":""; }
   var tel=document.getElementById("pp-phone"); if(tel&&tel.parentElement) tel.parentElement.style.display=enfant?"none":"";

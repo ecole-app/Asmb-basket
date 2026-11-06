@@ -181,7 +181,7 @@ function showInviteResult(code, role, clubName){
   var s=gmSheet("Invitation créée");
   var info=document.createElement("div");
   info.style.cssText="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:12px";
-  info.textContent="Envoyez ce lien "+(role==="independant"?"à l'indépendant":role==="dirigeant"?"au dirigeant":role==="coach"?"au coach":role==="parent"?"au parent":"à la personne")+(clubName?(role==="independant"?" (« "+clubName+" »)":" de "+clubName):"")
+  info.textContent="Envoyez ce lien "+(role==="independant"?"à l'indépendant":role==="dirigeant"?"au dirigeant":role==="coach"?"au coach":role==="parent"?"au parent":role==="benevole"?"au bénévole":"à la personne")+(clubName?(role==="independant"?" (« "+clubName+" »)":" de "+clubName):"")
     +". Il/elle crée son compte en l'ouvrant. Valable 7 jours, utilisable une seule fois.";
   var box=document.createElement("div");
   box.style.cssText="background:var(--card);border:1.5px dashed var(--bdr);border-radius:var(--rs);padding:12px;font-size:12px;word-break:break-all;color:var(--txt);font-family:monospace";
@@ -280,7 +280,7 @@ var DPA_INDEP_HTML=
  +'<p style="text-align:center"><a href="legal/contrat-sous-traitance-independant.html" target="_blank" style="color:var(--dkg);font-weight:700">Version complète (nouvel onglet)</a></p>';
 // Invitation du titulaire d'un espace Indépendant (posé par la Plateforme sur l'invitation).
 function inviteIndep(inv){ return !!(inv && inv.structure==="independant"); }
-function inviteRoleLbl(inv){ return inviteIndep(inv)?"Indépendant":(inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":"Coach")); }
+function inviteRoleLbl(inv){ return inviteIndep(inv)?"Indépendant":(inv.role==="dirigeant"?"Dirigeant":(inv.role==="parent"?"Parent":(inv.role==="benevole"?"Bénévole":"Coach"))); }
 
 function renderInviteDirigeantContrat(el, code, inv){
   var indep=inviteIndep(inv);
@@ -383,7 +383,7 @@ function acceptInviteExistant(code, inv){
         // Compte de connexion sans accès (par exemple retiré par le dirigeant) : on recrée la fiche d'accès.
         b.set(uref,{
           email:email, phone:(inv.tel||""), roles:[inv.role], clubId:inv.clubId, inviteCode:code,
-          permissions:(inv.grantedPermissions||{}), titre:null,
+          permissions:(inv.grantedPermissions||{}), titre:null, canaux:(inv.canauxIds||[]),
           linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
           dpaAcceptedAt:(inv.role==="dirigeant"?window.fbServerTimestamp():null),
           createdAt:window.fbServerTimestamp()
@@ -449,7 +449,7 @@ function acceptInvite(code, inv){
       // Choisi par le dirigeant à la création du lien (openBureauPermissionPicker),
       // lu depuis l'invitation elle-même : la personne qui accepte ne peut pas
       // modifier ce qu'elle reçoit.
-      permissions:(inv.grantedPermissions||{}), titre:null,
+      permissions:(inv.grantedPermissions||{}), titre:null, canaux:(inv.canauxIds||[]),
       linkedPlayerIds:(inv.playerIds||(inv.playerId?[String(inv.playerId)]:[])), linkedTeamIds:[],
       // Preuve horodatee de l'acceptation du contrat de sous-traitance RGPD,
       // lu (defilement force) juste avant cet ecran quand inv.role==="dirigeant".
@@ -1040,10 +1040,11 @@ function openClubAccessSettings(){
   // ce qui est coché (pas d'équipe à gérer). Jamais pour "parent" : un parent
   // ne peut pas recevoir ces accès, même si le dirigeant le voulait (voir
   // hasModulePermission et firestore.rules).
-  [["coach","Inviter un coach","primary"],["bureau","Inviter un membre du bureau","soft"],["dirigeant","Inviter un dirigeant","soft"]].forEach(function(def){
+  [["coach","Inviter un coach","primary"],["bureau","Inviter un membre du bureau","soft"],["benevole","Inviter un bénévole","soft"],["dirigeant","Inviter un dirigeant","soft"]].forEach(function(def){
     var role=def[0], label=def[1], kind=def[2];
     row.appendChild(gmBtn(label, kind, function(){
-      if(role==="coach"||role==="bureau"){
+      if(role==="benevole"){ benevInviter(); }
+      else if(role==="coach"||role==="bureau"){
         openBureauPermissionPicker(function(perms){
           createClubInvite(clubId, clubName, role, perms).then(function(code){ showInviteResult(code, role, clubName); })
             .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });

@@ -844,7 +844,7 @@ function renderAccesList(list,users,phoneToName){
     var teamBox=document.createElement("div");
     var roleWrap=document.createElement("div");
     roleWrap.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px";
-    ["dirigeant","coach","bureau","parent"].forEach(function(r){
+    ["dirigeant","coach","bureau","benevole","parent"].forEach(function(r){
       var chip=document.createElement("button");
       function paint(){var on=state.roles.indexOf(r)>=0;chip.style.cssText="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid "+(on?"var(--grn)":"var(--bdr)")+";background:"+(on?"var(--grn)":"transparent")+";color:"+(on?"#fff":"var(--mut)");}
       chip.textContent=roleLabel(r);paint();
@@ -865,6 +865,13 @@ function renderAccesList(list,users,phoneToName){
       roleWrap.appendChild(chip);
     });
     card.appendChild(roleWrap);
+    // Bénévole avec compte : le dirigeant choisit les canaux de la Communauté qu'il voit.
+    if((u.roles||[]).indexOf("benevole")>=0 && typeof benevCanauxModifier==="function"){
+      var canBtn=document.createElement("button"); canBtn.type="button"; canBtn.textContent="💬 Canaux de la Communauté";
+      canBtn.style.cssText="width:100%;min-height:44px;margin-bottom:10px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-weight:800;cursor:pointer";
+      canBtn.addEventListener("click",function(e){ e.stopPropagation(); benevCanauxModifier(u._uid,u.canaux||[],function(ids){ u.canaux=ids; }); });
+      card.appendChild(canBtn);
+    }
     // ── Bloc "Accès bureau" : regroupe titre + permissions + suggestion.
     // Réservé aux comptes coach et/ou "bureau" — jamais à un simple parent,
     // qui a son propre espace restreint (voir aussi hasModulePermission et

@@ -116,6 +116,7 @@ export async function seed() {
     await set("buvette_codes/BUVG", { clubId: "G", expiresAt: futur() });
     await set("club_invites/INVCOACH", { clubId: "A", role: "coach", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
     await set("club_invites/INVPARENT", { clubId: "A", role: "parent", tel: "0633333333", usedBy: null, expiresAt: futur(), createdBy: "dirA" });
+    await set("club_invites/INVBEN", { clubId: "A", role: "benevole", tel: "0644444444", canauxIds: ["general", "evenements"], usedBy: null, expiresAt: futur(), createdBy: "dirA" });
     await set("club_invites/INVOLD", { clubId: "A", role: "coach", usedBy: null, expiresAt: passe(), createdBy: "dirA" });
     await set("support_grants/SGA", { clubId: "A", expiresAt: SG_EXP });
     await set("inscription_codes/INSA", { clubId: "A" });

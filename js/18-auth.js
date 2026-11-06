@@ -437,9 +437,10 @@ function finishAuthedUser(user, u, isUpdate){
               : roles.indexOf("dirigeant")>=0 ? "dirigeant"
               : roles.indexOf("coach")>=0 ? "coach"
               : roles.indexOf("parent")>=0 ? "parent"
+              : roles.indexOf("benevole")>=0 ? "benevole"
               : "parent";
   var previousProfile=localStorage.getItem("asmb_profile");
-  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", prenom:u.prenom||"", nom:u.nom||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], badge:u.badge||"", plusGestes:u.plusGestes||null, pseudo:String(u.pseudo||"").substring(0,20) };
+  window.ASMB_USER = { uid:user.uid, email:u.email||user.email||"", prenom:u.prenom||"", nom:u.nom||"", phone:u.phone||"", roles:roles, clubId:u.clubId, linkedPlayerIds:u.linkedPlayerIds||[], linkedTeamIds:u.linkedTeamIds||[], canaux:u.canaux||[], badge:u.badge||"", plusGestes:u.plusGestes||null, pseudo:String(u.pseudo||"").substring(0,20) };
   if(typeof gmLangueCompte==="function") gmLangueCompte(u);
   // Mode support : le super admin consulte un club qui lui a donné un code d'accès
   var activeClub=u.clubId;

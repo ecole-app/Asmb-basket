@@ -542,6 +542,11 @@ function channelVisibleToMe(ch){
     if(tid) return (profile==="joueur"?joueurMesEquipes():familleMesEquipes()).indexOf(tid)>=0;
     return ch.id==="general"||!!ch.clubWide;
   }
+  // Bénévole : seulement les canaux que le dirigeant lui a ouverts (et ses fils d'événement).
+  if(profile==="benevole"){
+    if(ch.evt) return true;
+    return ((window.ASMB_USER&&window.ASMB_USER.canaux)||[]).indexOf(ch.id)>=0;
+  }
   if(profile!=="coach") return true;
   if(ch.clubWide||ch.evt) return true;
   // Canal d'équipe : lié par teamId, ou créé avec l'identifiant de l'équipe (ensureTeamChannel).
@@ -731,9 +736,9 @@ function chatNomCompte(u,noms){
 }
 function chatRoleCompte(u){
   var r=u.roles||[];
-  return r.indexOf("dirigeant")>=0?"Dirigeants":r.indexOf("coach")>=0?"Coachs":r.indexOf("bureau")>=0?"Bureau":r.indexOf("joueur")>=0?"Joueurs":"Familles";
+  return r.indexOf("dirigeant")>=0?"Dirigeants":r.indexOf("coach")>=0?"Coachs":r.indexOf("bureau")>=0?"Bureau":r.indexOf("benevole")>=0?"Bénévoles":r.indexOf("joueur")>=0?"Joueurs":"Familles";
 }
-var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Familles","Joueurs"];
+var CHAT_ORDRE_ROLES=["Dirigeants","Bureau","Coachs","Bénévoles","Familles","Joueurs"];
 function chatMembresCanal(chArg){
   if(!chArg && (currentConvKind!=="channel"||!currentChannelData)) return;
   var ch=chArg||currentChannelData, restreint=(ch.members||[]).length>0||!!ch.evt;

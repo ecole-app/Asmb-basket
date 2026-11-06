@@ -444,6 +444,23 @@ describe("Invitations", () => {
     const db = await as("parentA");
     await assertFails(updateDoc(doc(db, "users/parentA"), { roles: ["parent", "coach"], permissions: {}, linkedPlayerIds: [], inviteCode: "INVCOACH" }));
   });
+  it("bénévole : le compte reçoit les canaux de l'invitation, pas d'autres", async () => {
+    const db = await as("benev1");
+    const ok = writeBatch(db);
+    ok.set(doc(db, "users/benev1"), { clubId: "A", roles: ["benevole"], inviteCode: "INVBEN", phone: "0644444444", canaux: ["general", "evenements"] });
+    ok.update(doc(db, "club_invites/INVBEN"), { usedBy: "benev1", usedAt: Timestamp.now() });
+    await assertSucceeds(ok.commit());
+    const db2 = await as("benev2");
+    const b = writeBatch(db2);
+    b.set(doc(db2, "users/benev2"), { clubId: "A", roles: ["benevole"], inviteCode: "INVBEN", phone: "0644444444", canaux: ["general", "dirigeants"] });
+    b.update(doc(db2, "club_invites/INVBEN"), { usedBy: "benev2", usedAt: Timestamp.now() });
+    await assertFails(b.commit());
+  });
+  it("le dirigeant peut inviter un bénévole, un parent non", async () => {
+    const inv = { clubId: "A", role: "benevole", usedBy: null, expiresAt: futur(), canauxIds: ["general"] };
+    await assertSucceeds(setDoc(doc(await as("dirA"), "club_invites/BEN2"), { ...inv, createdBy: "dirA" }));
+    await assertFails(setDoc(doc(await as("parentA"), "club_invites/BEN3"), { ...inv, createdBy: "parentA" }));
+  });
   it("un parent ne peut pas créer une invitation de coach", async () => {
     const db = await as("parentA");
     await assertFails(setDoc(doc(db, "club_invites/PIRATE"), { clubId: "A", role: "coach", usedBy: null, expiresAt: futur(), createdBy: "parentA" }));

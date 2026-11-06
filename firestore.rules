@@ -217,6 +217,8 @@ service cloud.firestore {
         // sur l'invitation elle-même (grantedPermissions), jamais autre chose.
         && request.resource.data.get('permissions', {}) == get(invitePath(request.resource.data.inviteCode)).data.get('grantedPermissions', {})
         && request.resource.data.get('titre', null) == null
+        // Canaux de la Communauté ouverts à un bénévole : ceux que le dirigeant a posés sur l'invitation, jamais d'autres.
+        && request.resource.data.get('canaux', []) == get(invitePath(request.resource.data.inviteCode)).data.get('canauxIds', [])
         // Le numero rattache le compte aux enfants (rattachements/{tel}) : c'est
         // celui pose par le club sur l'invitation, jamais un numero choisi.
         && request.resource.data.get('phone', '') == get(invitePath(request.resource.data.inviteCode)).data.get('tel', '');
@@ -248,7 +250,7 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone','copie','copieDe']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone','copie','copieDe','canaux']))
         // Un dirigeant ne quitte SON rôle que si un autre dirigeant du club est déjà en place (remplacePar).
         // Copie d'un compte (users/{uid}__{clubId}, personne qui a plusieurs clubs) : le dirigeant de ce
         // club y change les accès comme sur une fiche normale, jamais les marques de copie.
@@ -383,7 +385,7 @@ service cloud.firestore {
       allow create: if request.resource.data.usedBy == null
         && (superAdmin()
             || (dirigeant(request.resource.data.clubId)
-                && request.resource.data.role in ['coach','dirigeant','parent','bureau'])
+                && request.resource.data.role in ['coach','dirigeant','parent','bureau','benevole'])
             // Un parent ouvre l'acces de SON enfant. C'est le club qui dit lesquels
             // sont les siens, via le rattachement : le compte ne peut pas se
             // l'attribuer lui-meme, et ne peut donc pas viser l'enfant d'un autre.
