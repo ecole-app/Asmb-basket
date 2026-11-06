@@ -68,7 +68,8 @@
     "fil/index.html",
     "js/03d-premiers-pas.js",
     "js/25-demo.js",
-    "js/12b-planning-alertes.js"
+    "js/12b-planning-alertes.js",
+    "js/18d-securite.js"
   ],
   "exclus": [
     "Imprimé le",
@@ -405,6 +406,8 @@
     "Votre enfant",
     "s'est inscrit comme bénévole : «",
     "· Équipe :",
-    "📣 Appel à bénévoles :"
+    "📣 Appel à bénévoles :",
+    "XXXX-XXXX",
+    "mfa codes"
   ]
 }

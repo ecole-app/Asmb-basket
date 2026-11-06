@@ -1725,3 +1725,94 @@ exports.onRefusParentBenevole = onDocumentWritten("clubs/{clubId}/checkins/{id}"
     }));
   }
 });
+
+// ── Double authentification (js/18d-securite.js) ─────────────────────────────────────────────
+// action "codes"    (connecté, double auth active) : 8 codes de secours, seules leurs empreintes sont gardées
+//                    dans mfa_secours/{uid} (collection fermée aux clients).
+// action "oublier"  (connecté) : efface les codes après une désactivation.
+// action "secours"  (sans connexion) : e-mail + mot de passe + un code de secours → retire la double authentification.
+//                    Mot de passe vérifié auprès de Firebase Auth ; 5 essais par heure et par compte.
+// action "debloquer" (super admin) : retire la double authentification d'un compte par son e-mail.
+const SECU_ALPHA = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+const SECU_CLE_WEB = "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ"; // clé web publique (js/firebase-init.js)
+function secuEmpreinte(uid, code) {
+  return require("crypto").createHash("sha256").update(uid + ":" + String(code).toUpperCase().replace(/[^A-Z0-9]/g, "")).digest("hex");
+}
+function secuCode() {
+  const b = require("crypto").randomBytes(8);
+  let s = "";
+  for (let i = 0; i < 8; i++) s += SECU_ALPHA[b[i] % SECU_ALPHA.length];
+  return s.slice(0, 4) + "-" + s.slice(4);
+}
+async function secuRetirer(uid) {
+  const u = await admin.auth().getUser(uid);
+  const avait = !!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length);
+  if (avait) await admin.auth().updateUser(uid, { multiFactor: { enrolledFactors: null } });
+  await db.collection("mfa_secours").doc(uid).delete().catch(() => {});
+  return avait;
+}
+exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://www.generalmanagerapp.fr"], memory: "256MiB" }, async (req, res) => {
+  if (req.method !== "POST") { res.status(405).json({ erreur: "methode" }); return; }
+  const corps = req.body || {};
+  const action = String(corps.action || "");
+  try {
+    if (action === "secours") {
+      const email = String(corps.email || "").trim().toLowerCase().slice(0, 200);
+      const code = String(corps.code || "");
+      if (!email || !corps.password || code.length < 8) { res.status(400).json({ erreur: "code" }); return; }
+      let user;
+      try { user = await admin.auth().getUserByEmail(email); } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
+      const ref = db.collection("mfa_secours").doc(user.uid);
+      const maintenant = Date.now();
+      const snap = await ref.get();
+      const d = snap.exists ? snap.data() : {};
+      const essais = (d.essais || []).filter((t) => t > maintenant - 3600000);
+      if (essais.length >= 5) { res.status(429).json({ erreur: "trop" }); return; }
+      await ref.set({ essais: essais.concat([maintenant]) }, { merge: true });
+      // Le mot de passe doit être le bon : Firebase répond « double authentification requise » (mfaPendingCredential).
+      const r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + SECU_CLE_WEB, {
+        method: "POST", headers: { "Content-Type": "application/json", Referer: "https://generalmanagerapp.fr/" },
+        body: JSON.stringify({ email, password: String(corps.password), returnSecureToken: true })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !(j.mfaPendingCredential || j.idToken)) { res.status(401).json({ erreur: "connexion" }); return; }
+      const h = secuEmpreinte(user.uid, code);
+      const codes = d.codes || [];
+      if (!codes.includes(h)) { res.status(401).json({ erreur: "code" }); return; }
+      await secuRetirer(user.uid);
+      res.json({ ok: true });
+      return;
+    }
+    let uid;
+    try {
+      const jeton = String(req.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+      uid = (await admin.auth().verifyIdToken(jeton)).uid;
+    } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
+    if (action === "codes") {
+      const u = await admin.auth().getUser(uid);
+      if (!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length)) { res.status(400).json({ erreur: "inactive" }); return; }
+      const codes = Array.from({ length: 8 }, secuCode);
+      await db.collection("mfa_secours").doc(uid).set({ codes: codes.map((c) => secuEmpreinte(uid, c)), cree: admin.firestore.FieldValue.serverTimestamp(), essais: [] });
+      res.json({ ok: true, codes });
+      return;
+    }
+    if (action === "oublier") {
+      const u = await admin.auth().getUser(uid);
+      if (!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length)) await db.collection("mfa_secours").doc(uid).delete().catch(() => {});
+      res.json({ ok: true });
+      return;
+    }
+    if (action === "debloquer") {
+      if (uid !== SUPER_ADMIN_UID) { res.status(403).json({ erreur: "interdit" }); return; }
+      let cible;
+      try { cible = await admin.auth().getUserByEmail(String(corps.email || "").trim().toLowerCase()); } catch (e) { res.status(404).json({ erreur: "compte" }); return; }
+      const avait = await secuRetirer(cible.uid);
+      res.json({ ok: true, avait });
+      return;
+    }
+    res.status(400).json({ erreur: "action" });
+  } catch (e) {
+    console.error("securite", e);
+    res.status(500).json({ erreur: "serveur" });
+  }
+});

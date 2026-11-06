@@ -101,6 +101,7 @@ vérifiez que ses dépendances sont dans un fichier au numéro inférieur.
 | `17c-convention.js` | Convention de partenariat (sponsoring) ou de mécénat en PDF depuis la fiche sponsor, formules par défaut (Or/Argent/Bronze, `sponsor_formules`). Hors périmètre i18n : PDF en français |
 | `18-auth.js` | Authentification, comptes, changement d'e-mail |
 | `18c-mes-clubs.js` | Plusieurs clubs pour un même compte : liste « Mes clubs » (`users/{uid}/clubs`, lecture seule), menu ▾ sur le titre de l'en-tête quand il y a 2 clubs ou plus (`mcMajEntete(id)` appelé par `showScr`), changement de club et rejoindre un autre club avec un compte existant via la fonction serveur `clubCompte`. Un seul club actif (`users/{uid}.clubId`) ; les autres clubs gardent une copie de la fiche (`users/{uid}__{clubId}`, serveur seul) pour continuer à voir la personne dans leurs listes : `gmUidDoc(d)` donne le vrai uid d'une fiche de liste. |
+| `18d-securite.js` | Double authentification par application d'authentification (TOTP) : activation par la personne (Paramètres, QR ou clé, code à 6 chiffres, e-mail vérifié exigé par Firebase), code demandé à la connexion (`gmMfaResoudre`, appelé par `fbSignIn`/`fbReauth` de `firebase-init.js`), codes de secours et déblocage par le super admin via la fonction serveur `securite`. Jamais de SMS. |
 | `19-profils.js` | Profils parent/coach/joueur, thèmes animés |
 | `20-parent-tabs.js` | Onglets événements et statistiques côté parent |
 | `20b-plateforme.js` | Espace plateforme (super admin), invitations staff, accès support |

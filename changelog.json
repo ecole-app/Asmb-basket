@@ -1,5 +1,28 @@
 [
  {
+  "v": "1793980514",
+  "semver": "1.15.0",
+  "titre": "Double authentification",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "benevole"
+    ],
+    "texte": "Nouveau dans Paramètres : « 🔐 Double authentification ». Avec une application d'authentification (Google Authenticator…), un code à 6 chiffres est demandé à chaque connexion. Des codes de secours servent si tu perds ton téléphone."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Recommandée pour les dirigeants : ton compte ouvre toutes les données du club."
+   }
+  ]
+ },
+ {
   "v": "1793964597",
   "semver": "1.14.1",
   "titre": "Appel à bénévoles : refus du parent",

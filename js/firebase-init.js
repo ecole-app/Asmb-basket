@@ -5,7 +5,7 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as acGetToken
 import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported, onMessage as fbMsgOnMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence, multiFactor, TotpMultiFactorGenerator, getMultiFactorResolver, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
@@ -64,13 +64,29 @@ const auth = getAuth(fbApp);
 setPersistence(auth, browserLocalPersistence).catch(function(e){console.log("Persistance auth:",e&&e.code);});
 window.fbAuth = auth;
 window.fbCreateUser = createUserWithEmailAndPassword;
-window.fbSignIn = signInWithEmailAndPassword;
+// Double authentification (application d'authentification, js/18d-securite.js) : si le compte l'a activée,
+// la connexion s'arrête sur « auth/multi-factor-auth-required » ; gmMfaResoudre demande le code et termine la connexion.
+// Même chose pour une reconnexion (changer d'e-mail, désactiver la double authentification).
+function fbMfaSuite(err, fini){
+  if(err && err.code === "auth/multi-factor-auth-required" && typeof window.gmMfaResoudre === "function"){
+    return window.gmMfaResoudre(getMultiFactorResolver(auth, err), fini);
+  }
+  throw err;
+}
+window.fbSignIn = function(a, email, pass){
+  return signInWithEmailAndPassword(a, email, pass).catch(function(err){ return fbMfaSuite(err, { email: email, pass: pass }); });
+};
 window.fbSendReset = sendPasswordResetEmail;
 window.fbOnAuthState = onAuthStateChanged;
 window.fbSignOut = signOut;
 window.fbUpdatePassword = updatePassword;
 window.fbUpdateEmail = updateEmail;
-window.fbReauth = reauthenticateWithCredential;
+window.fbReauth = function(user, cred){
+  return reauthenticateWithCredential(user, cred).catch(function(err){ return fbMfaSuite(err, { reauth: true }); });
+};
+window.fbMultiFactor = multiFactor;
+window.fbTotp = TotpMultiFactorGenerator;
+window.fbSendVerification = sendEmailVerification;
 window.fbEmailAuthProvider = EmailAuthProvider;
 window.fbAuthReady = true;
 

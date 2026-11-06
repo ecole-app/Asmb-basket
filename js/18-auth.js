@@ -143,6 +143,7 @@ function authDoLogin(){
   if(!pass){ authErr("Mot de passe requis"); return; }
   window.fbSignIn(window.fbAuth, email, pass).catch(function(e){
     var c=e&&e.code||"";
+    if(c==="auth/mfa-annule") return; // code de double authentification abandonné (js/18d-securite.js)
     if(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found") authErr("E-mail ou mot de passe incorrect");
     else if(c==="auth/too-many-requests") authErr("Trop de tentatives. Réessayer plus tard.");
     else authErr("Erreur : "+(c||e.message||"inconnue"));

@@ -787,6 +787,7 @@ function showPlateformeHome(opts){
   // Sauvegarde : lance tout de suite une sauvegarde de toute la base. Bugs : liste des erreurs remontées.
   var bSauv=gmBtn("Sauvegarde","ghost",function(){ pfSauvegarderMaintenant(bSauv); }); act.appendChild(bSauv);
   var bChif=gmBtn("Chiffres","ghost",function(){ pfRecalculerChiffres(bChif,list); }); act.appendChild(bChif);
+  act.appendChild(gmBtn("Débloquer un compte","ghost",function(){ mfaDebloquer(); }));
   var bBugs=gmBtn("Bugs","ghost",function(){ var sh=gmSheet("Bugs chez les utilisateurs"), bx=document.createElement("div"); bx.id="pf-bugs"; sh.body.appendChild(bx); pfBugsBox(bx); }); act.appendChild(bBugs);
   pfChipsEtat(bSauv,bBugs);
   el.appendChild(act);
