@@ -136,6 +136,17 @@ function benevHomeBuild(){
         +'<button type="button" onclick="benevRepondre(\''+authEsc(x.e.id)+'\',\''+authEsc(x.m.id)+'\',\'absent\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="absent"?"#C0392B":"var(--bdr)")+';background:'+(rep==="absent"?"rgba(192,57,43,.12)":"var(--bg)")+';color:'+(rep==="absent"?"#C0392B":"var(--txt)")+'">✗ Je ne peux pas</button></div></div>';
     });
   }
+  var ap=benevAppelsOuverts();
+  if(ap.length){
+    h+='<div class="sec" style="padding:14px 16px 6px">📣 Appels à bénévoles</div>';
+    ap.slice(0,6).forEach(function(e){
+      var reste=benevAppelPlaces(e).reduce(function(a,x){ return a+x.reste; },0);
+      h+='<div style="margin:0 16px 10px;padding:14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--bdr)">'
+        +'<div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(e.titre||eventTypeLabel(e.type))+'</div>'
+        +'<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(benJourTxt(e)+(e.heure?" à "+e.heure:"")+(e.equipe?" · "+e.equipe:""))+'</div>'
+        +'<button type="button" onclick="benevAppelOuvrir(\''+authEsc(e.id)+'\')" style="margin-top:10px;width:100%;min-height:44px;border-radius:var(--rx);border:none;background:var(--dkg);color:#fff;font:inherit;font-weight:800;cursor:pointer">'+(reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir")+'</button></div>';
+    });
+  }
   var dom=benevMatchsDomicile();
   h+='<div class="sec" style="padding:14px 16px 6px">Matchs à domicile</div>';
   if(!dom.length) h+='<div style="margin:0 16px;padding:16px;border-radius:var(--rs);background:var(--card);border:1px solid var(--bdr);font-size:13px;color:var(--mut)">Aucun match à domicile à venir.</div>';
@@ -241,4 +252,169 @@ function benevBilan(){
   });
   var msg="Merci à nos "+l.length+" bénévoles"+(saison?" de la saison "+saison:"")+" : "+tot+" missions assurées (buvette, table de marque, arbitrage…). Sans vous, rien ne serait possible !";
   s.body.appendChild(gmBtn("📣 Copier le message de remerciement","primary",function(){ copyToClipboard(msg); }));
+}
+
+
+// ── Appel à bénévoles (auto-inscription contrôlée par le dirigeant) ───────────────────────────
+// Le dirigeant ouvre un appel sur un événement (`event.appel={postes:{poste:n}, ouvert, publieLe}`) et le publie dans un canal
+// (message `type:"appel"`, carte avec bouton). Un membre (bénévole, parent, enfant) s'inscrit en direct : il crée
+// `ben_inscriptions/{eventId}_{uid}_{poste}` (règles : seulement le sien) et la Cloud Function `onInscriptionBenevole`
+// ajoute la mission dans `event.benevoles` (`auto:true`), ou répond « complet ». Se retirer = supprimer son document.
+// Le dirigeant retire quelqu'un dans « Bénévoles » comme pour n'importe quelle mission. Enfant (compte joueur) : sa mission
+// porte `pid` ; ses parents sont prévenus (push serveur) et voient un pop-up à l'ouverture (`benevAppelParents`).
+function benevAppelPlaces(e){
+  var postes=(e&&e.appel&&e.appel.postes)||{}, l=(e&&Array.isArray(e.benevoles))?e.benevoles:[];
+  return Object.keys(postes).map(function(p){
+    var n=Math.max(0,Number(postes[p])||0);
+    var pris=l.filter(function(m){ return m.poste===p&&(m.nom||m.uid); }).length;
+    return {poste:p,n:n,pris:pris,reste:Math.max(0,n-pris)};
+  }).filter(function(x){ return x.n>0; });
+}
+function benevAppelsOuverts(){
+  var auj=benJourLocal();
+  return (getEvents()||[]).filter(function(e){
+    return e&&e.appel&&e.appel.ouvert!==false&&!e.cancelled&&e.statut!=="attente"&&e.date&&String(e.date).slice(0,10)>=auj&&benevAppelPlaces(e).length;
+  }).sort(function(a,b){ return (a.date+(a.heure||""))<(b.date+(b.heure||""))?-1:1; });
+}
+function benevAppelEvenements(){
+  var auj=benJourLocal();
+  return (getEvents()||[]).filter(function(e){ return e&&!e.cancelled&&e.statut!=="attente"&&e.date&&String(e.date).slice(0,10)>=auj; })
+    .sort(function(a,b){ return (a.date+(a.heure||""))<(b.date+(b.heure||""))?-1:1; });
+}
+function benevEvLibelle(e){ return benJourTxt(e).replace(/^./,function(c){ return c.toUpperCase(); })+" · "+(e.equipe?e.equipe+" · ":"")+(e.titre||eventTypeLabel(e.type)); }
+
+// Côté dirigeant : choisir l'événement (liste ou recherche), les postes et le nombre de places, puis publier.
+function benevAppel(eid){
+  var s=gmSheet("📣 Appel à bénévoles");
+  var intro=document.createElement("div"); intro.style.cssText="font-size:12px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
+  intro.textContent="Les membres s'inscrivent en direct, premier arrivé premier servi. Vous pouvez retirer quelqu'un à tout moment dans « Bénévoles ». Les enfants peuvent s'inscrire : leurs parents sont prévenus.";
+  s.body.appendChild(intro);
+  var evs=benevAppelEvenements(), choisi=eid||"";
+  var lq=document.createElement("div"); lq.className="form-label"; lq.textContent="Événement ou match"; s.body.appendChild(lq);
+  var q=document.createElement("input"); q.className="form-input"; q.placeholder="Rechercher (équipe, adversaire, date…)"; q.style.marginBottom="6px"; s.body.appendChild(q);
+  var sel=document.createElement("select"); sel.className="form-input"; sel.style.marginBottom="12px"; s.body.appendChild(sel);
+  function remplir(){
+    var t=String(q.value||"").toLowerCase().trim(); sel.innerHTML="";
+    var o0=document.createElement("option"); o0.value=""; o0.textContent="— Choisir dans la liste —"; sel.appendChild(o0);
+    evs.forEach(function(e){ var lib=benevEvLibelle(e); if(t&&(lib+" "+e.date).toLowerCase().indexOf(t)<0&&e.id!==choisi) return;
+      var o=document.createElement("option"); o.value=e.id; o.textContent=lib; if(e.id===choisi) o.selected=true; sel.appendChild(o); });
+  }
+  q.addEventListener("input",function(){ remplir(); var n=sel.options.length; if(n===2&&q.value.trim()){ sel.selectedIndex=1; choisi=sel.value; chargerPostes(); } });
+  sel.addEventListener("change",function(){ choisi=sel.value; chargerPostes(); });
+  remplir();
+  var lp=document.createElement("div"); lp.className="form-label"; lp.textContent="Postes et nombre de places"; s.body.appendChild(lp);
+  var grille=document.createElement("div"); grille.style.cssText="display:grid;gap:6px;margin-bottom:12px"; s.body.appendChild(grille);
+  var champs={};
+  BEN_POSTES.forEach(function(p){
+    var r=document.createElement("label"); r.style.cssText="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:700;color:var(--txt)";
+    var t=document.createElement("span"); t.style.flex="1"; t.textContent=p;
+    var i=document.createElement("input"); i.type="number"; i.min="0"; i.max="20"; i.value="0"; i.className="form-input"; i.style.cssText="width:70px;text-align:center;margin:0";
+    r.appendChild(t); r.appendChild(i); grille.appendChild(r); champs[p]=i;
+  });
+  function chargerPostes(){
+    var e=evs.find(function(x){ return x.id===choisi; }), po=(e&&e.appel&&e.appel.postes)||{};
+    BEN_POSTES.forEach(function(p){ champs[p].value=String(po[p]||0); });
+  }
+  chargerPostes();
+  var lc=document.createElement("div"); lc.className="form-label"; lc.textContent="Publier dans le canal"; s.body.appendChild(lc);
+  var canal=document.createElement("select"); canal.className="form-input"; canal.style.marginBottom="14px"; s.body.appendChild(canal);
+  benevCanauxDispo().then(function(l){ l.forEach(function(c){ var o=document.createElement("option"); o.value=c.id; o.textContent=(c.icon?c.icon+" ":"")+c.name; if(c.id==="general") o.selected=true; canal.appendChild(o); }); }).catch(function(){});
+  s.body.appendChild(gmBtn("Publier l'appel","primary",function(){
+    if(!choisi){ askAlert("Choisissez d'abord l'événement."); return; }
+    var postes={}; BEN_POSTES.forEach(function(p){ var n=Math.max(0,Math.min(20,parseInt(champs[p].value,10)||0)); if(n) postes[p]=n; });
+    if(!Object.keys(postes).length){ askAlert("Mettez au moins une place sur un poste."); return; }
+    var all=getEvents(), i=all.findIndex(function(x){ return x.id===choisi; }); if(i<0) return;
+    var e=all[i]; all[i].appel={postes:postes,ouvert:true,publieLe:Date.now()}; saveEvents(all);
+    var resume=Object.keys(postes).map(function(p){ return postes[p]+" × "+p; }).join(", ");
+    var cid=canal.value||"general";
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels",cid,"messages"),Object.assign({
+      type:"appel",eventId:e.id,eventTitre:(e.equipe?e.equipe+" · ":"")+(e.titre||eventTypeLabel(e.type)),eventDate:e.date,eventHeure:e.heure||"",eventLieu:e.lieu||"",resume:resume,
+      pseudo:myChatPseudo(),ts:window.fbServerTimestamp()
+    },mySenderMeta())).then(function(){ s.modal.remove(); showToast("Appel publié"); }).catch(function(er){ askAlert("Appel enregistré, mais pas publié : "+((er&&er.code)||er)); });
+  }));
+  var ex=evs.find(function(x){ return x.id===choisi&&x.appel; });
+  if(ex||!eid) s.body.appendChild(gmBtn("Fermer l'appel de cet événement","ghost",function(){
+    if(!choisi) return;
+    var all=getEvents(), i=all.findIndex(function(x){ return x.id===choisi; }); if(i<0||!all[i].appel){ showToast("Pas d'appel ouvert ici"); return; }
+    delete all[i].appel; saveEvents(all); s.modal.remove(); showToast("Appel fermé");
+  }));
+}
+
+// Côté membre : places restantes, « Je m'inscris », « Me retirer ».
+function benevAppelMoi(e,poste){
+  var uid=(window.ASMB_USER&&window.ASMB_USER.uid)||"";
+  return benListe(e).filter(function(m){ return m.uid===uid&&m.poste===poste; })[0]||null;
+}
+function benevAppelNom(){
+  var u=window.ASMB_USER||{}, enfant=(u.roles||[]).indexOf("joueur")>=0&&(u.roles||[]).indexOf("parent")<0;
+  var n=String(u.nom||""); return (String(u.prenom||"")+" "+(enfant?n.charAt(0):n)).trim().slice(0,40)||"Membre";
+}
+function benevAppelOuvrir(eid){
+  var e=getEvents().find(function(x){ return x.id===eid; });
+  if(!e||!e.appel||e.appel.ouvert===false){ askAlert("Cet appel est terminé."); return; }
+  var s=gmSheet("📣 "+(e.titre||eventTypeLabel(e.type)));
+  var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--txt2);margin-bottom:12px;line-height:1.45";
+  info.textContent=benevEvLibelle(e).split(" · ")[0]+(e.heure?" à "+e.heure:"")+(e.lieu?" · "+e.lieu:"")+(e.equipe?" · Équipe : "+e.equipe:"");
+  s.body.appendChild(info);
+  var liste=document.createElement("div"); s.body.appendChild(liste);
+  function rendre(){
+    var ev=getEvents().find(function(x){ return x.id===eid; })||e; liste.innerHTML="";
+    var pl=benevAppelPlaces(ev);
+    if(!pl.length){ liste.textContent="Plus de place à pourvoir."; return; }
+    pl.forEach(function(x){
+      var moi=benevAppelMoi(ev,x.poste);
+      var d=document.createElement("div"); d.style.cssText="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;margin-bottom:8px";
+      var t=document.createElement("div"); t.style.cssText="flex:1;min-width:0";
+      t.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(x.poste)+'</div><div style="font-size:12px;color:var(--mut)">'+(moi?"Vous êtes inscrit·e":x.reste?x.reste+" place"+(x.reste>1?"s":"")+" sur "+x.n:"Complet")+'</div>';
+      d.appendChild(t);
+      if(moi) d.appendChild(gmBtn("Me retirer","ghost",function(){ benevAppelRetirer(eid,x.poste,rendre); }));
+      else if(x.reste) d.appendChild(gmBtn("Je m'inscris","primary",function(){ benevAppelInscrire(eid,x.poste,rendre); }));
+      liste.appendChild(d);
+    });
+  }
+  rendre();
+}
+function benevAppelId(eid,uid,poste){ return eid+"_"+uid+"_"+String(poste).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,30); }
+function benevAppelInscrire(eid,poste,fait){
+  var u=window.ASMB_USER||{}, uid=u.uid; if(!uid||!window.fbDb) return;
+  var ref=window.fbDoc(window.fbDb,"ben_inscriptions",benevAppelId(eid,uid,poste));
+  window.fbDeleteDoc(ref).catch(function(){}).then(function(){
+    return window.fbSetDoc(ref,{eventId:eid,poste:poste,uid:uid,nom:benevAppelNom(),ts:window.fbServerTimestamp()});
+  }).then(function(){
+    showToast("Inscription envoyée…");
+    setTimeout(function(){
+      window.fbGetDoc(ref).then(function(d){
+        var st=d.exists()?(d.data()||{}).statut:"";
+        if(st==="complet"){ window.fbDeleteDoc(ref).catch(function(){}); showToast("Désolé, la dernière place vient d'être prise"); }
+        else showToast("C'est noté, merci !");
+        if(fait) fait();
+        if(typeof benevHomeBuild==="function"&&document.getElementById("benevole-home-body")) benevHomeBuild();
+      }).catch(function(){ if(fait) fait(); });
+    },2200);
+  }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+function benevAppelRetirer(eid,poste,fait){
+  var uid=(window.ASMB_USER&&window.ASMB_USER.uid)||""; if(!uid) return;
+  window.fbDeleteDoc(window.fbDoc(window.fbDb,"ben_inscriptions",benevAppelId(eid,uid,poste))).then(function(){
+    showToast("Vous êtes retiré·e"); setTimeout(function(){ if(fait) fait(); if(document.getElementById("benevole-home-body")) benevHomeBuild(); },1800);
+  }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+}
+
+// Parents : un enfant s'est inscrit comme bénévole (mission avec `pid`, `auto`). Pop-up une seule fois par mission.
+function benevAppelParents(){
+  var u=window.ASMB_USER||{}; if((u.roles||[]).indexOf("parent")<0) return;
+  var mes=u.linkedPlayerIds||[]; if(!mes.length) return;
+  var auj=benJourLocal(), vus; try{ vus=JSON.parse(localStorage.getItem("gm_appel_vus")||"[]"); }catch(x){ vus=[]; }
+  var trouve=null;
+  (getEvents()||[]).forEach(function(e){
+    if(trouve||!e||e.cancelled||!e.date) return;
+    benListe(e).forEach(function(m){ if(trouve||!m.auto||!m.pid||mes.indexOf(m.pid)<0||vus.indexOf(e.id+"|"+m.id)>=0) return; if(String(m.jour||e.date).slice(0,10)<auj) return; trouve={e:e,m:m}; });
+  });
+  if(!trouve) return;
+  var cle=trouve.e.id+"|"+trouve.m.id;
+  var s=gmSheet("Votre enfant s'est inscrit");
+  var t=document.createElement("div"); t.style.cssText="font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:14px";
+  t.textContent=(trouve.m.nom||"Votre enfant")+" s'est inscrit comme bénévole : « "+trouve.m.poste+" » — "+(trouve.e.titre||eventTypeLabel(trouve.e.type))+", "+benJourTxt(trouve.e)+(trouve.e.heure?" à "+trouve.e.heure:"")+". Le club peut le retirer si besoin.";
+  s.body.appendChild(t);
+  s.body.appendChild(gmBtn("OK, j'ai vu","primary",function(){ vus.push(cle); try{ localStorage.setItem("gm_appel_vus",JSON.stringify(vus.slice(-80))); }catch(x){} s.modal.remove(); setTimeout(benevAppelParents,300); }));
 }

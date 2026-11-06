@@ -731,6 +731,17 @@ service cloud.firestore {
       // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.
       match /licences/{id}     { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
       match /checkins/{id}     { allow read: if readMember(clubId); allow write: if member(clubId); }
+      // Appel à bénévoles : chacun crée et retire seulement SON inscription ; la Cloud Function onInscriptionBenevole
+      // place la personne dans events/{id}.benevoles (ou répond « complet »). Pas de modification côté client.
+      match /ben_inscriptions/{id} {
+        allow read: if member(clubId) && (resource.data.uid == request.auth.uid || staff(clubId));
+        allow create: if member(clubId) && request.resource.data.uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['eventId','poste','uid','nom','ts'])
+          && request.resource.data.ts == request.time
+          && request.resource.data.eventId is string && request.resource.data.poste is string
+          && request.resource.data.nom is string && request.resource.data.nom.size() <= 60;
+        allow delete: if member(clubId) && (resource.data.uid == request.auth.uid || staff(clubId));
+      }
       match /joinRequests/{id} { allow read: if readMember(clubId); allow write: if member(clubId); }
 
       // ── Communauté ──

@@ -121,7 +121,7 @@ function demoDemarrer(){
     try{
       var evB=getEvents(), auj2=new Date().toISOString().slice(0,10);
       var cible=evB.filter(function(e){ return e&&e.date>=auj2&&e.type==="match"; }).sort(function(a,b){ return a.date<b.date?-1:1; })[0];
-      if(cible){ cible.benevoles=[{id:"mb-demo",poste:"Buvette",nom:"Léa Martin",uid:"demo-benevole"}]; saveEvents(evB); }
+      if(cible){ cible.benevoles=[{id:"mb-demo",poste:"Buvette",nom:"Léa Martin",uid:"demo-benevole"}]; cible.appel={postes:{"Marqueur":2,"Arbitrage":1},ouvert:true}; saveEvents(evB); }
     }catch(e){}
   }
   if(profil==="coach") localStorage.setItem("asmb_coach_teams",JSON.stringify(["demo-u13"]));

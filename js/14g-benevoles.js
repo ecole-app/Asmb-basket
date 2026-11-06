@@ -63,6 +63,7 @@ function benOuvrir(eid,jour){
   info.textContent=(jour?benJourTxt({date:jour}):benJourTxt(e))+(e.heure?" · "+e.heure:"")+(e.lieu?" · "+e.lieu:"");
   s.body.appendChild(info);
   gmRow(s.body).appendChild(gmBtn("🎫 Mes bénévoles (pass)","ghost",function(){ benCarnetOuvrir(); }));
+  if(benEstStaff()&&typeof benevAppel==="function") gmRow(s.body).appendChild(gmBtn("📣 Appel à bénévoles","ghost",function(){ benevAppel(eid); }));
   benCarnetCharger();
   var liste=document.createElement("div"); s.body.appendChild(liste);
   function rendre(){

@@ -128,3 +128,20 @@ describe("Missions d'un bénévole du carnet (benMissionsDe)", () => {
     assert.equal(c.benMissionsDe("ben1").length, 40);
   });
 });
+
+describe("Appel à bénévoles : places restantes (benevAppelPlaces)", () => {
+  function v(events) { return charger(["js/14g-benevoles.js", "js/14v-benevole-espace.js"], { getEvents: () => events, eventTypeLabel: () => "" }); }
+  it("compte les missions pourvues par poste, jamais en dessous de 0", () => {
+    const e = { appel: { postes: { Marqueur: 2, Arbitrage: 1, Buvette: 0 } }, benevoles: [
+      { id: "a", poste: "Marqueur", nom: "Léa" }, { id: "b", poste: "Arbitrage", nom: "X" }, { id: "c", poste: "Arbitrage", uid: "u2" }, { id: "d", poste: "Marqueur" } ] };
+    const r = v([]).benevAppelPlaces(e);
+    assert.equal(JSON.stringify(r.map((x) => [x.poste, x.n, x.pris, x.reste])), JSON.stringify([["Marqueur", 2, 1, 1], ["Arbitrage", 1, 2, 0]]));
+  });
+  it("sans appel : aucune place", () => { assert.equal(v([]).benevAppelPlaces({}).length, 0); });
+  it("appels ouverts : futurs, non annulés, avec des places", () => {
+    const d = new Date(); d.setDate(d.getDate() + 3); const j = d.toISOString().slice(0, 10);
+    const ok = { id: "1", date: j, appel: { postes: { Marqueur: 1 } } };
+    const evs = [ok, { id: "2", date: j }, { id: "3", date: j, cancelled: true, appel: { postes: { Marqueur: 1 } } }, { id: "4", date: "2020-01-01", appel: { postes: { Marqueur: 1 } } }, { id: "5", date: j, appel: { ouvert: false, postes: { Marqueur: 1 } } } ];
+    assert.equal(v(evs).benevAppelsOuverts().map((e) => e.id).join(), "1");
+  });
+});

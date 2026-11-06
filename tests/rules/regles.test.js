@@ -1592,3 +1592,20 @@ describe("Fiche joueur lue par le compte rattaché", () => {
     await assertFails(getDocs(collection(await as("joueurA"), "clubs/A/players")));
   });
 });
+
+describe("Appel à bénévoles (ben_inscriptions)", () => {
+  const ins = (uid) => ({ eventId: "e1", poste: "Marqueur", uid, nom: "Léa D", ts: serverTimestamp() });
+  it("un membre crée et retire sa propre inscription, pas celle d'un autre", async () => {
+    await assertSucceeds(setDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur"), ins("parentA")));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/e1_dirA_marqueur"), ins("dirA")));
+    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
+  });
+  it("pas de champ en trop, pas de modification, un autre membre ne lit pas", async () => {
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/x1"), { ...ins("parentA"), statut: "ok" }));
+    await setDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur"), ins("parentA"));
+    await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur"), { poste: "Buvette" }));
+    await assertFails(getDoc(doc(await as("parent2A"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
+    await assertSucceeds(getDoc(doc(await as("dirA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
+    await assertSucceeds(deleteDoc(doc(await as("dirA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
+  });
+});

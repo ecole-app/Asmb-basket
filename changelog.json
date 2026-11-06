@@ -1,189 +1,285 @@
 [
  {
+  "v": "1793962669",
+  "semver": "1.14.0",
+  "titre": "Appel à bénévoles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Nouveau « 📣 Appel à bénévoles » : tu choisis l'événement (liste ou recherche), les postes et le nombre de places, et tu le publies dans un canal. Chacun s'inscrit en direct, et tu peux retirer quelqu'un dans « Bénévoles »."
+   },
+   {
+    "roles": [
+     "parent",
+     "joueur",
+     "benevole"
+    ],
+    "texte": "Un appel à bénévoles apparaît dans la Communauté et sur l'accueil bénévole : « Je m'inscris » en un appui, « Me retirer » à tout moment."
+   },
+   {
+    "roles": [
+     "parent"
+    ],
+    "texte": "Si ton enfant s'inscrit comme bénévole (table de marque, arbitrage…), tu reçois une notification et un message à l'ouverture de l'appli."
+   }
+  ]
+ },
+ {
   "v": "1793960560",
   "semver": "1.13.0",
   "titre": "Bénévoles : remplaçant, rappels et bilan",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Quand un bénévole répond « Je ne peux pas », tu reçois une notification, et un bouton « Remplaçant » dans « Bénévoles » tire quelqu'un d'autre en un appui."
    },
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Les invitations bénévoles sans réponse depuis 3 jours apparaissent dans « À faire aujourd'hui », avec un SMS de relance. Nouveau « Bilan des bénévoles » dans le tirage : qui a fait combien de missions cette saison."
    },
    {
-    "roles": ["benevole"],
+    "roles": [
+     "benevole"
+    ],
     "texte": "Tu reçois un rappel la veille de ta mission, à 18 h."
    }
   ]
- }, {
+ },
+ {
   "v": "1793960134",
   "semver": "1.12.2",
   "titre": "Bénévole : son équipe et ses notifications",
   "points": [
    {
-    "roles": ["benevole"],
+    "roles": [
+     "benevole"
+    ],
     "texte": "Chaque mission indique maintenant l'équipe concernée, et un bouton permet d'activer les notifications pour être prévenu quand le club te place sur une mission."
    }
   ]
- }, {
+ },
+ {
   "v": "1793959243",
   "semver": "1.12.1",
   "titre": "Réponses des bénévoles visibles",
   "points": [
    {
-    "roles": ["dirigeant", "coach"],
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
     "texte": "Dans « Bénévoles », tu vois maintenant si un bénévole avec compte a répondu « Je viens » ou « Je ne peux pas »."
    }
   ]
- }, {
+ },
+ {
   "v": "1793953187",
   "semver": "1.12.0",
   "titre": "Compte bénévole",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Nouveau bouton « Inviter un bénévole » (Paramètres › Accès & invitations) : le bénévole crée son compte avec le lien et renseigne ses infos. Tu choisis les canaux de la Communauté qu'il voit (modifiable ensuite depuis sa fiche de compte). Il n'a jamais accès aux licences, à la comptabilité ni aux fiches joueurs."
    },
    {
-    "roles": ["benevole"],
+    "roles": [
+     "benevole"
+    ],
     "texte": "Ton espace bénévole : tes missions avec « Je viens / Je ne peux pas », les matchs à domicile, la Communauté (canaux ouverts par le club) et la caisse buvette ou le scan des billets avec le code du club."
    }
   ]
- }, {
+ },
+ {
   "v": "1793952207",
   "semver": "1.11.0",
   "titre": "Modifier toute une série d'entraînements",
   "points": [
    {
-    "roles": ["dirigeant", "coach"],
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
     "texte": "Quand tu changes le titre, l'heure ou le lieu d'un entraînement répété chaque semaine, l'appli propose de faire pareil sur les suivants ou sur toute la série. Les séances déjà pointées ne bougent pas."
    }
   ]
- }, {
+ },
+ {
   "v": "1793946831",
   "semver": "1.10.3",
   "titre": "Dossier d'inscription : case Options vierge",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Dans Documents › Tarifs, la case des options n'affiche plus d'exemple."
    }
   ]
- }, {
+ },
+ {
   "v": "1793945817",
   "semver": "1.10.2",
   "titre": "Dossier d'inscription : champs tarifs vierges",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Dans Documents › Tarifs, les champs vides n'affichent plus d'exemple propre à un club."
    }
   ]
- }, {
+ },
+ {
   "v": "1793945445",
   "semver": "1.10.1",
   "titre": "Tableau de bord coach : plus d'erreur au démarrage",
   "points": [
    {
-    "roles": ["coach"],
+    "roles": [
+     "coach"
+    ],
     "texte": "Le tableau de bord des présences n'essaie plus de se charger avant la fin de la connexion au club."
    }
   ]
- }, {
+ },
+ {
   "v": "1793919323",
   "semver": "1.10.0",
   "titre": "Officiels de table, arbitrage et PDF du planning",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Le tirage au sort désigne maintenant un délégué de club, un marqueur, un chronométreur, un chronométreur des tirs (et un aide-marqueur si besoin). Dans chaque équipe, deux cases : « table tenue par des officiels » (à partir de la N3) et « arbitres désignés » : ces postes ne sont plus tirés."
    },
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Nouveau bouton « PDF du planning » dans le tirage : un mois par page, les matchs à domicile avec les noms déjà dessus, à imprimer ou à envoyer. Sans numéro de téléphone."
    }
   ]
- }, {
+ },
+ {
   "v": "1793917198",
   "semver": "1.9.0",
   "titre": "Affiche de match à partager",
   "points": [
    {
-    "roles": ["dirigeant", "coach"],
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
     "texte": "Chaque match du planning a un bouton « Affiche » : une image aux couleurs du club, avant le match (adversaire, date, heure, lieu) ou avec le résultat (score, victoire), en post carré ou en story, à partager en un clic sur WhatsApp ou les réseaux."
    }
   ]
- }, {
+ },
+ {
   "v": "1793906949",
   "semver": "1.8.3",
   "titre": "Pass'Sport et Pass'Région activés d'office",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Les aides Pass'Sport et Pass'Région sont proposées par défaut sur la fiche d'inscription et dans le paiement. Un club qui n'en veut pas les décoche dans Paramètres."
    }
   ]
- }, {
+ },
+ {
   "v": "1793906357",
   "semver": "1.8.2",
   "titre": "Correctif des rôles",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Enregistrer les équipes d'un coach ne lui ajoute plus le rôle de dirigeant par erreur."
    }
   ]
- }, {
+ },
+ {
   "v": "1793906201",
   "semver": "1.8.1",
   "titre": "Pass'Sport et Pass'Région dans « Enregistrer le paiement »",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "La fenêtre « Enregistrer le paiement » d'une licence propose les codes Pass'Sport et Pass'Région (pré-remplis si la famille les a donnés) : un clic les compte dans le paiement."
    }
   ]
- }, {
+ },
+ {
   "v": "1793906023",
   "semver": "1.8.0",
   "titre": "Un joueur dans 2 équipes",
   "points": [
    {
-    "roles": ["dirigeant", "coach"],
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
     "texte": "Un joueur peut jouer et s'entraîner dans 2 équipes de son niveau (Équipe 1 et Équipe 2) : cochez ses équipes sur sa fiche, touchez 2 numéros d'équipe sur sa licence ou ajoutez-le depuis l'effectif. L'effectif affiche « aussi en … »."
    },
    {
-    "roles": ["dirigeant", "coach"],
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
     "texte": "Convocation : un joueur déjà convoqué à un autre match le même jour est signalé. Présences et assiduité restent comptées équipe par équipe."
    },
    {
-    "roles": ["parent", "joueur"],
+    "roles": [
+     "parent",
+     "joueur"
+    ],
     "texte": "Votre enfant dans 2 équipes : les deux apparaissent sur l'accueil, avec leurs entraînements, matchs et convocations."
    }
   ]
- }, {
+ },
+ {
   "v": "1793905343",
   "semver": "1.7.2",
   "titre": "Joueurs à reclasser : moins de faux positifs, « Ignorer tous »",
   "points": [
    {
-    "roles": ["dirigeant"],
+    "roles": [
+     "dirigeant"
+    ],
     "texte": "Un joueur U21 dont le genre n'est pas renseigné n'est plus proposé en Senior à tort. Un bouton « Ignorer tous » ferme la liste d'un coup."
    }
   ]
- }, {
+ },
+ {
   "v": "1793905049",
   "semver": "1.7.1",
   "titre": "Logo du club sur l'écran de connexion par invitation",
   "points": [
    {
-    "roles": ["dirigeant", "coach", "parent", "joueur"],
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
     "texte": "Quand on ouvre un lien d'invitation, le logo du club s'affiche en haut de l'écran de connexion ou de création de compte."
    }
   ]
- }, {
+ },
+ {
   "v": "1793903630",
   "semver": "1.7.0",
   "titre": "Supprimer une série d'entraînements d'un coup",

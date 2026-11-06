@@ -47,6 +47,7 @@ function webpushClub(clubId, plus) {
 const NOTIF_LANGUES = ["en", "ar", "es", "it", "de"];
 const NOTIF_TXT = {
   "Un bénévole ne peut pas venir": ["A volunteer can't come", "متطوع لا يستطيع الحضور", "Un voluntario no puede venir", "Un volontario non può venire", "Eine Helferin / ein Helfer kann nicht kommen"],
+  "Votre enfant est bénévole": ["Your child volunteered", "ابنك تطوّع", "Su hijo se ha apuntado como voluntario", "Suo figlio si è offerto come volontario", "Ihr Kind hat sich als Helfer eingetragen"],
   "Rappel bénévole": ["Volunteer reminder", "تذكير للمتطوع", "Recordatorio de voluntario", "Promemoria volontario", "Helfer-Erinnerung"],
   "Nouveau message": ["New message", "رسالة جديدة", "Nuevo mensaje", "Nuovo messaggio", "Neue Nachricht"],
   "Communauté": ["Community", "المجتمع", "Comunidad", "Community", "Community"],
@@ -1146,7 +1147,7 @@ exports.onBenevolePlace = onDocumentUpdated("clubs/{clubId}/events/{eventId}", a
   const apres = event.data && event.data.after.data();
   if (!avant || !apres || apres.cancelled) return;
   const dejaIds = new Set((avant.benevoles || []).map((m) => m.id));
-  const nouveaux = (apres.benevoles || []).filter((m) => m.uid && !dejaIds.has(m.id));
+  const nouveaux = (apres.benevoles || []).filter((m) => m.uid && !m.auto && !dejaIds.has(m.id));
   for (const m of nouveaux) {
     const jour = String(m.jour || apres.date || "");
     const jourFr = jour ? jour.split("-").reverse().join("/") : "";
@@ -1609,4 +1610,75 @@ exports.onAbonnementPush = onDocumentWritten("clubs/{clubId}/push_subscriptions/
       }
     } catch (e) { console.error("onAbonnementPush", autre, e); }
   }
+});
+
+
+// ── Appel à bénévoles : auto-inscription (ben_inscriptions) ─────────────────────────────────────
+const NOTIF_ENFANT_BEN_TPL = {
+  fr: (n, p, j, t) => `${n} s'est inscrit comme bénévole : « ${p} »${j ? " le " + j : ""} (${t}).`,
+  en: (n, p, j, t) => `${n} signed up as a volunteer: “${p}”${j ? " on " + j : ""} (${t}).`,
+  ar: (n, p, j, t) => `${n} سجّل كمتطوع: «${p}»${j ? " يوم " + j : ""} (${t}).`,
+  es: (n, p, j, t) => `${n} se ha apuntado como voluntario: «${p}»${j ? " el " + j : ""} (${t}).`,
+  it: (n, p, j, t) => `${n} si è offerto come volontario: «${p}»${j ? " il " + j : ""} (${t}).`,
+  de: (n, p, j, t) => `${n} hat sich als Helfer eingetragen: „${p}“${j ? " am " + j : ""} (${t}).`
+};
+exports.onInscriptionBenevole = onDocumentCreated("clubs/{clubId}/ben_inscriptions/{id}", async (event) => {
+  const ins = event.data && event.data.data();
+  if (!ins) return;
+  const clubId = event.params.clubId;
+  const club = db.collection("clubs").doc(clubId);
+  const evRef = club.collection("events").doc(String(ins.eventId));
+  const uid = String(ins.uid);
+  const user = await db.collection("users").doc(uid).get();
+  const u = user.exists ? user.data() : null;
+  if (!u || u.clubId !== clubId) { await event.data.ref.delete().catch(() => {}); return; }
+  const enfant = (u.roles || []).includes("joueur") && !(u.roles || []).includes("parent");
+  const pid = enfant && (u.linkedPlayerIds || [])[0] ? String(u.linkedPlayerIds[0]) : "";
+  let place = null;
+  const statut = await db.runTransaction(async (tx) => {
+    const ev = await tx.get(evRef);
+    if (!ev.exists) return "refus";
+    const e = ev.data();
+    const n = Number(e.appel && e.appel.postes && e.appel.postes[ins.poste]) || 0;
+    if (!e.appel || e.appel.ouvert === false || e.cancelled || n <= 0) return "refus";
+    const liste = Array.isArray(e.benevoles) ? e.benevoles : [];
+    if (liste.some((m) => m.uid === uid && m.poste === ins.poste)) return "ok";
+    const pris = liste.filter((m) => m.poste === ins.poste && (m.nom || m.uid)).length;
+    if (pris >= n) return "complet";
+    place = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), poste: String(ins.poste), heure: String(e.heure || "").slice(0, 12), nom: String(ins.nom || "").slice(0, 60), uid, auto: true };
+    if (pid) place.pid = pid;
+    tx.update(evRef, { benevoles: liste.concat([place]) });
+    return "ok";
+  });
+  await event.data.ref.update({ statut }).catch(() => {});
+  if (statut !== "ok" || !place || !pid) return;
+  // Enfant : ses parents sont prévenus (le pop-up s'affiche à leur prochaine ouverture).
+  const ev = (await evRef.get()).data() || {};
+  const jour = String(ev.date || "");
+  const jourFr = jour ? jour.split("-").reverse().join("/") : "";
+  const parents = await db.collection("users").where("clubId", "==", clubId).where("linkedPlayerIds", "array-contains", pid).get();
+  for (const d of parents.docs) {
+    if (!(d.data().roles || []).includes("parent")) continue;
+    await notifierCompte(clubId, uidDe(d), (l) => ({
+      titre: tn(l, "Votre enfant est bénévole"),
+      corps: (NOTIF_ENFANT_BEN_TPL[l] || NOTIF_ENFANT_BEN_TPL.fr)(place.nom, place.poste, jourFr, ev.titre || tn(l, "événement du club"))
+    }));
+  }
+});
+
+// Désinscription : la mission automatique disparaît (sauf si la personne s'est réinscrite entre-temps).
+exports.onDesinscriptionBenevole = onDocumentDeleted("clubs/{clubId}/ben_inscriptions/{id}", async (event) => {
+  const ins = event.data && event.data.data();
+  if (!ins) return;
+  const club = db.collection("clubs").doc(event.params.clubId);
+  const encore = await club.collection("ben_inscriptions").doc(event.params.id).get();
+  if (encore.exists) return;
+  const evRef = club.collection("events").doc(String(ins.eventId));
+  await db.runTransaction(async (tx) => {
+    const ev = await tx.get(evRef);
+    if (!ev.exists) return;
+    const liste = Array.isArray(ev.data().benevoles) ? ev.data().benevoles : [];
+    const reste = liste.filter((m) => !(m.auto && m.uid === ins.uid && m.poste === ins.poste));
+    if (reste.length !== liste.length) tx.update(evRef, { benevoles: reste });
+  });
 });

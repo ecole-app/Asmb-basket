@@ -17,6 +17,7 @@ function rjTr(t){ return typeof gmT==="function"?gmT(t):t; }
 // Appelé par showScr (js/03-nav-portal.js).
 function rjVerifier(id){
   if(window.SUPPORT_MODE||document.getElementById("rj-modale")) return;
+  if(id==="parent-home"&&typeof benevAppelParents==="function") setTimeout(benevAppelParents,1500); // un enfant s'est inscrit comme bénévole (js/14v)
   var p=localStorage.getItem("asmb_profile");
   var k=(id==="portal"&&p==="dirigeant")?"dir":(id==="parent-home"&&p==="parent")?"par":"";
   if(!k||rjDejaVu(k)) return;

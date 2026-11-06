@@ -360,6 +360,7 @@ function tirageOuvrir(){
     tirPdf(du,au,p);
   });
   col.appendChild(go); col.appendChild(pdfBtn);
+  col.appendChild(gmBtn("📣 Appel à bénévoles","soft",function(){ if(typeof benevAppel==="function") benevAppel(); }));
   col.appendChild(gmBtn("📊 Bilan des bénévoles","soft",function(){ if(typeof benevBilan==="function") benevBilan(); })); f.appendChild(col); s.body.appendChild(sortie);
   var dernier=""; try{ dernier=localStorage.getItem("gm_dernier_tirage")||""; }catch(e){}
   if(dernier && getEvents().some(function(e){ return benListe(e).some(function(m){ return m.tirage===dernier; }); })){

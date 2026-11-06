@@ -41,6 +41,7 @@ function chatMsgPlain(msg){
     return msg.mediaType==="pdf"?"📄 "+(msg.fileName||"Document"):(msg.mediaType==="audio"?"🎤 Message vocal":"📷 Photo");
   }
   if(msg.type==="poll") return "📊 "+(msg.question||"Sondage");
+  if(msg.type==="appel") return "📣 Appel à bénévoles : "+(msg.eventTitre||"");
   if(msg.type==="convocation") return "📋 Convocation : "+(msg.eventTitre||"");
   if(msg.type==="carpool") return "🚗 Covoiturage : "+(msg.eventTitre||"");
   return String(msg.text||"").replace(/<[^>]*>/g,"");
@@ -421,9 +422,9 @@ function chatRenderMessage(channelId,msgId,msg,pending,pinnedIds){
     chatBindGestures(bubble,wrap,channelId,msgId,false);
     return wrap;
   }
-  if(msg.type==="carpool"||msg.type==="poll"){
+  if(msg.type==="carpool"||msg.type==="poll"||msg.type==="appel"){
     bubble.className="poll-bubble";
-    bubble.innerHTML=(msg.type==="poll")?chatPollInner(channelId,msgId,msg,time):chatCarpoolInner(channelId,msgId,msg,time);
+    bubble.innerHTML=(msg.type==="poll")?chatPollInner(channelId,msgId,msg,time):(msg.type==="appel")?chatAppelInner(msg,time):chatCarpoolInner(channelId,msgId,msg,time);
     wrap.appendChild(bubble);
     chatAppendReactions(wrap,channelId,msgId,msg,mine);
     chatBindGestures(bubble,wrap,channelId,msgId,false);
@@ -481,6 +482,17 @@ function chatAppendReactions(wrap,channelId,msgId,msg,mine){
   wrap.appendChild(r);
 }
 
+function chatAppelInner(msg,time){
+  var e=(getEvents()||[]).filter(function(x){ return x.id===msg.eventId; })[0];
+  var ouvert=!!(e&&e.appel&&e.appel.ouvert!==false&&typeof benevAppelPlaces==="function"&&benevAppelPlaces(e).length);
+  var reste=ouvert?benevAppelPlaces(e).reduce(function(a,x){ return a+x.reste; },0):0;
+  return '<div class="poll-q">📣 Appel à bénévoles</div>'+
+    '<div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:2px">'+authEsc(msg.eventTitre||"")+'</div>'+
+    '<div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+authEsc((msg.eventDate?msg.eventDate.split("-").reverse().join("/"):"")+(msg.eventHeure?" à "+msg.eventHeure:"")+(msg.eventLieu?" · "+msg.eventLieu:""))+'</div>'+
+    '<div style="font-size:11.5px;color:var(--txt)">'+authEsc(msg.resume||"")+'</div>'+
+    '<div '+(ouvert?'onclick="benevAppelOuvrir(\''+authEsc(msg.eventId)+'\')"':'')+' style="cursor:'+(ouvert?"pointer":"default")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(ouvert&&reste?"var(--dkg);color:#fff":"var(--bdr);color:var(--mut)")+'">'+(!ouvert?"Appel terminé":reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir")+'</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+time+'</div>';
+}
 function chatPollInner(channelId,msgId,msg,time){
   var myP=savedPseudo||"moi", total=0;
   (msg.options||[]).forEach(function(o){ total+=(o.votes||[]).length; });
@@ -548,7 +560,7 @@ function chatOpenMenu(channelId,msgId,anchor){
   var acts=[];
   if(!msg.deleted){
     acts.push(["Répondre","↩",function(){ setReplyTo(msgId); }]);
-    if(msg.type!=="convocation"&&msg.type!=="poll"&&msg.type!=="carpool"&&(msg.text||msg.type==="media"&&msg.mediaType!=="audio")) {
+    if(msg.type!=="convocation"&&msg.type!=="poll"&&msg.type!=="carpool"&&msg.type!=="appel"&&(msg.text||msg.type==="media"&&msg.mediaType!=="audio")) {
       if(msg.text) acts.push(["Copier","⧉",function(){ chatCopy(msg.text); }]);
     }
     if(chatCanEdit(msg)) acts.push(["Modifier","✎",function(){ editMessage(channelId,msgId); }]);
