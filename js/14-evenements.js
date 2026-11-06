@@ -838,6 +838,7 @@ function sauverModifEvent(eventId,v){
   var ev=events.find(function(e){return e.id===eventId;});
   if(!ev){ evEditId=null; return; }
   var old={date:ev.date,heure:ev.heure,equipe:ev.equipe,lieu:ev.lieu};
+  var avantSerie={titre:ev.titre,heure:ev.heure||"",lieu:ev.lieu||"",adresse:ev.adresse||""};
   ev.titre=v.titre; ev.type=v.type; ev.date=v.date; ev.dateFin=v.dateFin||""; ev.heure=v.heure||""; ev.lieu=v.lieu||""; ev.adresse=v.adresse||""; ev.geo=v.geo||null; ev.equipe=v.equipe||"";
   ev.participantsClub=v.participantsClub; ev.participantsExternes=evExternes.slice();
   ev.evaluationEnabled=(v.type==="stage"&&document.getElementById("ev-eval-enabled").checked);
@@ -868,6 +869,52 @@ function sauverModifEvent(eventId,v){
     });
     showToast("Événement modifié, alerte envoyée dans le canal.");
   } else showToast("Événement modifié");
+  evSerieAppliquer(ev,avantSerie);
+}
+// Événement d'une série (« Répéter chaque semaine ») dont le titre, l'heure ou le lieu change :
+// on propose de faire pareil sur les suivants ou sur toute la série. La date, elle, ne bouge jamais ailleurs.
+function evSerieAppliquer(ev,avant){
+  var T=function(x){ return typeof gmT==="function"?gmT(x):x; };
+  var champs=["titre","heure","lieu","adresse"].filter(function(k){ return (ev[k]||"")!==(avant[k]||""); });
+  if(!champs.length) return;
+  var all=getEvents(), serie=evSerieDe(ev,all);
+  if(serie.length<2) return;
+  var jusque=function(x){ return !(x.presences&&Object.keys(x.presences).length); };
+  var suivants=serie.filter(function(x){ return x.id!==ev.id && x.date>ev.date && jusque(x); });
+  var toutes=serie.filter(function(x){ return x.id!==ev.id && jusque(x); });
+  if(!suivants.length&&!toutes.length) return;
+  var s=gmSheet("Appliquer aux autres séances ?");
+  var intro=document.createElement("div"); intro.style.cssText="font-size:13px;color:var(--txt2);line-height:1.45;margin-bottom:12px";
+  intro.textContent=T("Cet événement se répète chaque semaine")+" ("+serie.length+" "+T("dates")+"). "+T("Les séances déjà pointées ne sont pas touchées.");
+  s.body.appendChild(intro);
+  function bouton(txt,liste){
+    var b=document.createElement("button"); b.type="button"; b.textContent=txt;
+    b.style.cssText="width:100%;min-height:48px;margin-bottom:8px;padding:10px 14px;border-radius:var(--rx);font:inherit;font-size:14px;font-weight:800;cursor:pointer;text-align:left;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt)";
+    b.addEventListener("click",function(){
+      s.modal.remove();
+      var ids={}; liste.forEach(function(x){ ids[x.id]=true; });
+      var evs=getEvents();
+      evs.forEach(function(x){ if(ids[x.id]){ champs.forEach(function(k){ x[k]=ev[k]||""; if(k==="adresse") x.geo=ev.geo||null; }); } });
+      saveEvents(evs);
+      buildPlanning();buildAdminHome();
+      if(typeof buildRealEventsList==="function") buildRealEventsList();
+      showToast(liste.length+" "+T("séances modifiées"));
+      if(window.fbReady&&(champs.indexOf("heure")>=0||champs.indexOf("lieu")>=0)&&ev.equipe){
+        var txt=[]; if(champs.indexOf("heure")>=0) txt.push("nouvelle heure : "+(ev.heure||"—")); if(champs.indexOf("lieu")>=0) txt.push("lieu : "+(ev.lieu||"—"));
+        window.fbAddDoc(window.fbCollection(window.fbDb,"channels",findChannelForTeamText(ev.equipe),"messages"),{
+          text:"Créneaux modifiés\n\""+ev.titre+"\" ("+liste.length+" séances) : "+txt.join(", "),
+          pseudo:clubPseudo(""),ts:window.fbServerTimestamp(),likeUsers:[],heartUsers:[]
+        }).catch(function(){});
+      }
+    });
+    s.body.appendChild(b);
+  }
+  if(suivants.length) bouton(T("Les suivantes aussi")+" ("+suivants.length+")",suivants);
+  if(toutes.length>suivants.length) bouton(T("Toute la série")+" ("+toutes.length+")",toutes);
+  var ann=document.createElement("button"); ann.type="button"; ann.textContent=T("Celle-ci seulement");
+  ann.style.cssText="width:100%;min-height:44px;border:0;background:none;font:inherit;font-weight:700;color:var(--mut);cursor:pointer";
+  ann.addEventListener("click",function(){ s.modal.remove(); });
+  s.body.appendChild(ann);
 }
 async function editScore(eventId){
   var events=getEvents();

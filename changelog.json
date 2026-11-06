@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793952207",
+  "semver": "1.11.0",
+  "titre": "Modifier toute une série d'entraînements",
+  "points": [
+   {
+    "roles": ["dirigeant", "coach"],
+    "texte": "Quand tu changes le titre, l'heure ou le lieu d'un entraînement répété chaque semaine, l'appli propose de faire pareil sur les suivants ou sur toute la série. Les séances déjà pointées ne bougent pas."
+   }
+  ]
+ }, {
   "v": "1793946831",
   "semver": "1.10.3",
   "titre": "Dossier d'inscription : case Options vierge",
