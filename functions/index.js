@@ -1063,7 +1063,7 @@ exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds:
 });
 
 /* ===== Notifications « on vous a donné un rôle / un accès / un poste » ===== */
-const NOTIF_ROLES = { dirigeant: "Dirigeant", coach: "Coach", parent: "Parent", joueur: "Joueur", bureau: "Bureau" };
+const NOTIF_ROLES = { dirigeant: "Dirigeant", coach: "Coach", parent: "Parent", joueur: "Joueur", bureau: "Bureau", benevole: "Bénévole" };
 const NOTIF_TITRES = { tresorier: "Trésorier", secretaire: "Secrétaire", bureau: "Membre du bureau" };
 const NOTIF_MODULES = {
   invitations: "Accès & invitations", parametres: "Paramètres", communaute: "Communauté", licences: "Licences",

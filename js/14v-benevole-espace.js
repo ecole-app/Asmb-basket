@@ -129,7 +129,8 @@ function benevHomeBuild(){
       h+='<div style="margin:0 16px 10px;padding:14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--bdr)">'
         +'<div style="font-size:11px;font-weight:800;color:#E8670A;text-transform:uppercase;letter-spacing:.6px">'+authEsc(x.m.poste)+'</div>'
         +'<div style="font-size:15px;font-weight:900;color:var(--txt);margin-top:2px">'+authEsc(x.e.titre||eventTypeLabel(x.e.type))+'</div>'
-        +'<div style="font-size:12px;color:var(--txt2);margin-top:2px">'+authEsc(q+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+(x.e.lieu?" · "+x.e.lieu:""))+'</div>'
+        +(x.e.equipe?'<div style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 12%, transparent);color:var(--dkg);font-size:12px;font-weight:800">Équipe : '+authEsc(x.e.equipe)+'</div>':'')
+        +'<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(q+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+(x.e.lieu?" · "+x.e.lieu:""))+'</div>'
         +'<div style="display:flex;gap:8px;margin-top:10px">'
         +'<button type="button" onclick="benevRepondre(\''+authEsc(x.e.id)+'\',\''+authEsc(x.m.id)+'\',\'present\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="present"?"#1F8A4C":"var(--bdr)")+';background:'+(rep==="present"?"rgba(31,138,76,.14)":"var(--bg)")+';color:'+(rep==="present"?"#1F8A4C":"var(--txt)")+'">✓ Je viens</button>'
         +'<button type="button" onclick="benevRepondre(\''+authEsc(x.e.id)+'\',\''+authEsc(x.m.id)+'\',\'absent\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="absent"?"#C0392B":"var(--bdr)")+';background:'+(rep==="absent"?"rgba(192,57,43,.12)":"var(--bg)")+';color:'+(rep==="absent"?"#C0392B":"var(--txt)")+'">✗ Je ne peux pas</button></div></div>';
@@ -144,7 +145,10 @@ function benevHomeBuild(){
   h+='<div class="sec" style="padding:14px 16px 6px">Outils</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 24px">'
     +'<button type="button" onclick="location.href=location.origin+\'/buvette/\'" style="min-height:64px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-weight:800;cursor:pointer">🥤 Caisse buvette</button>'
     +'<button type="button" onclick="benevOutilCode(\'Code de l\\\'entrée\',\'Code donné par le club\',function(c){ return location.origin+\'/?entree=\'+c; })" style="min-height:64px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-weight:800;cursor:pointer">🎫 Scanner les billets</button></div>';
+  h+='<div style="margin:0 16px 24px"><button type="button" id="push-toggle-btn" style="width:100%;min-height:48px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font:inherit;font-weight:800;cursor:pointer">🔔 Activer les notifications</button>'
+    +'<div style="font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.45">Pour être prévenu dès que le club vous place sur une mission.</div></div>';
   el.innerHTML=h;
+  if(typeof refreshPushButton==="function") refreshPushButton();
 }
 function benevHome(){
   stack=["benevole-home"]; showScr("benevole-home"); benevHomeBuild(); benevChargerReponses(benevHomeBuild);

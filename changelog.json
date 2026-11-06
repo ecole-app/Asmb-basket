@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793960134",
+  "semver": "1.12.2",
+  "titre": "Bénévole : son équipe et ses notifications",
+  "points": [
+   {
+    "roles": ["benevole"],
+    "texte": "Chaque mission indique maintenant l'équipe concernée, et un bouton permet d'activer les notifications pour être prévenu quand le club te place sur une mission."
+   }
+  ]
+ }, {
   "v": "1793959243",
   "semver": "1.12.1",
   "titre": "Réponses des bénévoles visibles",
