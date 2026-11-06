@@ -75,6 +75,7 @@ function benOuvrir(eid,jour){
       d.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase">'+authEsc(m.poste+(m.heure?" · "+m.heure:""))+'</div>'+
         '<div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc(m.nom||"?")+(m.uid?'':' <span style="font-size:11px;color:var(--mut);font-weight:600">(sans compte)</span>')+'</div></div>';
       var rep=m.benId&&BEN_REPONSES[m.benId]&&BEN_REPONSES[m.benId][m.id];
+      if(!rep&&m.uid){ var rc=typeof BENEV_REP_STAFF!=="undefined"&&BENEV_REP_STAFF[eid+"|"+m.id]; if(rc) rep=rc==="present"?"oui":"non"; }
       if(rep) d.firstChild.lastChild.insertAdjacentHTML("beforeend",' <span style="font-size:11px;font-weight:800;color:'+(rep==="oui"?"#1F8A4C":"#C0392B")+'">'+(rep==="oui"?"✓ confirmé":"✗ ne peut pas")+'</span>');
       var sms=gmBtn("📱 SMS","soft",function(){ benSms(ev,m); }); sms.style.flex="0 0 auto";
       var del=gmBtn("✕","ghost",function(){
@@ -85,6 +86,7 @@ function benOuvrir(eid,jour){
   }
   rendre();
   benReponsesCharger().then(rendre);
+  if(typeof benevReponsesStaffCharger==="function") benevReponsesStaffCharger(eid).then(rendre);
   gmSection(s.body,"Placer quelqu'un");
   var g=document.createElement("div"); g.style.cssText="display:grid;grid-template-columns:2fr 1fr;gap:8px";
   var wp=document.createElement("div"); wp.className="form-group"; wp.innerHTML='<label class="form-label">Poste</label>';

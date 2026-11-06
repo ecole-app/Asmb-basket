@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793959243",
+  "semver": "1.12.1",
+  "titre": "Réponses des bénévoles visibles",
+  "points": [
+   {
+    "roles": ["dirigeant", "coach"],
+    "texte": "Dans « Bénévoles », tu vois maintenant si un bénévole avec compte a répondu « Je viens » ou « Je ne peux pas »."
+   }
+  ]
+ }, {
   "v": "1793953187",
   "semver": "1.12.0",
   "titre": "Compte bénévole",

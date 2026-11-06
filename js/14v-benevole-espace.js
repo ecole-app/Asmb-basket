@@ -81,6 +81,14 @@ function benevChargerReponses(fini){
     if(fini) fini();
   }).catch(function(){ if(fini) fini(); });
 }
+// Côté dirigeant / coach : les réponses des bénévoles avec compte pour un événement (affichées dans « Bénévoles »).
+var BENEV_REP_STAFF={};
+function benevReponsesStaffCharger(eid){
+  if(!window.fbGetDocs||!window.fbDb||!window.CURRENT_CLUB_ID) return Promise.resolve();
+  return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"checkins"),window.fbWhere("eventId","==",eid))).then(function(snap){
+    snap.forEach(function(d){ var c=d.data()||{}; if(c.source==="benevole"&&c.missionId) BENEV_REP_STAFF[c.eventId+"|"+c.missionId]=c.status; });
+  }).catch(function(){});
+}
 function benevRepondre(eid,mid,statut){
   var uid=(window.ASMB_USER&&window.ASMB_USER.uid)||""; if(!uid) return;
   var ref=window.fbDoc(window.fbDb,"checkins",eid+"_ben_"+uid+"_"+mid);
