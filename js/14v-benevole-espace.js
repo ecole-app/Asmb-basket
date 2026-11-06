@@ -160,3 +160,85 @@ function navToBenevole(which){
   else benevHome();
   var b=document.getElementById("bni-b-"+which); if(b) b.classList.add("on");
 }
+
+// ── Dirigeant : un bénévole dit « Je ne peux pas » → remplaçant tiré en un appui ─────────────
+// Retire sa mission, relance le tirage sur ce seul poste (sans lui) ; à défaut, choix à la main.
+function benevRemplacant(eid,m,fait){
+  var e=getEvents().find(function(x){ return x.id===eid; }); if(!e) return;
+  askConfirm("Retirer "+(m.nom||"ce bénévole")+" et tirer un remplaçant pour « "+m.poste+" » ?",{confirmText:"Tirer un remplaçant"}).then(function(ok){
+    if(!ok) return;
+    Promise.all([typeof benChargerComptes==="function"?benChargerComptes():[],typeof benCarnetCharger==="function"?benCarnetCharger():[]]).then(function(r){
+      var avant=benListe(e), cle=tirCleMission(m);
+      var reste=avant.filter(function(x){ return x.id!==m.id; });
+      benSauver(eid,reste);
+      var existants=reste.filter(function(x){ return x.poste===m.poste; }).length, postes={}; postes[m.poste]=existants+1;
+      var t=tirTirer(e.date,e.date,{zone:tirPrefs().zone,postes:postes},r[0]||[],r[1]||[],{eid:eid,forcer:true,exclure:[cle]});
+      var l=t.lignes[0], a=l&&l.affectes[0];
+      if(fait) fait();
+      if(!a){ showToast("Personne de disponible : choisis à la main"); if(typeof benOuvrir==="function") benOuvrir(eid); return; }
+      askConfirm("Remplaçant : "+a.m.nom+". Le prévenir par SMS ?",{confirmText:"Envoyer le SMS"}).then(function(ok2){
+        var ev2=getEvents().find(function(x){ return x.id===eid; })||e;
+        if(ok2&&typeof benSms==="function") benSms(ev2,a.m,a.tel);
+      });
+    }).catch(function(err){ askAlert("Erreur : "+((err&&err.message)||err)); });
+  });
+}
+
+// ── Dirigeant : relance des invitations bénévoles pas encore activées (3 jours) ──────────────
+function benevInvitesCharger(){
+  window.__invitesBenAttente=0; window.__invitesBen=[];
+  if(!window.fbGetDocs||!window.CURRENT_CLUB_ID) return Promise.resolve([]);
+  var il=Date.now()-3*86400000;
+  return window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"club_invites"),window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
+    var l=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.role!=="benevole"||x.usedBy) return;
+      var cr=x.createdAt&&x.createdAt.toDate?x.createdAt.toDate().getTime():0, ex=x.expiresAt&&x.expiresAt.toDate?x.expiresAt.toDate().getTime():0;
+      if(cr&&cr<=il) l.push({code:d.id,tel:x.tel||"",canauxIds:x.canauxIds||[],expiree:!!(ex&&ex<Date.now()),cree:cr}); });
+    window.__invitesBen=l; window.__invitesBenAttente=l.length; return l;
+  }).catch(function(){ return []; });
+}
+function benevInviteSms(code,tel){
+  var club=(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"le club";
+  var txt=club+" : bonjour, votre invitation General Manager n'est pas encore activée. Créez votre compte ici : "+inviteLink(code);
+  location.href="sms:"+String(tel||"").replace(/[^0-9+]/g,"")+"?&body="+encodeURIComponent(txt);
+}
+function benevInvitesRelance(){
+  benevInvitesCharger().then(function(l){
+    var s=gmSheet("Invitations bénévoles à relancer");
+    if(!l.length){ var v=document.createElement("div"); v.style.cssText="font-size:13px;color:var(--mut)"; v.textContent="Aucune invitation en attente depuis plus de 3 jours."; s.body.appendChild(v); return; }
+    l.forEach(function(x){
+      var d=document.createElement("div"); d.style.cssText="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;margin-bottom:8px";
+      var j=Math.max(3,Math.floor((Date.now()-x.cree)/86400000));
+      d.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800;color:var(--txt)">'+authEsc(x.tel||"Sans numéro")+'</div><div style="font-size:11.5px;color:var(--mut)">Envoyée il y a '+j+' jours'+(x.expiree?" · expirée":"")+'</div></div>';
+      var go=gmBtn(x.expiree?"Nouveau lien":"Relancer","primary",function(){
+        if(!x.expiree){ benevInviteSms(x.code,x.tel); return; }
+        createClubInvite(window.CURRENT_CLUB_ID,(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"","benevole",{},{canauxIds:x.canauxIds,tel:x.tel}).then(function(code){
+          window.fbDeleteDoc(window.fbDoc(window.fbDb,"club_invites",x.code)).catch(function(){});
+          s.modal.remove(); if(x.tel) benevInviteSms(code,x.tel); else showInviteResult(code,"benevole",(window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"");
+        }).catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+      }); go.style.flex="0 0 auto"; d.appendChild(go); s.body.appendChild(d);
+    });
+  });
+}
+
+// ── Dirigeant : bilan des missions de la saison (qui a fait combien) ─────────────────────────
+function benevBilan(){
+  var saison=typeof getCurrentSeason==="function"?getCurrentSeason():"";
+  var an=parseInt(String(saison).slice(0,4),10), debut=an?(an+"-08-01"):"0000-00-00", fin=an?((an+1)+"-07-31"):"9999-12-31";
+  var par={};
+  getEvents().forEach(function(e){
+    if(!e||e.cancelled||!e.date||e.date<debut||e.date>fin) return;
+    benListe(e).forEach(function(m){ var k=tirCleMission(m); var x=par[k]=par[k]||{nom:m.nom||"?",n:0,postes:{}}; x.n++; x.postes[m.poste]=(x.postes[m.poste]||0)+1; });
+  });
+  var l=Object.keys(par).map(function(k){ return par[k]; }).sort(function(a,b){ return b.n-a.n||String(a.nom).localeCompare(String(b.nom)); });
+  var s=gmSheet("Bilan des bénévoles"+(saison?" · "+saison:""));
+  if(!l.length){ var v=document.createElement("div"); v.style.cssText="font-size:13px;color:var(--mut)"; v.textContent="Aucune mission cette saison pour l'instant."; s.body.appendChild(v); return; }
+  var tot=l.reduce(function(a,x){ return a+x.n; },0);
+  var info=document.createElement("div"); info.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px"; info.textContent=l.length+" bénévoles · "+tot+" missions"; s.body.appendChild(info);
+  l.forEach(function(x){
+    var d=document.createElement("div"); d.style.cssText="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:9px 12px;margin-bottom:6px";
+    d.innerHTML='<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc(x.nom)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(Object.keys(x.postes).map(function(p){ return p+" ×"+x.postes[p]; }).join(" · "))+'</div></div><div style="font-size:18px;font-weight:900;color:var(--dkg)">'+x.n+'</div>';
+    s.body.appendChild(d);
+  });
+  var msg="Merci à nos "+l.length+" bénévoles"+(saison?" de la saison "+saison:"")+" : "+tot+" missions assurées (buvette, table de marque, arbitrage…). Sans vous, rien ne serait possible !";
+  s.body.appendChild(gmBtn("📣 Copier le message de remerciement","primary",function(){ copyToClipboard(msg); }));
+}

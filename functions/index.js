@@ -46,6 +46,8 @@ function webpushClub(clubId, plus) {
 // Les alertes Plateforme (super admin) restent en français.
 const NOTIF_LANGUES = ["en", "ar", "es", "it", "de"];
 const NOTIF_TXT = {
+  "Un bénévole ne peut pas venir": ["A volunteer can't come", "متطوع لا يستطيع الحضور", "Un voluntario no puede venir", "Un volontario non può venire", "Eine Helferin / ein Helfer kann nicht kommen"],
+  "Rappel bénévole": ["Volunteer reminder", "تذكير للمتطوع", "Recordatorio de voluntario", "Promemoria volontario", "Helfer-Erinnerung"],
   "Nouveau message": ["New message", "رسالة جديدة", "Nuevo mensaje", "Nuovo messaggio", "Neue Nachricht"],
   "Communauté": ["Community", "المجتمع", "Comunidad", "Community", "Community"],
   "Message privé": ["Private message", "رسالة خاصة", "Mensaje privado", "Messaggio privato", "Private Nachricht"],
@@ -1152,6 +1154,57 @@ exports.onBenevolePlace = onDocumentUpdated("clubs/{clubId}/events/{eventId}", a
       titre: tn(l, "Vous êtes bénévole"),
       corps: (NOTIF_BENEVOLE_TPL[l] || NOTIF_BENEVOLE_TPL.fr)(m.poste || tn(l, "bénévole"), jourFr, m.heure || "", apres.titre || tn(l, "événement du club"))
     }));
+  }
+});
+
+// Un bénévole avec compte répond « Je ne peux pas » : le dirigeant est prévenu (et peut tirer un remplaçant dans « Bénévoles »).
+const NOTIF_BEN_ABSENT_TPL = {
+  fr: (n, p, j, t) => `${n} ne peut pas assurer « ${p} »${j ? " le " + j : ""} : ${t}.`,
+  en: (n, p, j, t) => `${n} can't take “${p}”${j ? " on " + j : ""}: ${t}.`
+};
+const NOTIF_BEN_VEILLE_TPL = {
+  fr: (p, h, t) => `Demain : « ${p} »${h ? " à " + h : ""} : ${t}. Merci d'avance !`,
+  en: (p, h, t) => `Tomorrow: “${p}”${h ? " at " + h : ""}: ${t}. Thank you!`
+};
+exports.onBenevoleAbsent = onDocumentWritten("clubs/{clubId}/checkins/{id}", async (event) => {
+  const apres = event.data && event.data.after && event.data.after.data();
+  const avant = event.data && event.data.before && event.data.before.data();
+  if (!apres || apres.source !== "benevole" || apres.status !== "absent" || (avant && avant.status === "absent")) return;
+  const clubId = event.params.clubId;
+  const ev = await db.collection("clubs").doc(clubId).collection("events").doc(String(apres.eventId)).get();
+  if (!ev.exists) return;
+  const e = ev.data();
+  const m = (e.benevoles || []).find((x) => x.id === apres.missionId);
+  if (!m) return;
+  const jour = String(m.jour || e.date || "");
+  const jourFr = jour ? jour.split("-").reverse().join("/") : "";
+  const dirs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "dirigeant").get();
+  for (const d of dirs.docs) {
+    await notifierCompte(clubId, uidDe(d), (l) => ({
+      titre: tn(l, "Un bénévole ne peut pas venir"),
+      corps: (NOTIF_BEN_ABSENT_TPL[l] || NOTIF_BEN_ABSENT_TPL.fr)(m.nom || tn(l, "bénévole"), m.poste || tn(l, "bénévole"), jourFr, e.titre || tn(l, "événement du club"))
+    }));
+  }
+});
+
+// Chaque soir : rappel push aux bénévoles avec compte placés sur une mission le lendemain.
+exports.rappelBenevolesVeille = onSchedule({ schedule: "every day 18:00", timeZone: "Europe/Paris", timeoutSeconds: 300 }, async () => {
+  const demain = new Date(Date.now() + 86400000).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
+  const clubs = await db.collection("clubs").get();
+  for (const club of clubs.docs) {
+    if (["suspended", "deleted", "purging"].includes(club.get("status"))) continue;
+    const evs = await club.ref.collection("events").where("date", "==", demain).get();
+    for (const ev of evs.docs) {
+      const e = ev.data();
+      if (e.cancelled) continue;
+      for (const m of (e.benevoles || [])) {
+        if (!m.uid || (m.jour && m.jour !== demain)) continue;
+        await notifierCompte(club.id, m.uid, (l) => ({
+          titre: tn(l, "Rappel bénévole"),
+          corps: (NOTIF_BEN_VEILLE_TPL[l] || NOTIF_BEN_VEILLE_TPL.fr)(m.poste || tn(l, "bénévole"), m.heure || e.heure || "", e.titre || tn(l, "événement du club"))
+        }));
+      }
+    }
   }
 });
 

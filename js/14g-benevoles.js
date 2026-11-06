@@ -81,6 +81,7 @@ function benOuvrir(eid,jour){
       var del=gmBtn("✕","ghost",function(){
         benSauver(eid,benListe(getEvents().find(function(x){ return x.id===eid; })).filter(function(x){ return x.id!==m.id; })); rendre();
       }); del.style.flex="0 0 auto"; del.title="Retirer";
+      if(rep==='non'&&typeof benevRemplacant==='function'){ var rpl=gmBtn('🔁 Remplaçant','primary',function(){ benevRemplacant(eid,m,rendre); }); rpl.style.flex='0 0 auto'; d.appendChild(rpl); }
       d.appendChild(sms); d.appendChild(del); liste.appendChild(d);
     });
   }

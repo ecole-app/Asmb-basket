@@ -165,6 +165,7 @@ function tirTirer(du, au, prefs, comptes, carnet, opts){
     var deja=benListe(e), pris={}, off=tirOfficiels(e);
     ligne.officiels=[]; if(off.table) ligne.officiels.push("Table de marque"); if(off.arbitres) ligne.officiels.push("Arbitrage");
     deja.forEach(function(m){ pris[tirCleMission(m)]=true; });
+    (opts.exclure||[]).forEach(function(k){ pris[k]=true; });
     var viv=tirVivier(e.equipe||"", comptes);
     postes.forEach(function(poste){
       if(off.table&&TIR_POSTES_TABLE.indexOf(poste)>=0) return;
@@ -358,7 +359,8 @@ function tirageOuvrir(){
     f.querySelectorAll("#tir-postes input").forEach(function(i){ p.postes[i.getAttribute("data-poste")]=Math.max(0,Math.min(4,parseInt(i.value,10)||0)); });
     tirPdf(du,au,p);
   });
-  col.appendChild(go); col.appendChild(pdfBtn); f.appendChild(col); s.body.appendChild(sortie);
+  col.appendChild(go); col.appendChild(pdfBtn);
+  col.appendChild(gmBtn("📊 Bilan des bénévoles","soft",function(){ if(typeof benevBilan==="function") benevBilan(); })); f.appendChild(col); s.body.appendChild(sortie);
   var dernier=""; try{ dernier=localStorage.getItem("gm_dernier_tirage")||""; }catch(e){}
   if(dernier && getEvents().some(function(e){ return benListe(e).some(function(m){ return m.tirage===dernier; }); })){
     var rap=document.createElement("div"); rap.style.cssText="font-size:12px;color:var(--mut);margin-top:12px";

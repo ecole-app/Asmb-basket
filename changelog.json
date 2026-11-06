@@ -1,5 +1,23 @@
 [
  {
+  "v": "1793960560",
+  "semver": "1.13.0",
+  "titre": "Bénévoles : remplaçant, rappels et bilan",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Quand un bénévole répond « Je ne peux pas », tu reçois une notification, et un bouton « Remplaçant » dans « Bénévoles » tire quelqu'un d'autre en un appui."
+   },
+   {
+    "roles": ["dirigeant"],
+    "texte": "Les invitations bénévoles sans réponse depuis 3 jours apparaissent dans « À faire aujourd'hui », avec un SMS de relance. Nouveau « Bilan des bénévoles » dans le tirage : qui a fait combien de missions cette saison."
+   },
+   {
+    "roles": ["benevole"],
+    "texte": "Tu reçois un rappel la veille de ta mission, à 18 h."
+   }
+  ]
+ }, {
   "v": "1793960134",
   "semver": "1.12.2",
   "titre": "Bénévole : son équipe et ses notifications",

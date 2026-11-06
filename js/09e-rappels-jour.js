@@ -21,6 +21,7 @@ function rjVerifier(id){
   var k=(id==="portal"&&p==="dirigeant")?"dir":(id==="parent-home"&&p==="parent")?"par":"";
   if(!k||rjDejaVu(k)) return;
   clearTimeout(window.__rjT);
+  if(k==="dir"&&typeof benevInvitesCharger==="function") benevInvitesCharger();
   window.__rjT=setTimeout(function(){
     var on=document.querySelector(".scr.on");
     if(!on||on.id!=="scr-"+id||rjDejaVu(k)||document.getElementById("rj-modale")) return;
@@ -72,6 +73,7 @@ function rjTaches(){
       }});
     }
   }
+  if(window.__invitesBenAttente) t.push({ic:"✉️",lib:"Invitations bénévoles sans réponse",n:window.__invitesBenAttente,go:function(){ if(typeof benevInvitesRelance==="function") benevInvitesRelance(); }});
   var matchs=rjMatchsSemaine();
   var sansConvoc=matchs.filter(function(e){ return e.equipe&&!(e.convocations||[]).length; });
   if(sansConvoc.length) t.push({ic:"📋",lib:"Convocations à envoyer",n:sansConvoc.length,go:function(){ rjChoisirMatch(sansConvoc,showConvocation); }});
