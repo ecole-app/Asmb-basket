@@ -443,8 +443,10 @@ function buildCoachDashboard(el){
   el.innerHTML=loadingHtml("Chargement des présences…");
 
   if(!window.fbReady){window.addEventListener("fb-ready",function(){buildCoachDashboard(el);},{once:true});return;}
+  // Pas encore de club actif (connexion en cours) : on ne lit rien, l'écran se refait au rafraîchissement.
+  if(!window.CURRENT_CLUB_ID) return;
 
-  window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+  Promise.resolve().then(function(){ return window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")); }).then(function(snap){
     var statusByPlayer={};
     snap.forEach(function(d){
       var data=d.data();
@@ -500,7 +502,8 @@ function relancerSansReponse(eventId){
   if(!team)return;
   var players=(team.members&&team.members.length)?getPlayers().filter(function(p){return team.members.indexOf(p.id)>=0;}):getPlayers().filter(function(p){return p.cat===team.cat;});
 
-  window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")).then(function(snap){
+  if(!window.CURRENT_CLUB_ID) return;
+  Promise.resolve().then(function(){ return window.fbGetDocs(window.fbCollection(window.fbDb,"checkins")); }).then(function(snap){
     var responded={};
     snap.forEach(function(d){var data=d.data();if(data.eventId===eventId)responded[data.playerId]=true;});
     var noResponse=players.filter(function(p){return !responded[p.id];});

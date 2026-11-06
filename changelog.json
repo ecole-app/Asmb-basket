@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793945445",
+  "semver": "1.10.1",
+  "titre": "Tableau de bord coach : plus d'erreur au démarrage",
+  "points": [
+   {
+    "roles": ["coach"],
+    "texte": "Le tableau de bord des présences n'essaie plus de se charger avant la fin de la connexion au club."
+   }
+  ]
+ }, {
   "v": "1793919323",
   "semver": "1.10.0",
   "titre": "Officiels de table, arbitrage et PDF du planning",
