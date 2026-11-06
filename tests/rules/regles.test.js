@@ -1608,4 +1608,9 @@ describe("Appel à bénévoles (ben_inscriptions)", () => {
     await assertSucceeds(getDoc(doc(await as("dirA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
     await assertSucceeds(deleteDoc(doc(await as("dirA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
   });
+  it("refus d'un parent : seulement en son nom", async () => {
+    const ref = (id, uid) => setDoc(doc(id, "clubs/A/checkins/e1_refus_x_m1"), { eventId: "e1", missionId: "m1", benUid: uid, status: "refus", source: "parent_refus", ts: serverTimestamp() });
+    await assertFails(ref(await as("parentA"), "dirA"));
+    await assertSucceeds(ref(await as("parentA"), "parentA"));
+  });
 });

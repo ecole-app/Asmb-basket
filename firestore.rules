@@ -730,7 +730,9 @@ service cloud.firestore {
       // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que
       // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.
       match /licences/{id}     { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
-      match /checkins/{id}     { allow read: if readMember(clubId); allow write: if member(clubId); }
+      match /checkins/{id}     { allow read: if readMember(clubId);
+        // Refus d'un parent (appel à bénévoles) : au nom du parent connecté seulement.
+        allow write: if member(clubId) && (request.resource == null || request.resource.data.get('source', '') != 'parent_refus' || request.resource.data.get('benUid', '') == request.auth.uid); }
       // Appel à bénévoles : chacun crée et retire seulement SON inscription ; la Cloud Function onInscriptionBenevole
       // place la personne dans events/{id}.benevoles (ou répond « complet »). Pas de modification côté client.
       match /ben_inscriptions/{id} {

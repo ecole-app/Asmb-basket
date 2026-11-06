@@ -48,6 +48,7 @@ const NOTIF_LANGUES = ["en", "ar", "es", "it", "de"];
 const NOTIF_TXT = {
   "Un bénévole ne peut pas venir": ["A volunteer can't come", "متطوع لا يستطيع الحضور", "Un voluntario no puede venir", "Un volontario non può venire", "Eine Helferin / ein Helfer kann nicht kommen"],
   "Votre enfant est bénévole": ["Your child volunteered", "ابنك تطوّع", "Su hijo se ha apuntado como voluntario", "Suo figlio si è offerto come volontario", "Ihr Kind hat sich als Helfer eingetragen"],
+  "Un parent refuse une inscription": ["A parent declined a sign-up", "ولي أمر رفض تسجيلاً", "Un padre rechaza una inscripción", "Un genitore rifiuta un'iscrizione", "Ein Elternteil lehnt eine Anmeldung ab"],
   "Rappel bénévole": ["Volunteer reminder", "تذكير للمتطوع", "Recordatorio de voluntario", "Promemoria volontario", "Helfer-Erinnerung"],
   "Nouveau message": ["New message", "رسالة جديدة", "Nuevo mensaje", "Nuovo messaggio", "Neue Nachricht"],
   "Communauté": ["Community", "المجتمع", "Comunidad", "Community", "Community"],
@@ -1681,4 +1682,46 @@ exports.onDesinscriptionBenevole = onDocumentDeleted("clubs/{clubId}/ben_inscrip
     const reste = liste.filter((m) => !(m.auto && m.uid === ins.uid && m.poste === ins.poste));
     if (reste.length !== liste.length) tx.update(evRef, { benevoles: reste });
   });
+});
+
+// Un parent refuse la participation de son enfant comme bénévole : la mission disparaît, les dirigeants sont prévenus.
+const NOTIF_REFUS_PARENT_TPL = {
+  fr: (n, p, t) => `Le parent de ${n} refuse sa participation (« ${p} », ${t}). La place est de nouveau libre.`,
+  en: (n, p, t) => `${n}'s parent declined (“${p}”, ${t}). The spot is free again.`,
+  ar: (n, p, t) => `ولي أمر ${n} رفض المشاركة («${p}»، ${t}). المكان متاح من جديد.`,
+  es: (n, p, t) => `El padre/madre de ${n} rechaza su participación («${p}», ${t}). La plaza vuelve a estar libre.`,
+  it: (n, p, t) => `Il genitore di ${n} rifiuta la partecipazione («${p}», ${t}). Il posto è di nuovo libero.`,
+  de: (n, p, t) => `Das Elternteil von ${n} lehnt die Teilnahme ab („${p}“, ${t}). Der Platz ist wieder frei.`
+};
+exports.onRefusParentBenevole = onDocumentWritten("clubs/{clubId}/checkins/{id}", async (event) => {
+  const apres = event.data && event.data.after && event.data.after.data();
+  const avant = event.data && event.data.before && event.data.before.data();
+  if (!apres || avant || apres.source !== "parent_refus") return;
+  const clubId = event.params.clubId;
+  const club = db.collection("clubs").doc(clubId);
+  const pu = await db.collection("users").doc(String(apres.benUid)).get();
+  const p = pu.exists ? pu.data() : null;
+  if (!p || p.clubId !== clubId || !(p.roles || []).includes("parent")) return;
+  const evRef = club.collection("events").doc(String(apres.eventId));
+  let retire = null, titre = "";
+  await db.runTransaction(async (tx) => {
+    const ev = await tx.get(evRef);
+    if (!ev.exists) return;
+    const e = ev.data();
+    titre = e.titre || "";
+    const liste = Array.isArray(e.benevoles) ? e.benevoles : [];
+    const m = liste.find((x) => x.id === apres.missionId && x.auto && x.pid && (p.linkedPlayerIds || []).map(String).includes(String(x.pid)));
+    if (!m) return;
+    retire = m;
+    tx.update(evRef, { benevoles: liste.filter((x) => x.id !== m.id) });
+  });
+  if (!retire) return;
+  await club.collection("ben_inscriptions").get().then((s) => Promise.all(s.docs.filter((d) => d.get("uid") === retire.uid && d.get("eventId") === String(apres.eventId) && d.get("poste") === retire.poste).map((d) => d.ref.delete()))).catch(() => {});
+  const dirs = await db.collection("users").where("clubId", "==", clubId).where("roles", "array-contains", "dirigeant").get();
+  for (const d of dirs.docs) {
+    await notifierCompte(clubId, uidDe(d), (l) => ({
+      titre: tn(l, "Un parent refuse une inscription"),
+      corps: (NOTIF_REFUS_PARENT_TPL[l] || NOTIF_REFUS_PARENT_TPL.fr)(retire.nom || tn(l, "bénévole"), retire.poste, titre || tn(l, "événement du club"))
+    }));
+  }
 });

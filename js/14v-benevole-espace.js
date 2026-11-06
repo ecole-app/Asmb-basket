@@ -416,5 +416,11 @@ function benevAppelParents(){
   var t=document.createElement("div"); t.style.cssText="font-size:14px;color:var(--txt);line-height:1.5;margin-bottom:14px";
   t.textContent=(trouve.m.nom||"Votre enfant")+" s'est inscrit comme bénévole : « "+trouve.m.poste+" » — "+(trouve.e.titre||eventTypeLabel(trouve.e.type))+", "+benJourTxt(trouve.e)+(trouve.e.heure?" à "+trouve.e.heure:"")+". Le club peut le retirer si besoin.";
   s.body.appendChild(t);
+  s.body.appendChild(gmBtn("Je refuse sa participation","ghost",function(){
+    var uid=u.uid; if(!uid) return;
+    window.fbSetDoc(window.fbDoc(window.fbDb,"checkins",trouve.e.id+"_refus_"+uid+"_"+trouve.m.id),{eventId:trouve.e.id,missionId:trouve.m.id,benUid:uid,status:"refus",source:"parent_refus",ts:window.fbServerTimestamp()})
+      .then(function(){ vus.push(cle); try{ localStorage.setItem("gm_appel_vus",JSON.stringify(vus.slice(-80))); }catch(x){} s.modal.remove(); showToast("Refus envoyé : le club est prévenu"); setTimeout(benevAppelParents,300); })
+      .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
+  }));
   s.body.appendChild(gmBtn("OK, j'ai vu","primary",function(){ vus.push(cle); try{ localStorage.setItem("gm_appel_vus",JSON.stringify(vus.slice(-80))); }catch(x){} s.modal.remove(); setTimeout(benevAppelParents,300); }));
 }

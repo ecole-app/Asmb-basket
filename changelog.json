@@ -1,5 +1,19 @@
 [
  {
+  "v": "1793964597",
+  "semver": "1.14.1",
+  "titre": "Appel à bénévoles : refus du parent",
+  "points": [
+   {
+    "roles": [
+     "parent",
+     "dirigeant"
+    ],
+    "texte": "Quand ton enfant s'inscrit comme bénévole, tu peux refuser sa participation depuis le message : la place est libérée et le club est prévenu."
+   }
+  ]
+ },
+ {
   "v": "1793962669",
   "semver": "1.14.0",
   "titre": "Appel à bénévoles",
