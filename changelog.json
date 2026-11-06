@@ -1,5 +1,15 @@
 [
  {
+  "v": "1793946831",
+  "semver": "1.10.3",
+  "titre": "Dossier d'inscription : case Options vierge",
+  "points": [
+   {
+    "roles": ["dirigeant"],
+    "texte": "Dans Documents › Tarifs, la case des options n'affiche plus d'exemple."
+   }
+  ]
+ }, {
   "v": "1793945817",
   "semver": "1.10.2",
   "titre": "Dossier d'inscription : champs tarifs vierges",

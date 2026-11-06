@@ -229,7 +229,7 @@ function dossierEditeur(){
       });
       var b=gmBtn("+ Ajouter","soft",function(){ liste.push({label:"",prix:0}); render(); }); b.style.marginBottom="10px"; ct.appendChild(b);
     }
-    lignesPrix(d.tarifs.lignes,"Licences par catégorie","");
+    lignesPrix(d.tarifs.lignes,"Licences par catégorie","U11 (2017 / 2016)");
     lignesPrix(d.tarifs.options,"Options (cases à cocher)","");
     champ(ct,"Remise fratrie",d.tarifs.fratrie,function(v){d.tarifs.fratrie=v;},{max:200});
     champ(ct,"Modes de règlement (et IBAN si virement)",d.tarifs.reglement,function(v){d.tarifs.reglement=v;},{multi:true,rows:4,max:600});
