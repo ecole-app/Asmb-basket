@@ -424,3 +424,53 @@ function benevAppelParents(){
   }));
   s.body.appendChild(gmBtn("OK, j'ai vu","primary",function(){ vus.push(cle); try{ localStorage.setItem("gm_appel_vus",JSON.stringify(vus.slice(-80))); }catch(x){} s.modal.remove(); setTimeout(benevAppelParents,300); }));
 }
+
+// ── Suivi des appels côté dirigeant/coach (dans l'appli, jamais en notification) ──
+// Nouvelles inscriptions depuis la dernière fois qu'on a vu la liste « À faire aujourd'hui » : l'horodatage est dans l'identifiant de la mission (« a » + Date.now() en base 36).
+function benevAppelHorodatage(m){
+  var id=String((m&&m.id)||""); if(id.charAt(0)!=="a") return 0;
+  var t=parseInt(id.slice(1,9),36); return isFinite(t)?t:0;
+}
+function benevAppelVuLe(){ try{ return Number(localStorage.getItem("gm_appel_dir_vu")||0); }catch(e){ return 0; } }
+function benevAppelVu(){ try{ localStorage.setItem("gm_appel_dir_vu",String(Date.now())); }catch(e){} }
+function benevAppelNouveaux(){
+  var depuis=benevAppelVuLe(), res=[];
+  (getEvents()||[]).forEach(function(e){
+    if(!e||!e.appel||e.cancelled||!Array.isArray(e.benevoles)) return;
+    var n=e.benevoles.filter(function(m){ return m&&m.auto&&benevAppelHorodatage(m)>depuis; }).length;
+    if(n) res.push({e:e,n:n});
+  });
+  return res;
+}
+// Appels ouverts dont le jour est dans 3 jours ou moins et qui ont encore des places libres.
+function benevAppelManques(){
+  var auj=benJourLocal(), lim=benJourLocal(new Date(Date.now()+3*86400000));
+  return benevAppelsOuverts().filter(function(e){ var d=String(e.date).slice(0,10); return d>=auj&&d<=lim; })
+    .map(function(e){ var pl=benevAppelPlaces(e).filter(function(x){ return x.reste>0; }); return {e:e,places:pl,reste:pl.reduce(function(a,x){ return a+x.reste; },0)}; })
+    .filter(function(x){ return x.reste>0; });
+}
+// Republie l'appel dans un canal, avec seulement les places qui restent.
+function benevAppelRelancer(eid){
+  var e=getEvents().find(function(x){ return x.id===eid; });
+  if(!e||!e.appel||e.appel.ouvert===false){ askAlert("Cet appel est terminé."); return; }
+  var pl=benevAppelPlaces(e).filter(function(x){ return x.reste>0; });
+  if(!pl.length){ showToast("Toutes les places sont prises"); return; }
+  var resume=pl.map(function(x){ return x.reste+" × "+x.poste; }).join(", ");
+  askConfirm("Republier l'appel dans le canal Général ? Il reste : "+resume+".",{confirmText:"Relancer"}).then(function(ok){
+    if(!ok) return;
+    window.fbAddDoc(window.fbCollection(window.fbDb,"channels","general","messages"),Object.assign({
+      type:"appel",eventId:e.id,eventTitre:(e.equipe?e.equipe+" · ":"")+(e.titre||eventTypeLabel(e.type)),eventDate:e.date,eventHeure:e.heure||"",eventLieu:e.lieu||"",resume:resume,
+      pseudo:myChatPseudo(),ts:window.fbServerTimestamp()
+    },mySenderMeta())).then(function(){ showToast("Appel relancé"); }).catch(function(er){ askAlert("Pas publié : "+((er&&er.code)||er)); });
+  });
+}
+function benevAppelChoisir(liste,action,titre){
+  if(liste.length===1){ action(liste[0].e.id); return; }
+  var s=gmSheet(titre);
+  liste.forEach(function(x){
+    var b=document.createElement("button"); b.type="button"; b.className="gm-plus-choix";
+    b.innerHTML='<span style="display:block;font-weight:800" data-notr>'+authEsc(benevEvLibelle(x.e))+'</span>';
+    b.addEventListener("click",function(){ s.modal.remove(); action(x.e.id); });
+    s.body.appendChild(b);
+  });
+}

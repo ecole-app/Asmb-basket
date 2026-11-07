@@ -1,5 +1,18 @@
 [
  {
+  "v": "1794061396",
+  "semver": "1.17.0",
+  "titre": "Appels à bénévoles : suivi dans l'appli",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « À faire aujourd'hui », tu vois les nouvelles inscriptions à tes appels à bénévoles, et les postes encore vides à 3 jours ou moins avec un bouton « Relancer » qui republie l'appel dans le canal Général. Aucune notification : c'est seulement dans l'appli."
+   }
+  ]
+ },
+ {
   "v": "1794023260",
   "semver": "1.16.0",
   "titre": "Conseil : double authentification",

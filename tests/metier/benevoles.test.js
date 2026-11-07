@@ -145,3 +145,27 @@ describe("Appel à bénévoles : places restantes (benevAppelPlaces)", () => {
     assert.equal(v(evs).benevAppelsOuverts().map((e) => e.id).join(), "1");
   });
 });
+
+describe("Suivi des appels côté dirigeant (14v)", () => {
+  function v(events) { return charger(["js/14g-benevoles.js", "js/14v-benevole-espace.js"], { getEvents: () => events, eventTypeLabel: () => "" }); }
+  const jour = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  it("l'horodatage se lit dans l'identifiant de la mission automatique", () => {
+    const t = Date.now(), id = "a" + t.toString(36) + "xyz1";
+    assert.equal(v([]).benevAppelHorodatage({ id }), t);
+    assert.equal(v([]).benevAppelHorodatage({ id: "m123" }), 0);
+  });
+  it("nouvelles inscriptions : seulement les missions automatiques récentes", () => {
+    const ancien = "a" + (Date.now() - 86400000 * 400).toString(36) + "ab12", neuf = "a" + (Date.now() + 5000).toString(36) + "cd34";
+    const e = { id: "1", appel: { postes: { Marqueur: 3 } }, benevoles: [{ id: neuf, auto: true, poste: "Marqueur" }, { id: ancien, auto: true, poste: "Marqueur" }, { id: "m1", poste: "Marqueur" }] };
+    const c2 = v([e]); c2.benevAppelVu();
+    const r = c2.benevAppelNouveaux();
+    assert.equal(r.length, 1); assert.equal(r[0].n, 1);
+  });
+  it("postes vides à 3 jours ou moins : ni trop loin, ni complets", () => {
+    const proche = { id: "1", date: jour(2), appel: { postes: { Marqueur: 2 } }, benevoles: [{ id: "x", poste: "Marqueur", nom: "A" }] };
+    const loin = { id: "2", date: jour(10), appel: { postes: { Marqueur: 2 } } };
+    const plein = { id: "3", date: jour(1), appel: { postes: { Marqueur: 1 } }, benevoles: [{ id: "y", poste: "Marqueur", nom: "B" }] };
+    const r = v([proche, loin, plein]).benevAppelManques();
+    assert.equal(r.length, 1); assert.equal(r[0].e.id, "1"); assert.equal(r[0].reste, 1);
+  });
+});

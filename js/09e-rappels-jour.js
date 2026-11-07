@@ -75,6 +75,12 @@ function rjTaches(){
     }
   }
   if(window.__invitesBenAttente) t.push({ic:"✉️",lib:"Invitations bénévoles sans réponse",n:window.__invitesBenAttente,go:function(){ if(typeof benevInvitesRelance==="function") benevInvitesRelance(); }});
+  if(typeof benevAppelNouveaux==="function"&&perm("planning")){
+    var nv=benevAppelNouveaux(), nn=nv.reduce(function(a,x){ return a+x.n; },0);
+    if(nn) t.push({ic:"📣",lib:"Nouvelles inscriptions à vos appels à bénévoles",n:nn,go:function(){ benevAppelChoisir(nv,function(id){ benOuvrir(id); },"Choisir l'événement"); }});
+    var mq=benevAppelManques();
+    if(mq.length) t.push({ic:"🙋",lib:"Postes de bénévoles encore vides (dans 3 jours ou moins)",n:mq.reduce(function(a,x){ return a+x.reste; },0),rouge:true,go:function(){ benevAppelChoisir(mq,benevAppelRelancer,"Relancer l'appel"); }});
+  }
   var matchs=rjMatchsSemaine();
   var sansConvoc=matchs.filter(function(e){ return e.equipe&&!(e.convocations||[]).length; });
   if(sansConvoc.length) t.push({ic:"📋",lib:"Convocations à envoyer",n:sansConvoc.length,go:function(){ rjChoisirMatch(sansConvoc,showConvocation); }});
@@ -106,6 +112,7 @@ function rjDirigeant(){
   var t=rjTaches();
   if(!t.length) return; // rien à faire (ou données pas encore arrivées) : on revérifiera au prochain passage
   rjMarquer("dir");
+  if(typeof benevAppelVu==="function") benevAppelVu();
   rjModale(function(box,fermer){
     var d=document.createElement("div"); d.style.cssText="font-size:12px;font-weight:800;color:var(--dkg);letter-spacing:.04em"; d.textContent=rjDateLongue();
     var h=document.createElement("div"); h.style.cssText="font-weight:900;font-size:21px;margin:2px 0 14px"; h.textContent="À faire aujourd'hui";
