@@ -1,5 +1,18 @@
 [
  {
+  "v": "1794023260",
+  "semver": "1.16.0",
+  "titre": "Conseil : double authentification",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Dans « À faire aujourd'hui », un conseil te propose d'activer la double authentification pour protéger ton compte. Ce n'est pas obligatoire : « Pas maintenant » le cache 30 jours."
+   }
+  ]
+ },
+ {
   "v": "1794022885",
   "semver": "1.15.1",
   "titre": "Double authentification : œil du mot de passe",

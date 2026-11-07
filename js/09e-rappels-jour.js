@@ -97,6 +97,11 @@ function rjChoisirMatch(l,ouvrir){
     s.body.appendChild(b);
   });
 }
+function rjConseilSecurite(){
+  if(window.GM_DEMO||window.SUPPORT_MODE||typeof mfaActive!=="function") return false;
+  try{ if(mfaActive()) return false; var j=Number(localStorage.getItem("gm_conseil_mfa")||0); if(j&&Date.now()<j) return false; }catch(e){ return false; }
+  return !!(window.fbAuth&&window.fbAuth.currentUser);
+}
 function rjDirigeant(){
   var t=rjTaches();
   if(!t.length) return; // rien à faire (ou données pas encore arrivées) : on revérifiera au prochain passage
@@ -113,6 +118,18 @@ function rjDirigeant(){
       b.addEventListener("click",function(){ fermer(); try{ x.go(); }catch(e){ if(typeof gmSignalerErreur==="function") gmSignalerErreur(e,"rj:"+x.lib); } });
       box.appendChild(b);
     });
+    // Conseil (pas une tâche) : la double authentification, tant qu'elle n'est pas activée et pas écartée (30 jours).
+    var cs=rjConseilSecurite();
+    if(cs){
+      var c=document.createElement("div"); c.style.cssText="margin:14px 0 10px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb, var(--dkg) 8%, transparent);border:1px solid var(--bdr)";
+      c.innerHTML='<div style="font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--dkg);text-transform:uppercase">Conseil</div>'
+        +'<div style="font-weight:800;font-size:14px;margin-top:4px">Protégez votre compte avec la double authentification</div>'
+        +'<div style="font-size:12.5px;color:var(--txt2);line-height:1.45;margin-top:4px">Un code à 6 chiffres en plus du mot de passe. Votre compte ouvre toutes les données du club.</div>';
+      var r=document.createElement("div"); r.style.cssText="display:flex;gap:8px;margin-top:10px";
+      var a=rjBouton("Activer",true,function(){ fermer(); if(typeof mfaOuvrir==="function") mfaOuvrir(); });
+      var z=rjBouton("Pas maintenant",false,function(){ try{ localStorage.setItem("gm_conseil_mfa",String(Date.now()+30*86400000)); }catch(e){} c.remove(); });
+      a.style.flex="1"; z.style.flex="1"; r.appendChild(a); r.appendChild(z); c.appendChild(r); box.appendChild(c);
+    }
     box.appendChild(rjBouton("Plus tard",false,fermer));
     var n=document.createElement("div"); n.style.cssText="text-align:center;font-size:11px;color:var(--mut);margin-top:10px"; n.textContent="Affiché une fois par jour, à la première ouverture.";
     box.appendChild(n);
