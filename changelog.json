@@ -1,5 +1,22 @@
 [
  {
+  "v": "1794022885",
+  "semver": "1.15.1",
+  "titre": "Double authentification : œil du mot de passe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur",
+     "benevole"
+    ],
+    "texte": "Quand l'appli te demande ton mot de passe pour activer ou désactiver la double authentification, tu peux l'afficher avec l'œil."
+   }
+  ]
+ },
+ {
   "v": "1793980514",
   "semver": "1.15.0",
   "titre": "Double authentification",

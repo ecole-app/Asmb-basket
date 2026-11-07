@@ -81,7 +81,11 @@ function mfaMotDePasse(titre,suite){
   var u=window.fbAuth.currentUser;
   var s=gmSheet(titre);
   mfaTexte(s.body,"Pour votre sécurité, confirmez votre mot de passe.");
-  var p=mfaChamp(s.body,"Mot de passe",{type:"password"});
+  var l=document.createElement("label"); l.className="form-label"; l.textContent="Mot de passe"; s.body.appendChild(l);
+  var w=document.createElement("div"); w.style.marginBottom="10px"; w.innerHTML=authPassField("mfa-mdp","••••••••"); s.body.appendChild(w);
+  authWirePassToggles();
+  var p=document.getElementById("mfa-mdp");
+  p.addEventListener("keydown",function(e){ if(e.key==="Enter") b.click(); });
   var err=mfaErreur(s.body);
   var b=gmBtn("Continuer","primary",function(){
     if(!p.value){ err("Mot de passe requis."); return; }
