@@ -440,6 +440,13 @@ service cloud.firestore {
       allow get: if true;                                 // le site caisse buvette n'a pas de connexion : le code protège l'accès
       allow list: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);      // le club voit ses codes actifs pour les révoquer
       allow create: if dirigeant(request.resource.data.clubId);
+      // La caisse (même barrière : le code) tient à jour, sur le code lui-même, la liste des bénévoles du jour
+      // (prénom + initiale) et les compteurs d'articles offerts : rien d'autre ne peut changer.
+      allow update: if resource.data.expiresAt > request.time
+        && buvetteOuverte(resource.data.clubId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['equipe', 'offerts'])
+        && request.resource.data.get('equipe', []) is list && request.resource.data.get('equipe', []).size() <= 200
+        && request.resource.data.get('offerts', {}) is map && request.resource.data.get('offerts', {}).size() <= 200;
       allow delete: if dirigeant(resource.data.clubId) || purgeWindow(resource.data.clubId);    // révocation, ou purge du club
     }
 
@@ -837,7 +844,7 @@ service cloud.firestore {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'inventaire');
         allow delete: if dirigeant(clubId);
         allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
-          && request.resource.data.keys().hasOnly(['id','viaCode','benevole','date','t','mode','total','lignes'])
+          && request.resource.data.keys().hasOnly(['id','viaCode','benevole','service','date','t','mode','total','lignes'])
           && request.resource.data.total is number && request.resource.data.total > 0
           && request.resource.data.lignes is list && request.resource.data.lignes.size() <= 100;
       }
@@ -850,6 +857,37 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['blocs','maj'])
           && request.resource.data.blocs is list && request.resource.data.blocs.size() <= 20;
         allow delete: if dirigeant(clubId) || hasPermission(clubId, 'inventaire');
+      }
+      // Produits offerts aux bénévoles : réglage du club (maximum par personne ou par produit), lisible sans
+      // connexion par la caisse (rien de sensible : un mode et un nombre), écrit par le dirigeant ou l'inventaire.
+      match /buvette_reglages/{id} {
+        allow get: if true;
+        allow create, update: if (dirigeant(clubId) || hasPermission(clubId, 'inventaire'))
+          && request.resource.data.keys().hasOnly(['mode', 'max', 'maj'])
+          && request.resource.data.mode in ['personne', 'produit']
+          && request.resource.data.max is int && request.resource.data.max >= 0 && request.resource.data.max <= 20;
+        allow delete: if dirigeant(clubId) || hasPermission(clubId, 'inventaire');
+      }
+      // Articles offerts en caisse (une ligne par remise) : la caisse ne peut qu'ajouter.
+      match /buvette_offerts/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'inventaire');
+        allow delete: if dirigeant(clubId);
+        allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
+          && request.resource.data.keys().hasOnly(['id','viaCode','benevole','service','date','t','pour','lignes','valeur'])
+          && request.resource.data.pour is string && request.resource.data.pour.size() <= 60
+          && request.resource.data.valeur is number && request.resource.data.valeur >= 0
+          && request.resource.data.lignes is list && request.resource.data.lignes.size() <= 50;
+      }
+      // Créneaux de caisse : un bénévole prend la caisse (début), la passe (fin). La caisse ne peut qu'ajouter
+      // un créneau et poser sa fin.
+      match /buvette_services/{id} {
+        allow read: if readDirigeant(clubId) || hasPermission(clubId, 'inventaire');
+        allow delete: if dirigeant(clubId);
+        allow create: if buvetteCodeValid(clubId, request.resource.data.get('viaCode',''))
+          && request.resource.data.keys().hasOnly(['id','viaCode','benevole','date','debut','fin'])
+          && request.resource.data.debut is number;
+        allow update: if buvetteCodeValid(clubId, resource.data.get('viaCode',''))
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fin']);
       }
       match /sponsors/{id} {
         allow read: if readDirigeant(clubId) || hasPermission(clubId, 'sponsors');

@@ -1121,7 +1121,7 @@ var CLUB_SOUS_COLLECTIONS=["stats_joueurs","players","roster","rattachements","t
  "joinRequests","gallery","feedback","comptabilite","inventaire","backups","notes_frais",
  "annuaire","app_data","reminders_sent","inscription_submissions","reinscriptions","essais","evt_inscrits","support_sessions","buvette_ventes",
  "sponsors","factures","sponsor_formules","evt_dossiers","docs_club","facturation_compteur","push_subscriptions","push_ping","ffbb_demandes",
- "championnats","indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas","indep_annonces","indep_reactions","indep_discussions","indep_lignes","indep_reglages","indep_presences","benevoles","match_stats","buvette_procedure","club_docs","club_docs_parts","budgetPrev"];
+ "championnats","indep_clients","indep_notes","indep_creneaux","indep_seances","indep_resas","indep_annonces","indep_reactions","indep_discussions","indep_lignes","indep_reglages","indep_presences","benevoles","match_stats","buvette_procedure","buvette_reglages","buvette_offerts","buvette_services","club_docs","club_docs_parts","budgetPrev"];
 
 // "clubs" est une collection globale : le chemin passe brut, sans que le club
 // actif de la session ne se substitue a celui qu'on purge.

@@ -516,6 +516,39 @@ describe("Caisse buvette (sans compte, avec code du jour)", () => {
     const db = await as(null);
     await assertSucceeds(setDoc(doc(db, "clubs/A/buvette_ventes/x"), { id: "x", viaCode: "BUVA", benevole: "Sam", date: "2026-10-11", t: 1, mode: "especes", total: 4, lignes: [] }));
   });
+  it("équipe de caisse et offerts : seuls ces deux champs du code bougent", async () => {
+    const db = await as(null);
+    await assertSucceeds(updateDoc(doc(db, "buvette_codes/BUVA"), { equipe: [{ n: "Sam L.", d: 1 }] }));
+    await assertSucceeds(updateDoc(doc(db, "buvette_codes/BUVA"), { offerts: { "sam l.": { total: 1 } } }));
+    await assertFails(updateDoc(doc(db, "buvette_codes/BUVA"), { expiresAt: futur() }));
+    await assertFails(updateDoc(doc(db, "buvette_codes/BUVA"), { clubId: "L" }));
+    await assertFails(updateDoc(doc(db, "buvette_codes/BUVOLD"), { equipe: [] }));
+    await assertFails(updateDoc(doc(db, "buvette_codes/BUVA"), { equipe: new Array(201).fill({ n: "x" }) }));
+  });
+  it("produits offerts : réglage lisible sans compte, écrit par le dirigeant ; la caisse ajoute seulement", async () => {
+    const vis = await as(null);
+    await assertSucceeds(getDoc(doc(vis, "clubs/A/buvette_reglages/main")));
+    await assertFails(setDoc(doc(vis, "clubs/A/buvette_reglages/main"), { mode: "personne", max: 2, maj: 1 }));
+    const dir = await as("dirA");
+    await assertSucceeds(setDoc(doc(dir, "clubs/A/buvette_reglages/main"), { mode: "personne", max: 2, maj: 1 }));
+    await assertFails(setDoc(doc(dir, "clubs/A/buvette_reglages/main"), { mode: "autre", max: 2, maj: 1 }));
+    await assertFails(setDoc(doc(dir, "clubs/A/buvette_reglages/main"), { mode: "produit", max: 99, maj: 1 }));
+    const of = { id: "o1", viaCode: "BUVA", benevole: "Sam", service: "s1", date: "2026-11-10", t: 1, pour: "Léa M.", lignes: [], valeur: 1.5 };
+    await assertSucceeds(setDoc(doc(vis, "clubs/A/buvette_offerts/o1"), of));
+    await assertFails(setDoc(doc(vis, "clubs/A/buvette_offerts/o2"), { ...of, id: "o2", viaCode: "BUVOLD" }));
+    await assertFails(setDoc(doc(vis, "clubs/A/buvette_offerts/o3"), { ...of, id: "o3", tel: "0600000000" }));
+    await assertFails(getDoc(doc(vis, "clubs/A/buvette_offerts/o1")));
+    await assertSucceeds(getDoc(doc(dir, "clubs/A/buvette_offerts/o1")));
+  });
+  it("créneaux de caisse : la caisse crée un créneau et pose sa fin, rien d'autre", async () => {
+    const vis = await as(null);
+    const sv = { id: "s1", viaCode: "BUVA", benevole: "Sam L.", date: "2026-11-10", debut: 1 };
+    await assertSucceeds(setDoc(doc(vis, "clubs/A/buvette_services/s1"), sv));
+    await assertSucceeds(updateDoc(doc(vis, "clubs/A/buvette_services/s1"), { fin: 2 }));
+    await assertFails(updateDoc(doc(vis, "clubs/A/buvette_services/s1"), { benevole: "Autre" }));
+    await assertFails(setDoc(doc(vis, "clubs/A/buvette_services/s2"), { ...sv, id: "s2", viaCode: "BUVOLD" }));
+    await assertFails(getDoc(doc(vis, "clubs/A/buvette_services/s1")));
+  });
   it("procédure de la caisse : lisible sans compte, écrite par le dirigeant seul", async () => {
     const vis = await as(null);
     const ok = { blocs: [{ titre: "Allumage", etapes: [{ texte: "Compter le fond de caisse" }] }], maj: 1 };

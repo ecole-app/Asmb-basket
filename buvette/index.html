@@ -79,6 +79,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .pay-cb{background:var(--dkg);color:#fff}
 .sale-ok{font-size:12.5px;font-weight:700;color:var(--grn);text-align:center;margin-top:8px;min-height:16px}
 
+/* CRÉNEAUX, OFFERTS, FENÊTRES */
+.who-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1.5px solid var(--bdr);border-radius:var(--rs);padding:8px 12px;margin-bottom:10px;font-size:13px}
+.who-bar b{font-weight:800}
+.mini-btn{padding:8px 12px;font-size:12px;font-weight:800;border:none;border-radius:14px;background:var(--dkg);color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif}
+.mini-btn.sec{background:var(--bg);color:var(--txt);border:1.5px solid var(--bdr)}
+.pay-off{background:#e8670a;color:#fff;grid-column:1/-1}
+#modal{position:fixed;inset:0;background:rgba(20,20,31,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+#modal .mcard{background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:16px;width:100%;max-width:520px;max-height:88vh;overflow:auto}
+#modal h2{font-size:16px;font-weight:800;margin-bottom:10px}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.pick button{padding:11px 8px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--sf);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--txt)}
+.pick button.on{border-color:var(--dkg);background:rgba(91,91,240,.1);color:var(--dkg)}
+.add-row{display:flex;gap:6px;margin-bottom:10px}
+.add-row input{flex:1;min-width:0;padding:10px;font-size:14px;border:2px solid var(--bdr);border-radius:var(--rx);font-family:'DM Sans',sans-serif}
+.off-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13.5px}
+.off-row .q{display:flex;align-items:center;gap:8px;font-weight:800}
+.off-row .q button{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--sf);font-size:16px;font-weight:800;cursor:pointer}
+.m-info{font-size:12px;color:var(--mut);margin:6px 0}
+.m-err{font-size:12px;color:var(--red);font-weight:700;min-height:16px;margin:4px 0}
+.m-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+
 /* PROCEDURE */
 .proc-bar{height:8px;border-radius:6px;background:var(--bdr);overflow:hidden;margin:6px 0 4px}
 .proc-bar>div{height:100%;background:var(--grn);border-radius:6px;transition:width .2s}
@@ -141,11 +162,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
       <button class="pay-btn pay-cb" id="recap-print">📄 PDF / Imprimer</button>
       <button class="pay-btn pay-esp" id="recap-csv">⬇ Fichier Excel (CSV)</button>
     </div>
-    <div class="gate-hint" style="text-align:center">Ce récap ne contient que les ventes faites sur cet appareil avec ce code. Remettez-le au trésorier en fin d'événement.</div>
+    <div class="gate-hint" style="text-align:center">Ce récap ne contient que les ventes faites sur cet appareil avec ce code ; le total de toutes les caisses est dans l'appli du club (Inventaire › Journées buvette). Remettez-le au trésorier en fin d'événement.</div>
   </div>
 
   <!-- CAISSE -->
   <div class="panel active" id="panel-caisse">
+    <div class="who-bar"><div>🧑 À la caisse : <b id="who-name"></b></div><button class="mini-btn" id="btn-main">🔄 Passer la main</button></div>
     <div id="prod-grid" class="prod-grid"></div>
     <div class="panier-wrap">
       <div class="panier-title"><span>🛒 Panier</span><span id="panier-count"></span></div>
@@ -158,6 +180,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     <div class="pay-btns">
       <button class="pay-btn pay-esp" id="btn-esp">💵 Espèces</button>
       <button class="pay-btn pay-cb" id="btn-cb">💳 CB</button>
+      <button class="pay-btn pay-off hidden" id="btn-offert">🎁 Offrir un produit à un bénévole</button>
     </div>
     <div class="sale-ok" id="sale-ok"></div>
   </div>
@@ -173,7 +196,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
 import {
-  getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch, setDoc
+  getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch, setDoc, updateDoc, arrayUnion, increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -235,9 +258,23 @@ let session = null;       // { code, clubId, clubName, validUntil, benevole }
 let items = [];           // articles buvette live (Firestore)
 let panier = [];          // { id, name, price, qty, stock }
 let unsubInventaire = null;
+let unsubCode = null, unsubReglages = null;
+let codeData = {};        // document buvette_codes/{code} : equipe + offerts (compteurs)
+let reglages = null;      // { mode:'personne'|'produit', max }
 
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function fmtHM(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+// Un bénévole s'affiche toujours « Prénom I. » (jamais le nom entier).
+function court(n){
+  const m = String(n || '').trim().replace(/\s+/g, ' ').split(' ');
+  if(!m[0]) return '';
+  const p = m[0].charAt(0).toUpperCase() + m[0].slice(1);
+  return (m[1] ? p + ' ' + m[1].charAt(0).toUpperCase() + '.' : p).slice(0, 30);
+}
+function cleKey(n){ return court(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '') || 'anon'; }
+function cleProd(id){ return 'p' + String(id).replace(/[^A-Za-z0-9]/g, '_'); }
+function equipe(){ return Array.isArray(codeData.equipe) ? codeData.equipe.map(e => String(e && e.n || '')).filter(Boolean) : []; }
 
 /* ===== SESSION / CODE GATE ===== */
 function loadSession(){
@@ -253,7 +290,7 @@ function clearSession(){ localStorage.removeItem(K_SESSION); }
 async function tryCode(){
   const nameEl = document.getElementById('gate-name');
   const codeEl = document.getElementById('gate-code');
-  const benevole = (nameEl.value || '').trim();
+  const benevole = court(nameEl.value);
   const code = (codeEl.value || '').trim().toUpperCase();
   const errEl = document.getElementById('gate-error');
   const btn = document.getElementById('gate-btn');
@@ -285,6 +322,10 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   if(!confirm('Fermer la session de caisse ?')) return;
   clearSession();
   if(unsubInventaire){ unsubInventaire(); unsubInventaire = null; }
+  if(unsubCode){ unsubCode(); unsubCode = null; }
+  if(unsubReglages){ unsubReglages(); unsubReglages = null; }
+  finService();
+  codeData = {}; reglages = null;
   session = null; panier = [];
   procBlocs = null; try{ localStorage.removeItem(K_PROC); }catch(e){}
   document.getElementById('app').classList.add('hidden');
@@ -317,8 +358,209 @@ function startApp(){
     ? 'Accès permanent'
     : 'Session valable jusqu\'à ' + fmtHM(expDate);
   listenInventaire();
+  listenCode();
+  if(!session.service) demarrerService(session.benevole, true); else majWho();
   renderProc();
   loadProc();
+}
+
+/* ===== ÉQUIPE DU JOUR, CRÉNEAUX, RÉGLAGES ===== */
+function listenCode(){
+  if(unsubCode) unsubCode();
+  unsubCode = onSnapshot(doc(db, 'buvette_codes', session.code), snap => {
+    codeData = snap.exists() ? snap.data() : {};
+  }, e => console.log('code:', (e && e.code) || e));
+  if(unsubReglages) unsubReglages();
+  unsubReglages = onSnapshot(doc(db, 'clubs', session.clubId, 'buvette_reglages', 'main'), snap => {
+    reglages = snap.exists() ? snap.data() : null;
+    buildProdGrid();
+  }, e => console.log('réglages:', (e && e.code) || e));
+}
+function majWho(){
+  document.getElementById('who-name').textContent = session.benevole || '—';
+  document.getElementById('app-benevole').textContent = 'Bénévole : ' + (session.benevole || '');
+}
+function finService(){
+  if(session && session.service){
+    updateDoc(doc(db, 'clubs', session.clubId, 'buvette_services', session.service), { fin: Date.now() }).catch(e => console.log('fin créneau:', (e && e.code) || e));
+  }
+}
+function demarrerService(nom, premier){
+  nom = court(nom); if(!nom) return;
+  if(!premier) finService();
+  const id = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+  session.service = id; session.benevole = nom; saveSession(session); majWho();
+  setDoc(doc(db, 'clubs', session.clubId, 'buvette_services', id), { id, viaCode: session.code, benevole: nom, date: todayISO(), debut: Date.now() })
+    .catch(e => console.log('créneau:', (e && e.code) || e));
+}
+
+/* Fenêtre générique */
+function ouvrirModal(titre, build){
+  fermerModal();
+  const m = document.createElement('div'); m.id = 'modal';
+  const c = document.createElement('div'); c.className = 'mcard';
+  const h = document.createElement('h2'); h.textContent = titre; c.appendChild(h);
+  m.appendChild(c);
+  m.addEventListener('click', e => { if(e.target === m) fermerModal(); });
+  document.body.appendChild(m);
+  build(c);
+}
+function fermerModal(){ const m = document.getElementById('modal'); if(m) m.remove(); }
+
+/* Liste des bénévoles du jour + « Ajouter bénévole » (n'importe qui peut ajouter quelqu'un au dernier moment) */
+function selecteurBenevole(box, choisi, onChange){
+  const zone = document.createElement('div'); box.appendChild(zone);
+  let ajout = false;
+  function dessiner(){
+    zone.innerHTML = '';
+    const liste = equipe();
+    const g = document.createElement('div'); g.className = 'pick';
+    liste.forEach(n => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
+      if(n === choisi.v) b.className = 'on';
+      b.addEventListener('click', () => { choisi.v = n; onChange(); dessiner(); });
+      g.appendChild(b);
+    });
+    if(!liste.length){ const i = document.createElement('div'); i.className = 'm-info'; i.textContent = 'Aucun bénévole dans la liste pour le moment.'; zone.appendChild(i); }
+    zone.appendChild(g);
+    if(ajout){
+      const r = document.createElement('div'); r.className = 'add-row';
+      const inp = document.createElement('input'); inp.maxLength = 40; inp.placeholder = 'Prénom Nom'; inp.autocomplete = 'off';
+      const ok = document.createElement('button'); ok.type = 'button'; ok.className = 'mini-btn'; ok.textContent = 'Ajouter';
+      ok.addEventListener('click', async () => {
+        const n = court(inp.value); if(!n) return;
+        ok.disabled = true;
+        try{
+          if(!equipe().some(x => cleKey(x) === cleKey(n))) await updateDoc(doc(db, 'buvette_codes', session.code), { equipe: arrayUnion({ n, d: Date.now() }) });
+          const deja = equipe().find(x => cleKey(x) === cleKey(n));
+          choisi.v = deja || n;
+          if(!deja){ codeData.equipe = (codeData.equipe || []).concat([{ n, d: Date.now() }]); }
+          ajout = false; onChange(); dessiner();
+        }catch(e){ ok.disabled = false; inp.value = ''; inp.placeholder = 'Ajout impossible, réessayez'; console.log(e); }
+      });
+      r.appendChild(inp); r.appendChild(ok); zone.appendChild(r); inp.focus();
+    }else{
+      const a = document.createElement('button'); a.type = 'button'; a.className = 'mini-btn sec'; a.textContent = 'Ajouter bénévole';
+      a.style.marginBottom = '10px';
+      a.addEventListener('click', () => { ajout = true; dessiner(); });
+      zone.appendChild(a);
+    }
+  }
+  dessiner();
+}
+
+document.getElementById('btn-main').addEventListener('click', () => {
+  const choisi = { v: '' };
+  ouvrirModal('Qui prend la caisse ?', c => {
+    const info = document.createElement('div'); info.className = 'm-info'; info.textContent = 'Vous passez la main : le créneau de ' + (session.benevole || '') + ' se termine.'; c.appendChild(info);
+    const ok = document.createElement('button'); ok.className = 'pay-btn pay-cb'; ok.textContent = 'Prendre la caisse'; ok.disabled = true; ok.style.width = '100%';
+    selecteurBenevole(c, choisi, () => { ok.disabled = !choisi.v; });
+    ok.addEventListener('click', () => { demarrerService(choisi.v, false); fermerModal(); });
+    const an = document.createElement('button'); an.className = 'mini-btn sec'; an.textContent = 'Annuler'; an.style.cssText = 'width:100%;margin-top:8px;padding:12px';
+    an.addEventListener('click', fermerModal);
+    c.appendChild(ok); c.appendChild(an);
+  });
+});
+
+/* ===== PRODUITS OFFERTS (limite fixée par le dirigeant, pas d'écriture comptable) ===== */
+function offrables(){ return items.filter(it => it.offrable === true && Number(it.qte || 0) > 0); }
+function reste(pk, pid, sel){
+  // Combien d'unités de ce produit peut encore recevoir cette personne (hors sélection en cours = sel).
+  const u = (codeData.offerts && codeData.offerts[pk]) || {};
+  const max = Number(reglages && reglages.max || 0);
+  const autres = Object.keys(sel).reduce((s, k) => s + (k === pid ? 0 : sel[k]), 0);
+  let r;
+  if(reglages && reglages.mode === 'produit') r = max - Number(u[cleProd(pid)] || 0);
+  else r = max - Number(u.total || 0) - autres;
+  const it = items.find(x => x.id === pid);
+  return Math.max(0, Math.min(r, Number(it && it.qte || 0)));
+}
+function resteTotal(pk){
+  const u = (codeData.offerts && codeData.offerts[pk]) || {};
+  return Math.max(0, Number(reglages && reglages.max || 0) - Number(u.total || 0));
+}
+document.getElementById('btn-offert').addEventListener('click', () => {
+  if(!reglages || !(reglages.max > 0)){ alert('Le dirigeant n\'a pas encore réglé les produits offerts.'); return; }
+  const choisi = { v: '' }; const sel = {};
+  ouvrirModal('Offrir à un bénévole', c => {
+    const regle = document.createElement('div'); regle.className = 'm-info';
+    regle.textContent = reglages.mode === 'produit' ? 'Maximum ' + reglages.max + ' de chaque produit par bénévole.' : 'Maximum ' + reglages.max + ' article(s) par bénévole.';
+    c.appendChild(regle);
+    const pers = document.createElement('div'); c.appendChild(pers);
+    const prods = document.createElement('div'); c.appendChild(prods);
+    const err = document.createElement('div'); err.className = 'm-err'; c.appendChild(err);
+    const actions = document.createElement('div'); actions.className = 'm-actions';
+    const an = document.createElement('button'); an.className = 'mini-btn sec'; an.style.padding = '14px'; an.textContent = 'Annuler'; an.addEventListener('click', fermerModal);
+    const ok = document.createElement('button'); ok.className = 'pay-btn pay-off'; ok.style.gridColumn = 'auto'; ok.textContent = 'Valider'; ok.disabled = true;
+    actions.appendChild(an); actions.appendChild(ok); c.appendChild(actions);
+    function dessinerProduits(){
+      prods.innerHTML = '';
+      if(!choisi.v){ ok.disabled = true; return; }
+      const pk = cleKey(choisi.v);
+      const info = document.createElement('div'); info.className = 'm-info';
+      info.textContent = choisi.v + (reglages.mode === 'produit' ? '' : ' : il reste ' + Math.max(0, resteTotal(pk) - Object.keys(sel).reduce((s, k) => s + sel[k], 0)) + ' article(s) à offrir.');
+      prods.appendChild(info);
+      const liste = offrables();
+      if(!liste.length){ const i = document.createElement('div'); i.className = 'm-info'; i.textContent = 'Aucun produit n\'est marqué « offrable » dans l\'inventaire.'; prods.appendChild(i); }
+      liste.forEach(it => {
+        const q = sel[it.id] || 0, cap = reste(pk, it.id, sel);
+        const row = document.createElement('div'); row.className = 'off-row';
+        row.innerHTML = '<div>' + esc(it.nom || '') + '</div>';
+        const qq = document.createElement('div'); qq.className = 'q';
+        const mo = document.createElement('button'); mo.textContent = '−'; mo.disabled = q <= 0;
+        const nb = document.createElement('span'); nb.textContent = q;
+        const pl = document.createElement('button'); pl.textContent = '+'; pl.disabled = q >= cap;
+        mo.addEventListener('click', () => { sel[it.id] = q - 1; if(sel[it.id] <= 0) delete sel[it.id]; dessinerProduits(); });
+        pl.addEventListener('click', () => { sel[it.id] = q + 1; dessinerProduits(); });
+        qq.appendChild(mo); qq.appendChild(nb); qq.appendChild(pl); row.appendChild(qq); prods.appendChild(row);
+      });
+      ok.disabled = !Object.keys(sel).length;
+    }
+    selecteurBenevole(pers, choisi, () => { for(const k in sel) delete sel[k]; dessinerProduits(); });
+    ok.addEventListener('click', async () => {
+      const pk = cleKey(choisi.v);
+      const ids = Object.keys(sel);
+      // dernier contrôle des limites avec les compteurs les plus récents
+      for(const pid of ids){ if(sel[pid] > reste(pk, pid, Object.assign({}, sel, { [pid]: 0 }))){ err.textContent = 'Limite atteinte pour ' + choisi.v + '.'; dessinerProduits(); return; } }
+      ok.disabled = true; err.textContent = '';
+      try{
+        const batch = writeBatch(db);
+        const lignes = []; let valeur = 0, nb = 0;
+        const maj = {};
+        ids.forEach(pid => {
+          const it = items.find(x => x.id === pid), q = sel[pid];
+          const newQte = Math.max(0, Number((it && it.qte) || 0) - q);
+          batch.update(doc(db, 'clubs', session.clubId, 'inventaire', pid), { qte: newQte, viaCode: session.code });
+          lignes.push({ name: it.nom || '', qty: q, price: Number(it.prixVente || 0) });
+          valeur += Number(it.prixVente || 0) * q; nb += q;
+          maj['offerts.' + pk + '.' + cleProd(pid)] = increment(q);
+        });
+        maj['offerts.' + pk + '.total'] = increment(nb);
+        batch.update(doc(db, 'buvette_codes', session.code), maj);
+        const oid = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+        valeur = Math.round(valeur * 100) / 100;
+        batch.set(doc(db, 'clubs', session.clubId, 'buvette_offerts', oid), {
+          id: oid, viaCode: session.code, benevole: session.benevole || '', service: session.service || '', date: todayISO(), t: Date.now(),
+          pour: choisi.v, lignes, valeur
+        });
+        await batch.commit();
+        offertsLocal({ t: Date.now(), benevole: session.benevole, pour: choisi.v, lignes, valeur });
+        fermerModal();
+        document.getElementById('sale-ok').textContent = '🎁 Offert à ' + choisi.v;
+        setTimeout(() => { document.getElementById('sale-ok').textContent = ''; }, 4000);
+      }catch(e){ err.textContent = 'Échec (' + ((e && e.code) || e) + '). Rien n\'a été enregistré, réessayez.'; ok.disabled = false; console.log(e); }
+    });
+    dessinerProduits();
+  });
+});
+const K_OFFERTS = 'asmb_buvette_offerts';
+function offertsGet(){ try{ return JSON.parse(localStorage.getItem(K_OFFERTS) || '[]').filter(v => v.code === session.code); }catch(e){ return []; } }
+function offertsLocal(o){
+  try{
+    const all = JSON.parse(localStorage.getItem(K_OFFERTS) || '[]');
+    all.push(Object.assign({ code: session.code }, o));
+    localStorage.setItem(K_OFFERTS, JSON.stringify(all.slice(-1000)));
+  }catch(e){ console.log(e); }
 }
 
 /* ===== CAISSE — catalogue live depuis l'inventaire buvette ===== */
@@ -342,6 +584,7 @@ function listenInventaire(){
 }
 function buildProdGrid(){
   const el = document.getElementById('prod-grid');
+  document.getElementById('btn-offert').classList.toggle('hidden', !(reglages && reglages.max > 0 && items.some(it => it.offrable === true)));
   const vendables = items.filter(it => it.prixVente != null && it.prixVente > 0);
   if(!vendables.length){ el.innerHTML = '<div class="empty-msg">Aucun article buvette avec un prix de vente. Demandez au dirigeant d\'en renseigner dans l\'inventaire.</div>'; return; }
   el.innerHTML = '';
@@ -427,7 +670,7 @@ async function encaisser(mode){
     // elle échoue, la vente reste encaissée et le récap local la garde.
     const lignesVente = panier.map(p => ({ name: p.name, qty: p.qty, price: p.price }));
     setDoc(doc(db, 'clubs', session.clubId, 'buvette_ventes', ligneId), {
-      id: ligneId, viaCode: session.code, benevole: session.benevole || '', date: todayISO(), t: Date.now(),
+      id: ligneId, viaCode: session.code, benevole: session.benevole || '', service: session.service || '', date: todayISO(), t: Date.now(),
       mode: mode === 'especes' ? 'especes' : 'cb', total, lignes: lignesVente
     }).catch(e => console.log('trace buvette:', (e && e.code) || e));
     journalAdd(mode, total);
@@ -461,7 +704,10 @@ function recapData(){
     if(v.mode === 'especes') esp += v.total; else cb += v.total;
     v.lignes.forEach(l => { const p = prod[l.name] || (prod[l.name] = { qty: 0, ca: 0 }); p.qty += l.qty; p.ca += l.qty * l.price; });
   });
-  return { ventes, prod, esp: Math.round(esp * 100) / 100, cb: Math.round(cb * 100) / 100 };
+  const parBen = {};
+  ventes.forEach(v => { const n = v.benevole || '—'; const b = parBen[n] || (parBen[n] = { nb: 0, total: 0 }); b.nb++; b.total += v.total; });
+  const offerts = offertsGet();
+  return { ventes, prod, parBen, offerts, esp: Math.round(esp * 100) / 100, cb: Math.round(cb * 100) / 100 };
 }
 function renderRecap(){
   const r = recapData();
@@ -472,7 +718,12 @@ function renderRecap(){
     (lignes || '<div class="panier-vide">Aucune vente enregistrée</div>') +
     '<div class="panier-total"><span style="font-weight:700">💵 Espèces</span><span class="panier-price">' + r.esp.toFixed(2) + ' €</span></div>' +
     '<div class="panier-total" style="border-top:none;margin-top:0"><span style="font-weight:700">💳 CB</span><span class="panier-price">' + r.cb.toFixed(2) + ' €</span></div>' +
-    '<div class="panier-total"><span style="font-weight:800">Total</span><span class="panier-total-val">' + (r.esp + r.cb).toFixed(2) + ' €</span></div>';
+    '<div class="panier-total"><span style="font-weight:800">Total</span><span class="panier-total-val">' + (r.esp + r.cb).toFixed(2) + ' €</span></div>' +
+    '<div class="sec-title" style="margin-top:14px">Par bénévole (cet appareil)</div>' +
+    (Object.keys(r.parBen).sort().map(n => '<div class="panier-item"><div>' + esc(n) + ' <span style="color:var(--mut);font-size:11px">' + r.parBen[n].nb + ' vente(s)</span></div><span class="panier-price">' + r.parBen[n].total.toFixed(2) + ' €</span></div>').join('') || '<div class="panier-vide">—</div>') +
+    (r.offerts.length ? '<div class="sec-title" style="margin-top:14px">🎁 Offerts aux bénévoles (hors caisse)</div>' +
+      r.offerts.map(o => '<div class="panier-item"><div>' + esc(o.pour) + ' : ' + esc(o.lignes.map(l => l.qty + '× ' + l.name).join(', ')) + '</div><span class="panier-price">' + Number(o.valeur || 0).toFixed(2) + ' €</span></div>').join('') +
+      '<div class="panier-total"><span style="font-weight:700">Valeur offerte</span><span class="panier-price">' + r.offerts.reduce((s, o) => s + Number(o.valeur || 0), 0).toFixed(2) + ' €</span></div>' : '');
 }
 document.getElementById('recap-print').addEventListener('click', () => { renderRecap(); window.print(); });
 document.getElementById('recap-csv').addEventListener('click', () => {

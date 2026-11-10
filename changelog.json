@@ -1,5 +1,24 @@
 [
  {
+  "v": "1794307826",
+  "semver": "1.18.0",
+  "titre": "Buvette : créneaux de caisse et produits offerts",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Caisse buvette : chaque bénévole prend la caisse puis « passe la main » ; tu retrouves son créneau, son total et le total global de la journée dans Journées buvette (PDF). La liste des bénévoles du jour est préremplie depuis tes événements, et n'importe quel bénévole peut en « Ajouter » un au dernier moment (prénom + initiale seulement, jamais la liste des licenciés)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Produits offerts aux bénévoles : tu coches « Peut être offert » sur les articles (canette, sandwich…) et tu fixes la limite, par personne ou par produit, dans Accès caisse buvette. La caisse a un bouton « Offrir » : le stock baisse, rien n'entre en comptabilité, les offerts apparaissent dans le PDF."
+   }
+  ]
+ },
+ {
   "v": "1794061396",
   "semver": "1.17.0",
   "titre": "Appels à bénévoles : suivi dans l'appli",

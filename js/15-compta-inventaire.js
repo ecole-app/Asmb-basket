@@ -882,7 +882,8 @@ function openBuvetteAccessSettings(){
     window.fbSetDoc(window.fbDoc(window.fbDb,"buvette_codes",code),{
       clubId:clubId,clubName:clubName,createdBy:(window.ASMB_USER&&window.ASMB_USER.uid)||null,
       createdAt:window.fbServerTimestamp(),expiresAt:fin,
-      comptaLiee:(typeof hasPremium==="function")?hasPremium():true
+      comptaLiee:(typeof hasPremium==="function")?hasPremium():true,
+      equipe:buvetteEquipeDuJour()
     }).then(function(){
       askAlert("Code d'accès caisse buvette :\n\n"+code+"\n\n"+label+"\n\nTransmettez-le au bénévole avec le lien : "+BUVETTE_SITE_URL);
       loadBuvetteGrants(grants,clubId);
@@ -903,8 +904,49 @@ function openBuvetteAccessSettings(){
   s.body.appendChild(hint);
   s.body.appendChild(grants);
   loadBuvetteGrants(grants,clubId);
+  buvetteReglageOfferts(s.body,clubId);
   gmSection(s.body,"Procédure de la caisse","Les étapes que le bénévole voit et coche dans l'onglet « Procédure » (allumage, service, fermeture…). Vous les écrivez une fois, elles s'affichent sur toutes les tablettes.");
   gmRow(s.body).appendChild(gmBtn("📋 Modifier la procédure","soft",function(){ s.modal.remove(); openBuvetteProcedure(); }));
+}
+// Bénévoles placés aujourd'hui sur un événement ou un match : « Prénom I. » seulement (la caisse n'a jamais
+// accès aux licences). Un bénévole trouvé au dernier moment s'ajoute depuis la caisse (« Ajouter bénévole »).
+function buvetteNomCourt(n){
+  var m=String(n||"").replace(/\(.*?\)/g,"").trim().replace(/\s+/g," ").split(" ");
+  if(!m[0]) return "";
+  var p=m[0].charAt(0).toUpperCase()+m[0].slice(1);
+  return (m[1]?p+" "+m[1].charAt(0).toUpperCase()+".":p).slice(0,30);
+}
+function buvetteEquipeDuJour(){
+  var j=(typeof benJourLocal==="function")?benJourLocal():new Date().toISOString().slice(0,10), vus={}, out=[];
+  (getEvents()||[]).forEach(function(e){
+    if(!e||!e.date||e.date>j||(e.dateFin||e.date)<j) return;
+    ((typeof benListe==="function")?benListe(e,j):(e.benevoles||[])).forEach(function(m){
+      var n=buvetteNomCourt(m&&m.nom), k=n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase(); if(!n||vus[k]) return;
+      vus[k]=1; out.push({n:n,d:Date.now()});
+    });
+  });
+  return out.slice(0,200);
+}
+// Réglage des produits offerts (clubs/{id}/buvette_reglages/main) : un maximum par bénévole,
+// soit au total (« personne »), soit pour chaque produit (« produit »). 0 = rien d'offert.
+function buvetteReglageOfferts(body,clubId){
+  var ref=window.fbDoc(window.fbDb,"clubs",clubId,"buvette_reglages","main");
+  gmSection(body,"Produits offerts aux bénévoles","Une canette, un sandwich… La caisse propose un bouton « Offrir » : le stock baisse, rien n'entre en comptabilité, et la limite que vous fixez ici est appliquée par bénévole et par jour. Cochez « Peut être offert » sur chaque article concerné dans l'Inventaire.");
+  var card=gmCard(), mode="personne", max=0;
+  var sel=document.createElement("select");
+  sel.style.cssText="width:100%;padding:10px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--bg);color:var(--txt);font-size:13px;margin-bottom:8px";
+  sel.innerHTML='<option value="personne">Limite par personne (tous produits confondus)</option><option value="produit">Limite par produit offert (pour chaque personne)</option>';
+  var inp=document.createElement("input"); inp.type="number"; inp.min="0"; inp.max="20"; inp.step="1"; inp.placeholder="Maximum (0 = rien d'offert)";
+  inp.style.cssText="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--bg);color:var(--txt);font-size:13px;margin-bottom:8px";
+  card.appendChild(sel); card.appendChild(inp);
+  gmRow(card).appendChild(gmBtn("Enregistrer","primary",function(btn){
+    var n=parseInt(inp.value,10); if(isNaN(n)||n<0||n>20){ askAlert("Entrez un maximum entre 0 et 20."); return; }
+    btn.disabled=true;
+    window.fbSetDoc(ref,{mode:sel.value,max:n,maj:Date.now()}).then(function(){ btn.disabled=false; showToast("Réglage enregistré"); })
+      .catch(function(e){ btn.disabled=false; askAlert("Erreur : "+((e&&e.code)||e)); });
+  }));
+  body.appendChild(card);
+  window.fbGetDoc(ref).then(function(snap){ if(snap.exists()){ var d=snap.data(); sel.value=d.mode==="produit"?"produit":"personne"; inp.value=d.max!=null?d.max:""; } }).catch(function(){});
 }
 function loadBuvetteGrants(el,clubId){
   el.innerHTML="";
@@ -1017,27 +1059,33 @@ function openJourneesBuvette(){
   var box=document.createElement("div");
   box.innerHTML='<div style="font-size:12px;color:var(--mut)">Chargement…</div>';
   s.body.appendChild(box);
-  window.fbGetDocs(window.fbCollection(window.fbDb,"buvette_ventes")).then(function(snap){
-    var parJour={};
+  var lire=function(nom){ return window.fbGetDocs(window.fbCollection(window.fbDb,nom)).catch(function(){ return null; }); };
+  Promise.all([window.fbGetDocs(window.fbCollection(window.fbDb,"buvette_ventes")),lire("buvette_services"),lire("buvette_offerts")]).then(function(res){
+    var snap=res[0], parJour={}, svJour={}, ofJour={};
     snap.forEach(function(d){
       var v=d.data(); if(!v||!v.date) return;
       (parJour[v.date]=parJour[v.date]||[]).push(v);
     });
+    if(res[1]) res[1].forEach(function(d){ var v=d.data(); if(v&&v.date) (svJour[v.date]=svJour[v.date]||[]).push(v); });
+    if(res[2]) res[2].forEach(function(d){ var v=d.data(); if(v&&v.date) (ofJour[v.date]=ofJour[v.date]||[]).push(v); });
+    Object.keys(ofJour).concat(Object.keys(svJour)).forEach(function(j){ if(!parJour[j]) parJour[j]=[]; });
     var jours=Object.keys(parJour).sort().reverse();
     box.innerHTML="";
     if(!jours.length){ box.innerHTML='<div style="font-size:12px;color:var(--mut)">Aucune vente enregistrée par la caisse en ligne pour l\'instant.</div>'; return; }
     jours.forEach(function(j){
-      var ventes=parJour[j];
+      var ventes=parJour[j], serv=svJour[j]||[], offs=ofJour[j]||[];
       var tot=ventes.reduce(function(a,v){return a+(Number(v.total)||0);},0);
       var card=gmCard();
       card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(new Date(j+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}))+'</div>'
-        +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+ventes.length+' vente'+(ventes.length>1?'s':'')+' · '+tot.toFixed(2).replace(".",",")+' €</div>';
-      gmRow(card).appendChild(gmBtn("PDF de la journée","primary",function(){ pdfJourneeBuvette(j,ventes); }));
+        +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+ventes.length+' vente'+(ventes.length>1?'s':'')+' · '+tot.toFixed(2).replace(".",",")+' €'
+        +(offs.length?' · 🎁 '+offs.reduce(function(a,o){return a+(o.lignes||[]).reduce(function(b,l){return b+(Number(l.qty)||0);},0);},0)+' offert(s)':'')+'</div>';
+      gmRow(card).appendChild(gmBtn("PDF de la journée","primary",function(){ pdfJourneeBuvette(j,ventes,serv,offs); }));
       box.appendChild(card);
     });
   }).catch(function(e){ box.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+authEsc(String((e&&e.code)||e))+'</div>'; });
 }
-function pdfJourneeBuvette(jour,ventes){
+function pdfJourneeBuvette(jour,ventes,serv,offs){
+  serv=serv||[]; offs=offs||[];
   if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
   ventes=ventes.slice().sort(function(a,b){return (a.t||0)-(b.t||0);});
   var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
@@ -1070,6 +1118,28 @@ function pdfJourneeBuvette(jour,ventes){
   doc.setFontSize(9); doc.setTextColor(30,30,30);
   Object.keys(parBen).sort().forEach(function(b){ doc.text(String(b).substring(0,60),16,y); doc.text(eur(parBen[b]),160,y); y+=5.5; });
   y+=5;
+  if(serv.length){
+    doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Créneaux de caisse",14,y); y+=6;
+    doc.setFontSize(9); doc.setTextColor(30,30,30);
+    var hm=function(t){ return t?new Date(t).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"…"; };
+    serv.slice().sort(function(a,b){return (a.debut||0)-(b.debut||0);}).forEach(function(sv){
+      if(y>280){ doc.addPage(); y=20; }
+      var tt=ventes.filter(function(v){return v.service===sv.id;}).reduce(function(a,v){return a+(Number(v.total)||0);},0);
+      doc.text(String(sv.benevole||"").substring(0,30),16,y); doc.text(hm(sv.debut)+" - "+hm(sv.fin),80,y); doc.text(eur(tt),160,y); y+=5.5;
+    });
+    y+=5;
+  }
+  if(offs.length){
+    doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Produits offerts aux bénévoles (hors comptabilité)",14,y); y+=6;
+    doc.setFontSize(9); doc.setTextColor(30,30,30);
+    var vo=0;
+    offs.slice().sort(function(a,b){return (a.t||0)-(b.t||0);}).forEach(function(o){
+      if(y>280){ doc.addPage(); y=20; }
+      var det=(o.lignes||[]).map(function(l){return l.qty+"x "+l.name;}).join(", "); vo+=Number(o.valeur)||0;
+      doc.text(String(o.pour||"").substring(0,24),16,y); doc.text(det.substring(0,60),60,y); doc.text(eur(Number(o.valeur)||0),160,y); y+=5.5;
+    });
+    doc.setFont(undefined,"bold"); doc.text("Valeur offerte",16,y); doc.text(eur(vo),160,y); doc.setFont(undefined,"normal"); y+=10;
+  }
   doc.setFontSize(11); doc.setTextColor.apply(doc,rgb); doc.text("Détail des ventes",14,y); y+=6;
   doc.setFontSize(8); doc.setTextColor(30,30,30);
   ventes.forEach(function(v){
@@ -1105,6 +1175,7 @@ function showAddInvItem(){
   document.getElementById("inv-seuil").value="";
   document.getElementById("inv-prix-achat").value="";
   document.getElementById("inv-prix-vente").value="";
+  document.getElementById("inv-offrable").checked=false;
   document.getElementById("inv-emplacement").value="";
   document.getElementById("inv-notes").value="";
   document.getElementById("inv-delete-btn").style.display="none";
@@ -1122,6 +1193,7 @@ function showEditInvItem(id){
   document.getElementById("inv-seuil").value=it.seuil!=null?it.seuil:"";
   document.getElementById("inv-prix-achat").value=it.prixAchat!=null?it.prixAchat:"";
   document.getElementById("inv-prix-vente").value=it.prixVente!=null?it.prixVente:"";
+  document.getElementById("inv-offrable").checked=it.offrable===true;
   document.getElementById("inv-emplacement").value=it.emplacement||"";
   document.getElementById("inv-notes").value=it.notes||"";
   document.getElementById("inv-delete-btn").style.display="block";
@@ -1141,6 +1213,7 @@ function saveInvItem(){
     seuil:seuilRaw!==""?parseInt(seuilRaw,10):null,
     prixAchat:prixAchatRaw!==""?parseFloat(prixAchatRaw):null,
     prixVente:prixVenteRaw!==""?parseFloat(prixVenteRaw):null,
+    offrable:invEditCat==="buvette"&&document.getElementById("inv-offrable").checked,
     emplacement:document.getElementById("inv-emplacement").value.trim(),
     notes:document.getElementById("inv-notes").value.trim()
   };
