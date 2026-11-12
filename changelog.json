@@ -1,5 +1,21 @@
 [
  {
+  "v": "1794510270",
+  "semver": "1.19.0",
+  "titre": "Notifications en sourdine",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Le bouton 🔕 d'un canal coupe maintenant aussi les notifications sur le téléphone (avant, seulement celles de l'écran). Les inscrits extérieurs qui suivent le fil d'un événement ont leur propre bouton « Sourdine »."
+   }
+  ]
+ },
+ {
   "v": "1794484478",
   "semver": "1.18.1",
   "titre": "Sécurité renforcée",

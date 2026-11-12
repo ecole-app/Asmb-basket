@@ -301,6 +301,8 @@ exports.onChannelMessage = onDocumentCreated(
       if (!doc.exists) return;
       if (authorUid && doc.id === authorUid) return;
       const d = doc.data() || {};
+      // Canal mis en sourdine par la personne (🔕) : pas de notification push pour ce canal.
+      if (Array.isArray(d.muets) && d.muets.includes(channelId)) return;
       if (d.token) entrees.push({ token: d.token, ref: subsCol.doc(doc.id), langue: d.langue, copie: !!d.copieDe });
     });
     if (!entrees.length) return;

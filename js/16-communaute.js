@@ -500,6 +500,11 @@ function toggleChannelMute(){
   else{muted.push(currentChannelId);showToast("Notifications coupées pour ce canal");}
   localStorage.setItem("asmb_muted_channels",JSON.stringify(muted));
   updateMuteBtn();
+  // Aussi côté serveur : la fonction n'envoie plus de push pour les canaux en sourdine.
+  try{
+    if(window.fbReady&&window.ASMB_USER&&window.ASMB_USER.uid&&window.fbSetDoc&&!window.SUPPORT_MODE)
+      window.fbSetDoc(window.fbDoc(window.fbDb,"push_subscriptions",window.ASMB_USER.uid),{muets:muted},{merge:true}).catch(function(){});
+  }catch(e){}
 }
 function updateMuteBtn(){
   var b=document.getElementById("chat-mute-btn");

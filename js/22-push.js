@@ -77,6 +77,7 @@ async function enablePushNotifications(){
       token: token,
       uid: window.ASMB_USER.uid,
       langue: window.GM_LANG||"fr",   // langue des notifications (functions/index.js)
+      muets: (typeof getMutedChannels==="function"?getMutedChannels():[]),   // canaux en sourdine : pas de push
       updatedAt: window.fbServerTimestamp()
     });
     try{ localStorage.removeItem("gm_push_off"); }catch(e){}
@@ -116,7 +117,7 @@ async function pushAutoClub(){
       var token=await window.fbMsgGetToken(reg,GM_FCM_VAPID_KEY);
       if(!token) return;
       await window.fbSetDoc(window.fbDoc(window.fbDb,"push_subscriptions",window.ASMB_USER.uid),
-        {token:token,uid:window.ASMB_USER.uid,langue:window.GM_LANG||"fr",updatedAt:window.fbServerTimestamp()});
+        {token:token,uid:window.ASMB_USER.uid,langue:window.GM_LANG||"fr",muets:(typeof getMutedChannels==="function"?getMutedChannels():[]),updatedAt:window.fbServerTimestamp()});
       refreshPushButton();
     } else if(st==="default"||pushIosAInstaller()){
       var vu=parseInt(localStorage.getItem("gm_push_invite")||"0",10);

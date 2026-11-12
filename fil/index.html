@@ -49,7 +49,7 @@ button:disabled{opacity:.5}
 </head>
 <body>
 <header><div class="club" id="club"></div><h1 id="titre">Discussion de l'événement</h1></header>
-<div id="notif"><span id="notif-t">Reçois une alerte à chaque nouveau message.</span><button id="notif-b" type="button">🔔 Activer les notifications</button></div>
+<div id="notif"><span id="notif-t">Reçois une alerte à chaque nouveau message.</span><button id="notif-b" type="button">🔔 Activer les notifications</button><button id="notif-m" type="button" style="display:none">🔕 Sourdine</button></div>
 <div id="liste"><div class="info" id="info">Chargement…</div></div>
 <div class="verrou" id="verrou" style="display:none">🔒 Événement terminé : cette discussion est en lecture seule.</div>
 <form id="f" style="display:none" autocomplete="off">
@@ -136,10 +136,23 @@ function chargerSdk(){
   function sc(u){ return new Promise(function(ok,ko){ var e=document.createElement("script"); e.src=u; e.onload=ok; e.onerror=ko; document.head.appendChild(e); }); }
   return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js").then(function(){ return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"); });
 }
+var nMut=document.getElementById("notif-m");
 function nEtat(actif){
-  nBox.style.display="flex";
-  if(actif){ nTxt.textContent=T("🔔 Notifications activées sur cet appareil."); nBtn.style.display="none"; }
-  else { nTxt.textContent=T("Reçois une alerte à chaque nouveau message."); nBtn.style.display=""; }
+  nBox.style.display="flex"; nMut.style.display="none";
+  if(actif==="sourdine"){ nTxt.textContent=T("🔕 Notifications en sourdine."); nBtn.textContent=T("🔔 Réactiver"); nBtn.style.display=""; }
+  else if(actif){ nTxt.textContent=T("🔔 Notifications activées sur cet appareil."); nBtn.style.display="none"; nMut.style.display=""; }
+  else { nTxt.textContent=T("Reçois une alerte à chaque nouveau message."); nBtn.textContent=T("🔔 Activer les notifications"); nBtn.style.display=""; }
+}
+// Sourdine : le serveur oublie l'appareil (notifs_off) ; le choix reste sur l'appareil jusqu'à « Réactiver ».
+var CLE_SOURDINE="gm_fil_mute_"+pid+"_"+code;
+function enSourdine(){ try{ return localStorage.getItem(CLE_SOURDINE)==="1"; }catch(e){ return false; } }
+function mettreSourdine(){
+  nMut.disabled=true;
+  appeler({action:"notifs_off"}).then(function(j){
+    if(!j.ok) throw 0;
+    try{ localStorage.setItem(CLE_SOURDINE,"1"); localStorage.removeItem("gm_fil_tok_"+pid+"_"+code); }catch(e){}
+    nEtat("sourdine");
+  }).catch(function(){ alert(T("Impossible pour le moment. Réessaie dans un instant.")); }).then(function(){ nMut.disabled=false; });
 }
 function guideIphone(){
   var m=document.createElement("div"); m.className="modal";
@@ -175,7 +188,7 @@ function activerNotifs(){
   Notification.requestPermission().then(function(p){
     if(p!=="granted"){ if(p==="denied") alert(T("Notifications refusées. Tu peux les autoriser dans les réglages du navigateur.")); return; }
     return jeton().then(function(tok){ if(!tok) throw 0; return enregistrer(tok); }).then(function(ok){
-      if(ok) nEtat(true); else alert(T("Activation impossible. Réessaie dans un instant."));
+      if(ok){ try{ localStorage.removeItem(CLE_SOURDINE); }catch(e){} nEtat(true); } else alert(T("Activation impossible. Réessaie dans un instant."));
     });
   }).catch(function(){ alert(T("Activation impossible. Réessaie dans un instant.")); }).then(function(){ nBtn.disabled=false; });
 }
@@ -183,10 +196,12 @@ function initNotifs(){
   if(!pid||!code) return;
   if(!("Notification" in window)){ if(ios()&&!installee()){ nEtat(false); } return; }
   if(Notification.permission==="granted"&&"serviceWorker" in navigator){
+    if(enSourdine()){ nEtat("sourdine"); return; }
     nEtat(true); jeton().then(function(t){ if(t) enregistrer(t); }).catch(function(){});
   } else if(Notification.permission!=="denied"||ios()){ nEtat(false); }
 }
 nBtn.addEventListener("click",activerNotifs);
+nMut.addEventListener("click",mettreSourdine);
 if(!pid||!code){ msgInfo("Ce lien n'est pas valide. Rouvrez-le depuis votre billet."); }
 else { charger().then(planifier); initNotifs(); }
 })();
