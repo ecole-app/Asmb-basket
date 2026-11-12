@@ -408,6 +408,23 @@ describe("Invitations", () => {
     b.update(doc(db, "club_invites/INVPARENT"), { usedBy: "famille2", usedAt: Timestamp.now() });
     await assertFails(b.commit());
   });
+  it("les fiches joueur rattachées sont celles de l'invitation, jamais d'autres", async () => {
+    const creer = async (uid, plus) => {
+      const db = await as(uid);
+      const b = writeBatch(db);
+      b.set(doc(db, `users/${uid}`), { clubId: "A", roles: ["parent"], inviteCode: "INVENF", phone: "0655555555", ...plus });
+      b.update(doc(db, "club_invites/INVENF"), { usedBy: uid, usedAt: Timestamp.now() });
+      return b.commit();
+    };
+    await assertFails(creer("curieux1", { linkedPlayerIds: ["p1", "p2"] }));
+    await assertFails(creer("curieux2", { linkedPlayerIds: ["p2"] }));
+    await assertFails(creer("curieux3", { linkedPlayerIds: ["p1"], linkedTeamIds: ["t1"] }));
+    await assertSucceeds(creer("famille3", { linkedPlayerIds: ["p1"], linkedTeamIds: [] }));
+  });
+  it("un coach ne se donne pas lui-même une équipe ; le dirigeant, oui", async () => {
+    await assertFails(updateDoc(doc(await as("coachA"), "users/coachA"), { linkedTeamIds: ["t9"] }));
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "users/coachA"), { linkedTeamIds: ["t9"] }));
+  });
   it("une invitation ne sert qu'une fois", async () => {
     await assertSucceeds(rejoindre("nouveau1", "INVCOACH", {}));
     await assertFails(rejoindre("nouveau2", "INVCOACH", {}));

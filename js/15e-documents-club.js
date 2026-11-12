@@ -131,8 +131,11 @@ async function docsOuvrir(id){
     }
     var bin=atob(morceaux.join("")), octets=new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++) octets[i]=bin.charCodeAt(i);
-    var url=URL.createObjectURL(new Blob([octets],{type:d.mime||"application/octet-stream"}));
-    if(d.type==="pdf"||d.type==="image"){
+    // Le type du fichier est imposé (PDF ou image) : un document déclaré autrement ne s'ouvre jamais
+    // dans le navigateur (une page HTML ouverte ainsi s'exécuterait avec les droits de l'appli), il se télécharge.
+    var mimeSur=d.type==="pdf"?"application/pdf":(d.type==="image"&&/^image\/(png|jpe?g|gif|webp|heic|heif)$/i.test(String(d.mime||""))?String(d.mime):"application/octet-stream");
+    var url=URL.createObjectURL(new Blob([octets],{type:mimeSur}));
+    if(mimeSur!=="application/octet-stream"){
       var w=null; try{ w=window.open(url,"_blank"); }catch(e){}
       if(w) return;
     }
@@ -165,7 +168,7 @@ function docsParentsDessiner(){
   var icones={pdf:"📕",image:"🖼️",word:"📘",excel:"📗",autre:"📄"};
   docs.forEach(function(d){
     var cat=d.category||"autre";
-    h+="<button onclick=\"docsOuvrir('"+authEsc(d.id)+"')\" style=\"display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);width:100%;min-height:60px\">"
+    h+="<button onclick=\"docsOuvrir('"+gmJs(d.id)+"')\" style=\"display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--txt);width:100%;min-height:60px\">"
       +"<span style=\"font-size:26px\">"+(icones[d.type]||"📄")+"</span><span style=\"flex:1;min-width:0\"><span style=\"display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+authEsc(d.name)+"</span>"
       +"<span style=\"display:block;font-size:11px;color:var(--mut);margin-top:2px\">"+authEsc(DOC_CAT_LABELS[cat]||"Autre")+" · "+authEsc(d.size||"")+" · "+authEsc(d.date||"")+"</span></span>"
       +"<span style=\"font-size:12px;font-weight:700;color:var(--dkg)\">Ouvrir</span></button>";

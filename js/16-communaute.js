@@ -145,7 +145,7 @@ function viewFicheModal(phone){
   var html="";
   rows.forEach(function(r){
     if(!r[1])return;
-    html+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">'+r[0]+'</div><div style="font-size:13px;color:var(--txt);margin-top:2px">'+r[1]+'</div></div>';
+    html+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">'+authEsc(r[0])+'</div><div style="font-size:13px;color:var(--txt);margin-top:2px">'+authEsc(r[1])+'</div></div>';
   });
   document.getElementById("fiche-view-content").innerHTML=html||'<div style="font-size:12px;color:var(--mut)">Fiche incomplète</div>';
  document.getElementById("modal-fiche-view").style.display="flex";
@@ -245,7 +245,7 @@ function renderMembers(ch){
     var phone=typeof m==="string"?m:m.phone;
     var label=typeof m==="string"?null:m.label;
     var div=document.createElement("div");div.className="member-card";
-    div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0">'+(label?'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(label)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(phone)+'</div>':'<div style="font-size:13px;font-weight:600;color:var(--txt)">'+authEsc(phone)+'</div>')+'</div><div style="display:flex;flex-direction:column;gap:5px"><button onclick="editMemberLabel(\''+authEsc(String(phone).replace(/[^+0-9]/g,""))+'\',\''+authEsc((label||"").replace(/['\\]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button><button onclick="removeMemberFromChannel(\''+authEsc(String(phone).replace(/[^+0-9]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button></div>';
+    div.innerHTML='<div class="member-avatar"></div><div style="flex:1;min-width:0">'+(label?'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(label)+'</div><div style="font-size:11px;color:var(--mut)">'+authEsc(phone)+'</div>':'<div style="font-size:13px;font-weight:600;color:var(--txt)">'+authEsc(phone)+'</div>')+'</div><div style="display:flex;flex-direction:column;gap:5px"><button onclick="editMemberLabel(\''+gmJs(String(phone).replace(/[^+0-9]/g,""))+'\',\''+gmJs((label||"").replace(/['\\]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button><button onclick="removeMemberFromChannel(\''+gmJs(String(phone).replace(/[^+0-9]/g,""))+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer">Révoquer</button></div>';
     el.appendChild(div);
   });
 }
@@ -472,7 +472,7 @@ function handleMentionInput(inputEl){
   var matches=channelKnownPseudos.filter(function(p){return p.toLowerCase().indexOf(partial)===0 && p!==(savedPseudo||"");});
   if(!matches.length){list.style.display="none";return;}
   list.innerHTML=matches.slice(0,6).map(function(p){
-    return '<div onclick="insertMention(\''+p.replace(/'/g,"")+'\')" style="padding:10px 14px;font-size:13px;color:var(--txt);cursor:pointer;border-bottom:1px solid var(--bdr)">@'+authEsc(p)+'</div>';
+    return '<div onclick="insertMention(\''+gmJs(p.replace(/'/g,""))+'\')" style="padding:10px 14px;font-size:13px;color:var(--txt);cursor:pointer;border-bottom:1px solid var(--bdr)">@'+authEsc(p)+'</div>';
   }).join("");
   list.style.display="block";
   list.dataset.matchLen=m[0].length;
@@ -614,8 +614,8 @@ function renderChannelList(channels){
       div.style.opacity=".5";
     }
     var lockBadge=isRestricted?(isMember?'<span style="font-size:10px;color:var(--ltg)"> Membre</span>':'<span style="font-size:10px;color:var(--red)"> Prive</span>'):'';
-    var unreadBadge='<span id="badge-'+ch.id+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
-    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--txt)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(ch.name)+'</span><span style="font-size:10px;font-weight:600;color:var(--mut);flex-shrink:0">'+authEsc(chHeure(ch.lastTs&&ch.lastTs.toMillis?ch.lastTs.toMillis():(lastUsedActivity[ch.id]||0)))+'</span></div><div id="chdesc-'+ch.id+'" style="font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc((isMember&&(lastMsgTxt[ch.id]||(ch.lastMsg?(ch.lastPseudo?ch.lastPseudo+" : ":"")+ch.lastMsg:"")))||ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
+    var unreadBadge='<span id="badge-'+authEsc(ch.id)+'" style="display:none;position:absolute;top:10px;right:14px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>';
+    div.innerHTML=unreadBadge+'<div class="ch-icon">'+authEsc(ch.icon||"")+'</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--txt)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(ch.name)+'</span><span style="font-size:10px;font-weight:600;color:var(--mut);flex-shrink:0">'+authEsc(chHeure(ch.lastTs&&ch.lastTs.toMillis?ch.lastTs.toMillis():(lastUsedActivity[ch.id]||0)))+'</span></div><div id="chdesc-'+authEsc(ch.id)+'" style="font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc((isMember&&(lastMsgTxt[ch.id]||(ch.lastMsg?(ch.lastPseudo?ch.lastPseudo+" : ":"")+ch.lastMsg:"")))||ch.desc||"")+'</div>'+(lockBadge?'<div style="margin-top:3px">'+lockBadge+'</div>':'')+'</div><div style="color:var(--mut);font-size:18px">'+(isMember?"›":"")+'</div>';
     el.appendChild(div);
   });
   checkUnreadBadges();
@@ -1078,7 +1078,7 @@ function showCarpoolCreator(){
   // sur tous les evenements a venir (un canal general peut aussi organiser
   // un covoiturage pour un tournoi multi-equipes).
   sel.innerHTML=events.map(function(e){
-    return '<option value="'+e.id+'">'+e.titre+' · '+e.date+(e.lieu?" · "+e.lieu:"")+'</option>';
+    return '<option value="'+authEsc(e.id)+'">'+authEsc(e.titre)+' · '+authEsc(e.date)+(authEsc(e.lieu?" · "+e.lieu:""))+'</option>';
   }).join("");
   if(!events.length){sel.innerHTML='<option value="">Aucun événement à venir</option>';}
   document.getElementById("carpool-places").value="3";

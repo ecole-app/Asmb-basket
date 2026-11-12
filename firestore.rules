@@ -221,7 +221,13 @@ service cloud.firestore {
         && request.resource.data.get('canaux', []) == get(invitePath(request.resource.data.inviteCode)).data.get('canauxIds', [])
         // Le numero rattache le compte aux enfants (rattachements/{tel}) : c'est
         // celui pose par le club sur l'invitation, jamais un numero choisi.
-        && request.resource.data.get('phone', '') == get(invitePath(request.resource.data.inviteCode)).data.get('tel', '');
+        && request.resource.data.get('phone', '') == get(invitePath(request.resource.data.inviteCode)).data.get('tel', '')
+        // Les fiches joueur rattachées sont celles de l'invitation, jamais d'autres : sinon un compte
+        // tout juste invité pourrait s'ouvrir la fiche complète (naissance, téléphones) d'autres enfants.
+        && request.resource.data.get('linkedPlayerIds', []).toSet()
+             .difference(inviteIds(get(invitePath(request.resource.data.inviteCode)).data).toSet()).size() == 0
+        // Les équipes d'un coach sont posées ensuite par le dirigeant.
+        && request.resource.data.get('linkedTeamIds', []) == [];
       // c) Compte d'origine du super admin : recréation à l'identique du seed
       //    posé par applyAuthedUser() (même après suppression), jamais avec un
       //    autre club ou un autre rôle — sinon la restriction de l'update
@@ -250,7 +256,7 @@ service cloud.firestore {
       // rattachement unique du compte bootstrap (clubId absent -> club d'origine)
       // est autorisé, exactement ce que fait applyAuthedUser() au premier login.
       // Tout autre club se rejoint via une invitation (branche b ci-dessus).
-      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','permissions','titre','phone','copie','copieDe','canaux']))
+      allow update: if (signedIn() && request.auth.uid == uid && !changes(['roles','clubId','inviteCode','linkedPlayerIds','linkedTeamIds','permissions','titre','phone','copie','copieDe','canaux']))
         // Un dirigeant ne quitte SON rôle que si un autre dirigeant du club est déjà en place (remplacePar).
         // Copie d'un compte (users/{uid}__{clubId}, personne qui a plusieurs clubs) : le dirigeant de ce
         // club y change les accès comme sur une fiche normale, jamais les marques de copie.

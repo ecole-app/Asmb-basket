@@ -314,11 +314,11 @@ function tirageOuvrir(){
     +'<div style="display:flex;gap:6px;margin:-4px 0 10px;flex-wrap:wrap"><button type="button" id="tir-mois" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Mois</button><button type="button" class="mini" id="tir-2m" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Phase (2 mois)</button>'
     +'<button type="button" id="tir-saison" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">Toute la saison</button></div>'
     +'<div class="form-group"><label class="form-label">Zone scolaire du club</label><select class="form-select" id="tir-zone">'
-    +["A","B","C"].map(function(z){ return '<option value="'+z+'"'+(prefs.zone===z?" selected":"")+'>Zone '+z+(z==="A"?" (Lyon, Saint-Étienne)":"")+'</option>'; }).join("")+'</select></div>'
+    +["A","B","C"].map(function(z){ return '<option value="'+authEsc(z)+'"'+(prefs.zone===z?" selected":"")+'>Zone '+authEsc(z)+(z==="A"?" (Lyon, Saint-Étienne)":"")+'</option>'; }).join("")+'</select></div>'
     +'<div class="form-label" style="margin-bottom:4px">Postes à tirer (nombre de personnes)</div><div id="tir-postes" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:12px">'
     +TIR_POSTES.map(function(p){
         return '<label style="font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:7px 10px">'+authEsc(p)
-          +'<input type="number" min="0" max="4" value="'+(prefs.postes[p]||0)+'" data-poste="'+authEsc(p)+'" style="width:44px;text-align:center" class="form-input"></label>'; }).join("")+'</div>';
+          +'<input type="number" min="0" max="4" value="'+(authEsc(prefs.postes[p]||0))+'" data-poste="'+authEsc(p)+'" style="width:44px;text-align:center" class="form-input"></label>'; }).join("")+'</div>';
   var f=document.createElement("div"); f.innerHTML=html; s.body.appendChild(f);
   // Mois : jusqu'à la fin du mois en cours ; après le 20, le mois suivant entier.
   f.querySelector("#tir-mois").onclick=function(){

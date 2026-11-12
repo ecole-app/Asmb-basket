@@ -56,7 +56,7 @@ function respBandeau(refId,marge){
   box.style.cssText="margin:"+(marge||"0 0 14px")+";padding:14px 16px;border-radius:var(--rs);background:color-mix(in srgb, var(--dkg) 10%, var(--card));border:1.5px solid var(--dkg)";
   box.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--dkg);margin-bottom:6px">🎟️ Vous êtes responsable</div>'+
     ms.map(function(e){
-      var eid=authEsc(e.id), insc=!!e.inscr;
+      var eid=gmJs(e.id), insc=!!e.inscr;
       return '<div style="margin-top:8px"><div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(e.titre||"")+'</div>'+
         '<div style="font-size:12px;color:var(--txt2);margin-bottom:8px">'+(typeof evtDateTxt==="function"?authEsc(evtDateTxt(e)):authEsc(e.date))+'</div>'+
         '<div style="display:flex;gap:8px;flex-wrap:wrap">'+

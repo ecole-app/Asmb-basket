@@ -354,7 +354,7 @@ function benBandeau(refId,marge){
       var j=x.j===0?"Aujourd'hui":benJourTxt(x.e);
       return '<div style="display:flex;gap:10px;align-items:flex-start;margin-top:6px"><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(x.m.poste)+(x.j>1?' <span style="font-size:11px;font-weight:800;color:#E8670A">· '+benQuand(x.j)+'</span>':'')+'</div>'+
         '<div style="font-size:12px;color:var(--txt2)">'+authEsc(j.charAt(0).toUpperCase()+j.slice(1)+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+" · "+(x.e.titre||eventTypeLabel(x.e.type))+(x.e.lieu?" · "+x.e.lieu:""))+'</div></div>'+
-        '<button type="button" title="Masquer ce rappel" aria-label="Masquer ce rappel" onclick="benMasquer(\''+benCle(x,"ferme")+'\',\''+refId+'\',\''+(marge||"")+'\')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:none;background:color-mix(in srgb, #E8670A 18%, transparent);color:#E8670A;font-size:13px;font-weight:900;cursor:pointer">✕</button></div>';
+        '<button type="button" title="Masquer ce rappel" aria-label="Masquer ce rappel" onclick="benMasquer(\''+gmJs(benCle(x,"ferme"))+'\',\''+gmJs(refId)+'\',\''+(gmJs(marge||""))+'\')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:none;background:color-mix(in srgb, #E8670A 18%, transparent);color:#E8670A;font-size:13px;font-weight:900;cursor:pointer">✕</button></div>';
     }).join("")+
     '<div style="font-size:11px;color:var(--mut);margin-top:8px">Un empêchement ? Prévenez le club au plus vite.</div>';
 }

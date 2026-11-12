@@ -84,11 +84,11 @@ function buildComptabilite(){
   auInp.addEventListener("change",function(){COMPTA_FILTERS.au=auInp.value;buildComptabilite();});
   var catSel=document.createElement("select");
   catSel.style.cssText="flex:1;min-width:120px;padding:8px;border:1.5px solid var(--bdr);border-radius:8px;font-size:12px;background:var(--bg);color:var(--txt)";
-  catSel.innerHTML='<option value="">Toutes catégories</option>'+uniqCats.map(function(c){return '<option value="'+c+'"'+(COMPTA_FILTERS.categorie===c?" selected":"")+'>'+c+'</option>';}).join("");
+  catSel.innerHTML='<option value="">Toutes catégories</option>'+uniqCats.map(function(c){return '<option value="'+authEsc(c)+'"'+(COMPTA_FILTERS.categorie===c?" selected":"")+'>'+authEsc(c)+'</option>';}).join("");
   catSel.addEventListener("change",function(){COMPTA_FILTERS.categorie=catSel.value;buildComptabilite();});
   var moyenSel=document.createElement("select");
   moyenSel.style.cssText=catSel.style.cssText;
-  moyenSel.innerHTML='<option value="">Tout moyen</option>'+["Espèces","Chèque","Virement","CB","Autre"].map(function(m){return '<option value="'+m+'"'+(COMPTA_FILTERS.moyen===m?" selected":"")+'>'+m+'</option>';}).join("");
+  moyenSel.innerHTML='<option value="">Tout moyen</option>'+["Espèces","Chèque","Virement","CB","Autre"].map(function(m){return '<option value="'+authEsc(m)+'"'+(COMPTA_FILTERS.moyen===m?" selected":"")+'>'+authEsc(m)+'</option>';}).join("");
   moyenSel.addEventListener("change",function(){COMPTA_FILTERS.moyen=moyenSel.value;buildComptabilite();});
   var pointeSel=document.createElement("select");
   pointeSel.style.cssText=catSel.style.cssText;
@@ -96,7 +96,7 @@ function buildComptabilite(){
   pointeSel.addEventListener("change",function(){COMPTA_FILTERS.pointe=pointeSel.value;buildComptabilite();});
   var compteSel=document.createElement("select");
   compteSel.style.cssText=catSel.style.cssText;
-  compteSel.innerHTML='<option value="">Tout compte</option>'+COMPTA_COMPTES.map(function(c){return '<option value="'+c+'"'+(COMPTA_FILTERS.compte===c?" selected":"")+'>'+c+'</option>';}).join("");
+  compteSel.innerHTML='<option value="">Tout compte</option>'+COMPTA_COMPTES.map(function(c){return '<option value="'+authEsc(c)+'"'+(COMPTA_FILTERS.compte===c?" selected":"")+'>'+authEsc(c)+'</option>';}).join("");
   compteSel.addEventListener("change",function(){COMPTA_FILTERS.compte=compteSel.value;buildComptabilite();});
   fEl.appendChild(duInp);fEl.appendChild(auInp);fEl.appendChild(catSel);fEl.appendChild(moyenSel);fEl.appendChild(compteSel);fEl.appendChild(pointeSel);
   if(typeof comptaFiltreExercice==="function") comptaFiltreExercice(fEl,all);
@@ -113,11 +113,11 @@ function buildComptabilite(){
   var tiers=all.map(function(l){return l.tiers;}).filter(Boolean);
   var uniq=function(arr){return arr.filter(function(v,i){return arr.indexOf(v)===i;});};
   var dlCat=document.getElementById("compta-cat-list");
-  if(dlCat) dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+c+'">';}).join("");
+  if(dlCat) dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+authEsc(c)+'">';}).join("");
   var dlMotif=document.getElementById("compta-motif-list");
-  if(dlMotif) dlMotif.innerHTML=uniq(motifs).map(function(m){return '<option value="'+m+'">';}).join("");
+  if(dlMotif) dlMotif.innerHTML=uniq(motifs).map(function(m){return '<option value="'+authEsc(m)+'">';}).join("");
   var dlTiers=document.getElementById("compta-tiers-list");
-  if(dlTiers) dlTiers.innerHTML=uniq(tiers).map(function(t){return '<option value="'+t+'">';}).join("");
+  if(dlTiers) dlTiers.innerHTML=uniq(tiers).map(function(t){return '<option value="'+authEsc(t)+'">';}).join("");
 
   // Liste + totaux
   var filtered=comptaFilteredList();
@@ -143,7 +143,7 @@ function buildComptabilite(){
   '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
     Object.keys(soldesComptes).map(function(c){
       return '<div style="flex:1;min-width:100px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 10px">'+
-        '<div style="color:var(--mut);font-size:9.5px;font-weight:700;text-transform:uppercase">'+c+'</div>'+
+        '<div style="color:var(--mut);font-size:9.5px;font-weight:700;text-transform:uppercase">'+authEsc(c)+'</div>'+
         '<div style="color:var(--txt);font-weight:800;font-size:13px">'+soldesComptes[c].toFixed(2)+' €</div></div>';
     }).join("")+
   '</div>'+
@@ -198,7 +198,7 @@ function comptaTableau(listEl,lines){
   lines.forEach(function(l){
     var dep=l.type==="depense", n=(typeof comptaCompteNum==="function")?comptaCompteNum(l):"";
     h+='<tr data-id="'+authEsc(String(l.id))+'">'+
-      '<td style="white-space:nowrap">'+fr(l.date)+'</td>'+
+      '<td style="white-space:nowrap">'+authEsc(fr(l.date))+'</td>'+
       '<td class="mono">'+authEsc(l.piece||"")+'</td>'+
       '<td><div style="font-weight:700">'+authEsc(l.motif||"(sans motif)")+(l.justificatif?' <span title="Justificatif joint">📎</span>':'')+'</div>'+(l.tiers?'<div class="mut">'+authEsc(l.tiers)+'</div>':'')+'</td>'+
       '<td>'+authEsc(l.categorie||"")+(n?'<div class="mono">'+authEsc(n+" "+((typeof comptaLibCompte==="function")?comptaLibCompte(n):""))+'</div>':'')+'</td>'+
@@ -225,7 +225,7 @@ function setComptaType(type){
   var catSel=document.getElementById("cl-categorie");
   if(catSel){
     var prev=catSel.getAttribute("data-keep")||catSel.value;
-    catSel.innerHTML=COMPTA_CATS[type].map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
+    catSel.innerHTML=COMPTA_CATS[type].map(function(c){return '<option value="'+authEsc(c)+'">'+authEsc(c)+'</option>';}).join("");
     if(prev && COMPTA_CATS[type].indexOf(prev)>=0) catSel.value=prev;
     catSel.removeAttribute("data-keep");
   }
@@ -265,7 +265,7 @@ function showAddComptaLine(editId){
   moyenSelEl.value=existing?existing.moyen||"Espèces":"Espèces";
   var compteSelEl=document.getElementById("cl-compte");
   if(compteSelEl){
-    compteSelEl.innerHTML=COMPTA_COMPTES.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
+    compteSelEl.innerHTML=COMPTA_COMPTES.map(function(c){return '<option value="'+authEsc(c)+'">'+authEsc(c)+'</option>';}).join("");
     compteSelEl.value=existing?comptaLigneCompte(existing):compteParDefaut("Espèces");
     // Pour une nouvelle ligne, changer le moyen de paiement met à jour la suggestion de compte
     if(!existing && moyenSelEl && !moyenSelEl.dataset.compteWired){
@@ -407,8 +407,8 @@ function openBudgetPrev(cle){
   var realise=budgetRealise(ex);
   var body=document.getElementById("modal-budget-body");
   var html='<select id="budget-ex" class="form-input" onchange="openBudgetPrev(this.value)" style="margin-bottom:8px">'+
-    exs.map(function(e){ return '<option value="'+e.cle+'"'+(e.cle===ex.cle?" selected":"")+'>'+gmT("Exercice")+' '+e.label+'</option>'; }).join("")+'</select>';
-  html+='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">'+gmT("Budget prévisionnel")+' '+ex.label+' : '+gmT("comparez le prévu au réalisé de l'exercice.")+'</div>';
+    exs.map(function(e){ return '<option value="'+authEsc(e.cle)+'"'+(e.cle===ex.cle?" selected":"")+'>'+gmT("Exercice")+' '+authEsc(e.label)+'</option>'; }).join("")+'</select>';
+  html+='<div style="font-size:11px;color:var(--mut);margin-bottom:10px">'+gmT("Budget prévisionnel")+' '+authEsc(ex.label)+' : '+gmT("comparez le prévu au réalisé de l'exercice.")+'</div>';
   html+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
     '<button type="button" onclick="budgetReprendreN1()" style="padding:8px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">↺ '+gmT("Reprendre l'an dernier")+'</button>'+
     '<button type="button" onclick="budgetPdf()" style="padding:8px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">📄 '+gmT("PDF du budget")+'</button></div>';
@@ -424,9 +424,9 @@ function openBudgetPrev(cle){
       var over=prevu>0 && reel>prevu;
       html+='<div style="margin-bottom:10px">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt);margin-bottom:3px">'+
-          '<span>'+gmT(cat)+'</span>'+
+          '<span>'+authEsc(gmT(cat))+'</span>'+
           '<span style="display:flex;align-items:center;gap:6px">'+
-            '<input type="number" step="1" min="0" value="'+(prevu||"")+'" placeholder="0" oninput="budgetMajTotaux()" data-budget-type="'+type+'" data-budget-reel="'+reel+'" '+(subvAuto?'disabled data-budget-auto="1" title="Calculé depuis la liste des subventions (accordées et versées)" ':'data-budget-key="'+type+'|'+cat+'" ')+'style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
+            '<input type="number" step="1" min="0" value="'+(authEsc(prevu||""))+'" placeholder="0" oninput="budgetMajTotaux()" data-budget-type="'+authEsc(type)+'" data-budget-reel="'+reel+'" '+(subvAuto?'disabled data-budget-auto="1" title="Calculé depuis la liste des subventions (accordées et versées)" ':'data-budget-key="'+authEsc(type)+'|'+authEsc(cat)+'" ')+'style="width:70px;padding:5px 6px;border:1px solid var(--bdr);border-radius:6px;font-size:11px;background:var(--bg);color:var(--txt);text-align:right">'+
             '<span style="color:var(--mut);font-size:10px">'+gmT("prévu")+'</span>'+
           '</span>'+
         '</div>'+
@@ -450,7 +450,7 @@ function budgetMajTotaux(){
     var ty=inp.getAttribute("data-budget-type"); t[ty].p+=parseFloat(inp.value)||0; t[ty].r+=parseFloat(inp.getAttribute("data-budget-reel"))||0;
   });
   function lig(lib,p,r,gras){
-    return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;'+(gras?"font-weight:800;":"")+'color:var(--txt);padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="flex:1">'+lib+'</span><span style="width:84px;text-align:right">'+budgetEur(p)+'</span><span style="width:84px;text-align:right">'+budgetEur(r)+'</span></div>';
+    return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;'+(gras?"font-weight:800;":"")+'color:var(--txt);padding:5px 0;border-bottom:1px solid var(--bdr)"><span style="flex:1">'+authEsc(lib)+'</span><span style="width:84px;text-align:right">'+budgetEur(p)+'</span><span style="width:84px;text-align:right">'+budgetEur(r)+'</span></div>';
   }
   z.innerHTML='<div style="margin:16px 0 4px;padding:10px 12px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs)">'+
     '<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--mut);padding-bottom:4px"><span style="flex:1">'+gmT("Totaux")+'</span><span style="width:84px;text-align:right">'+gmT("Prévu")+'</span><span style="width:84px;text-align:right">'+gmT("Réalisé")+'</span></div>'+
@@ -603,19 +603,19 @@ function openBilanAnnuel(){
     byCat[l.type===("depense")?"depense":"recette"][cat]=(byCat[l.type==="depense"?"depense":"recette"][cat]||0)+(l.montant||0);
     if(l.type==="depense") totD+=(l.montant||0); else totR+=(l.montant||0);
   });
-  var html='<div style="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px">Bilan financier '+year+'</div>'+
+  var html='<div style="font-size:13px;font-weight:800;color:var(--txt);margin-bottom:2px">Bilan financier '+authEsc(year)+'</div>'+
     '<div style="font-size:11px;color:var(--mut);margin-bottom:14px">À présenter en Assemblée Générale</div>';
   html+='<div style="font-size:12px;font-weight:800;color:var(--grn);margin:10px 0 6px">Recettes</div>';
   Object.keys(byCat.recette).sort().forEach(function(c){
-    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+c+'</span><span style="font-weight:700">'+byCat.recette[c].toFixed(2)+' €</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+authEsc(c)+'</span><span style="font-weight:700">'+byCat.recette[c].toFixed(2)+' €</span></div>';
   });
   html+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--grn);padding:6px 0">Total recettes<span>'+totR.toFixed(2)+' €</span></div>';
   html+='<div style="font-size:12px;font-weight:800;color:var(--red);margin:14px 0 6px">Dépenses</div>';
   Object.keys(byCat.depense).sort().forEach(function(c){
-    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+c+'</span><span style="font-weight:700">'+byCat.depense[c].toFixed(2)+' €</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt);padding:4px 0;border-bottom:1px solid var(--bdr)"><span>'+authEsc(c)+'</span><span style="font-weight:700">'+byCat.depense[c].toFixed(2)+' €</span></div>';
   });
   html+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--red);padding:6px 0">Total dépenses<span>'+totD.toFixed(2)+' €</span></div>';
-  html+='<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--dkg);padding:12px 0;margin-top:8px;border-top:2px solid var(--bdr)">Résultat net '+year+'<span>'+(totR-totD).toFixed(2)+' €</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--dkg);padding:12px 0;margin-top:8px;border-top:2px solid var(--bdr)">Résultat net '+authEsc(year)+'<span>'+(totR-totD).toFixed(2)+' €</span></div>';
   document.getElementById("modal-bilan-body").innerHTML=html;
   document.getElementById("modal-bilan-annuel").style.display="flex";
 }
@@ -973,7 +973,7 @@ function loadBuvetteGrants(el,clubId){
         }));
         el.appendChild(card);
       });
-    }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+    }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+(authEsc((e&&e.code)||e))+'</div>'; });
 }
 
 // ═══ PROCÉDURE DE LA CAISSE BUVETTE ═══════════════════════════════════
@@ -1045,7 +1045,7 @@ function openBuvetteProcedure(){
         }).catch(function(e){ btn.disabled=false; askAlert("Erreur : "+((e&&e.code)||e)); });
       }));
     }
-  }).catch(function(e){ s.body.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+  }).catch(function(e){ s.body.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+(authEsc((e&&e.code)||e))+'</div>'; });
 }
 
 // ═══ JOURNÉES BUVETTE (trace des ventes de la caisse en ligne) ═════════
@@ -1078,7 +1078,7 @@ function openJourneesBuvette(){
       var card=gmCard();
       card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(new Date(j+"T12:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}))+'</div>'
         +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+ventes.length+' vente'+(ventes.length>1?'s':'')+' · '+tot.toFixed(2).replace(".",",")+' €'
-        +(offs.length?' · 🎁 '+offs.reduce(function(a,o){return a+(o.lignes||[]).reduce(function(b,l){return b+(Number(l.qty)||0);},0);},0)+' offert(s)':'')+'</div>';
+        +(authEsc(offs.length?' · 🎁 '+offs.reduce(function(a,o){return a+(o.lignes||[]).reduce(function(b,l){return b+(Number(l.qty)||0);},0);},0)+' offert(s)':''))+'</div>';
       gmRow(card).appendChild(gmBtn("PDF de la journée","primary",function(){ pdfJourneeBuvette(j,ventes,serv,offs); }));
       box.appendChild(card);
     });
@@ -1281,7 +1281,7 @@ function buildDocs(){
     var div=document.createElement("div");div.className="doc-card";
     var catBadge="<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;background:"+(DOC_CAT_COLORS[cat]||"#8E44AD")+"\">"+(DOC_CAT_LABELS[cat]||"Autre")+"</span>";
     var pubBadge=d.publie?"<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;background:rgba(22,179,120,.15);color:var(--grn)\">Publié aux parents</span>":"<span style=\"font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;background:var(--bdr);color:var(--mut)\">Réservé au bureau</span>";
-    var id=authEsc(d.id);
+    var id=gmJs(d.id);
     var btns="<div style=\"display:flex;gap:6px;margin-top:8px;flex-wrap:wrap\">"
       +"<button onclick=\"docsOuvrir('"+id+"')\" style=\"padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Ouvrir</button>"
       +"<button onclick=\"docsBasculerPublication('"+id+"')\" style=\"padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--txt);font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(d.publie?"Retirer aux parents":"Publier aux parents")+"</button></div>";

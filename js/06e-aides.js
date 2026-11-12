@@ -140,18 +140,18 @@ function aidesBlockHtml(lic, pref){
     h+='<div style="font-size:12px;color:var(--txt2);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">'+
       '<b>'+authEsc(t.nom)+'</b> · '+(Number(x.montant)||0).toFixed(2)+' € · n° '+authEsc(x.ref)+' · <b>'+authEsc(noms[x.statut]||x.statut)+'</b>'+
       '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'+
-      (x.statut==="a_saisir"?'<button onclick="aidesStatut(\''+lic.code+'\','+i+',\'saisi\')" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Marquer saisi</button>':'')+
-      (x.statut==="saisi"?'<button onclick="aidesStatut(\''+lic.code+'\','+i+',\'rembourse\')" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Marquer remboursé</button>':'')+
-      '<button onclick="aidesRetirer(\''+lic.code+'\','+i+')" style="padding:6px 10px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Retirer</button>'+
+      (x.statut==="a_saisir"?'<button onclick="aidesStatut(\''+gmJs(lic.code)+'\','+i+',\'saisi\')" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Marquer saisi</button>':'')+
+      (x.statut==="saisi"?'<button onclick="aidesStatut(\''+gmJs(lic.code)+'\','+i+',\'rembourse\')" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Marquer remboursé</button>':'')+
+      '<button onclick="aidesRetirer(\''+gmJs(lic.code)+'\','+i+')" style="padding:6px 10px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:11px;font-weight:600;border:none;cursor:pointer">Retirer</button>'+
       '</div></div>';
   });
   if(showPS&&!aPS){
     h+='<div style="display:flex;gap:6px;margin-bottom:8px"><input class="form-input" id="'+pref+'aide-add-passsport" value="'+authEsc(f.passSport||"")+'" placeholder="Code Pass\'Sport 26-XXXX-XXXX" style="flex:1">'+
-      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passsport\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 50 €</button></div>';
+      '<button onclick="aidesAjouter(\''+gmJs(lic.code)+'\',\'passsport\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 50 €</button></div>';
   }
   if(showPR&&!aPR){
     h+='<div style="display:flex;gap:6px"><input class="form-input" id="'+pref+'aide-add-passregion" value="'+authEsc(f.passRegionNumero||"")+'" placeholder="N° de carte Pass\'Région" style="flex:1">'+
-      '<button onclick="aidesAjouter(\''+lic.code+'\',\'passregion\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 30 €</button></div>';
+      '<button onclick="aidesAjouter(\''+gmJs(lic.code)+'\',\'passregion\',\''+pref+'\')" style="padding:8px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Compter 30 €</button></div>';
   }
   if(liste.length) h+='<div style="font-size:11px;color:var(--mut);margin-top:8px">Les aides comptent dans le paiement : la famille règle la différence.</div>';
   return h+'</div>';
@@ -278,7 +278,7 @@ function aidesOuvrirListe(){
     return '<div style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt2)">'+
       '<b>'+authEsc(nom(x.lic))+'</b>'+(f.naissance?' · né(e) le '+authEsc(f.naissance):'')+'<br><span style="font-family:monospace;font-size:13px;color:var(--txt)">'+authEsc(x.aide.ref)+'</span>'+
       '<div style="display:flex;gap:6px;margin-top:6px"><button class="aide-cp" data-ref="'+authEsc(x.aide.ref)+'" style="padding:6px 10px;border-radius:20px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Copier le code</button>'+
-      '<button onclick="aidesStatut(\''+x.lic.code+'\','+x.i+',\'saisi\');aidesFermerListe()" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Saisi ✓</button></div></div>';
+      '<button onclick="aidesStatut(\''+gmJs(x.lic.code)+'\','+x.i+',\'saisi\');aidesFermerListe()" style="padding:6px 10px;border-radius:20px;background:var(--dkg);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer">Saisi ✓</button></div></div>';
   }
   var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:15px;font-weight:800;color:var(--txt)">Codes à saisir</div>'+
     '<button id="aide-close" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button></div>';

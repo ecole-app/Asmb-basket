@@ -189,7 +189,7 @@ function trnGenerer(cfg){
 function trnBoutonCarte(e){
   if(e.type!=="tournoi") return "";
   if(typeof isStaffUser==="function"&&!isStaffUser()) return "";
-  return "<button onclick=\"trnOuvrir('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:#b7791f;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer\">🏆 Tournoi</button>";
+  return "<button onclick=\"trnOuvrir('"+gmJs(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:#b7791f;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer\">🏆 Tournoi</button>";
 }
 // sansModif : enregistrement qui ne change ni équipes ni format (publication).
 function trnSauver(eid,maj,sansModif){
@@ -342,7 +342,7 @@ function trnOuvrir(eid){
       function majS(){
         var nbP=parseInt(selP.value,10), tailles=trnPoules(c.equipes.filter(function(q){ return (q.cat||"Sans catégorie")===k; }),nbP).map(function(x){ return x.length; });
         var ok=trnSuitesPossibles(nbP,Math.min.apply(null,tailles),n), cur=selS.value||cc.suite;
-        selS.innerHTML=ok.map(function(sx){ return '<option value="'+sx+'">'+authEsc(TRN_SUITES[sx])+'</option>'; }).join("");
+        selS.innerHTML=ok.map(function(sx){ return '<option value="'+authEsc(sx)+'">'+authEsc(TRN_SUITES[sx])+'</option>'; }).join("");
         selS.value=ok.indexOf(cur)>=0?cur:"aucune";
         pfL.style.display=(selS.value==="demis"||selS.value==="finale")?"flex":"none";
         var nbM=tailles.reduce(function(t,x){ return t+x*(x-1)/2; },0);
@@ -439,7 +439,7 @@ function trnListeHtml(c,matchs,publique){
       var ga=fini&&r.sa>r.sb, gb=fini&&r.sb>r.sa;
       var d=document.createElement("div");
       d.style.cssText="background:var(--card);border:1px solid "+(m.hors?"var(--red)":enc?"#d97706":"var(--bdr)")+";border-radius:10px;padding:7px 10px"+(m.phase==="finale"?";border-left:4px solid #b7791f":"");
-      function ligne(n,sc,gagne){ return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:'+(gagne?900:700)+';color:var(--txt)"><span style="min-width:0;overflow-wrap:anywhere">'+authEsc(n)+'</span>'+(r&&r.statut!=="prevu"?'<span style="font-variant-numeric:tabular-nums">'+sc+'</span>':'')+'</div>'; }
+      function ligne(n,sc,gagne){ return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:'+(gagne?900:700)+';color:var(--txt)"><span style="min-width:0;overflow-wrap:anywhere">'+authEsc(n)+'</span>'+(r&&r.statut!=="prevu"?'<span style="font-variant-numeric:tabular-nums">'+authEsc(sc)+'</span>':'')+'</div>'; }
       d.innerHTML='<div style="font-size:10.5px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">'+authEsc(trnTerrainTxt(c.typesTerrains,m.terrain))+' · '+authEsc(m.cat)+' · '+authEsc(m.label)+
         (enc?' · <span style="color:#d97706">en cours</span>':fini?' · <span style="color:var(--grn)">terminé</span>':'')+(m.hors?' · <span style="color:var(--red)">après l\'heure de fin</span>':'')+'</div>'+
         (r&&r.statut!=="prevu"?ligne(a,r.sa,ga)+ligne(b,r.sb,gb)+(r.forfait?'<div style="font-size:11px;color:var(--red)">Forfait de '+authEsc(r.forfait==="a"?a:b)+'</div>':'')

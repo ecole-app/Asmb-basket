@@ -204,7 +204,7 @@ function buildLiveEval(){
   if(!jbar){ jbar=document.createElement("div"); jbar.id="live-eval-jours"; lbEl.parentNode.insertBefore(jbar,lbEl.previousElementSibling); }
   jbar.style.cssText=jours.length?"display:flex;gap:6px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none":"display:none";
   jbar.innerHTML=jours.map(function(j){
-    return '<button onclick="evalChoisirJour(\''+j+'\')" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+(j===evalJour?'var(--dkg)':'var(--bdr)')+';background:'+(j===evalJour?'var(--dkg)':'var(--card)')+';color:'+(j===evalJour?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">'+authEsc(typeof evtJourTxt==="function"?evtJourTxt(j):j)+'</button>';
+    return '<button onclick="evalChoisirJour(\''+gmJs(j)+'\')" style="padding:8px 14px;border-radius:20px;border:1.5px solid '+(j===evalJour?'var(--dkg)':'var(--bdr)')+';background:'+(j===evalJour?'var(--dkg)':'var(--card)')+';color:'+(j===evalJour?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">'+authEsc(typeof evtJourTxt==="function"?evtJourTxt(j):j)+'</button>';
   }).join("");
   var players=evalParticipants(ev,evalInscrits[currentEvalEventId]||[],evalJour,getPlayers());
   var allEvals=getAllEvaluations();
@@ -229,7 +229,7 @@ function buildLiveEval(){
     row.addEventListener("click",function(){evalAllerFiche(p.key);});
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
     row.innerHTML='<div style="width:20px;font-size:13px;font-weight:900;color:'+(i===0?"#F5A623":"var(--mut)")+';text-align:center">'+(i+1)+'</div>'+
-      '<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
+      '<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+authEsc(initials)+'</div>'+
       '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+authEsc((p.prenom+' '+p.nom).trim())+(p.ext?' <span style="font-size:9px;font-weight:800;color:var(--mut);border:1px solid var(--bdr);border-radius:8px;padding:1px 6px;margin-left:4px">EXT.</span>':'')+'</div>'+
       '<div style="font-size:13px;font-weight:900;color:var(--ltg)">'+totalFor(p.key).toFixed(1)+'</div>';
     lb.appendChild(row);
@@ -246,7 +246,7 @@ function buildLiveEval(){
     var hdr=document.createElement("div");
     hdr.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
     var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
-    hdr.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
+    hdr.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:var(--dkg);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+authEsc(initials)+'</div>'+
       '<div style="flex:1;font-size:13.5px;font-weight:800;color:var(--txt)">'+authEsc((p.prenom+' '+p.nom).trim())+(p.ext?' <span style="font-size:9px;font-weight:800;color:var(--mut);border:1px solid var(--bdr);border-radius:8px;padding:1px 6px;margin-left:4px">EXTÉRIEUR</span>':'')+'</div>'+
       '<div style="font-size:13px;font-weight:900;color:var(--ltg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:3px 10px;border-radius:12px">'+totalFor(p.key).toFixed(1)+' pts</div>';
     card.appendChild(hdr);

@@ -1475,7 +1475,8 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
   try {
     if (corps.action === "changer") {
       const cible = String(corps.clubId || "");
-      if (!cible || estCopie(cible)) throw new ErreurClub("club");
+      // Identifiant de club simple (lettres, chiffres, - et _) : jamais un chemin (« a/b/c »).
+      if (!/^[A-Za-z0-9_-]{1,80}$/.test(cible) || estCopie(cible)) throw new ErreurClub("club");
       await db.runTransaction(async (t) => {
         const uSnap = await t.get(uRef);
         if (!uSnap.exists) throw new ErreurClub("compte");
@@ -1506,7 +1507,7 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
     }
     if (corps.action === "rejoindre") {
       const code = String(corps.code || "");
-      if (!code || code.length > 80 || code.indexOf("/") >= 0) throw new ErreurClub("invitation");
+      if (!/^[A-Za-z0-9_-]{1,80}$/.test(code)) throw new ErreurClub("invitation");
       const iRef = db.collection("club_invites").doc(code);
       await db.runTransaction(async (t) => {
         const [uSnap, iSnap] = await Promise.all([t.get(uRef), t.get(iRef)]);

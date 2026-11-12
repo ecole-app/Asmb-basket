@@ -59,8 +59,8 @@ function statsBoutonCarte(e){
   if(!e || e.type!=="match" || typeof isStaffUser!=="function" || !isStaffUser()) return "";
   var m=getMatchStats().filter(function(x){return String(x.id)===String(e.id);})[0];
   var lib=m?(m.statut==="termine"?"Feuille de match":"Stats en cours"):"Stats";
-  var salle=(m&&msPremium())?"<button onclick=\"statsSalleOuvrir('"+authEsc(String(e.id))+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">📺 Salle</button>":"";
-  return salle+"<button onclick=\"statsOuvrir('"+authEsc(String(e.id))+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 14%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">📊 "+lib+"</button>";
+  var salle=(m&&msPremium())?"<button onclick=\"statsSalleOuvrir('"+gmJs(String(e.id))+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\">📺 Salle</button>":"";
+  return salle+"<button onclick=\"statsOuvrir('"+gmJs(String(e.id))+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 14%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">📊 "+lib+"</button>";
 }
 function statsOuvrir(eventId){
   if(typeof isStaffUser==="function" && !isStaffUser()){ askAlert("Réservé aux coachs et au dirigeant."); return; }
@@ -119,8 +119,8 @@ function msDebut(ev){
   liste.forEach(function(p){
     var on=!!msChoix.presents[p.id], tit=!!msChoix.titulaires[p.id];
     h+="<div class=\"ms-ligne"+(on?" entre":"")+"\" style=\"cursor:default\">"
-      +"<b onclick=\"msBasculePresent('"+authEsc(String(p.id))+"')\" style=\"cursor:pointer\">"+(on?"✓ ":"")+authEsc(((p.prenom||"")+" "+(p.nom||"")).trim())+"</b>"
-      +(prem&&on?"<button class=\"ms-btn"+(tit?" plein":"")+"\" style=\"min-height:36px\" onclick=\"msBasculeTitulaire('"+authEsc(String(p.id))+"')\">Titulaire</button>":"")
+      +"<b onclick=\"msBasculePresent('"+gmJs(String(p.id))+"')\" style=\"cursor:pointer\">"+(on?"✓ ":"")+authEsc(((p.prenom||"")+" "+(p.nom||"")).trim())+"</b>"
+      +(prem&&on?"<button class=\"ms-btn"+(tit?" plein":"")+"\" style=\"min-height:36px\" onclick=\"msBasculeTitulaire('"+gmJs(String(p.id))+"')\">Titulaire</button>":"")
       +"</div>";
   });
   h+="</div><div class=\"ms-pied\"><button class=\"ms-btn plein\" onclick=\"msCommencer()\">Commencer le match</button></div>";
@@ -176,7 +176,7 @@ function msSaisie(m){
   if(msSel && terrain.indexOf(msSel)<0) msSel=terrain[0]||null;
   if(!msSel) msSel=terrain[0]||null;
   var h=msEntete("Saisie du match",(m.equipe||"")+" · "+(m.date||""),
-    (prem?"<button class=\"ms-pill\" onclick=\"statsSalleOuvrir('"+authEsc(String(m.id))+"')\">📺</button> ":"")+"<button class=\"ms-pill\" onclick=\"msVoirFeuille()\">Feuille</button>");
+    (prem?"<button class=\"ms-pill\" onclick=\"statsSalleOuvrir('"+gmJs(String(m.id))+"')\">📺</button> ":"")+"<button class=\"ms-pill\" onclick=\"msVoirFeuille()\">Feuille</button>");
   h+="<div class=\"ms-body\" style=\"padding-bottom:0\">";
   h+="<div class=\"ms-card\"><div class=\"ms-score\">"
     +"<div><div class=\"ms-lbl\">"+authEsc(clubLabel("Nous"))+"</div><div class=\"ms-big\">"+r.score.nous+"</div></div>"
@@ -185,18 +185,18 @@ function msSaisie(m){
         +"<button class=\"ms-btn\" id=\"ms-pause\" onclick=\"msBasculeChrono()\" style=\"min-width:76px\">"+(msChronoMarche(m)?"Pause":"Démarrer")+"</button>":"")
     +"<div class=\"ms-lbl\" style=\"margin-top:2px\">Fautes éq. "+(r.fautesEq[q-1]||0)+"</div></div>"
     +"<div><div class=\"ms-lbl\">"+authEsc(m.adversaire||"Adversaire")+"</div><div class=\"ms-big\">"+r.score.eux+"</div>"
-    +"<div class=\"ms-adv\">"+["a1","a2","a3"].map(function(a){return "<button class=\"ms-btn\" onclick=\"msAction('"+a+"')\">+"+MS_ADV[a]+"</button>";}).join("")+"</div></div>"
+    +"<div class=\"ms-adv\">"+["a1","a2","a3"].map(function(a){return "<button class=\"ms-btn\" onclick=\"msAction('"+gmJs(a)+"')\">+"+MS_ADV[a]+"</button>";}).join("")+"</div></div>"
     +"</div></div>";
   h+="<div class=\"ms-joueurs"+(prem?"":" defile")+"\">";
   terrain.forEach(function(id){
     var L=r.joueurs[id]||msLigneVide();
-    h+="<button class=\"ms-j"+(id===msSel?" sel":"")+"\" onclick=\"msChoisir('"+authEsc(String(id))+"')\"><div class=\"n\">"+authEsc(msNomJoueur(id))+"</div><div class=\"p\">"+L.pts+"</div><div class=\"f\">"+L.fc+" faute(s)</div></button>";
+    h+="<button class=\"ms-j"+(id===msSel?" sel":"")+"\" onclick=\"msChoisir('"+gmJs(String(id))+"')\"><div class=\"n\">"+authEsc(msNomJoueur(id))+"</div><div class=\"p\">"+L.pts+"</div><div class=\"f\">"+L.fc+" faute(s)</div></button>";
   });
   h+="</div>";
   h+="<div style=\"font-size:12px;color:var(--mut)\">Joueur sélectionné : <b style=\"color:var(--txt)\">"+authEsc(msSel?msNomJoueur(msSel):"aucun")+"</b> · touche une action pour l'enregistrer</div>";
   h+="<div class=\"ms-actions\">";
   (prem?MS_ORDRE:MS_ORDRE_STANDARD).forEach(function(a){
-    h+="<button class=\"ms-a "+MS_ACTIONS[a].groupe+"\" onclick=\"msAction('"+a+"')\">"+MS_ACTIONS[a].lib+"</button>";
+    h+="<button class=\"ms-a "+MS_ACTIONS[a].groupe+"\" onclick=\"msAction('"+gmJs(a)+"')\">"+MS_ACTIONS[a].lib+"</button>";
   });
   if(prem) h+="<button class=\"ms-a\" onclick=\"msOuvrirRempl()\">Remplacement</button>";
   h+="</div>";
@@ -275,13 +275,13 @@ function msRempl(m){
   h+="<div class=\"ms-body\"><div class=\"ms-h\">1. Qui sort ? (sur le terrain)</div><div style=\"display:flex;flex-direction:column;gap:6px\">";
   sur.forEach(function(id){
     var L=r.joueurs[id]||msLigneVide();
-    h+="<div class=\"ms-ligne"+(msPendSort===id?" sort":"")+"\" onclick=\"msPendSort='"+authEsc(String(id))+"';msRempl(msMatch())\"><b>"+authEsc(msNomJoueur(id))+"</b><span>"+L.min+" min · "+L.fc+" faute(s)</span></div>";
+    h+="<div class=\"ms-ligne"+(msPendSort===id?" sort":"")+"\" onclick=\"msPendSort='"+gmJs(String(id))+"';msRempl(msMatch())\"><b>"+authEsc(msNomJoueur(id))+"</b><span>"+L.min+" min · "+L.fc+" faute(s)</span></div>";
   });
   h+="</div><div class=\"ms-h\">2. Qui entre ? (sur le banc)</div><div class=\"ms-grid2\">";
   if(!banc.length) h+="<div style=\"font-size:13px;color:var(--mut);grid-column:1/-1\">Personne sur le banc.</div>";
   banc.forEach(function(id){
     var L=r.joueurs[id]||msLigneVide();
-    h+="<div class=\"ms-ligne"+(msPendEntre===id?" entre":"")+"\" onclick=\"msPendEntre='"+authEsc(String(id))+"';msRempl(msMatch())\"><b>"+authEsc(msNomJoueur(id))+"</b><span>"+L.min+" min</span></div>";
+    h+="<div class=\"ms-ligne"+(msPendEntre===id?" entre":"")+"\" onclick=\"msPendEntre='"+gmJs(String(id))+"';msRempl(msMatch())\"><b>"+authEsc(msNomJoueur(id))+"</b><span>"+L.min+" min</span></div>";
   });
   h+="</div><div class=\"ms-card\" style=\"font-size:13px;line-height:1.5\">"
     +(msPendSort&&msPendEntre?"<b>"+authEsc(msNomJoueur(msPendSort))+"</b> sort, <b>"+authEsc(msNomJoueur(msPendEntre))+"</b> entre.":"Choisis le joueur qui sort et celui qui entre.")
@@ -312,7 +312,7 @@ function msFeuille(m){
   var o=msOverlay(), prem=msPremium(), r=msCalcul(m);
   var gagne=r.score.nous>r.score.eux, nul=r.score.nous===r.score.eux;
   var h=msEntete("Feuille de match",(m.equipe||"")+" · "+(m.date||"")+(m.statut==="termine"?" · terminé":" · en cours"),
-    (prem?"<button class=\"ms-pill\" onclick=\"statsSalleOuvrir('"+authEsc(String(m.id))+"')\">📺 Salle</button> ":"")
+    (prem?"<button class=\"ms-pill\" onclick=\"statsSalleOuvrir('"+gmJs(String(m.id))+"')\">📺 Salle</button> ":"")
     +(m.statut==="termine"?"<span class=\"ms-pill\">"+(nul?"Nul":gagne?"Victoire":"Défaite")+"</span>":""));
   h+="<div class=\"ms-body ms-feuille\">";
   var nq=r.nbQuarts;

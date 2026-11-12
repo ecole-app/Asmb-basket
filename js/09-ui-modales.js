@@ -118,7 +118,7 @@ window.alert = function(message){ askAlert(message); };
 // dans l'appli plutot qu'un texte statique qui donne l'impression que l'ecran
 // est fige.
 function loadingHtml(label){
-  return '<div style="text-align:center;padding:30px 10px"><div class="loader-spin"></div><div style="font-size:12px;color:var(--mut)">'+(label||"Chargement...")+'</div></div>';
+  return '<div style="text-align:center;padding:30px 10px"><div class="loader-spin"></div><div style="font-size:12px;color:var(--mut)">'+(authEsc(label||"Chargement..."))+'</div></div>';
 }
 
 // showToast(message) : petite confirmation qui disparait toute seule, pour les
@@ -218,7 +218,7 @@ function buildClubStats(){
     var count=byCat[c];
     if(count===0)return;
     var pct=Math.round(count/players.length*100)||0;
-    html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--txt);font-weight:600">'+c+'</span><span style="color:var(--mut)">'+count+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
+    html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--txt);font-weight:600">'+authEsc(c)+'</span><span style="color:var(--mut)">'+count+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div></div>';
   });
   if(!players.length){html+='<div style="font-size:11px;color:var(--mut);text-align:center;padding:10px 0">Aucune donnée pour le moment</div>';}
 

@@ -8,7 +8,7 @@ function buildParametres(){
   if(seasonEl){
     var cur=getCurrentSeason(), natural=computeNaturalSeason();
     if(natural!==cur){
-      seasonEl.innerHTML='Saison affichée : <b>'+cur+'</b><br><span style="color:#E8670A;font-weight:700">La saison '+natural+' a commencé — pensez à archiver.</span>';
+      seasonEl.innerHTML='Saison affichée : <b>'+authEsc(cur)+'</b><br><span style="color:#E8670A;font-weight:700">La saison '+natural+' a commencé — pensez à archiver.</span>';
     } else {
       seasonEl.textContent="Saison affichée : "+cur;
     }
@@ -590,7 +590,7 @@ function majBoutonPalette(){
   var sw=document.getElementById("club-palette-sw"), lbl=document.getElementById("club-palette-lbl");
   if(!sw||!lbl) return;
   var c=[clubCouleur(),clubCouleur2()].filter(Boolean);
-  sw.innerHTML=c.map(function(x){ return '<i style="width:20px;height:20px;border-radius:6px;display:block;background:'+x+'"></i>'; }).join("");
+  sw.innerHTML=c.map(function(x){ return '<i style="width:20px;height:20px;border-radius:6px;display:block;background:'+authEsc(x)+'"></i>'; }).join("");
   lbl.textContent=c.length?(c.length===2?"2 couleurs choisies":"1 couleur choisie"):"Couleurs General Manager (par défaut)";
 }
 

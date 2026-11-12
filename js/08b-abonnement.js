@@ -302,9 +302,9 @@ function pfRibOuvrir(){
   var rib=window.__gmRib||{};
   function champ(lib,id,val,ph){
     var w=document.createElement("div"); w.style.marginBottom="10px";
-    w.innerHTML='<label for="'+id+'" style="display:block;font-size:12px;font-weight:700;color:var(--txt2);margin-bottom:4px">'+lib+'</label>'+
-      '<input id="'+id+'" type="text" autocomplete="off" autocapitalize="characters" placeholder="'+ph+'" style="width:100%;padding:11px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:14px">'+
-      '<div id="'+id+'-m" style="font-size:12px;margin-top:3px;min-height:16px"></div>';
+    w.innerHTML='<label for="'+authEsc(id)+'" style="display:block;font-size:12px;font-weight:700;color:var(--txt2);margin-bottom:4px">'+authEsc(lib)+'</label>'+
+      '<input id="'+authEsc(id)+'" type="text" autocomplete="off" autocapitalize="characters" placeholder="'+authEsc(ph)+'" style="width:100%;padding:11px 12px;border-radius:var(--rx);border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:14px">'+
+      '<div id="'+authEsc(id)+'-m" style="font-size:12px;margin-top:3px;min-height:16px"></div>';
     w.querySelector("input").value=val||"";
     s.body.appendChild(w); return w.querySelector("input");
   }

@@ -8,7 +8,7 @@ function deskJour(iso){ var d=new Date(iso+"T12:00:00"); return isNaN(d)?{j:"",n
 function deskCarte(titre, val, sous, onclick, ton){
   return '<button type="button" class="dk-kpi" onclick="'+onclick+'">'+
     '<div class="dk-kpi-t">'+authEsc(titre)+'</div>'+
-    '<div class="dk-kpi-v"'+(ton?' style="color:'+ton+'"':'')+'>'+authEsc(String(val))+'</div>'+
+    '<div class="dk-kpi-v"'+(ton?' style="color:'+authEsc(ton)+'"':'')+'>'+authEsc(String(val))+'</div>'+
     '<div class="dk-kpi-s">'+sous+'</div></button>';
 }
 function renderDeskHome(){
@@ -56,7 +56,7 @@ function renderDeskHome(){
   if(dir&&typeof plAlertesAFaire==="function") todo=todo.concat(plAlertesAFaire()); // bénévoles J-7, conflits de salle (js/12b)
   var t='<section class="dk-card"><h2>À faire</h2>';
   t+=todo.length?todo.map(function(x){
-    return '<div class="dk-todo"><span class="dk-dot" style="background:'+x[0]+'"></span><span class="dk-todo-t">'+authEsc(x[1])+'</span><button type="button" class="dk-btn" onclick="'+x[3]+'">'+authEsc(x[2])+'</button></div>';
+    return '<div class="dk-todo"><span class="dk-dot" style="background:'+authEsc(x[0])+'"></span><span class="dk-todo-t">'+authEsc(x[1])+'</span><button type="button" class="dk-btn" onclick="'+x[3]+'">'+authEsc(x[2])+'</button></div>';
   }).join(""):'<div class="dk-vide">Rien en attente. Tout est à jour.</div>';
   t+='</section>';
 
@@ -67,8 +67,8 @@ function renderDeskHome(){
     ev='<section class="dk-card"><h2>Inscriptions en cours</h2>'+ins.map(function(e){
       return '<div class="dk-evt"><div style="min-width:0;flex:1"><div class="dk-evt-t">'+authEsc(e.titre||"")+'</div>'+
         '<div class="dk-evt-s">'+authEsc(typeof evtDateTxt==="function"?evtDateTxt(e):e.date)+' · <span class="dk-nb" data-eid="'+authEsc(e.id)+'">…</span></div></div>'+
-        '<button type="button" class="dk-btn" onclick="evtTableau(\''+authEsc(e.id)+'\')">Inscrits</button>'+
-        '<button type="button" class="dk-btn dk-btn-ghost" onclick="evtAffiche(\''+authEsc(e.id)+'\')">Affiche</button></div>';
+        '<button type="button" class="dk-btn" onclick="evtTableau(\''+gmJs(e.id)+'\')">Inscrits</button>'+
+        '<button type="button" class="dk-btn dk-btn-ghost" onclick="evtAffiche(\''+gmJs(e.id)+'\')">Affiche</button></div>';
     }).join("")+'</section>';
   }
 

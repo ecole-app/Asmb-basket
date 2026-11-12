@@ -330,7 +330,7 @@ function dossierFicheHtml(f){
     t.lignes.forEach(function(l){ h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0"><span>'+authEsc(l.label)+'</span><b style="white-space:nowrap">'+l.prix+' €</b></div>'; });
     if(t.fratrie) h+='<div style="margin-top:8px;color:var(--txt2)">Remise fratrie : '+authEsc(t.fratrie)+'</div>';
     if(t.reglement) h+='<div style="margin-top:8px;color:var(--txt2);white-space:pre-line">'+authEsc(t.reglement)+'</div>';
-    if(t.enLigne) h+='<a href="'+authEsc(t.enLigne)+'" target="_blank" rel="noopener" style="display:block;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none">Payer en ligne (HelloAsso)</a>';
+    if(t.enLigne) h+='<a href="'+authEsc(gmUrl(t.enLigne))+'" target="_blank" rel="noopener" style="display:block;margin-top:10px;padding:11px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:700;text-align:center;text-decoration:none">Payer en ligne (HelloAsso)</a>';
     h+='</div>';
     if(t.options.length){
       var opts=(f.optionsTarif||[]);

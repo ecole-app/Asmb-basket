@@ -43,6 +43,28 @@ function serveur() {
   });
 }
 
+// ── Mode « données hostiles » (JARVIS_HOSTILE=1, cd tests && npm run jarvis:hostile) ──────────────
+// Tout ce qu'une personne peut écrire dans la démo (prénoms, noms, titres, lieux, messages…) reçoit une
+// balise piégée. Si un écran l'affiche sans l'échapper (authEsc, js/18-auth.js), la balise s'exécute :
+// Jarvis le voit et dit où. À lancer après avoir touché à un affichage ; ne bloque pas la mise en ligne.
+const HOSTILE = !!process.env.JARVIS_HOSTILE;
+function empoisonner() {
+  const PIEGE = `'"><img src=data:, onerror="(window.__xss=window.__xss||[]).push(this.parentNode?this.parentNode.outerHTML.slice(0,260):'?')">`;
+  const CHAMPS = /^(prenom|nom|titre|lieu|adresse|notes?|name|label|text|texte|pseudo|respNom|resp2Nom|urgenceNom|playerName|motif|tiers|emetteur|adversaire|description|question|message|clubOrigine|poste|salle|depart|fileName|objet|libelle|commentaire|ville|certMedecin)$/;
+  const marche = (v, cle) => {
+    if (typeof v === "string") return (CHAMPS.test(cle || "") && v && v.indexOf("__xss") < 0) ? v + PIEGE : v;
+    if (Array.isArray(v)) return v.map((x) => marche(x, cle));
+    if (v && typeof v === "object") { const o = {}; for (const k in v) o[k] = marche(v[k], k); return o; }
+    return v;
+  };
+  const lire = Storage.prototype.getItem;
+  Storage.prototype.getItem = function (k) {
+    const brut = lire.call(this, k);
+    if (!brut || !/^(asmb_|gm_demo_db)/.test(k) || !/^[\[{]/.test(brut)) return brut;
+    try { return JSON.stringify(marche(JSON.parse(brut), "")); } catch (e) { return brut; }
+  };
+}
+
 const echecs = [], notes = [], vus = [];
 let nVerifs = 0;
 let nCaptures = 0;
@@ -67,6 +89,7 @@ async function nouvelOnglet(navigateur, base, taille, { sw = false } = {}) {
       console.error("JARVIS-REJET " + String((r && r.message) || r) + " @ " + String((r && r.stack) || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " "));
     });
   });
+  if (HOSTILE) await ctx.addInitScript(empoisonner);
   const page = await ctx.newPage();
   const journal = { erreurs: [], fichiers: [] };
   page.on("pageerror", (e) => journal.erreurs.push((String(e && e.message || e) + " @ " + String(e && e.stack || "").split("\n").slice(1, 3).join(" ").replace(/\s+/g, " ")).slice(0, 400)));
@@ -87,6 +110,13 @@ async function verifier(page, journal, ou, { contenuMin = 15 } = {}) {
   await page.waitForTimeout(700);
   nVerifs++;
   const err = journal.erreurs.splice(0), fic = journal.fichiers.splice(0);
+  if (HOSTILE) {
+    const xss = await page.evaluate(() => { const x = window.__xss || []; window.__xss = []; return x; }).catch(() => []);
+    for (const x of [...new Set(xss)]) await echec(page, ou, "TEXTE NON ÉCHAPPÉ → " + x.replace(/\s+/g, " "));
+    // L'inverse : un texte échappé deux fois s'affiche avec ses « &lt; » en clair.
+    const double = await page.evaluate(() => { const m = document.body.innerText.match(/.{0,40}&(lt|gt|quot|amp);.{0,20}/); return m ? m[0] : ""; }).catch(() => "");
+    if (double) await echec(page, ou, "TEXTE ÉCHAPPÉ DEUX FOIS → " + double.replace(/\s+/g, " "));
+  }
   for (const e of err) await echec(page, ou, "erreur « " + e + " »");
   for (const f of fic) await echec(page, ou, "fichier " + f);
   const etat = await page.evaluate(() => {
@@ -101,7 +131,8 @@ async function verifier(page, journal, ou, { contenuMin = 15 } = {}) {
   });
   if (etat.fenetre) {
     if (etat.nf < contenuMin) await echec(page, ou, "fenêtre « " + etat.fenetre + " » vide");
-    if (/erreur|error|undefined|NaN|null\b/i.test(etat.tf)) await echec(page, ou, "fenêtre « " + etat.tf.replace(/\s+/g, " ") + " »");
+    // (en mode hostile, le piège affiché en clair contient « onerror » : c'est justement le bon résultat)
+    if (/erreur|error|undefined|NaN|null\b/i.test(HOSTILE ? etat.tf.replace(/'"><img[\s\S]*$/, "") : etat.tf)) await echec(page, ou, "fenêtre « " + etat.tf.replace(/\s+/g, " ") + " »");
   } else if (!etat.ecran) await echec(page, ou, "aucun écran affiché");
   else if (etat.n < contenuMin) await echec(page, ou, "écran « " + etat.ecran + " » vide (" + etat.n + " caractères)");
   if (etat.reprise) await echec(page, ou, "message de chargement raté affiché");

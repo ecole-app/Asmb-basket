@@ -303,7 +303,7 @@ function impRendre(){
   };
   var maps=IMP_CHAMPS.map(function(c){
     return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:0 0 120px;font-size:12px;font-weight:700;color:var(--txt)">'+c.label+'</div>'+
-      '<select class="form-select" style="flex:1" onchange="impChangeMap(\''+c.id+'\',this.value)">'+opts(IMP_ETAT.map[c.id])+'</select></div>';
+      '<select class="form-select" style="flex:1" onchange="impChangeMap(\''+gmJs(c.id)+'\',this.value)">'+opts(IMP_ETAT.map[c.id])+'</select></div>';
   }).join("");
   var peutNew=res.nouvelles.length, maxNew=peutNew;
   if(typeof hasPremium==="function"&&!hasPremium()){
@@ -316,10 +316,10 @@ function impRendre(){
   var cats={}; res.nouvelles.forEach(function(d){ var c=impCat(d); if(c&&(!d.role||d.role==="joueur")) cats[c]=(cats[c]||0)+1; });
   var lots=Object.keys(cats).map(function(c){
     return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span style="font-size:12px;color:var(--txt2)">'+authEsc(c)+' ('+cats[c]+') : tous en équipe</span>'+
-      [1,2,3].map(function(n){return '<button onclick="impEqTous(\''+authEsc(c)+'\','+n+')" style="min-width:30px;padding:5px 9px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">'+n+'</button>';}).join("")+'</div>';
+      [1,2,3].map(function(n){return '<button onclick="impEqTous(\''+gmJs(c)+'\','+n+')" style="min-width:30px;padding:5px 9px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--card);color:var(--txt);font-size:11px;font-weight:700;cursor:pointer">'+authEsc(n)+'</button>';}).join("")+'</div>';
   }).join("");
   var apercu=res.nouvelles.slice(0,15).map(function(d){
-    var av=d.photo?'<img src="'+d.photo+'" alt="" style="width:40px;height:50px;object-fit:cover;border-radius:6px;flex:none">'
+    var av=d.photo?'<img src="'+authEsc(d.photo)+'" alt="" style="width:40px;height:50px;object-fit:cover;border-radius:6px;flex:none">'
       :'<div style="width:40px;height:50px;border-radius:6px;background:var(--bdr);flex:none"></div>';
     var infos=[d.naissance?d.naissance.split("-").reverse().join("/"):"",d.genre,d.categorie,d.numLicence,d.nationalite].filter(Boolean).map(authEsc).join(" · ");
     return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">'+av+

@@ -26,11 +26,11 @@ function buildRealEventsList(){
     var evLieu=e.lieu?"<div style=\"font-size:11px;color:var(--mut);margin-top:2px\">📍 "+authEsc(e.lieu)+"</div>"+(e.adresse?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px;padding-left:16px\">"+authEsc(e.adresse)+"</div>":""):"";
     var evEquipe=e.equipe?"<div style=\"font-size:11px;color:var(--mut);margin-top:1px\">"+authEsc(e.equipe)+"</div>":"";
     var presenceCount=e.presences?Object.keys(e.presences).length:0;
-    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+e.id+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
-    var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
-    var editTimeBtn="<button onclick=\"editEventDateTime('"+e.id+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
-    var delBtn="<button onclick=\"deleteEvent('"+e.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+eventTypeLabel(e.type)+"</span><span style=\"font-size:11px;color:var(--mut)\">"+authEsc(evDate)+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+authEsc(e.titre)+"</div>"+evLieu+evEquipe+(typeof evtBoutonCarte==="function"?evtBoutonCarte(e):"")+(typeof trnBoutonCarte==="function"?trnBoutonCarte(e):"")+presBtn+evalBtn+editTimeBtn+"</div>"+delBtn+"</div>";
+    var presBtn=(e.type==="entrainement"||e.type==="match")?("<button onclick=\"openPresences('"+gmJs(e.id)+"')\" style=\"margin-top:8px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer\">✓ Gerer les présences"+(presenceCount?" ("+presenceCount+")":"")+"</button>"):"";
+    var evalBtn=(e.type==="stage"&&e.evaluationEnabled)?("<button onclick=\"openLiveEval('"+gmJs(e.id)+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">Évaluer</button>"):"";
+    var editTimeBtn="<button onclick=\"editEventDateTime('"+gmJs(e.id)+"')\" style=\"margin-top:8px;margin-left:6px;padding:6px 12px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer\"> Modifier</button>";
+    var delBtn="<button onclick=\"deleteEvent('"+gmJs(e.id)+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
+    d.innerHTML="<div style=\"display:flex;align-items:flex-start;justify-content:space-between\"><div style=\"flex:1\"><div style=\"display:flex;align-items:center;gap:8px;margin-bottom:4px\"><span style=\"font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:"+evCol+"\">"+authEsc(eventTypeLabel(e.type))+"</span><span style=\"font-size:11px;color:var(--mut)\">"+authEsc(evDate)+"</span></div><div style=\"font-size:13px;font-weight:700;color:var(--txt)\">"+authEsc(e.titre)+"</div>"+evLieu+evEquipe+(typeof evtBoutonCarte==="function"?evtBoutonCarte(e):"")+(typeof trnBoutonCarte==="function"?trnBoutonCarte(e):"")+presBtn+evalBtn+editTimeBtn+"</div>"+delBtn+"</div>";
     el.appendChild(d);
   });
 }
@@ -104,12 +104,12 @@ function renderJourFields(){
     var fin=data.fin||"20:00";
     var salle=data.salle||"";
     return '<div style="border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--bg)">'
-      +'<div style="font-size:12px;font-weight:700;margin-bottom:8px">'+j+'</div>'
+      +'<div style="font-size:12px;font-weight:700;margin-bottom:8px">'+authEsc(j)+'</div>'
       +'<div style="display:flex;gap:12px">'
-        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Début</label><input class="form-input" id="cr-debut-'+j+'" type="time" value="'+debut+'"></div>'
-        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Fin</label><input class="form-input" id="cr-fin-'+j+'" type="time" value="'+fin+'"></div>'
+        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Début</label><input class="form-input" id="cr-debut-'+authEsc(j)+'" type="time" value="'+authEsc(debut)+'"></div>'
+        +'<div class="form-group" style="flex:1;margin-bottom:8px"><label class="form-label">Fin</label><input class="form-input" id="cr-fin-'+authEsc(j)+'" type="time" value="'+authEsc(fin)+'"></div>'
       +'</div>'
-      +'<div class="form-group" style="margin-bottom:0"><label class="form-label">Salle / Lieu</label><input class="form-input" id="cr-salle-'+j+'" placeholder="" value="'+authEsc(salle)+'"></div>'
+      +'<div class="form-group" style="margin-bottom:0"><label class="form-label">Salle / Lieu</label><input class="form-input" id="cr-salle-'+authEsc(j)+'" placeholder="" value="'+authEsc(salle)+'"></div>'
     +'</div>';
   }).join("");
 }
@@ -194,7 +194,7 @@ function evTypePastilles(){
   }
   z.innerHTML=EV_TYPE_PASTILLES.map(function(t){
     var on=sel.value===t[0], c=(typeof eventTypeColor==="function")?eventTypeColor(t[0]):"var(--dkg)";
-    return '<button type="button" onclick="evTypeChoisir(\''+t[0]+'\')" aria-pressed="'+on+'" style="display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;border:1.5px solid '+(on?c:'var(--bdr)')+';background:'+(on?c:'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+'"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#fff':c)+'"></span>'+t[1]+'</button>';
+    return '<button type="button" onclick="evTypeChoisir(\''+gmJs(t[0])+'\')" aria-pressed="'+on+'" style="display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;border:1.5px solid '+(on?c:'var(--bdr)')+';background:'+(on?c:'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+'"><span style="width:8px;height:8px;border-radius:50%;background:'+(on?'#fff':c)+'"></span>'+t[1]+'</button>';
   }).join("");
 }
 function evTypeChoisir(t){
@@ -369,7 +369,7 @@ function renderEvPlayers(){
     var lbl=document.createElement("label");
     lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
     var checkedAttr=(allClub||selectedTeams.length)?"checked":"";
-    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+p.id+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>';
+    lbl.innerHTML='<input type="checkbox" class="ev-player-cb" value="'+authEsc(p.id)+'" '+checkedAttr+' style="width:16px;height:16px;accent-color:var(--dkg)"> '+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>';
     el.appendChild(lbl);
   });
 }
@@ -968,7 +968,7 @@ function showConvocation(eventId){
       var lbl=document.createElement("label");
       lbl.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--txt)";
       var a=assid[p.id];
-      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+p.id+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg);flex:none">'+
+      lbl.innerHTML='<input type="checkbox" class="convoc-cb" value="'+authEsc(p.id)+'" '+(isChecked?"checked":"")+' style="width:16px;height:16px;accent-color:var(--dkg);flex:none">'+
         '<span style="flex:1;min-width:0">'+authEsc(p.prenom)+' '+authEsc(p.nom)+' <span style="color:var(--mut);font-size:10px">('+authEsc(p.cat)+')</span>'+
         (a?'<span style="display:block;font-size:10.5px;color:var(--mut);margin-top:1px">'+authEsc(assidSousTitre(a))+'</span>':'')+
         convocAilleursHtml(ev,p.id)+'</span>'+
@@ -1048,7 +1048,7 @@ function weatherIconHtml(code){
   // Codes WMO simplifies : 0-1 soleil, 2-3 nuage, 45-48 brouillard, 51-67/80-82 pluie, 71-77/85-86 neige, 95+ orage
   if(code===0||code===1){
     return '<div class="weather-icon-wrap"><div class="w-sun"></div><div class="w-sun-rays">'+
-      [0,45,90,135,180,225,270,315].map(function(a){return '<div class="w-ray" style="transform:rotate('+a+'deg) translateY(2px)"></div>';}).join("")+
+      [0,45,90,135,180,225,270,315].map(function(a){return '<div class="w-ray" style="transform:rotate('+authEsc(a)+'deg) translateY(2px)"></div>';}).join("")+
       '</div></div>';
   }
   if(code>=2&&code<=3){
@@ -1232,18 +1232,18 @@ function matchdayBannerHtml(ev,mini){
   var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   var rdv=rdvTimeFor(ev);
   if(mini){
-    return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;background:linear-gradient(135deg,#E8670A,#c0560a);border-radius:var(--r);padding:12px 14px;color:#fff;display:flex;align-items:center;gap:12px;box-shadow:0 3px 12px rgba(232,103,10,.28)">'+
+    return '<div onclick="openMatchday(\''+gmJs(ev.id)+'\')" style="cursor:pointer;background:linear-gradient(135deg,#E8670A,#c0560a);border-radius:var(--r);padding:12px 14px;color:#fff;display:flex;align-items:center;gap:12px;box-shadow:0 3px 12px rgba(232,103,10,.28)">'+
       '<div style="font-size:22px">🏀</div>'+
-      '<div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.85;text-transform:uppercase">Jour de match</div><div style="font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ev.titre+'</div></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.85;text-transform:uppercase">Jour de match</div><div style="font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(ev.titre)+'</div></div>'+
       '<div style="font-size:20px">›</div></div>';
   }
-  return '<div onclick="openMatchday(\''+ev.id+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), var(--hdrgrad);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
+  return '<div onclick="openMatchday(\''+gmJs(ev.id)+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), var(--hdrgrad);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
     '<div style="font-size:64px;margin-bottom:14px">🏀</div>'+
     '<div style="display:inline-block;margin:0 auto 16px;background:var(--red);font-size:11px;font-weight:800;padding:5px 16px;border-radius:20px;letter-spacing:1px">JOUR DE MATCH</div>'+
-    '<div style="font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px">'+ev.titre+'</div>'+
-    '<div style="font-size:14px;opacity:.85;margin-bottom:6px">'+jour+(ev.heure?" · "+ev.heure:"")+'</div>'+
-    (ev.lieu?'<div style="font-size:14px;opacity:.85">📍 '+ev.lieu+'</div>':'')+
-    (rdv?'<div style="margin:22px auto 0;background:rgba(232,103,10,.2);border:1px solid rgba(232,103,10,.5);border-radius:var(--rs);padding:12px 18px;font-size:15px;font-weight:800">⏰ RDV sur place à '+rdv.txt+'</div>':'')+
+    '<div style="font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px">'+authEsc(ev.titre)+'</div>'+
+    '<div style="font-size:14px;opacity:.85;margin-bottom:6px">'+jour+(authEsc(ev.heure?" · "+ev.heure:""))+'</div>'+
+    (ev.lieu?'<div style="font-size:14px;opacity:.85">📍 '+authEsc(ev.lieu)+'</div>':'')+
+    (rdv?'<div style="margin:22px auto 0;background:rgba(232,103,10,.2);border:1px solid rgba(232,103,10,.5);border-radius:var(--rs);padding:12px 18px;font-size:15px;font-weight:800">⏰ RDV sur place à '+authEsc(rdv.txt)+'</div>':'')+
     '<div style="margin-top:28px;font-size:13px;font-weight:800;background:#fff;color:#1A2E5A;padding:14px;border-radius:var(--rx)">Appuyer pour voir les details ›</div></div>';
 }
 
@@ -1272,14 +1272,14 @@ function buildMatchday(eventId){
   var jour=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
   var rdv=rdvTimeFor(ev);
   var mapsBtn=ev.lieu?'<button onclick="window.open(\'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(ev.lieu)+'\',\'_blank\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(26,46,90,.1);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer">🧭 Itineraire</button>':'';
-  var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+ev.id+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Météo</button>':'';
+  var weatherBtn=ev.lieu?'<button onclick="showWeather(\''+gmJs(ev.id)+'\')" style="flex:1;padding:12px;border-radius:var(--rx);background:rgba(232,103,10,.12);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer">☀️ Météo</button>':'';
 
   el.innerHTML=
     '<div style="padding:22px 18px;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.22) 0%, transparent 50%), var(--hdrgrad);color:#fff">'+
       '<div style="display:inline-block;background:var(--red);font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:.5px">MATCH</div>'+
-      '<div style="font-size:22px;font-weight:900;line-height:1.15;margin-top:12px">'+ev.titre+'</div>'+
-      '<div style="font-size:13px;opacity:.85;margin-top:8px">'+jour+(ev.heure?" · "+ev.heure:"")+(ev.lieu?" · "+ev.lieu:"")+'</div>'+
-      (rdv?'<div style="background:rgba(232,103,10,.18);border:1px solid rgba(232,103,10,.4);border-radius:var(--rs);padding:12px 14px;margin-top:14px;font-size:14px;font-weight:800">⏰ RDV sur place à '+rdv.txt+' ('+rdv.mins+' min avant)</div>':'')+
+      '<div style="font-size:22px;font-weight:900;line-height:1.15;margin-top:12px">'+authEsc(ev.titre)+'</div>'+
+      '<div style="font-size:13px;opacity:.85;margin-top:8px">'+jour+(authEsc(ev.heure?" · "+ev.heure:""))+(authEsc(ev.lieu?" · "+ev.lieu:""))+'</div>'+
+      (rdv?'<div style="background:rgba(232,103,10,.18);border:1px solid rgba(232,103,10,.4);border-radius:var(--rs);padding:12px 14px;margin-top:14px;font-size:14px;font-weight:800">⏰ RDV sur place à '+authEsc(rdv.txt)+' ('+rdv.mins+' min avant)</div>':'')+
     '</div>'+
     '<div style="padding:16px">'+
       '<div style="display:flex;gap:10px;margin-bottom:18px">'+mapsBtn+weatherBtn+'</div>'+
@@ -1316,8 +1316,8 @@ function renderMatchdayPlayers(ev){
                 st==="absent"?'<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:rgba(192,57,43,.12);color:#C0392B">Absent</span>':
                 '<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;background:var(--bdr);color:var(--mut)">—</span>';
       rows+='<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px">'+
-        '<div style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">'+initials+'</div>'+
-        '<div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+badge+'</div>';
+        '<div style="width:38px;height:38px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">'+authEsc(initials)+'</div>'+
+        '<div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div>'+badge+'</div>';
     });
     if(countsEl){
       countsEl.innerHTML=

@@ -49,8 +49,8 @@ function buildPoleScreen(poleId){
   var aboutHtml="";
   if(pole&&pole.about){
     var col=pole.color||"var(--dkg)";
-    var itemsHtml=(pole.items||[]).map(function(it){return '<div style="font-size:11px;color:var(--txt2);padding:3px 0 3px 14px;position:relative"><span style="position:absolute;left:0;color:'+col+'">→</span>'+it+'</div>';}).join("");
-    aboutHtml='<div style="margin:8px 12px 12px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)"><div style="font-size:12px;color:var(--txt2);line-height:1.55;margin-bottom:10px">'+pole.about+'</div>'+itemsHtml+'</div>';
+    var itemsHtml=(pole.items||[]).map(function(it){return '<div style="font-size:11px;color:var(--txt2);padding:3px 0 3px 14px;position:relative"><span style="position:absolute;left:0;color:'+authEsc(col)+'">→</span>'+authEsc(it)+'</div>';}).join("");
+    aboutHtml='<div style="margin:8px 12px 12px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+authEsc(col)+';border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)"><div style="font-size:12px;color:var(--txt2);line-height:1.55;margin-bottom:10px">'+authEsc(pole.about)+'</div>'+itemsHtml+'</div>';
   }
   listEl.innerHTML=aboutHtml;
   if(!data.length){
@@ -65,11 +65,11 @@ function buildPoleScreen(poleId){
     var mainInfo=item.nom||item.adversaire||item.titre||"Sans nom";
     var dateRange=item.date_debut?(item.date_fin&&item.date_fin!==item.date_debut?(item.date_debut+" → "+item.date_fin):item.date_debut):item.date;
     var subInfo=[item.cat,dateRange,item.heure,item.lieu,item.groupe].filter(Boolean).join(" · ");
-    var subHtml=subInfo?"<div style=\"font-size:11px;color:var(--mut)\">"+subInfo+"</div>":"";
+    var subHtml=subInfo?"<div style=\"font-size:11px;color:var(--mut)\">"+authEsc(subInfo)+"</div>":"";
  // Ancien « tournoi » noté à la main : on le transforme en vrai tournoi (équipes, planning, jour J).
-    var orgBtn=(item.type==="tournoi"&&typeof trnOuvrir==="function")?"<button onclick=\"poleTournoiVersEvenement('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:#b7791f;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">🏆 Organiser</button>":"";
-    var delBtn="<button onclick=\"deletePoleItem('"+poleId+"','"+item.id+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
-    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?" ":"")+mainInfo+"</div>"+subHtml+"</div>"+orgBtn+delBtn;
+    var orgBtn=(item.type==="tournoi"&&typeof trnOuvrir==="function")?"<button onclick=\"poleTournoiVersEvenement('"+gmJs(poleId)+"','"+gmJs(item.id)+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:#b7791f;color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">🏆 Organiser</button>":"";
+    var delBtn="<button onclick=\"deletePoleItem('"+gmJs(poleId)+"','"+gmJs(item.id)+"')\" style=\"padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0;margin-left:8px\">✕</button>";
+    div.innerHTML="<div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px\">"+(indent?" ":"")+authEsc(mainInfo)+"</div>"+subHtml+"</div>"+orgBtn+delBtn;
     listEl.appendChild(div);
   }
 
@@ -111,26 +111,26 @@ function showAddPoleItem(poleId,type){
   document.getElementById("modal-pole-title").textContent=form.title;
   var html="";
   form.fields.forEach(function(f){
-    html+='<div class="form-group"><label class="form-label">'+f.label+'</label>';
+    html+='<div class="form-group"><label class="form-label">'+authEsc(f.label)+'</label>';
     if(f.type==="date"){
-      html+='<input class="form-input" id="pf-'+f.id+'" type="date">';
+      html+='<input class="form-input" id="pf-'+authEsc(f.id)+'" type="date">';
     } else if(f.type==="select-cat"){
-      var opts=CATS_OPT.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join("");
+      var opts=CATS_OPT.map(function(c){return '<option value="'+authEsc(c)+'">'+authEsc(c)+'</option>';}).join("");
       var catOnchange=(currentPoleType==="joueur")?' onchange="refreshPlayerSelect(this.value)"':"";
-      html+='<select class="form-select" id="pf-'+f.id+'"'+catOnchange+'><option value="">Sélectionnez une catégorie...</option>'+opts+'</select>';
+      html+='<select class="form-select" id="pf-'+authEsc(f.id)+'"'+catOnchange+'><option value="">Sélectionnez une catégorie...</option>'+opts+'</select>';
     } else if(f.type==="select-team"){
-      var teamOpts=getTeams().map(function(t){return '<option value="'+t.name+'">'+t.name+' ('+t.cat+')</option>';}).join("");
+      var teamOpts=getTeams().map(function(t){return '<option value="'+authEsc(t.name)+'">'+authEsc(t.name)+' ('+authEsc(t.cat)+')</option>';}).join("");
       if(!getTeams().length){
-        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Aucune équipe créée - Admin > Équipes</option></select>';
+        html+='<select class="form-select" id="pf-'+authEsc(f.id)+'"><option value="">Aucune équipe créée - Admin > Équipes</option></select>';
       } else {
-        html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Sélectionnez une équipe...</option>'+teamOpts+'</select>';
+        html+='<select class="form-select" id="pf-'+authEsc(f.id)+'"><option value="">Sélectionnez une équipe...</option>'+teamOpts+'</select>';
       }
     } else if(f.type==="select-lieu"){
-      html+='<select class="form-select" id="pf-'+f.id+'"><option value="">Sélectionnez...</option><option value="Domicile">Domicile</option><option value="Extérieur">Extérieur</option></select>';
+      html+='<select class="form-select" id="pf-'+authEsc(f.id)+'"><option value="">Sélectionnez...</option><option value="Domicile">Domicile</option><option value="Extérieur">Extérieur</option></select>';
     } else if(f.type==="select-player"){
-      html+='<select class="form-select" id="pf-'+f.id+'" onchange="prefillFromPlayer(this.value)"><option value="">D\'abord choisir une catégorie...</option></select>';
+      html+='<select class="form-select" id="pf-'+authEsc(f.id)+'" onchange="prefillFromPlayer(this.value)"><option value="">D\'abord choisir une catégorie...</option></select>';
     } else {
-      html+='<input class="form-input" id="pf-'+f.id+'" placeholder="'+(f.ph||'')+'">';
+      html+='<input class="form-input" id="pf-'+authEsc(f.id)+'" placeholder="'+(authEsc(f.ph||''))+'">';
     }
     html+='</div>';
   });
@@ -149,7 +149,7 @@ function refreshPlayerSelect(cat){
   }
   var opts=players.map(function(pl){
     var dot=pl.genre==="M"?"":(pl.genre==="F"?"":"");
-    return '<option value="'+pl.prenom+' '+pl.nom+'">'+dot+' '+pl.prenom+' '+pl.nom+'</option>';
+    return '<option value="'+authEsc(pl.prenom)+' '+authEsc(pl.nom)+'">'+dot+' '+authEsc(pl.prenom)+' '+authEsc(pl.nom)+'</option>';
   }).join("");
   sel.innerHTML='<option value="">Sélectionnez un joueur...</option>'+opts;
 }

@@ -348,7 +348,7 @@ function entreeResultat(src, code, host, suivant, fermer){
   function peindre(){
     var aPayer=it&&Number(it.m)>0&&!it.py;
     host.style.display="flex";
-    host.innerHTML='<div style="margin:auto;width:100%;height:100%;background:'+col+';color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box">'+
+    host.innerHTML='<div style="margin:auto;width:100%;height:100%;background:'+authEsc(col)+';color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box">'+
       '<div style="width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900">'+(etat==="ok"?"✓":etat==="deja"?"!":"✕")+'</div>'+
       '<div style="font-size:24px;font-weight:900;margin-top:16px">'+(etat==="ok"?"Entrée validée":etat==="deja"?"Déjà entré"+(it.pr?" à "+authEsc(entreeHeure(it.pr)):""):etat==="horsjour"?"Pas inscrit ce jour":"Billet inconnu")+'</div>'+
       (hj?'<div style="font-size:20px;font-weight:800;margin-top:10px">'+authEsc((hj.p||"")+" "+(hj.n||""))+'</div><div style="font-size:14px;opacity:.95;margin-top:6px;max-width:320px;line-height:1.45">Inscrit : '+authEsc(evtJoursTxt(hj.j,src.jours.length))+'<br>Aujourd\'hui : '+authEsc(evtJourTxt(src.jour,true))+'</div>':'')+

@@ -261,7 +261,7 @@ function indPeindre(){
     var nbLus=coach?indNbDiscNonLues():indNbNonLus()+(indDiscNonLueClient()?1:0);
     h+='<nav class="ind-nav" style="grid-template-columns:repeat('+tabs.length+',1fr)">'+tabs.map(function(t){
       var bdg=(t[0]==="messages"&&nbLus>0)?'<i class="bdg" aria-label="'+nbLus+' non lu'+(nbLus>1?"s":"")+'">'+nbLus+'</i>':'';
-      return '<button type="button" data-act="tab" data-v="'+t[0]+'" class="'+(IND.tab===t[0]?"on":"")+'"'+(IND.tab===t[0]?' aria-current="page"':'')+'>'+IND_ICONES[t[0]]+t[1]+bdg+'</button>';
+      return '<button type="button" data-act="tab" data-v="'+authEsc(t[0])+'" class="'+(IND.tab===t[0]?"on":"")+'"'+(IND.tab===t[0]?' aria-current="page"':'')+'>'+IND_ICONES[t[0]]+authEsc(t[1])+bdg+'</button>';
     }).join("")+'</nav>';
   }
   root.innerHTML='<div class="ind" style="--ia:'+indCouleur()+'">'+h+'</div>';
@@ -442,7 +442,7 @@ function indCreneauForm(id){
   var clients=indClientsActifs(), hab={}; (c.habitues||[]).forEach(function(u){ hab[u]=1; });
   sh.body.innerHTML='<form class="ind-f" id="ind-cr-f" novalidate>'
     +'<label>Nom de la séance<input id="ind-cr-titre" maxlength="60" required value="'+indEsc(c.titre||"")+'" placeholder="Ex. : Cross-training"></label>'
-    +'<div class="deux"><label>Jour<select id="ind-cr-jour">'+[1,2,3,4,5,6,0].map(function(j){ return '<option value="'+j+'"'+(Number(c.jour)===j?" selected":"")+'>'+IND_JOURS[j]+'</option>'; }).join("")+'</select></label>'
+    +'<div class="deux"><label>Jour<select id="ind-cr-jour">'+[1,2,3,4,5,6,0].map(function(j){ return '<option value="'+authEsc(j)+'"'+(Number(c.jour)===j?" selected":"")+'>'+IND_JOURS[j]+'</option>'; }).join("")+'</select></label>'
     +'<label>Heure<input id="ind-cr-heure" type="time" value="'+indEsc(c.heure||"18:30")+'"></label></div>'
     +'<div class="deux"><label>Durée (min)<input id="ind-cr-duree" type="number" inputmode="numeric" min="0" max="600" value="'+indEsc(c.duree||"")+'"></label>'
     +'<label>Places (vide = illimité)<input id="ind-cr-places" type="number" inputmode="numeric" min="0" max="500" value="'+indEsc(c.places||"")+'"></label></div>'
@@ -668,7 +668,7 @@ function indAvatarClub(){
 }
 // Carte « Écrire… » en haut du fil : ouvre le formulaire ou la discussion.
 function indCarteCompo(act,titre,sous,nonLue){
-  return '<div class="ind-compo" data-act="'+act+'" role="button" tabindex="0">'+indAvatarClub()+'<div class="t"><b>'+indEsc(titre)+'</b><span>'+indEsc(sous)+'</span></div>'
+  return '<div class="ind-compo" data-act="'+authEsc(act)+'" role="button" tabindex="0">'+indAvatarClub()+'<div class="t"><b>'+indEsc(titre)+'</b><span>'+indEsc(sous)+'</span></div>'
     +(nonLue?'<span class="ind-pill ok">Nouveau</span>':'')+'</div>';
 }
 function indAnnoncesTriees(){ return IND.annonces.slice().sort(function(x,y){ return indAnnMs(y)-indAnnMs(x); }); }
@@ -753,7 +753,7 @@ function indOuvrirAnnonce(id){
     var a=indAnnonceParId(id); if(!a){ sh.modal.remove(); return; }
     var c=indCompteReac(a);
     function liste(titre,uids){
-      return '<div class="ind-k">'+titre+' · '+uids.length+'</div>'+(uids.length?'<div class="ind-c ind-list">'+uids.map(function(uid){
+      return '<div class="ind-k">'+authEsc(titre)+' · '+uids.length+'</div>'+(uids.length?'<div class="ind-c ind-list">'+uids.map(function(uid){
         var f=IND.clients[uid]||{}, par=indParentDe(f);
         return '<div class="ind-row"><div class="ind-av">'+indEsc(indInitiales(f.prenom,f.nom))+'</div><div class="t"><strong>'+indEsc(indNom(uid))+'</strong>'
           +(indEstMineur(f)?'<span>Mineur'+(par?" · parent : "+indEsc(par.prenom||""):"")+'</span>':'')+'</div></div>';
@@ -827,7 +827,7 @@ function indListeAnnoncesClient(l){
       +'<div class="pf col">'+pers.map(function(p){
         var r=IND.reacs[a.id+"__"+p.id], v=r&&r.val;
         function bt(val,emoji,lib){
-          return '<button type="button" class="ind-pb'+(v===val?" on":"")+'" data-act="reac" data-v="'+val+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+lib+(multi?" pour "+indEsc(p.prenom):"")+'"><span class="em">'+emoji+'</span> '+lib+'</button>';
+          return '<button type="button" class="ind-pb'+(v===val?" on":"")+'" data-act="reac" data-v="'+authEsc(val)+'" data-id="'+indEsc(a.id)+'" data-pid="'+indEsc(p.id)+'" aria-pressed="'+(v===val)+'" aria-label="'+authEsc(lib)+(multi?" pour "+indEsc(p.prenom):"")+'"><span class="em">'+authEsc(emoji)+'</span> '+authEsc(lib)+'</button>';
         }
         return '<div class="pr">'+(multi?'<b>'+indEsc(p.prenom)+'</b>':'')+bt("up","👍🏼","D\'accord")+bt("down","👎🏼","Pas d\'accord")+'</div>';
       }).join("")+'</div></div>';
@@ -913,7 +913,7 @@ function indOuvrirDiscussion(uid){
       var img=indImgSure(m.img);
       return sep+'<div class="ind-bulle '+(m.de===moi?"moi":"autre")+'">'
         +(m.texte?'<div class="tx">'+indEsc(m.texte)+'</div>':'')
-        +(img?'<img src="'+img+'" alt="Photo envoyée">':'')
+        +(img?'<img src="'+authEsc(img)+'" alt="Photo envoyée">':'')
         +'<small>'+indEsc(indHeure(d))+'</small></div>';
     }).join("");
     zone.scrollTop=zone.scrollHeight;
@@ -1240,7 +1240,7 @@ function indRejoindre(code){
   stack=["indep"]; showScr("indep");
   var root=document.getElementById("indep-root"); if(!root) return;
   function cadre(couleur, sur, titre, corps){
-    root.innerHTML='<div class="ind" style="--ia:'+(/^#[0-9a-fA-F]{6}$/.test(couleur||"")?couleur:IND_COULEUR)+'">'+indTop(sur,titre,'')
+    root.innerHTML='<div class="ind" style="--ia:'+(authEsc(/^#[0-9a-fA-F]{6}$/.test(couleur||"")?couleur:IND_COULEUR))+'">'+indTop(sur,titre,'')
       +'<div class="ind-body" style="padding-bottom:30px">'+corps+'</div></div>';
   }
   cadre("", "Invitation", "Chargement…", '<div class="ind-c ind-vide">Vérification du lien…</div>');

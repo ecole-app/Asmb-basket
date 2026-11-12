@@ -471,9 +471,9 @@ function buildJoueurScreen(player){
 
     var html='<div style="text-align:center;margin-bottom:24px;position:relative">'+
       (localStorage.getItem("asmb_profile")==="joueur"?'':'<button onclick="openJoueurSettings()" aria-label="Paramètres" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:16px;color:var(--mut);display:flex;align-items:center;justify-content:center">⚙️</button>')+
-      '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+player.prenom[0]+player.nom[0]+'</div>'+
-      '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+player.prenom+' '+player.nom+'</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+player.cat+(myTeams.length?" · "+myTeams.map(function(t){return t.name;}).join(" · "):"")+'</div>'+
+      '<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 10px;font-weight:800">'+authEsc(player.prenom[0])+authEsc(player.nom[0])+'</div>'+
+      '<div style="font-size:17px;font-weight:900;color:var(--txt)">'+authEsc(player.prenom)+' '+authEsc(player.nom)+'</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+authEsc(player.cat)+(authEsc(myTeams.length?" · "+myTeams.map(function(t){return t.name;}).join(" · "):""))+'</div>'+
     '</div>';
 
     var mdMatch=getTodayMatchForTeams(myTeams.length?myTeams.map(function(t){return t.name;}):[player.cat]);
@@ -514,7 +514,7 @@ function buildJoueurScreen(player){
         } else if(ev.type==="match"){
           actionHtml='<div style="margin-top:12px">'+checkinButtonsHtml(player.id,ev.id)+'</div>';
         } else {
-          actionHtml='<div style="margin-top:12px"><button onclick="signalerAbsence(\''+ev.id+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:12px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button></div>';
+          actionHtml='<div style="margin-top:12px"><button onclick="signalerAbsence(\''+gmJs(ev.id)+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:12px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button></div>';
         }
         card.innerHTML='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(ev.titre)+'</div>'+
           '<div style="font-size:12px;color:var(--mut);margin-top:2px">'+authEsc(ev.heure||"")+(ev.lieu?" · "+authEsc(ev.lieu):"")+'</div>'+actionHtml;
@@ -559,7 +559,7 @@ function refreshEventCounts(eventId){
       if(notable.length){
         var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
         notable.forEach(function(c){
-          html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+c.playerName+' absent(e)</div>';
+          html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+authEsc(c.playerName)+' absent(e)</div>';
         });
         html+='</div>';
         absEl.innerHTML=html;
@@ -569,16 +569,16 @@ function refreshEventCounts(eventId){
 }
 
 function checkinButtonsHtml(playerId,eventId){
-  return '<div style="display:flex;gap:8px" id="checkin-btns-'+eventId+'">'+
-    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:var(--ltg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
-    '<button onclick="joueurSelfCheckin(\''+playerId+'\',\''+eventId+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
+  return '<div style="display:flex;gap:8px" id="checkin-btns-'+authEsc(eventId)+'">'+
+    '<button onclick="joueurSelfCheckin(\''+gmJs(playerId)+'\',\''+gmJs(eventId)+'\',\'present\')" style="flex:1;padding:10px;border-radius:var(--rx);background:var(--ltg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✓ Présent</button>'+
+    '<button onclick="joueurSelfCheckin(\''+gmJs(playerId)+'\',\''+gmJs(eventId)+'\',\'absent\')" style="flex:1;padding:10px;border-radius:var(--rx);background:#C0392B;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">✕ Absent</button>'+
   '</div>';
 }
 
 function checkinBadgeHtml(playerId,eventId,status){
  var lbl={present:"✓ Présent",retard:"En retard",absent:"✕ Absent"};
  var col={present:"var(--ltg)",retard:"#E8670A",absent:"#C0392B"};
- return '<div onclick="reopenCheckin(this,\''+playerId+'\',\''+eventId+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistré (toucher pour modifier)</div>';
+ return '<div onclick="reopenCheckin(this,\''+gmJs(playerId)+'\',\''+gmJs(eventId)+'\')" style="cursor:pointer;text-align:center;padding:9px;border-radius:var(--rx);background:'+col[status]+';color:#fff;font-size:12px;font-weight:800">'+lbl[status]+' · enregistré (toucher pour modifier)</div>';
 }
 
 function reopenCheckin(el,playerId,eventId){
@@ -828,7 +828,7 @@ function openSenderIdentityModal(msg){
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var ident=resolveIdentityForPhone(msg.senderPhone);
   var initiales=((ident&&ident.nom)||msg.pseudo||"?").trim().split(/\s+/).map(function(w){return w[0];}).join("").substring(0,2).toUpperCase();
-  var html='<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 12px">'+initiales+'</div>';
+  var html='<div style="width:56px;height:56px;border-radius:50%;background:var(--dkg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 12px">'+authEsc(initiales)+'</div>';
   html+='<div style="font-size:16px;font-weight:800;color:var(--txt)">'+authEsc((ident&&ident.nom)||msg.pseudo||"?")+'</div>';
   if(ident&&ident.detail)html+='<div style="font-size:12px;color:var(--mut);margin-top:3px">'+authEsc(ident.detail)+'</div>';
   if(!ident)html+='<div style="font-size:11px;color:var(--mut);margin-top:6px">Identité non disponible (ancien message ou compte introuvable)</div>';
@@ -843,7 +843,7 @@ function openSenderIdentityModal(msg){
     lbl.textContent="Libellé (badge)";
     var sel=document.createElement("select");
     sel.className="form-input";
-    sel.innerHTML='<option value="">Aucun / par défaut</option>'+Object.keys(BADGE_TYPES).map(function(k){return '<option value="'+k+'">'+BADGE_TYPES[k].emoji+' '+BADGE_TYPES[k].label+'</option>';}).join("");
+    sel.innerHTML='<option value="">Aucun / par défaut</option>'+Object.keys(BADGE_TYPES).map(function(k){return '<option value="'+authEsc(k)+'">'+BADGE_TYPES[k].emoji+' '+BADGE_TYPES[k].label+'</option>';}).join("");
     sel.value=msg.senderUid?"":""; // rempli en asynchrone ci-dessous une fois le compte lu
     if(window.fbGetDoc&&window.fbDb){
       window.fbGetDoc(window.fbDoc(window.fbDb,"users",msg.senderUid)).then(function(snap){
@@ -1065,8 +1065,8 @@ function renderTutoStep(){
   el.innerHTML=
     '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center">'+
       '<div style="font-size:64px;margin-bottom:24px">'+step.icon+'</div>'+
-      '<div style="font-size:19px;font-weight:900;color:var(--txt);margin-bottom:12px">'+step.titre+'</div>'+
-      '<div style="font-size:14px;color:var(--mut);line-height:1.6;max-width:320px">'+step.texte+'</div>'+
+      '<div style="font-size:19px;font-weight:900;color:var(--txt);margin-bottom:12px">'+authEsc(step.titre)+'</div>'+
+      '<div style="font-size:14px;color:var(--mut);line-height:1.6;max-width:320px">'+authEsc(step.texte)+'</div>'+
     '</div>'+
     '<div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">'+
       '<div style="display:flex;justify-content:center;gap:6px">'+dots+'</div>'+
@@ -1204,7 +1204,7 @@ function buildParentHome(){
     var lienPaie=(typeof clubLienPaiement==="function")?clubLienPaiement():null;
     var peutPayer=lienPaie && !myLic.paiement;
     var tag=peutPayer?"a":"div";
-    var extraAttrs=peutPayer?(' href="'+lienPaie+'" target="_blank" rel="noopener"'):"";
+    var extraAttrs=peutPayer?(' href="'+authEsc(gmUrl(lienPaie))+'" target="_blank" rel="noopener"'):"";
     licBadge='<'+tag+extraAttrs+' style="flex:1;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;text-align:center;box-shadow:0 2px 8px var(--shadow);text-decoration:none;display:block">'+
       '<div style="font-size:10px;color:'+((licColors[myLic.statut])||"var(--mut)")+';font-weight:700">●</div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--txt);margin-top:2px">'+(peutPayer?"💳 Payer ma licence":(licLabels[myLic.statut]||"Licence"))+'</div>'+
@@ -1263,17 +1263,17 @@ function buildParentHome(){
     var dateObj=new Date(nextEv.date);
     var dStr=dateObj.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
     var mapsBtn=(nextEv.type==="match"&&nextEv.lieu)?('<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(nextEv.lieu)+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 14px;border-radius:20px;background:rgba(26,46,90,.1);color:#1A2E5A;font-size:11px;font-weight:700;text-decoration:none"> Itinéraire</a>'):"";
-    var absenceBtn='<button onclick="signalerAbsence(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button>';
+    var absenceBtn='<button onclick="signalerAbsence(\''+gmJs(nextEv.id)+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button>';
     var repHtml=(typeof repBoutonsHtml==="function")?repBoutonsHtml(nextEv,children):"";
     var rdv=(nextEv.type==="match")?rdvTimeFor(nextEv):null;
-    var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place à '+rdv.txt+' ('+rdv.mins+' min avant)</div>'):'';
-    var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
-    var carB=(nextEv.type==="match")?('<button onclick="shareCovoiturage(\''+nextEv.id+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:11px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>'):'';
+    var rdvLine=rdv?('<div style="margin-top:10px;padding:8px 12px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:800">RDV sur place à '+authEsc(rdv.txt)+' ('+rdv.mins+' min avant)</div>'):'';
+    var icsB=(nextEv.type==="match")?('<button onclick="exportEventIcs(\''+gmJs(nextEv.id)+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--ltg);font-size:11px;font-weight:700;border:none;cursor:pointer"> Agenda</button>'):'';
+    var carB=(nextEv.type==="match")?('<button onclick="shareCovoiturage(\''+gmJs(nextEv.id)+'\')" style="margin-top:10px;margin-right:6px;padding:7px 14px;border-radius:20px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:11px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>'):'';
     evEl.innerHTML='<div style="background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+col+';border-radius:var(--r);padding:16px;box-shadow:0 2px 12px var(--shadow)">'+
-      '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;color:#fff;background:'+col+'">'+nextEv.type.toUpperCase()+'</span>'+
-      '<div style="font-size:17px;font-weight:900;color:var(--txt);margin-top:10px;line-height:1.25">'+nextEv.titre+'</div>'+
-      '<div style="font-size:13px;color:var(--mut);margin-top:6px">'+dStr+(nextEv.heure?" · "+nextEv.heure:"")+'</div>'+
-      (nextEv.lieu?'<div style="font-size:13px;color:var(--mut);margin-top:2px">📍 '+nextEv.lieu+'</div>':'')+
+      '<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;color:#fff;background:'+col+'">'+authEsc(nextEv.type.toUpperCase())+'</span>'+
+      '<div style="font-size:17px;font-weight:900;color:var(--txt);margin-top:10px;line-height:1.25">'+authEsc(nextEv.titre)+'</div>'+
+      '<div style="font-size:13px;color:var(--mut);margin-top:6px">'+dStr+(authEsc(nextEv.heure?" · "+nextEv.heure:""))+'</div>'+
+      (nextEv.lieu?'<div style="font-size:13px;color:var(--mut);margin-top:2px">📍 '+authEsc(nextEv.lieu)+'</div>':'')+
       rdvLine+
       (repHtml||'')+
       '<div style="display:flex;flex-wrap:wrap">'+(repHtml?'':absenceBtn)+mapsBtn+icsB+carB+'</div>'+
@@ -1294,7 +1294,7 @@ function buildParentHome(){
       var resCol=res==="V"?"var(--ltg)":(res==="D"?"#C0392B":"#E8670A");
       var div=document.createElement("div");
       div.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow)";
-      div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+clubLabel()+' '+m.score.asmb+' - '+m.score.adv+' '+m.score.adversaire+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+m.date+'</div></div>';
+      div.innerHTML='<div style="width:30px;height:30px;border-radius:50%;background:'+resCol+';color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+res+'</div><div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--txt)">'+authEsc(clubLabel())+' '+m.score.asmb+' - '+m.score.adv+' '+authEsc(m.score.adversaire)+'</div><div style="font-size:10px;color:var(--mut);margin-top:2px">'+authEsc(m.date)+'</div></div>';
       lmEl.appendChild(div);
     });
   }
@@ -1436,7 +1436,7 @@ function buildParentEquipe(){
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Joueur";
     var metaTxt=posteEligible?"Voir la fiche":"";
-    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+authEsc(p.maillot)+'</span>'):"";
     div.innerHTML=joueurAvatarHtml(p,"var(--dkg)")+'<div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div>';
     if(posteEligible){
       div.style.cursor="pointer";
@@ -1528,10 +1528,10 @@ function buildCoachEquipe(){
     div.className="player-card";
     var posteTxt=p.poste&&p.poste!=="---"?p.poste:"Poste non défini";
     var metaTxt=posteEligibleCoach?posteTxt:"";
-    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+p.maillot+'</span>'):"";
-    var maillotBtn='<button onclick="editPlayerMaillot(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
-    var licenceBtn='<button onclick="editPlayerLicence(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
-    var historyBtn='<button onclick="openPlayerHistory(\''+p.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
+    var maillotBadge=p.maillot?('<span style="font-size:11px;font-weight:800;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 12%, transparent);padding:2px 8px;border-radius:10px;margin-left:6px">#'+authEsc(p.maillot)+'</span>'):"";
+    var maillotBtn='<button onclick="editPlayerMaillot(\''+gmJs(p.id)+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Maillot</button>';
+    var licenceBtn='<button onclick="editPlayerLicence(\''+gmJs(p.id)+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer;margin-top:4px">Licence</button>';
+    var historyBtn='<button onclick="openPlayerHistory(\''+gmJs(p.id)+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(27,92,40,.08);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer;margin-top:4px">Historique</button>';
     div.innerHTML=joueurAvatarHtml(p,"var(--dkg)")+'<div class="player-info"><div class="player-name">'+authEsc(p.prenom)+" "+authEsc(p.nom)+maillotBadge+'</div><div class="player-meta">'+authEsc(metaTxt)+'</div></div><div style="display:flex;flex-direction:column;gap:4px">'+maillotBtn+licenceBtn+historyBtn+'</div>';
     el.appendChild(div);
   });
@@ -1594,7 +1594,7 @@ function buildPlayerHistoryScreen(){
     '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:color-mix(in srgb, var(--ltg) 12%, transparent)"><div style="font-size:18px;font-weight:900;color:var(--ltg)">'+pct+'%</div><div style="font-size:9px;font-weight:600;color:var(--ltg);text-transform:uppercase">Présence</div></div>'+
     '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;background:rgba(0,0,0,.05)"><div style="font-size:18px;font-weight:900;color:var(--txt)">'+total+'</div><div style="font-size:9px;font-weight:600;color:var(--mut);text-transform:uppercase">Séances</div></div>'+
     '</div>'+
-    (total?'<div style="text-align:center"><span onclick="showPresenceHistory(\''+p.id+'\')" style="font-size:11px;color:var(--dkg);font-weight:700;cursor:pointer">Voir le détail complet →</span></div>':'<div style="font-size:12px;color:var(--mut)">Aucune donnée pour le moment</div>');
+    (total?'<div style="text-align:center"><span onclick="showPresenceHistory(\''+gmJs(p.id)+'\')" style="font-size:11px;color:var(--dkg);font-weight:700;cursor:pointer">Voir le détail complet →</span></div>':'<div style="font-size:12px;color:var(--mut)">Aucune donnée pour le moment</div>');
 
   // Bloc 2 : evaluations mensuelles
   var criteria=getEvalCriteria();
@@ -1646,11 +1646,11 @@ function buildEvalAccordionRow(title,subLabel,total,maxTotal,criteria,scores,pre
   wrap.style.cssText="border-bottom:1px solid var(--bdr)";
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer";
-  hdr.innerHTML='<span style="font-size:12.5px;font-weight:800;color:var(--txt)">'+title+'</span>'+
-    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:var(--ltg)">'+total.toFixed(1)+' / '+maxTotal+'</span><span class="ph2-arrow" style="font-size:11px;color:var(--mut);transition:transform .18s">▾</span></div>';
+  hdr.innerHTML='<span style="font-size:12.5px;font-weight:800;color:var(--txt)">'+authEsc(title)+'</span>'+
+    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:var(--ltg)">'+total.toFixed(1)+' / '+authEsc(maxTotal)+'</span><span class="ph2-arrow" style="font-size:11px;color:var(--mut);transition:transform .18s">▾</span></div>';
   var detail=document.createElement("div");
   detail.style.cssText="display:none;padding:0 0 10px";
-  var detailHtml=subLabel?('<div style="font-size:10.5px;color:var(--mut);margin-bottom:6px">'+subLabel+'</div>'):"";
+  var detailHtml=subLabel?('<div style="font-size:10.5px;color:var(--mut);margin-bottom:6px">'+authEsc(subLabel)+'</div>'):"";
   criteria.forEach(function(c){
     var val=scores[c]||0;
     var full=Math.floor(val),half=(val-full)===0.5;
@@ -1663,7 +1663,7 @@ function buildEvalAccordionRow(title,subLabel,total,maxTotal,criteria,scores,pre
       else if(diff<0)trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(192,57,43,.12);color:#C0392B">▼ '+diff.toFixed(1)+'</span>';
       else trendHtml='<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px;background:rgba(0,0,0,.06);color:var(--mut)">＝</span>';
     }
-    detailHtml+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);margin-bottom:3px"><b style="color:var(--txt);width:82px;flex-shrink:0;font-weight:700">'+c+'</b><span style="color:#F5A623;letter-spacing:1px">'+(starsStr||"—")+'</span>'+trendHtml+'</div>';
+    detailHtml+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);margin-bottom:3px"><b style="color:var(--txt);width:82px;flex-shrink:0;font-weight:700">'+authEsc(c)+'</b><span style="color:#F5A623;letter-spacing:1px">'+(starsStr||"—")+'</span>'+trendHtml+'</div>';
   });
   detail.innerHTML=detailHtml;
   hdr.onclick=function(){

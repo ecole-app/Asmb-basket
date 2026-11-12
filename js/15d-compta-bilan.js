@@ -84,10 +84,10 @@ function openComptaBilan(ex){
   function ligne(lib,v,fort,sous){
     return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:'+(fort?13.5:12.5)+'px;'+(fort?"font-weight:800;":"")+'color:var(--txt)"><span style="flex:1;min-width:0">'+authEsc(lib)+(sous?'<span style="display:block;font-size:10.5px;color:var(--mut);font-weight:500">'+authEsc(sous)+'</span>':'')+'</span><span style="white-space:nowrap;font-variant-numeric:tabular-nums">'+comptaEur(v)+'</span></div>';
   }
-  function titre(t,col){ return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:'+(col||"var(--mut)")+';margin:16px 0 4px">'+authEsc(t)+'</div>'; }
+  function titre(t,col){ return '<div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:'+(authEsc(col||"var(--mut)"))+';margin:16px 0 4px">'+authEsc(t)+'</div>'; }
   function rendre(){
     var c=comptaBilanCalcul(all,ex,sai);
-    var h='<div style="font-size:12px;color:var(--txt2);margin:2px 0 4px">Situation au '+ex.fin.split("-").reverse().join("/")+'</div>'+
+    var h='<div style="font-size:12px;color:var(--txt2);margin:2px 0 4px">Situation au '+authEsc(ex.fin.split("-").reverse().join("/"))+'</div>'+
       titre("Actif","var(--dkg)")+
       (sai.immo?ligne("Immobilisations (matériel durable, net)",sai.immo):"")+
       (sai.stock?ligne("Stocks (buvette, boutique)",sai.stock):"")+

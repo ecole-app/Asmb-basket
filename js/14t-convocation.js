@@ -52,7 +52,7 @@ function assidPour(pid,team){
 function assidCouleur(p){ return p==null?"var(--mut)":(p>=75?"var(--ltg)":(p>=50?"#E8670A":"#C0392B")); }
 function assidHtml(a,pid,teamId){
   var c=assidCouleur(a.pct), txt=a.pct==null?"—":a.pct+" %";
-  return '<button type="button" onclick="event.preventDefault();event.stopPropagation();assidDetail(\''+authEsc(String(pid))+'\',\''+authEsc(String(teamId||""))+'\')" title="Assiduité aux entraînements (6 semaines)" '+
+  return '<button type="button" onclick="event.preventDefault();event.stopPropagation();assidDetail(\''+gmJs(String(pid))+'\',\''+gmJs(String(teamId||""))+'\')" title="Assiduité aux entraînements (6 semaines)" '+
     'style="margin-left:auto;flex:none;display:flex;align-items:center;gap:6px;border:0;background:none;cursor:pointer;font-size:12px;font-weight:800;color:'+c+';font-variant-numeric:tabular-nums;padding:2px 0">'+
     '<span style="width:42px;height:6px;border-radius:9px;background:var(--bdr);overflow:hidden;display:inline-block"><i style="display:block;height:100%;width:'+(a.pct||0)+'%;background:'+c+'"></i></span>'+txt+'</button>';
 }
@@ -112,7 +112,7 @@ function convocCarteCoach(team){
     corps='<div style="font-size:10px;font-weight:800;color:#E8670A;text-transform:uppercase;letter-spacing:1px">À faire cette semaine</div>'+
       '<div style="font-size:14px;font-weight:800;color:var(--txt);margin-top:4px">Match '+authEsc((typeof plJourCourt==="function"?plJourCourt(m.date):m.date).split(" ")[0])+' : convocation à envoyer</div>'+
       '<div style="font-size:11.5px;color:var(--mut);margin-top:2px">'+authEsc((m.titre||"")+" · "+jour)+'</div>'+
-      '<button type="button" onclick="showConvocation(\''+authEsc(m.id)+'\')" style="width:100%;margin-top:10px;padding:11px;border:0;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:800;cursor:pointer">Convoquer</button>';
+      '<button type="button" onclick="showConvocation(\''+gmJs(m.id)+'\')" style="width:100%;margin-top:10px;padding:11px;border:0;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:13px;font-weight:800;cursor:pointer">Convoquer</button>';
   } else {
     var b=(typeof repBilan==="function")?repBilan(m):{present:[],absent:[],sans:[]};
     corps='<div style="font-size:10px;font-weight:800;color:var(--ltg);text-transform:uppercase;letter-spacing:1px">Convocation envoyée</div>'+
@@ -120,8 +120,8 @@ function convocCarteCoach(team){
       '<div style="font-size:11.5px;color:var(--mut);margin-top:2px">'+authEsc(jour)+'</div>'+
       '<div style="font-size:12px;font-weight:800;margin-top:8px"><span style="color:var(--ltg)">'+b.present.length+' présente'+(b.present.length>1?"s":"")+'</span> · <span style="color:#C0392B">'+b.absent.length+' absente'+(b.absent.length>1?"s":"")+'</span> · <span style="color:#E8670A">'+b.sans.length+' sans réponse</span></div>'+
       '<div style="display:flex;gap:8px;margin-top:10px">'+
-        '<button type="button" onclick="repOuvrir(\''+authEsc(m.id)+'\')" style="flex:1;padding:10px;border:0;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12.5px;font-weight:800;cursor:pointer">Voir les réponses</button>'+
-        '<button type="button" onclick="showConvocation(\''+authEsc(m.id)+'\')" style="flex:1;padding:10px;border:0;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12.5px;font-weight:800;cursor:pointer">Modifier</button></div>';
+        '<button type="button" onclick="repOuvrir(\''+gmJs(m.id)+'\')" style="flex:1;padding:10px;border:0;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12.5px;font-weight:800;cursor:pointer">Voir les réponses</button>'+
+        '<button type="button" onclick="showConvocation(\''+gmJs(m.id)+'\')" style="flex:1;padding:10px;border:0;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12.5px;font-weight:800;cursor:pointer">Modifier</button></div>';
   }
   return '<div id="coach-convoc-carte" style="margin:0 0 10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid '+(envoyee?'var(--ltg)':'#E8670A')+';border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)">'+corps+'</div>';
 }
@@ -167,7 +167,7 @@ function assidAlerteCarte(team){
     h+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px">'+
       '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc((typeof repNom==="function")?repNom(x.pid):"Joueur")+'</div>'+
       '<div style="font-size:11.5px;color:var(--mut)">'+x.n+' entraînements d\'affilée sans prévenir</div></div>'+
-      '<button type="button" onclick="assidEcrire(\''+authEsc(x.pid)+'\',\''+authEsc(String(team.id))+'\')" style="flex:none;border:0;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;background:var(--dkg);color:#fff">Écrire à la famille</button></div>';
+      '<button type="button" onclick="assidEcrire(\''+gmJs(x.pid)+'\',\''+gmJs(String(team.id))+'\')" style="flex:none;border:0;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;background:var(--dkg);color:#fff">Écrire à la famille</button></div>';
   });
   return h+'</div>';
 }

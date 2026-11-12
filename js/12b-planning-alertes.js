@@ -95,7 +95,7 @@ function plCarteAccueil(){
   return '<div style="margin-top:10px;background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:12px 14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">À surveiller</div>'+
     l.map(function(x){
-      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--bdr)"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:'+x[0]+'"></span>'+
+      return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--bdr)"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:'+authEsc(x[0])+'"></span>'+
         '<span style="flex:1;min-width:0;font-size:12.5px;color:var(--txt)">'+authEsc(x[1])+'</span>'+
         '<button type="button" onclick="'+x[3]+'" style="flex:none;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:6px 10px;background:var(--dkg);color:#fff;cursor:pointer">'+authEsc(x[2])+'</button></div>';
     }).join("")+'</div>';

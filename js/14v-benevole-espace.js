@@ -132,8 +132,8 @@ function benevHomeBuild(){
         +(x.e.equipe?'<div style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 12%, transparent);color:var(--dkg);font-size:12px;font-weight:800">Équipe : '+authEsc(x.e.equipe)+'</div>':'')
         +'<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(q+((x.m.heure||x.e.heure)?" à "+(x.m.heure||x.e.heure):"")+(x.e.lieu?" · "+x.e.lieu:""))+'</div>'
         +'<div style="display:flex;gap:8px;margin-top:10px">'
-        +'<button type="button" onclick="benevRepondre(\''+authEsc(x.e.id)+'\',\''+authEsc(x.m.id)+'\',\'present\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="present"?"#1F8A4C":"var(--bdr)")+';background:'+(rep==="present"?"rgba(31,138,76,.14)":"var(--bg)")+';color:'+(rep==="present"?"#1F8A4C":"var(--txt)")+'">✓ Je viens</button>'
-        +'<button type="button" onclick="benevRepondre(\''+authEsc(x.e.id)+'\',\''+authEsc(x.m.id)+'\',\'absent\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="absent"?"#C0392B":"var(--bdr)")+';background:'+(rep==="absent"?"rgba(192,57,43,.12)":"var(--bg)")+';color:'+(rep==="absent"?"#C0392B":"var(--txt)")+'">✗ Je ne peux pas</button></div></div>';
+        +'<button type="button" onclick="benevRepondre(\''+gmJs(x.e.id)+'\',\''+gmJs(x.m.id)+'\',\'present\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="present"?"#1F8A4C":"var(--bdr)")+';background:'+(rep==="present"?"rgba(31,138,76,.14)":"var(--bg)")+';color:'+(rep==="present"?"#1F8A4C":"var(--txt)")+'">✓ Je viens</button>'
+        +'<button type="button" onclick="benevRepondre(\''+gmJs(x.e.id)+'\',\''+gmJs(x.m.id)+'\',\'absent\')" style="flex:1;min-height:44px;border-radius:var(--rx);font:inherit;font-weight:800;cursor:pointer;border:1.5px solid '+(rep==="absent"?"#C0392B":"var(--bdr)")+';background:'+(rep==="absent"?"rgba(192,57,43,.12)":"var(--bg)")+';color:'+(rep==="absent"?"#C0392B":"var(--txt)")+'">✗ Je ne peux pas</button></div></div>';
     });
   }
   var ap=benevAppelsOuverts();
@@ -144,7 +144,7 @@ function benevHomeBuild(){
       h+='<div style="margin:0 16px 10px;padding:14px;border-radius:var(--rs);background:var(--card);border:1px solid var(--bdr)">'
         +'<div style="font-size:15px;font-weight:900;color:var(--txt)">'+authEsc(e.titre||eventTypeLabel(e.type))+'</div>'
         +'<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(benJourTxt(e)+(e.heure?" à "+e.heure:"")+(e.equipe?" · "+e.equipe:""))+'</div>'
-        +'<button type="button" onclick="benevAppelOuvrir(\''+authEsc(e.id)+'\')" style="margin-top:10px;width:100%;min-height:44px;border-radius:var(--rx);border:none;background:var(--dkg);color:#fff;font:inherit;font-weight:800;cursor:pointer">'+(reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir")+'</button></div>';
+        +'<button type="button" onclick="benevAppelOuvrir(\''+gmJs(e.id)+'\')" style="margin-top:10px;width:100%;min-height:44px;border-radius:var(--rx);border:none;background:var(--dkg);color:#fff;font:inherit;font-weight:800;cursor:pointer">'+(authEsc(reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir"))+'</button></div>';
     });
   }
   var dom=benevMatchsDomicile();

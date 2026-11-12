@@ -5,11 +5,11 @@
 var LIC_ROLES={joueur:"Joueur",coach:"Coach",benevole:"Bénévole",autre:"Autre (bureau, arbitre…)"};
 function licRoleHtml(lic){
   var r=lic.role||"joueur";
-  var opts=Object.keys(LIC_ROLES).map(function(k){return '<option value="'+k+'"'+(r===k?" selected":"")+'>'+LIC_ROLES[k]+'</option>';}).join("");
+  var opts=Object.keys(LIC_ROLES).map(function(k){return '<option value="'+authEsc(k)+'"'+(r===k?" selected":"")+'>'+LIC_ROLES[k]+'</option>';}).join("");
   return '<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
     '<div style="font-size:12px;font-weight:700;color:var(--txt)">Cette personne est</div>'+
-    '<select class="form-select" style="flex:1;min-width:140px" onchange="licChangerRole(\''+lic.code+'\',this.value)">'+opts+'</select>'+
-    '<button onclick="licSupprimer(\''+lic.code+'\')" style="padding:9px 12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer">Supprimer la fiche</button>'+
+    '<select class="form-select" style="flex:1;min-width:140px" onchange="licChangerRole(\''+gmJs(lic.code)+'\',this.value)">'+opts+'</select>'+
+    '<button onclick="licSupprimer(\''+gmJs(lic.code)+'\')" style="padding:9px 12px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:700;border:none;cursor:pointer">Supprimer la fiche</button>'+
     (typeof licEquipeHtml==="function"?licEquipeHtml(lic):'')+'</div>'+licPecHtml(lic);
 }
 function licChangerRole(code, role){
@@ -91,7 +91,7 @@ function licEquipeHtml(lic){
   var l=licEquipes(lic), h='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%"><div style="font-size:12px;font-weight:700;color:var(--txt);margin-right:4px">Équipe'+(lic.categorie?' '+authEsc(lic.categorie):'')+'</div>';
   for(var n=1;n<=EQ_NB;n++){
     var on=l.indexOf(n)>=0;
-    h+='<button onclick="licEquipeSet(\''+lic.code+'\','+n+')" style="min-width:34px;padding:7px 10px;border-radius:20px;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer">'+n+'</button>';
+    h+='<button onclick="licEquipeSet(\''+gmJs(lic.code)+'\','+n+')" style="min-width:34px;padding:7px 10px;border-radius:20px;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer">'+n+'</button>';
   }
   return h+'<div style="font-size:10px;color:var(--mut)">'+(lic.statut==="validee"?'':'placé à la validation')+'</div>'
     +'<div style="font-size:10px;color:var(--mut);width:100%">Touchez 2 numéros pour qu\'il joue dans 2 équipes.</div></div>';
@@ -146,7 +146,7 @@ function licPecHtml(lic){
   var v=lic.priseEnCharge||"";
   function chip(k,txt){
     var on=v===k;
-    return '<button type="button" onclick="licPecSet(\''+lic.code+'\',\''+k+'\')" style="padding:7px 12px;border-radius:20px;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+';font-size:11.5px;font-weight:700;cursor:pointer">'+txt+'</button>';
+    return '<button type="button" onclick="licPecSet(\''+gmJs(lic.code)+'\',\''+gmJs(k)+'\')" style="padding:7px 12px;border-radius:20px;border:1.5px solid '+(on?'var(--dkg)':'var(--bdr)')+';background:'+(on?'var(--dkg)':'var(--card)')+';color:'+(on?'#fff':'var(--txt)')+';font-size:11.5px;font-weight:700;cursor:pointer">'+txt+'</button>';
   }
   var h='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px">'+
     '<div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:8px">Sa licence</div>'+
@@ -154,12 +154,12 @@ function licPecHtml(lic){
   if(v==="club"){
     h+='<div style="font-size:11px;color:var(--mut);margin:10px 0 6px">Aucun paiement demandé. Coût de la licence pour le club (facultatif) : il est ajouté en dépense dans la comptabilité.</div>'+
       '<div style="display:flex;gap:8px"><input class="form-input" id="lic-pec-cout" type="number" step="0.01" min="0" placeholder="Coût (€)" value="'+(lic.coutClub!=null?authEsc(String(lic.coutClub)):"")+'" style="flex:1">'+
-      '<button type="button" onclick="licPecCout(\''+lic.code+'\')" style="padding:0 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button></div>';
+      '<button type="button" onclick="licPecCout(\''+gmJs(lic.code)+'\')" style="padding:0 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button></div>';
   } else if(v==="ailleurs"){
     h+='<div style="font-size:11px;color:var(--mut);margin:10px 0 6px">Aucun paiement demandé. La personne garde son accès au club (coach, bénévole, bureau).</div>'+
       '<input class="form-input" id="lic-pec-club" placeholder="Club où il est licencié" value="'+authEsc(lic.clubAilleurs||"")+'" style="margin-bottom:6px">'+
       '<div style="display:flex;gap:8px"><input class="form-input" id="lic-pec-num" placeholder="N° de licence (facultatif)" value="'+authEsc(lic.numAilleurs||"")+'" style="flex:1">'+
-      '<button type="button" onclick="licPecAilleurs(\''+lic.code+'\')" style="padding:0 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button></div>';
+      '<button type="button" onclick="licPecAilleurs(\''+gmJs(lic.code)+'\')" style="padding:0 14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Enregistrer</button></div>';
   }
   return h+'</div>';
 }

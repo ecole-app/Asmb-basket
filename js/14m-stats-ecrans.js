@@ -79,7 +79,7 @@ function statsEquipeDessiner(){
     +"<div class=\"ms-t\"><b>"+authEsc(msEqFiltre.equipe||"Statistiques de l'équipe")+"</b><span>Saison "+authEsc(saison)+" · "+r.n+" match"+(r.n>1?"s":"")+"</span></div></div>"
     +"<div class=\"ms-body ms-eq\">";
   h+="<div class=\"eq-chips\">"
-    +[["saison","Saison"],["3","3 derniers"]].map(function(p){return "<button class=\"ms-btn mini"+(msEqFiltre.periode===p[0]?" plein":"")+"\" onclick=\"msEqFiltre.periode='"+p[0]+"';statsEquipeDessiner()\">"+p[1]+"</button>";}).join("")
+    +[["saison","Saison"],["3","3 derniers"]].map(function(p){return "<button class=\"ms-btn mini"+(msEqFiltre.periode===p[0]?" plein":"")+"\" onclick=\"msEqFiltre.periode='"+gmJs(p[0])+"';statsEquipeDessiner()\">"+p[1]+"</button>";}).join("")
     +(equipes.length>1?"<button class=\"ms-btn mini"+(!msEqFiltre.equipe?" plein":"")+"\" onclick=\"msEqFiltre.equipe='';statsEquipeDessiner()\">Toutes</button>"+equipes.map(function(e){return "<button class=\"ms-btn mini"+(msEqFiltre.equipe===e?" plein":"")+"\" data-eq=\""+authEsc(e)+"\" onclick=\"msEqFiltre.equipe=this.dataset.eq;statsEquipeDessiner()\">"+authEsc(e)+"</button>";}).join(""):"")
     +"</div>";
   if(!r.n){
@@ -107,7 +107,7 @@ function statsEquipeDessiner(){
   h+="<div class=\"ms-card eq-tab\"><table class=\"ms-tab\"><tr><th>Joueur</th><th>Matchs</th><th>MIN</th><th>PTS</th><th>REB</th><th>PD</th><th>Tirs</th><th>3 pts</th><th>LF</th><th>Éval</th><th class=\"eq-sp\">Évaluation par match</th></tr>"
     +r.joueurs.map(function(j){
       var a=j.adresse;
-      return "<tr class=\"clic\" onclick=\"statsFicheJoueur('"+authEsc(String(j.id))+"')\"><td>"+authEsc(msNomJoueur(j.id))+"</td><td>"+j.n+"</td><td>"+virg(j.min)+"</td><td>"+virg(j.pts)+"</td><td>"+virg(j.reb)+"</td><td>"+virg(j.pd)+"</td><td>"+(a.tirs==null?"–":a.tirs+" %")+"</td><td>"+(a.p3==null?"–":a.p3+" %")+"</td><td>"+(a.lf==null?"–":a.lf+" %")+"</td><td class=\"ms-ev\">"+virg(j.eval)+"</td><td class=\"eq-sp\">"+spark(j.evals)+"</td></tr>";}).join("")
+      return "<tr class=\"clic\" onclick=\"statsFicheJoueur('"+gmJs(String(j.id))+"')\"><td>"+authEsc(msNomJoueur(j.id))+"</td><td>"+j.n+"</td><td>"+virg(j.min)+"</td><td>"+virg(j.pts)+"</td><td>"+virg(j.reb)+"</td><td>"+virg(j.pd)+"</td><td>"+(a.tirs==null?"–":a.tirs+" %")+"</td><td>"+(a.p3==null?"–":a.p3+" %")+"</td><td>"+(a.lf==null?"–":a.lf+" %")+"</td><td class=\"ms-ev\">"+virg(j.eval)+"</td><td class=\"eq-sp\">"+spark(j.evals)+"</td></tr>";}).join("")
     +"</table></div>";
   h+="<div style=\"font-size:12px;color:var(--mut)\">Touche un joueur pour ouvrir sa fiche. Les joueurs et les parents ne verront que leurs propres chiffres, jamais ce tableau.</div></div>";
   o.innerHTML=h;

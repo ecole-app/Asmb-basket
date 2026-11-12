@@ -49,7 +49,7 @@ function buildSponsors(){
     card.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(SP_STATUT_COLOR[s.statut]||"var(--bdr)")+";border-radius:var(--rs);padding:12px;cursor:pointer";
     card.addEventListener("click",function(){showEditSponsor(s.id);});
     var logoHtml=s.logo
-      ? '<img src="'+s.logo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">'
+      ? '<img src="'+authEsc(s.logo)+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">'
       : '<div style="width:40px;height:40px;border-radius:8px;background:var(--bdr);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--mut);flex-shrink:0">'+authEsc((s.nom||"?").charAt(0).toUpperCase())+'</div>';
     var top=document.createElement("div");
     top.style.cssText="display:flex;align-items:center;gap:10px";
@@ -58,7 +58,7 @@ function buildSponsors(){
         +'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(s.nom||"")+'</div>'
         +'<div style="font-size:11px;color:var(--mut);margin-top:2px">'+(s.montant?Number(s.montant).toFixed(2)+" €":"Montant non précisé")+(s.dateFin?" · jusqu'au "+authEsc(s.dateFin.split("-").reverse().join("/")):"")+'</div>'
       +'</div>'
-      +'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(SP_STATUT_COLOR[s.statut]||"var(--mut)")+'">'+(SP_STATUT_LABEL[s.statut]||s.statut||"")+'</span>';
+      +'<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(SP_STATUT_COLOR[s.statut]||"var(--mut)")+'">'+(authEsc(SP_STATUT_LABEL[s.statut]||s.statut||""))+'</span>';
     card.appendChild(top);
     if(relanceDue){
       var alertBox=document.createElement("div");

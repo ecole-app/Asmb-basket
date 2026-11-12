@@ -2,7 +2,25 @@
 // ═══ AUTHENTIFICATION (comptes réels e-mail/mot de passe) ═══════════
 var BOOTSTRAP_DIRIGEANT_UID = "7f2br1aTiJVWHTEbqVePbMLD0uc2"; // compte dirigeant bootstrap (console Firebase)
 var BOOTSTRAP_CLUB_ID = "asmb"; // club d'origine, rattaché au compte bootstrap
-function authEsc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+// Texte → HTML sûr (texte d'une balise ou attribut entre guillemets doubles). Accepte aussi un nombre ;
+// rien (null, undefined, false) donne une chaîne vide.
+function authEsc(s){ return String(s==null||s===false?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+// Valeur placée DANS une chaîne JavaScript d'un attribut onclick="f('…')" : authEsc ne suffit pas
+// (une apostrophe ferme la chaîne). On échappe pour JavaScript, puis pour HTML.
+// Adresse placée dans un lien (href) ou ouverte dans un onglet : seulement http(s), mailto, tel, sms,
+// un fichier intégré (image, PDF, son, vidéo) ou un chemin du site. Tout le reste (javascript:…) devient "#".
+function gmUrl(u){
+  u=String(u==null||u===false?"":u).trim();
+  if(/^(https?:|mailto:|tel:|sms:|blob:)/i.test(u)) return u;
+  if(/^data:(image\/(png|jpe?g|gif|webp|heic|heif|bmp)|application\/pdf|audio\/|video\/)/i.test(u)) return u;
+  if(/^[.\/#?]/.test(u) && !/^\/\//.test(u)) return u;
+  return u?"#":"";
+}
+function gmJs(s){
+  return String(s==null||s===false?"":s)
+    .replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\r?\n/g,"\\n").replace(/\u2028|\u2029/g," ")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/`/g,"&#96;");
+}
 
 // ── Identité visuelle de l'écran d'entrée ────────────────────────────
 // Avant connexion aucun club n'est charge : cet écran porte la marque
@@ -53,8 +71,8 @@ var AUTH_EYE_CLOSED='<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
 
 function authPassField(id, placeholder){
   return '<div style="position:relative">'
-    +'<input id="'+id+'" class="auth-field" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
-    +'<button type="button" class="auth-eye-btn" data-target="'+id+'" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:'+AUTH_MUTTXT+';display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
+    +'<input id="'+authEsc(id)+'" class="auth-field" type="password" style="'+AUTH_INP+';padding-right:46px" placeholder="'+authEsc(placeholder)+'">'
+    +'<button type="button" class="auth-eye-btn" data-target="'+authEsc(id)+'" aria-label="Afficher le mot de passe" style="position:absolute;right:10px;top:0;bottom:0;margin:auto;height:36px;width:36px;border:none;background:transparent;color:'+AUTH_MUTTXT+';display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">'+AUTH_EYE_CLOSED+'</button>'
     +'</div>';
 }
 

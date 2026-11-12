@@ -36,7 +36,7 @@ function showMatchFilter(){
   teams.forEach(function(t){if(cats.indexOf(t.cat)<0)cats.push(t.cat);});
   var html='<button class="cat-filter'+(matchFilterCat==="all"?" on":"")+'" onclick="setMatchFilter(\'all\')" style="display:inline-block;margin-right:6px">Tous</button>';
   cats.forEach(function(c){
-    html+='<button class="cat-filter'+(matchFilterCat===c?" on":"")+'" onclick="setMatchFilter(\''+c+'\')" style="display:inline-block;margin-right:6px">'+c+'</button>';
+    html+='<button class="cat-filter'+(matchFilterCat===c?" on":"")+'" onclick="setMatchFilter(\''+gmJs(c)+'\')" style="display:inline-block;margin-right:6px">'+authEsc(c)+'</button>';
   });
   row.innerHTML=html;
   row.style.display="flex";
@@ -83,13 +83,13 @@ function buildMatchList(){
           '<div style="font-size:9px;font-weight:700;color:var(--mut);text-transform:uppercase">'+d.toLocaleDateString("fr-FR",{month:"short"})+'</div>'+
         '</div>'+
         '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+
-          '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(e.heure||"?")+(e.lieu?" · "+e.lieu:"")+'</div>'+
-          '<div id="match-counts-'+e.id+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
-          (e.lieu?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'')+
+          '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(e.titre)+'</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+d.toLocaleDateString("fr-FR",{weekday:"long"})+', '+(authEsc(e.heure||"?"))+(authEsc(e.lieu?" · "+e.lieu:""))+'</div>'+
+          '<div id="match-counts-'+authEsc(e.id)+'" style="margin-top:8px;display:flex;gap:6px;align-items:center"></div>'+
+          (e.lieu?'<button onclick="showWeather(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'')+
           (e.lieu?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itinéraire</a>':'')+
-          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'')+
-          '<div id="match-actions-'+e.id+'" style="margin-top:8px"></div>'+
+          ((["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0)?('<button onclick="showConvocation(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+'<button onclick="openPresences(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'')+
+          '<div id="match-actions-'+authEsc(e.id)+'" style="margin-top:8px"></div>'+
         '</div>';
       content.appendChild(card);
 
@@ -232,7 +232,7 @@ function buildCalendrier(){
 
     if(calVue==="mois"&&gridEl){
       var h='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:10px 12px 4px">';
-      ["L","M","M","J","V","S","D"].forEach(function(n){h+='<div style="text-align:center;font-size:10px;font-weight:800;color:var(--mut)">'+n+'</div>';});
+      ["L","M","M","J","V","S","D"].forEach(function(n){h+='<div style="text-align:center;font-size:10px;font-weight:800;color:var(--mut)">'+authEsc(n)+'</div>';});
       var debut=getMonday(moisPremier);
       var mois=moisPremier.getMonth();
       for(var k=0;k<42;k++){
@@ -276,22 +276,22 @@ function buildCalendrier(){
           var isMatch=e.type==="match";
           var isCoachOrDir=["coach","dirigeant"].indexOf(localStorage.getItem("asmb_profile"))>=0;
           var itinBtn=(e.type==="match"&&e.lieu)?'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(e.lieu)+'" target="_blank" style="display:inline-block;margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;text-decoration:none"> Itinéraire</a>':'';
-          var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'';
-          var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
-          var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
+          var weatherBtn=(isMatch&&e.lieu)?'<button onclick="showWeather(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Météo</button>':'';
+          var icsBtn=isMatch?'<button onclick="exportEventIcs(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer"> Agenda</button>':'';
+          var carBtn=isMatch?'<button onclick="shareCovoiturage(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(142,68,173,.12);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer"> Covoiturage</button>':'';
           var multi=!!(e.dateFin&&e.dateFin>e.date), nbBen=(typeof benListe==="function")?benListe(e,multi?dStr:null).length:0;
-          var jourTxt=multi?'<div style="font-size:10px;font-weight:700;color:var(--dkg);margin-top:2px">'+(typeof evtPlageFr==="function"?evtPlageFr(e):"")+' · jour '+(Math.round((new Date(dStr+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'/'+(Math.round((new Date(e.dateFin+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'</div>':"";
-          var benBtn=(isCoachOrDir&&e.type!=="entrainement"&&typeof benOuvrir==="function")?'<button onclick="benOuvrir(\''+e.id+'\''+(multi?',\''+dStr+'\'':'')+')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">🙋 Bénévoles'+(nbBen?' ('+nbBen+')':'')+'</button>':'';
+          var jourTxt=multi?'<div style="font-size:10px;font-weight:700;color:var(--dkg);margin-top:2px">'+(authEsc(typeof evtPlageFr==="function"?evtPlageFr(e):""))+' · jour '+(Math.round((new Date(dStr+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'/'+(Math.round((new Date(e.dateFin+"T12:00:00")-new Date(e.date+"T12:00:00"))/86400000)+1)+'</div>':"";
+          var benBtn=(isCoachOrDir&&e.type!=="entrainement"&&typeof benOuvrir==="function")?'<button onclick="benOuvrir(\''+gmJs(e.id)+'\''+(multi?',\''+dStr+'\'':'')+')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(232,103,10,.12);color:#E8670A;font-size:10px;font-weight:700;border:none;cursor:pointer">🙋 Bénévoles'+(nbBen?' ('+nbBen+')':'')+'</button>':'';
           var coachBtns=(isCoachOrDir&&isMatch)?
-            ('<button onclick="showConvocation(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
-            '<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>')
-            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+e.id+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'');
+            ('<button onclick="showConvocation(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:rgba(26,46,90,.12);color:#1A2E5A;font-size:10px;font-weight:700;border:none;cursor:pointer"> Convocation</button>'+
+            '<button onclick="openPresences(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>')
+            :((isCoachOrDir&&e.type==="entrainement")?('<button onclick="openPresences(\''+gmJs(e.id)+'\')" style="margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:700;border:none;cursor:pointer">✓ Présences</button>'):'');
           eventsHtml+='<div style="background:var(--card);border:1px solid var(--bdr);border-left:3px solid '+eventTypeColor(e.type)+';border-radius:var(--rs);padding:9px 12px;margin-bottom:6px">'+
             '<div style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0">'+
-            '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+eventTypeLabel(e.type)+'</span>'+
-            '<div style="font-size:12px;font-weight:700;color:var(--txt)">'+e.titre+'</div>'+jourTxt+'<div style="font-size:10px;color:var(--mut);margin-top:1px">'+(e.heure||"")+(e.lieu?" · "+e.lieu:"")+'</div></div>'+(isMatch?'<div id="cal-counts-'+e.id+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
+            '<span style="display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;color:#fff;background:'+eventTypeColor(e.type)+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px">'+authEsc(eventTypeLabel(e.type))+'</span>'+
+            '<div style="font-size:12px;font-weight:700;color:var(--txt)">'+authEsc(e.titre)+'</div>'+jourTxt+'<div style="font-size:10px;color:var(--mut);margin-top:1px">'+(authEsc(e.heure||""))+(authEsc(e.lieu?" · "+e.lieu:""))+'</div></div>'+(isMatch?'<div id="cal-counts-'+authEsc(e.id)+'" style="display:flex;gap:6px"></div>':"")+'</div>'+
             '<div style="display:flex;flex-wrap:wrap">'+itinBtn+weatherBtn+icsBtn+carBtn+coachBtns+benBtn+'</div>'+
-            (isMatch?'<div id="cal-absences-'+e.id+'"></div><div id="cal-checkin-'+e.id+'" style="margin-top:8px"></div>':"")+
+            (isMatch?'<div id="cal-absences-'+authEsc(e.id)+'"></div><div id="cal-checkin-'+authEsc(e.id)+'" style="margin-top:8px"></div>':"")+
           '</div>';
         });
       }
@@ -322,7 +322,7 @@ function buildCalendrier(){
           if(notable.length){
             var html='<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--bdr)">';
             notable.forEach(function(c){
-              html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+c.playerName+' absent(e)</div>';
+              html+='<div style="font-size:10px;color:var(--mut);margin-top:2px">'+authEsc(c.playerName)+' absent(e)</div>';
             });
             html+='</div>';
             absEl.innerHTML=html;
@@ -350,7 +350,7 @@ function buildCalendrier(){
             }
           });
         } else {
-          slot.innerHTML='<div style="margin-top:8px"><button onclick="signalerAbsence(\''+e.id+'\')" style="width:100%;padding:9px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button></div>';
+          slot.innerHTML='<div style="margin-top:8px"><button onclick="signalerAbsence(\''+gmJs(e.id)+'\')" style="width:100%;padding:9px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:#C0392B;font-size:11px;font-weight:700;border:none;cursor:pointer"> Signaler une absence</button></div>';
         }
       });
     }
@@ -441,14 +441,14 @@ function buildClassement(){
       var isUs=isOurTeamName(r.equipe);
       html+='<tr style="border-bottom:1px solid var(--bdr);'+(isUs?"background:rgba(27,92,40,.08)":"")+'">'+
         '<td style="padding:8px 4px;font-size:12px;font-weight:800;color:var(--txt)">'+r.rang+'</td>'+
-        '<td style="font-size:12px;font-weight:'+(isUs?"700":"400")+';color:var(--txt);white-space:nowrap">'+r.equipe+'</td>'+
+        '<td style="font-size:12px;font-weight:'+(isUs?"700":"400")+';color:var(--txt);white-space:nowrap">'+authEsc(r.equipe)+'</td>'+
         '<td style="text-align:center;font-size:12px;font-weight:800;color:var(--txt)">'+(r.points||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.joues||0)+'</td>'+
         '<td style="text-align:center;color:var(--ltg);font-weight:700">'+(r.victoires||0)+'</td>'+
         '<td style="text-align:center;color:#C0392B;font-weight:700">'+(r.defaites||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.pointsMarques||0)+'</td>'+
         '<td style="text-align:center;color:var(--mut)">'+(r.pointsEncaisses||0)+'</td>'+
-        (isCoachOrDir?'<td><button onclick="deleteClassementRow(\''+r.id+'\')" style="padding:4px 8px;border-radius:12px;background:rgba(192,57,43,.1);color:#C0392B;font-size:10px;border:none;cursor:pointer">✕</button></td>':'')+
+        (isCoachOrDir?'<td><button onclick="deleteClassementRow(\''+gmJs(r.id)+'\')" style="padding:4px 8px;border-radius:12px;background:rgba(192,57,43,.1);color:#C0392B;font-size:10px;border:none;cursor:pointer">✕</button></td>':'')+
       '</tr>';
     });
     html+='</table></div>';
@@ -519,7 +519,7 @@ function buildAnnuaire(){
     var initials=(c.nom||"?")[0].toUpperCase();
     var div=document.createElement("div");
     div.className="player-card";
-    var delBtn=window.asmbCoachMode?('<button onclick="deleteContact(\''+c.id+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0">✕</button>'):"";
+    var delBtn=window.asmbCoachMode?('<button onclick="deleteContact(\''+gmJs(c.id)+'\')" style="padding:5px 10px;border-radius:var(--rx);background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:600;border:none;cursor:pointer;flex-shrink:0">✕</button>'):"";
     var telLink=c.tel?('<a href="tel:'+authEsc(c.tel)+'" style="font-size:11px;color:var(--ltg);text-decoration:none">'+authEsc(c.tel)+'</a>'):"";
     var benBadge=c.type==="benevole"?'<span style="display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;background:rgba(232,103,10,.12);color:#E8670A;font-size:9px;font-weight:800;text-transform:uppercase">Bénévole</span>':"";
     var dispoLine=(c.type==="benevole"&&c.dispo)?('<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(c.dispo)+'</div>'):"";
@@ -598,7 +598,7 @@ function buildGalerie(){
     photos.reverse().forEach(function(p){
       var div=document.createElement("div");
       div.style.cssText="aspect-ratio:1;border-radius:var(--rx);overflow:hidden;cursor:pointer;background:var(--card)";
-      div.innerHTML='<img src="'+p.url+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">';
+      div.innerHTML='<img src="'+authEsc(p.url)+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">';
       div.onclick=function(){viewPhoto(p);};
       el.appendChild(div);
     });

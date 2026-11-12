@@ -97,7 +97,7 @@ function indAboGeler(){
     +'<div class="ind-btns" id="ind-gel-m" style="margin:10px 0"></div><div class="actions"><button type="button" class="ok" id="ind-gel-ok">Geler</button></div>';
   var box=s.body.querySelector("#ind-gel-m");
   function peindre(){
-    box.innerHTML=[1,2,3].map(function(m){ return '<button type="button" class="ind-btn '+(m===choix?"p":"s")+'" data-m="'+m+'">'+m+' mois</button>'; }).join("");
+    box.innerHTML=[1,2,3].map(function(m){ return '<button type="button" class="ind-btn '+(m===choix?"p":"s")+'" data-m="'+authEsc(m)+'">'+authEsc(m)+' mois</button>'; }).join("");
   }
   peindre();
   box.addEventListener("click",function(e){ var b=e.target.closest("button[data-m]"); if(b){ choix=+b.dataset.m; peindre(); } });

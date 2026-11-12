@@ -100,8 +100,8 @@ function repBoutonsHtml(e,enfants){
     var r=repDe(e.id,c.id), st=repStatut(r), prenom=authEsc(c.prenom||"Mon enfant");
     var b=function(val,lib,coul){
       var on=st===val;
-      return '<button type="button" onclick="repRepondre(\''+authEsc(e.id)+'\',\''+authEsc(String(c.id))+'\',\''+val+'\')" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:800;cursor:pointer;'+
-        (on?'border:none;background:'+coul+';color:#fff':'border:1.5px solid '+coul+';background:transparent;color:'+coul)+'">'+lib+'</button>';
+      return '<button type="button" onclick="repRepondre(\''+gmJs(e.id)+'\',\''+gmJs(String(c.id))+'\',\''+gmJs(val)+'\')" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:800;cursor:pointer;'+
+        (authEsc(on?'border:none;background:'+coul+';color:#fff':'border:1.5px solid '+coul+';background:transparent;color:'+coul))+'">'+authEsc(lib)+'</button>';
     };
     h+='<div style="margin-top:12px"><div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:6px">'+prenom+(st?'':' · <span style="color:#E8670A">réponse attendue</span>')+'</div>'+
       '<div style="display:flex;gap:8px">'+b("present","✓ Présent(e)","var(--ltg)")+b("absent","✕ Absent(e)","#C0392B")+'</div>'+
@@ -114,14 +114,14 @@ function repBoutonsHtml(e,enfants){
 function repBadge(e){
   if(!repConcerne(e)||typeof isStaffUser!=="function"||!isStaffUser()) return "";
   var b=repBilan(e);
-  return '<div><button type="button" onclick="event.stopPropagation();repOuvrir(\''+authEsc(e.id)+'\')" style="margin-top:6px;font-size:11px;font-weight:700;border:none;border-radius:8px;padding:5px 9px;cursor:pointer;background:var(--bdr);color:var(--txt)">'+
+  return '<div><button type="button" onclick="event.stopPropagation();repOuvrir(\''+gmJs(e.id)+'\')" style="margin-top:6px;font-size:11px;font-weight:700;border:none;border-radius:8px;padding:5px 9px;cursor:pointer;background:var(--bdr);color:var(--txt)">'+
     '<span style="color:var(--ltg)">✓ '+b.present.length+'</span> · <span style="color:#C0392B">✕ '+b.absent.length+'</span> · <span style="color:#E8670A">? '+b.sans.length+'</span></button></div>';
 }
 function repOuvrir(eid){
   var e=getEvents().filter(function(x){ return x.id===eid; })[0]; if(!e) return;
   var s=gmSheet("Réponses · "+(e.titre||eventTypeLabel(e.type))), b=repBilan(e);
   var bloc=function(titre,coul,ids,motifs){
-    var h='<div style="font-size:11px;font-weight:800;color:'+coul+';text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px">'+titre+' ('+ids.length+')</div>';
+    var h='<div style="font-size:11px;font-weight:800;color:'+authEsc(coul)+';text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px">'+authEsc(titre)+' ('+ids.length+')</div>';
     if(!ids.length) return h+'<div style="font-size:12px;color:var(--mut)">Personne</div>';
     return h+ids.map(function(pid){ var r=motifs?repDe(e.id,pid):null;
       return '<div style="font-size:13px;color:var(--txt);padding:5px 0;border-bottom:1px solid var(--bdr)">'+authEsc(repNom(pid))+(r&&r.motif?' <span style="color:var(--mut);font-size:11px">· '+authEsc(r.motif)+'</span>':'')+'</div>'; }).join("");

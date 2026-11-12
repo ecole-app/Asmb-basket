@@ -170,7 +170,7 @@ function rechPeindre(){
   var tous=rechTrouver(q), par={};
   tous.forEach(function(it){ (par[it.grp]=par[it.grp]||[]).push(it); });
   var f='<button type="button" class="rech-chip'+(rechEtat.filtre==="tout"?" on":"")+'" onclick="rechFiltre(\'tout\')">Tout · <span data-notr>'+tous.length+'</span></button>';
-  RECH_GROUPES.forEach(function(g){ if(par[g[0]]) f+='<button type="button" class="rech-chip'+(rechEtat.filtre===g[0]?" on":"")+'" onclick="rechFiltre(\''+g[0]+'\')">'+g[1]+' · <span data-notr>'+par[g[0]].length+'</span></button>'; });
+  RECH_GROUPES.forEach(function(g){ if(par[g[0]]) f+='<button type="button" class="rech-chip'+(rechEtat.filtre===g[0]?" on":"")+'" onclick="rechFiltre(\''+gmJs(g[0])+'\')">'+g[1]+' · <span data-notr>'+par[g[0]].length+'</span></button>'; });
   fz.innerHTML=f;
   if(!tous.length){ res.innerHTML='<div class="rech-vide">Aucun résultat pour « <span data-notr>'+authEsc(q)+'</span> ».</div>'; rechEtat.items=[]; return; }
   var h="", items=[];
@@ -185,11 +185,11 @@ function rechPeindre(){
       h+='<div class="rech-item" data-i="'+i+'"><button type="button" class="rech-ouvrir" onclick="rechAller('+i+')">'+
         '<span class="rech-t" data-notr>'+rechSurligner(it.titre,q)+'</span>'+
         (it.sous?'<span class="rech-s" data-notr>'+rechSurligner(it.sous,q)+'</span>':'')+'</button>'+
-        (it.droite?'<span class="rech-d '+(it.droiteCls||"")+'" data-notr>'+authEsc(it.droite)+'</span>':'')+
+        (it.droite?'<span class="rech-d '+(authEsc(it.droiteCls||""))+'" data-notr>'+authEsc(it.droite)+'</span>':'')+
         (tel?'<a class="rech-tel" href="tel:'+authEsc(tel)+'" aria-label="Appeler"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a>':'')+
       '</div>';
     });
-    if(rechEtat.filtre==="tout"&&l.length>RECH_MAX_GROUPE) h+='<button type="button" class="rech-plus" onclick="rechFiltre(\''+g[0]+'\')">Voir les <span data-notr>'+l.length+'</span></button>';
+    if(rechEtat.filtre==="tout"&&l.length>RECH_MAX_GROUPE) h+='<button type="button" class="rech-plus" onclick="rechFiltre(\''+gmJs(g[0])+'\')">Voir les <span data-notr>'+l.length+'</span></button>';
     h+='</div></div>';
   });
   res.innerHTML=h; rechEtat.items=items;

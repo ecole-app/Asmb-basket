@@ -34,7 +34,7 @@ function sortLicenciesList(mode){
   players.forEach(function(p){
     var div=document.createElement("div");
     div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr)";
-    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(p.naissance||"?")+' · '+(p.cat||"?")+(p.genre==="F"||p.genre==="M"?' · '+genreLabelSing(p.genre):'')+'</div></div>'+
+    div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">'+(authEsc(p.naissance||"?"))+' · '+(authEsc(p.cat||"?"))+(p.genre==="F"||p.genre==="M"?' · '+genreLabelSing(p.genre):'')+'</div></div>'+
       '<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+(p.licence==="ok"?"var(--ltg)":"#E8670A")+'">'+(p.licence==="ok"?"OK":"En attente")+'</span>';
     el.appendChild(div);
   });
@@ -51,7 +51,7 @@ function showPendingLicences(){
       var div=document.createElement("div");
       div.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--bdr);cursor:pointer";
       div.onclick=function(){closeModal("modal-pending-licences");openLicenceDetail(l.code);};
-      div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Code : '+l.code+(l.categorie?" · "+l.categorie:"")+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
+      div.innerHTML='<div><div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(nom)+'</div><div style="font-size:11px;color:var(--mut);margin-top:2px">Code : '+authEsc(l.code)+(authEsc(l.categorie?" · "+l.categorie:""))+'</div></div><span style="color:var(--mut);font-size:16px">›</span>';
       el.appendChild(div);
     });
   }
@@ -88,8 +88,8 @@ function showTeamRoster(teamId){
   var html=backBtn;
   players.forEach(function(p){
     html+='<div style="padding:10px 4px;border-bottom:1px solid var(--bdr)">'+
-      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Né(e) le '+(p.naissance||"?")+' · N° licence '+(p.numLicence||"0C")+' ('+(p.typeLicence==="competition"?"Compétition":"Loisir")+')</div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">Né(e) le '+(authEsc(p.naissance||"?"))+' · N° licence '+(authEsc(p.numLicence||"0C"))+' ('+(p.typeLicence==="competition"?"Compétition":"Loisir")+')</div>'+
     '</div>';
   });
   el.innerHTML=html;
@@ -126,7 +126,7 @@ function showAssiduiteChart(){
     html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">'+
       '<div style="font-size:10px;font-weight:700;color:var(--txt)">'+(d.total?pct+"%":"—")+'</div>'+
       '<div style="width:100%;height:'+barH+'px;background:'+(d.total?"var(--ltg)":"var(--bdr)")+';border-radius:4px 4px 0 0"></div>'+
-      '<div style="font-size:9px;color:var(--mut);text-transform:capitalize">'+m.label+'</div>'+
+      '<div style="font-size:9px;color:var(--mut);text-transform:capitalize">'+authEsc(m.label)+'</div>'+
     '</div>';
   });
   html+='</div>';
@@ -170,7 +170,7 @@ function buildU13Home(){
   var vl=document.getElementById("vacList");
   if(vl){
     vl.innerHTML="";
-    getVacances().forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+v.c+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+v.d+'</div></div><div class="vimp">'+v.imp+'</div></div>';});
+    getVacances().forEach(function(v){vl.innerHTML+='<div class="vac"><div class="vdot" style="background:'+authEsc(v.c)+'"></div><div class="vinf"><div class="vnm">'+v.n+'</div><div class="vdt">'+authEsc(v.d)+'</div></div><div class="vimp">'+authEsc(v.imp)+'</div></div>';});
     if(canEditCycles()){
       var b=document.createElement("button");
       b.textContent="Modifier la zone et les dates";
@@ -187,7 +187,7 @@ function buildU13Home(){
     var progTxt=pr&&pr.total>0?" · "+pr.done+"/"+pr.total+" faites":"";
     var d=document.createElement("div");d.className="cy-card";
     d.onclick=function(){openCy(cy.id);};
-    d.innerHTML='<div class="cy-bar" style="background:'+(allDone?"var(--ltg)":cy.c)+'"></div><div class="cy-em" style="background:'+(allDone?"var(--ltg)":cy.c)+'">'+(allDone?"✓":cycleNum(cy))+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"var(--ltg)":"var(--txt)")+'">Cycle '+cy.id+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"var(--ltg)":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
+    d.innerHTML='<div class="cy-bar" style="background:'+(authEsc(allDone?"var(--ltg)":cy.c))+'"></div><div class="cy-em" style="background:'+(authEsc(allDone?"var(--ltg)":cy.c))+'">'+(authEsc(allDone?"✓":cycleNum(cy)))+'</div><div class="cy-inf"><div class="cy-nm" style="color:'+(allDone?"var(--ltg)":"var(--txt)")+'">Cycle '+authEsc(cy.id)+' — '+cy.n+'</div><div class="cy-pr">'+cy.p+'</div><div class="cy-se">'+cy.s+' séances'+progTxt+'</div></div><div style="color:'+(allDone?"var(--ltg)":"var(--mut)")+';font-size:16px">'+(allDone?"✓":"›")+'</div>';
     cl.appendChild(d);
   });
   if(canEditCycles()){
@@ -221,7 +221,7 @@ function openCycleEditModal(cyId){
   var inner=document.createElement("div");
   inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
   inner.addEventListener("click",function(e){e.stopPropagation();});
-  var colorOpts=KC.map(function(c){return '<option value="'+c+'"'+(existing&&existing.c===c?" selected":"")+'>'+c+'</option>';}).join("");
+  var colorOpts=KC.map(function(c){return '<option value="'+authEsc(c)+'"'+(existing&&existing.c===c?" selected":"")+'>'+authEsc(c)+'</option>';}).join("");
   inner.innerHTML=
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
       '<div style="font-size:15px;font-weight:800;color:var(--txt)">'+(existing?"Modifier le cycle":"Nouveau cycle")+'</div>'+
@@ -390,8 +390,8 @@ function openSeanceEditModal(cyId,seaNum){
 function openCy(id){curCy=findCycle(id);stack.push("cycle");buildCycle(curCy);showScr("cycle");}
 function buildCycle(cy){
   if(!cy)return;
-  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+cy.c+';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">'+cycleNum(cy)+'</div><div><div style="font-size:17px;font-weight:900;color:var(--txt)">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' séances</div></div></div></div>';
-  document.getElementById("cyObjs").innerHTML='<div class="obj-bx">'+cy.objs.map(function(o){return '<div class="obj-it">'+o+'</div>';}).join("")+'</div>';
+  document.getElementById("cyHdr").innerHTML='<div style="padding:14px 16px;border-bottom:1px solid var(--bdr)"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:12px;background:'+authEsc(cy.c)+';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">'+authEsc(cycleNum(cy))+'</div><div><div style="font-size:17px;font-weight:900;color:var(--txt)">'+cy.n+'</div><div style="font-size:11px;color:var(--mut)">'+cy.p+' · '+cy.s+' séances</div></div></div></div>';
+  document.getElementById("cyObjs").innerHTML='<div class="obj-bx">'+cy.objs.map(function(o){return '<div class="obj-it">'+authEsc(o)+'</div>';}).join("")+'</div>';
   var sl=document.getElementById("cySeances");sl.innerHTML="";
   var pr=cycleProgress(cy.id);
   if(pr&&pr.total>0){var pct=Math.round(pr.done/pr.total*100);var _pw=document.createElement("div");_pw.className="prog-wrap";_pw.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut)">Progression</span><span style="font-size:11px;font-weight:700;color:var(--ltg)">'+pr.done+'/'+pr.total+' séances</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>';sl.appendChild(_pw);}
@@ -399,7 +399,7 @@ function buildCycle(cy){
     var done=isDone(cy.id,s.num);
     var d=document.createElement("div");d.className="sea-card";
     d.onclick=function(){openSea(cy.id,s.num);};
-    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(done?"var(--ltg)":cy.c)+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"var(--ltg)":"var(--txt)")+'">'+s.t+'</div><div class="sobj">'+s.obj+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"var(--ltg)":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
+    d.innerHTML='<div class="shdr"><div class="snum" style="background:'+(authEsc(done?"var(--ltg)":cy.c))+'">'+(done?"✓":(si+1))+'</div><div class="sinf"><div class="stit" style="color:'+(done?"var(--ltg)":"var(--txt)")+'">'+s.t+'</div><div class="sobj">'+authEsc(s.obj)+'</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--mut)">'+s.dur+'</span><span style="color:'+(done?"var(--ltg)":"var(--mut)")+';font-size:14px">'+(done?"✓":"›")+'</span></div></div>';
     if(canEditCycles()){
       var editSea=document.createElement("button");
       editSea.textContent="Modifier";
@@ -434,7 +434,7 @@ function buildSeance(cy,s){
   var top=document.createElement("div");
   top.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:6px";
   var seaIdx=curCy.seas.findIndex(function(x){return x.num===s.num;})+1;
-  top.innerHTML='<div style="background:'+cy.c+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+seaIdx+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
+  top.innerHTML='<div style="background:'+authEsc(cy.c)+';color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px">Séance '+seaIdx+'</div><div style="font-size:11px;color:var(--mut)">'+s.dur+'</div>';
  var ttl=document.createElement("div");ttl.style.cssText="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:4px";ttl.textContent=s.t;
  var obj=document.createElement("div");obj.style.cssText="font-size:11.5px;color:var(--mut);line-height:1.4;margin-bottom:8px";obj.textContent=s.obj;
  var btn=document.createElement("button");
@@ -456,7 +456,7 @@ function buildSeance(cy,s){
     // authEsc() sur tout le contenu de sit.* : ces situations peuvent être
     // éditées par un coach (voir getCycleOverrides/02-formation-cycles.js),
     // donc pas un simple texte développeur figé.
-    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+cy.c+'"><div class="st2">Sit. '+(i+1)+' — '+authEsc(sit.ti)+'</div><div class="sdur">'+authEsc(sit.dur)+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+authEsc(sit.desc)+'</div><div class="lbl">Organisation</div><div class="txt">'+authEsc(sit.org)+'</div>'+animDiv+'<div class="lbl">Axes évolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+authEsc(a)+'</div>';}).join("")+'</div><div class="lbl">Mots clés</div><div class="kws">'+kws+'</div></div>';
+    d.innerHTML='<div class="shd2" style="border-bottom:2px solid '+authEsc(cy.c)+'"><div class="st2">Sit. '+(i+1)+' — '+authEsc(sit.ti)+'</div><div class="sdur">'+authEsc(sit.dur)+'</div></div><div class="sbdy">'+ch+'<div class="lbl">Description</div><div class="txt">'+authEsc(sit.desc)+'</div><div class="lbl">Organisation</div><div class="txt">'+authEsc(sit.org)+'</div>'+animDiv+'<div class="lbl">Axes évolution</div><div style="margin-bottom:10px">'+sit.axes.map(function(a){return '<div class="axe">'+authEsc(a)+'</div>';}).join("")+'</div><div class="lbl">Mots clés</div><div class="kws">'+kws+'</div></div>';
     if(canEditCycles()&&typeof openAnimPicker==="function"){
       var bar=document.createElement("div");
       bar.style.cssText="padding:0 12px 12px";

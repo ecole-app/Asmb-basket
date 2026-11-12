@@ -22,7 +22,7 @@ var PLUS_IC={
   plus:'<path d="M12 5v14M5 12h14"/>',
   fermer:'<path d="M6 6l12 12M18 6L6 18"/>'
 };
-function plusSvg(k,taille){ return '<svg width="'+(taille||22)+'" height="'+(taille||22)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(PLUS_IC[k]||"")+'</svg>'; }
+function plusSvg(k,taille){ return '<svg width="'+(authEsc(taille||22))+'" height="'+(authEsc(taille||22))+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(PLUS_IC[k]||"")+'</svg>'; }
 function plusProfil(){ return localStorage.getItem("asmb_profile")||""; }
 function plusPerm(id){ return typeof hasModulePermission==="function" && hasModulePermission(id); }
 
@@ -108,7 +108,7 @@ function plusOuvrir(){
   choix.slice().reverse().forEach(function(id){
     var g=PLUS_GESTES.filter(function(x){ return x.id===id; })[0]; if(!g) return;
     var l=document.createElement("button"); l.type="button"; l.className="gm-plus-geste";
-    l.innerHTML='<span class="gm-plus-lbl">'+g.label+'</span><span class="gm-plus-ic">'+plusSvg(g.id)+'</span>';
+    l.innerHTML='<span class="gm-plus-lbl">'+authEsc(g.label)+'</span><span class="gm-plus-ic">'+plusSvg(g.id)+'</span>';
     l.addEventListener("click",function(){ plusFermer(); try{ g.go(); }catch(e){ if(typeof gmSignalerErreur==="function") gmSignalerErreur(e,"plus:"+g.id); } });
     liste.appendChild(l);
   });
@@ -265,7 +265,7 @@ function plusPeindreParam(box){
   dispo.forEach(function(g){
     var on=choix.indexOf(g.id)>=0, plein=choix.length>=PLUS_MAX&&!on;
     var lab=document.createElement("label"); lab.className="gm-plus-param"+(plein?" plein":"");
-    lab.innerHTML='<input type="checkbox"'+(on?" checked":"")+(plein?" disabled":"")+'><span class="gm-plus-ic petit">'+plusSvg(g.id,18)+'</span><span style="flex:1">'+g.label+'</span>';
+    lab.innerHTML='<input type="checkbox"'+(on?" checked":"")+(plein?" disabled":"")+'><span class="gm-plus-ic petit">'+plusSvg(g.id,18)+'</span><span style="flex:1">'+authEsc(g.label)+'</span>';
     lab.querySelector("input").addEventListener("change",function(ev){
       var c=plusChoix();
       if(ev.target.checked){ if(c.length>=PLUS_MAX){ ev.target.checked=false; return; } c.push(g.id); }

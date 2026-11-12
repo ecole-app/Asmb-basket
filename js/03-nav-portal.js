@@ -355,7 +355,7 @@ function makeCard(p,onclick){
  d.style.borderLeftColor=p.color||"var(--dkg)";
  if(p.ready&&onclick)d.onclick=onclick;
  var ic=(p.icon&&p.icon.trim())?p.icon:((p.name||p.title||"?").trim().charAt(0).toUpperCase());
- d.innerHTML='<div class="ci"><div class="cicon" style="background:'+(p.color||"var(--dkg)")+'">'+ic+'</div><div class="cinfo"><div class="ctit">'+(p.name||p.title)+'</div><div class="csub">'+(p.sub||"")+'</div><div class="cdsc">'+(p.desc||"")+'</div></div><div class="carr">'+(p.ready?"›":"")+'</div></div>';
+ d.innerHTML='<div class="ci"><div class="cicon" style="background:'+(authEsc(p.color||"var(--dkg)"))+'">'+authEsc(ic)+'</div><div class="cinfo"><div class="ctit">'+(authEsc(p.name||p.title))+'</div><div class="csub">'+(authEsc(p.sub||""))+'</div><div class="cdsc">'+(authEsc(p.desc||""))+'</div></div><div class="carr">'+(p.ready?"›":"")+'</div></div>';
   return d;
 }
 
@@ -468,17 +468,17 @@ function buildCoachDashboard(el){
       var colTxt=st==="present"?"var(--ltg)":(st==="absent"||st==="retard"?"#C0392B":"#E8670A");
       var initials=(p.prenom||"?").charAt(0).toUpperCase()+(p.nom||"?").charAt(0).toUpperCase();
       return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rx);background:var(--bg)">'+
-        '<div style="width:32px;height:32px;border-radius:50%;background:var(--dkg);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+initials+'</div>'+
-        '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+p.prenom+' '+p.nom+'</div>'+
+        '<div style="width:32px;height:32px;border-radius:50%;background:var(--dkg);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+authEsc(initials)+'</div>'+
+        '<div style="flex:1;font-size:12.5px;font-weight:700;color:var(--txt)">'+authEsc(p.prenom)+' '+authEsc(p.nom)+'</div>'+
         '<div style="font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:'+colBg+';color:'+colTxt+'">'+lbl+'</div></div>';
     }).join("");
 
-    var relanceBtn=noResponse.length?('<button onclick="relancerSansReponse(\''+upcoming.id+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:12px">🔔 Relancer les sans réponse ('+noResponse.length+')</button>'):"";
+    var relanceBtn=noResponse.length?('<button onclick="relancerSansReponse(\''+gmJs(upcoming.id)+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:12px">🔔 Relancer les sans réponse ('+noResponse.length+')</button>'):"";
 
     el.innerHTML='<div style="margin:0 0 10px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--dkg);border-radius:var(--r);padding:14px;box-shadow:0 2px 12px var(--shadow)">'+
       '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+upLabel+'</div>'+
-      '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+upcoming.titre+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+dateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div>'+
+      '<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(upcoming.titre)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(dateFr)+(authEsc(upcoming.heure?" · "+upcoming.heure:""))+'</div>'+
       '<div style="display:flex;gap:8px;margin-top:12px">'+
         '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg)"><b style="display:block;font-size:18px">'+present.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Présents</span></div>'+
         '<div style="flex:1;text-align:center;border-radius:var(--rs);padding:8px 4px;font-weight:800;background:rgba(192,57,43,.12);color:#C0392B"><b style="display:block;font-size:18px">'+absent.length+'</b><span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Absents</span></div>'+
@@ -558,7 +558,7 @@ function buildDashboard(){
 
   html+='<div onclick="showLicenciesList()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:var(--dkg)">'+players.length+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés'+(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":"")+'</div></div>';
+    '<div style="font-size:10px;color:var(--mut);margin-top:2px">Licenciés'+(authEsc(topCat&&byCat[topCat]>0?" · "+topCat+" majoritaire":""))+'</div></div>';
 
   html+='<div onclick="showPendingLicences()" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:14px;box-shadow:0 2px 8px var(--shadow)">'+
     '<div style="font-size:22px;font-weight:900;color:'+(licencesEnAttente>0?"#E8670A":"var(--ltg)")+'">'+licencesEnAttente+'</div>'+
@@ -581,7 +581,7 @@ function buildDashboard(){
       '<div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#E8670A,#c2410c);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div>'+
       '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:#E8670A;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">En cours</div>'+
       '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(ev.titre)+'</div>'+
-      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+evtPlageFr(ev)+'</div></div>'+(cl?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
+      '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(evtPlageFr(ev))+'</div></div>'+(cl?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
   });
   if(upcoming){
     var typeLabels={match:"Prochain match",entrainement:"Prochain entraînement",tournoi:"Prochain tournoi"};
@@ -594,7 +594,7 @@ function buildDashboard(){
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+upcomingLabel+'</div>'+
         '<div style="font-size:13px;font-weight:700;color:var(--txt)">'+authEsc(upcoming.titre)+'</div>'+
-        '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+upDateFr+(upcoming.heure?" · "+upcoming.heure:"")+'</div></div>'+(upCliq?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
+        '<div style="font-size:11px;color:var(--mut);margin-top:2px">'+authEsc(upDateFr)+(authEsc(upcoming.heure?" · "+upcoming.heure:""))+'</div></div>'+(upCliq?'<div style="font-size:18px;color:var(--mut)">›</div>':'')+'</div>';
   }
 
   html+=buildAssiduiteChartCard();
@@ -604,7 +604,7 @@ function buildDashboard(){
     var noms=homonymes.map(function(g){return g[0].prenom+" "+g[0].nom+" ("+g.length+")";}).join(", ");
     html='<div onclick="showLicenciesList()" style="cursor:pointer;margin-bottom:10px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
       '<div style="font-size:11.5px;font-weight:700;color:#E8670A">⚠️ '+homonymes.length+' homonyme'+(homonymes.length>1?"s":"")+' détecté'+(homonymes.length>1?"s":"")+' dans les licenciés</div>'+
-      '<div style="font-size:10.5px;color:var(--mut);margin-top:3px">'+noms+' — vérifiez que les rattachements (photo, téléphone, accès parent) correspondent à la bonne personne.</div></div>'+html;
+      '<div style="font-size:10.5px;color:var(--mut);margin-top:3px">'+authEsc(noms)+' — vérifiez que les rattachements (photo, téléphone, accès parent) correspondent à la bonne personne.</div></div>'+html;
   }
 
   el.innerHTML=html;

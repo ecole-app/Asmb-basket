@@ -142,10 +142,10 @@ function evtBoutonCarte(e){
   var h="";
   if(EVT_TYPES_INSCR.indexOf(e.type)>=0){
     var on=e.inscr&&e.inscr.actif;
-    h+="<button onclick=\"evtTableau('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?(evtResa(e)?"Réservations":"Inscriptions"):(evtResa(e)?"Ouvrir les réservations":"Ouvrir les inscriptions"))+"</button>";
+    h+="<button onclick=\"evtTableau('"+gmJs(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:"+(on?"var(--dkg)":"color-mix(in srgb, var(--dkg) 10%, transparent)")+";color:"+(on?"#fff":"var(--dkg)")+";font-size:10px;font-weight:700;border:none;cursor:pointer\">"+(on?(evtResa(e)?"Réservations":"Inscriptions"):(evtResa(e)?"Ouvrir les réservations":"Ouvrir les inscriptions"))+"</button>";
   }
   if(EVT_TYPES_AFFICHE.indexOf(e.type)<0) return h;
-  return h+(typeof evtAffiche==="function"?"<button onclick=\"evtAffiche('"+authEsc(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 10%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">🖼️ Affiche</button>":"");
+  return h+(typeof evtAffiche==="function"?"<button onclick=\"evtAffiche('"+gmJs(e.id)+"')\" style=\"margin-top:8px;margin-right:6px;padding:6px 12px;border-radius:20px;background:color-mix(in srgb, var(--dkg) 10%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer\">🖼️ Affiche</button>":"");
 }
 
 // ── Réglages des inscriptions (staff) ───────────────────────────────
@@ -366,7 +366,7 @@ function evtTableau(eid){
           (e.inscr.actif?(places?" · "+authEsc(evtPlacesTxt(places,page.nb)):""):' · <b style="color:var(--red)">Inscriptions fermées</b>')+'</div>'+
         (jTxt?'<div style="font-size:12px;color:var(--txt2);font-weight:700;margin-bottom:4px">'+authEsc(jTxt)+'</div>':'')+
         ((places&&e.inscr.actif&&places-(page.nb||0)<=5&&typeof afAlerteTxt==="function")?
-          '<button onclick="document.querySelectorAll(\'.gm-sheet\').forEach(function(m){m.remove();});evtAffiche(\''+authEsc(eid)+'\')" style="margin-top:8px;width:100%;text-align:left;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer">'+authEsc(afAlerteTxt(Math.max(0,places-(page.nb||0))))+' : republier l\'affiche à jour →</button>':'');
+          '<button onclick="document.querySelectorAll(\'.gm-sheet\').forEach(function(m){m.remove();});evtAffiche(\''+gmJs(eid)+'\')" style="margin-top:8px;width:100%;text-align:left;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer">'+authEsc(afAlerteTxt(Math.max(0,places-(page.nb||0))))+' : republier l\'affiche à jour →</button>':'');
       var vue=items;
       if(parJ){
         var ch=document.createElement("div"); ch.style.cssText="display:flex;gap:6px;overflow-x:auto;margin:10px 0 2px;padding-bottom:4px";
@@ -668,7 +668,7 @@ function evtBilletDepuisLien(code,pid){
 }
 function evtBoutonsBillet(b,p,pid){
   EVT_BILLETS_VUS[b.code]={b:b,p:p,pid:pid};
-  function bt(act,txt,fond,coul){ return '<button data-act="'+act+'" style="flex:1;padding:11px 6px;border-radius:var(--rx);border:none;cursor:pointer;font-size:13px;font-weight:800;background:'+fond+';color:'+coul+'">'+txt+'</button>'; }
+  function bt(act,txt,fond,coul){ return '<button data-act="'+authEsc(act)+'" style="flex:1;padding:11px 6px;border-radius:var(--rx);border:none;cursor:pointer;font-size:13px;font-weight:800;background:'+authEsc(fond)+';color:'+authEsc(coul)+'">'+authEsc(txt)+'</button>'; }
   return '<div class="evt-garder" data-code="'+authEsc(b.code)+'" style="margin:-4px 0 14px">'+
     '<div style="display:flex;gap:8px">'+
       bt("img","📥 Enregistrer l'image","var(--dkg)","#fff")+
@@ -910,7 +910,7 @@ function rendreEvtPublic(el,p,pid){
       '<div class="form-group"><label class="form-label" for="evt-prenom">Prénom du participant</label><input class="form-input" id="evt-prenom" maxlength="40" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-nom">Nom</label><input class="form-input" id="evt-nom" maxlength="60" autocomplete="off"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-naiss">Date de naissance</label><input class="form-input" id="evt-naiss" type="date"></div>'+
-      '<div id="evt-club-g"><div class="form-group"><label class="form-label" for="evt-cat">Catégorie</label><select class="form-select" id="evt-cat">'+EVT_CATS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("")+'</select><div style="font-size:11px;color:var(--mut);margin-top:4px">Calculée d\'après la date de naissance, modifiable.</div></div>'+
+      '<div id="evt-club-g"><div class="form-group"><label class="form-label" for="evt-cat">Catégorie</label><select class="form-select" id="evt-cat">'+EVT_CATS.map(function(c){ return '<option value="'+authEsc(c)+'">'+authEsc(c)+'</option>'; }).join("")+'</select><div style="font-size:11px;color:var(--mut);margin-top:4px">Calculée d\'après la date de naissance, modifiable.</div></div>'+
         '<div class="form-group"><label class="form-label" for="evt-club">Club actuel (facultatif)</label><input class="form-input" id="evt-club" maxlength="60" autocomplete="off"></div></div>'+
       '<div class="form-group"><label class="form-label" for="evt-tel">Téléphone (parent si mineur)</label><input class="form-input" id="evt-tel" type="tel" maxlength="20" autocomplete="tel" placeholder="0612345678"></div>'+
       '<div class="form-group"><label class="form-label" for="evt-email">E-mail (facultatif)</label><input class="form-input" id="evt-email" type="email" inputmode="email" autocapitalize="off" maxlength="100" autocomplete="email" placeholder="mail@gmail.com"></div>'+
@@ -1009,7 +1009,7 @@ function rendreEvtPublic(el,p,pid){
 }
 function evtConfirmation(el,p,pid,b){
   var pay=b.mode==="helloasso"&&p.helloasso
-    ?'<a href="'+authEsc(p.helloasso)+'" target="_blank" rel="noopener" style="display:block;text-align:center;width:100%;box-sizing:border-box;padding:15px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:15px;font-weight:900;text-decoration:none;margin-bottom:10px">Payer '+authEsc(evtPrix(b.montant))+' sur HelloAsso</a>'
+    ?'<a href="'+authEsc(gmUrl(p.helloasso))+'" target="_blank" rel="noopener" style="display:block;text-align:center;width:100%;box-sizing:border-box;padding:15px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:15px;font-weight:900;text-decoration:none;margin-bottom:10px">Payer '+authEsc(evtPrix(b.montant))+' sur HelloAsso</a>'
     :(Number(b.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:10px">À régler sur place : '+authEsc(evtPrix(b.montant))+' ('+authEsc(EVT_MODES[b.mode]||"")+')</div>':'');
   el.innerHTML=evtEntete(p)+
     '<div style="padding:18px 16px 40px">'+
@@ -1081,7 +1081,7 @@ function evtReserverApp(e){
           var billet=Object.assign({code:r.code},data);
           evtGarderBillet(pageId,billet);
           s.body.innerHTML=evtBilletHtml(billet,Object.assign({},r.page))+evtBoutonsBillet(billet,Object.assign({},r.page),pageId)+
-            ((data.mode==="helloasso"&&ins.helloasso)?'<a href="'+authEsc(ins.helloasso)+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
+            ((data.mode==="helloasso"&&ins.helloasso)?'<a href="'+authEsc(gmUrl(ins.helloasso))+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
               (Number(data.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center">À régler sur place : '+authEsc(evtPrix(data.montant))+'</div>':''));
           evtDessinerQr(s.body,pageId);
         }).catch(function(err){
@@ -1193,7 +1193,7 @@ function evtInscrireEnfant(e){
       var billet=Object.assign({code:r.code},data);
       evtGarderBillet(pageId,billet);
       s.body.innerHTML=evtBilletHtml(billet,Object.assign({},r.page))+evtBoutonsBillet(billet,Object.assign({},r.page),pageId)+
-        ((mode==="helloasso"&&e.inscr.helloasso)?'<a href="'+authEsc(e.inscr.helloasso)+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
+        ((mode==="helloasso"&&e.inscr.helloasso)?'<a href="'+authEsc(gmUrl(e.inscr.helloasso))+'" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:var(--rx);background:#49D38A;color:#0b1630;font-size:14px;font-weight:900;text-decoration:none">Payer '+authEsc(evtPrix(data.montant))+' sur HelloAsso</a>':
           (Number(data.montant)>0?'<div style="font-size:13px;color:var(--txt2);text-align:center">À régler sur place : '+authEsc(evtPrix(data.montant))+'</div>':''));
       evtDessinerQr(s.body,pageId);
     }).catch(function(err){

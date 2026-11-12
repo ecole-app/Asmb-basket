@@ -421,7 +421,7 @@ function buildLicences(){
    var archivedCount=allLics.filter(function(l){return l.saison && l.saison<season;}).length;
    if(archivedCount>0){
      archBox.style.display="block";
-     archBox.innerHTML='<button onclick="licShowArchived=!licShowArchived;buildLicences();" style="width:100%;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer;margin:0 12px 10px;width:calc(100% - 24px)">'+(licShowArchived?"← Retour à la saison "+season:"Voir les saisons précédentes ("+archivedCount+")")+'</button>';
+     archBox.innerHTML='<button onclick="licShowArchived=!licShowArchived;buildLicences();" style="width:100%;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:11px;font-weight:700;border:none;cursor:pointer;margin:0 12px 10px;width:calc(100% - 24px)">'+(authEsc(licShowArchived?"← Retour à la saison "+season:"Voir les saisons précédentes ("+archivedCount+")"))+'</button>';
    } else { archBox.style.display="none"; archBox.innerHTML=""; }
  }
 
@@ -442,7 +442,7 @@ function buildLicences(){
       chtml+='<div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Validées vs en attente</div><div class="lic-cnt-grid">';
       catKeys.forEach(function(cat){
         var c=byCat[cat];
-        chtml+='<div class="lic-cnt-cat"><div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+cat+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div><div style="font-size:10px;color:var(--mut);padding:0 0 4px">'+effectifTexte(c)+'</div></div>';
+        chtml+='<div class="lic-cnt-cat"><div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px"><span style="color:var(--txt);font-weight:600">'+authEsc(cat)+'</span><span><span style="color:var(--ltg);font-weight:700">'+c.valid+' validée'+(c.valid>1?"s":"")+'</span> <span style="color:var(--mut)">· </span><span style="color:#E8670A;font-weight:700">'+c.pending+' en attente</span></span></div><div style="font-size:10px;color:var(--mut);padding:0 0 4px">'+authEsc(effectifTexte(c))+'</div></div>';
       });
       chtml+='</div></div>';
       counterEl.innerHTML=chtml;
@@ -499,14 +499,14 @@ function buildLicences(){
     var impayeBadge=lic.suspendue?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">⛔ Suspendue</span>'
       :statutPaie==="impaye"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:var(--red)">Impayé</span>'
       :statutPaie==="partiel"?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#E8670A">Partiel</span>':"";
-    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+st.color+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+(lic.saison&&lic.saison>season?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#1A2E5A">Saison '+authEsc(lic.saison)+'</span>':'')+(lic.reinscriptionEnLigne?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 15%, transparent)">Réinscription en ligne</span>':'')+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
+    div.innerHTML='<div style="padding:13px 14px;display:flex;align-items:center;gap:12px">'+photoHtml+'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">'+nom+'</div><div style="font-size:11px;color:var(--mut);margin-bottom:4px">Code : <b>'+authEsc(lic.code)+'</b>'+(lic.email?' · '+authEsc(lic.email):'')+'</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:'+authEsc(st.color)+'">'+st.icon+' '+authEsc(st.label)+'</span>'+catBadge+(lic.ouvertLe?'<span style="font-size:9px;color:var(--mut)">Ouvert le '+authEsc(lic.ouvertLe)+'</span>':'')+relanceBadge+impayeBadge+(lic.saison&&lic.saison>season?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;background:#1A2E5A">Saison '+authEsc(lic.saison)+'</span>':'')+(lic.reinscriptionEnLigne?'<span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px;color:var(--dkg);background:color-mix(in srgb, var(--ltg) 15%, transparent)">Réinscription en ligne</span>':'')+'</div></div><div style="color:var(--mut);font-size:16px">›</div></div>';
     el.appendChild(div);
   });
 }
 
 // Version ordinateur : fiches en tableau ; clic sur la ligne = ouvrir la fiche.
 function licencesTableau(el,lics,season){
-  function pastille(txt,fond,coul){ return '<span class="gm-pill" style="background:'+fond+';color:'+(coul||"#fff")+'">'+txt+'</span>'; }
+  function pastille(txt,fond,coul){ return '<span class="gm-pill" style="background:'+authEsc(fond)+';color:'+(authEsc(coul||"#fff"))+'">'+txt+'</span>'; }
   var h='<div class="gm-tw"><table class="gm-table"><thead><tr><th>Licencié</th><th>Code</th><th>Email</th><th>Catégorie</th><th>Statut</th><th>Paiement</th><th>Suivi</th></tr></thead><tbody>';
   lics.forEach(function(lic){
     var st=STATUTS.find(function(s){return s.id===lic.statut;})||STATUTS[0];
@@ -621,7 +621,7 @@ function renderLicenceDetail(lic){
   // Catégorie selector
   var catSel=CATS_LIC.map(function(c){
     var sel=lic.categorie===c;
-    return '<button onclick="setLicCat(\''+c+'\')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid '+(sel?CAT_COLS_LIC[c]:"var(--bdr)")+';background:'+(sel?CAT_COLS_LIC[c]:"var(--card)")+';color:'+(sel?"#fff":"var(--mut)")+';cursor:pointer;transition:all .2s">'+c+'</button>';
+    return '<button onclick="setLicCat(\''+gmJs(c)+'\')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid '+(sel?CAT_COLS_LIC[c]:"var(--bdr)")+';background:'+(sel?CAT_COLS_LIC[c]:"var(--card)")+';color:'+(sel?"#fff":"var(--mut)")+';cursor:pointer;transition:all .2s">'+authEsc(c)+'</button>';
  }).join("");
 
  // Fiche data
@@ -653,9 +653,9 @@ function renderLicenceDetail(lic){
     // compte (inscription_codes) — n'importe qui avec le lien du club peut
     // soumettre ces champs, y compris photo/certificat en attribut src/href.
     if(f.photo)ficheHtml+='<div style="text-align:center;padding:16px;border-bottom:1px solid var(--bdr)"><img src="'+authEsc(f.photo)+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover"></div>';
-    if(f.certificat){var isImg=f.certificat.startsWith("data:image");ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px"><span style="font-size:16px"></span><div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--mut)">Certificat medical</div><div style="font-size:11px;color:var(--ltg)">✓ Fichier joint</div></div>'+(isImg?'<a href="'+authEsc(f.certificat)+'" target="_blank" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:10px;font-weight:600;text-decoration:none">Voir</a>':'')+'</div>';}
+    if(f.certificat){var isImg=/^data:image\/(png|jpe?g|gif|webp|heic|heif)/i.test(String(f.certificat));ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px"><span style="font-size:16px"></span><div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--mut)">Certificat medical</div><div style="font-size:11px;color:var(--ltg)">✓ Fichier joint</div></div>'+(isImg?'<a href="'+authEsc(gmUrl(f.certificat))+'" target="_blank" rel="noopener" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:10px;font-weight:600;text-decoration:none">Voir</a>':'')+'</div>';}
     rows.forEach(function(r){
-      ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--mut);width:120px;flex-shrink:0">'+r[0]+'</span><span style="font-size:12px;color:var(--txt)">'+authEsc(String(r[1]))+'</span></div>';
+      ficheHtml+='<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;gap:10px"><span style="font-size:11px;font-weight:600;color:var(--mut);width:120px;flex-shrink:0">'+authEsc(r[0])+'</span><span style="font-size:12px;color:var(--txt)">'+authEsc(String(r[1]))+'</span></div>';
     });
     ficheHtml+='</div>';
   }
@@ -674,16 +674,16 @@ function renderLicenceDetail(lic){
         '<div style="font-size:12px;color:var(--txt2);margin-top:4px">'+authEsc(p.moyen)+' · '+(p.montant||0).toFixed(2)+' €'+(lic.cheques&&lic.cheques.length?'':' · '+(p.date?new Date(p.date).toLocaleDateString("fr-FR"):""))+'</div>'+
         (typeof chqHtmlLicence==="function"?chqHtmlLicence(lic):"")+
         '<div style="display:flex;gap:8px;margin-top:10px">'+
-          '<button onclick="printFactureLicence(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Imprimer</button>'+
-          '<button onclick="sendFactureLicenceMail(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Envoyer</button>'+
-          '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:transparent;border:1px solid var(--bdr);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer">Modifier</button>'+
+          '<button onclick="printFactureLicence(\''+gmJs(lic.code)+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Imprimer</button>'+
+          '<button onclick="sendFactureLicenceMail(\''+gmJs(lic.code)+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">Envoyer</button>'+
+          '<button onclick="openPaiementLicenceModal(\''+gmJs(lic.code)+'\')" style="flex:1;padding:9px;border-radius:var(--rx);background:transparent;border:1px solid var(--bdr);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer">Modifier</button>'+
         '</div></div>';
     } else {
       var lienPaieLic=(typeof clubLienPaiement==="function")?clubLienPaiement():null;
       paiementHtml='<div style="margin-top:12px;background:rgba(232,103,10,.08);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:14px">'+
         '<div style="font-size:13px;font-weight:800;color:#E8670A">⏳ Paiement non enregistré</div>'+
         (lienPaieLic?'<div style="font-size:11px;color:var(--mut);margin-top:4px">La famille voit un bouton « Payer ma licence » sur son espace, pointant vers votre lien de paiement en ligne.</div>':'')+
-        '<button onclick="openPaiementLicenceModal(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
+        '<button onclick="openPaiementLicenceModal(\''+gmJs(lic.code)+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:#E8670A;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Enregistrer un paiement</button>'+
         '</div>';
     }
     if(typeof aidesBlockHtml==="function"&&licEstJoueur(lic)) paiementHtml+=aidesBlockHtml(lic);
@@ -694,7 +694,7 @@ function renderLicenceDetail(lic){
   var actions="";
   var curSeason=getCurrentSeason();
   if(lic.saison && lic.saison<curSeason){
-    actions+='<button onclick="renewLicence(\''+lic.code+'\')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Renouveler pour la saison '+curSeason+'</button>';
+    actions+='<button onclick="renewLicence(\''+gmJs(lic.code)+'\')" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Renouveler pour la saison '+authEsc(curSeason)+'</button>';
     actions+='<div style="font-size:11px;color:var(--mut);text-align:center;margin-top:4px">Recopie la fiche existante (identité, contacts...) sans tout ressaisir.</div>';
   }
   if(lic.statut==="recue"){
@@ -705,11 +705,11 @@ function renderLicenceDetail(lic){
   }
   if(lic.fiche){
     actions+='<button onclick="showEditFiche()" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(26,46,90,.12);color:#1A2E5A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Modifier la fiche (dirigeant)</button>';
-    actions+='<button onclick="addLicenceAsBenevole(\''+lic.code+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
+    actions+='<button onclick="addLicenceAsBenevole(\''+gmJs(lic.code)+'\')" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(232,103,10,.1);color:#E8670A;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">Ajouter comme bénévole</button>';
   }
   if(lic.statut==="validee"){
     if(lic.accesEnvoyeLe) actions+='<div style="font-size:11px;color:var(--grn);font-weight:700;text-align:center;margin-top:10px">✓ Accès famille envoyé le '+new Date(lic.accesEnvoyeLe).toLocaleDateString("fr-FR")+'</div>';
-    actions+='<button onclick="proposerAccesFamille(getLicences().find(function(l){return l.code===\''+lic.code+'\';}),true)" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">'+(lic.accesEnvoyeLe?"Renvoyer l'accès à la famille":"Envoyer l'accès à la famille")+'</button>';
+    actions+='<button onclick="proposerAccesFamille(getLicences().find(function(l){return l.code===\''+gmJs(lic.code)+'\';}),true)" style="width:100%;padding:11px;border-radius:var(--rx);background:rgba(39,142,84,.12);color:var(--grn);font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px">'+(lic.accesEnvoyeLe?"Renvoyer l'accès à la famille":"Envoyer l'accès à la famille")+'</button>';
   }
 
   el.innerHTML=
@@ -720,7 +720,7 @@ function renderLicenceDetail(lic){
       '<div style="display:flex;align-items:center;gap:10px">'+
         '<div style="font-size:18px;font-weight:900;color:var(--txt);font-family:monospace;letter-spacing:2px">'+authEsc(lic.code)+'</div>'+
         (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"var(--ltg)")+'">'+( lic.typeLicence==="competition"?" Compétition":" Loisir")+'</div>':'')+
-        '<button onclick="copyCode(\''+lic.code+'\')" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:600;border:none;cursor:pointer">Copier</button>'+
+        '<button onclick="copyCode(\''+gmJs(lic.code)+'\')" style="padding:6px 12px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:11px;font-weight:600;border:none;cursor:pointer">Copier</button>'+
       '</div>'+
       (lic.email?'<div style="font-size:11px;color:var(--mut);margin-top:4px">'+authEsc(lic.email)+'</div>':'')+
       (lic.ouvertLe?'<div style="font-size:11px;color:#E8670A;margin-top:4px">Ouvert le '+authEsc(lic.ouvertLe)+'</div>':'')+
@@ -744,7 +744,7 @@ function openPaiementLicenceModal(code){
   var moyens=["Espèces","Chèque","Virement","CB"];
   var moyenBtns=moyens.map(function(m){
     var sel=(p.moyen||"Espèces")===m;
-    return '<button type="button" class="pl-moyen-btn" data-moyen="'+m+'" style="flex:1;padding:10px 6px;border-radius:var(--rx);border:2px solid '+(sel?"var(--grn)":"var(--bdr)")+';background:'+(sel?"color-mix(in srgb, var(--ltg) 10%, transparent)":"var(--card)")+';color:'+(sel?"var(--dkg)":"var(--mut)")+';font-size:11px;font-weight:700;cursor:pointer">'+m+'</button>';
+    return '<button type="button" class="pl-moyen-btn" data-moyen="'+authEsc(m)+'" style="flex:1;padding:10px 6px;border-radius:var(--rx);border:2px solid '+(sel?"var(--grn)":"var(--bdr)")+';background:'+(sel?"color-mix(in srgb, var(--ltg) 10%, transparent)":"var(--card)")+';color:'+(sel?"var(--dkg)":"var(--mut)")+';font-size:11px;font-weight:700;cursor:pointer">'+authEsc(m)+'</button>';
   }).join("");
   inner.innerHTML=
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
@@ -755,7 +755,7 @@ function openPaiementLicenceModal(code){
     '<div class="form-group"><label class="form-label">Moyen de paiement</label><div id="pl-moyen-row" style="display:flex;gap:6px;flex-wrap:wrap">'+moyenBtns+'</div></div>'+
     '<div id="pl-simple">'+
     '<div class="form-group"><label class="form-label">Montant (€)</label><input class="form-input" id="pl-montant" type="number" step="0.01" value="'+(p.montant!=null?p.montant:"")+'" placeholder="0.00"></div>'+
-    '<div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" id="pl-date" type="date" value="'+(p.date||new Date().toISOString().slice(0,10))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Date du paiement</label><input class="form-input" id="pl-date" type="date" value="'+(authEsc(p.date||new Date().toISOString().slice(0,10)))+'"></div>'+
     '<div class="form-group"><label class="form-label">Référence (optionnel)</label><input class="form-input" id="pl-reference" value="'+authEsc(p.reference||"")+'" placeholder="N° de virement, etc."></div>'+
     '</div><div id="pl-cheques"></div>'+
     ((typeof aidesBlockHtml==="function"&&(typeof licEstJoueur!=="function"||licEstJoueur(lic)))?'<div id="pl-aides" data-code="'+authEsc(lic.code)+'" style="margin-bottom:12px">'+aidesBlockHtml(lic,"pl-")+'</div>':'')+
@@ -876,7 +876,7 @@ function renderImpayesBlock(lic){
     // Pas encore de suivi : proposer d'en démarrer un (optionnel, à la discrétion du dirigeant).
     return '<div style="margin-top:12px;border:1px dashed var(--bdr);border-radius:var(--rs);padding:12px">'+
       '<div style="font-size:11.5px;font-weight:700;color:var(--mut);margin-bottom:8px">Suivre un reste à payer pour cette licence ?</div>'+
-      '<div style="display:flex;gap:8px"><input class="form-input" id="lic-montant-attendu" type="number" step="0.01" placeholder="Montant attendu (€)" style="flex:1"><button onclick="enregistrerMontantAttendu(\''+lic.code+'\')" style="padding:0 16px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">OK</button></div>'+
+      '<div style="display:flex;gap:8px"><input class="form-input" id="lic-montant-attendu" type="number" step="0.01" placeholder="Montant attendu (€)" style="flex:1"><button onclick="enregistrerMontantAttendu(\''+gmJs(lic.code)+'\')" style="padding:0 16px;border-radius:var(--rx);background:var(--bdr);color:var(--txt);font-size:12px;font-weight:700;border:none;cursor:pointer">OK</button></div>'+
       '</div>';
   }
   var html="";
@@ -884,7 +884,7 @@ function renderImpayesBlock(lic){
     html+='<div style="margin-top:12px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);border-radius:var(--rs);padding:14px">'+
       '<div style="font-size:13px;font-weight:800;color:var(--red)">⛔ Licence suspendue</div>'+
       '<div style="font-size:11.5px;color:var(--mut);margin-top:4px">Convocations et accès de l\'espace licencié coupés jusqu\'à régularisation.</div>'+
-      '<button onclick="setLicenceSuspendue(\''+lic.code+'\',false)" style="width:100%;padding:10px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Réactiver la licence</button>'+
+      '<button onclick="setLicenceSuspendue(\''+gmJs(lic.code)+'\',false)" style="width:100%;padding:10px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px">Réactiver la licence</button>'+
       '</div>';
   }
   if(statut&&statut!=="paye"){
@@ -898,8 +898,8 @@ function renderImpayesBlock(lic){
         '<div style="font-size:15px;font-weight:800;color:var(--red)">'+du.toFixed(2)+' € dus</div>'+
       '</div>'+
       (histo?'<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.5">'+histo+'</div>':'<div style="font-size:11px;color:var(--mut);margin-top:8px">Jamais relancé</div>')+
-      '<button onclick="openRelanceModal(\''+lic.code+'\')" '+(peut?"":"disabled")+' style="width:100%;padding:11px;border-radius:var(--rx);background:'+(peut?"#E8670A":"var(--bdr)")+';color:'+(peut?"#fff":"var(--mut)")+';font-size:12px;font-weight:700;border:none;cursor:'+(peut?"pointer":"default")+';margin-top:10px">'+(peut?"Relancer":"Relancé récemment (attendre 3 j)")+'</button>'+
-      (licenceEligibleSuspension(lic)?'<button onclick="setLicenceSuspendue(\''+lic.code+'\',true)" style="width:100%;padding:10px;border-radius:var(--rx);background:transparent;border:1px solid var(--red);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">Suspendre la licence ('+nb+' relances sans paiement)</button>':'')+
+      '<button onclick="openRelanceModal(\''+gmJs(lic.code)+'\')" '+(peut?"":"disabled")+' style="width:100%;padding:11px;border-radius:var(--rx);background:'+(peut?"#E8670A":"var(--bdr)")+';color:'+(peut?"#fff":"var(--mut)")+';font-size:12px;font-weight:700;border:none;cursor:'+(peut?"pointer":"default")+';margin-top:10px">'+(peut?"Relancer":"Relancé récemment (attendre 3 j)")+'</button>'+
+      (licenceEligibleSuspension(lic)?'<button onclick="setLicenceSuspendue(\''+gmJs(lic.code)+'\',true)" style="width:100%;padding:10px;border-radius:var(--rx);background:transparent;border:1px solid var(--red);color:var(--red);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">Suspendre la licence ('+nb+' relances sans paiement)</button>':'')+
       '</div>';
   }
   return html;
@@ -930,7 +930,7 @@ function openRelanceModal(code){
       '<button type="button" id="rl-canal-sms" style="flex:1;padding:9px;border-radius:var(--rx);border:2px solid var(--grn);background:color-mix(in srgb, var(--ltg) 10%, transparent);color:var(--dkg);font-size:12px;font-weight:700;cursor:pointer">SMS</button>'+
       '<button type="button" id="rl-canal-email" style="flex:1;padding:9px;border-radius:var(--rx);border:2px solid var(--bdr);background:var(--card);color:var(--mut);font-size:12px;font-weight:700;cursor:pointer">Email</button>'+
     '</div>'+
-    '<textarea id="rl-message" class="form-input" style="width:100%;min-height:120px;font-size:12.5px;line-height:1.5">'+message("sms")+'</textarea>'+
+    '<textarea id="rl-message" class="form-input" style="width:100%;min-height:120px;font-size:12.5px;line-height:1.5">'+authEsc(message("sms"))+'</textarea>'+
     '<button id="rl-send" style="width:100%;padding:13px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:12px">Envoyer la relance</button>'+
     '<div style="font-size:10.5px;color:var(--mut);text-align:center;margin-top:8px">Ouvre votre app SMS/mail avec le message prêt à envoyer, puis marque la relance comme faite.</div>';
   modal.appendChild(inner);
@@ -990,7 +990,7 @@ function generateFactureHtml(lic){
   var p=lic.paiement||{};
   var f=lic.fiche||{};
   var nom=((f.prenom||"")+" "+(f.nom||"")).trim();
-  return '<h1>Reçu de paiement — '+clubLabel()+'</h1>'+
+  return '<h1>Reçu de paiement — '+authEsc(clubLabel())+'</h1>'+
     '<div class="row"><span>Licencié(e)</span><b>'+authEsc(nom)+'</b></div>'+
     '<div class="row"><span>Code licence</span><b>'+authEsc(lic.code)+'</b></div>'+
     '<div class="row"><span>Catégorie</span><b>'+authEsc(lic.categorie||"-")+'</b></div>'+
@@ -1152,12 +1152,12 @@ function showEditFiche(){
   var f=lic.fiche;
   var el=document.getElementById("edit-fiche-form");
   el.innerHTML=
-    '<div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="ef-prenom" value="'+(f.prenom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ef-nom" value="'+(f.nom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="ef-naissance" type="date" value="'+(f.naissance||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2" autocomplete="off" oninput="adrChercher(this)">'+(f.adresse||"")+'</textarea></div>'+
-    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ef-telephone" value="'+(f.telephone||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ef-emailLic" value="'+(f.emailLic||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="ef-prenom" value="'+(authEsc(f.prenom||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ef-nom" value="'+(authEsc(f.nom||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="ef-naissance" type="date" value="'+(authEsc(f.naissance||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Adresse</label><textarea class="form-input" id="ef-adresse" rows="2" autocomplete="off" oninput="adrChercher(this)">'+(authEsc(f.adresse||""))+'</textarea></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="ef-telephone" value="'+(authEsc(f.telephone||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="ef-emailLic" value="'+(authEsc(f.emailLic||""))+'"></div>'+
     '<div class="form-group" style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px">'+
       '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'+
         '<input type="checkbox" id="ef-photoAutorisee" '+(f.photoAutorisee?"checked":"")+' style="width:18px;height:18px;margin-top:1px;accent-color:var(--dkg);flex-shrink:0">'+
@@ -1165,13 +1165,13 @@ function showEditFiche(){
       '</label>'+
     '</div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable légal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(f.respNom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable légal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(f.respTel||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Responsable légal 1 - Email</label><input class="form-input" id="ef-respEmail" value="'+(f.respEmail||"")+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Nom</label><input class="form-input" id="ef-respNom" value="'+(authEsc(f.respNom||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Téléphone</label><input class="form-input" id="ef-respTel" value="'+(authEsc(f.respTel||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Responsable légal 1 - Email</label><input class="form-input" id="ef-respEmail" value="'+(authEsc(f.respEmail||""))+'"></div>'+
     '<div style="background:var(--bdr);height:1px;margin:14px 0"></div>'+
-    '<div class="form-group"><label class="form-label">Contact urgence - Nom</label><input class="form-input" id="ef-urgenceNom" value="'+(f.urgenceNom||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Contact urgence - Téléphone</label><input class="form-input" id="ef-urgenceTel" value="'+(f.urgenceTel||"")+'"></div>'+
-    '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="ef-notes" rows="3">'+(f.notes||"")+'</textarea></div>';
+    '<div class="form-group"><label class="form-label">Contact urgence - Nom</label><input class="form-input" id="ef-urgenceNom" value="'+(authEsc(f.urgenceNom||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Contact urgence - Téléphone</label><input class="form-input" id="ef-urgenceTel" value="'+(authEsc(f.urgenceTel||""))+'"></div>'+
+    '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="ef-notes" rows="3">'+(authEsc(f.notes||""))+'</textarea></div>';
   document.getElementById("modal-edit-fiche").style.display="flex";
 }
 
@@ -1298,7 +1298,7 @@ function renderLicenceChoice(lic){
   var el=document.getElementById("insc-public-content");if(!el)return;
   var backBtn=document.createElement("div");
   backBtn.style.cssText="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px";
-  backBtn.innerHTML='<button onclick="buildInscriptionPublic()" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button><div><div style="font-size:14px;font-weight:800;color:var(--txt)">Choix de licence</div><div style="font-size:10px;color:var(--mut)">'+lic.code+'</div></div>';
+  backBtn.innerHTML='<button onclick="buildInscriptionPublic()" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button><div><div style="font-size:14px;font-weight:800;color:var(--txt)">Choix de licence</div><div style="font-size:10px;color:var(--mut)">'+authEsc(lic.code)+'</div></div>';
   el.innerHTML="";
   el.appendChild(backBtn);
 
@@ -1372,13 +1372,13 @@ function renderFicheForm(lic){
   el.innerHTML=
     '<div style="padding:16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px">'+
       '<button onclick="renderLicenceChoice(getLicences().find(function(l){return l.code===licCurrentCode;})||{code:licCurrentCode})" style="width:30px;height:30px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">←</button>'+
-      '<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--txt)">Ma fiche</div><div style="font-size:10px;color:var(--mut)">'+lic.code+'</div></div>'+
+      '<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--txt)">Ma fiche</div><div style="font-size:10px;color:var(--mut)">'+authEsc(lic.code)+'</div></div>'+
       (lic.typeLicence?'<div style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;background:'+(lic.typeLicence==="competition"?"#C0392B":"var(--ltg)")+'">'+( lic.typeLicence==="competition"?"Compétition":"Loisir")+'</div>':'')+
     '</div>'+
     '<div style="padding:16px;padding-bottom:80px">'+
       // Photo
       '<div style="text-align:center;margin-bottom:20px">'+
-        '<div id="photo-preview" style="width:90px;height:90px;border-radius:50%;background:var(--bdr);margin:0 auto 10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px">'+(f.photo?'<img src="'+f.photo+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div>'+
+        '<div id="photo-preview" style="width:90px;height:90px;border-radius:50%;background:var(--bdr);margin:0 auto 10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px">'+(f.photo?'<img src="'+authEsc(f.photo)+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div>'+
         '<button onclick="document.getElementById(\'photo-input\').click()" style="padding:8px 18px;border-radius:20px;background:var(--dkg);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer"> Ajouter une photo</button>'+
         '<input type="file" id="photo-input" accept="image/*" capture="user" style="display:none" onchange="handlePhoto(this)">'+
         '<label style="display:flex;align-items:flex-start;gap:8px;text-align:left;margin-top:14px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);cursor:pointer">'+
@@ -1393,9 +1393,9 @@ function renderFicheForm(lic){
           '<button id="btn-F" onclick="selectGenre(\'F\')" style="flex:1;padding:11px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.genre==="F"?"var(--dkg)":"var(--bdr)")+';background:'+(f.genre==="F"?"var(--dkg)":"var(--bg)")+';color:'+(f.genre==="F"?"#fff":"var(--mut)")+';cursor:pointer">Féminin</button>'+
         '</div>'+
       '</div>'+
-      '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(f.prenom||'')+'" placeholder="Prénom"></div>'+
-      '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(f.nom||'')+'" placeholder="Nom de famille"></div>'+
-      '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(f.naissance||'')+'" oninput="if(typeof aidesMaj===\'function\')aidesMaj()" onchange="if(typeof aidesMaj===\'function\')aidesMaj()"></div>'+
+      '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="f-prenom" value="'+(authEsc(f.prenom||''))+'" placeholder="Prénom"></div>'+
+      '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="f-nom" value="'+(authEsc(f.nom||''))+'" placeholder="Nom de famille"></div>'+
+      '<div class="form-group"><label class="form-label">Date de naissance *</label><input class="form-input" id="f-naissance" type="date" value="'+(authEsc(f.naissance||''))+'" oninput="if(typeof aidesMaj===\'function\')aidesMaj()" onchange="if(typeof aidesMaj===\'function\')aidesMaj()"></div>'+
       '<div class="form-group"><label class="form-label">Né(e) à l\'étranger ?</label>'+
         '<div style="display:flex;gap:10px">'+
           '<button type="button" id="btn-etr-non" onclick="selectEtranger(false)" style="flex:1;padding:10px;border-radius:var(--rx);font-size:13px;font-weight:700;border:2px solid '+(f.neEtranger?"var(--bdr)":"var(--dkg)")+';background:'+(f.neEtranger?"var(--bg)":"var(--dkg)")+';color:'+(f.neEtranger?"var(--mut)":"#fff")+';cursor:pointer">Non</button>'+
@@ -1403,38 +1403,38 @@ function renderFicheForm(lic){
         '</div>'+
       '</div>'+
       '<div id="etranger-fields" style="'+(f.neEtranger?"":"display:none")+'">'+
-        '<div class="form-group"><label class="form-label">Ville de naissance</label><input class="form-input" id="f-villeNaiss" value="'+(f.villeNaiss||'')+'" placeholder="Ville"></div>'+
-        '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(f.paysNaiss||'')+'" placeholder="Pays"></div>'+
+        '<div class="form-group"><label class="form-label">Ville de naissance</label><input class="form-input" id="f-villeNaiss" value="'+(authEsc(f.villeNaiss||''))+'" placeholder="Ville"></div>'+
+        '<div class="form-group"><label class="form-label">Pays de naissance</label><input class="form-input" id="f-paysNaiss" value="'+(authEsc(f.paysNaiss||''))+'" placeholder="Pays"></div>'+
       '</div>'+
-      '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville" autocomplete="off" oninput="adrChercher(this)">'+(f.adresse||'')+'</textarea></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(f.telephone||'')+'" placeholder="0612345678"></div>'+
-      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(f.emailLic||lic.email||'')+'" placeholder="mail@gmail.com"></div>'+
+      '<div class="form-group"><label class="form-label">Adresse complète</label><textarea class="form-input" id="f-adresse" rows="2" placeholder="Adresse, code postal, ville" autocomplete="off" oninput="adrChercher(this)">'+(authEsc(f.adresse||''))+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-telephone" type="tel" value="'+(authEsc(f.telephone||''))+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-emailLic" type="email" value="'+(authEsc(f.emailLic||lic.email||''))+'" placeholder="mail@gmail.com"></div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Responsable légal</div>'+
-      '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(f.respNom||'')+'" placeholder="Prénom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-respLien" value="'+(f.respLien||'')+'" placeholder=""></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(f.respTel||'')+'" placeholder="0612345678"></div>'+
-      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(f.respEmail||'')+'" placeholder="mail@gmail.com"></div>'+
+      '<div class="form-group"><label class="form-label">Nom du responsable</label><input class="form-input" id="f-respNom" value="'+(authEsc(f.respNom||''))+'" placeholder="Prénom Nom"></div>'+
+      '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-respLien" value="'+(authEsc(f.respLien||''))+'" placeholder=""></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-respTel" type="tel" value="'+(authEsc(f.respTel||''))+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-respEmail" type="email" value="'+(authEsc(f.respEmail||''))+'" placeholder="mail@gmail.com"></div>'+
       '<div style="margin:4px 0 16px" id="resp2-toggle-wrap">'+
         (f.resp2Nom ?
           '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Responsable légal 2</div>'+
-          '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(f.resp2Nom||'')+'" placeholder="Prénom Nom"></div>'+
-          '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" value="'+(f.resp2Lien||'')+'" placeholder=""></div>'+
-          '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(f.resp2Tel||'')+'" placeholder="0612345678"></div>'+
-          '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(f.resp2Email||'')+'" placeholder="mail@gmail.com"></div>'+
+          '<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-resp2Nom" value="'+(authEsc(f.resp2Nom||''))+'" placeholder="Prénom Nom"></div>'+
+          '<div class="form-group"><label class="form-label">Lien de parenté</label><input class="form-input" id="f-resp2Lien" value="'+(authEsc(f.resp2Lien||''))+'" placeholder=""></div>'+
+          '<div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-resp2Tel" type="tel" value="'+(authEsc(f.resp2Tel||''))+'" placeholder="0612345678"></div>'+
+          '<div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-resp2Email" type="email" value="'+(authEsc(f.resp2Email||''))+'" placeholder="mail@gmail.com"></div>'+
           '<button type="button" onclick="removeResp2()" style="padding:6px 14px;border-radius:20px;background:rgba(192,57,43,.1);color:var(--red);font-size:11px;font-weight:600;border:none;cursor:pointer;margin-bottom:8px">✕ Supprimer le 2ème responsable</button>'
         :
           '<button type="button" onclick="addResp2()" style="padding:8px 16px;border-radius:20px;background:var(--bdr);color:var(--mut);font-size:12px;font-weight:600;border:1.5px dashed var(--bdr);cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-size:16px">+</span> Ajouter un 2ème responsable légal</button>'
         )+'</div>'+
       '<div style="background:var(--bdr);height:1px;margin:16px 0"></div>'+
       '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Contact en cas d\'urgence</div>'+
-      '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(f.urgenceNom||'')+'" placeholder="Prénom Nom"></div>'+
-      '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(f.urgenceTel||'')+'" placeholder="0612345678"></div>'+
-      '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="">'+(f.notes||'')+'</textarea></div>'+
+      '<div class="form-group"><label class="form-label">Nom du contact</label><input class="form-input" id="f-urgenceNom" value="'+(authEsc(f.urgenceNom||''))+'" placeholder="Prénom Nom"></div>'+
+      '<div class="form-group"><label class="form-label">Téléphone urgence</label><input class="form-input" id="f-urgenceTel" type="tel" value="'+(authEsc(f.urgenceTel||''))+'" placeholder="0612345678"></div>'+
+      '<div class="form-group"><label class="form-label">Notes / Informations médicales</label><textarea class="form-input" id="f-notes" rows="3" placeholder="">'+(authEsc(f.notes||''))+'</textarea></div>'+
       '<div class="form-group"><label class="form-label" for="f-paiementPrevu">Comment pensez-vous régler la licence ?</label>'+
         '<select class="form-input" id="f-paiementPrevu" onchange="var h=document.getElementById(\'f-ordre\');if(h)h.style.display=/^cheque/.test(this.value)?\'block\':\'none\'">'+
           '<option value="">Je verrai avec le club</option>'+
-          ['especes','cheque1','cheque2','cheque3','virement','cb','enligne'].map(function(k){ return '<option value="'+k+'"'+(f.paiementPrevu===k?' selected':'')+'>'+(typeof CHQ_PREVU!=="undefined"?CHQ_PREVU[k]:k)+'</option>'; }).join("")+
+          ['especes','cheque1','cheque2','cheque3','virement','cb','enligne'].map(function(k){ return '<option value="'+authEsc(k)+'"'+(f.paiementPrevu===k?' selected':'')+'>'+(authEsc(typeof CHQ_PREVU!=="undefined"?CHQ_PREVU[k]:k))+'</option>'; }).join("")+
         '</select>'+
         '<div id="f-ordre" style="display:'+(/^cheque/.test(f.paiementPrevu||'')?'block':'none')+';font-size:12px;color:var(--txt2);margin-top:6px">Chèques à l\'ordre de : <b>'+authEsc((window.CURRENT_CLUB&&window.CURRENT_CLUB.name)||"le club")+'</b>. Vous les remettez au club, qui les encaisse aux dates convenues.</div>'+
       '</div>'+
@@ -1461,11 +1461,11 @@ function renderFicheForm(lic){
       '</div>'+
       '<div class="form-group">'+
         '<label class="form-label">Date du certificat</label>'+
-        '<input class="form-input" id="f-certDate" type="date" value="'+(f.certDate||'')+'">'+
+        '<input class="form-input" id="f-certDate" type="date" value="'+(authEsc(f.certDate||''))+'">'+
       '</div>'+
       '<div class="form-group">'+
         '<label class="form-label">Médecin / Établissement</label>'+
-        '<input class="form-input" id="f-certMedecin" value="'+(f.certMedecin||'')+'" placeholder="">'+
+        '<input class="form-input" id="f-certMedecin" value="'+(authEsc(f.certMedecin||''))+'" placeholder="">'+
       '</div>'+
       '<button id="fiche-submit-btn" onclick="soumettreFiche()" style="width:100%;padding:14px;border-radius:var(--rx);background:var(--dkg);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:8px"> Valider ma fiche</button>'+
     '</div>';
@@ -1551,7 +1551,7 @@ function handlePhoto(input){
   reader.onload=function(e){
     fichePhoto=e.target.result;
     var prev=document.getElementById("photo-preview");
-    if(prev)prev.innerHTML='<img src="'+fichePhoto+'" style="width:100%;height:100%;object-fit:cover">';
+    if(prev)prev.innerHTML='<img src="'+authEsc(fichePhoto)+'" style="width:100%;height:100%;object-fit:cover">';
   };
   reader.readAsDataURL(input.files[0]);
 }
@@ -1568,7 +1568,7 @@ function handleCertificat(input){
     if(isPdf){
       prev.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rx)"><span style="font-size:20px"></span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(file.name)+'</div><div style="font-size:10px;color:var(--mut)">PDF · '+(file.size/1024).toFixed(0)+'Ko</div></div><button onclick="removeCertificat()" style="padding:4px 8px;border-radius:6px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;border:none;cursor:pointer">✕</button></div>';
     } else {
-      prev.innerHTML='<div style="position:relative;display:inline-block"><img src="'+e.target.result+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:var(--rx);display:block"><button onclick="removeCertificat()" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;border:none;cursor:pointer">✕</button></div>';
+      prev.innerHTML='<div style="position:relative;display:inline-block"><img src="'+authEsc(e.target.result)+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:var(--rx);display:block"><button onclick="removeCertificat()" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;border:none;cursor:pointer">✕</button></div>';
     }
   };
   reader.readAsDataURL(file);

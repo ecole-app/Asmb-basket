@@ -61,7 +61,12 @@ Messages en français, sans casser le style des commits existants.
 ## Sécurité et données
 
 - **Tout texte saisi par un utilisateur** passe par `authEsc()` avant d'aller dans `innerHTML`
-  ou dans un attribut (`src`, `onclick`...). Les fiches d'inscription viennent d'un formulaire public.
+  ou dans un attribut entre guillemets doubles (`value`, `src`...). Les fiches d'inscription viennent d'un formulaire public.
+  Trois cas où `authEsc()` ne suffit pas (js/18-auth.js) : une valeur dans la chaîne d'un gestionnaire
+  (`onclick="f('…')"`, même un identifiant) → `gmJs()` ; l'adresse d'un lien (`href`, `window.open`) → `authEsc(gmUrl(…))`
+  (jamais de `javascript:`) ; un fragment HTML déjà construit ne se ré-échappe pas.
+  Contrôle : `cd tests && npm run jarvis:hostile` (Jarvis avec des noms piégés dans la démo : il dit quel écran
+  affiche un texte sans l'échapper) et `node outils/audit-xss.js` (liste les valeurs non échappées, fichier par fichier).
 - Collections Firestore : le code utilise `window.fbCollection` / `window.fbDoc`, qui préfixent
   automatiquement `clubs/{clubId}/...`. Seules les collections de `GLOBAL_COLLECTIONS`
   (`js/firebase-init.js`) sont globales. Une nouvelle collection de club = une règle dans

@@ -216,7 +216,7 @@ function chatConvocInner(msg,msgId){
     var peut=chatCanAnswerFor(p.id);
     var btn=function(val,lbl,col){
       var on=(s===val);
-      return '<span data-convoc-btn="'+val+'" data-player="'+authEsc(String(p.id))+'" style="cursor:'+(peut?"pointer":"default")+';font-size:10px;font-weight:700;padding:5px 10px;border-radius:12px;background:'+(on?col:"rgba(0,0,0,.08)")+';color:'+(on?"#fff":"var(--mut)")+';opacity:'+(peut||on?"1":".45")+'">'+lbl+'</span>';
+      return '<span data-convoc-btn="'+authEsc(val)+'" data-player="'+authEsc(String(p.id))+'" style="cursor:'+(peut?"pointer":"default")+';font-size:10px;font-weight:700;padding:5px 10px;border-radius:12px;background:'+(authEsc(on?col:"rgba(0,0,0,.08)"))+';color:'+(on?"#fff":"var(--mut)")+';opacity:'+(peut||on?"1":".45")+'">'+authEsc(lbl)+'</span>';
     };
     return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)">'+
       '<span style="font-size:12px;color:var(--txt)">'+authEsc(p.nom||"")+'</span>'+
@@ -345,7 +345,7 @@ function listenMessages(channelId, prevLastRead){
       if(pinnedMsgs.length){
         pinEl.style.display="flex";
         pinEl.innerHTML=pinnedMsgs.map(function(pm){
-          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span onclick="scrollToMsg(\''+pm.id+'\')" style="cursor:pointer;font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 '+authEsc(pm.text)+'</span>'+(chatIsAdmin()?'<span onclick="togglePin(\''+channelId+'\',\''+pm.id+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span onclick="scrollToMsg(\''+gmJs(pm.id)+'\')" style="cursor:pointer;font-size:11px;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 '+authEsc(pm.text)+'</span>'+(chatIsAdmin()?'<span onclick="togglePin(\''+gmJs(channelId)+'\',\''+gmJs(pm.id)+'\')" style="cursor:pointer;font-size:10px;color:var(--mut)">✕</span>':"")+'</div>';
         }).join("");
       } else { pinEl.style.display="none"; pinEl.innerHTML=""; }
     }
@@ -434,13 +434,13 @@ function chatRenderMessage(channelId,msgId,msg,pending,pinnedIds){
     bubble.style.cssText="max-width:78%;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px var(--shadow);background:"+(mine?"var(--dkg)":"var(--card)")+";color:"+(mine?"#fff":"var(--txt)")+";border:1px solid var(--bdr)";
     var body="";
     if(msg.mediaType==="pdf"){
-      body='<a href="'+authEsc(msg.mediaUrl||"")+'" download="'+authEsc(msg.fileName||"document.pdf")+'" style="display:flex;align-items:center;gap:10px;padding:12px;text-decoration:none;color:inherit"><div style="width:36px;height:36px;border-radius:10px;background:rgba(192,57,43,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📄</div><div style="flex:1;min-width:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(msg.fileName||"Document.pdf")+'</div></a>';
+      body='<a href="'+authEsc(gmUrl(msg.mediaUrl))+'" download="'+authEsc(msg.fileName||"document.pdf")+'" style="display:flex;align-items:center;gap:10px;padding:12px;text-decoration:none;color:inherit"><div style="width:36px;height:36px;border-radius:10px;background:rgba(192,57,43,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📄</div><div style="flex:1;min-width:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(msg.fileName||"Document.pdf")+'</div></a>';
     } else if(msg.mediaType==="audio"){
-      body='<div style="padding:10px 10px 0"><audio controls preload="metadata" src="'+authEsc(msg.mediaUrl||"")+'" style="width:230px;max-width:100%;height:36px"></audio></div>';
+      body='<div style="padding:10px 10px 0"><audio controls preload="metadata" src="'+authEsc(gmUrl(msg.mediaUrl))+'" style="width:230px;max-width:100%;height:36px"></audio></div>';
     } else if(msg.mediaType==="video"){
-      body='<video src="'+authEsc(msg.mediaUrl||"")+'" controls style="width:100%;display:block;max-height:300px;background:#000"></video>';
+      body='<video src="'+authEsc(gmUrl(msg.mediaUrl))+'" controls style="width:100%;display:block;max-height:300px;background:#000"></video>';
     } else {
-      body='<img data-view="1" src="'+authEsc(msg.mediaUrl||"")+'" style="width:100%;display:block;max-height:320px;object-fit:cover;cursor:pointer">';
+      body='<img data-view="1" src="'+authEsc(gmUrl(msg.mediaUrl))+'" style="width:100%;display:block;max-height:320px;object-fit:cover;cursor:pointer">';
     }
     bubble.innerHTML=(fwd||reply?'<div style="padding:8px 10px 0">'+fwd+reply+'</div>':"")+body+'<div style="padding:2px 10px 6px">'+meta+'</div>';
     var img=bubble.querySelector("img[data-view]");
@@ -490,8 +490,8 @@ function chatAppelInner(msg,time){
     '<div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:2px">'+authEsc(msg.eventTitre||"")+'</div>'+
     '<div style="font-size:11px;color:var(--mut);margin-bottom:6px">'+authEsc((msg.eventDate?msg.eventDate.split("-").reverse().join("/"):"")+(msg.eventHeure?" à "+msg.eventHeure:"")+(msg.eventLieu?" · "+msg.eventLieu:""))+'</div>'+
     '<div style="font-size:11.5px;color:var(--txt)">'+authEsc(msg.resume||"")+'</div>'+
-    '<div '+(ouvert?'onclick="benevAppelOuvrir(\''+authEsc(msg.eventId)+'\')"':'')+' style="cursor:'+(ouvert?"pointer":"default")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(ouvert&&reste?"var(--dkg);color:#fff":"var(--bdr);color:var(--mut)")+'">'+(!ouvert?"Appel terminé":reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir")+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+time+'</div>';
+    '<div '+(ouvert?'onclick="benevAppelOuvrir(\''+authEsc(msg.eventId)+'\')"':'')+' style="cursor:'+(ouvert?"pointer":"default")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(ouvert&&reste?"var(--dkg);color:#fff":"var(--bdr);color:var(--mut)")+'">'+(authEsc(!ouvert?"Appel terminé":reste?"Je m'inscris ("+reste+" place"+(reste>1?"s":"")+")":"Complet · voir"))+'</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+authEsc(time)+'</div>';
 }
 function chatPollInner(channelId,msgId,msg,time){
   var myP=savedPseudo||"moi", total=0;
@@ -500,9 +500,9 @@ function chatPollInner(channelId,msgId,msg,time){
   var h='<div class="poll-q">📊 '+authEsc(msg.question||"")+(msg.allowMultiple?' <span style="font-size:9px;color:var(--mut);font-weight:600">(choix multiple)</span>':"")+'</div>';
   (msg.options||[]).forEach(function(o,oi){
     var v=(o.votes||[]).length, pct=total?Math.round(v/total*100):0, mineV=(o.votes||[]).indexOf(myP)>=0;
-    h+='<div class="poll-opt'+(mineV?" voted":"")+'" onclick="'+(isClosed?"":"votePoll(\'"+channelId+"\',\'"+msgId+"\',"+oi+")")+'" style="'+(isClosed?"cursor:default;opacity:.7":"")+'"><div class="poll-opt-fill" style="width:'+pct+'%"></div><div class="poll-opt-content"><span>'+(mineV?"✓ ":"")+authEsc(o.text||"")+'</span><span style="color:var(--mut);font-size:10px">'+pct+'% ('+v+')</span></div></div>';
+    h+='<div class="poll-opt'+(mineV?" voted":"")+'" onclick="'+(isClosed?"":"votePoll(\'"+gmJs(channelId)+"\',\'"+gmJs(msgId)+"\',"+oi+")")+'" style="'+(isClosed?"cursor:default;opacity:.7":"")+'"><div class="poll-opt-fill" style="width:'+pct+'%"></div><div class="poll-opt-content"><span>'+(mineV?"✓ ":"")+authEsc(o.text||"")+'</span><span style="color:var(--mut);font-size:10px">'+pct+'% ('+v+')</span></div></div>';
   });
-  return h+'<div style="font-size:10px;color:var(--mut);margin-top:4px">'+total+' vote'+(total>1?"s":"")+' · '+time+(msg.deadline?' · '+(isClosed?"Clôturé le "+authEsc(msg.deadline):"Jusqu'au "+authEsc(msg.deadline)):"")+'</div>';
+  return h+'<div style="font-size:10px;color:var(--mut);margin-top:4px">'+total+' vote'+(total>1?"s":"")+' · '+authEsc(time)+(msg.deadline?' · '+(isClosed?"Clôturé le "+authEsc(msg.deadline):"Jusqu'au "+authEsc(msg.deadline)):"")+'</div>';
 }
 function chatCarpoolInner(channelId,msgId,msg,time){
   var passagers=msg.passagers||[];
@@ -515,8 +515,8 @@ function chatCarpoolInner(channelId,msgId,msg,time){
     '<div style="font-size:11.5px;color:var(--txt)">Conducteur·rice : <b>'+authEsc(msg.conducteur||"")+'</b></div>'+
     (msg.depart?'<div style="font-size:11px;color:var(--mut);margin-top:2px">Départ : '+authEsc(msg.depart)+'</div>':"")+
     '<div style="font-size:11px;color:var(--mut);margin-top:6px">'+(passagers.length?authEsc(passagers.join(", ")):"Personne pour l'instant")+'</div>'+
-    '<div onclick="reserverCarpool(\''+channelId+'\',\''+msgId+'\')" style="cursor:'+(full?"default":"pointer")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(meIn?"#1B5C28":(full?"rgba(0,0,0,.08)":"color-mix(in srgb, var(--ltg) 15%, transparent)"))+';color:'+(meIn?"#fff":(full?"var(--mut)":"var(--ltg)"))+'">'+(meIn?"✓ Vous avez une place — annuler":(full?"Complet":"Réserver une place ("+reste+" restante"+(reste>1?"s":"")+")"))+'</div>'+
-    '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+time+'</div>';
+    '<div onclick="reserverCarpool(\''+gmJs(channelId)+'\',\''+gmJs(msgId)+'\')" style="cursor:'+(full?"default":"pointer")+';margin-top:8px;text-align:center;padding:8px;border-radius:12px;font-size:11px;font-weight:700;background:'+(meIn?"#1B5C28":(full?"rgba(0,0,0,.08)":"color-mix(in srgb, var(--ltg) 15%, transparent)"))+';color:'+(meIn?"#fff":(full?"var(--mut)":"var(--ltg)"))+'">'+(meIn?"✓ Vous avez une place — annuler":(full?"Complet":"Réserver une place ("+reste+" restante"+(reste>1?"s":"")+")"))+'</div>'+
+    '<div style="font-size:10px;color:var(--mut);margin-top:8px">'+authEsc(time)+'</div>';
 }
 
 // ── Appui long / clic droit / glisser pour répondre ────────────────
@@ -580,12 +580,12 @@ function chatOpenMenu(channelId,msgId,anchor){
   var h='';
   if(!msg.deleted){
     h+='<div id="chat-menu-emo" style="background:var(--sf);border-radius:26px;padding:6px 10px;display:flex;justify-content:space-between;margin-bottom:8px;box-shadow:0 3px 14px var(--shadow)">';
-    QUICK_REACTIONS.forEach(function(em){ h+='<span data-emo="'+em+'" style="font-size:22px;cursor:pointer;padding:2px">'+em+'</span>'; });
+    QUICK_REACTIONS.forEach(function(em){ h+='<span data-emo="'+authEsc(em)+'" style="font-size:22px;cursor:pointer;padding:2px">'+authEsc(em)+'</span>'; });
     h+='<span data-emo="+" style="font-size:18px;font-weight:800;color:var(--mut);cursor:pointer;padding:2px 6px">＋</span></div>';
   }
   h+='<div style="background:var(--sf);border-radius:14px;overflow:hidden;box-shadow:0 3px 14px var(--shadow)">';
   acts.forEach(function(a,i){
-    h+='<button type="button" data-act="'+i+'" style="display:flex;width:100%;justify-content:space-between;align-items:center;border:0;border-bottom:1px solid var(--bdr);background:none;padding:12px 14px;min-height:44px;font-size:14px;color:'+(a[3]?"var(--red)":"var(--txt)")+';cursor:pointer;text-align:left"><span>'+a[0]+'</span><span style="opacity:.7">'+a[1]+'</span></button>';
+    h+='<button type="button" data-act="'+i+'" style="display:flex;width:100%;justify-content:space-between;align-items:center;border:0;border-bottom:1px solid var(--bdr);background:none;padding:12px 14px;min-height:44px;font-size:14px;color:'+(a[3]?"var(--red)":"var(--txt)")+';cursor:pointer;text-align:left"><span>'+authEsc(a[0])+'</span><span style="opacity:.7">'+authEsc(a[1])+'</span></button>';
   });
   h+='</div>';
   menu.innerHTML=h;
@@ -898,7 +898,7 @@ function dmStartPicker(){
       '<input id="dm-search" placeholder="Rechercher…" style="width:100%;padding:10px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:14px;outline:none;margin-bottom:6px">'+
       '<div id="dm-people">';
     list.forEach(function(p,i){
-      h+='<button type="button" data-p="'+i+'" data-q="'+authEsc((p.label+" "+p.role).toLowerCase())+'" style="display:flex;justify-content:space-between;width:100%;text-align:left;border:0;border-bottom:1px solid var(--bdr);background:none;padding:12px 4px;min-height:44px;font-size:14px;color:var(--txt);cursor:pointer"><span>'+authEsc(p.label)+'</span><span style="font-size:11px;color:var(--mut)">'+p.role+'</span></button>';
+      h+='<button type="button" data-p="'+i+'" data-q="'+authEsc((p.label+" "+p.role).toLowerCase())+'" style="display:flex;justify-content:space-between;width:100%;text-align:left;border:0;border-bottom:1px solid var(--bdr);background:none;padding:12px 4px;min-height:44px;font-size:14px;color:var(--txt);cursor:pointer"><span>'+authEsc(p.label)+'</span><span style="font-size:11px;color:var(--mut)">'+authEsc(p.role)+'</span></button>';
     });
     if(!list.length) h+='<div style="font-size:12px;color:var(--mut);padding:10px 0">Aucun compte dans le club.</div>';
     h+='</div><div style="font-size:10.5px;color:var(--mut);margin-top:10px">Les comptes joueurs ne sont pas proposés : pas de discussion privée avec un mineur.</div>'+

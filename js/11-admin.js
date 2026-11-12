@@ -310,13 +310,13 @@ function genreFilterHtml(current,fnName,showNR){
   var opts=[["all","Tous"],["F","Filles"],["M","Garçons"]];
   if(showNR)opts.push(["NR","Non renseigné"]);
   return opts.map(function(o){
-    return '<button class="cat-filter'+(current===o[0]?' on':'')+'" onclick="'+fnName+'(\''+o[0]+'\')">'+o[1]+'</button>';
+    return '<button class="cat-filter'+(current===o[0]?' on':'')+'" onclick="'+fnName+'(\''+gmJs(o[0])+'\')">'+authEsc(o[1])+'</button>';
   }).join("");
 }
 function inscFiltresHtml(players,hasNR){
   var st='style="flex:1 1 30%;min-width:96px;padding:9px 8px;border-radius:var(--rx);border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:12px;font-weight:600"';
   function sel(label,fn,cur,opts){
-    return '<select aria-label="'+label+'" onchange="'+fn+'(this.value)" '+st+(cur!=="all"?' class="on"':'')+'>'+opts.map(function(o){return '<option value="'+authEsc(o[0])+'"'+(cur===o[0]?' selected':'')+'>'+authEsc(o[1])+'</option>';}).join("")+'</select>';
+    return '<select aria-label="'+authEsc(label)+'" onchange="'+fn+'(this.value)" '+st+(cur!=="all"?' class="on"':'')+'>'+opts.map(function(o){return '<option value="'+authEsc(o[0])+'"'+(cur===o[0]?' selected':'')+'>'+authEsc(o[1])+'</option>';}).join("")+'</select>';
   }
   var cats=[["all","Catégorie : toutes"]].concat(["Micro","Baby basket","U7","U9","U11","U13","U15","U17","U18","U21","Senior"].map(function(c){return [c,c];}));
   var genres=[["all","Genre : tous"],["F","Filles"],["M","Garçons"]];
@@ -495,7 +495,7 @@ function buildAdminHome(){
    pf.style.cssText="margin:0 12px 14px;background:linear-gradient(135deg,#0F1B33,#1B2C4F);border-radius:var(--rs);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px";
    pf.innerHTML='<div style="width:40px;height:40px;flex-shrink:0">'+gmLogoHtml(40)+'</div>'
      +'<div style="flex:1"><div style="font-size:14px;font-weight:800;color:#fff">Plateforme General Manager</div><div style="font-size:11px;color:rgba(255,255,255,.65)">Clubs · Invitations · Accès support</div></div>'
-     +'<span id="gm-pf-badge" style="display:'+(window.__gmDemandesN?"flex":"none")+';min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center">'+(window.__gmDemandesN||"")+'</span>'
+     +'<span id="gm-pf-badge" style="display:'+(window.__gmDemandesN?"flex":"none")+';min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#C0392B;color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center">'+(authEsc(window.__gmDemandesN||""))+'</span>'
      +'<div style="color:#E8A93B;font-size:18px">›</div>';
    pf.addEventListener("click",openPlateforme);
    if(typeof majBadgeDemandes==="function") majBadgeDemandes();
@@ -507,7 +507,7 @@ function buildAdminHome(){
    if(natural!==cur){
      banner.innerHTML='<div style="margin:0 12px 14px;background:rgba(232,103,10,.1);border:1px solid rgba(232,103,10,.3);border-radius:var(--rs);padding:12px 14px">'+
        '<div style="font-size:13px;font-weight:700;color:#E8670A">La saison '+natural+' a commencé</div>'+
-       '<div style="font-size:11px;color:var(--mut);margin-top:2px">Vous affichez encore la saison '+cur+'. Archivez les licences et passez à la nouvelle saison depuis Paramètres → Données.</div>'+
+       '<div style="font-size:11px;color:var(--mut);margin-top:2px">Vous affichez encore la saison '+authEsc(cur)+'. Archivez les licences et passez à la nouvelle saison depuis Paramètres → Données.</div>'+
        '</div>';
    } else { banner.innerHTML=""; }
    var mismatched=findMiscategorizedPlayers();
@@ -568,7 +568,7 @@ function buildAdminHome(){
  var ferme=!adminModuleOuvertLimite(m.id);
  if(ferme) d.style.cssText+=";opacity:.55;filter:grayscale(1)";
  var count=ferme?"🔒 Fermé (accès limité)":getAdminCount(m.id);
- d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+m.color+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+m.name+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+m.sub+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div class="drag-handle" style="color:var(--mut);font-size:20px;padding:10px;cursor:grab">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
+ d.innerHTML='<div class="admin-ci"><div class="admin-icon" style="background:'+authEsc(m.color)+'">'+m.icon+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(m.name)+'</div><div style="font-size:10px;color:var(--ltg);font-weight:600;margin-bottom:2px">'+authEsc(m.sub)+'</div><div style="font-size:11px;color:var(--mut)">'+count+'</div></div>'+(ADMIN_EDIT_MODE?'<div class="drag-handle" style="color:var(--mut);font-size:20px;padding:10px;cursor:grab">\u2807</div>':'<div style="color:var(--mut);font-size:18px">\u203a</div>')+'</div>';
  if(ADMIN_EDIT_MODE){
    var ctrl=document.createElement("div");
    ctrl.style.cssText="display:flex;justify-content:flex-end;padding:0 12px 10px";
@@ -591,7 +591,7 @@ function buildAdminHome(){
       var cs=ids.map(function(i){used[i]=1;return byId[i];}).filter(Boolean);
       if(!cs.length)return;
       var g=document.createElement("div");g.className="adm-grp";
-      g.innerHTML='<div class="adm-grp-t">'+titre+'</div>';
+      g.innerHTML='<div class="adm-grp-t">'+authEsc(titre)+'</div>';
       var gr=document.createElement("div");gr.className="adm-grp-g";
       cs.forEach(function(c){gr.appendChild(c);});
       g.appendChild(gr);el.appendChild(g);
@@ -725,7 +725,7 @@ function openAccesCoach(){
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"users"), window.fbWhere("clubId","==",window.CURRENT_CLUB_ID))).then(function(snap){
     snap.forEach(function(d){var v=d.data();v._uid=d.id;allUsers.push(v);});
     renderDefaultView();
-  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+(authEsc((e&&e.code)||e))+'</div>';});
 }
 // Ajoute/retire le coach des canaux liés à ses équipes selon son affectation actuelle
 function syncCoachChannels(u, newTeamIds){
@@ -1086,7 +1086,7 @@ function openFichesRecues(){
       return tb-ta;
     });
     renderFichesRecues(list,items);
-  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+(authEsc((e&&e.code)||e))+'</div>';});
 }
 function renderFichesRecues(list,items){
   list.innerHTML="";
@@ -1170,7 +1170,7 @@ function openAvisModule(){
   window.fbGetDocs(window.fbQuery(window.fbCollection(window.fbDb,"feedback"),window.fbOrderBy("ts","desc"))).then(function(snap){
     var items=[];snap.forEach(function(d){var v=d.data();v._id=d.id;items.push(v);});
     renderAvisList(list,items);
-  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+((e&&e.code)||e)+'</div>';});
+  }).catch(function(e){list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Erreur : '+(authEsc((e&&e.code)||e))+'</div>';});
 }
 function renderAvisList(list,items){
   list.innerHTML="";
@@ -1230,9 +1230,9 @@ function getPlayers(){
 function joueurAvatarHtml(p, fond){
   var ph=p&&p.photo;
   if(ph && (p.photoAutorisee===true||p._roster) && /^data:image\/|^https:\/\//.test(ph))
-    return '<div class="player-avatar" style="background:'+fond+';overflow:hidden;padding:0"><img src="'+authEsc(ph)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
+    return '<div class="player-avatar" style="background:'+authEsc(fond)+';overflow:hidden;padding:0"><img src="'+authEsc(ph)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
   var ini=((p&&p.prenom)||"?")[0].toUpperCase()+((p&&p.nom)||"?")[0].toUpperCase();
-  return '<div class="player-avatar" style="background:'+fond+'">'+authEsc(ini)+'</div>';
+  return '<div class="player-avatar" style="background:'+authEsc(fond)+'">'+authEsc(ini)+'</div>';
 }
 // Trombinoscope derive de la fiche complete : nom, prenom, categorie, poste,
 // maillot. La photo n'y figure que si le responsable l'a autorisee.
@@ -1293,7 +1293,7 @@ function renderPlayers(){
     var genreBadge=p.genre==="F"?'<span class="status-badge" style="background:rgba(142,68,173,.12);color:#8E44AD;margin-left:5px">F</span>':p.genre==="M"?'<span class="status-badge" style="background:rgba(22,160,133,.12);color:#16A085;margin-left:5px">M</span>':'';
     var d=document.createElement("div");d.className="player-card";
     var meta=authEsc(p.cat||"")+" · "+authEsc(p.naissance||"")+(posteDe(p)?" - "+authEsc(posteDe(p)):"");
-    var safeId=authEsc(String(p.id||""));
+    var safeId=gmJs(String(p.id||""));
     var btns='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
     btns+='<button onclick="showPresenceHistory(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--ltg);font-size:10px;font-weight:600;border:none;cursor:pointer">Historique</button>';
     btns+='<button onclick="editPlayer(\''+safeId+'\')" style="padding:5px 10px;border-radius:var(--rx);background:var(--bdr);color:var(--mut);font-size:10px;font-weight:600;border:none;cursor:pointer">Modifier</button>';
@@ -1376,22 +1376,22 @@ function wirePlayerCatAutofill(){
 }
 function renderPlayerForm(p){
   var CATS_ALL=["Micro","Baby basket","U7","U9","U11","U13","U15","U17","U18","U21","Senior","Loisir","3x3"];
-    var cats=CATS_ALL.map(function(c){return '<option value="'+c+'"'+(p&&p.cat===c?' selected':'')+'>'+c+'</option>';}).join("");
-  var postes=["Meneur","Arrière","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+x+'"'+(p&&p.poste===x?' selected':'')+'>'+x+'</option>';}).join("");
+    var cats=CATS_ALL.map(function(c){return '<option value="'+authEsc(c)+'"'+(p&&p.cat===c?' selected':'')+'>'+authEsc(c)+'</option>';}).join("");
+  var postes=["Meneur","Arrière","Ailier","Ailier Fort","Pivot","---"].map(function(x){return '<option value="'+authEsc(x)+'"'+(p&&p.poste===x?' selected':'')+'>'+authEsc(x)+'</option>';}).join("");
   var licences=['<option value="ok"'+(p&&p.licence==="ok"?' selected':'')+'>Licencié</option>','<option value="attente"'+(p&&p.licence==="attente"?' selected':'')+'>En attente</option>','<option value="non"'+(p&&p.licence==="non"?' selected':'')+'>Sans licence</option>'].join("");
   document.getElementById("player-form").innerHTML=
-    '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="fp-prenom" value="'+(p?p.prenom:'')+'" placeholder="Prénom"></div>'+
-    '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="fp-nom" value="'+(p?p.nom:'')+'" placeholder="Nom de famille"></div>'+
+    '<div class="form-group"><label class="form-label">Prénom *</label><input class="form-input" id="fp-prenom" value="'+(authEsc(p?p.prenom:''))+'" placeholder="Prénom"></div>'+
+    '<div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="fp-nom" value="'+(authEsc(p?p.nom:''))+'" placeholder="Nom de famille"></div>'+
     '<div class="form-group"><label class="form-label">Genre</label><select class="form-select" id="fp-genre"><option value="">Non renseigné</option><option value="M"'+(p&&p.genre==="M"?" selected":"")+'>Masculin</option><option value="F"'+(p&&p.genre==="F"?" selected":"")+'>Féminin</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(p?p.naissance:'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" id="fp-naissance" type="date" value="'+(authEsc(p?p.naissance:''))+'"></div>'+
     '<div class="form-group"><label class="form-label">Catégorie *</label><select class="form-select" id="fp-cat">'+cats+'</select></div>'+
     fpEquipesHtml(p)+
-    '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(p&&p.telEnfant?p.telEnfant:"")+'" placeholder="0612345678"></div>'+
+    '<div class="form-group"><label class="form-label">Téléphone de l\'enfant (autonomie)</label><input class="form-input" id="fp-telEnfant" value="'+(authEsc(p&&p.telEnfant?p.telEnfant:""))+'" placeholder="0612345678"></div>'+
     '<div class="form-group" id="fp-poste-grp"'+(p&&!posteVisible(p.cat)?' style="display:none"':'')+'><label class="form-label">Poste</label><select class="form-select" id="fp-poste">'+postes+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(p&&p.maillot?p.maillot:"")+'" placeholder=""></div>'+
+    '<div class="form-group"><label class="form-label">Numéro de maillot</label><input class="form-input" id="fp-maillot" type="number" min="0" max="99" value="'+(authEsc(p&&p.maillot?p.maillot:""))+'" placeholder=""></div>'+
     '<div class="form-group"><label class="form-label">Statut licence</label><select class="form-select" id="fp-licence">'+licences+'</select></div>'+
     '<div class="form-group"><label class="form-label">Type de licence</label><select class="form-select" id="fp-typeLicence"><option value="competition"'+(p&&p.typeLicence==="competition"?" selected":"")+'>Compétition</option><option value="loisir"'+(!p||p.typeLicence!=="competition"?" selected":"")+'>Loisir</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(p&&p.numLicence?p.numLicence:"0C")+'" placeholder="0C..."></div>'+
+    '<div class="form-group"><label class="form-label">Numéro de licence</label><input class="form-input" id="fp-numLicence" value="'+(authEsc(p&&p.numLicence?p.numLicence:"0C"))+'" placeholder="0C..."></div>'+
     '<div class="form-group"><label class="form-label">Contact (tel/email)</label><input class="form-input" id="fp-contact" value="'+authEsc(p&&p.contact||'')+'" placeholder="0612345678"></div>'+
     '<div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="fp-notes" rows="2" placeholder="Observations...">'+authEsc(p&&p.notes||'')+'</textarea></div>'+
     (typeof polesFicheHtml==="function"?polesFicheHtml(p):"");
@@ -1513,7 +1513,7 @@ function renderNotesFraisList(list,isDir){
       var img=document.createElement("img");
       img.src=n.photo;
       img.style.cssText="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer";
-      img.addEventListener("click",function(){window.open(n.photo,"_blank");});
+      img.addEventListener("click",function(){window.open(gmUrl(n.photo),"_blank");});
       card.appendChild(img);
     }
     var body=document.createElement("div");
@@ -1617,7 +1617,7 @@ function openNoteFraisForm(parentModal){
   var dlCat=document.getElementById("nf-cat-list");
   var cats=getNotesFrais().map(function(n){return n.categorie;}).filter(Boolean);
   var uniqCats=cats.filter(function(c,i){return cats.indexOf(c)===i;});
-  dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+c+'">';}).join("");
+  dlCat.innerHTML=uniqCats.map(function(c){return '<option value="'+authEsc(c)+'">';}).join("");
   document.getElementById("nf-photo-btn").addEventListener("click",function(){document.getElementById("nf-photo-input").click();});
   document.getElementById("nf-close").addEventListener("click",function(){modal.remove();});
   document.getElementById("nf-save").addEventListener("click",function(){ saveNoteFrais(modal,parentModal); });
@@ -1634,7 +1634,7 @@ function handleNoteFraisPhoto(input){
     return dataUrl;
   }).then(function(dataUrl){
     noteFraisPhotoData=dataUrl;
-    preview.innerHTML='<img src="'+dataUrl+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px">';
+    preview.innerHTML='<img src="'+authEsc(dataUrl)+'" style="width:80px;height:80px;object-fit:cover;border-radius:8px">';
     btn.textContent="📷 Changer la photo";btn.disabled=false;
     noteFraisLireTicket(file);
   }).catch(function(){
@@ -1695,14 +1695,14 @@ function printNoteFrais(n){
     '.row b{color:#1A2E5A}'+
     'img{max-width:100%;margin-top:20px;border-radius:8px}'+
     '</style></head><body>'+
-    '<h1>Note de frais — '+clubLabel()+'</h1>'+
+    '<h1>Note de frais — '+authEsc(clubLabel())+'</h1>'+
     '<div class="row"><span>Demandeur</span><b>'+authEsc(n.demandeurNom||n.demandeurEmail||"")+'</b></div>'+
     '<div class="row"><span>Date</span><b>'+(n.date?new Date(n.date).toLocaleDateString("fr-FR"):"")+'</b></div>'+
     '<div class="row"><span>Motif</span><b>'+authEsc(n.motif||"")+'</b></div>'+
     '<div class="row"><span>Catégorie</span><b>'+authEsc(n.categorie||"-")+'</b></div>'+
     '<div class="row"><span>Montant</span><b>'+(n.montant||0).toFixed(2)+' €</b></div>'+
     '<div class="row"><span>Statut</span><b>'+authEsc(n.statut||"")+'</b></div>'+
-    (n.photo?'<img src="'+n.photo+'">':'')+
+    (n.photo?'<img src="'+authEsc(n.photo)+'">':'')+
     '</body></html>';
   win.document.write(html);
   win.document.close();
@@ -1801,7 +1801,7 @@ function renderTeamReclassementList(list){
     name.textContent=t.name;
     var meta=document.createElement("div");
     meta.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
-    meta.innerHTML="Catégorie actuelle <b>"+t.cat+"</b> · "+entry.matchCount+"/"+entry.totalCount+" joueurs en <b style=\"color:var(--dkg)\">"+entry.suggested+"</b>";
+    meta.innerHTML="Catégorie actuelle <b>"+authEsc(t.cat)+"</b> · "+entry.matchCount+"/"+entry.totalCount+" joueurs en <b style=\"color:var(--dkg)\">"+authEsc(entry.suggested)+"</b>";
     var btnRow=document.createElement("div");
     btnRow.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
     var renameBtn=document.createElement("button");
@@ -1889,7 +1889,7 @@ function renderReclassementList(list){
     name.textContent=p.prenom+" "+p.nom;
     var meta=document.createElement("div");
     meta.style.cssText="font-size:12px;color:var(--mut);margin-bottom:10px";
-    meta.innerHTML="Actuellement <b>"+p.cat+"</b> → devrait être <b style=\"color:var(--dkg)\">"+suggested+"</b>";
+    meta.innerHTML="Actuellement <b>"+authEsc(p.cat)+"</b> → devrait être <b style=\"color:var(--dkg)\">"+suggested+"</b>";
     var btnRow=document.createElement("div");
     btnRow.style.cssText="display:flex;gap:8px";
     var applyBtn=document.createElement("button");

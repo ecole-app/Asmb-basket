@@ -39,7 +39,7 @@ function poleInfosTxt(id,info){
 function polePastilles(p){
   var ids=Object.keys((p&&p.poles)||{}).filter(function(id){ return POLES_JOUEURS[id]; });
   return ids.map(function(id){ var c=poleDef(id).color||"var(--dkg)";
-    return '<span style="display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:10px;margin:2px 4px 0 0;color:'+c+';background:color-mix(in srgb, '+c+' 13%, transparent)">'+authEsc(poleCourt(id))+'</span>'; }).join("");
+    return '<span style="display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:10px;margin:2px 4px 0 0;color:'+authEsc(c)+';background:color-mix(in srgb, '+authEsc(c)+' 13%, transparent)">'+authEsc(poleCourt(id))+'</span>'; }).join("");
 }
 
 // ── Bloc en tête de chaque page de pôle ───────────────────────────────
@@ -50,7 +50,7 @@ function poleRendreEquipe(poleId,avant){
   var col=poleDef(poleId).color||"var(--dkg)", coachs=poleCoachs(poleId), dir=poleEstDirigeant();
   var h='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:10px">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)">Coachs du pôle</div>'+
-    (dir?'<button type="button" data-act="coachs" style="padding:5px 11px;border-radius:20px;border:none;background:color-mix(in srgb, '+col+' 12%, transparent);color:'+col+';font-size:11px;font-weight:800;cursor:pointer">Choisir les coachs</button>':'')+'</div>'+
+    (dir?'<button type="button" data-act="coachs" style="padding:5px 11px;border-radius:20px;border:none;background:color-mix(in srgb, '+authEsc(col)+' 12%, transparent);color:'+authEsc(col)+';font-size:11px;font-weight:800;cursor:pointer">Choisir les coachs</button>':'')+'</div>'+
     (coachs.length?'<div style="display:flex;flex-wrap:wrap;gap:6px">'+coachs.map(function(c){ return '<span style="font-size:12px;font-weight:700;padding:5px 10px;border-radius:20px;background:var(--bdr);color:var(--txt2)">'+authEsc(c.nom||"Coach")+'</span>'; }).join("")+'</div>'
       :'<div style="font-size:12px;color:var(--mut)">'+(dir?"Aucun coach pour l'instant : choisissez qui gère ce pôle.":"Aucun coach désigné.")+'</div>')+
     '</div>';
@@ -60,7 +60,7 @@ function poleRendreEquipe(poleId,avant){
     js.forEach(function(p){ cats[p.cat||"?"]=1; });
     h+='<div style="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 14px;margin-bottom:10px">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px"><div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)">Joueurs du pôle · '+js.length+(js.length?' · '+Object.keys(cats).length+' catégorie'+(Object.keys(cats).length>1?"s":""):'')+'</div>'+
-      (gere?'<button type="button" data-act="ajout" style="padding:5px 11px;border-radius:20px;border:none;background:'+col+';color:#fff;font-size:11px;font-weight:800;cursor:pointer">+ Joueurs</button>':'')+'</div>';
+      (gere?'<button type="button" data-act="ajout" style="padding:5px 11px;border-radius:20px;border:none;background:'+authEsc(col)+';color:#fff;font-size:11px;font-weight:800;cursor:pointer">+ Joueurs</button>':'')+'</div>';
     if(!js.length) h+='<div style="font-size:12px;color:var(--mut);padding:6px 0">'+(gere?"Ajoutez les joueurs suivis dans ce pôle.":"Aucun joueur pour l'instant.")+'</div>';
     js.forEach(function(p){
       var info=poleInfosTxt(poleId,p.poles[poleId]);
@@ -170,10 +170,10 @@ function poleChampsHtml(poleId,info,prefixe){
   return d.champs.map(function(f){
     var id=prefixe+poleId+"-"+f.id, v=(info&&info[f.id])||"";
     var ctl;
-    if(f.options) ctl='<select class="form-select" id="'+id+'"><option value="">—</option>'+f.options.map(function(o){ return '<option'+(o===v?" selected":"")+'>'+authEsc(o)+'</option>'; }).join("")+'</select>';
-    else if(f.type==="team"){ var teams=(typeof getTeams==="function"?getTeams():[]); ctl='<select class="form-select" id="'+id+'"><option value="">—</option>'+teams.map(function(t){ var n=(t.name||"")+(t.cat?" ("+t.cat+")":""); return '<option value="'+authEsc(t.name||"")+'"'+(t.name===v?" selected":"")+'>'+authEsc(n)+'</option>'; }).join("")+'</select>'; }
-    else ctl='<input class="form-input" id="'+id+'" maxlength="'+(f.max||40)+'" placeholder="'+authEsc(f.ph||"")+'" value="'+authEsc(v)+'">';
-    return '<div class="form-group" style="margin-bottom:8px"><label class="form-label" for="'+id+'">'+authEsc(f.label)+'</label>'+ctl+'</div>';
+    if(f.options) ctl='<select class="form-select" id="'+authEsc(id)+'"><option value="">—</option>'+f.options.map(function(o){ return '<option'+(o===v?" selected":"")+'>'+authEsc(o)+'</option>'; }).join("")+'</select>';
+    else if(f.type==="team"){ var teams=(typeof getTeams==="function"?getTeams():[]); ctl='<select class="form-select" id="'+authEsc(id)+'"><option value="">—</option>'+teams.map(function(t){ var n=(t.name||"")+(t.cat?" ("+t.cat+")":""); return '<option value="'+authEsc(t.name||"")+'"'+(t.name===v?" selected":"")+'>'+authEsc(n)+'</option>'; }).join("")+'</select>'; }
+    else ctl='<input class="form-input" id="'+authEsc(id)+'" maxlength="'+(f.max||40)+'" placeholder="'+authEsc(f.ph||"")+'" value="'+authEsc(v)+'">';
+    return '<div class="form-group" style="margin-bottom:8px"><label class="form-label" for="'+authEsc(id)+'">'+authEsc(f.label)+'</label>'+ctl+'</div>';
   }).join("");
 }
 function poleLireChamps(poleId,prefixe,base){
@@ -210,12 +210,12 @@ function polesFicheHtml(p){
   var h='<div class="form-group" id="fp-poles"><label class="form-label">Pôles</label><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">';
   ps.forEach(function(po){
     var on=!!(p&&p.poles&&p.poles[po.id]), ok=peutGererPole(po.id), c=po.color||"var(--dkg)";
-    h+='<button type="button" class="fp-pole" data-pole="'+po.id+'" aria-pressed="'+on+'"'+(ok?'':' disabled title="Réservé au dirigeant et aux coachs de ce pôle"')+' style="--c:'+c+';padding:6px 11px;border-radius:20px;font-size:12px;font-weight:800;cursor:'+(ok?"pointer":"not-allowed")+';opacity:'+(ok?1:.6)+';border:1.5px solid '+(on?c:"var(--bdr)")+';background:'+(on?"color-mix(in srgb, "+c+" 14%, var(--card))":"var(--card)")+';color:var(--txt)">'+authEsc(poleCourt(po.id))+'</button>';
+    h+='<button type="button" class="fp-pole" data-pole="'+authEsc(po.id)+'" aria-pressed="'+on+'"'+(ok?'':' disabled title="Réservé au dirigeant et aux coachs de ce pôle"')+' style="--c:'+authEsc(c)+';padding:6px 11px;border-radius:20px;font-size:12px;font-weight:800;cursor:'+(ok?"pointer":"not-allowed")+';opacity:'+(ok?1:.6)+';border:1.5px solid '+(authEsc(on?c:"var(--bdr)"))+';background:'+(authEsc(on?"color-mix(in srgb, "+c+" 14%, var(--card))":"var(--card)"))+';color:var(--txt)">'+authEsc(poleCourt(po.id))+'</button>';
   });
   h+='</div>';
   ps.forEach(function(po){
     var on=!!(p&&p.poles&&p.poles[po.id]);
-    h+='<div class="fp-pole-champs" data-pole="'+po.id+'" style="display:'+(on?"block":"none")+';border-left:3px solid '+(po.color||"var(--dkg)")+';padding:6px 0 2px 10px;margin:6px 0">'+
+    h+='<div class="fp-pole-champs" data-pole="'+authEsc(po.id)+'" style="display:'+(on?"block":"none")+';border-left:3px solid '+(authEsc(po.color||"var(--dkg)"))+';padding:6px 0 2px 10px;margin:6px 0">'+
       '<div style="font-size:11px;font-weight:800;color:var(--mut);margin-bottom:4px">'+authEsc(po.name)+'</div>'+
       (peutGererPole(po.id)?poleChampsHtml(po.id,p&&p.poles&&p.poles[po.id],"fpp-"):'<div style="font-size:12px;color:var(--txt2)">'+authEsc(poleInfosTxt(po.id,p&&p.poles&&p.poles[po.id])||"—")+'</div>')+'</div>';
   });

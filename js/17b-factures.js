@@ -120,7 +120,7 @@ function factOuvrir(){
   var tot=document.createElement("div"); tot.style.cssText="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px";
   [["À encaisser",att,"#C45A06"],["En retard",ret,"#C0392B"],["Encaissé",enc,"#13863A"]].forEach(function(t){
     var d=document.createElement("div"); d.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:9px 10px;min-width:0";
-    d.innerHTML='<b style="display:block;font-size:15px;color:'+t[2]+'">'+authEsc(factEur(t[1]))+'</b><span style="font-size:10.5px;color:var(--mut)">'+t[0]+'</span>';
+    d.innerHTML='<b style="display:block;font-size:15px;color:'+authEsc(t[2])+'">'+authEsc(factEur(t[1]))+'</b><span style="font-size:10.5px;color:var(--mut)">'+authEsc(t[0])+'</span>';
     tot.appendChild(d);
   });
   s.body.appendChild(tot);
@@ -143,7 +143,7 @@ function factOuvrir(){
     var st=factStatut(f), lib=FACT_STATUTS[st], card=gmCard();
     var sous=st==="payee"?"payée le "+factFr(f.payeeLe):(st==="brouillon"?"pas encore envoyée":"échéance "+factFr(f.echeance));
     card.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:13px;min-width:0">'+authEsc(f.client)+'</b><b>'+authEsc(factEur(f.montantTtc))+'</b></div>'
-      +'<div style="font-size:11px;color:var(--mut);margin:2px 0 6px">'+authEsc(f.numero)+' · '+factFr(f.date)+' · '+authEsc(sous)+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin:2px 0 6px">'+authEsc(f.numero)+' · '+authEsc(factFr(f.date))+' · '+authEsc(sous)+'</div>'
       +'<span style="display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:10px;color:#fff;background:'+lib[1]+'">'+lib[0]+'</span>';
     var row=document.createElement("div"); row.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"; card.appendChild(row);
     var bt=function(txt,kind,fn){ var b=gmBtn(txt,kind,fn); b.style.padding="7px 12px"; b.style.fontSize="11px"; row.appendChild(b); };

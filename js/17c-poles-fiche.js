@@ -43,10 +43,10 @@ function poleFicheJoueur(poleId,pid,apres,onglet){
     var photo=(j.photo&&j.photoAutorisee!==false&&/^data:image\/|^https:\/\//.test(j.photo))?'<img src="'+authEsc(j.photo)+'" alt="" style="width:100%;height:100%;object-fit:cover">':authEsc(ini);
     var pause=i.statut==="pause";
     head.innerHTML='<div style="display:flex;align-items:center;gap:12px">'+
-      '<div style="width:58px;height:58px;border-radius:16px;overflow:hidden;flex-shrink:0;background:'+col+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900">'+photo+'</div>'+
+      '<div style="width:58px;height:58px;border-radius:16px;overflow:hidden;flex-shrink:0;background:'+authEsc(col)+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900">'+photo+'</div>'+
       '<div style="flex:1;min-width:0"><div style="font-size:18px;font-weight:900;color:var(--txt);line-height:1.15">'+authEsc((j.prenom||"")+" "+(j.nom||""))+'</div>'+
       '<div style="font-size:12.5px;color:var(--txt2);margin-top:2px">'+authEsc([j.cat,age,posteDe(j),j.maillot?"n°"+j.maillot:""].filter(Boolean).join(" · "))+'</div>'+
-      '<div style="margin-top:5px"><span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;color:'+(pause?"#8a4500":col)+';background:color-mix(in srgb, '+(pause?"#8a4500":col)+' 13%, transparent)">'+(pause?"⏸ En pause":"● Actif")+' · '+authEsc(poleCourt(poleId))+'</span></div></div></div>';
+      '<div style="margin-top:5px"><span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;color:'+(authEsc(pause?"#8a4500":col))+';background:color-mix(in srgb, '+(authEsc(pause?"#8a4500":col))+' 13%, transparent)">'+(pause?"⏸ En pause":"● Actif")+' · '+authEsc(poleCourt(poleId))+'</span></div></div></div>';
   }
   function peindreBarre(){
     bar.innerHTML="";
@@ -74,7 +74,7 @@ function poleFicheJoueur(poleId,pid,apres,onglet){
   }
   function tuiles(c,items){
     var w=document.createElement("div"); w.style.cssText="display:grid;grid-template-columns:repeat("+items.length+",1fr);gap:8px";
-    w.innerHTML=items.map(function(x){ return '<div style="background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center"><div style="font-size:19px;font-weight:900;color:'+(x.c||"var(--txt)")+';font-variant-numeric:tabular-nums">'+authEsc(String(x.v))+'</div><div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-top:2px">'+authEsc(x.l)+'</div></div>'; }).join("");
+    w.innerHTML=items.map(function(x){ return '<div style="background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center"><div style="font-size:19px;font-weight:900;color:'+(authEsc(x.c||"var(--txt)"))+';font-variant-numeric:tabular-nums">'+authEsc(String(x.v))+'</div><div style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-top:2px">'+authEsc(x.l)+'</div></div>'; }).join("");
     c.appendChild(w);
   }
 
@@ -110,7 +110,7 @@ function poleFicheJoueur(poleId,pid,apres,onglet){
       var du=typeof licenceMontantDu==="function"?licenceMontantDu(lic):0, paye=typeof licenceMontantPaye==="function"?licenceMontantPaye(lic):0;
       var stp=typeof licenceStatutPaiement==="function"?licenceStatutPaiement(lic):"";
       var lib={paye:["Payée","var(--grn)"],partiel:["Partiel","#c77700"],impaye:["Impayée","var(--red)"]}[stp]||["Montant non défini","var(--mut)"];
-      c.innerHTML+='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div style="font-size:13.5px;color:var(--txt)">'+authEsc(lic.saison||"")+(lic.montantAttendu!=null?' · '+poleEuros(lic.montantAttendu):'')+'</div><div style="font-size:12.5px;font-weight:800;color:'+lib[1]+'">'+lib[0]+'</div></div>'+
+      c.innerHTML+='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div style="font-size:13.5px;color:var(--txt)">'+authEsc(lic.saison||"")+(lic.montantAttendu!=null?' · '+poleEuros(lic.montantAttendu):'')+'</div><div style="font-size:12.5px;font-weight:800;color:'+authEsc(lib[1])+'">'+authEsc(lib[0])+'</div></div>'+
         (lic.montantAttendu!=null?'<div style="font-size:12px;color:var(--mut);margin-top:3px">Payé '+poleEuros(paye)+(du>0?' · reste '+poleEuros(du):'')+'</div>':'');
     } else c.innerHTML+='<div style="font-size:12.5px;color:var(--mut)">Aucune licence trouvée pour ce joueur cette saison.</div>';
 

@@ -82,8 +82,8 @@ function ppHtml(){
   l.forEach(function(x,i){
     var cl=x.fait?"ok":(x===suivante?"todo next":"todo");
     h+='<div class="pp-st '+cl+'"><div class="pp-ck">'+(x.fait?"✓":(i+1))+'</div>'+
-      '<div class="pp-tx">'+(x===suivante?'<b>'+x.titre+'</b>':x.titre)+'<small>'+authEsc(x.sous)+'</small></div>'+
-      (x.fait?'':'<button class="pp-go'+(x===suivante?'':' pp-clair')+'" onclick="ppGo(\''+x.id+'\')">'+x.bouton+'</button>')+'</div>';
+      '<div class="pp-tx">'+(x===suivante?'<b>'+authEsc(x.titre)+'</b>':authEsc(x.titre))+'<small>'+authEsc(x.sous)+'</small></div>'+
+      (x.fait?'':'<button class="pp-go'+(x===suivante?'':' pp-clair')+'" onclick="ppGo(\''+gmJs(x.id)+'\')">'+authEsc(x.bouton)+'</button>')+'</div>';
   });
   return h+'<button class="pp-masquer" onclick="ppMasquer()">Masquer pour l\'instant</button></div>';
 }

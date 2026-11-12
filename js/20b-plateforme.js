@@ -546,7 +546,7 @@ function pfBugsBox(box){
         '<b>'+authEsc(x.msg)+'</b><br><span style="color:var(--txt2)">'+authEsc((x.src||"?")+(x.ligne?":"+x.ligne:""))+(x.page?' · '+authEsc(x.page):'')+'</span><br>'+
         authEsc(x.n+" fois · dernière le "+pfSauvegardeDate(x.dernier)+" · version "+String(x.v||"?").slice(-5)+" · "+((x.clubs||[]).length)+" club(s)"+(x.role?" · "+x.role:""))+
         (x.pile?'<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--txt2)">Détail technique</summary><pre style="white-space:pre-wrap;word-break:break-word;font-size:10px;margin:4px 0 0">'+authEsc(x.pile)+'</pre></details>':'')+
-        '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-s" onclick="pfBugCopier(\''+authEsc(x.id)+'\')">Copier pour Claude</button><button class="btn-s" onclick="pfBugCorrige(\''+authEsc(x.id)+'\')">Corrigé, retirer</button></div></div>';
+        '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-s" onclick="pfBugCopier(\''+gmJs(x.id)+'\')">Copier pour Claude</button><button class="btn-s" onclick="pfBugCorrige(\''+gmJs(x.id)+'\')">Corrigé, retirer</button></div></div>';
     });
     box.innerHTML=h+'</div>';
   }).catch(function(e){ box.innerHTML=""; });
@@ -844,7 +844,7 @@ function loadClubsList(list){
       if(window.__gmAboBox) renderAvisReconduction(window.__gmAboBox, clubs, list);
     });
   }).catch(function(e){
-    list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Erreur : '+((e&&e.code)||e)+'</div>';
+    list.innerHTML='<div style="color:var(--red);padding:20px;text-align:center;font-size:12px">Erreur : '+(authEsc((e&&e.code)||e))+'</div>';
   });
 }
 // Logo d'un club dans la liste Plateforme. Indépendant de window.CURRENT_CLUB
@@ -872,7 +872,7 @@ function pfStatsHtml(c){
   var act=st.activiteMs?Math.floor((Date.now()-st.activiteMs)/86400000):null;
   var actTxt=act===null?"jamais":(act<=0?"aujourd'hui":(act<=30?"il y a "+act+" j":"rien depuis "+act+" j"));
   var cree=gmDate(c.createdAt);
-  var cell=function(k,v,warn){ return '<div style="border:1px solid var(--bdr);border-radius:12px;padding:7px 10px;min-width:0"><div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)">'+k+'</div><div style="font-size:13px;font-weight:700;margin-top:2px;color:'+(warn?'#B25A00':'var(--txt)')+'">'+v+'</div></div>'; };
+  var cell=function(k,v,warn){ return '<div style="border:1px solid var(--bdr);border-radius:12px;padding:7px 10px;min-width:0"><div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)">'+authEsc(k)+'</div><div style="font-size:13px;font-weight:700;margin-top:2px;color:'+(warn?'#B25A00':'var(--txt)')+'">'+authEsc(v)+'</div></div>'; };
   var h='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:20px;color:var(--txt)">'+n+(plafond?'<span style="font-size:12px;color:var(--mut);font-weight:600"> / '+plafond+'</span>':'<span style="font-size:12px;color:var(--mut);font-weight:600"> licences</span>')+'</b><span style="font-size:11px;color:var(--mut)">licences · saison '+authEsc(st.saison||"")+'</span></div>'+
     (plafond?'<div style="height:8px;border-radius:99px;background:var(--bdr);overflow:hidden;margin-top:5px"><i style="display:block;height:100%;width:'+pct+'%;border-radius:99px;background:'+(chaud?'#E8670A':'var(--ltg)')+'"></i></div>':'')+'</div>'+
     '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">'+
@@ -1094,7 +1094,7 @@ function loadSupportGrants(el, clubId){
         }));
         el.appendChild(card);
       });
-    }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+((e&&e.code)||e)+'</div>'; });
+    }).catch(function(e){ el.innerHTML='<div style="font-size:12px;color:var(--red)">Erreur : '+(authEsc((e&&e.code)||e))+'</div>'; });
 }
 function revokeSupportGrant(code, clubId){
   // Supprimer le code suffit à couper l'accès (les règles exigent qu'il existe) ;
@@ -1219,8 +1219,8 @@ async function loadDemandesEssai(box){
     var lignes=[["Sport",d.sport],["Ville",d.ville],["Licenciés (saison dernière)",d.licencies?("≈ "+d.licencies):""],["Dirigeant",d.nom],["Téléphone",d.tel],["E-mail",d.email],["Alerte push",d.notif?(d.notif.ok?"envoyée":"échec : "+(d.notif.erreur||"?")):""],["Liens",d.liens&&typeof d.liens==="object"?Object.keys(d.liens).filter(function(k){return d.liens[k];}).join(", "):""]];
     var h='<div style="font-size:14px;font-weight:800;color:var(--txt)">'+authEsc(d.club||"")+'</div>'+
       '<div style="font-size:11px;color:var(--mut);margin-bottom:8px">'+(at?at.toLocaleString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</div>';
-    lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+l[0]+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
-    if(coul.length) h+='<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0"><span style="color:var(--mut)">Couleurs</span><span style="display:flex;gap:4px">'+coul.map(function(c){return '<span style="width:18px;height:18px;border-radius:5px;background:'+c+'"></span>';}).join("")+'</span></div>';
+    lignes.forEach(function(l){ if(l[1]) h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--mut)">'+authEsc(l[0])+'</span><span style="color:var(--txt);text-align:right">'+authEsc(String(l[1]))+'</span></div>'; });
+    if(coul.length) h+='<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0"><span style="color:var(--mut)">Couleurs</span><span style="display:flex;gap:4px">'+coul.map(function(c){return '<span style="width:18px;height:18px;border-radius:5px;background:'+authEsc(c)+'"></span>';}).join("")+'</span></div>';
     var info=document.createElement("div"); info.innerHTML=h; card.appendChild(info);
     var row=gmRow(card);
     row.appendChild(gmBtn("Valider","primary",function(){ validerDemandeEssai(d); }));

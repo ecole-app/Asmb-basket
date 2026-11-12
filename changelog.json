@@ -1,5 +1,18 @@
 [
  {
+  "v": "1794484478",
+  "semver": "1.18.1",
+  "titre": "Sécurité renforcée",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Contrôle de sécurité de toute l'appli : les noms, titres et textes saisis (fiches d'inscription, événements, messages, liens) sont maintenant neutralisés partout où ils s'affichent, et un compte invité ne peut être rattaché qu'aux enfants prévus par son invitation. Rien ne change dans ton utilisation."
+   }
+  ]
+ },
+ {
   "v": "1794307826",
   "semver": "1.18.0",
   "titre": "Buvette : créneaux de caisse et produits offerts",

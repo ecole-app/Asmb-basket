@@ -157,7 +157,7 @@ function chqHtmlLicence(lic){
     var dep=c.statut==="depose", pret=!dep&&c.encaissement<=auj;
     return '<div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rx);padding:8px 10px">'+
       '<div style="flex:1;min-width:0;font-size:12px;color:var(--txt)"><b>'+chqEuro(c.montant)+'</b> · '+(c.num?"n° "+authEsc(c.num):"chèque "+(i+1))+(c.banque?" · "+authEsc(c.banque):"")+
-      '<div style="font-size:11px;color:var(--mut)">'+(dep?"Déposé le "+chqDateFr(c.deposeLe):"À encaisser le "+chqDateFr(c.encaissement))+(c.emetteur?" · "+authEsc(c.emetteur):"")+'</div></div>'+
+      '<div style="font-size:11px;color:var(--mut)">'+(authEsc(dep?"Déposé le "+chqDateFr(c.deposeLe):"À encaisser le "+chqDateFr(c.encaissement)))+(c.emetteur?" · "+authEsc(c.emetteur):"")+'</div></div>'+
       '<span style="flex-shrink:0;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;'+(dep?"background:var(--grn);color:#fff":(pret?"background:#E8670A;color:#fff":"background:var(--bdr);color:var(--txt2)"))+'">'+(dep?"Déposé":(pret?"À déposer":"Plus tard"))+'</span></div>';
   }).join("")+'</div>';
 }

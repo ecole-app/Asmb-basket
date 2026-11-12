@@ -57,7 +57,7 @@ function projetsBlocHtml(){
   if(!l.length) return h+'<div style="font-size:11px;color:var(--mut);margin-bottom:12px">Un stage, un achat, un tournoi… Indiquez ce qu\'il coûte et comment le financer : subventions à demander, sponsors, fonds propres. Budget du projet en PDF pour vos dossiers.</div>';
   l.forEach(function(p){
     var t=projetTotaux(p), pct=t.cout>0?Math.min(100,Math.round(t.finance/t.cout*100)):0;
-    h+='<div role="button" onclick="projetOuvrir(\''+authEsc(p.id)+'\')" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:11px 12px;margin-bottom:8px">'+
+    h+='<div role="button" onclick="projetOuvrir(\''+gmJs(p.id)+'\')" style="cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:11px 12px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><div style="font-size:13px;font-weight:800;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+authEsc(p.nom||"Sans nom")+'</div>'+
       '<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap">'+projetsEur(t.cout)+'</div></div>'+
       '<div style="height:6px;border-radius:4px;background:var(--bdr);overflow:hidden;margin:7px 0 4px"><div style="height:100%;width:'+pct+'%;background:var(--grn)"></div></div>'+
@@ -94,10 +94,10 @@ function projetOuvrir(id){
       '<button type="button" data-del aria-label="Supprimer" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;color:var(--mut);flex-shrink:0">✕</button></div>';
   }
   function section(k,titre,aide,plus){
-    return '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:14px 0 2px">'+titre+'</div>'+
+    return '<div style="font-size:12px;font-weight:800;color:var(--txt);margin:14px 0 2px">'+authEsc(titre)+'</div>'+
       '<div style="font-size:10.5px;color:var(--mut);margin-bottom:6px">'+aide+'</div>'+
       (p[k]||[]).map(function(o){ return ligne(k,o); }).join("")+
-      '<button type="button" data-add="'+k+'" style="padding:6px 12px;border-radius:20px;border:1.5px dashed var(--bdr);background:none;color:var(--dkg);font-size:11.5px;font-weight:700;cursor:pointer">'+plus+'</button>';
+      '<button type="button" data-add="'+k+'" style="padding:6px 12px;border-radius:20px;border:1.5px dashed var(--bdr);background:none;color:var(--dkg);font-size:11.5px;font-weight:700;cursor:pointer">'+authEsc(plus)+'</button>';
   }
   function dessiner(){
     var t=projetTotaux(p);

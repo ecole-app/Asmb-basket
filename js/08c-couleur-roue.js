@@ -76,7 +76,7 @@ function couleurRoueOuvrir(rang){
     curseur.style.background=choisie;
     var clair=gmContrasteBlanc(choisie)<4.5;
     apercu.style.background=choisie; apercu.style.color=clair?"#14141f":"#fff"; apercu.style.border=clair?"1px solid var(--bdr)":"none";
-    apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+choisie+'</span>';
+    apercu.innerHTML='<span>Aa</span><span style="font-size:12px;font-weight:600;opacity:.9">'+authEsc(choisie)+'</span>';
     note.textContent=clair?"Couleur claire : texte noir sur l'en-tête et l'accueil, boutons dans une version plus foncée de la teinte.":"";
   }
   function pointer(e){

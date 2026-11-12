@@ -150,7 +150,7 @@ function comptaFiltreExercice(fEl, all){
   var actuel="";
   ex.forEach(function(e){ if(COMPTA_FILTERS.du===e.debut&&COMPTA_FILTERS.au===e.fin) actuel=e.cle; });
   sel.innerHTML='<option value="">Tous les exercices</option>'+ex.map(function(e){
-    return '<option value="'+e.cle+'"'+(actuel===e.cle?" selected":"")+'>Exercice '+e.label+'</option>';
+    return '<option value="'+authEsc(e.cle)+'"'+(actuel===e.cle?" selected":"")+'>Exercice '+authEsc(e.label)+'</option>';
   }).join("")+(actuel===""&&(COMPTA_FILTERS.du||COMPTA_FILTERS.au)?'<option value="_" selected>Période personnalisée</option>':'');
   sel.addEventListener("change",function(){
     var e=ex.filter(function(x){ return x.cle===sel.value; })[0];
@@ -183,8 +183,8 @@ function comptaRemplirCompte(valeur){
   var nums=Object.keys(PCG_COMPTES).filter(function(k){ return k.charAt(0)===classe; });
   if(valeur&&nums.indexOf(valeur)<0) nums.push(valeur);
   nums.sort();
-  sel.innerHTML='<option value="">Automatique · '+auto+' '+authEsc(comptaLibCompte(auto))+'</option>'+
-    nums.map(function(k){ return '<option value="'+k+'">'+k+' '+authEsc(comptaLibCompte(k))+'</option>'; }).join("");
+  sel.innerHTML='<option value="">Automatique · '+authEsc(auto)+' '+authEsc(comptaLibCompte(auto))+'</option>'+
+    nums.map(function(k){ return '<option value="'+authEsc(k)+'">'+authEsc(k)+' '+authEsc(comptaLibCompte(k))+'</option>'; }).join("");
   sel.value=valeur||"";
 }
 
@@ -198,7 +198,7 @@ function comptaPlanFenetre(r){
   gmSection(b,"Exercice comptable","Année civile, ou saison sportive (le plus courant : septembre → août). Sert aux numéros de pièce, au compte de résultat et à l'export FEC.");
   var mois=document.createElement("select"); mois.className="form-input";
   mois.innerHTML=COMPTA_MOIS.map(function(m,i){
-    var d=i+1; return '<option value="'+d+'">'+(d===1?"Année civile (janvier → décembre)":"Du 1er "+m+" au "+COMPTA_MOIS[(i+11)%12]+" suivant")+'</option>';
+    var d=i+1; return '<option value="'+d+'">'+(authEsc(d===1?"Année civile (janvier → décembre)":"Du 1er "+m+" au "+COMPTA_MOIS[(i+11)%12]+" suivant"))+'</option>';
   }).join("");
   mois.value=String(r.debutMois); b.appendChild(mois);
   var ex=document.createElement("div"); ex.style.cssText="font-size:12px;color:var(--txt2);margin:6px 0 4px";
@@ -206,7 +206,7 @@ function comptaPlanFenetre(r){
   mois.addEventListener("change",majEx); majEx(); b.appendChild(ex);
 
   var dl=document.createElement("datalist"); dl.id="pcg-list";
-  dl.innerHTML=Object.keys(PCG_COMPTES).sort().map(function(k){ return '<option value="'+k+'">'+authEsc(PCG_COMPTES[k])+'</option>'; }).join("");
+  dl.innerHTML=Object.keys(PCG_COMPTES).sort().map(function(k){ return '<option value="'+authEsc(k)+'">'+authEsc(PCG_COMPTES[k])+'</option>'; }).join("");
   b.appendChild(dl);
   var champs=[];
   function ligne(parent,label,cle,defaut,classes,cible){
@@ -324,7 +324,7 @@ function openComptaComptes(){
   var exs=comptaExercicesConnus(all);
   var s=gmSheet("Comptes annuels"), b=s.body;
   var sel=document.createElement("select"); sel.className="form-input";
-  sel.innerHTML=exs.map(function(e){ return '<option value="'+e.cle+'">Exercice '+e.label+'</option>'; }).join("");
+  sel.innerHTML=exs.map(function(e){ return '<option value="'+authEsc(e.cle)+'">Exercice '+authEsc(e.label)+'</option>'; }).join("");
   // Par défaut : le dernier exercice terminé s'il a des lignes (c'est lui qu'on présente en AG).
   var cour=comptaExerciceCourant(), prec=exs.filter(function(e){ return e.cle<cour.cle&&comptaLignesPeriode(all,e).length; })[0];
   sel.value=(prec&&!comptaLignesPeriode(all,cour).length)?prec.cle:cour.cle;
@@ -343,20 +343,20 @@ function openComptaComptes(){
     var cr=comptaCompteResultat(comptaLignesPeriode(all,ex)), crN1=comptaCompteResultat(comptaLignesPeriode(all,n1));
     var nb=comptaLignesPeriode(all,ex).length;
     function bloc(titre,rubs,tot,rubsN1,totN1,coul){
-      var h='<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin:16px 0 4px"><span>'+titre+'</span><span>'+ex.label+' · <span style="opacity:.7">'+n1.label+'</span></span></div>';
+      var h='<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);margin:16px 0 4px"><span>'+authEsc(titre)+'</span><span>'+authEsc(ex.label)+' · <span style="opacity:.7">'+authEsc(n1.label)+'</span></span></div>';
       rubs.forEach(function(r,i){
         var v1=rubsN1[i].total; if(!r.total&&!v1) return;
         h+='<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--txt);padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="flex:1;min-width:0">'+authEsc(r.lib)+
           '<span style="display:block;font-size:10.5px;color:var(--mut);font-family:monospace">'+Object.keys(r.comptes).sort().map(function(k){ return k+" "+authEsc(comptaLibCompte(k))+" : "+comptaEur(r.comptes[k]); }).join("<br>")+'</span></span>'+
           '<span style="text-align:right;white-space:nowrap;font-weight:700">'+comptaEur(r.total)+'<span style="display:block;font-weight:500;color:var(--mut);font-size:11px">'+comptaEur(v1)+'</span></span></div>';
       });
-      h+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:'+coul+';padding:7px 0">Total '+titre.toLowerCase()+'<span style="text-align:right">'+comptaEur(tot)+'<span style="display:block;font-weight:500;color:var(--mut);font-size:11px">'+comptaEur(totN1)+'</span></span></div>';
+      h+='<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:'+authEsc(coul)+';padding:7px 0">Total '+authEsc(titre.toLowerCase())+'<span style="text-align:right">'+comptaEur(tot)+'<span style="display:block;font-weight:500;color:var(--mut);font-size:11px">'+comptaEur(totN1)+'</span></span></div>';
       return h;
     }
-    zone.innerHTML='<div style="font-size:12px;color:var(--txt2);margin-top:8px">Du '+ex.debut.split("-").reverse().join("/")+' au '+ex.fin.split("-").reverse().join("/")+' · '+nb+' écriture'+(nb>1?"s":"")+'</div>'+
+    zone.innerHTML='<div style="font-size:12px;color:var(--txt2);margin-top:8px">Du '+authEsc(ex.debut.split("-").reverse().join("/"))+' au '+authEsc(ex.fin.split("-").reverse().join("/"))+' · '+nb+' écriture'+(nb>1?"s":"")+'</div>'+
       bloc("Produits",cr.produits,cr.totalProduits,crN1.produits,crN1.totalProduits,"var(--grn)")+
       bloc("Charges",cr.charges,cr.totalCharges,crN1.charges,crN1.totalCharges,"var(--red)")+
-      '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--dkg);padding:12px 0;margin-top:6px;border-top:2px solid var(--bdr)">'+(cr.resultat>=0?"Excédent":"Déficit")+' de l\'exercice<span style="text-align:right">'+comptaEur(cr.resultat)+'<span style="display:block;font-size:11px;font-weight:500;color:var(--mut)">'+n1.label+' : '+comptaEur(crN1.resultat)+'</span></span></div>';
+      '<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--dkg);padding:12px 0;margin-top:6px;border-top:2px solid var(--bdr)">'+(cr.resultat>=0?"Excédent":"Déficit")+' de l\'exercice<span style="text-align:right">'+comptaEur(cr.resultat)+'<span style="display:block;font-size:11px;font-weight:500;color:var(--mut)">'+authEsc(n1.label)+' : '+comptaEur(crN1.resultat)+'</span></span></div>';
   }
   sel.addEventListener("change",rendre); rendre();
 }
@@ -638,7 +638,7 @@ function openComptaReleve(){
     zone.innerHTML="";
     var resume=document.createElement("div");
     resume.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;font-size:12.5px;color:var(--txt);line-height:1.6";
-    resume.innerHTML='<b>'+ops.length+' opération'+(ops.length>1?"s":"")+'</b> du '+fr(ops[0].date)+' au '+fr(ops[ops.length-1].date)+
+    resume.innerHTML='<b>'+ops.length+' opération'+(ops.length>1?"s":"")+'</b> du '+authEsc(fr(ops[0].date))+' au '+authEsc(fr(ops[ops.length-1].date))+
       ' · entrées '+comptaEur(entrees)+' · sorties '+comptaEur(sorties)+'<br>'+
       '<span style="color:var(--grn);font-weight:700">'+nb.trouve+' trouvée'+(nb.trouve>1?"s":"")+'</span> · '+
       '<span style="color:#b45309;font-weight:700">'+nb.aCreer+' sans ligne</span> · '+
@@ -649,7 +649,7 @@ function openComptaReleve(){
     res.slice().sort(function(a,b){ return ordre[a.etat]-ordre[b.etat]||a.op.date.localeCompare(b.op.date); }).forEach(function(r){
       var o=r.op, c=document.createElement("div");
       c.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(r.etat==="trouve"?"var(--grn)":r.etat==="aCreer"?"#d97706":"var(--bdr)")+";border-radius:var(--rs);padding:10px 12px;margin-top:8px;"+(r.etat==="deja"?"opacity:.6":"");
-      c.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0;flex:1"><div style="font-size:11px;color:var(--mut)">'+fr(o.date)+'</div>'+
+      c.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0;flex:1"><div style="font-size:11px;color:var(--mut)">'+authEsc(fr(o.date))+'</div>'+
         '<div style="font-size:12.5px;font-weight:700;color:var(--txt);word-break:break-word">'+authEsc(o.libelle||"(sans libellé)")+'</div></div>'+
         '<div style="font-size:14px;font-weight:800;white-space:nowrap;color:'+(o.montant<0?"var(--red)":"var(--grn)")+'">'+(o.montant>0?"+":"")+comptaEur(o.montant)+'</div></div>';
       var bas=document.createElement("div"); bas.style.cssText="margin-top:8px;font-size:12px;color:var(--txt2)";
@@ -658,7 +658,7 @@ function openComptaReleve(){
       } else if(r.etat==="trouve"){
         var lab=document.createElement("label"); lab.style.cssText="display:flex;gap:8px;align-items:flex-start;cursor:pointer";
         var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=true; cb.style.cssText="width:17px;height:17px;flex-shrink:0;margin-top:1px";
-        var t=document.createElement("span"); t.innerHTML='Correspond à <b>'+authEsc(r.ligne.piece||"")+'</b> · '+authEsc(r.ligne.motif||r.ligne.categorie||"")+' ('+fr(r.ligne.date||o.date)+')';
+        var t=document.createElement("span"); t.innerHTML='Correspond à <b>'+authEsc(r.ligne.piece||"")+'</b> · '+authEsc(r.ligne.motif||r.ligne.categorie||"")+' ('+authEsc(fr(r.ligne.date||o.date))+')';
         lab.appendChild(cb); lab.appendChild(t); bas.appendChild(lab);
         coches.push({cb:cb,r:r});
       } else {

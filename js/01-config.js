@@ -33,10 +33,10 @@ function clubLogoHtml(px){
   px=px||44;
   var r=Math.round(px*0.18);
   var src=clubLogo();
-  if(src) return '<img src="'+src+'" alt="" style="width:'+px+'px;height:'+px+'px;object-fit:contain;display:block;border-radius:'+r+'px">';
+  if(src) return '<img src="'+(typeof authEsc==="function"?authEsc(src):String(src).replace(/["<>]/g,""))+'" alt="" style="width:'+px+'px;height:'+px+'px;object-fit:contain;display:block;border-radius:'+r+'px">';
   return '<div style="width:'+px+'px;height:'+px+'px;border-radius:'+r+'px;background:linear-gradient(145deg,#1A2E5A,#10203d);'+
     'display:flex;align-items:center;justify-content:center;font-size:'+Math.max(9,Math.round(px*0.36))+'px;'+
-    'font-weight:900;color:#F2D57E;letter-spacing:.5px">'+clubInitiales()+'</div>';
+    'font-weight:900;color:#F2D57E;letter-spacing:.5px">'+authEsc(clubInitiales())+'</div>';
 }
 
 // ═══ COULEUR DU CLUB ═════════════════════════════════════════════

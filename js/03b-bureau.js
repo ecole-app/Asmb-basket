@@ -246,7 +246,7 @@ function gmDeskRender(){
       h+='<button type="button" class="gs-grp gs-grp-btn'+(ouvert?" ouvert":"")+'" aria-expanded="'+ouvert+'" onclick="gmDeskGrpBascule(this.dataset.g)" data-g="'+authEsc(grp)+'"><span>'+authEsc(grp)+'</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="gs-grp-body"'+(ouvert?'':' hidden')+'>';
     }
     var n=gmDeskBadge(it);
-    h+='<button type="button" class="gs-item'+(it.id===GM_DESK_ACTIF?" on":"")+'" onclick="gmDeskOuvrir(\''+it.id+'\')"'+(it.id===GM_DESK_ACTIF?' aria-current="page"':'')+(mini?' title="'+authEsc(it.label)+'" aria-label="'+authEsc(it.label)+'"':'')+'>'+
+    h+='<button type="button" class="gs-item'+(it.id===GM_DESK_ACTIF?" on":"")+'" onclick="gmDeskOuvrir(\''+gmJs(it.id)+'\')"'+(it.id===GM_DESK_ACTIF?' aria-current="page"':'')+(mini?' title="'+authEsc(it.label)+'" aria-label="'+authEsc(it.label)+'"':'')+'>'+
       '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(GM_DESK_SVG[it.ic]||"")+'</svg>'+
       '<span class="gs-lbl">'+authEsc(it.label)+'</span>'+(n?'<span class="gs-badge">'+n+'</span>':'')+'</button>';
   });
@@ -290,7 +290,7 @@ function gmDeskThemeBuild(){
   Object.keys(GM_DESK_THEMES).forEach(function(k){
     var th=GM_DESK_THEMES[k], b=document.createElement("button");
     b.type="button"; b.className="dt-sw"+(k===cur?" on":""); b.setAttribute("aria-pressed",k===cur?"true":"false");
-    b.innerHTML='<div class="dt-mini" aria-hidden="true"><i style="background:'+th.menu+'"></i><b style="background:'+th.fond+'"></b><i style="width:14%;background:'+th.acc+'"></i></div><span>'+authEsc(th.label)+'</span><small>'+authEsc(th.desc)+'</small>';
+    b.innerHTML='<div class="dt-mini" aria-hidden="true"><i style="background:'+authEsc(th.menu)+'"></i><b style="background:'+authEsc(th.fond)+'"></b><i style="width:14%;background:'+authEsc(th.acc)+'"></i></div><span>'+authEsc(th.label)+'</span><small>'+authEsc(th.desc)+'</small>';
     b.addEventListener("click",function(){ gmDeskThemeSet(k); });
     box.appendChild(b);
   });

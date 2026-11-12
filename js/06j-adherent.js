@@ -5,9 +5,9 @@
 function adhOuvrir(){
   var s=gmSheet("Nouvelle fiche adhérent");
   var champ=function(id,label,type,ph){
-    return '<div class="form-group"><label class="form-label">'+label+'</label><input class="form-input" id="'+id+'" type="'+(type||"text")+'"'+(ph?' placeholder="'+ph+'"':'')+'></div>';
+    return '<div class="form-group"><label class="form-label">'+authEsc(label)+'</label><input class="form-input" id="'+authEsc(id)+'" type="'+(type||"text")+'"'+(ph?' placeholder="'+authEsc(ph)+'"':'')+'></div>';
   };
-  var roles=["joueur","benevole","coach","autre"].map(function(k){ return '<option value="'+k+'">'+authEsc(LIC_ROLES[k])+'</option>'; }).join("");
+  var roles=["joueur","benevole","coach","autre"].map(function(k){ return '<option value="'+authEsc(k)+'">'+authEsc(LIC_ROLES[k])+'</option>'; }).join("");
   s.body.innerHTML=
     '<div class="form-group"><label class="form-label">Cette personne est</label><select class="form-select" id="adh-role">'+roles+'</select></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+champ("adh-prenom","Prénom *","text")+champ("adh-nom","Nom *","text")+'</div>'+

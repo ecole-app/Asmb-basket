@@ -8,7 +8,8 @@
     "test:metier": "node --test metier/*.test.js",
     "test:metier:ci": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=./rules/reporter-gh.mjs --test-reporter-destination=stdout metier/*.test.js",
     "test": "npm run test:metier && npm run test:rules",
-    "jarvis": "node jarvis/jarvis.mjs"
+    "jarvis": "node jarvis/jarvis.mjs",
+    "jarvis:hostile": "JARVIS_HOSTILE=1 node jarvis/jarvis.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

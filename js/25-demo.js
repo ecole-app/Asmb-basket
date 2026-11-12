@@ -149,7 +149,7 @@ function demoBandeau(){
   if(document.getElementById("gm-demo-band")) return;
   var b=document.createElement("div"); b.id="gm-demo-band";
   b.title="Mode démo : rien n'est enregistré";
-  var p=demoProfil(), opts=Object.keys(DEMO_PROFILS).map(function(k){ return '<option value="'+k+'"'+(k===p?' selected':'')+'>'+DEMO_PROFILS[k]+'</option>'; }).join("");
+  var p=demoProfil(), opts=Object.keys(DEMO_PROFILS).map(function(k){ return '<option value="'+authEsc(k)+'"'+(k===p?' selected':'')+'>'+DEMO_PROFILS[k]+'</option>'; }).join("");
   b.innerHTML='<span>🧪 Démo</span>'+
     '<select aria-label="Voir la démo en tant que" onchange="demoChangerProfil(this.value)">'+opts+'</select>'+
     '<a href="https://accueil.generalmanagerapp.fr/#essai" target="_blank" rel="noopener">Créer mon club</a>'+
