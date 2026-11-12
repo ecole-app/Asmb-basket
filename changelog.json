@@ -1,5 +1,21 @@
 [
  {
+  "v": "1794512205",
+  "semver": "1.19.1",
+  "titre": "Double authentification plus claire",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Quand on active la double authentification, l'écran explique quelle appli installer (avec les liens Android et iPhone) et comment faire avec un seul appareil."
+   }
+  ]
+ },
+ {
   "v": "1794510270",
   "semver": "1.19.0",
   "titre": "Notifications en sourdine",

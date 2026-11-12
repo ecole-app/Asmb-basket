@@ -105,6 +105,16 @@ function mfaActiver(){
     mf.getSession().then(function(sess){ return window.fbTotp.generateSecret(sess); }).then(function(secret){
       var url=secret.generateQrCodeUrl(u.email||"compte","General Manager");
       var s=gmSheet("Activer la double authentification");
+      // Aide : quelle appli installer (liens des magasins) et comment faire avec un seul appareil.
+      var aide=document.createElement("div"); aide.style.cssText="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;line-height:1.5;color:var(--txt2)";
+      var at=document.createElement("div"); at.style.cssText="font-weight:800;color:var(--txt);margin-bottom:4px"; at.textContent="Il vous faut une appli d'authentification (gratuite)."; aide.appendChild(at);
+      var ap=document.createElement("div"); ap.textContent="Pas encore installée ? Sur Android : Google Authenticator. Sur iPhone : l'appli « Mots de passe » du téléphone convient, ou Google Authenticator."; aide.appendChild(ap);
+      var al=document.createElement("div"); al.style.cssText="margin:6px 0"; 
+      [["Google Authenticator (Android)","https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"],["Google Authenticator (iPhone)","https://apps.apple.com/app/google-authenticator/id388497605"]].forEach(function(x,i){
+        var a=document.createElement("a"); a.href=x[1]; a.target="_blank"; a.rel="noopener"; a.textContent=x[0]; a.style.cssText="display:block;font-weight:700;color:var(--club);text-decoration:underline;padding:3px 0"; al.appendChild(a);
+      }); aide.appendChild(al);
+      var a1=document.createElement("div"); a1.textContent="Un seul appareil ? Touchez « Copier la clé », ouvrez l'appli, touchez +, puis « Saisir une clé de configuration » et collez-la."; aide.appendChild(a1);
+      s.body.appendChild(aide);
       mfaTexte(s.body,"1. Sur ordinateur : scannez ce QR code avec l'application d'authentification de votre téléphone. Sur le téléphone : touchez « Ouvrir l'application » ou copiez la clé.");
       var qr=document.createElement("div"); qr.style.cssText="display:flex;justify-content:center;background:#fff;border-radius:12px;padding:12px;margin:0 auto 10px;width:max-content"; s.body.appendChild(qr);
       if(typeof QRCode!=="undefined"){ try{ new QRCode(qr,{text:url,width:180,height:180,colorDark:"#0b1630",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); }catch(e){ qr.remove(); } } else qr.remove();
