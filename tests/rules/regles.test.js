@@ -1659,8 +1659,34 @@ describe("Appel à bénévoles (ben_inscriptions)", () => {
     await assertSucceeds(deleteDoc(doc(await as("dirA"), "clubs/A/ben_inscriptions/e1_parentA_marqueur")));
   });
   it("refus d'un parent : seulement en son nom", async () => {
-    const ref = (id, uid) => setDoc(doc(id, "clubs/A/checkins/e1_refus_x_m1"), { eventId: "e1", missionId: "m1", benUid: uid, status: "refus", source: "parent_refus", ts: serverTimestamp() });
-    await assertFails(ref(await as("parentA"), "dirA"));
-    await assertSucceeds(ref(await as("parentA"), "parentA"));
+    const ref = (db, uid, idUid) => setDoc(doc(db, `clubs/A/checkins/e1_refus_${idUid}_m1`), { eventId: "e1", missionId: "m1", benUid: uid, status: "refus", source: "parent_refus", ts: serverTimestamp() });
+    await assertFails(ref(await as("parentA"), "dirA", "dirA"));
+    await assertFails(ref(await as("parentA"), "parentA", "dirA"));
+    await assertSucceeds(ref(await as("parentA"), "parentA", "parentA"));
   });
+  it("présent/absent : un parent ne répond que pour ses enfants, le staff pour tous", async () => {
+    const rep = (db, pid, id) => setDoc(doc(db, `clubs/A/checkins/${id || "e1_" + pid}`), { eventId: "e1", playerId: pid, status: "absent", source: "parent", ts: serverTimestamp() });
+    await assertSucceeds(rep(await as("parentA"), "p1"));
+    await assertFails(rep(await as("parentA"), "p2"));
+    await assertFails(rep(await as("parent2A"), "p1"));
+    await assertFails(rep(await as("parentA"), "p1", "e1_p2"));
+    await assertSucceeds(rep(await as("joueurA"), "p1"));
+    await assertFails(rep(await as("joueurA"), "p2"));
+    await assertSucceeds(rep(await as("coachA"), "p2"));
+    await assertSucceeds(rep(await as("dirA"), "p3"));
+  });
+  it("présent/absent : on ne modifie ni ne retire la réponse d'un autre enfant", async () => {
+    await setDoc(doc(await as("coachA"), "clubs/A/checkins/e1_p2"), { eventId: "e1", playerId: "p2", status: "present", ts: serverTimestamp() });
+    await assertFails(updateDoc(doc(await as("parentA"), "clubs/A/checkins/e1_p2"), { status: "absent" }));
+    await assertFails(deleteDoc(doc(await as("parentA"), "clubs/A/checkins/e1_p2")));
+    await setDoc(doc(await as("parentA"), "clubs/A/checkins/e1_p1"), { eventId: "e1", playerId: "p1", status: "present", ts: serverTimestamp() });
+    await assertSucceeds(deleteDoc(doc(await as("parentA"), "clubs/A/checkins/e1_p1")));
+  });
+  it("réponse de bénévole : seulement la sienne", async () => {
+    const ben = (db, uid, idUid) => setDoc(doc(db, `clubs/A/checkins/e1_ben_${idUid}_m1`), { eventId: "e1", missionId: "m1", benUid: uid, status: "present", source: "benevole", ts: serverTimestamp() });
+    await assertSucceeds(ben(await as("parentA"), "parentA", "parentA"));
+    await assertFails(ben(await as("parentA"), "parent2A", "parent2A"));
+    await assertFails(setDoc(doc(await as("parentA"), "clubs/A/checkins/e1_p2"), { eventId: "e1", benUid: "parentA", status: "absent" }));
+  });
+
 });

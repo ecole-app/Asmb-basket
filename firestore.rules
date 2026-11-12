@@ -135,6 +135,13 @@ service cloud.firestore {
         );
     }
 
+    // Ce joueur est-il l'un de mes enfants (ou moi) ? Compte rattaché, ou rattachement par numéro.
+    function monJoueur(clubId, pid) {
+      return pid in me().get('linkedPlayerIds', [])
+        || (exists(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone','')))
+            && pid in get(/databases/$(database)/documents/clubs/$(clubId)/rattachements/$(me().get('phone',''))).data.get('playerIds', []));
+    }
+
     function changes(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
     }
@@ -743,9 +750,19 @@ service cloud.firestore {
       // legaux, le certificat medical et la photo d'un mineur. Elle ne regarde que
       // le staff : jusqu'ici tout membre du club pouvait lire toutes les fiches.
       match /licences/{id}     { allow read: if readStaff(clubId);  allow write: if staff(clubId); }
+      // Présent / absent (checkins/{eventId}_{playerId}) : le staff pour tous ; un parent ou un joueur
+      // seulement pour SES enfants / lui-même (linkedPlayerIds ou rattachement par numéro) ; un bénévole
+      // seulement pour ses propres réponses (eventId_ben_<uid>_<mission>, eventId_refus_<uid>_<mission>).
       match /checkins/{id}     { allow read: if readMember(clubId);
-        // Refus d'un parent (appel à bénévoles) : au nom du parent connecté seulement.
-        allow write: if member(clubId) && (request.resource == null || request.resource.data.get('source', '') != 'parent_refus' || request.resource.data.get('benUid', '') == request.auth.uid); }
+        allow create, update: if member(clubId) && (staff(clubId)
+          || (request.resource.data.get('benUid', '') == request.auth.uid
+              && id.matches('.*_(ben|refus)_' + request.auth.uid + '_.*'))
+          || (request.resource.data.get('playerId', null) != null
+              && id == string(request.resource.data.get('eventId', '')) + '_' + string(request.resource.data.playerId)
+              && monJoueur(clubId, string(request.resource.data.playerId))));
+        allow delete: if member(clubId) && (staff(clubId)
+          || resource.data.get('benUid', '') == request.auth.uid
+          || (resource.data.get('playerId', null) != null && monJoueur(clubId, string(resource.data.playerId)))); }
       // Appel à bénévoles : chacun crée et retire seulement SON inscription ; la Cloud Function onInscriptionBenevole
       // place la personne dans events/{id}.benevoles (ou répond « complet »). Pas de modification côté client.
       match /ben_inscriptions/{id} {
