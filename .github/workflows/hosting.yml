@@ -1,0 +1,45 @@
+name: Hébergement Firebase (liens des e-mails)
+
+# Firebase Hosting ne sert qu'à une chose : le domaine auth.generalmanagerapp.fr, qui affiche
+# les pages des liens envoyés par e-mail (vérification, mot de passe oublié, double
+# authentification) à la place de asmb-app.firebaseapp.com. Le dossier hosting/ ne contient
+# qu'une page qui renvoie vers generalmanagerapp.fr. Le site lui-même reste sur GitHub Pages.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "hosting/**"
+      - "firebase.json"
+      - ".github/workflows/hosting.yml"
+  workflow_dispatch:
+
+jobs:
+  hosting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier le secret
+        id: cle
+        env:
+          CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$CLE" ]; then echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secret absent : rien déployé."; else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.cle.outputs.ok == 'true'
+        with:
+          node-version: 22
+      - name: Déployer l'hébergement
+        if: steps.cle.outputs.ok == 'true'
+        env:
+          CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$CLE" > "$RUNNER_TEMP/cle.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/cle.json"
+          if ! npx --yes firebase-tools@14 deploy --only hosting --project asmb-app --non-interactive > "$RUNNER_TEMP/sortie.txt" 2>&1; then
+            cat "$RUNNER_TEMP/sortie.txt"
+            echo "::error title=Echec du deploiement hosting::$(tail -n 25 "$RUNNER_TEMP/sortie.txt" | sed 's/%/%25/g' | tr '\n' '|')"
+            rm -f "$RUNNER_TEMP/cle.json"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/sortie.txt"
+          rm -f "$RUNNER_TEMP/cle.json"
