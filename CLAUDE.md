@@ -109,7 +109,7 @@ pour ces comptes, pas seulement pour le rôle `dirigeant`.
 
 ## E-mails de connexion (Firebase Auth)
 
-Modèles en français, expéditeur « General Manager » <noreply@generalmanagerapp.fr> (domaine vérifié par DNS chez IONOS : TXT firebase=asmb-app, SPF complété, CNAME firebase1/2._domainkey), réponse à contact@generalmanagerapp.fr (redirigé chez Ahmed). Liens des mails : https://auth.generalmanagerapp.fr/__/auth/action, servi par Firebase Hosting (dossier `hosting/` = simple renvoi vers le site, workflow `hosting.yml`, CNAME `auth` → asmb-app.web.app). Le site reste sur GitHub Pages.
+Modèles en français, expéditeur « General Manager » <noreply@generalmanagerapp.fr> (domaine vérifié par DNS chez IONOS : TXT firebase=asmb-app, SPF complété, CNAME firebase1/2._domainkey), réponse à contact@generalmanagerapp.fr (redirigé chez Ahmed). Nom affiché « General Manager » (fiche Branding Google Auth Platform créée le 15/11/2026 ; sans elle les mails affichaient l'identifiant `asmb-app`). **Les liens des mails restent en `asmb-app.firebaseapp.com`** : Firebase refuse de modifier l'URL d'action et le texte des modèles (console et API : `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`, « les modèles ne peuvent pas être modifiés », support Google Cloud payant) ; l'identifiant de projet est définitif. Décision d'Ahmed (15/11/2026) : on laisse comme ça, pas d'envoi de ces mails par nous-mêmes. Le domaine `auth.generalmanagerapp.fr` (Firebase Hosting, dossier `hosting/` = simple renvoi vers le site, workflow `hosting.yml`, CNAME `auth` → asmb-app.web.app) est en place mais pas utilisé par les liens. Le site reste sur GitHub Pages.
 
 ## Sauvegarde
 
