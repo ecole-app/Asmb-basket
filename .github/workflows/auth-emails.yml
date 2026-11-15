@@ -2,7 +2,7 @@ name: E-mails de connexion (nom et lien)
 
 # Règle les e-mails envoyés par Firebase Auth (mot de passe oublié, vérification, changement
 # d'adresse, double authentification) via l'API Identity Platform :
-# - remplace %APP_NAME% (qui affiche « asmb-app ») par « General Manager » en dur ;
+# (le texte des modèles, lui, n'est pas modifiable par l'API : EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED)
 # - pose l'URL d'action https://auth.generalmanagerapp.fr/__/auth/action (au lieu de
 #   asmb-app.firebaseapp.com). La console Firebase refusait ce changement sans dire pourquoi.
 # Se lance au push de ce fichier ou à la main.
@@ -29,30 +29,14 @@ jobs:
           cat > run.js <<'JS'
           const { GoogleAuth } = require("google-auth-library");
           const URL_ACTION = "https://auth.generalmanagerapp.fr/__/auth/action";
-          const NOM = "General Manager";
-          (async () => {
+                    (async () => {
             const auth = new GoogleAuth({ keyFile: process.env.RUNNER_TEMP + "/cle.json", scopes: ["https://www.googleapis.com/auth/cloud-platform"] });
             const c = await auth.getClient();
             const base = "https://identitytoolkit.googleapis.com/admin/v2/projects/asmb-app/config";
             const cfg = (await c.request({ url: base })).data;
             const se = (cfg.notification && cfg.notification.sendEmail) || {};
             console.log("Avant : callbackUri =", se.callbackUri || "(défaut)");
-            const masque = [], nouveau = {};
-            for (const k of Object.keys(se)) {
-              if (!/Template$/.test(k) || typeof se[k] !== "object") continue;
-              const t = Object.assign({}, se[k]);
-              const avant = JSON.stringify([t.subject, t.body]);
-              t.subject = String(t.subject || "").split("%APP_NAME%").join(NOM);
-              t.body = String(t.body || "").split("%APP_NAME%").join(NOM);
-              if (JSON.stringify([t.subject, t.body]) === avant) { console.log(k, ": rien à changer"); continue; }
-              t.customized = true;
-              nouveau[k] = t; masque.push("notification.sendEmail." + k);
-              console.log(k, ": objet =", t.subject);
-            }
-            if (masque.length) {
-              await c.request({ url: base + "?updateMask=" + masque.join(","), method: "PATCH", data: { notification: { sendEmail: nouveau } } });
-              console.log("Modèles enregistrés :", masque.length);
-            }
+            // Le texte des modèles ne peut pas être modifié par l'API (EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED).
             try {
               const r = await c.request({ url: base + "?updateMask=notification.sendEmail.callbackUri", method: "PATCH", data: { notification: { sendEmail: { callbackUri: URL_ACTION } } } });
               console.log("Après : callbackUri =", r.data.notification.sendEmail.callbackUri);
