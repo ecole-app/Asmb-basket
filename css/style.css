@@ -390,7 +390,9 @@ html.gm-desk .main>#scr-portal.on{max-width:1360px}
 .dk-head-act{display:flex;gap:10px;flex-wrap:wrap}
 .dk-cta{min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);font-size:14px;font-weight:700;cursor:pointer}
 .dk-cta-main{background:var(--dkg);border-color:var(--dkg);color:#fff}
-.dk-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:22px}
+/* flex : les cartes chiffres tiennent sur une ligne dès que la place le permet ; une carte qui passe à la ligne s'élargit au lieu de rester seule et étroite */
+.dk-kpis{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:22px}
+.dk-kpis>.dk-kpi{flex:1 1 170px;min-width:0}
 .dk-kpi{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px 20px;transition:box-shadow .15s,transform .15s}
 .dk-kpi:hover{box-shadow:0 6px 20px var(--shadow);transform:translateY(-1px)}
 .dk-kpi:focus-visible,.dk-rv:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
@@ -894,3 +896,11 @@ html.gm-desk .rech-aide{display:block;font-size:12px;color:var(--mut);padding:10
 /* Annuler : barre qui se vide en 5 s (showUndoToast, js/09) */
 .gm-undo-barre{position:absolute;left:0;bottom:0;height:4px;width:100%;background:#F2D57E;transform-origin:left center}
 html[dir="rtl"] .gm-undo-barre{transform-origin:right center}
+
+/* Plateforme (super admin) sur ordinateur : contenu centré, clubs sur 2 colonnes (js/20b-plateforme.js) */
+@media (min-width:1024px){
+  #plateforme-content.pf-home{max-width:1240px;margin-left:auto;margin-right:auto}
+  .pf-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px;align-items:start}
+  .pf-liste>.pf-club{margin-bottom:0!important}
+  .pf-liste>:not(.pf-club){grid-column:1/-1}
+}

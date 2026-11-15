@@ -747,6 +747,7 @@ function showPlateformeHome(opts){
     return false;
   }
   el.innerHTML="";
+  el.classList.add("pf-home"); // version ordinateur : largeur limitée + clubs en grille (css/style.css)
   var clocheW=pfClocheCarte(), cloche=clocheW._carte||clocheW;
   el.appendChild(clocheW);
   // Panneau déroulant (comme la cloche de Twitch) : fermé par défaut, s'ouvre au toucher.
@@ -792,6 +793,7 @@ function showPlateformeHome(opts){
   pfChipsEtat(bSauv,bBugs);
   el.appendChild(act);
   list.style.cssText="margin:14px 12px 24px";
+  list.className="pf-liste";
   el.appendChild(list);
   loadClubsList(list);
   stack=["plateforme"];
@@ -884,6 +886,7 @@ function pfStatsHtml(c){
 }
 function renderClubCard(c, list){
   var card=gmCard();
+  card.classList.add("pf-club");
   var suspLimite=!!c.planAvantSuspension;
   var suspended=c.status==="suspended" || suspLimite;
   var supprime=(c.status==="deleted"||c.status==="purging");

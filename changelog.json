@@ -1,5 +1,36 @@
 [
  {
+  "v": "1794777848",
+  "semver": "1.20.0",
+  "titre": "Version ordinateur et sécurité renforcées",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Nouvelle case « Ordinateur partagé » à la connexion : sur l'ordinateur du club ou de l'école, la session se ferme toute seule quand on ferme le navigateur."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, les chiffres de l'accueil tiennent sur une seule ligne."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Sécurité : l'appli refuse de s'afficher à l'intérieur d'un autre site, et les outils PDF, QR code, Excel et ZIP sont vérifiés avant d'être utilisés."
+   }
+  ]
+ },
+ {
   "v": "1794512205",
   "semver": "1.19.1",
   "titre": "Double authentification plus claire",

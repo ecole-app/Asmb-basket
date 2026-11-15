@@ -67,6 +67,7 @@ Messages en français, sans casser le style des commits existants.
   (jamais de `javascript:`) ; un fragment HTML déjà construit ne se ré-échappe pas.
   Contrôle : `cd tests && npm run jarvis:hostile` (Jarvis avec des noms piégés dans la démo : il dit quel écran
   affiche un texte sans l'échapper) et `node outils/audit-xss.js` (liste les valeurs non échappées, fichier par fichier).
+- Accès web (1.20.0) : scripts cdnjs avec `integrity` (index.html : jsPDF, QR code ; à la demande : SheetJS `js/23-export.js`, JSZip `js/06g-photos.js`) → changer de version = recalculer l'empreinte sha384 (cdnjs est bloqué depuis le conteneur : calculer dans le navigateur du PC). Anti-encadrement en tête d'`index.html` (l'appli ne s'affiche pas dans un iframe d'un autre site, sauf `?inscription=`). Case « Ordinateur partagé » à la connexion (`gm_ordi_partage`, persistance session dans `js/firebase-init.js`).
 - Collections Firestore : le code utilise `window.fbCollection` / `window.fbDoc`, qui préfixent
   automatiquement `clubs/{clubId}/...`. Seules les collections de `GLOBAL_COLLECTIONS`
   (`js/firebase-init.js`) sont globales. Une nouvelle collection de club = une règle dans

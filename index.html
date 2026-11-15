@@ -2,6 +2,21 @@
 <html lang="fr" translate="no" class="gm-boot">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Anti-encadrement : l'appli ne s'affiche jamais dans le site de quelqu'un d'autre (un faux site
+   pourrait l'encadrer pour piéger des clics). GitHub Pages ne permet pas l'en-tête qui l'interdit,
+   donc on le fait ici. Exception : la fiche d'inscription (?inscription=), intégrable au site d'un club. */
+(function(){
+  try{ if(window.top===window.self) return; }catch(e){}
+  if(/[?&]inscription=/.test(location.search)) return;
+  document.documentElement.style.display="none";
+  try{ window.top.location.replace(location.href); }catch(e){}
+  document.addEventListener("DOMContentLoaded",function(){
+    document.body.innerHTML='<p style="font:16px system-ui,sans-serif;text-align:center;padding:40px 16px"><a href="https://generalmanagerapp.fr/" target="_top" rel="noopener">Ouvrir General Manager</a></p>';
+    document.documentElement.style.display="";
+  });
+})();
+</script>
 <meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -54,8 +69,9 @@ window.gmReprise=reprise;})();
 <script src="js/sw-register.js"></script>
 
 <script type="module" src="js/firebase-init.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- integrity : le navigateur refuse le fichier s'il a été modifié chez cdnjs (empreinte calculée le 15/11/2026). Changer de version = recalculer l'empreinte. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <!-- Écran de démarrage : masque l'appli tant que la connexion n'est pas vérifiée

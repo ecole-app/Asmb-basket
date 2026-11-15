@@ -11,6 +11,8 @@ function chargerXlsx(){
   xlsxLoading=new Promise(function(resolve,reject){
     var s=document.createElement("script");
     s.src=XLSX_URL;
+    // Empreinte du fichier (refusé s'il a été modifié chez cdnjs). Changer de version = recalculer.
+    s.integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw"; s.crossOrigin="anonymous";
     s.onload=function(){resolve();};
     s.onerror=function(){xlsxLoading=null;reject(new Error("Chargement impossible"));};
     document.head.appendChild(s);

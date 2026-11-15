@@ -122,6 +122,7 @@ function showAuth(step, data){
       +'<input id="auth-email" class="auth-field" type="email" inputmode="email" autocapitalize="off" style="'+AUTH_INP+'" value="'+authEsc(savedEmail)+'" placeholder="mail@gmail.com">'
       +'<label style="'+AUTH_LBL+'">Mot de passe</label>'
       +authPassField("auth-pass","••••••••")
+      +authCaseOrdiPartage()
       +'<div id="auth-err" style="display:none;color:#C0392B;font-size:12px;font-weight:600;margin-top:12px;text-align:center"></div>'
       +'<button style="'+AUTH_BTN+'" onclick="authDoLogin()">Se connecter</button>'
       +'<p style="text-align:center;font-size:13px;color:'+AUTH_INKTXT+';font-weight:600;margin-top:18px;cursor:pointer" onclick="showAuth(\'reset\')">Mot de passe oublié ?</p>'
@@ -154,11 +155,26 @@ function authErr(msg){
   else askAlert(msg);
 }
 
+// « Ordinateur partagé » (club, école, CDI…) : la session se ferme à la fermeture du navigateur
+// (persistance choisie dans js/firebase-init.js). Choix gardé sur l'appareil (préfixe gm_, jamais purgé).
+function authCaseOrdiPartage(){
+  var c=false; try{ c=localStorage.getItem("gm_ordi_partage")==="1"; }catch(e){}
+  return '<label style="display:flex;align-items:flex-start;gap:10px;margin-top:14px;font-size:13px;color:'+AUTH_INKTXT+';font-weight:600;cursor:pointer">'
+    +'<input id="auth-ordi-partage" type="checkbox"'+(c?' checked':'')+' style="width:18px;height:18px;margin-top:1px;flex:none">'
+    +'<span>Ordinateur partagé<br><span style="font-weight:500;font-size:12px;color:'+AUTH_MUTTXT+'">Déconnexion automatique quand le navigateur se ferme.</span></span>'
+    +'</label>';
+}
+function authNoterOrdiPartage(){
+  var b=document.getElementById("auth-ordi-partage");
+  if(b){ try{ localStorage.setItem("gm_ordi_partage", b.checked?"1":"0"); }catch(e){} }
+}
+
 function authDoLogin(){
   var email=((document.getElementById("auth-email")||{}).value||"").trim();
   var pass=(document.getElementById("auth-pass")||{}).value||"";
   if(email.indexOf("@")<1){ authErr("E-mail invalide"); return; }
   if(!pass){ authErr("Mot de passe requis"); return; }
+  authNoterOrdiPartage();
   window.fbSignIn(window.fbAuth, email, pass).catch(function(e){
     var c=e&&e.code||"";
     if(c==="auth/mfa-annule") return; // code de double authentification abandonné (js/18d-securite.js)

@@ -11,6 +11,8 @@ function chargerJszip(){
   if(jszipLoading) return jszipLoading;
   jszipLoading=new Promise(function(resolve,reject){
     var s=document.createElement("script"); s.src=JSZIP_URL;
+    // Empreinte du fichier (refusé s'il a été modifié chez cdnjs). Changer de version = recalculer.
+    s.integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG"; s.crossOrigin="anonymous";
     s.onload=function(){resolve();};
     s.onerror=function(){jszipLoading=null;reject(new Error("Chargement du ZIP impossible"));};
     document.head.appendChild(s);

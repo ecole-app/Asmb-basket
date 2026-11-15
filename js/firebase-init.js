@@ -5,7 +5,7 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as acGetToken
 import { getFirestore, collection, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 import { getMessaging, getToken as fbMsgGetToken, deleteToken as fbMsgDeleteToken, isSupported as fbMsgIsSupported, onMessage as fbMsgOnMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence, multiFactor, TotpMultiFactorGenerator, getMultiFactorResolver, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, setPersistence, browserLocalPersistence, browserSessionPersistence, multiFactor, TotpMultiFactorGenerator, getMultiFactorResolver, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
@@ -61,7 +61,13 @@ window.fbStorage = storage;
 
 // ── Authentification (comptes réels e-mail/mot de passe) ──
 const auth = getAuth(fbApp);
-setPersistence(auth, browserLocalPersistence).catch(function(e){console.log("Persistance auth:",e&&e.code);});
+// Session : gardée sur l'appareil, sauf « Ordinateur partagé » coché à la connexion (gm_ordi_partage,
+// js/18-auth.js) → la session se ferme quand on ferme le navigateur.
+function gmPersistance(){
+  var p=false; try{ p=localStorage.getItem("gm_ordi_partage")==="1"; }catch(e){}
+  return p ? browserSessionPersistence : browserLocalPersistence;
+}
+setPersistence(auth, gmPersistance()).catch(function(e){console.log("Persistance auth:",e&&e.code);});
 window.fbAuth = auth;
 window.fbCreateUser = createUserWithEmailAndPassword;
 // Double authentification (application d'authentification, js/18d-securite.js) : si le compte l'a activée,
@@ -74,7 +80,7 @@ function fbMfaSuite(err, fini){
   throw err;
 }
 window.fbSignIn = function(a, email, pass){
-  return signInWithEmailAndPassword(a, email, pass).catch(function(err){ return fbMfaSuite(err, { email: email, pass: pass }); });
+  return setPersistence(a, gmPersistance()).catch(function(){}).then(function(){ return signInWithEmailAndPassword(a, email, pass); }).catch(function(err){ return fbMfaSuite(err, { email: email, pass: pass }); });
 };
 window.fbSendReset = sendPasswordResetEmail;
 window.fbOnAuthState = onAuthStateChanged;
