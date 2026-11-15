@@ -1,0 +1,66 @@
+name: E-mails de connexion (nom et lien)
+
+# Règle les e-mails envoyés par Firebase Auth (mot de passe oublié, vérification, changement
+# d'adresse, double authentification) via l'API Identity Platform :
+# - remplace %APP_NAME% (qui affiche « asmb-app ») par « General Manager » en dur ;
+# - pose l'URL d'action https://auth.generalmanagerapp.fr/__/auth/action (au lieu de
+#   asmb-app.firebaseapp.com). La console Firebase refusait ce changement sans dire pourquoi.
+# Se lance au push de ce fichier ou à la main.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/auth-emails.yml"
+  workflow_dispatch:
+
+jobs:
+  emails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Régler les e-mails
+        env:
+          CLE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          mkdir w && cd w && npm init -y >/dev/null && npm i google-auth-library@9 --no-audit --no-fund >/dev/null
+          echo "$CLE" > "$RUNNER_TEMP/cle.json"
+          cat > run.js <<'JS'
+          const { GoogleAuth } = require("google-auth-library");
+          const URL_ACTION = "https://auth.generalmanagerapp.fr/__/auth/action";
+          const NOM = "General Manager";
+          (async () => {
+            const auth = new GoogleAuth({ keyFile: process.env.RUNNER_TEMP + "/cle.json", scopes: ["https://www.googleapis.com/auth/cloud-platform"] });
+            const c = await auth.getClient();
+            const base = "https://identitytoolkit.googleapis.com/admin/v2/projects/asmb-app/config";
+            const cfg = (await c.request({ url: base })).data;
+            const se = (cfg.notification && cfg.notification.sendEmail) || {};
+            console.log("Avant : callbackUri =", se.callbackUri || "(défaut)");
+            const masque = [], nouveau = {};
+            for (const k of Object.keys(se)) {
+              if (!/Template$/.test(k) || typeof se[k] !== "object") continue;
+              const t = Object.assign({}, se[k]);
+              const avant = JSON.stringify([t.subject, t.body]);
+              t.subject = String(t.subject || "").split("%APP_NAME%").join(NOM);
+              t.body = String(t.body || "").split("%APP_NAME%").join(NOM);
+              if (JSON.stringify([t.subject, t.body]) === avant) { console.log(k, ": rien à changer"); continue; }
+              t.customized = true;
+              nouveau[k] = t; masque.push("notification.sendEmail." + k);
+              console.log(k, ": objet =", t.subject);
+            }
+            if (masque.length) {
+              await c.request({ url: base + "?updateMask=" + masque.join(","), method: "PATCH", data: { notification: { sendEmail: nouveau } } });
+              console.log("Modèles enregistrés :", masque.length);
+            }
+            try {
+              const r = await c.request({ url: base + "?updateMask=notification.sendEmail.callbackUri", method: "PATCH", data: { notification: { sendEmail: { callbackUri: URL_ACTION } } } });
+              console.log("Après : callbackUri =", r.data.notification.sendEmail.callbackUri);
+            } catch (e) {
+              console.error("ERREUR URL d'action", e.response ? JSON.stringify(e.response.data) : e.message);
+              process.exitCode = 1;
+            }
+          })().catch((e) => { console.error("ERREUR", e.response ? JSON.stringify(e.response.data) : e.message); process.exit(1); });
+          JS
+          node run.js
+          rm -f "$RUNNER_TEMP/cle.json"
