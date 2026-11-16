@@ -354,8 +354,8 @@ var TRN=(function(){
   function leaflet(){
     if(window.L&&window.L.map) return Promise.resolve(window.L);
     return new Promise(function(ok,ko){
-      var l=document.createElement("link"); l.rel="stylesheet"; l.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(l);
-      var s=document.createElement("script"); s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.onload=function(){ ok(window.L); }; s.onerror=ko; document.head.appendChild(s);
+      var l=document.createElement("link"); l.rel="stylesheet"; l.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; l.integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H"; l.crossOrigin="anonymous"; document.head.appendChild(l);
+      var s=document.createElement("script"); s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH"; s.crossOrigin="anonymous"; /* empreinte : changer de version = recalculer */ s.onload=function(){ ok(window.L); }; s.onerror=ko; document.head.appendChild(s);
     });
   }
   function vuePlan(){

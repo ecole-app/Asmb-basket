@@ -24,8 +24,9 @@ function gmLeaflet(){
   if(window.L&&window.L.map) return Promise.resolve(window.L);
   if(gmLeaflet.p) return gmLeaflet.p;
   gmLeaflet.p=new Promise(function(ok,ko){
-    var l=document.createElement("link"); l.rel="stylesheet"; l.href=GM_LEAFLET+"leaflet.css"; document.head.appendChild(l);
-    var s=document.createElement("script"); s.src=GM_LEAFLET+"leaflet.js"; s.onload=function(){ ok(window.L); }; s.onerror=function(){ gmLeaflet.p=null; ko(new Error("leaflet")); };
+    var l=document.createElement("link"); l.rel="stylesheet"; l.href=GM_LEAFLET+"leaflet.css"; l.integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H"; l.crossOrigin="anonymous"; document.head.appendChild(l);
+    var s=document.createElement("script"); s.src=GM_LEAFLET+"leaflet.js"; s.integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH"; s.crossOrigin="anonymous"; // empreinte : changer de version = recalculer
+    s.onload=function(){ ok(window.L); }; s.onerror=function(){ gmLeaflet.p=null; ko(new Error("leaflet")); };
     document.head.appendChild(s);
   });
   return gmLeaflet.p;

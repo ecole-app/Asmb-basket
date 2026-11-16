@@ -1770,7 +1770,14 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
       const snap = await ref.get();
       const d = snap.exists ? snap.data() : {};
       const essais = (d.essais || []).filter((t) => t > maintenant - 3600000);
-      if (essais.length >= 5) { res.status(429).json({ erreur: "trop" }); return; }
+      if (essais.length >= 5) {
+        // Alerte sécurité (une par heure et par compte) : quelqu'un insiste avec des codes de secours.
+        if (!(d.alerteAt > maintenant - 3600000)) {
+          await ref.set({ alerteAt: maintenant }, { merge: true });
+          await alerteSuperAdmin("Sécurité : essais répétés", email + " : 5 essais de code de secours en 1 h (bloqué pour l'heure)").catch(() => {});
+        }
+        res.status(429).json({ erreur: "trop" }); return;
+      }
       await ref.set({ essais: essais.concat([maintenant]) }, { merge: true });
       // Le mot de passe doit être le bon : Firebase répond « double authentification requise » (mfaPendingCredential).
       const r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + SECU_CLE_WEB, {
@@ -1783,6 +1790,8 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
       const codes = d.codes || [];
       if (!codes.includes(h)) { res.status(401).json({ erreur: "code" }); return; }
       await secuRetirer(user.uid);
+      // Alerte sécurité : la double authentification d'un compte vient d'être retirée avec un code de secours.
+      await alerteSuperAdmin("Sécurité : double authentification retirée", email + " a utilisé un code de secours").catch(() => {});
       res.json({ ok: true });
       return;
     }

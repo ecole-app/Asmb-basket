@@ -275,7 +275,7 @@ function entreeEncaisser(src,x,fini){
 // ── Scanner (BarcodeDetector, sinon jsQR chargé à la demande) ───────
 function entreeChargerJsQR(){
   if(window.jsQR) return Promise.resolve();
-  return new Promise(function(ok,ko){ var s=document.createElement("script"); s.src=ENTREE_JSQR; s.onload=ok; s.onerror=ko; document.head.appendChild(s); });
+  return new Promise(function(ok,ko){ var s=document.createElement("script"); s.src=ENTREE_JSQR; s.integrity="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx"; s.crossOrigin="anonymous"; /* empreinte : changer de version = recalculer */ s.onload=ok; s.onerror=ko; document.head.appendChild(s); });
 }
 function entreeScanner(src, repeindre){
   var o=document.createElement("div");
