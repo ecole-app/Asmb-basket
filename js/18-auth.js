@@ -100,6 +100,7 @@ function showAuth(step, data){
   var el=document.getElementById("auth-content");
   if(!el) return;
   stack=["auth"]; showScr("auth");
+  try{ var sb=document.getElementById("hdr-settings-btn"); if(sb) sb.style.display="none"; }catch(e){}   // rien à régler tant qu'on n'est pas connecté
   el.style.background=AUTH_CHALK;
   var h="";
   if(step==="entry"){

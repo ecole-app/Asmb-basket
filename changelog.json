@@ -1,5 +1,19 @@
 [
  {
+  "v": "1794826899",
+  "semver": "1.20.3",
+  "titre": "Écran de connexion plus net",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "L'engrenage des paramètres n'apparaît plus sur l'écran de connexion."
+   }
+  ]
+ },
+ {
   "v": "1794826254",
   "semver": "1.20.2",
   "titre": "Sécurité renforcée",
