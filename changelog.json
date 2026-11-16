@@ -1,5 +1,19 @@
 [
  {
+  "v": "1794827363",
+  "semver": "1.20.4",
+  "titre": "Mise à jour technique",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Mise à jour des outils de connexion et de synchronisation, pour plus de sécurité et de fiabilité."
+   }
+  ]
+ },
+ {
   "v": "1794826899",
   "semver": "1.20.3",
   "titre": "Écran de connexion plus net",

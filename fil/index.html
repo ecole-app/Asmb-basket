@@ -134,7 +134,7 @@ function installee(){ return navigator.standalone===true||(window.matchMedia&&ma
 function chargerSdk(){
   if(window.firebase&&firebase.messaging) return Promise.resolve();
   function sc(u){ return new Promise(function(ok,ko){ var e=document.createElement("script"); e.src=u; e.onload=ok; e.onerror=ko; document.head.appendChild(e); }); }
-  return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js").then(function(){ return sc("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"); });
+  return sc("https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js").then(function(){ return sc("https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js"); });
 }
 var nMut=document.getElementById("notif-m");
 function nEtat(actif){

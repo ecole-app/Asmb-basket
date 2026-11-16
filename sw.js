@@ -15,8 +15,8 @@ const CACHE_NAME = 'asmb-' + VERSION;
 // recevoir les push : on y importe le SDK compat FCM, qui s'abonne lui-même
 // à l'événement 'push' et affiche la notif via onBackgroundMessage. Pas besoin
 // d'un fichier firebase-messaging-sw.js séparé ni d'un listener 'push' manuel.
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js');
 firebase.initializeApp({
   apiKey: "AIzaSyAv5azCx_NU0kgRflnFBetaqqWN7ahi8TQ",
   authDomain: "asmb-app.firebaseapp.com",

@@ -9,10 +9,13 @@ const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted, onDocumentWritt
 const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
+const { getMessaging } = require("firebase-admin/messaging");
 const crypto = require("crypto");
 
 admin.initializeApp();
-const db = admin.firestore();
+const db = getFirestore();
 
 // Région proche de la majorité des utilisateurs visés (club basé en France).
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
@@ -130,7 +133,7 @@ async function envoyerParLangue(clubId, entrees, fabrique, data, plus) {
     if (copie) w.fcmOptions = { link: "./?club=" + encodeURIComponent(clubId) };
     for (let i = 0; i < g.length; i += 500) {
       const lot = g.slice(i, i + 500);
-      const r = await admin.messaging().sendEachForMulticast({ tokens: lot.map((e) => e.token), notification, data: d, webpush: w });
+      const r = await getMessaging().sendEachForMulticast({ tokens: lot.map((e) => e.token), notification, data: d, webpush: w });
       r.responses.forEach((x, j) => { if (!x.success && jetonMort(x.error && x.error.code)) morts.push(lot[j].ref); });
       if (copie) await compterNonLus(clubId, lot.map((e) => e.ref.id));
     }
@@ -143,7 +146,7 @@ async function nomDuClub(clubId) {
 // Point rouge de « Mes clubs » : un de plus sur la ligne de ce club (remis à zéro par clubCompte).
 async function compterNonLus(clubId, uids) {
   await Promise.all(uids.map((uid) => db.collection("users").doc(uid).collection("clubs").doc(clubId)
-    .update({ nonLus: admin.firestore.FieldValue.increment(1) }).catch(() => {})));
+    .update({ nonLus: FieldValue.increment(1) }).catch(() => {})));
 }
 
 exports.logoClub = onRequest({ cors: false, memory: "256MiB" }, async (req, res) => {
@@ -223,10 +226,10 @@ async function notifierExternes(clubId, channelId, ch, msg, fabrique) {
     const w = webpushClub(clubId, { headers: { Urgency: "high" }, fcmOptions: { link: lien } });
     return { token: c.token, notification: { title: String(ch.name || f.title).slice(0, 80), body: ((msg.pseudo ? msg.pseudo + " : " : "") + f.body).slice(0, 160) }, data: { url: lien }, webpush: w };
   });
-  const rep = await admin.messaging().sendEach(messages);
+  const rep = await getMessaging().sendEach(messages);
   const morts = [];
   rep.responses.forEach((x, i) => { if (!x.success && jetonMort(x.error && x.error.code)) morts.push(cibles[i].ref); });
-  await Promise.all(morts.map((ref) => ref.update({ token: admin.firestore.FieldValue.delete() }).catch(() => {})));
+  await Promise.all(morts.map((ref) => ref.update({ token: FieldValue.delete() }).catch(() => {})));
 }
 
 exports.onChannelMessage = onDocumentCreated(
@@ -243,7 +246,7 @@ exports.onChannelMessage = onDocumentCreated(
     // Écrit ici (compte serveur) car une famille n'a pas le droit de modifier la fiche d'un canal.
     try {
       await db.collection("clubs").doc(clubId).collection("channels").doc(channelId).set({
-        lastTs: admin.firestore.FieldValue.serverTimestamp(),
+        lastTs: FieldValue.serverTimestamp(),
         lastMsg: msg.type === "media" ? (msg.mediaType === "pdf" ? "📄 Document" : "📷 Photo") : texte.replace(/\s+/g, " ").slice(0, 80),
         lastPseudo: String(msg.pseudo || "").slice(0, 40)
       }, { merge: true });
@@ -376,7 +379,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
         const n = essais(sn);
         return ref.set(n === 0
           ? { n: 1, depuis: maintenant, expire: new Date(maintenant + 2 * FIL_ESSAIS_FENETRE) }
-          : { n: admin.firestore.FieldValue.increment(1) }, { merge: true }).catch(() => {});
+          : { n: FieldValue.increment(1) }, { merge: true }).catch(() => {});
       }));
     };
     const bil = bSnap.exists ? bSnap.data() : null;
@@ -407,7 +410,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
 
     // Notifications d'un extérieur : son appareil enregistre/retire son jeton (stocké côté serveur seulement).
     if (b.action === "notifs" || b.action === "notifs_off") {
-      if (b.action === "notifs_off") { await accRef.update({ token: admin.firestore.FieldValue.delete() }).catch(() => {}); res.json({ ok: true }); return; }
+      if (b.action === "notifs_off") { await accRef.update({ token: FieldValue.delete() }).catch(() => {}); res.json({ ok: true }); return; }
       const token = String(b.token || "");
       if (token.length < 20 || token.length > 4096 || /\s/.test(token)) { res.status(400).json({ erreur: "jeton" }); return; }
       await accRef.set({ token, langue: notifLangue(b.langue), notifLe: now }, { merge: true });
@@ -422,7 +425,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
       if (acc.dernier && now - acc.dernier < 1500) { res.status(429).json({ erreur: "trop_vite" }); return; }
       await canalRef.collection("messages").add({
         text: texte, pseudo, senderUid: null, ext: true, extCode: code,
-        ts: admin.firestore.FieldValue.serverTimestamp()
+        ts: FieldValue.serverTimestamp()
       });
       await accRef.set({ dernier: now }, { merge: true });
       res.json({ ok: true });
@@ -432,7 +435,7 @@ exports.filEvenement = onRequest({ cors: ["https://generalmanagerapp.fr", "https
     // Lecture : de son arrivée à la fin de l'événement (jamais au-delà), par morceaux si « apres » est donné.
     const apres = Number(b.apres) > 0 ? Number(b.apres) + 1 : 0;
     const de = Math.max(acc.depuis, apres), a = finMs ? Math.min(now, finMs) : now;
-    const T = admin.firestore.Timestamp;
+    const T = Timestamp;
     const msgs = [];
     if (de <= a) {
       const r = await canalRef.collection("messages").where("ts", ">=", T.fromMillis(de)).where("ts", "<=", T.fromMillis(a)).orderBy("ts").limit(200).get();
@@ -511,7 +514,7 @@ exports.onInviteDirigeantUtilisee = onDocumentUpdated("club_invites/{code}", asy
   const token = snap.exists && snap.data() && snap.data().token;
   if (!token) return;
   try {
-    await admin.messaging().send({
+    await getMessaging().send({
       token,
       notification: { title: "Compte dirigeant validé", body: String(apres.clubName || "Un club") + " : le dirigeant vient de créer son compte" },
       data: { url: "./" },
@@ -544,7 +547,7 @@ exports.onPlateformePing = onDocumentCreated("plateforme_ping/{id}", async (even
   const token = sub.exists && sub.data() && sub.data().token;
   if (!token) { await ref.update({ ok: false, erreur: "aucun appareil enregistré" }); return; }
   try {
-    await admin.messaging().send({
+    await getMessaging().send({
       token,
       notification: { title: "Test d'alerte", body: "Si tu vois ceci, les alertes Plateforme fonctionnent." },
       data: { url: "./" },
@@ -593,7 +596,7 @@ exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
     if (d.id === uid) continue;
     const dmId = [uid, d.id].sort().join("__");
     const dmRef = clubRef.collection("dms").doc(dmId);
-    const now = admin.firestore.FieldValue.serverTimestamp();
+    const now = FieldValue.serverTimestamp();
     await dmRef.set({
       memberUids: [uid, d.id],
       members: [{ uid, label }, { uid: d.id, label: nomDe(d.data()) || d.data().email || "Dirigeant" }],
@@ -608,7 +611,7 @@ exports.onCompteModifie = onDocumentUpdated("users/{uid}", async (event) => {
 // 12 mois. Tant qu'un participant la garde, rien n'est supprimé.
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 exports.purgeDiscussionsMasquees = onSchedule("every day 03:30", async () => {
-  const limite = admin.firestore.Timestamp.fromMillis(Date.now() - 365 * 24 * 3600 * 1000);
+  const limite = Timestamp.fromMillis(Date.now() - 365 * 24 * 3600 * 1000);
   const clubs = await db.collection("clubs").get();
   for (const club of clubs.docs) {
     const vieux = await club.ref.collection("dms").where("lastTs", "<", limite).get();
@@ -632,7 +635,7 @@ exports.onClubPushPing = onDocumentCreated("clubs/{clubId}/push_ping/{id}", asyn
   if (!token) { await ref.update({ ok: false, erreur: "aucun abonnement pour ce compte dans ce club (active les notifications dans les réglages)" }); return; }
   const l = notifLangue(sub.data().langue);
   try {
-    await admin.messaging().send({
+    await getMessaging().send({
       token,
       notification: { title: tn(l, "Test de notification"), body: tn(l, "Si tu vois ceci, les messages du club t'arriveront.") },
       data: { url: "./" },
@@ -977,7 +980,7 @@ async function ffbbAlertesEquipe(clubId, champ, diffs) {
       texte = `Résultat\n${champ.equipe} : ${texteResultat(x)}`;
     }
     await canal.collection("messages").add({
-      text: texte, pseudo: club.name || "Club", ts: admin.firestore.FieldValue.serverTimestamp(), likeUsers: [], heartUsers: []
+      text: texte, pseudo: club.name || "Club", ts: FieldValue.serverTimestamp(), likeUsers: [], heartUsers: []
     });
   }
 }
@@ -1059,7 +1062,7 @@ exports.ffbbSyncNuit = onSchedule({ schedule: "every day 05:15", timeoutSeconds:
     const token = snap.exists && snap.data() && snap.data().token;
     if (token) {
       try {
-        await admin.messaging().send({
+        await getMessaging().send({
           token, notification: { title: "Synchro FFBB en panne", body: "3 nuits sans réponse (" + derniere + "). L'API a peut-être changé." },
           data: { url: "./" }, webpush: webpushClub(null)
         });
@@ -1090,7 +1093,7 @@ async function notifierCompte(clubId, uid, fabrique, langueCompte) {
   const w = webpushClub(clubId, { headers: { Urgency: "high" } });
   if (copie) w.fcmOptions = { link: lien };
   try {
-    await admin.messaging().send({
+    await getMessaging().send({
       token, notification: { title: copie ? (await nomDuClub(clubId)) + " · " + titre : titre, body: corps }, data: { url: lien }, webpush: w
     });
     if (copie) await compterNonLus(clubId, [uid]);
@@ -1224,7 +1227,7 @@ exports.dossiersPurge = onSchedule({ schedule: "every day 04:40", timeZone: "Eur
     let batch = db.batch(), k = 0;
     for (const d of q.docs) {
       if (!d.get("sante")) continue;
-      batch.update(d.ref, { sante: admin.firestore.FieldValue.delete(), santePurgee: true });
+      batch.update(d.ref, { sante: FieldValue.delete(), santePurgee: true });
       k++; n++;
       if (k >= 400) { await batch.commit(); batch = db.batch(); k = 0; }
     }
@@ -1245,7 +1248,7 @@ async function alerteSuperAdmin(titre, corps) {
   const token = snap.exists && snap.data() && snap.data().token;
   if (!token) { console.error("alerteSuperAdmin: aucun jeton dans plateforme_push"); return { ok: false, erreur: "aucun jeton" }; }
   try {
-    await admin.messaging().send({ token, notification: { title: titre, body: corps }, data: { url: "./" }, webpush: webpushClub(null) });
+    await getMessaging().send({ token, notification: { title: titre, body: corps }, data: { url: "./" }, webpush: webpushClub(null) });
     return { ok: true };
   } catch (e) {
     console.error("alerteSuperAdmin:", e && e.code, e && e.message);
@@ -1409,7 +1412,7 @@ async function comptageClub(clubRef, saison, prec) {
   const uids = us.docs.map((d) => ({ uid: uidDe(d) }));
   for (let i = 0; i < uids.length; i += 100) {
     try {
-      const r = await admin.auth().getUsers(uids.slice(i, i + 100));
+      const r = await getAuth().getUsers(uids.slice(i, i + 100));
       r.users.forEach((u) => {
         const t = Date.parse((u.metadata && (u.metadata.lastRefreshTime || u.metadata.lastSignInTime)) || "");
         if (t > derniere) derniere = t;
@@ -1456,12 +1459,12 @@ const CHAMPS_CLUB = ["roles", "linkedPlayerIds", "linkedTeamIds", "permissions",
 const CHAMPS_COMPTE = ["email", "prenom", "nom", "langue", "identifiant"];
 const STATUTS_FERMES = ["suspended", "deleted", "purging"];
 function copieDeFiche(u, uid, clubId) {
-  const c = { clubId, copie: true, copieDe: uid, copieLe: admin.firestore.FieldValue.serverTimestamp() };
+  const c = { clubId, copie: true, copieDe: uid, copieLe: FieldValue.serverTimestamp() };
   CHAMPS_COMPTE.concat(CHAMPS_CLUB).forEach((k) => { if (u[k] !== undefined) c[k] = u[k]; });
   return c;
 }
 function ligneMesClubs(club, roles) {
-  return { nom: String((club && club.name) || "Club").slice(0, 80), roles: Array.isArray(roles) ? roles : [], maj: admin.firestore.FieldValue.serverTimestamp() };
+  return { nom: String((club && club.name) || "Club").slice(0, 80), roles: Array.isArray(roles) ? roles : [], maj: FieldValue.serverTimestamp() };
 }
 class ErreurClub extends Error { constructor(code) { super(code); this.code = code; } }
 
@@ -1470,7 +1473,7 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
   let uid;
   try {
     const jeton = String(req.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-    uid = (await admin.auth().verifyIdToken(jeton)).uid;
+    uid = (await getAuth().verifyIdToken(jeton)).uid;
   } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
   const corps = req.body || {};
   const uRef = db.collection("users").doc(uid);
@@ -1494,7 +1497,7 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         const [sA, sC] = await Promise.all([t.get(subA), t.get(subC)]);
         const m = mSnap.data();
         const maj = { clubId: cible };
-        CHAMPS_CLUB.forEach((k) => { maj[k] = m[k] !== undefined ? m[k] : admin.firestore.FieldValue.delete(); });
+        CHAMPS_CLUB.forEach((k) => { maj[k] = m[k] !== undefined ? m[k] : FieldValue.delete(); });
         t.set(db.collection("users").doc(uid + "__" + actuel), copieDeFiche(u, uid, actuel));
         t.update(uRef, maj);
         t.delete(mRef);
@@ -1502,7 +1505,7 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         t.set(uRef.collection("clubs").doc(cible), Object.assign(ligneMesClubs(cCible.data(), m.roles), { nonLus: 0 }), { merge: true });
         // Notifications : l'ancien club devient une copie (nom du club devant le titre), le nouveau redevient normal.
         if (sA.exists) t.update(subA, { copieDe: cible });
-        if (sC.exists) t.update(subC, { copieDe: admin.firestore.FieldValue.delete() });
+        if (sC.exists) t.update(subC, { copieDe: FieldValue.delete() });
       });
       res.json({ ok: true });
       return;
@@ -1530,12 +1533,12 @@ exports.clubCompte = onRequest({ cors: ["https://generalmanagerapp.fr", "https:/
         const maj = {
           clubId: cible, roles: [inv.role], permissions: inv.grantedPermissions || {}, titre: null,
           linkedPlayerIds: [...new Set(joueurs)], linkedTeamIds: [], phone: String(inv.tel || ""), inviteCode: code,
-          dpaAcceptedAt: inv.role === "dirigeant" ? admin.firestore.FieldValue.serverTimestamp() : null,
-          remplacePar: admin.firestore.FieldValue.delete(), badge: admin.firestore.FieldValue.delete()
+          dpaAcceptedAt: inv.role === "dirigeant" ? FieldValue.serverTimestamp() : null,
+          remplacePar: FieldValue.delete(), badge: FieldValue.delete()
         };
         t.set(db.collection("users").doc(uid + "__" + actuel), copieDeFiche(u, uid, actuel));
         t.update(uRef, maj);
-        t.update(iRef, { usedBy: uid, usedAt: admin.firestore.FieldValue.serverTimestamp() });
+        t.update(iRef, { usedBy: uid, usedAt: FieldValue.serverTimestamp() });
         t.set(uRef.collection("clubs").doc(actuel), ligneMesClubs(cActuel.exists ? cActuel.data() : null, u.roles), { merge: true });
         t.set(uRef.collection("clubs").doc(cible), Object.assign(ligneMesClubs(cCible.data(), [inv.role]), { nonLus: 0 }), { merge: true });
         if (sA.exists) t.update(subA, { copieDe: cible });
@@ -1576,7 +1579,7 @@ exports.onCompteSupprime = onDocumentDeleted("users/{id}", async (event) => {
   const suivante = copies.docs.find((d) => d.id.indexOf(uid + "__") === 0);
   if (!suivante) return;
   // Le compte de connexion doit encore exister (sinon : suppression complète voulue).
-  try { await admin.auth().getUser(uid); } catch (e) { return; }
+  try { await getAuth().getUser(uid); } catch (e) { return; }
   const c = Object.assign({}, suivante.data());
   delete c.copie; delete c.copieDe; delete c.copieLe;
   const uRef = db.collection("users").doc(uid);
@@ -1610,7 +1613,7 @@ exports.onAbonnementPush = onDocumentWritten("clubs/{clubId}/push_subscriptions/
         // Seulement si la personne est encore membre de ce club (copie de sa fiche présente).
         const membre = await db.collection("users").doc(uid + "__" + autre).get();
         if (!membre.exists) continue;
-        await ref.set({ token: apres.token, uid, langue: apres.langue || "fr", copieDe: clubId, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+        await ref.set({ token: apres.token, uid, langue: apres.langue || "fr", copieDe: clubId, updatedAt: FieldValue.serverTimestamp() });
       }
     } catch (e) { console.error("onAbonnementPush", autre, e); }
   }
@@ -1748,9 +1751,9 @@ function secuCode() {
   return s.slice(0, 4) + "-" + s.slice(4);
 }
 async function secuRetirer(uid) {
-  const u = await admin.auth().getUser(uid);
+  const u = await getAuth().getUser(uid);
   const avait = !!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length);
-  if (avait) await admin.auth().updateUser(uid, { multiFactor: { enrolledFactors: null } });
+  if (avait) await getAuth().updateUser(uid, { multiFactor: { enrolledFactors: null } });
   await db.collection("mfa_secours").doc(uid).delete().catch(() => {});
   return avait;
 }
@@ -1764,7 +1767,7 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
       const code = String(corps.code || "");
       if (!email || !corps.password || code.length < 8) { res.status(400).json({ erreur: "code" }); return; }
       let user;
-      try { user = await admin.auth().getUserByEmail(email); } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
+      try { user = await getAuth().getUserByEmail(email); } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
       const ref = db.collection("mfa_secours").doc(user.uid);
       const maintenant = Date.now();
       const snap = await ref.get();
@@ -1798,18 +1801,18 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
     let uid;
     try {
       const jeton = String(req.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-      uid = (await admin.auth().verifyIdToken(jeton)).uid;
+      uid = (await getAuth().verifyIdToken(jeton)).uid;
     } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
     if (action === "codes") {
-      const u = await admin.auth().getUser(uid);
+      const u = await getAuth().getUser(uid);
       if (!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length)) { res.status(400).json({ erreur: "inactive" }); return; }
       const codes = Array.from({ length: 8 }, secuCode);
-      await db.collection("mfa_secours").doc(uid).set({ codes: codes.map((c) => secuEmpreinte(uid, c)), cree: admin.firestore.FieldValue.serverTimestamp(), essais: [] });
+      await db.collection("mfa_secours").doc(uid).set({ codes: codes.map((c) => secuEmpreinte(uid, c)), cree: FieldValue.serverTimestamp(), essais: [] });
       res.json({ ok: true, codes });
       return;
     }
     if (action === "oublier") {
-      const u = await admin.auth().getUser(uid);
+      const u = await getAuth().getUser(uid);
       if (!(u.multiFactor && u.multiFactor.enrolledFactors && u.multiFactor.enrolledFactors.length)) await db.collection("mfa_secours").doc(uid).delete().catch(() => {});
       res.json({ ok: true });
       return;
@@ -1817,7 +1820,7 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
     if (action === "debloquer") {
       if (uid !== SUPER_ADMIN_UID) { res.status(403).json({ erreur: "interdit" }); return; }
       let cible;
-      try { cible = await admin.auth().getUserByEmail(String(corps.email || "").trim().toLowerCase()); } catch (e) { res.status(404).json({ erreur: "compte" }); return; }
+      try { cible = await getAuth().getUserByEmail(String(corps.email || "").trim().toLowerCase()); } catch (e) { res.status(404).json({ erreur: "compte" }); return; }
       const avait = await secuRetirer(cible.uid);
       res.json({ ok: true, avait });
       return;
