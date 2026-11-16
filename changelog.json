@@ -1,5 +1,28 @@
 [
  {
+  "v": "1794806616",
+  "semver": "1.20.1",
+  "titre": "Aperçu des liens partagés",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Les liens de l'appli et des tournois envoyés par WhatsApp, SMS ou réseaux sociaux affichent maintenant un aperçu propre (logo et titre General Manager)."
+   },
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Un lien incomplet ou trop ancien mène à une page claire, avec un bouton pour ouvrir l'appli."
+   }
+  ]
+ },
+ {
   "v": "1794777848",
   "semver": "1.20.0",
   "titre": "Version ordinateur et sécurité renforcées",

@@ -37,6 +37,19 @@
 <meta name="apple-mobile-web-app-title" content="General Manager">
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png">
 <title>General Manager</title>
+<!-- Aperçu du lien (Google, WhatsApp, Facebook) : liens d'invitation et fiches d'inscription envoyés aux familles. Image : img/og.jpg (1200×630, < 300 Ko pour WhatsApp) -->
+<meta name="description" content="L'appli de votre club : licences, planning, convocations et messages du club, sur téléphone et ordinateur.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="General Manager">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="General Manager : l'appli de votre club">
+<meta property="og:description" content="Licences, planning, convocations et messages du club, sur téléphone et ordinateur.">
+<meta property="og:url" content="https://generalmanagerapp.fr/">
+<meta property="og:image" content="https://generalmanagerapp.fr/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="General Manager, l'appli de votre club">
+<meta name="twitter:card" content="summary_large_image">
 <script>
 /* Filet de sécurité du démarrage.
    - Un fichier de l'appli qui ne se charge pas (réseau qui flanche) : on recharge une fois tout seul,
@@ -1818,7 +1831,7 @@ window.gmReprise=reprise;})();
   <!-- ═══ MODAL PHOTO PLEIN ECRAN ═══ -->
   <div id="modal-photo-view" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;align-items:center;justify-content:center;flex-direction:column">
     <button onclick="closeModal('modal-photo-view')" style="position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer">✕</button>
- <img id="photo-view-img" style="max-width:92%;max-height:75vh;border-radius:8px">
+ <img id="photo-view-img" alt="Photo agrandie" style="max-width:92%;max-height:75vh;border-radius:8px">
  <div id="photo-view-caption" style="color:rgba(255,255,255,.7);font-size:12px;margin-top:14px;text-align:center;padding:0 20px"></div>
  <button id="photo-delete-btn" onclick="deleteGalleryPhoto()" style="display:none;margin-top:16px;padding:9px 18px;border-radius:20px;background:rgba(192,57,43,.8);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer"> Supprimer</button>
  </div>

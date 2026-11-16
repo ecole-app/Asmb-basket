@@ -1,0 +1,10 @@
+# Appli General Manager. Le site de présentation (et son sitemap) est sur accueil.generalmanagerapp.fr.
+User-agent: *
+Allow: /
+Disallow: /buvette/
+Disallow: /fil/
+Disallow: /benevole/
+Disallow: /legal/contrat-sous-traitance.html
+Disallow: /legal/contrat-sous-traitance-independant.html
+
+Sitemap: https://accueil.generalmanagerapp.fr/sitemap.xml
