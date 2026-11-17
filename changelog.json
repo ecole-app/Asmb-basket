@@ -1,5 +1,21 @@
 [
  {
+  "v": "1794937965",
+  "semver": "1.20.5",
+  "titre": "Nom et icône stables sur Android",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "L'appli installée garde son nom et son icône, même déconnecté : plus de message « Examiner les modifications apportées au nom et à l'icône »."
+   }
+  ]
+ },
+ {
   "v": "1794827363",
   "semver": "1.20.4",
   "titre": "Mise à jour technique",

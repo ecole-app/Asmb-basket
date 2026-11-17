@@ -114,7 +114,7 @@ function majIconeAppli(){
   var lf=head.querySelector('link[rel="icon"]');
   var la=head.querySelector('link[rel="apple-touch-icon"]');
   var lm=head.querySelector('link[rel="manifest"]');
-  if(!ICONE_ORIGINE) ICONE_ORIGINE={f:lf&&lf.getAttribute("href"),a:la&&la.getAttribute("href"),m:lm&&lm.getAttribute("href")};
+  if(!ICONE_ORIGINE) ICONE_ORIGINE={f:lf&&lf.getAttribute("href"),a:la&&la.getAttribute("href"),m:lm&&(lm.getAttribute("data-orig")||lm.getAttribute("href"))};
   // Nom de l'appli (iPhone, onglet) = nom du club ; sans nom, General Manager.
   var mt=head.querySelector('meta[name="apple-mobile-web-app-title"]');
   // Compte du super admin (Ahmed) : l'icône et le nom de l'appli restent General Manager,
@@ -124,6 +124,13 @@ function majIconeAppli(){
   if(mt) mt.setAttribute("content",nomClub||"General Manager");
   document.title=nomClub||"General Manager";
   var logo=gm?null:clubLogo();
+  // Mémoire de l'appareil : au prochain lancement (avant la connexion), la page reprend le même
+  // manifeste que connectée. Sinon Android voit le nom changer (« ASMB Basket » -> « General Manager »)
+  // et demande « Examiner les modifications apportées au nom et à l'icône ».
+  try{
+    if(logo&&window.CURRENT_CLUB_ID&&!window.GM_DEMO&&!window.SUPPORT_MODE) localStorage.setItem("gm_app_club",JSON.stringify({id:window.CURRENT_CLUB_ID,v:logo.length,nom:nomClub}));
+    else if(!window.GM_DEMO&&!window.SUPPORT_MODE&&(gm||window.CURRENT_CLUB_ID)) localStorage.removeItem("gm_app_club");
+  }catch(e){}
   if(!logo){
     if(lf&&ICONE_ORIGINE.f){ lf.setAttribute("href",ICONE_ORIGINE.f); lf.setAttribute("type","image/x-icon"); }
     if(la&&ICONE_ORIGINE.a) la.setAttribute("href",ICONE_ORIGINE.a);
@@ -814,3 +821,22 @@ function gmGlisserRetour(){
 if(gmIosInstallee()) gmGlisserRetour();
 // Chrome ignore les entrées d'historique créées sans geste : on (ré)arme au toucher.
 ["pointerdown","keydown"].forEach(function(t){ document.addEventListener(t,gmArmerRetour,true); });
+
+// Lancement avant la connexion : même nom et même icône que la dernière fois (voir majIconeAppli).
+(function(){
+  try{
+    if(window.GM_DEMO||location.hostname!=="generalmanagerapp.fr"||/[?&]demo/.test(location.search)||sessionStorage.getItem("gm_demo")==="1") return;
+    var m=JSON.parse(localStorage.getItem("gm_app_club")||"null");
+    if(!m||!m.id) return;
+    var lm=document.head.querySelector('link[rel="manifest"]');
+    if(!lm) return;
+    lm.setAttribute("data-orig",lm.getAttribute("href"));
+    lm.setAttribute("crossorigin","anonymous");
+    lm.setAttribute("href",ICONE_URL+"?c="+encodeURIComponent(m.id)+"&m=1&v="+(Number(m.v)||0));
+    if(m.nom){
+      document.title=m.nom;
+      var mt=document.head.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if(mt) mt.setAttribute("content",m.nom);
+    }
+  }catch(e){}
+})();
