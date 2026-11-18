@@ -46,7 +46,7 @@ function aboBlocParam(){
 function aboPeindre(box){
   box=box||document.getElementById("abo-param"); if(!box) return;
   var c=window.CURRENT_CLUB||{};
-  var own=(c.id&&typeof BOOTSTRAP_CLUB_ID!=="undefined"&&c.id===BOOTSTRAP_CLUB_ID);
+  var own=false;   // l'ASMB gère son abonnement comme les autres clubs
   var pk=aboPackTxt(c), ech=aboEcheanceMs(c), gel=aboGelActif(c), res=c.aboResiliation||null;
   var etat, coul;
   if(gel){ etat="⏸ Gelé jusqu'au "+aboDateTxt(gel.fin)+" (accès limité)"; coul="#8a4500"; }

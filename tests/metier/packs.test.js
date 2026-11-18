@@ -17,7 +17,13 @@ describe("Pack du club : modules Premium", () => {
   it("Essai en cours : tout ouvert", () => assert.equal(app({ id: "A", plan: "trial", trialEndsAt: jours(10) }).hasPremium(), true));
   it("Essai terminé : Premium fermé", () => assert.equal(app({ id: "A", plan: "trial", trialEndsAt: jours(-1) }).hasPremium(), false));
   it("Accès limité : Premium fermé", () => assert.equal(app({ id: "A", plan: "limite" }).hasPremium(), false));
-  it("Club d'origine : toujours ouvert", () => assert.equal(app({ id: "asmb", plan: "standard" }).hasPremium(), true));
+  it("Club d'origine : mêmes règles que les autres clubs", () => {
+    assert.equal(app({ id: "asmb", plan: "standard" }).hasPremium(), false);
+    assert.equal(app({ id: "asmb", plan: "trial", trialEndsAt: jours(10) }).hasPremium(), true);
+  });
+  it("Super admin : Premium ouvert partout, même dans l'ASMB", () => {
+    const c = app({ id: "asmb", plan: "standard" }); c.isSuperAdmin = () => true; assert.equal(c.hasPremium(), true);
+  });
   it("Session support : ouvert (lecture)", () => { const c = app({ id: "A", plan: "standard" }); c.SUPPORT_MODE = true; assert.equal(c.hasPremium(), true); });
 });
 
@@ -26,11 +32,14 @@ describe("Accès limité", () => {
     assert.equal(app({ id: "A", plan: "limite" }).isLimite(), true);
     assert.equal(app({ id: "A", plan: "trial", trialEndsAt: jours(-2) }).isLimite(), true);
   });
-  it("essai en cours, Standard, Premium, club d'origine = pas limité", () => {
+  it("essai en cours, Standard, Premium = pas limité", () => {
     assert.equal(app({ id: "A", plan: "trial", trialEndsAt: jours(5) }).isLimite(), false);
     assert.equal(app({ id: "A", plan: "standard" }).isLimite(), false);
     assert.equal(app({ id: "A", plan: "premium" }).isLimite(), false);
-    assert.equal(app({ id: "asmb", plan: "limite" }).isLimite(), false);
+  });
+  it("club d'origine : limité comme les autres, sauf pour le super admin", () => {
+    assert.equal(app({ id: "asmb", plan: "limite" }).isLimite(), true);
+    const c = app({ id: "asmb", plan: "limite" }); c.isSuperAdmin = () => true; assert.equal(c.isLimite(), false);
   });
   it("modules par défaut : licences ouvertes, messagerie et buvette fermées", () => {
     const c = app({ id: "A", plan: "limite" });

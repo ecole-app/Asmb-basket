@@ -75,7 +75,7 @@ function hasPremium(){
   var c=window.CURRENT_CLUB||{};
   if(window.SUPPORT_MODE) return true;
   if(typeof isSuperAdmin==="function" && isSuperAdmin()) return true;
-  if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return true;
+  // Le club d'origine (ASMB) suit les mêmes règles que les autres clubs (essai puis pack) ; seul le super admin reste exempt.
   // Essai gratuit : tout est ouvert pendant les 30 jours, puis les modules
   // Premium se verrouillent (les données saisies restent intactes).
   if(c.plan==="trial"){
@@ -105,7 +105,7 @@ function gmLimiteDefauts(){ var o={}; GM_LIMITE_MODULES.forEach(function(m){o[m.
 function isLimite(){
   var c=window.CURRENT_CLUB||{};
   if(window.SUPPORT_MODE) return false;
-  if(c.id && typeof BOOTSTRAP_CLUB_ID!=="undefined" && c.id===BOOTSTRAP_CLUB_ID) return false;
+  if(typeof isSuperAdmin==="function" && isSuperAdmin()) return false;   // le super admin garde tout, y compris dans l'ASMB
   if(c.plan==="limite") return true;
   // Abonnement gelé par le dirigeant (Paramètres › Abonnement).
   if(typeof aboGelActif==="function" && aboGelActif(c)) return true;

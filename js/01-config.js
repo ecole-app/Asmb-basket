@@ -244,8 +244,9 @@ function activePoles(){
   var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
   var estOrigine=!!(c && c.id===boot);
   var ids=BASE_POLES.slice();
-  if(estOrigine) ids=POLES.map(function(p){ return p.id; });
-  else if(typeof hasPremium==="function" && hasPremium()) ids=ids.concat(PREMIUM_POLES);
+  // Élite Academy et Basket Pour Tous : exclusifs à l'ASMB. Le reste suit le pack, comme pour tous les clubs.
+  if(estOrigine) POLES.forEach(function(p){ if(BASE_POLES.indexOf(p.id)<0 && PREMIUM_POLES.indexOf(p.id)<0) ids.push(p.id); });
+  if(typeof hasPremium==="function" && hasPremium()) ids=ids.concat(PREMIUM_POLES);
   return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
 }
 
@@ -253,8 +254,7 @@ function activePoles(){
 // verrouillés, en dernier, à l'accueil du dirigeant.
 function polesVerrouilles(){
   var c=window.CURRENT_CLUB;
-  var boot=(typeof BOOTSTRAP_CLUB_ID!=="undefined") ? BOOTSTRAP_CLUB_ID : "asmb";
-  if(!c || c.id===boot || (typeof hasPremium==="function" && hasPremium())) return [];
+  if(!c || (typeof hasPremium==="function" && hasPremium())) return [];
   return POLES.filter(function(p){ return PREMIUM_POLES.indexOf(p.id)>=0; });
 }
 function isPoleActive(poleId){

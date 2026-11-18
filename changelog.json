@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795024642",
+  "semver": "1.20.6",
+  "titre": "Packs et pôles",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "L'affichage des pôles et des accès suit strictement le pack du club (essai, Standard, Premium)."
+   }
+  ]
+ },
+ {
   "v": "1794937965",
   "semver": "1.20.5",
   "titre": "Nom et icône stables sur Android",
