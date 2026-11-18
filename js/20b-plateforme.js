@@ -934,12 +934,12 @@ function renderClubCard(c, list){
       .catch(function(e){ askAlert("Erreur : "+((e&&e.code)||e)); });
   }));
   if(!own){ row.appendChild(gmBtn("Accès support","soft",function(){ enterSupportFlow(c); })); }
-  if(!own && !supprime && typeof pfcFacturerClub==="function"){ row.appendChild(gmBtn("Facturer","soft",function(){ pfcFacturerClub(c); })); }
-  if(!own && !supprime && c.plan==="trial"){
+  if(!supprime && typeof pfcFacturerClub==="function"){ row.appendChild(gmBtn("Facturer","soft",function(){ pfcFacturerClub(c); })); }
+  if(!supprime && c.plan==="trial"){
     row.appendChild(gmBtn("Passer en payant","soft",function(){ passerEnPayant(c, list); }));
     row.appendChild(gmBtn("Prolonger l'essai","soft",function(){ prolongerEssai(c, list); }));
   }
-  if(!own && !supprime){
+  if(!supprime){
     row.appendChild(gmBtn("Pack : "+packLabel(c),"soft",function(){ choisirPack(c, list); }));
     if(c.plan==="standard"||c.plan==="premium"){
       row.appendChild(gmBtn("Échéance","soft",function(){ modifierEcheance(c, list); }));

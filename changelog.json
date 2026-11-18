@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795028220",
+  "semver": "1.20.7",
+  "titre": "Plateforme : fiche de l'ASMB complète",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur la Plateforme, la fiche du club d'origine propose les mêmes réglages que les autres clubs (pack, échéance, essai, facturation)."
+   }
+  ]
+ },
+ {
   "v": "1795024642",
   "semver": "1.20.6",
   "titre": "Packs et pôles",
