@@ -17,6 +17,8 @@ function fsStartSync(coll, lsKey){
       FS_PREV[coll]=arr.slice();
       localStorage.setItem(lsKey, JSON.stringify(arr));
       if(coll==="championnats" && typeof champSyncPlanning==="function") setTimeout(champSyncPlanning,300);
+      // Note de frais reçue → entre en compta chez le dirigeant (js/15h-compta-virements.js).
+      if((coll==="notes_frais"||coll==="comptabilite") && typeof ndfSynchroCompta==="function") setTimeout(ndfSynchroCompta,600);
       refreshCurrentScreen();
     },
     function(err){ console.log("sync "+coll+":", (err&&err.code)||err); }

@@ -29,7 +29,8 @@ function comptaBilanSauver(maj){
 // Comptes de trésorerie présents (caisses du club + celles des lignes).
 function comptaBilanComptesTreso(all){
   var out=(typeof COMPTA_COMPTES!=="undefined"?COMPTA_COMPTES:["Banque"]).filter(function(c){ return c!=="Autre"; });
-  (all||[]).forEach(function(l){ var c=comptaLigneCompte(l); if(c&&out.indexOf(c)<0) out.push(c); });
+  // Le compte « Notes de frais à rembourser » est une dette, pas de l'argent disponible.
+  (all||[]).forEach(function(l){ var c=comptaLigneCompte(l); if(c&&c!==COMPTA_NDF&&out.indexOf(c)<0) out.push(c); });
   return out;
 }
 // Solde d'un compte à une date : solde de départ (s'il est antérieur) + lignes depuis.
@@ -50,7 +51,9 @@ function comptaBilanSuggestions(ex){
     (typeof getInventaire==="function"?getInventaire():[]).forEach(function(it){ if(it&&it.categorie==="buvette"&&it.prixAchat!=null) o.stock+=(Number(it.qte)||0)*(Number(it.prixAchat)||0); });
     var saison=(typeof getCurrentSeason==="function")?getCurrentSeason():"";
     (typeof getLicences==="function"?getLicences():[]).forEach(function(l){ if(l&&(!l.saison||l.saison>=saison)&&l.montantAttendu!=null&&typeof licenceMontantDu==="function") o.creancesAdh+=licenceMontantDu(l); });
-    (typeof getNotesFrais==="function"?getNotesFrais():[]).forEach(function(n){ if(n&&n.statut==="soumise"&&(!n.date||n.date<=ex.fin)) o.dettesNdf+=Number(n.montant)||0; });
+    // Notes de frais reçues mais pas encore en compta + ce que doit le compte « Notes de frais à rembourser ».
+    (typeof getNotesFrais==="function"?getNotesFrais():[]).forEach(function(n){ if(n&&n.statut==="soumise"&&!n.comptaId&&(!n.date||n.date<=ex.fin)) o.dettesNdf+=Number(n.montant)||0; });
+    o.dettesNdf-=comptaBilanSolde(getComptabiliteTout(),COMPTA_NDF,ex.fin,null);
   }catch(e){}
   o.stock=comptaArrondi(o.stock); o.creancesAdh=comptaArrondi(o.creancesAdh); o.dettesNdf=comptaArrondi(o.dettesNdf);
   return o;
@@ -65,7 +68,9 @@ function comptaBilanSaisie(ex){
 }
 function comptaBilanCalcul(all,ex,sai){
   var init=comptaBilanReglages().soldesInit;
-  var dispo=comptaBilanComptesTreso(all).map(function(c){ return {compte:c,num:(comptaReglages().tresorerie[c]||COMPTA_TRESO_DEFAUT[c]||"471"),solde:comptaBilanSolde(all,c,ex.fin,init[c])}; })
+  // Soldes des comptes : avec les virements entre comptes (absents de « all », qui sert au résultat).
+  var tout=(typeof getComptabiliteTout==="function")?getComptabiliteTout():all;
+  var dispo=comptaBilanComptesTreso(tout).map(function(c){ return {compte:c,num:(comptaReglages().tresorerie[c]||COMPTA_TRESO_DEFAUT[c]||"471"),solde:comptaBilanSolde(tout,c,ex.fin,init[c])}; })
     .filter(function(d){ return d.solde!==0||init[d.compte]; });
   var totDispo=comptaArrondi(dispo.reduce(function(t,d){ return t+d.solde; },0));
   var actif=comptaArrondi(sai.immo+sai.stock+sai.creancesAdh+sai.autresCreances+totDispo);

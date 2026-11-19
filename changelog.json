@@ -1,5 +1,30 @@
 [
  {
+  "v": "1795111735",
+  "semver": "1.23.0",
+  "titre": "Notes de frais en compta, virements entre comptes",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Une note de frais reçue entre tout de suite en compta (dépense « Note de frais » sur le compte « Notes de frais à rembourser »). Elle se solde par « Rembourser » (virement depuis la banque ou la caisse) ou par « Abandon de frais » (le coach renonce : don au club)."
+   },
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Compta : nouveau « Virement entre comptes » (dépôt d'espèces en banque, retrait, caisse buvette versée en banque). Ni recette ni dépense : seuls les soldes des comptes bougent."
+   },
+   {
+    "roles": [
+     "coach"
+    ],
+    "texte": "Notes de frais : le statut montre si ta note est à rembourser, remboursée ou transformée en don."
+   }
+  ]
+ },
+ {
   "v": "1795110386",
   "semver": "1.22.0",
   "titre": "Fiche d'inscription : champs obligatoires",

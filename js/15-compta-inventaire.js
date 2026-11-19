@@ -4,12 +4,25 @@ function getDocs(){try{return JSON.parse(localStorage.getItem("asmb_docs")||"[]"
 function saveDocs(d){localStorage.setItem("asmb_docs",JSON.stringify(d));}
 
 // ── COMPTABILITE (reserve dirigeant) ────────────────────────────────
-function getComptabilite(){try{return JSON.parse(localStorage.getItem("asmb_comptabilite")||"[]");}catch(e){return [];}}
-function saveComptabilite(c){
+// Virements entre comptes (js/15h-compta-virements.js) : 2 lignes liées (virement:true) qui ne sont ni des
+// recettes ni des dépenses. getComptabilite() ne les rend PAS : tous les calculs (totaux, résultat, budget,
+// bilan, graphiques) restent justes sans le savoir. getComptabiliteTout() les inclut (liste, soldes des
+// comptes, relevé bancaire, FEC). saveComptabilite() remet les virements qu'il n'a pas reçus ;
+// saveComptabiliteTout() écrit exactement ce qu'on lui donne (pour supprimer un virement).
+function comptaBrut(){try{return JSON.parse(localStorage.getItem("asmb_comptabilite")||"[]");}catch(e){return [];}}
+function getComptabiliteTout(){ return comptaBrut(); }
+function getComptabilite(){ return comptaBrut().filter(function(l){ return !(l&&l.virement); }); }
+function comptaEcrire(c){
   // N° de pièce donné à chaque nouvelle ligne, quelle que soit son origine (js/15b-compta-plan.js).
   if(typeof comptaNumeroter==="function"){ comptaDedoublonnerPieces(c); comptaNumeroter(c); }
   localStorage.setItem("asmb_comptabilite",JSON.stringify(c));fsWriteCollection("comptabilite",c);
 }
+function saveComptabilite(c){
+  var ids={}; (c||[]).forEach(function(l){ if(l) ids[l.id]=1; });
+  var vir=comptaBrut().filter(function(l){ return l&&l.virement&&!ids[l.id]; });
+  comptaEcrire(vir.length?c.concat(vir):c);
+}
+function saveComptabiliteTout(c){ comptaEcrire(c); }
 
 // Taxonomie fixe des catégories (club sportif loi 1901)
 var COMPTA_CATS={
@@ -37,8 +50,8 @@ var comptaEditId=null;
 // Le compte d'une ligne ancienne (créée avant l'ajout de ce champ) se déduit de son moyen de paiement
 function comptaLigneCompte(l){ return l.compte||compteParDefaut(l.moyen); }
 
-function comptaFilteredList(){
-  var lines=getComptabilite().slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+function comptaFilteredList(sansVirements){
+  var lines=(sansVirements?getComptabilite():getComptabiliteTout()).slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
   return lines.filter(function(l){
     if(COMPTA_FILTERS.du && (l.date||"") < COMPTA_FILTERS.du) return false;
     if(COMPTA_FILTERS.au && (l.date||"") > COMPTA_FILTERS.au) return false;
@@ -62,9 +75,10 @@ function buildComptabilite(){
     if(listElNo) listElNo.innerHTML='<div class="empty-state"><div style="font-size:13px;font-weight:600">Accès non autorisé</div></div>';
     return;
   }
-  var all=getComptabilite();
+  if(typeof ndfSynchroCompta==="function") ndfSynchroCompta();
+  var all=getComptabiliteTout();
   // Lignes arrivées sans n° de pièce (caisse buvette en ligne, autre appareil) : numérotées ici.
-  if(typeof comptaNumeroter==="function" && (comptaDedoublonnerPieces(all)+comptaNumeroter(all))>0) saveComptabilite(all);
+  if(typeof comptaNumeroter==="function" && (comptaDedoublonnerPieces(all)+comptaNumeroter(all))>0) saveComptabiliteTout(all);
   if(typeof comptaChargerReglages==="function" && !window.__comptaReglagesLus){
     window.__comptaReglagesLus=true;
     var avantR=localStorage.getItem("asmb_compta_reglages");
@@ -124,8 +138,8 @@ function buildComptabilite(){
   var totalRecette=0,totalDepense=0,soldePointe=0;
   filtered.forEach(function(l){
     var m=l.montant||0;
-    if(l.type==="depense"){totalDepense+=m; if(l.pointe) soldePointe-=m;}
-    else {totalRecette+=m; if(l.pointe) soldePointe+=m;}
+    if(l.type==="depense"){ if(!l.virement) totalDepense+=m; if(l.pointe) soldePointe-=m;}
+    else { if(!l.virement) totalRecette+=m; if(l.pointe) soldePointe+=m;}
   });
   var soldesComptes={};
   COMPTA_COMPTES.forEach(function(c){soldesComptes[c]=0;});
@@ -155,6 +169,7 @@ function buildComptabilite(){
       '<button onclick="openBilanAnnuel()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📄 Bilan AG</button>'+
       '<button onclick="openComptaReleve()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">🏦 Relevé bancaire</button>'+
       '<button onclick="openComptaComptes()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">📑 Comptes annuels</button>'+
+      '<button onclick="openComptaVirement()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">↔ Virement entre comptes</button>'+
       '<button onclick="openComptaPlan()" style="padding:6px 10px;border-radius:8px;background:var(--bdr);color:var(--txt);font-size:11px;font-weight:700;border:none;cursor:pointer">⚙️ Plan comptable</button>'+
     '</span>'+
   '</div>';
@@ -166,6 +181,7 @@ function buildComptabilite(){
   filtered.forEach(function(l){
     var row=document.createElement("div");
     row.style.cssText="margin:0 12px 8px;background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(l.type==="depense"?"var(--red)":"var(--grn)")+";border-radius:var(--rs);padding:12px;cursor:pointer";
+    if(l.virement) row.style.borderLeftColor="var(--mut)";
     row.addEventListener("click",function(){showAddComptaLine(l.id);});
     var top=document.createElement("div");
     top.style.cssText="display:flex;justify-content:space-between;align-items:flex-start;gap:8px";
@@ -183,8 +199,8 @@ function buildComptabilite(){
       left.appendChild(pcgDiv);
     }
     var montantDiv=document.createElement("div");
-    montantDiv.style.cssText="font-size:15px;font-weight:800;flex-shrink:0;color:"+(l.type==="depense"?"var(--red)":"var(--grn)");
-    montantDiv.textContent=(l.type==="depense"?"-":"+")+(l.montant||0).toFixed(2)+" €";
+    montantDiv.style.cssText="font-size:15px;font-weight:800;flex-shrink:0;color:"+(l.virement?"var(--mut)":l.type==="depense"?"var(--red)":"var(--grn)");
+    montantDiv.textContent=(l.virement?"↔ ":"")+(l.type==="depense"?"-":"+")+(l.montant||0).toFixed(2)+" €";
     top.appendChild(left);top.appendChild(montantDiv);
     row.appendChild(top);
     listEl.appendChild(row);
@@ -204,7 +220,7 @@ function comptaTableau(listEl,lines){
       '<td>'+authEsc(l.categorie||"")+(n?'<div class="mono">'+authEsc(n+" "+((typeof comptaLibCompte==="function")?comptaLibCompte(n):""))+'</div>':'')+'</td>'+
       '<td class="mut">'+authEsc([l.moyen,comptaLigneCompte(l)].filter(Boolean).join(" · "))+'</td>'+
       '<td style="text-align:center;color:var(--grn);font-weight:800">'+(l.pointe?"✓":"")+'</td>'+
-      '<td class="num" style="color:'+(dep?"var(--red)":"var(--grn)")+'">'+(dep?"-":"+")+(Number(l.montant)||0).toFixed(2).replace(".",",")+' €</td></tr>';
+      '<td class="num" style="color:'+(l.virement?"var(--mut)":dep?"var(--red)":"var(--grn)")+'">'+(l.virement?"↔ ":"")+(dep?"-":"+")+(Number(l.montant)||0).toFixed(2).replace(".",",")+' €</td></tr>';
   });
   h+='</tbody></table></div>';
   listEl.innerHTML=h;
@@ -251,6 +267,7 @@ function comptaJustifClear(){
   var prev=document.getElementById("cl-justif-preview"); if(prev) prev.textContent="Aucun justificatif joint";
 }
 function showAddComptaLine(editId){
+  if(editId&&typeof comptaVirementDe==="function"){ var vl=comptaVirementDe(editId); if(vl){ comptaVirementDetail(vl); return; } }
   comptaEditId=editId||null;
   var lines=getComptabilite();
   var existing=comptaEditId?lines.find(function(l){return l.id===comptaEditId;}):null;
@@ -355,7 +372,7 @@ async function deleteComptaLine(){
 }
 function exportComptaCsv(){
   if(!hasPremium()){ askComptaVerrouillee(); return; }
-  var lines=comptaFilteredList();
+  var lines=comptaFilteredList(true);
   if(!lines.length){askAlert("Aucune ligne à exporter.");return;}
   var header=["Date","Type","Montant","Catégorie","Motif","Tiers/Membre","Moyen de paiement","Compte","Référence","Pointé","Justificatif"];
   var rows=lines.map(function(l){

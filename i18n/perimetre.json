@@ -37,6 +37,7 @@
     "js/15b-compta-plan.js",
     "js/15c-compta-ticket.js",
     "js/15d-compta-bilan.js",
+    "js/15h-compta-virements.js",
     "js/15e-documents-club.js",
     "js/14b-billetterie.js",
     "js/14c-entree.js",

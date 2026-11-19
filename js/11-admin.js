@@ -1504,8 +1504,9 @@ function renderNotesFraisList(list,isDir){
     list.innerHTML='<div style="text-align:center;color:var(--mut);padding:24px;font-size:12px">Aucune note de frais.</div>';
     return;
   }
-  var statutColors={soumise:"#E8670A",remboursee:"var(--ltg)",refusee:"#C0392B"};
-  var statutLabels={soumise:"Soumise",remboursee:"Remboursée",refusee:"Refusée"};
+  if(isDir&&typeof ndfSynchroCompta==="function"&&ndfSynchroCompta()>0){ all=getNotesFrais(); notes=all.slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");}); }
+  var statutColors={soumise:"#E8670A",arembourser:"#E8670A",remboursee:"var(--ltg)",abandonnee:"#8E44AD",refusee:"#C0392B"};
+  var statutLabels={soumise:"Envoyée",arembourser:"À rembourser",remboursee:"Remboursée",abandonnee:"Abandonnée (don)",refusee:"Refusée"};
   notes.forEach(function(n){
     var card=document.createElement("div");
     card.style.cssText="background:var(--card);border:1px solid var(--bdr);border-left:4px solid "+(statutColors[n.statut]||"#8E44AD")+";border-radius:var(--rs);padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start";
@@ -1542,28 +1543,29 @@ function renderNotesFraisList(list,isDir){
     sendBtn.style.cssText="padding:6px 12px;border-radius:16px;background:var(--bdr);color:var(--mut);font-size:10px;font-weight:700;border:none;cursor:pointer";
     sendBtn.addEventListener("click",function(e){e.stopPropagation();sendNoteFraisMail(n);});
     btnRow.appendChild(printBtn);btnRow.appendChild(sendBtn);
-    if(isDir&&n.statut==="soumise"){
+    if(isDir&&(n.statut==="soumise"||n.statut==="arembourser")&&typeof ndfRembourser==="function"&&ndfPeutCompta()){
+      var reAff=function(){ renderNotesFraisList(list,isDir); if(typeof buildComptabilite==="function") try{ buildComptabilite(); }catch(x){} };
       var okBtn=document.createElement("button");
-      okBtn.textContent="Marquer remboursée";
+      okBtn.textContent="Rembourser";
       okBtn.style.cssText="padding:6px 12px;border-radius:16px;background:color-mix(in srgb, var(--ltg) 12%, transparent);color:var(--dkg);font-size:10px;font-weight:700;border:none;cursor:pointer";
-      okBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"remboursee",list,isDir);});
-      var refBtn=document.createElement("button");
-      refBtn.textContent="Refuser";
-      refBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:700;border:none;cursor:pointer";
-      refBtn.addEventListener("click",function(e){e.stopPropagation();markNoteFraisStatut(n.id,"refusee",list,isDir);});
-      btnRow.appendChild(okBtn);btnRow.appendChild(refBtn);
+      okBtn.addEventListener("click",function(e){e.stopPropagation();ndfRembourser(n.id,reAff);});
+      var abBtn=document.createElement("button");
+      abBtn.textContent="Abandon de frais (don)";
+      abBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(142,68,173,.1);color:#8E44AD;font-size:10px;font-weight:700;border:none;cursor:pointer";
+      abBtn.addEventListener("click",function(e){e.stopPropagation();ndfAbandon(n.id,reAff);});
+      btnRow.appendChild(okBtn);btnRow.appendChild(abBtn);
     }
     var delBtn=document.createElement("button");
     delBtn.textContent="Supprimer";
     delBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:700;border:none;cursor:pointer";
     delBtn.addEventListener("click",function(e){
       e.stopPropagation();
-      askConfirm("Supprimer cette note de frais ?"+(n.statut==="remboursee"?" Sa ligne de comptabilité sera aussi supprimée.":""),{danger:true,confirmText:"Supprimer"}).then(function(ok){
+      askConfirm("Supprimer cette note de frais ?"+(n.comptaId||n.statut==="remboursee"?" Ses lignes de comptabilité seront aussi supprimées.":""),{danger:true,confirmText:"Supprimer"}).then(function(ok){
         if(!ok)return;
         saveNotesFrais(getNotesFrais().filter(function(x){return x.id!==n.id;}));
-        // Note déjà remboursée : sa ligne de comptabilité part avec elle.
-        var cpt=getComptabilite(), sans=cpt.filter(function(c){return c.reference!=="Note de frais #"+n.id;});
-        if(sans.length!==cpt.length) saveComptabilite(sans);
+        // Ses lignes de comptabilité (dépense, remboursement, abandon) partent avec elle.
+        if(typeof ndfSupprimerCompta==="function") ndfSupprimerCompta(n);
+        else { var cpt=getComptabilite(), sans=cpt.filter(function(c){return c.reference!=="Note de frais #"+n.id;}); if(sans.length!==cpt.length) saveComptabilite(sans); }
         renderNotesFraisList(list,isDir);
       });
     });

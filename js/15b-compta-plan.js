@@ -31,7 +31,7 @@ var COMPTA_PLAN_DEFAUT={
   "depense|Achats buvette":"607","depense|Déplacements":"625","depense|Arbitrage/Formations":"622",
   "depense|Assurances":"616","depense|Frais administratifs":"6064","depense|Note de frais":"625","depense|Autre":"658"
 };
-var COMPTA_TRESO_DEFAUT={"Banque":"512","Caisse espèces":"530","Caisse buvette":"531","Autre":"471"};
+var COMPTA_TRESO_DEFAUT={"Banque":"512","Caisse espèces":"530","Caisse buvette":"531","Autre":"471","Notes de frais à rembourser":"467"};
 var COMPTA_JOURNAUX={BQ:"Banque",CA:"Caisse",OD:"Opérations diverses"};
 var COMPTA_MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 
@@ -290,6 +290,12 @@ function comptaLignesPeriode(lines,ex){
 // dépense → débit charge / crédit trésorerie (montant négatif : sens inversé).
 function comptaEcritures(l){
   var m=comptaArrondi(l.montant); if(!m) return [];
+  // Virement entre comptes : une seule écriture, portée par la ligne de sortie (trésorerie → trésorerie).
+  if(l.virement){
+    if(l.type!=="depense"||!l.vers) return [];
+    var src=comptaTresoNum(l), dst=comptaTresoNum({compte:l.vers});
+    return [{compte:dst,debit:m,credit:0},{compte:src,debit:0,credit:m}];
+  }
   var cn=comptaCompteNum(l), tr=comptaTresoNum(l), dep=l.type==="depense";
   var debit=dep?cn:tr, credit=dep?tr:cn;
   if(m<0){ m=-m; var x=debit; debit=credit; credit=x; }
@@ -456,7 +462,7 @@ function comptaIso885915(s){
   return out;
 }
 function comptaExportFec(ex){
-  var all=getComptabilite();
+  var all=getComptabiliteTout();
   if(comptaDedoublonnerPieces(all)+comptaNumeroter(all)>0) saveComptabilite(all);
   var lignes=comptaLignesPeriode(all,ex);
   if(!lignes.length){ askAlert("Aucune ligne sur l'exercice "+ex.label+"."); return; }
@@ -634,7 +640,7 @@ function openComptaReleve(){
   });
   function fr(d){ return d.split("-").reverse().join("/"); }
   function rendre(){
-    var lines=getComptabilite(), res=comptaRapprocher(ops,lines);
+    var lines=getComptabiliteTout(), res=comptaRapprocher(ops,lines);
     var nb={deja:0,trouve:0,aCreer:0}; res.forEach(function(r){ nb[r.etat]++; });
     var entrees=0, sorties=0; ops.forEach(function(o){ if(o.montant>0) entrees+=o.montant; else sorties-=o.montant; });
     zone.innerHTML="";
@@ -670,7 +676,7 @@ function openComptaReleve(){
           ch.innerHTML='<option value="">Associer à une ligne existante de même montant…</option>'+r.choix.map(function(l){ return '<option value="'+authEsc(l.id)+'">'+authEsc((l.piece||"")+" · "+(l.motif||l.categorie||"")+" ("+fr(l.date||"")+")")+'</option>'; }).join("");
           ch.addEventListener("change",function(){
             if(!ch.value) return;
-            var all=getComptabilite(), l=all.filter(function(x){ return String(x.id)===ch.value; })[0]; if(!l) return;
+            var all=getComptabiliteTout(), l=all.filter(function(x){ return String(x.id)===ch.value; })[0]; if(!l) return;
             l.pointe=true; l.releveId=o.id; saveComptabilite(all); showToast("Ligne "+(l.piece||"")+" pointée"); rendre(); buildComptabilite();
           });
           lig.appendChild(ch);
@@ -683,7 +689,7 @@ function openComptaReleve(){
         cat.innerHTML=COMPTA_CATS[type].map(function(x){ return '<option value="'+authEsc(x)+'"'+(x===defCat?" selected":"")+'>'+authEsc(x)+'</option>'; }).join("");
         lig.appendChild(cat);
         lig.appendChild(gmBtn("+ Créer la ligne","soft",function(){
-          var all=getComptabilite();
+          var all=getComptabiliteTout();
           all.push({id:Date.now().toString()+Math.random().toString(36).slice(2,6),date:o.date,montant:Math.abs(o.montant),type:type,categorie:cat.value,
             motif:String(o.libelle||"Opération bancaire").slice(0,120),tiers:"",moyen:comptaMoyenDepuisLibelle(o.libelle),compte:"Banque",
             reference:"Relevé bancaire",pointe:true,releveId:o.id,justificatif:null});
@@ -697,7 +703,7 @@ function openComptaReleve(){
     if(coches.length){
       var pied=document.createElement("div"); pied.style.cssText="position:sticky;bottom:-20px;background:var(--bg);padding:12px 0 4px;margin-top:8px";
       var go=gmBtn("✓ Pointer les "+coches.length+" opérations trouvées","primary",function(){
-        var all=getComptabilite(), n=0, parId={}; all.forEach(function(l){ parId[String(l.id)]=l; });
+        var all=getComptabiliteTout(), n=0, parId={}; all.forEach(function(l){ parId[String(l.id)]=l; });
         coches.forEach(function(x){ if(!x.cb.checked) return; var l=parId[String(x.r.ligne.id)]; if(!l) return; l.pointe=true; l.releveId=x.r.op.id; n++; });
         if(!n) return askAlert("Aucune opération cochée.");
         saveComptabilite(all); showToast(n+" ligne"+(n>1?"s":"")+" pointée"+(n>1?"s":"")); rendre(); buildComptabilite();

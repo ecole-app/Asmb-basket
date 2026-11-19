@@ -49,7 +49,7 @@ function exportDateStr(){ return new Date().toISOString().slice(0,10); }
 function exportComptaXlsx(){
   if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
   if(typeof hasPremium==="function" && !hasPremium()){ askComptaVerrouillee(); return; }
-  var lines=comptaFilteredList();
+  var lines=comptaFilteredList(true);
   if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
   var ecritures=lines.map(function(l){
     return [l.date||"",l.type==="depense"?"Dépense":"Recette",Number(l.montant)||0,l.categorie||"",l.motif||"",l.tiers||"",l.moyen||"",comptaLigneCompte(l),l.reference||"",l.pointe?"Oui":"Non"];
@@ -184,7 +184,7 @@ function exportComptaBilanPdf(opts){
   if(typeof hasModulePermission==="function" && !hasModulePermission("comptabilite")){ askAlert("Accès non autorisé."); return; }
   if(!opts.archive && typeof hasPremium==="function" && !hasPremium()){ askComptaVerrouillee(); return; }
   if(typeof window.jspdf==="undefined"){ askAlert("Chargement du générateur PDF, réessayez dans quelques secondes"); return; }
-  var lines=(opts.archive?(hasPremium()?getComptabilite():comptaLignesAvantVerrou()):comptaFilteredList()).slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
+  var lines=(opts.archive?(hasPremium()?getComptabilite():comptaLignesAvantVerrou()):comptaFilteredList(true)).slice().sort(function(a,b){return (a.date||"")>(b.date||"")?1:-1;});
   if(!lines.length){ askAlert("Aucune ligne à exporter."); return; }
   var eur=function(n){ return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" EUR"; };
   var parCat={recette:{},depense:{}}, totR=0, totD=0;

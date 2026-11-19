@@ -269,6 +269,13 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         const i = document.getElementById("rech-input"); i.value = "an"; i.dispatchEvent(new Event("input"));
       });
       if (nom === "dirigeant") {
+        // Compta : la fenêtre « Virement entre comptes » doit s'ouvrir (Premium en démo), puis on la ferme.
+        await action(page, journal, ou + " › virement entre comptes", () => {
+          if (typeof window.hasPremium === "function" && !window.hasPremium()) return;
+          window.openComptaVirement();
+          if (!document.getElementById("vir-de")) throw new Error("fenêtre virement absente");
+          document.querySelector(".gm-sheet").remove();
+        });
         // Composition d'équipe : sur un match d'une équipe seniors de la démo, l'écran doit s'ouvrir avec le terrain.
         await action(page, journal, ou + " › composition d'équipe", () => {
           const ev = window.getEvents().find((e) => window.compoBoutonCarte(e));
