@@ -1,4 +1,4 @@
-# General Manager (repo `asmb-basket`) — conventions du projet
+# General Manager (repo `generalmanagerapp/generalmanager`) — conventions du projet
 
 PWA multi-clubs (test client : ASMB Basket). Vanilla JS sans bundler, Firebase Firestore
 (projet `asmb-app`), déployée sur GitHub Pages (`generalmanagerapp.fr`).
