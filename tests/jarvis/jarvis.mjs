@@ -268,6 +268,19 @@ async function profil(navigateur, base, nom, taille, libTaille) {
         b.click();
         const i = document.getElementById("rech-input"); i.value = "an"; i.dispatchEvent(new Event("input"));
       });
+      if (nom === "dirigeant") {
+        // Composition d'équipe : sur un match d'une équipe seniors de la démo, l'écran doit s'ouvrir avec le terrain.
+        await action(page, journal, ou + " › composition d'équipe", () => {
+          const ev = window.getEvents().find((e) => window.compoBoutonCarte(e));
+          if (!ev) return;
+          const t = window.compoEquipe(ev);
+          if (!window.compoActive(t)) return;
+          window.compoOuvrir(ev.id);
+          if (!window.compoEtat) return;
+          if (!document.getElementById("compo-cour")) throw new Error("terrain de la composition absent");
+          document.getElementById("compo-ecran").remove(); window.compoEtat = null;
+        });
+      }
       if (libTaille === "téléphone") {
         // Bouton + : il doit être sur l'accueil, s'ouvrir, puis chaque geste disponible doit marcher.
         await action(page, journal, ou + " › bouton +", (n) => {

@@ -1,5 +1,19 @@
 [
  {
+  "v": "1795065803",
+  "semver": "1.21.0",
+  "titre": "Composition d'équipe",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Nouveau bouton « Composition » sur les matchs : place tes 5 de départ sur le terrain où tu veux, verrouille-les, et glisse un joueur vers le banc pour le remplacer. Actif d'office en seniors ; pour les autres catégories (à partir de U13), le coach ou le dirigeant l'active en un clic."
+   }
+  ]
+ },
+ {
   "v": "1795028220",
   "semver": "1.20.7",
   "titre": "Plateforme : fiche de l'ASMB complète",
