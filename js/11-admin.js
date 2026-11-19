@@ -1558,9 +1558,12 @@ function renderNotesFraisList(list,isDir){
     delBtn.style.cssText="padding:6px 12px;border-radius:16px;background:rgba(192,57,43,.1);color:var(--red);font-size:10px;font-weight:700;border:none;cursor:pointer";
     delBtn.addEventListener("click",function(e){
       e.stopPropagation();
-      askConfirm("Supprimer cette note de frais ?",{danger:true,confirmText:"Supprimer"}).then(function(ok){
+      askConfirm("Supprimer cette note de frais ?"+(n.statut==="remboursee"?" Sa ligne de comptabilité sera aussi supprimée.":""),{danger:true,confirmText:"Supprimer"}).then(function(ok){
         if(!ok)return;
         saveNotesFrais(getNotesFrais().filter(function(x){return x.id!==n.id;}));
+        // Note déjà remboursée : sa ligne de comptabilité part avec elle.
+        var cpt=getComptabilite(), sans=cpt.filter(function(c){return c.reference!=="Note de frais #"+n.id;});
+        if(sans.length!==cpt.length) saveComptabilite(sans);
         renderNotesFraisList(list,isDir);
       });
     });

@@ -46,13 +46,31 @@ async function licSupprimer(code){
   var compta=getComptabilite(), restes=compta.filter(function(c){return !(refs[c.reference]||refs[c.id]);});
   var retirees=compta.filter(function(c){return refs[c.reference]||refs[c.id];});
   if(restes.length!==compta.length) saveComptabilite(restes);
-  saveLicences(lics.filter(function(l){return l.code!==code;}));
+  var reste=lics.filter(function(l){return l.code!==code;});
+  saveLicences(reste);
+  // Le joueur disparaît aussi du trombinoscope et des équipes (sauf s'il a une autre fiche : saison précédente...).
+  var nn=function(x){return String(x||"").trim().toLowerCase();};
+  var meme=function(a,b){return nn(a.nom)===nn(b.nom)&&nn(a.prenom)===nn(b.prenom)&&(a.naissance||"")===(b.naissance||"");};
+  var joueurRetire=null, equipesAvant=null;
+  if(f.nom&&!reste.some(function(l){return l.fiche&&meme(l.fiche,f);})&&typeof getPlayers==="function"){
+    var pls=getPlayers(), pl=pls.find(function(q){return meme(q,f);});
+    if(pl){
+      joueurRetire=pl; equipesAvant=JSON.stringify(getTeams());
+      savePlayers(pls.filter(function(q){return q.id!==pl.id;}));
+      var ts=getTeams(), chg=false;
+      ts.forEach(function(t){ if((t.members||[]).indexOf(pl.id)>=0){ t.members=t.members.filter(function(id){return id!==pl.id;}); chg=true; } });
+      if(chg) saveTeams(ts); else equipesAvant=null;
+    }
+  }
   buildLicences(); if(typeof buildAdminHome==="function") buildAdminHome();
+  if(typeof buildTeams==="function") try{ buildTeams(); }catch(e){}
   if(typeof goBack==="function") goBack();
   // Rattrapable 5 secondes : la fiche et ses lignes de comptabilité reviennent telles quelles.
   showUndoToast("Fiche de "+nom+" supprimée",function(){
     var cur=getLicences(); if(!cur.some(function(l){return l.code===code;})){ cur.push(lic); saveLicences(cur); }
     if(retirees.length){ var cc=getComptabilite(), ids={}; cc.forEach(function(c){ ids[c.id]=true; }); saveComptabilite(cc.concat(retirees.filter(function(c){ return !ids[c.id]; }))); }
+    if(joueurRetire){ var pp=getPlayers(); if(!pp.some(function(q){return q.id===joueurRetire.id;})){ pp.push(joueurRetire); savePlayers(pp); } }
+    if(equipesAvant){ saveTeams(JSON.parse(equipesAvant)); }
     buildLicences(); if(typeof buildAdminHome==="function") buildAdminHome();
   });
 }
