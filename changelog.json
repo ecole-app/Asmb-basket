@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795109925",
+  "semver": "1.21.2",
+  "titre": "Compta : anciens exercices",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Comptabilité : les 5 exercices précédents sont toujours accessibles dans le sélecteur, même sans ligne, pour saisir ou consulter l'historique."
+   }
+  ]
+ },
+ {
   "v": "1795108298",
   "semver": "1.21.1",
   "titre": "Suppressions plus propres",

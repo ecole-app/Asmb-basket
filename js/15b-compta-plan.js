@@ -78,6 +78,8 @@ function comptaExerciceCourant(){ return comptaExercice(new Date().toISOString()
 function comptaExercicesConnus(lines){
   var vus={}, out=[], cour=comptaExerciceCourant();
   vus[cour.cle]=1; out.push(cour);
+  // Les 5 exercices avant l'exercice courant restent toujours accessibles (saisie de l'historique, bilans passés), même sans ligne.
+  for(var k=1;k<=5;k++){ var pe=comptaExercice((parseInt(cour.cle,10)-k)+cour.debut.slice(4)); if(!vus[pe.cle]){ vus[pe.cle]=1; out.push(pe); } }
   (lines||[]).forEach(function(l){ if(!l.date) return; var e=comptaExercice(l.date); if(!vus[e.cle]){ vus[e.cle]=1; out.push(e); } });
   return out.sort(function(a,b){ return b.cle.localeCompare(a.cle); });
 }
