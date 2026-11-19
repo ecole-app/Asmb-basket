@@ -1,5 +1,20 @@
 [
  {
+  "v": "1795110386",
+  "semver": "1.22.0",
+  "titre": "Fiche d'inscription : champs obligatoires",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Sur la fiche d'inscription, la photo est obligatoire et l'adhérent ne peut plus envoyer sa fiche s'il manque l'adresse, ses coordonnées (ou celles du responsable légal s'il est mineur) ou le contact d'urgence. Le champ manquant est entouré en rouge."
+   }
+  ]
+ },
+ {
   "v": "1795109925",
   "semver": "1.21.2",
   "titre": "Compta : anciens exercices",

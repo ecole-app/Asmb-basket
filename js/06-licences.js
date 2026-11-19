@@ -1475,6 +1475,9 @@ function renderFicheForm(lic){
     var btn=document.getElementById("cert-btn");
     if(btn)btn.onclick=function(){var inp=document.getElementById("cert-input");if(inp)inp.click();};
     updateCertBanner();
+    var nai=document.getElementById("f-naissance");
+    ficheEtoiles(nai?nai.value:"");
+    if(nai) nai.addEventListener("change",function(){ ficheEtoiles(nai.value); });
   },50);
   // Mise a jour statut en cours si fiche déjà partiellement remplie
   var lics=getLicences();
@@ -1551,7 +1554,7 @@ function handlePhoto(input){
   reader.onload=function(e){
     fichePhoto=e.target.result;
     var prev=document.getElementById("photo-preview");
-    if(prev)prev.innerHTML='<img src="'+authEsc(fichePhoto)+'" style="width:100%;height:100%;object-fit:cover">';
+    if(prev){ prev.innerHTML='<img src="'+authEsc(fichePhoto)+'" style="width:100%;height:100%;object-fit:cover">'; prev.style.borderColor=""; prev.style.outline=""; }
   };
   reader.readAsDataURL(input.files[0]);
 }
@@ -1580,12 +1583,52 @@ function removeCertificat(){
   var inp=document.getElementById("cert-input");
   if(inp)inp.value="";
 }
+// Champs sans lesquels l'adhérent ne peut pas envoyer sa fiche (photo, identité, coordonnées, responsable légal
+// si mineur, contact d'urgence). Le premier manquant est entouré en rouge, on y défile et le message dit lequel.
+function ficheAge(naissance){
+  var d=new Date(naissance); if(isNaN(d)) return 99;
+  var n=new Date(), a=n.getFullYear()-d.getFullYear();
+  if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate())) a--;
+  return a;
+}
+function ficheObligatoires(naissance){
+  var mineur=ficheAge(naissance)<18, l=[["photo","Ajoutez une photo (obligatoire) pour continuer."],["f-adresse","L'adresse est obligatoire."]];
+  if(mineur) l.push(["f-respNom","Le nom du responsable légal est obligatoire."],["f-respLien","Le lien de parenté du responsable est obligatoire."],["f-respTel","Le téléphone du responsable légal est obligatoire."],["f-respEmail","L'email du responsable légal est obligatoire."]);
+  else l.push(["f-telephone","Le téléphone est obligatoire."],["f-emailLic","L'email est obligatoire."]);
+  l.push(["f-urgenceNom","Le nom du contact d'urgence est obligatoire."],["f-urgenceTel","Le téléphone du contact d'urgence est obligatoire."]);
+  return l;
+}
+function ficheBloquer(naissance){
+  document.querySelectorAll(".f-manque").forEach(function(e){ e.classList.remove("f-manque"); e.style.borderColor=""; e.style.outline=""; });
+  var l=ficheObligatoires(naissance);
+  for(var i=0;i<l.length;i++){
+    var id=l[i][0], vide, el;
+    if(id==="photo"){ vide=!fichePhoto; el=document.getElementById("photo-preview"); }
+    else { el=document.getElementById(id); vide=!el||!String(el.value||"").trim(); }
+    if(vide){
+      if(el){ el.classList.add("f-manque"); el.style.borderColor="var(--red)"; if(id==="photo") el.style.outline="3px solid var(--red)"; if(el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"center"}); if(el.focus&&id!=="photo") try{ el.focus({preventScroll:true}); }catch(e){} }
+      askAlert(l[i][1]); return true;
+    }
+  }
+  return false;
+}
+// Étoile rouge sur les champs obligatoires (nœud à part : les libellés restent traduits tels quels).
+function ficheEtoiles(naissance){
+  document.querySelectorAll(".f-etoile").forEach(function(e){ e.remove(); });
+  ficheObligatoires(naissance).forEach(function(o){
+    var el=document.getElementById(o[0]==="photo"?"photo-preview":o[0]); if(!el) return;
+    var lab=o[0]==="photo"?el.parentNode.querySelector("button"):(el.parentNode&&el.parentNode.querySelector("label"));
+    if(!lab) return;
+    var st=document.createElement("span"); st.className="f-etoile"; st.setAttribute("data-notr",""); st.textContent=" *"; st.style.color="var(--red)"; lab.appendChild(st);
+  });
+}
 function soumettreFiche(){
   var prenom=(document.getElementById("f-prenom")||{}).value||"";
   var nom=(document.getElementById("f-nom")||{}).value||"";
   var naissance=(document.getElementById("f-naissance")||{}).value||"";
   if(!prenom||!nom||!naissance){askAlert("Prénom, nom et date de naissance sont obligatoires");return;}
   if(!ficheGenre){askAlert("Sélectionnez votre genre");return;}
+  if(!isStaffUser() && ficheBloquer(naissance)) return;
   if(ficheSurclassement){
     var certDateVal=(document.getElementById("f-certDate")||{}).value||"";
     if(!ficheCertificat || !certDateVal){
