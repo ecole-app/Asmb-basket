@@ -139,6 +139,7 @@ function openPole(id){
   else if(id==="elite"||id==="competition"||id==="3x3"||id==="evenement"||id==="basketpourtous"||id==="basketsante"){
     openPoleScreen(id);
   }
+  else if(String(id).indexOf("pc_")===0 && typeof polesClubOuvrir==="function") polesClubOuvrir(id);
 }
 function buildElite(){
   var el=document.getElementById("eliteCards");if(!el)return;el.innerHTML="";

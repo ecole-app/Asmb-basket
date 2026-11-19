@@ -396,6 +396,7 @@ function buildPortal(){
       el.appendChild(c);
     });
   }
+  if(typeof polesClubBouton==="function") polesClubBouton(el);
   buildDashboard();
   if(typeof renderDeskHome==="function") renderDeskHome();
   if(typeof ppAfficher==="function") ppAfficher();

@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795116349",
+  "semver": "1.24.0",
+  "titre": "Pôles du club : créer, masquer, supprimer",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur ordinateur, le bouton « Gérer les pôles » (accueil) permet de créer un pôle propre au club, de supprimer un pôle créé, ou de masquer un pôle d'origine (il se restaure à tout moment, rien n'est effacé)."
+   }
+  ]
+ },
+ {
   "v": "1795111735",
   "semver": "1.23.0",
   "titre": "Notes de frais en compta, virements entre comptes",

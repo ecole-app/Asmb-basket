@@ -154,6 +154,7 @@ const PRECACHE = [
   './js/17-poles.js',
   './js/17b-poles-joueurs.js',
   './js/17c-poles-fiche.js',
+  './js/17d-poles-club.js',
   './js/18-auth.js',
   './js/18c-mes-clubs.js',
   './js/18d-securite.js',

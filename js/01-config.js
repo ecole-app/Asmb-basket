@@ -247,7 +247,11 @@ function activePoles(){
   // Élite Academy et Basket Pour Tous : exclusifs à l'ASMB. Le reste suit le pack, comme pour tous les clubs.
   if(estOrigine) POLES.forEach(function(p){ if(BASE_POLES.indexOf(p.id)<0 && PREMIUM_POLES.indexOf(p.id)<0) ids.push(p.id); });
   if(typeof hasPremium==="function" && hasPremium()) ids=ids.concat(PREMIUM_POLES);
-  return POLES.filter(function(p){ return ids.indexOf(p.id)>=0; });
+  var masq=(typeof polesClubMasques==="function")?polesClubMasques():[];
+  var out=POLES.filter(function(p){ return ids.indexOf(p.id)>=0 && masq.indexOf(p.id)<0; });
+  // Pôles créés par le dirigeant du club (js/17d-poles-club.js)
+  if(typeof polesClubObjets==="function") out=out.concat(polesClubObjets());
+  return out;
 }
 
 // Pôles Premium pas encore ouverts pour ce club (essai fini ou Standard) : affichés
@@ -255,7 +259,8 @@ function activePoles(){
 function polesVerrouilles(){
   var c=window.CURRENT_CLUB;
   if(!c || (typeof hasPremium==="function" && hasPremium())) return [];
-  return POLES.filter(function(p){ return PREMIUM_POLES.indexOf(p.id)>=0; });
+  var masq=(typeof polesClubMasques==="function")?polesClubMasques():[];
+  return POLES.filter(function(p){ return PREMIUM_POLES.indexOf(p.id)>=0 && masq.indexOf(p.id)<0; });
 }
 function isPoleActive(poleId){
   return activePoles().some(function(p){ return p.id===poleId; });

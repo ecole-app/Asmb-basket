@@ -17,7 +17,7 @@ var GM_DESK_ITEMS=[
   {id:"equipes", label:"Équipes", grp:"Sportif", ic:"team", mod:"equipes", scr:["equipes"]},
   {id:"inscriptions", label:"Joueurs", grp:"Sportif", ic:"users", mod:"inscriptions", scr:["inscriptions","player-history"]},
   // Pôles du club : seuls ceux ouverts pour ce club (isPoleActive) apparaissent.
-  {id:"formation", label:"Formation", grp:"Pôles", ic:"book", scr:["elite","u13home","cycle","seance"], go:function(){ stack=["portal"]; openPole("formation"); }},
+  {id:"formation", label:"Formation", grp:"Pôles", ic:"book", pole:"formation", scr:["elite","u13home","cycle","seance"], go:function(){ stack=["portal"]; openPole("formation"); }},
   {id:"competition", label:"Compétition 5x5", grp:"Pôles", ic:"trophy", pole:"competition", scr:["pole-competition"], go:function(){ stack=["portal"]; openPole("competition"); }},
   {id:"evenement", label:"Événements", grp:"Pôles", ic:"flag", pole:"evenement", scr:["pole-evenement"], go:function(){ stack=["portal"]; openPole("evenement"); }},
   {id:"elite-academy", label:"Élite Academy", grp:"Pôles", ic:"star", pole:"elite", scr:["pole-elite"], go:function(){ stack=["portal"]; openPole("elite"); }},

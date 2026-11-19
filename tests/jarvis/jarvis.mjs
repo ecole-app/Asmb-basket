@@ -276,6 +276,14 @@ async function profil(navigateur, base, nom, taille, libTaille) {
           if (!document.getElementById("vir-de")) throw new Error("fenêtre virement absente");
           document.querySelector(".gm-sheet").remove();
         });
+        // Pôles du club : la fenêtre « Gérer les pôles » s'ouvre (ordinateur) et liste les pôles, puis on la ferme.
+        await action(page, journal, ou + " › gérer les pôles", () => {
+          if (typeof window.polesClubGerable !== "function" || !window.polesClubGerable()) return;
+          window.polesClubGerer();
+          const m = document.getElementById("modal-poles-club");
+          if (!m || !m.textContent.includes("Gérer les pôles")) throw new Error("fenêtre des pôles absente");
+          m.remove();
+        });
         // Composition d'équipe : sur un match d'une équipe seniors de la démo, l'écran doit s'ouvrir avec le terrain.
         await action(page, journal, ou + " › composition d'équipe", () => {
           const ev = window.getEvents().find((e) => window.compoBoutonCarte(e));

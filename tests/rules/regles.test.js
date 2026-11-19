@@ -161,6 +161,12 @@ describe("Fiche du club (clubs/{id})", () => {
     await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), { polesCoachs: m }));
     await assertFails(updateDoc(doc(await as("dirB"), "clubs/A"), { polesCoachs: m }));
   });
+  it("pôles du club : le dirigeant crée/masque, un coach ou un autre club non", async () => {
+    const c = { polesCustom: [{ id: "pc_1", name: "Féminin" }], polesMasques: ["3x3"] };
+    await assertSucceeds(updateDoc(doc(await as("dirA"), "clubs/A"), c));
+    await assertFails(updateDoc(doc(await as("coachA"), "clubs/A"), c));
+    await assertFails(updateDoc(doc(await as("dirB"), "clubs/A"), c));
+  });
   it("abonnement : le dirigeant gèle, relance et résilie lui-même ; personne d'autre", async () => {
     const fin = Date.now() + 60 * 86400000;
     const gel = { aboGels: [{ debut: Date.now(), fin, mois: 2, par: "dirA" }], aboGelFin: fin, aboNotif: { t: "gel", le: Date.now(), vu: false, detail: "2 mois" } };
