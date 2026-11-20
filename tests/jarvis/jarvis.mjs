@@ -304,6 +304,16 @@ async function profil(navigateur, base, nom, taille, libTaille) {
           if (!document.getElementById("compo-cour")) throw new Error("terrain de la composition absent");
           document.getElementById("compo-ecran").remove(); window.compoEtat = null;
         });
+        // Plaquette du coach : sur un match, l'écran plein écran doit s'ouvrir avec le terrain et les pions.
+        await action(page, journal, ou + " › plaquette", () => {
+          const ev = window.getEvents().find((e) => window.plqBoutonCarte(e));
+          if (!ev) return;
+          window.plqOuvrir(ev.id);
+          if (!document.querySelector("#plq-court svg")) throw new Error("terrain de la plaquette absent");
+          if (!document.querySelector("#plq-stage .plq-ballon")) throw new Error("ballon de la plaquette absent");
+          window.plqFermer();
+          if (document.getElementById("plq-ecran")) throw new Error("la plaquette ne se ferme pas");
+        });
       }
       if (libTaille === "téléphone") {
         // Bouton + : il doit être sur l'accueil, s'ouvrir, puis chaque geste disponible doit marcher.

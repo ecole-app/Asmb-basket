@@ -1,5 +1,19 @@
 [
  {
+  "v": "1795196948",
+  "semver": "1.28.0",
+  "titre": "Plaquette du coach",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach"
+    ],
+    "texte": "Planning : nouveau bouton « Plaquette » sur les matchs et entraînements. Un vrai terrain en plein écran avec le logo du club, vos joueurs présents à déplacer, un ballon, un stylo, un surligneur et une gomme. Sur téléphone, le terrain complet s'affiche dans la longueur. Rien n'est enregistré ni envoyé."
+   }
+  ]
+ },
+ {
   "v": "1795170319",
   "semver": "1.27.0",
   "titre": "Taille du texte réglable",
