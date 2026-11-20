@@ -1,17 +1,14 @@
 // ══════════════════════════════════════════════════════════════
 // COMPTA — PHOTO DE TICKET → LIGNE PRÉ-REMPLIE
-// Photo réduite (1280 px, JPEG) → lue par Gemini (Firebase AI Logic) →
-// date, montant, fournisseur, catégorie, moyen de paiement pré-remplis
-// dans « Nouvelle ligne ». La photo reste jointe en justificatif. Rien
-// n'est enregistré sans validation : si la lecture échoue, on complète
-// à la main comme avant. Aucune clé à part : l'appel passe par le projet
-// Firebase (clé publique + jeton App Check), l'API « Gemini Developer »
-// est activée dans la console Firebase.
+// Photo réduite (1280 px, JPEG) → lue par un modèle d'IA gratuit
+// via la fonction serveur lireTicket (functions/index.js, clé dans Secret
+// Manager, 40 lectures/jour/compte) → date, montant, fournisseur, catégorie,
+// moyen de paiement pré-remplis dans « Nouvelle ligne ». La photo reste jointe
+// en justificatif. Rien n'est enregistré sans validation : si la lecture
+// échoue, on complète à la main comme avant.
 // ══════════════════════════════════════════════════════════════
-// Modèles stables (liste officielle Firebase AI Logic). Les « 2.5 » ne sont plus
-// ouverts aux nouveaux projets (404) : à revoir si Google annonce un arrêt.
-var GM_GEMINI_MODELES=["gemini-3.5-flash-lite","gemini-3.5-flash","gemini-3.1-flash-lite"];
-var GM_TICKET_DELAI=20000; // par modèle essayé (3 au plus)
+var GM_TICKET_URL="https://europe-west1-asmb-app.cloudfunctions.net/lireTicket";
+var GM_TICKET_DELAI=110000; // le serveur essaie jusqu'à 3 modèles gratuits
 
 // Bouton de la barre : ouvre une nouvelle ligne (dépense) puis l'appareil photo.
 function comptaTicketNouveau(){
@@ -54,14 +51,6 @@ function comptaTicketReduire(file,maxPx,qualite){
     img.src=url;
   });
 }
-function comptaTicketPrompt(){
-  return "Photo d'un ticket de caisse ou d'une facture française, payée par un club de basket. "+
-    "Réponds UNIQUEMENT avec un objet JSON brut, sans markdown ni explication :\n"+
-    '{"date":"AAAA-MM-JJ","montant":12.34,"fournisseur":"nom du magasin ou de la société","description":"achat en 2 à 5 mots","categorie":"une valeur de la liste","moyen":"CB ou Espèces ou Chèque ou Virement ou null"}\n'+
-    "montant = TOTAL TTC payé (pas le sous-total, pas la TVA, pas le rendu monnaie). "+
-    "categorie parmi : "+COMPTA_CATS.depense.join(" | ")+". "+
-    "Utilise null si une information est illisible.";
-}
 // Erreur avec le détail technique, affiché sous le message pour le diagnostic.
 function comptaTicketErr(detail){ var e=new Error("ia"); e.detail=String(detail||"").slice(0,160); return e; }
 // Extrait et vérifie le JSON renvoyé par l'IA (rien d'aberrant n'est gardé).
@@ -83,56 +72,41 @@ function comptaTicketAnalyser(txt){
   if(["CB","Espèces","Chèque","Virement"].indexOf(d.moyen)>=0) out.moyen=d.moyen;
   return (out.montant||out.date||out.fournisseur)?out:null;
 }
-// Lecture par Gemini (Firebase AI Logic). Essaie chaque modèle de la liste.
-function comptaTicketGemini(dataUrl){
-  if(!window.fbApiKey||!window.fbProjectId) return Promise.reject(comptaTicketErr("Gemini : Firebase non chargé"));
+// Lecture par le serveur (fonction lireTicket) : il pose la question et renvoie le texte de l'IA.
+function comptaTicketServeur(dataUrl){
+  var cu=window.fbAuth&&window.fbAuth.currentUser;
+  if(!cu) return Promise.reject(comptaTicketErr("pas connecté"));
   var b64=String(dataUrl).split(",")[1]||"";
-  var corps={contents:[{role:"user",parts:[{inlineData:{mimeType:"image/jpeg",data:b64}},{text:comptaTicketPrompt()}]}],
-    generationConfig:{temperature:0,maxOutputTokens:1500,responseMimeType:"application/json"}};
-  function essai(i,derniere){
-    if(i>=GM_GEMINI_MODELES.length) return Promise.reject(derniere||comptaTicketErr("Gemini : aucun modèle"));
-    var mod=GM_GEMINI_MODELES[i];
-    var ctrl=window.AbortController?new AbortController():null;
-    var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
-    var jeton=typeof window.fbAppCheckToken==="function"?window.fbAppCheckToken():Promise.resolve("");
-    return jeton.then(function(ac){
-      var h={"Content-Type":"application/json","x-goog-api-key":window.fbApiKey,"x-goog-api-client":"gl-js/ fire/10.7.1"};
-      if(ac) h["X-Firebase-AppCheck"]=ac;
-      return fetch("https://firebasevertexai.googleapis.com/v1beta/projects/"+encodeURIComponent(window.fbProjectId)+"/models/"+mod+":generateContent",
-        {method:"POST",headers:h,body:JSON.stringify(corps),signal:ctrl?ctrl.signal:undefined});
-    }).then(function(r){ return r.text().then(function(x){ var d=null; try{ d=JSON.parse(x); }catch(e){} return {st:r.status,d:d,x:x}; }); })
-    .then(function(o){
-      clearTimeout(t);
-      if(o.st!==200||!o.d||o.d.error){
-        var m=(o.d&&o.d.error&&o.d.error.message)||o.x.slice(0,100);
-        throw comptaTicketErr("Gemini "+o.st+" ("+mod+") : "+m);
-      }
-      var parts=(o.d.candidates&&o.d.candidates[0]&&o.d.candidates[0].content&&o.d.candidates[0].content.parts)||[];
-      var txt=parts.map(function(p){ return p.text||""; }).join("");
-      var res=comptaTicketAnalyser(txt);
-      if(!res) throw comptaTicketErr("Gemini illisible ("+mod+") : "+(txt.slice(0,80)||"vide"));
-      return res;
-    },function(e){ clearTimeout(t); throw (e&&e.detail)?e:comptaTicketErr("Gemini réseau ("+mod+") : "+(e&&e.name==="AbortError"?"trop long":(e&&e.message||e))); })
-    .catch(function(e){
-      // 403 = AI Logic pas activé : inutile d'essayer l'autre modèle.
-      if(e&&/Gemini 403/.test(e.detail||"")) throw e;
-      return essai(i+1,e);
-    });
-  }
-  return essai(0,null);
+  var ctrl=window.AbortController?new AbortController():null;
+  var t=setTimeout(function(){ if(ctrl) ctrl.abort(); },GM_TICKET_DELAI);
+  return cu.getIdToken().then(function(jeton){
+    return fetch(GM_TICKET_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+jeton},
+      body:JSON.stringify({image:b64,categories:(typeof COMPTA_CATS!=="undefined"&&COMPTA_CATS.depense)||[]}),signal:ctrl?ctrl.signal:undefined});
+  }).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ return {st:r.status,j:j}; }); })
+  .then(function(o){
+    clearTimeout(t);
+    if(o.st===429) throw comptaTicketErr("quota");
+    if(o.st!==200||!o.j.ok) throw comptaTicketErr("serveur "+o.st+" : "+(o.j.detail||o.j.erreur||""));
+    var res=comptaTicketAnalyser(o.j.texte);
+    if(!res) throw comptaTicketErr("illisible ("+(o.j.modele||"")+")");
+    return res;
+  },function(e){ clearTimeout(t); throw (e&&e.detail)?e:comptaTicketErr("réseau : "+(e&&e.name==="AbortError"?"trop long":(e&&e.message||e))); });
 }
 // Lecture IA d'une photo de ticket, partagée (compta, notes de frais).
 // statut(txt) : gardé pour les appelants, plus utilisé (un seul fournisseur). Renvoie {date,montant,fournisseur,...}.
 function gmTicketIA(file,statut){
   if(!navigator.onLine) return Promise.reject(new Error("hors-ligne"));
   // Image plus légère pour l'IA (réponse plus rapide) ; le justificatif garde sa propre version.
-  return comptaTicketReduire(file,1024,0.6).then(function(petite){ return comptaTicketGemini(petite); });
+  if(window.GM_DEMO) return Promise.reject(comptaTicketErr("démo"));
+  return comptaTicketReduire(file,1024,0.6).then(function(petite){ return comptaTicketServeur(petite); });
 }
 function gmTicketMsgErreur(e){
   var m=e&&e.message;
   return m==="image"?"⚠️ Photo illisible. Réessaie ou complète à la main.":
     m==="hors-ligne"?"⚠️ Pas de connexion : photo jointe, complète à la main.":
     (e&&e.name==="AbortError")?"⏱ Lecture trop longue : photo jointe, complète à la main.":
+    (e&&e.detail==="quota")?"⚠️ Limite de 40 lectures par jour atteinte : photo jointe, complète à la main.":
+    (e&&e.detail==="démo")?"Démo : la lecture du ticket marche avec un vrai compte. Complète à la main.":
     "⚠️ Lecture impossible : photo jointe, complète à la main."+(e&&e.detail?"\n("+e.detail+")":"");
 }
 function comptaTicketLire(file){

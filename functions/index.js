@@ -1831,3 +1831,85 @@ exports.securite = onRequest({ cors: ["https://generalmanagerapp.fr", "https://w
     res.status(500).json({ erreur: "serveur" });
   }
 });
+
+// ── Lecture d'une photo de ticket de caisse (compta, notes de frais) ─────
+// Le client envoie la photo réduite (JPEG en base64) et la liste de ses catégories de dépenses ;
+// le serveur pose la question à un modèle gratuit d'OpenRouter (clé dans Secret Manager,
+// jamais côté client) et renvoie le texte brut, vérifié ensuite par l'appli (comptaTicketAnalyser).
+// Réservé aux comptes connectés d'un club ; 40 lectures par jour et par compte (ia_quota/{uid}, serveur seul).
+const { defineSecret } = require("firebase-functions/params");
+const OPENROUTER_KEY = defineSecret("OPENROUTER_KEY");
+const TICKET_MODELES = [
+  "nvidia/nemotron-3.5-super-vl:free",
+  "inclusionai/ling-3.2-flash:free",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+];
+const TICKET_QUOTA_JOUR = 40;
+function ticketPrompt(cats) {
+  return "Photo d'un ticket de caisse ou d'une facture française, payée par un club de sport. " +
+    "Réponds UNIQUEMENT avec un objet JSON brut, sans markdown ni explication :\n" +
+    '{"date":"AAAA-MM-JJ","montant":12.34,"fournisseur":"nom du magasin ou de la société","description":"achat en 2 à 5 mots","categorie":"une valeur de la liste","moyen":"CB ou Espèces ou Chèque ou Virement ou null"}\n' +
+    "montant = TOTAL TTC payé (pas le sous-total, pas la TVA, pas le rendu monnaie). " +
+    (cats.length ? "categorie parmi : " + cats.join(" | ") + ". " : "") +
+    "Utilise null si une information est illisible.";
+}
+exports.lireTicket = onRequest({ cors: ["https://generalmanagerapp.fr", "https://www.generalmanagerapp.fr"], memory: "256MiB", timeoutSeconds: 120, secrets: [OPENROUTER_KEY] }, async (req, res) => {
+  if (req.method !== "POST") { res.status(405).json({ erreur: "methode" }); return; }
+  let uid;
+  try {
+    const jeton = String(req.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    uid = (await getAuth().verifyIdToken(jeton)).uid;
+  } catch (e) { res.status(401).json({ erreur: "connexion" }); return; }
+  const corps = req.body || {};
+  const image = String(corps.image || "");
+  if (!/^[A-Za-z0-9+/=]+$/.test(image) || image.length < 1000 || image.length > 2000000) { res.status(400).json({ erreur: "image" }); return; }
+  const cats = (Array.isArray(corps.categories) ? corps.categories : []).slice(0, 40)
+    .map((c) => String(c || "").replace(/[\r\n|]/g, " ").trim().slice(0, 60)).filter(Boolean);
+  try {
+    const u = await db.collection("users").doc(uid).get();
+    if (!u.exists) { res.status(403).json({ erreur: "compte" }); return; }
+    // Quota du jour (heure de Paris), compté avant l'appel.
+    const jour = new Date().toLocaleDateString("fr-CA", { timeZone: "Europe/Paris" });
+    const qRef = db.collection("ia_quota").doc(uid);
+    const ok = await db.runTransaction(async (t) => {
+      const q = await t.get(qRef), d = q.exists ? q.data() : {};
+      const n = d.jour === jour ? (d.n || 0) : 0;
+      if (n >= TICKET_QUOTA_JOUR) return false;
+      t.set(qRef, { jour, n: n + 1, maj: FieldValue.serverTimestamp() });
+      return true;
+    });
+    if (!ok) { res.status(429).json({ erreur: "quota" }); return; }
+  } catch (e) { console.error("lireTicket quota", e); res.status(500).json({ erreur: "serveur" }); return; }
+  const messages = [{ role: "user", content: [
+    { type: "text", text: ticketPrompt(cats) },
+    { type: "image_url", image_url: { url: "data:image/jpeg;base64," + image } },
+  ] }];
+  const debut = Date.now();
+  let derniere = "aucun modèle";
+  for (const modele of TICKET_MODELES) {
+    if (Date.now() - debut > 80000) break;
+    const ctrl = new AbortController();
+    const minuteur = setTimeout(() => ctrl.abort(), 35000);
+    try {
+      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST", signal: ctrl.signal,
+        headers: {
+          "Authorization": "Bearer " + OPENROUTER_KEY.value(), "Content-Type": "application/json",
+          "HTTP-Referer": "https://generalmanagerapp.fr", "X-Title": "General Manager",
+        },
+        body: JSON.stringify({ model: modele, messages, temperature: 0, max_tokens: 1200, reasoning: { enabled: false } }),
+      });
+      const j = await r.json().catch(() => ({}));
+      const texte = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if (r.ok && typeof texte === "string" && texte.indexOf("{") >= 0) {
+        res.json({ ok: true, texte: texte.slice(0, 4000), modele });
+        return;
+      }
+      derniere = modele + " " + r.status + " " + String((j && j.error && j.error.message) || texte || "").slice(0, 80);
+    } catch (e) {
+      derniere = modele + " " + (e && e.name === "AbortError" ? "trop long" : String(e && e.message || e).slice(0, 80));
+    } finally { clearTimeout(minuteur); }
+  }
+  console.warn("lireTicket échec", derniere);
+  res.status(502).json({ erreur: "ia", detail: derniere.slice(0, 160) });
+});

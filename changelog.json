@@ -1,5 +1,20 @@
 [
  {
+  "v": "1795259954",
+  "semver": "1.28.2",
+  "titre": "Photo des tickets de caisse",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "bureau",
+     "coach"
+    ],
+    "texte": "Compta et notes de frais : la photo d'un ticket de caisse pré-remplit de nouveau la date, le montant et le magasin. Vérifiez toujours avant d'enregistrer."
+   }
+  ]
+ },
+ {
   "v": "1795211064",
   "semver": "1.28.1",
   "titre": "Alertes de bugs plus fiables",

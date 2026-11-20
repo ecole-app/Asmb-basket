@@ -408,7 +408,7 @@ function pfcLigneForm(l, apres, pre) {
   s.body.appendChild(go);
 }
 
-// Dépense : saisie à la main ou par photo du justificatif (lue par Gemini, comme les tickets des clubs).
+// Dépense : saisie à la main ou par photo du justificatif (lue par l'IA via lireTicket, comme les tickets des clubs).
 // Rien n'est enregistré sans ta validation ; si la lecture échoue, tu complètes à la main.
 var PFC_MOYEN_IA = { "CB": "cb", "Espèces": "especes", "Chèque": "cheque", "Virement": "virement" };
 function pfcJustifReduire(file) {
