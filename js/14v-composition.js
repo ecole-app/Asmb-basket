@@ -116,8 +116,8 @@ function compoPion(cour,id){
     if(!dep) return;
     if(Math.abs(e.clientX-dep.x)+Math.abs(e.clientY-dep.y)>6) dep.bouge=true;
     if(!dep.bouge||c.l) return;
-    var r=cour.getBoundingClientRect(), W=r.width-T, H=r.height-T;
-    var rx=e.clientX-r.left-T/2, ry=e.clientY-r.top-T/2;
+    var r=cour.getBoundingClientRect(), Tz=T*((typeof gmZoom==="function")?gmZoom():1), W=r.width-Tz, H=r.height-Tz;
+    var rx=e.clientX-r.left-Tz/2, ry=e.clientY-r.top-Tz/2;
     var bord=rx<-6||rx>W+6||ry<-6||ry>H+6;
     c.x=Math.max(0,Math.min(1,rx/W)); c.y=Math.max(0,Math.min(1,ry/H)); place();
     var banc=document.getElementById("compo-banc");

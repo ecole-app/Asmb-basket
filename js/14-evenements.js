@@ -732,7 +732,7 @@ function openEventsValidationModal(){
   modal.className="events-validation-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -1237,7 +1237,7 @@ function matchdayBannerHtml(ev,mini){
       '<div style="flex:1;min-width:0"><div style="font-size:9px;font-weight:800;letter-spacing:1px;opacity:.85;text-transform:uppercase">Jour de match</div><div style="font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+authEsc(ev.titre)+'</div></div>'+
       '<div style="font-size:20px">›</div></div>';
   }
-  return '<div onclick="openMatchday(\''+gmJs(ev.id)+'\')" style="cursor:pointer;min-height:calc(100vh - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), var(--hdrgrad);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
+  return '<div onclick="openMatchday(\''+gmJs(ev.id)+'\')" style="cursor:pointer;min-height:calc(calc(100*var(--vh,1vh)) - 220px);margin:-16px -16px 0;padding:40px 26px;border-radius:0;background:radial-gradient(circle at 85% 0%, rgba(232,103,10,.25) 0%, transparent 50%), var(--hdrgrad);color:#fff;display:flex;flex-direction:column;justify-content:center;text-align:center">'+
     '<div style="font-size:64px;margin-bottom:14px">🏀</div>'+
     '<div style="display:inline-block;margin:0 auto 16px;background:var(--red);font-size:11px;font-weight:800;padding:5px 16px;border-radius:20px;letter-spacing:1px">JOUR DE MATCH</div>'+
     '<div style="font-size:26px;font-weight:900;line-height:1.2;margin-bottom:10px">'+authEsc(ev.titre)+'</div>'+

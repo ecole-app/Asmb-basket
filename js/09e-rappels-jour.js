@@ -35,7 +35,7 @@ function rjModale(contenu){
   ov.style.cssText="position:fixed;inset:0;z-index:320;background:rgba(10,15,25,.55);display:flex;align-items:center;justify-content:center;padding:16px";
   var box=document.createElement("div");
   box.setAttribute("role","dialog"); box.setAttribute("aria-modal","true");
-  box.style.cssText="background:var(--card);color:var(--txt);border-radius:22px;padding:22px 20px 16px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.35)";
+  box.style.cssText="background:var(--card);color:var(--txt);border-radius:22px;padding:22px 20px 16px;width:100%;max-width:420px;max-height:calc(88*var(--vh,1vh));overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.35)";
   box.addEventListener("click",function(e){ e.stopPropagation(); });
   ov.addEventListener("click",function(){ ov.remove(); });
   ov.appendChild(box); document.body.appendChild(ov);

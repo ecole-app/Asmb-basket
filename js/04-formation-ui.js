@@ -220,7 +220,7 @@ function openCycleEditModal(cyId){
   var modal=document.createElement("div");
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var colorOpts=KC.map(function(c){return '<option value="'+authEsc(c)+'"'+(existing&&existing.c===c?" selected":"")+'>'+authEsc(c)+'</option>';}).join("");
   inner.innerHTML=
@@ -288,7 +288,7 @@ function openSeanceEditModal(cyId,seaNum){
   var modal=document.createElement("div");
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var existingContent="";
   if(existing&&existing.sits&&existing.sits.length===1&&existing.sits[0].freeText){ existingContent=existing.sits[0].desc||""; }

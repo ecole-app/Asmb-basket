@@ -385,7 +385,7 @@ function wirePressDragGlobalListenersOnce(){
     lastPointerY=e.clientY;
     startAutoScroll();
     var item=s.item;
-    item.style.top=(e.clientY-s.offsetY)+"px";
+    item.style.top=((e.clientY-s.offsetY)/((typeof gmZoom==="function")?gmZoom():1))+"px";
     var siblings=Array.prototype.slice.call(item.parentNode.children).filter(function(c){return c!==item && c!==s.placeholder;});
     for(var i=0;i<siblings.length;i++){
       var r=siblings[i].getBoundingClientRect();
@@ -423,15 +423,15 @@ function enablePressDrag(items, onDrop){
     handle.addEventListener("pointerdown",function(e){
       startY=e.clientY; startX=e.clientX;
       pressTimer=setTimeout(function(){
-        var rect=item.getBoundingClientRect();
+        var rect=item.getBoundingClientRect(), z=(typeof gmZoom==="function")?gmZoom():1;
         var placeholder=document.createElement("div");
-        placeholder.style.cssText="height:"+rect.height+"px;margin:"+getComputedStyle(item).marginTop+" 0";
+        placeholder.style.cssText="height:"+(rect.height/z)+"px;margin:"+getComputedStyle(item).marginTop+" 0";
         item.parentNode.insertBefore(placeholder,item.nextSibling);
         item.classList.add("press-dragging");
         item.style.position="fixed";
-        item.style.left=rect.left+"px";
-        item.style.top=rect.top+"px";
-        item.style.width=rect.width+"px";
+        item.style.left=(rect.left/z)+"px";
+        item.style.top=(rect.top/z)+"px";
+        item.style.width=(rect.width/z)+"px";
         PRESS_DRAG_STATE={active:true,item:item,placeholder:placeholder,offsetY:startY-rect.top,onDrop:onDrop};
         if(navigator.vibrate) navigator.vibrate(15);
       }, 380);
@@ -657,7 +657,7 @@ function openAccesCoach(){
   modal.className="acces-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -1059,7 +1059,7 @@ function openFichesRecues(){
   modal.className="fiches-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -1148,7 +1148,7 @@ function openAvisModule(){
   modal.className="avis-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -1467,7 +1467,7 @@ function openNotesFrais(){
   modal.className="notesfrais-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px";
@@ -1598,7 +1598,7 @@ function openNoteFraisForm(parentModal){
   var modal=document.createElement("div");
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   inner.innerHTML=
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
@@ -1770,7 +1770,7 @@ function openTeamReclassementModal(){
   modal.className="team-reclass-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -1850,7 +1850,7 @@ function openReclassementModal(){
   modal.className="reclass-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";

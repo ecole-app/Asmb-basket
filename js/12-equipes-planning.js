@@ -431,7 +431,7 @@ function openAddTeamMember(teamId){
   modal.className="team-member-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;display:flex;flex-direction:column";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(70*var(--vh,1vh));display:flex;flex-direction:column";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -506,7 +506,7 @@ function choisirCategorieEquipe(){
     var modal=document.createElement("div");
     modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:500;display:flex;align-items:flex-end";
     var inner=document.createElement("div");
-    inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+    inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto";
     inner.addEventListener("click",function(e){e.stopPropagation();});
     inner.innerHTML='<div style="font-size:15px;font-weight:800;color:var(--txt);margin-bottom:12px">Catégorie de l\'équipe</div><div id="cat-eq-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>';
     modal.appendChild(inner);

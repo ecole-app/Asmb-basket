@@ -64,7 +64,7 @@ function polesClubGerer(){
   m.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px";
   m.onclick=function(){ m.remove(); };
   var b=document.createElement("div");
-  b.style.cssText="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:460px;max-height:85vh;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.25)";
+  b.style.cssText="background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:460px;max-height:calc(85*var(--vh,1vh));overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.25)";
   b.onclick=function(e){ e.stopPropagation(); };
   m.appendChild(b); document.body.appendChild(m);
   var redo=function(){ polesClubGerer(); };

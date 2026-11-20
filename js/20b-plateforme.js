@@ -42,7 +42,7 @@ function gmSheet(title){
   modal.className="gm-sheet";
   modal.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));width:100%;box-sizing:border-box;max-height:88vh;max-height:92dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));width:100%;box-sizing:border-box;max-height:calc(88*var(--vh,1vh));max-height:calc(92*var(--dvh,1dvh));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   var hdr=document.createElement("div");
   hdr.style.cssText="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px";
@@ -287,7 +287,7 @@ function renderInviteDirigeantContrat(el, code, inv){
   el.innerHTML=authHero(authEsc(inv.clubName||(indep?"Votre activité":"Votre club")),indep?"Indépendant":"Dirigeant",indep?null:inv.clubId)
     +'<div style="padding:16px 18px 22px;display:flex;flex-direction:column;flex:1">'
     +'<p style="font-size:12.5px;color:var(--txt2);text-align:center;line-height:1.4;margin-bottom:10px">En activant '+authEsc(inv.clubName||(indep?"votre espace":"ce club"))+', vous acceptez le contrat de sous-traitance RGPD ci-dessous. Faites défiler jusqu\'au bout pour continuer.</p>'
-    +'<div id="dpa-scroll" style="max-height:50vh;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+(indep?DPA_INDEP_HTML:DPA_TEXT_HTML)+'</div>'
+    +'<div id="dpa-scroll" style="max-height:calc(50*var(--vh,1vh));overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:14px 16px;background:#fff;font-size:12.5px;color:var(--txt2)">'+(indep?DPA_INDEP_HTML:DPA_TEXT_HTML)+'</div>'
     +'<button id="dpa-accept-btn" disabled style="'+AUTH_BTN+';opacity:.4;cursor:not-allowed">Continuer (lisez jusqu\'en bas)</button>'
     +'</div>';
   var box=document.getElementById("dpa-scroll");

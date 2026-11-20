@@ -282,7 +282,7 @@ function entreeScanner(src, repeindre){
   o.style.cssText="position:fixed;inset:0;z-index:360;background:#000;display:flex;flex-direction:column";
   o.innerHTML=
     '<video playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>'+
-    '<div style="position:absolute;left:50%;top:42%;width:min(68vw,280px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);border:3px solid rgba(255,255,255,.9)"></div>'+
+    '<div style="position:absolute;left:50%;top:42%;width:min(calc(68*var(--vw,1vw)),280px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);border:3px solid rgba(255,255,255,.9)"></div>'+
     '<div style="position:relative;padding:calc(env(safe-area-inset-top) + 14px) 16px;display:flex;justify-content:space-between;align-items:center;color:#fff">'+
       '<div style="font-size:15px;font-weight:800">Placez le QR code du billet dans le cadre</div>'+
       '<button class="sc-x" aria-label="Fermer le scanner" style="border:none;background:rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer">✕</button></div>'+

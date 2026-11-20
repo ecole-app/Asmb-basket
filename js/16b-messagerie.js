@@ -96,11 +96,11 @@ function chatEnsureUi(){
   document.body.appendChild(ov);
   var menu=document.createElement("div");
   menu.id="chat-msg-menu";
-  menu.style.cssText="display:none;position:fixed;z-index:301;width:270px;max-width:calc(100vw - 24px)";
+  menu.style.cssText="display:none;position:fixed;z-index:301;width:270px;max-width:calc(calc(100*var(--vw,1vw)) - 24px)";
   document.body.appendChild(menu);
   var sheet=document.createElement("div");
   sheet.id="chat-sheet";
-  sheet.style.cssText="display:none;position:fixed;left:0;right:0;bottom:0;z-index:302;background:var(--sf);border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:75vh;overflow-y:auto;box-shadow:0 -4px 20px var(--shadow)";
+  sheet.style.cssText="display:none;position:fixed;left:0;right:0;bottom:0;z-index:302;background:var(--sf);border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:calc(75*var(--vh,1vh));overflow-y:auto;box-shadow:0 -4px 20px var(--shadow)";
   document.body.appendChild(sheet);
   var nb=document.createElement("div");
   nb.id="chat-new-btn";
@@ -604,11 +604,11 @@ function chatOpenMenu(channelId,msgId,anchor){
   menu.style.display="block";
   document.getElementById("chat-msg-overlay").style.display="block";
   var r=anchor.getBoundingClientRect();
-  var mh=menu.offsetHeight, mw=menu.offsetWidth;
+  var z=(typeof gmZoom==="function")?gmZoom():1, mh=menu.offsetHeight*z, mw=menu.offsetWidth*z;
   var top=r.bottom+6;
   if(top+mh>window.innerHeight-16) top=Math.max(12,r.top-mh-6);
   var left=chatIsMine(msg)?Math.max(12,r.right-mw):Math.min(window.innerWidth-mw-12,Math.max(12,r.left));
-  menu.style.top=top+"px"; menu.style.left=left+"px";
+  menu.style.top=(top/z)+"px"; menu.style.left=(left/z)+"px";
 }
 // Ancien point d'entrée (réactions) : redirige vers le menu complet.
 function openReactionPicker(ev,channelId,msgId){

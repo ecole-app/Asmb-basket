@@ -1,6 +1,9 @@
 /* ===== 09-ui-modales.js — Modales maison : confirmation, saisie, alerte ===== */
 // ── CONFIRMATION MAISON (remplace confirm() du navigateur) ────────
 // askConfirm(message, {title, confirmText, cancelText, danger}) -> Promise<boolean>
+// Zoom de la version ordinateur (css/style.css) : getBoundingClientRect et la souris sont en pixels d'écran,
+// les styles left/top/width en pixels de page. Diviser par gmZoom() pour passer de l'un à l'autre.
+function gmZoom(){ try{ return parseFloat(getComputedStyle(document.documentElement).zoom)||1; }catch(e){ return 1; } }
 function askConfirm(message, opts){
   opts=opts||{};
   var title=opts.title||"Confirmer";
@@ -135,7 +138,7 @@ function showToast(message){
   }
   var t=document.createElement("div");
   t.textContent=String(message);
-  t.style.cssText="background:rgba(20,20,20,.92);color:#fff;font-size:12.5px;font-weight:600;padding:11px 18px;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:min(90vw,360px);text-align:center;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s";
+  t.style.cssText="background:rgba(20,20,20,.92);color:#fff;font-size:12.5px;font-weight:600;padding:11px 18px;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:min(calc(90*var(--vw,1vw)),360px);text-align:center;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s";
   TOAST_STACK_EL.appendChild(t);
   requestAnimationFrame(function(){ t.style.opacity="1"; t.style.transform="translateY(0)"; });
   setTimeout(function(){
@@ -157,7 +160,7 @@ function showUndoToast(message,undoFn){
   }
   var t=document.createElement("div");
   // Barre dorée qui se vide pendant les 5 secondes où « Annuler » reste possible.
-  t.style.cssText="position:relative;overflow:hidden;background:rgba(20,20,20,.94);color:#fff;font-size:13px;font-weight:600;padding:8px 8px 12px 16px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.3);width:min(92vw,380px);box-sizing:border-box;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:auto";
+  t.style.cssText="position:relative;overflow:hidden;background:rgba(20,20,20,.94);color:#fff;font-size:13px;font-weight:600;padding:8px 8px 12px 16px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.3);width:min(calc(92*var(--vw,1vw)),380px);box-sizing:border-box;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:auto";
   var span=document.createElement("span");span.textContent=String(message);span.style.cssText="flex:1;line-height:1.35";
   var btn=document.createElement("button");btn.textContent="Annuler";
   btn.style.cssText="background:#F2D57E;border:none;color:#14141f;font-size:14px;font-weight:800;cursor:pointer;padding:0 16px;min-height:44px;border-radius:12px;flex-shrink:0";

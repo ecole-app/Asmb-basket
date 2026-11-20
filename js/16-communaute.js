@@ -642,7 +642,7 @@ function chatFilsRendre(ch){
   if(!parent){ if(box) box.style.display="none"; return; }
   if(!box){
     box=document.createElement("div"); box.id="chat-fils";
-    box.style.cssText="padding:8px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;max-height:34vh;overflow-y:auto";
+    box.style.cssText="padding:8px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;max-height:calc(34*var(--vh,1vh));overflow-y:auto";
     msgs.parentNode.insertBefore(box,msgs);
   }
   var fils=(window.__chatChannelsCache||[]).filter(chatFilVisible).sort(function(a,b){ return String(b.debut||"").localeCompare(String(a.debut||"")); });

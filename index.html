@@ -125,7 +125,7 @@ window.gmReprise=reprise;})();
 
 <!-- ═══ MODAL FICHE (lecture seule, coach/dirigeant) ═══ -->
 <div id="modal-fiche-view" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(82*var(--vh,1vh));overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div style="font-size:15px;font-weight:800;color:var(--txt)">Fiche du licencié</div>
       <button onclick="closeModal('modal-fiche-view')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -136,7 +136,7 @@ window.gmReprise=reprise;})();
 
 <!-- ═══ MODAL LISTE LICENCIES ═══ -->
 <div id="modal-licencies-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div style="font-size:15px;font-weight:800;color:var(--txt)">Tous les licenciés</div>
       <button onclick="closeModal('modal-licencies-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -154,7 +154,7 @@ window.gmReprise=reprise;})();
 
 <!-- ═══ MODAL LICENCES EN ATTENTE ═══ -->
 <div id="modal-pending-licences" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(82*var(--vh,1vh));overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div style="font-size:15px;font-weight:800;color:var(--txt)">Licences en attente</div>
       <button onclick="closeModal('modal-pending-licences')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -165,7 +165,7 @@ window.gmReprise=reprise;})();
 
 <!-- ═══ MODAL LISTE EQUIPES ═══ -->
 <div id="modal-teams-list" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div style="font-size:15px;font-weight:800;color:var(--txt)" id="teams-list-title">Équipes du club</div>
       <button onclick="closeModal('modal-teams-list')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -176,7 +176,7 @@ window.gmReprise=reprise;})();
 
 <!-- ═══ MODAL GRAPHIQUE ASSIDUITE ═══ -->
 <div id="modal-assiduite" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:75vh;overflow-y:auto">
+  <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(75*var(--vh,1vh));overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div style="font-size:15px;font-weight:800;color:var(--txt)">Assiduité mensuelle</div>
       <button onclick="closeModal('modal-assiduite')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -309,7 +309,7 @@ window.gmReprise=reprise;})();
     <div id="playerList" style="padding:8px 0 80px"></div>
     <!-- Modal ajout joueur -->
     <div id="modal-player" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)" id="modal-player-title">Nouveau joueur</div>
           <button onclick="closeModal('modal-player')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -357,7 +357,7 @@ window.gmReprise=reprise;})();
     <div id="planningList" style="padding:8px 0 80px"></div>
     <!-- Modal créneau -->
     <div id="modal-creneau" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau créneau</div>
           <button onclick="closeModal('modal-creneau')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -527,7 +527,7 @@ window.gmReprise=reprise;})();
 
     <!-- Modal nouvelle ligne comptable -->
     <div id="modal-compta-line" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)" id="compta-modal-title">Nouvelle ligne</div>
           <button onclick="closeModal('modal-compta-line')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -564,7 +564,7 @@ window.gmReprise=reprise;})();
     </div>
 
     <div id="modal-cerfa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Reçu fiscal (CERFA)</div>
           <button onclick="closeModal('modal-cerfa')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -589,7 +589,7 @@ window.gmReprise=reprise;})();
 
     <!-- Modal budget prévisionnel -->
     <div id="modal-budget-prev" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Budget prévisionnel</div>
           <button onclick="closeModal('modal-budget-prev')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -601,7 +601,7 @@ window.gmReprise=reprise;})();
 
     <!-- Modal bilan annuel / AG -->
     <div id="modal-bilan-annuel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Bilan financier</div>
           <button onclick="closeModal('modal-bilan-annuel')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -636,7 +636,7 @@ window.gmReprise=reprise;})();
 
     <!-- Modal article inventaire -->
     <div id="modal-inv-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)" id="inv-modal-title">Nouvel article</div>
           <button onclick="closeModal('modal-inv-item')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -691,7 +691,7 @@ window.gmReprise=reprise;})();
 
     <!-- Modal fiche sponsor -->
     <div id="modal-sponsor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)" id="sp-modal-title">Nouveau sponsor</div>
           <button onclick="closeModal('modal-sponsor')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -749,7 +749,7 @@ window.gmReprise=reprise;})();
     </div>
 
     <div id="modal-facture" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:210;align-items:flex-end">
-      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+      <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div style="font-size:15px;font-weight:800;color:var(--txt)">Facture</div>
           <button onclick="closeModal('modal-facture')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -885,7 +885,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL POLE ITEM ═══ -->
   <div id="modal-pole-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)" id="modal-pole-title">Ajouter</div>
         <button onclick="closeModal('modal-pole-item')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -963,7 +963,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL CREATION SONDAGE ═══ -->
   <div id="modal-poll" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Nouveau sondage</div>
         <button onclick="closeModal('modal-poll')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -984,7 +984,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL PROPOSITION COVOITURAGE ═══ -->
   <div id="modal-carpool" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">🚗 Proposer un covoiturage</div>
         <button onclick="closeModal('modal-carpool')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1014,7 +1014,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL CRITERES EVALUATION ═══ -->
   <div id="modal-eval-criteria" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Critères d'évaluation</div>
         <button onclick="closeModal('modal-eval-criteria')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1045,7 +1045,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ FORMULAIRE EVALUATION MENSUELLE ═══ -->
   <div id="modal-monthly-eval" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div id="monthly-eval-title" style="font-size:15px;font-weight:800;color:var(--txt)">Évaluation du mois</div>
         <button onclick="closeModal('modal-monthly-eval')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1068,7 +1068,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL PARAMÈTRES COMMUNAUTÉ ═══ -->
   <div id="modal-comm-settings" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Paramètres · Communauté</div>
         <button onclick="saveCommPseudo(document.getElementById('cs-pseudo').value);closeModal('modal-comm-settings')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1144,7 +1144,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL PICKER CONTACTS LICENCES ═══ -->
   <div id="modal-lic-picker" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:75vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(75*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Choisir un contact</div>
         <button onclick="closeModal('modal-lic-picker')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1155,7 +1155,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL HISTORIQUE PRESENCE ═══ -->
   <div id="modal-presence-history" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(82*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="ph-name">Historique</div><div style="font-size:11px;color:var(--mut)">Présences · Absences</div></div>
         <button onclick="closeModal('modal-presence-history')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1174,7 +1174,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL EDITION FICHE (dirigeant) ═══ -->
   <div id="modal-edit-fiche" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Modifier la fiche</div>
         <button onclick="closeModal('modal-edit-fiche')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1186,7 +1186,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL METEO ═══ -->
   <div id="modal-qr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(82*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="qr-title">QR code</div><div style="font-size:11px;color:var(--mut)" id="qr-sub"></div></div>
         <button onclick="closeModal('modal-qr')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1197,7 +1197,7 @@ window.gmReprise=reprise;})();
   </div>
 
   <div id="modal-weather" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(70*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:var(--txt)">Météo du match</div>
         <button onclick="closeModal('modal-weather')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1208,7 +1208,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL CONVOCATION ═══ -->
   <div id="modal-convocation" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:82vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(82*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div><div style="font-size:15px;font-weight:800;color:var(--txt)">Convocation</div><div style="font-size:11px;color:var(--mut)" id="convoc-sub"></div></div>
         <button onclick="closeModal('modal-convocation')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1220,7 +1220,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL EVENEMENT COMPLET ═══ -->
   <div id="modal-event-full" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(88*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div id="ev-modal-titre" style="font-size:15px;font-weight:800;color:var(--txt)">Nouvel événement</div>
         <button onclick="closeModal('modal-event-full')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1278,7 +1278,7 @@ window.gmReprise=reprise;})();
 
   <!-- ═══ MODAL PRESENCES ═══ -->
   <div id="modal-presence" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
-    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div><div style="font-size:15px;font-weight:800;color:var(--txt)" id="presence-title">Présences</div><div style="font-size:11px;color:var(--mut)" id="presence-sub"></div></div>
         <button onclick="closeModal('modal-presence')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1290,7 +1290,7 @@ window.gmReprise=reprise;})();
 
  <!-- ═══ MODAL BROADCAST EMAIL ═══ -->
  <div id="modal-broadcast" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end">
- <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+ <div style="background:var(--sf);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:calc(80*var(--vh,1vh));overflow-y:auto">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
  <div style="font-size:15px;font-weight:800;color:var(--txt)">Envoyer une info aux familles</div>
  <button onclick="closeModal('modal-broadcast')" style="width:28px;height:28px;border-radius:50%;background:var(--bdr);border:none;cursor:pointer;font-size:14px;color:var(--mut)">✕</button>
@@ -1831,7 +1831,7 @@ window.gmReprise=reprise;})();
   <!-- ═══ MODAL PHOTO PLEIN ECRAN ═══ -->
   <div id="modal-photo-view" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;align-items:center;justify-content:center;flex-direction:column">
     <button onclick="closeModal('modal-photo-view')" style="position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer">✕</button>
- <img id="photo-view-img" alt="Photo agrandie" style="max-width:92%;max-height:75vh;border-radius:8px">
+ <img id="photo-view-img" alt="Photo agrandie" style="max-width:92%;max-height:calc(75*var(--vh,1vh));border-radius:8px">
  <div id="photo-view-caption" style="color:rgba(255,255,255,.7);font-size:12px;margin-top:14px;text-align:center;padding:0 20px"></div>
  <button id="photo-delete-btn" onclick="deleteGalleryPhoto()" style="display:none;margin-top:16px;padding:9px 18px;border-radius:20px;background:rgba(192,57,43,.8);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer"> Supprimer</button>
  </div>

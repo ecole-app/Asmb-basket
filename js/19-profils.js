@@ -403,7 +403,7 @@ function openJoueurSettings(){
   modal.className="joueur-settings-modal";
   modal.style.cssText="position:fixed;inset:0;background:rgba(10,20,12,.55);z-index:400;display:flex;align-items:flex-end";
   var inner=document.createElement("div");
-  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto";
+  inner.style.cssText="background:var(--bg);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:calc(85*var(--vh,1vh));overflow-y:auto";
   inner.addEventListener("click",function(e){e.stopPropagation();});
   inner.innerHTML=
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
