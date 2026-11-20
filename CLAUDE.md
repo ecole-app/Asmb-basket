@@ -37,6 +37,7 @@ dans les 5 langues avant le push** : `node outils/i18n.js manquants` → traduir
 (le test `tests/metier/i18n.test.js` échoue sinon). Ce que les gens écrivent n'est jamais
 traduit (`data-notr`, messages). Les dates « fr-FR » en toutes lettres suivent la langue ;
 les formats chiffrés restent français (données enregistrées).
+Vocabulaire « adhérent / adhésion » réservé à l'ASMB : `node outils/vocab-asmb.js` après tout nouveau texte contenant « licence » (voir `i18n/LISEZMOI.md`).
 Pages publiques (tournoi, buvette, bénévole) : `window.GM_I18N_BASE="../"` puis `../js/00-i18n.js`.
 Notifications push : l'appareil enregistre sa langue dans `push_subscriptions/{uid}.langue`
 (js/22-push.js) ; `functions/index.js` traduit les textes fixes (`NOTIF_TXT`, `tn()`,

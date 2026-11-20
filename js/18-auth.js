@@ -328,6 +328,7 @@ function loadClubProfile(clubId){
     if(snap && snap.exists()){
       window.CURRENT_CLUB=clubNormaliserCouleurs(Object.assign({id:clubId}, snap.data()));
       try{ localStorage.setItem("gm_type_"+clubId, snap.data().type||"club"); }catch(e){}
+      if(clubId===BOOTSTRAP_CLUB_ID && typeof gmVocabClub==="function") gmVocabClub();   // vocabulaire « adhérent » : ASMB seulement
       if(typeof applyClubLabels==="function") applyClubLabels();
       // Premier dirigeant qui vient de créer son compte : logo avant d'installer l'appli.
       if(!(window.CURRENT_CLUB.type==="independant") && typeof logoPremierPas==="function"){

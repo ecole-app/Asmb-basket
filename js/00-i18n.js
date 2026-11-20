@@ -53,8 +53,9 @@
 
   // ── Dictionnaire
   var DICT={};
+  var ACTIF=LANG!=="fr";   // vrai si une traduction (ou le vocabulaire du club, plus bas) est appliquée
   window.gmT=function(s){
-    if(LANG==="fr"||s==null) return s;
+    if(!ACTIF||s==null) return s;
     var k=String(s).replace(/\s+/g," ").trim();
     return Object.prototype.hasOwnProperty.call(DICT,k)?DICT[k]:s;
   };
@@ -89,7 +90,7 @@
     }
     return null;
   }
-  window.gmTraduireTexte=function(s){ var t=LANG==="fr"?null:traduire(s); return t==null?s:t; };
+  window.gmTraduireTexte=function(s){ var t=!ACTIF?null:traduire(s); return t==null?s:t; };
 
   var NOTR="[data-notr],.notr,.msg-bubble,.msg-pseudo,textarea,script,style,code,pre,[contenteditable=\"true\"]";
   var ATTRS=["placeholder","title","aria-label","alt"];
@@ -118,9 +119,9 @@
     var w=document.createTreeWalker(racine,5,null), n;   // éléments + textes
     while((n=w.nextNode())){ if(n.nodeType===3) noeudTexte(n); else element(n); }
   }
-  window.gmTraduireDom=function(r){ if(LANG!=="fr") parcourir(r||document.body); };
+  window.gmTraduireDom=function(r){ if(ACTIF) parcourir(r||document.body); };
 
-  if(LANG!=="fr"){
+  function demarrer(fichier){
     var pret=false, enAttente=[];
     var obs=new MutationObserver(function(muts){
       if(!pret){ return; }
@@ -133,13 +134,21 @@
     });
     obs.observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
     var v=(window.APP_VERSION_I18N||"");
-    fetch((window.GM_I18N_BASE||"")+"i18n/"+LANG+".json"+(v?"?v="+v:""),{cache:"no-cache"}).then(function(r){ return r.ok?r.json():{}; }).catch(function(){ return {}; })
+    fetch((window.GM_I18N_BASE||"")+"i18n/"+fichier+".json"+(v?"?v="+v:""),{cache:"no-cache"}).then(function(r){ return r.ok?r.json():{}; }).catch(function(){ return {}; })
       .then(function(d){
         DICT=d||{}; pret=true;
         var go=function(){ parcourir(document.body); };
         if(document.body) go(); else document.addEventListener("DOMContentLoaded",go);
       });
   }
+  if(LANG!=="fr") demarrer(LANG);
+  // Vocabulaire propre à un club (français → français) : seul le club d'origine (ASMB) dit « adhérent / adhésion »
+  // au lieu de « licencié / licence ». Appelée à l'ouverture du club (js/18-auth.js) ; sans effet en autre langue.
+  // Dictionnaire généré par outils/vocab-asmb.js (voir i18n/LISEZMOI.md).
+  window.gmVocabClub=function(){
+    if(LANG!=="fr"||ACTIF) return;
+    ACTIF=true; demarrer("vocab-asmb");
+  };
 
   // ── Choix de la langue
   window.gmLangueChoisir=function(code){

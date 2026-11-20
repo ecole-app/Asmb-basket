@@ -96,6 +96,7 @@ const PRECACHE = [
   './i18n/es.json',
   './i18n/it.json',
   './i18n/de.json',
+  './i18n/vocab-asmb.json',
   './js/firebase-init.js',
   './js/01-config.js',
   './js/02-formation-cycles.js',

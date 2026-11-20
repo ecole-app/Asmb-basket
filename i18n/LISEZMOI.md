@@ -30,3 +30,12 @@ espagnol `es`, italien `it`, allemand `de`.
 `i18n/perimetre.json` liste les fichiers traduits. Étape 1 (fait) : ce que voient les familles
 et l'écran de connexion. Étape 2 : écrans dirigeant/coach. Étape 3 : PDF, notifications,
 pages publiques (tournoi, buvette, bénévole), contenu pédagogique.
+
+## Vocabulaire du club d'origine (ASMB)
+Seul le club ASMB dit « adhérent / adhésion » à la place de « licencié / licence » (les autres clubs gardent « licence »).
+C'est un dictionnaire français → français, `i18n/vocab-asmb.json`, appliqué à l'affichage par le même mécanisme que les
+traductions (`gmVocabClub()` dans `js/00-i18n.js`, appelée à l'ouverture du club dans `js/18-auth.js`, langue française seulement).
+Il est généré par `node outils/vocab-asmb.js` à partir des textes du périmètre : **après avoir ajouté un texte contenant
+« licence » ou « licencié », relancer cette commande** (le test `tests/metier/vocab-asmb.test.js` échoue sinon).
+Jamais renommés : numéro/code de licence fédéral, colonnes d'import (`numlicence`, `typelicence`), catégories de la compta
+(données). Les PDF et les textes construits en code restent inchangés.

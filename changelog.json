@@ -1,5 +1,20 @@
 [
  {
+  "v": "1795167850",
+  "semver": "1.25.0",
+  "titre": "Vocabulaire « adhérent » pour l'ASMB",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent"
+    ],
+    "texte": "Dans l'appli de l'ASMB, « licence » devient « adhésion » et « licencié » devient « adhérent » (les autres clubs ne changent pas)."
+   }
+  ]
+ },
+ {
   "v": "1795133281",
   "semver": "1.24.1",
   "titre": "Démarrage plus fiable quand le réseau est lent",
