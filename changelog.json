@@ -1,5 +1,21 @@
 [
  {
+  "v": "1795133281",
+  "semver": "1.24.1",
+  "titre": "Démarrage plus fiable quand le réseau est lent",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "parent",
+     "joueur"
+    ],
+    "texte": "Si la vérification de connexion traîne plus de 5 secondes, l'écran de connexion s'affiche au lieu d'un écran vide ; la session s'ouvre toute seule dès qu'elle est retrouvée."
+   }
+  ]
+ },
+ {
   "v": "1795116349",
   "semver": "1.24.0",
   "titre": "Pôles du club : créer, masquer, supprimer",

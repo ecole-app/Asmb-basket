@@ -558,7 +558,12 @@ function initAuthGate(){
     if(window.__authWait++ < 40){ setTimeout(initAuthGate,100); return; }
     initProfile(); return;
   }
+  // Connexion lente (jeton App Check ou réseau qui traîne) : Firebase met parfois > 5 s à dire si une session existe.
+  // Plutôt qu'un écran vide, on affiche la connexion ; si la session est finalement retrouvée, l'appli s'ouvre toute seule.
+  window.__authResolu=false;
+  setTimeout(function(){ if(!window.__authResolu && !document.querySelector(".scr.on")) showAuth("entry"); },5000);
   window.fbOnAuthState(window.fbAuth, function(user){
+    window.__authResolu=true;
     if(user){ applyAuthedUser(user); }
     else { showAuth("entry"); }
   });
