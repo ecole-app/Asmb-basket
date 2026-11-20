@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795169699",
+  "semver": "1.26.2",
+  "titre": "Le bouton + ne cache plus les raccourcis",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Sur téléphone, en bas de l'accueil, le bouton + ne recouvre plus Annuaire, Galerie photos et Calendrier."
+   }
+  ]
+ },
+ {
   "v": "1795169188",
   "semver": "1.26.1",
   "titre": "Plus lisible sur ordinateur, pour tout le monde",
