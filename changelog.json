@@ -1,5 +1,19 @@
 [
  {
+  "v": "1795168431",
+  "semver": "1.25.1",
+  "titre": "Plateforme plus lisible sur ordinateur",
+  "demo": true,
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Textes de la Plateforme agrandis sur grand écran."
+   }
+  ]
+ },
+ {
   "v": "1795167850",
   "semver": "1.25.0",
   "titre": "Vocabulaire « adhérent » pour l'ASMB",

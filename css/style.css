@@ -897,6 +897,8 @@ html.gm-desk .rech-aide{display:block;font-size:12px;color:var(--mut);padding:10
 .gm-undo-barre{position:absolute;left:0;bottom:0;height:4px;width:100%;background:#F2D57E;transform-origin:left center}
 html[dir="rtl"] .gm-undo-barre{transform-origin:right center}
 
+/* Plateforme sur grand écran : textes en 10-13 px pensés pour téléphone, agrandis de 20 % (zoom = tout suit : textes, boutons, marges). */
+@media (min-width:1024px){ html.gm-horsclub #scr-plateforme.on{zoom:1.2} }
 /* Plateforme (super admin) sur ordinateur : contenu centré, clubs sur 2 colonnes (js/20b-plateforme.js) */
 @media (min-width:1024px){
   #plateforme-content.pf-home{max-width:1240px;margin-left:auto;margin-right:auto}
