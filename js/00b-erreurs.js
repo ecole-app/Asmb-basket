@@ -9,7 +9,9 @@
   var envoyes=0, vus={}, file=[], essais=0;
   function txt(s,n){ return String(s==null?"":s).slice(0,n); }
   function bruit(m,src){
-    return !m || /Script error\.?$|ResizeObserver loop|Failed to fetch|Load failed|NetworkError|network ?error|net::ERR|AbortError|The operation was aborted|chrome-extension:|moz-extension:|safari-(web-)?extension:|webkit-masked-url/i.test(m+" "+(src||""));
+    // « Script error. » = erreur d'un script d'un autre site (Safari masque tout) : sans détail, rien à corriger.
+    if(/^Script error\.?$/i.test(String(m||"").trim())) return true;
+    return !m || /ResizeObserver loop|Failed to fetch|Load failed|NetworkError|network ?error|net::ERR|AbortError|The operation was aborted|chrome-extension:|moz-extension:|safari-(web-)?extension:|webkit-masked-url/i.test(m+" "+(src||""));
   }
   function role(){ var r=window.ASMB_USER&&window.ASMB_USER.roles; return txt(r&&r[0]||"",20); }
   function vider(){

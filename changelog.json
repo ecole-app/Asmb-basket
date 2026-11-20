@@ -1,5 +1,18 @@
 [
  {
+  "v": "1795211064",
+  "semver": "1.28.1",
+  "titre": "Alertes de bugs plus fiables",
+  "points": [
+   {
+    "roles": [
+     "dirigeant"
+    ],
+    "texte": "Les fausses alertes « Script error » venant d'iPhone ne sont plus envoyées."
+   }
+  ]
+ },
+ {
   "v": "1795196948",
   "semver": "1.28.0",
   "titre": "Plaquette du coach",
