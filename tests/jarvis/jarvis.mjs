@@ -276,6 +276,15 @@ async function profil(navigateur, base, nom, taille, libTaille) {
           if (!document.getElementById("vir-de")) throw new Error("fenêtre virement absente");
           document.querySelector(".gm-sheet").remove();
         });
+        // Taille du texte (Paramètres) : « Très grand » agrandit l'affichage, puis on revient à Normal.
+        await action(page, journal, ou + " › taille du texte", () => {
+          const avant = window.gmZoom();
+          localStorage.setItem("gm_taille_texte", "1.3"); window.gmZoomAppliquer();
+          const apres = window.gmZoom();
+          localStorage.removeItem("gm_taille_texte"); window.gmZoomAppliquer();
+          if (!(apres > avant)) throw new Error("la taille du texte ne change pas l'affichage");
+          if (Math.abs(window.gmZoom() - avant) > 0.001) throw new Error("retour à Normal raté");
+        });
         // Pôles du club : la fenêtre « Gérer les pôles » s'ouvre (ordinateur) et liste les pôles, puis on la ferme.
         await action(page, journal, ou + " › gérer les pôles", () => {
           if (typeof window.polesClubGerable !== "function" || !window.polesClubGerable()) return;

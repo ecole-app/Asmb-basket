@@ -1,5 +1,21 @@
 [
  {
+  "v": "1795170319",
+  "semver": "1.27.0",
+  "titre": "Taille du texte réglable",
+  "points": [
+   {
+    "roles": [
+     "dirigeant",
+     "coach",
+     "bureau",
+     "parent"
+    ],
+    "texte": "Paramètres : nouvelle option « Taille du texte » (Normal, Grand, Très grand, Énorme) pour agrandir tout l'affichage sur votre appareil."
+   }
+  ]
+ },
+ {
   "v": "1795169699",
   "semver": "1.26.2",
   "titre": "Le bouton + ne cache plus les raccourcis",

@@ -4,6 +4,46 @@
 // Zoom de la version ordinateur (css/style.css) : getBoundingClientRect et la souris sont en pixels d'écran,
 // les styles left/top/width en pixels de page. Diviser par gmZoom() pour passer de l'un à l'autre.
 function gmZoom(){ try{ return parseFloat(getComputedStyle(document.documentElement).zoom)||1; }catch(e){ return 1; } }
+// Taille du texte choisie par la personne (Paramètres › Langue & apparence, Paramètres du parent), par appareil
+// (localStorage gm_taille_texte). Elle multiplie le zoom de grand écran (css/style.css) : le total est posé sur <html>
+// avec les unités d'écran compensées (--vh/--vw/--dvh), comme le zoom de grand écran.
+var GM_TAILLES=[{v:1,l:"Normal"},{v:1.15,l:"Grand"},{v:1.3,l:"Très grand"},{v:1.4,l:"Énorme"}];
+function gmTailleTexte(){
+  var v=1; try{ v=parseFloat(localStorage.getItem("gm_taille_texte")); }catch(e){}
+  for(var i=0;i<GM_TAILLES.length;i++) if(GM_TAILLES[i].v===v) return v;
+  return 1;
+}
+function gmZoomEcran(){
+  if(!window.matchMedia) return 1;
+  if(window.matchMedia("(min-width:1600px)").matches) return 1.2;
+  if(window.matchMedia("(min-width:1366px)").matches) return 1.1;
+  return 1;
+}
+function gmZoomAppliquer(){
+  var h=document.documentElement, t=gmTailleTexte();
+  if(t===1){ ["zoom","--vh","--vw","--dvh"].forEach(function(p){ h.style.removeProperty(p); }); return; }
+  var z=Math.round(gmZoomEcran()*t*1000)/1000;
+  h.style.zoom=String(z);
+  h.style.setProperty("--vh","calc(1vh / "+z+")"); h.style.setProperty("--vw","calc(1vw / "+z+")"); h.style.setProperty("--dvh","calc(1dvh / "+z+")");
+}
+function gmTailleParams(){
+  var cs=document.querySelectorAll(".gm-taille-param");
+  for(var i=0;i<cs.length;i++){
+    var c=cs[i]; c.innerHTML=""; c.style.cssText="display:grid;grid-template-columns:repeat(2,1fr);gap:8px";
+    GM_TAILLES.forEach(function(t){
+      var b=document.createElement("button"); b.type="button"; b.textContent=t.l;
+      var on=gmTailleTexte()===t.v;
+      b.style.cssText="padding:11px 8px;border-radius:var(--rx);cursor:pointer;font-weight:800;font-size:"+Math.round(13*t.v)+"px;"+(on?"background:var(--dkg);color:#fff;border:2px solid var(--dkg)":"background:var(--card);color:var(--txt);border:2px solid var(--bdr)");
+      b.onclick=function(){ try{ localStorage.setItem("gm_taille_texte",String(t.v)); }catch(e){} gmZoomAppliquer(); gmTailleParams(); };
+      c.appendChild(b);
+    });
+  }
+}
+(function(){
+  try{ gmZoomAppliquer(); }catch(e){}
+  if(window.matchMedia){ ["(min-width:1366px)","(min-width:1600px)"].forEach(function(q){ var m=window.matchMedia(q); if(m.addEventListener) m.addEventListener("change",gmZoomAppliquer); }); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",gmTailleParams); else gmTailleParams();
+})();
 function askConfirm(message, opts){
   opts=opts||{};
   var title=opts.title||"Confirmer";

@@ -408,7 +408,7 @@ function clubSeuilRelances(){
 var PARAMS_EDIT_MODE=false;
 var PARAMS_SECTION_NAMES={
   identite:"Identité du club",couleurs:"Couleurs du club",paiement:"Paiement des licences",cerfa:"Reçus fiscaux (CERFA)",facturation:"Facturation (sponsors/partenaires)",relances:"Relances impayés (licences)",aides:"Aides Pass'Sport / Pass'Région",themes:"Thèmes animés",avis:"Avis et suggestions",notesfrais:"Notes de frais",stats:"Statistiques du club",
-  apparence:"Apparence",qr:"Partage & QR codes",notifications:"Notifications",
+  apparence:"Apparence",taille:"Taille du texte",qr:"Partage & QR codes",notifications:"Notifications",
   communication:"Communication",donnees:"Données",demo:"Démonstration"
 };
 function getParamsOrder(){try{return JSON.parse(localStorage.getItem("asmb_params_order")||"[]");}catch(e){return [];}}
@@ -469,7 +469,7 @@ function buildParametresLayout(){ buildParamsAccordeon(); }
 // tous fermés à l'ouverture. Rien n'est dupliqué : on déplace les vrais noeuds.
 var PARAMS_GROUPES=[
   {id:"compte", ic:"👤", titre:"Mon compte", secs:["@compte","notifications","notesfrais","avis"]},
-  {id:"apparence", ic:"🎨", titre:"Langue & apparence", secs:["langue","apparence","themes"]},
+  {id:"apparence", ic:"🎨", titre:"Langue & apparence", secs:["langue","taille","apparence","themes"]},
   {id:"plus", ic:"➕", titre:"Bouton +", staff:true, secs:["@plus"]},
   {id:"club", ic:"🏀", titre:"Mon club", dir:true, secs:["identite","couleurs","liens","stats","qr"]},
   {id:"argent", ic:"📝", titre:"Inscriptions & licences", dir:true, secs:["dossier","paiement","aides","relances"]},
