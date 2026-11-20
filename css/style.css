@@ -897,19 +897,17 @@ html.gm-desk .rech-aide{display:block;font-size:12px;color:var(--mut);padding:10
 .gm-undo-barre{position:absolute;left:0;bottom:0;height:4px;width:100%;background:#F2D57E;transform-origin:left center}
 html[dir="rtl"] .gm-undo-barre{transform-origin:right center}
 
-/* Plateforme sur grand écran : textes en 10-13 px pensés pour téléphone, agrandis de 20 % (zoom = tout suit : textes, boutons, marges). */
-@media (min-width:1024px){ html.gm-horsclub:not(.gm-desk) #scr-plateforme.on{zoom:1.2} }
-/* Version ordinateur sur grand écran : textes pensés pour téléphone (10-14 px), toute l'appli est agrandie (zoom).
+/* Grand écran (tous les comptes, Plateforme comprise) : textes pensés pour téléphone (10-14 px), toute l'appli est agrandie (zoom).
    Le zoom grossit aussi les unités d'écran (vh, vw) : elles passent par --vh/--vw/--dvh, divisées par le même
    facteur, pour qu'une fenêtre « 85 % de la hauteur » reste à 85 %. Code qui place un élément d'après la souris ou
    getBoundingClientRect : diviser par gmZoom() (js/09-ui-modales.js). Leaflet garde l'échelle 1. */
 @media (min-width:1366px){
-  html.gm-desk{zoom:1.1;--vh:calc(1vh / 1.1);--vw:calc(1vw / 1.1);--dvh:calc(1dvh / 1.1)}
-  html.gm-desk .leaflet-container{zoom:calc(1 / 1.1)}
+  html{zoom:1.1;--vh:calc(1vh / 1.1);--vw:calc(1vw / 1.1);--dvh:calc(1dvh / 1.1)}
+  .leaflet-container{zoom:calc(1 / 1.1)}
 }
 @media (min-width:1600px){
-  html.gm-desk{zoom:1.2;--vh:calc(1vh / 1.2);--vw:calc(1vw / 1.2);--dvh:calc(1dvh / 1.2)}
-  html.gm-desk .leaflet-container{zoom:calc(1 / 1.2)}
+  html{zoom:1.2;--vh:calc(1vh / 1.2);--vw:calc(1vw / 1.2);--dvh:calc(1dvh / 1.2)}
+  .leaflet-container{zoom:calc(1 / 1.2)}
 }
 /* Plateforme (super admin) sur ordinateur : contenu centré, clubs sur 2 colonnes (js/20b-plateforme.js) */
 @media (min-width:1024px){

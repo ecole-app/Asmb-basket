@@ -1,5 +1,21 @@
 [
  {
+  "v": "1795169188",
+  "semver": "1.26.1",
+  "titre": "Plus lisible sur ordinateur, pour tout le monde",
+  "points": [
+   {
+    "roles": [
+     "coach",
+     "parent",
+     "joueur",
+     "bureau"
+    ],
+    "texte": "Sur un grand écran d'ordinateur, l'appli s'affiche en plus grand (+10 à +20 % selon la largeur)."
+   }
+  ]
+ },
+ {
   "v": "1795168854",
   "semver": "1.26.0",
   "titre": "Version ordinateur plus lisible",
